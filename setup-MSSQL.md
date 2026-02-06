@@ -1,13 +1,20 @@
-# If you're running your own MSSQL Server, follow these steps.
+# Set up local MSSQL using Docker (recommended)
+
+This repo is set up to run SQL Server locally via Docker Compose (see `docker-compose.yml`).
+These steps work on Windows/macOS/Linux as long as you have Docker Desktop / Docker Engine installed.
 
 Your .env file should look similar to this:
 
 ```env
-# MSSQL Connection Configuration
+# Docker SQL Server container (used by docker-compose.yml)
+# IMPORTANT: SQL Server enforces strong passwords for SA.
+MSSQL_SA_PASSWORD=YourComplex!P4ssw0rd
+MSSQL_PORT=1433
+
+# App/Prisma connection info
 MSSQL_USER=SA
 MSSQL_PASSWORD=YourComplex!P4ssw0rd
 MSSQL_HOST=localhost
-MSSQL_PORT=1433
 MSSQL_DATABASE=CoreDB
 
 # Connection String for MSSQL (if using libraries that accept connection strings)
@@ -20,77 +27,50 @@ AUTH_SECRET=<your generated base64 auth secret>
 
 Don't forget to generate your Base64 Auth Secret and save!
 
-### 4. Setting Up MSSQL Server
+## Start SQL Server (Docker Compose)
 
-#### 4.1. Install MSSQL Server
-
-Follow the
-official [installation guide for SQL Server](https://docs.microsoft.com/en-us/sql/linux/quickstart-install-connect-ubuntu)
-to install MSSQL Server on your system.
-
-#### 4.2. Start MSSQL Server
-
-Start the MSSQL Server service:
+From the repo root:
 
 ```bash
-sudo systemctl start mssql-server
+docker compose up -d sqlserver
 ```
 
-Enable MSSQL Server to start on boot:
+Wait until the container is healthy:
 
 ```bash
-sudo systemctl enable mssql-server
+docker compose ps
 ```
 
-#### 4.3. Configure MSSQL Server
+You should see `mssql-server` with a `healthy` status.
 
-Run the setup command and follow the prompts to configure your MSSQL Server:
+## Create the database (CoreDB)
+
+Create the DB inside the container:
 
 ```bash
-sudo /opt/mssql/bin/mssql-conf setup
+docker exec -it mssql-server /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "%MSSQL_SA_PASSWORD%" -C -Q "CREATE DATABASE CoreDB"
 ```
 
-#### 4.4. Install MSSQL Tools
+Notes:
+- On **PowerShell**, environment variable expansion is different. If `%MSSQL_SA_PASSWORD%` doesn’t expand for you, paste the password literally (or run via `cmd.exe`).
+- If the DB already exists, you can skip this step.
 
-To interact with your MSSQL Server instance, install the MSSQL tools:
+## Set up Prisma schema + seed
 
-```bash
-curl -o- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-sudo curl -o /etc/apt/sources.list.d/mssql-tools.list https://packages.microsoft.com/config/ubuntu/20.04/prod.list
-sudo apt-get update
-sudo apt-get install mssql-tools unixodbc-dev
-```
-
-#### 4.5. Connect to MSSQL Server
-
-Use `sqlcmd` to connect to your MSSQL Server instance:
-
-```bash
-sqlcmd -S localhost -U SA -P YourComplex!P4ssw0rd
-```
-
-#### 4.6. Create the Database
-
-Once connected, create your database:
-
-```sql
-CREATE
-DATABASE CoreDB;
-GO
-```
-
-### 5. Set Up the Database
-
-Generate Prisma client and push the schema to your MSSQL database:
+Generate Prisma client and apply the schema:
 
 ```bash
 npx prisma generate
 npx prisma db push
 ```
 
-### 6. Seed the Database
+Seed from the anonymized JSON fixtures in `prisma/mock-data/` (recommended for local dev):
 
-To seed the database with initial data, run:
+```bash
+npm run db:seed:anonymized
+```
+
+Alternative (generates synthetic/faker data; does NOT use `prisma/mock-data/`):
 
 ```bash
 npm run seed
