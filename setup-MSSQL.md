@@ -3,6 +3,8 @@
 This repo is set up to run SQL Server locally via Docker Compose (see `docker-compose.yml`).
 These steps work on Windows/macOS/Linux as long as you have Docker Desktop / Docker Engine installed.
 
+**Docker Image**: The setup uses the official Microsoft SQL Server 2025 Docker image (`mcr.microsoft.com/mssql/server:2025-latest`) running in Developer Edition mode. This provides a full-featured SQL Server instance suitable for local development.
+
 Your .env file should look similar to this:
 
 ```env
