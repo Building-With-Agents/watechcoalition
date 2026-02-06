@@ -1,0 +1,22 @@
+
+BEGIN TRY
+
+BEGIN TRAN;
+
+
+-- AlterTable
+ALTER TABLE [dbo].[CaseMgmt] ADD [AssignedCareerPrepTrack] VARCHAR(15);
+
+-- AlterTable
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH

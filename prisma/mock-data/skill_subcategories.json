@@ -1,0 +1,429 @@
+[
+  {
+    "skill_subcategory_id": "d1cdc6c6-a0d6-4cdb-ac50-907b0d3dcae0",
+    "subcategory_name": "Agile Software Development",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "10b5691f-f2a3-494a-ac5e-01c5ea451690",
+    "subcategory_name": "Augmented and Virtual Reality (AR/VR)",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "8c6d5186-09fd-4e7d-9f29-b3492b6ece24",
+    "subcategory_name": "Backup Software",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "f6cd1df0-8352-4b4e-be9b-e5291bc95702",
+    "subcategory_name": "Artificial Intelligence and Machine Learning (AI/ML)",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "89a9d8c8-f2d7-4007-93e3-b2943a80e564",
+    "subcategory_name": "Application Programming Interfaces (API)",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "27fed51d-b468-4491-95c9-e21411876223",
+    "subcategory_name": "Basic Technical Knowledge",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "9abbdfc2-b339-429e-945c-948b52e58c5a",
+    "subcategory_name": "Databases",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "333e845a-d14c-4b36-9fed-09e28fb46f0d",
+    "subcategory_name": "C and C++",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "138428b1-fa9e-483c-945c-5c9d19efa4ba",
+    "subcategory_name": "Enterprise Application Management",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "3f32d3b6-2bbb-475b-9ee9-23f3fa444715",
+    "subcategory_name": "Enterprise Information Management",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "02ae65d1-3d85-4ef6-9fb3-2bdc8b3533e8",
+    "subcategory_name": "Cloud Solutions",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "be4dc3bc-2c6a-4007-a517-92da16226444",
+    "subcategory_name": "Collaborative Software",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "7c82810c-8cb5-45b1-91ad-ac0fb47b9af2",
+    "subcategory_name": "Extraction, Transformation, and Loading (ETL)",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "0fa1b353-ea97-413e-ab52-ad8cbd892f49",
+    "subcategory_name": "Firmware",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "fc126690-2ee7-481a-8b9f-1962e0267289",
+    "subcategory_name": "Computer Science",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "f71be483-0cdc-4960-8a70-bd9aa47d4a93",
+    "subcategory_name": "Configuration Management",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "424a34b7-5f1b-4069-910c-82395dd2ba85",
+    "subcategory_name": "Identity and Access Management",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "ba00eff2-b9db-472f-90e8-691cbbf7f1b6",
+    "subcategory_name": "Cybersecurity",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "7c0dbeb0-45ca-4eab-8b2d-d0dd3555264c",
+    "subcategory_name": "Data Collection",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "344def26-88c4-430f-a7d2-0195a6eff498",
+    "subcategory_name": "IT Automation",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "0b4e49b4-0fdc-40b9-bf20-c50492500895",
+    "subcategory_name": "Data Storage",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "19f41618-1e99-457a-aa99-e3cad9ec819a",
+    "subcategory_name": "Software Development",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "e2a7d30d-5768-49eb-843d-3b9da71c91af",
+    "subcategory_name": "Software Development Tools",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "4caf288b-a6f5-4ad3-b47a-2ceaa51299ed",
+    "subcategory_name": "Virtualization and Virtual Machines",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "c4637db7-c720-45bd-8cfb-ace2818d82a0",
+    "subcategory_name": "Web Design and Development",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "9a198768-b21d-4d8e-ab40-5aac38efd2a7",
+    "subcategory_name": "Microsoft Development Tools",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "e12e6acd-a0d8-4a5a-8385-e4c0805fc0db",
+    "subcategory_name": "Software Quality Assurance",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "1d9e4810-fd8b-4e5a-85ed-ab5da1818490",
+    "subcategory_name": "Middleware",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "7aef17dc-4a45-40d0-a976-222dadb55987",
+    "subcategory_name": "Mobile Development",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "a1aaac6a-f0f0-48fd-a9ce-17356d22aa3e",
+    "subcategory_name": "Systems Administration",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "d838ada8-28e1-4df5-ace4-5d0d214006fc",
+    "subcategory_name": "Technical Support and Services",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "4510c6a9-f63f-4b85-b581-f81e8498667d",
+    "subcategory_name": "Telecommunications",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "2ec61dc2-5ee2-4230-af9c-b16e5cc63437",
+    "subcategory_name": "Networking Hardware",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "5fd0f4d7-244c-4f33-82b2-a3083e5d089d",
+    "subcategory_name": "Test Automation",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "65029d28-eca9-4bcf-abc6-71efadf55557",
+    "subcategory_name": "Query Languages",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "bd347f35-b27c-4188-8bc8-9d41c9ce4a54",
+    "subcategory_name": "Operating Systems",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "ee805d26-c1af-4f07-a8bf-08dd2736aee9",
+    "subcategory_name": "Other Programming Languages",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "9cad3203-05a4-4885-b2ac-0902910abb6b",
+    "subcategory_name": "Unspecified",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "db637f6a-96bc-4674-b197-4c8e5f1780e8",
+    "subcategory_name": "Communication & Influence",
+    "subcategory_description": "Effectively conveys complex ideas and persuades diverse stakeholders",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "03e3baf7-45bb-49c0-802d-6a6ecd9e2462",
+    "subcategory_name": "Relationship Building & Emotional Intelligence",
+    "subcategory_description": "Connects authentically with clients, adapts to personalities, and builds trust",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "74a6c923-eb42-4527-a932-a40c12395bcc",
+    "subcategory_name": "Adaptability & Learning Agility",
+    "subcategory_description": "Thrives in ambiguity, learns quickly, and adjusts to fast product changes",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "07150e32-8e41-4c70-be33-3e4c9d68ebeb",
+    "subcategory_name": "Team Collaboration & Internal Communication",
+    "subcategory_description": "Works with product, engineering, and customer success teams to close the loop",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "1317c4c9-1669-4ef3-8a21-e6b0466c4ca9",
+    "subcategory_name": "Cloud Computing",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "32643e52-6fc8-48f4-83c0-7913e18217ae",
+    "subcategory_name": "Computer Hardware",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "c8e8d041-63a1-4706-b3bf-aadb8d65eb72",
+    "subcategory_name": "General Networking",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "e414a125-6de5-489f-a7e7-7d33844db956",
+    "subcategory_name": "Content Management Systems",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "a7ed60cc-d6c2-439d-acbd-c1686d98e591",
+    "subcategory_name": "Data Management",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "95647492-a3f3-412f-ba82-5b38c652a185",
+    "subcategory_name": "IT Management",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "81340fe0-040c-495c-b89a-0580e119adce",
+    "subcategory_name": "Java",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "1fb79f41-f412-46da-b423-c77262ddb3f2",
+    "subcategory_name": "JavaScript and jQuery",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "70e86ce6-3348-47b1-8874-a23cea484410",
+    "subcategory_name": "System Design and Implementation",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "fa8d0bbf-20d4-4608-9410-a3a19c03aa6a",
+    "subcategory_name": "Network Security",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "90d72b6a-2069-46d5-a7b2-940fe1429650",
+    "subcategory_name": "Version Control",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "1d56434b-1c9c-431a-bc5c-342c0d32437d",
+    "subcategory_name": "Scripting",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "bcf8630e-4a79-4e6d-b3e6-591863bf8cd5",
+    "subcategory_name": "Scripting Languages",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "65a3122b-2ddc-4018-8070-c6a07f3e1901",
+    "subcategory_name": "Business Operations",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "b7241ef8-b982-42df-a1c8-fdfc6a6e33a5",
+    "subcategory_name": "Data Science",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "cd585c0a-762e-4ff1-83b5-60b5a9900236",
+    "subcategory_name": "Data Visualization",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "58eb1c9e-595e-443c-9f38-5576902afaad",
+    "subcategory_name": "Statistical Modeling",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "2ab7c83d-55ea-498a-b861-bdcda8c59d17",
+    "subcategory_name": "Technical Support Services",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "skill_subcategory_id": "dbe71616-6a13-4153-8ded-ffd90f1d8f43",
+    "subcategory_name": "Database Architecture and Administration",
+    "subcategory_description": "",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  }
+]

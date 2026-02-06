@@ -1,0 +1,38 @@
+export const users = [
+  {
+    id: "410544b2-4001-4271-9855-fec4b6a6442a",
+    firstName: "",
+    lastName: "Jobseeker",
+    birthDate: "01/1/2024",
+    email: "Jobseeker@nextmail.com",
+    password: "123456",
+    role: "JOBSEEKER",
+  },
+  {
+    id: "410544b2-4001-4271-9855-fec4b6a6442b",
+    firstName: "",
+    lastName: "Employer",
+    birthDate: "01/2/2024",
+    email: "employer@nextmail.com",
+    password: "123456",
+    role: "EMPLOYER",
+  },
+  {
+    id: "410544b2-4002-4271-9855-fec4b6a6442c",
+    firstName: "",
+    lastName: "Educator",
+    birthDate: "01/3/2024",
+    email: "educator@nextmail.com",
+    password: "123456",
+    role: "EDUCATOR",
+  },
+  {
+    id: "410544b2-4001-4271-9855-fec4b6a6442c",
+    firstName: "",
+    lastName: "Admin",
+    birthDate: "01/4/2024",
+    email: "admin@nextmail.com",
+    password: "123456",
+    role: "ADMIN",
+  },
+];

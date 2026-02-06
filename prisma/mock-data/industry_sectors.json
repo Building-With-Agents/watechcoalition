@@ -1,0 +1,80 @@
+[
+  {
+    "industry_sector_id": "db5d97be-8ef2-4d6d-ad6f-06b780f73598",
+    "sector_title": "Education",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "industry_sector_id": "417b38a8-c128-4ba3-a865-83b95c599a85",
+    "sector_title": "Government",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "industry_sector_id": "5398f0b3-7775-4276-8708-0299b38ad725",
+    "sector_title": "Healthcare",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "industry_sector_id": "16895c25-f3a5-4d50-88ea-45256c2f7c63",
+    "sector_title": "Media and Entertainment",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "industry_sector_id": "966063c2-9e94-4fc0-b687-81236a03e0bf",
+    "sector_title": "Nonprofit",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "industry_sector_id": "5664d2f1-4a7a-41c1-b55f-434ff7bd5fef",
+    "sector_title": "Transportation and Logistics",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "industry_sector_id": "9aebfa65-6d13-44f5-8386-a445118b4862",
+    "sector_title": "Utilities",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "industry_sector_id": "b05b61af-4d2e-4a53-a51c-96e8f0e6e0d2",
+    "sector_title": "Other",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "industry_sector_id": "b6d61694-dbb3-4695-a888-f89cd0420ec5",
+    "sector_title": "Information Technology",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "industry_sector_id": "2ad4593d-ce82-4156-a83b-f7d0d30f98e7",
+    "sector_title": "Manufacturing",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "industry_sector_id": "6c39cc16-4ecc-4bf6-9b8a-e97988ed7815",
+    "sector_title": "Retail",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "industry_sector_id": "dae571b1-7b5b-4d48-b17c-e6838b8d6b49",
+    "sector_title": "Telecommunications",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "industry_sector_id": "d07b22bd-b1f9-465d-ba02-dfb2bf533d9d",
+    "sector_title": "Aerospace",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  }
+]

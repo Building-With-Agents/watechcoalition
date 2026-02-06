@@ -1,0 +1,632 @@
+[
+  {
+    "jobseeker_id": "03d015cd-cc57-48dc-a098-5ac87e1b0b07",
+    "skill_id": "6333b4c3-6a39-45ce-be41-c4661d47f168",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "03d015cd-cc57-48dc-a098-5ac87e1b0b07",
+    "skill_id": "59bc2dff-101a-4d75-9a40-bbdf0eee774d",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "03d015cd-cc57-48dc-a098-5ac87e1b0b07",
+    "skill_id": "1e30f52f-63b4-4952-a7b4-9ffda590decb",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "03d015cd-cc57-48dc-a098-5ac87e1b0b07",
+    "skill_id": "356e0040-8400-49a0-b772-6f6475776612",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "03d015cd-cc57-48dc-a098-5ac87e1b0b07",
+    "skill_id": "8258a361-a193-4041-ad70-55da87b2007a",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "53b69cab-fd22-4032-bad1-0a960eccdbc4",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "9eb3ddc2-197a-46a4-8424-90032b52202b",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "9d1a14d0-3688-4340-8b49-37bab65fcb69",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "004465f8-7377-4442-a94d-c612072a90d9",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "982c6d3b-e9ce-46f9-a8b8-2b30bdc4b17d",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "599dced9-3bc2-4891-9be3-cffefc05781e",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "ff871c6c-0465-4f25-b534-340cf8c4cb4a",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "930b4082-e845-42da-b569-5489885eabf5",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "54d5567a-c2d5-4187-9b78-c9b8a5e346ae",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "05958621-37f6-4fed-8f4b-b489134235cb",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "b6547d15-74ae-41d9-9b82-0595fc63aed9",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "4ef69713-1f30-47f5-8c2e-6dc6c875f17e",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "57d87946-dd8a-47f4-96ee-02db366d5ee8",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "fbd7f528-dfd3-4e1b-8569-b3c6253680ad",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "16412e3d-6220-4fff-80aa-5c321715640c",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "07ac48bf-598a-480a-98e4-ee9d5f20538b",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "e6041930-7927-4498-9a67-69421823df7b",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "60f205fd-0826-423e-b750-593194045ea3",
+    "skill_id": "320909ba-bfb0-4239-8369-41a1c26a446f",
+    "updatedAt": "2025-08-06T18:17:36.766Z",
+    "createdAt": "2025-08-06T18:17:36.766Z"
+  },
+  {
+    "jobseeker_id": "e058ffb7-ab12-4cdf-861c-4545e99e9163",
+    "skill_id": "8f1ce903-38c3-428c-8e40-ed258f4b9710",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "e058ffb7-ab12-4cdf-861c-4545e99e9163",
+    "skill_id": "a81550bd-41a1-49d8-be7c-2ac76c045491",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "e058ffb7-ab12-4cdf-861c-4545e99e9163",
+    "skill_id": "b5adf2c3-b240-4f1b-b492-589b92897cb1",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "e058ffb7-ab12-4cdf-861c-4545e99e9163",
+    "skill_id": "320909ba-bfb0-4239-8369-41a1c26a446f",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "e058ffb7-ab12-4cdf-861c-4545e99e9163",
+    "skill_id": "59bc2dff-101a-4d75-9a40-bbdf0eee774d",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "87e3b0f1-bd8b-4bbf-8c7b-c01efcc702b8",
+    "skill_id": "8f1ce903-38c3-428c-8e40-ed258f4b9710",
+    "updatedAt": "2025-07-22T16:18:15.966Z",
+    "createdAt": "2025-07-22T16:18:15.966Z"
+  },
+  {
+    "jobseeker_id": "87e3b0f1-bd8b-4bbf-8c7b-c01efcc702b8",
+    "skill_id": "59bc2dff-101a-4d75-9a40-bbdf0eee774d",
+    "updatedAt": "2025-07-22T16:18:15.966Z",
+    "createdAt": "2025-07-22T16:18:15.966Z"
+  },
+  {
+    "jobseeker_id": "87e3b0f1-bd8b-4bbf-8c7b-c01efcc702b8",
+    "skill_id": "1e30f52f-63b4-4952-a7b4-9ffda590decb",
+    "updatedAt": "2025-07-22T16:18:15.966Z",
+    "createdAt": "2025-07-22T16:18:15.966Z"
+  },
+  {
+    "jobseeker_id": "87e3b0f1-bd8b-4bbf-8c7b-c01efcc702b8",
+    "skill_id": "971c85b3-a442-4059-862c-7e32efd7a613",
+    "updatedAt": "2025-07-22T16:18:15.966Z",
+    "createdAt": "2025-07-22T16:18:15.966Z"
+  },
+  {
+    "jobseeker_id": "87e3b0f1-bd8b-4bbf-8c7b-c01efcc702b8",
+    "skill_id": "320909ba-bfb0-4239-8369-41a1c26a446f",
+    "updatedAt": "2025-07-22T16:18:15.966Z",
+    "createdAt": "2025-07-22T16:18:15.966Z"
+  },
+  {
+    "jobseeker_id": "71c4e5c3-b85a-4f45-b659-2c60759b7b10",
+    "skill_id": "59bc2dff-101a-4d75-9a40-bbdf0eee774d",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "71c4e5c3-b85a-4f45-b659-2c60759b7b10",
+    "skill_id": "ac42ddda-bbc4-40e9-8b41-6598a921df16",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "71c4e5c3-b85a-4f45-b659-2c60759b7b10",
+    "skill_id": "e5080409-1860-4cc0-80bc-5a19110ac175",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "71c4e5c3-b85a-4f45-b659-2c60759b7b10",
+    "skill_id": "c1aa3301-830d-4d15-b64f-4c088a3e21c3",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "71c4e5c3-b85a-4f45-b659-2c60759b7b10",
+    "skill_id": "320909ba-bfb0-4239-8369-41a1c26a446f",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "5e9d50f4-0fac-4170-8f58-f1380505b38b",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "8f1ce903-38c3-428c-8e40-ed258f4b9710",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "e5581135-5084-4b36-b3a9-ce595d657300",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "c19599cf-8498-4b77-99ba-c8b6d38eda94",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "59bc2dff-101a-4d75-9a40-bbdf0eee774d",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "07ee788c-3431-443e-b3c7-b7cf6f95fc42",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "800b475f-d860-498a-9f41-b7340337c4ac",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "356e0040-8400-49a0-b772-6f6475776612",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "e6041930-7927-4498-9a67-69421823df7b",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "4ecbed20-f08f-4708-8147-6625fd29b2f2",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "b5adf2c3-b240-4f1b-b492-589b92897cb1",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "320909ba-bfb0-4239-8369-41a1c26a446f",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "1f606a22-f500-47cf-9900-3f30ff5a5481",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "c53cb9b1-ea73-4893-9706-3a717b2538b6",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "fadac164-1f37-4d37-8d4c-2f3217aa5f2f",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "67ee862c-2e5e-430e-8a0a-95bb5137bc75",
+    "skill_id": "7d266be5-e004-4f12-93bb-111c776ca4b4",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "4df7ce2d-79dd-4378-a77f-87d33f0f50aa",
+    "skill_id": "320909ba-bfb0-4239-8369-41a1c26a446f",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "4df7ce2d-79dd-4378-a77f-87d33f0f50aa",
+    "skill_id": "f6e43524-1b55-400a-a376-1014b7191ba4",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "c1e0bafb-e23c-4b8e-bfa1-7556c9c4474f",
+    "skill_id": "bf87d0b5-613a-46dd-8694-f237f6b67629",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "c1e0bafb-e23c-4b8e-bfa1-7556c9c4474f",
+    "skill_id": "f61e578f-5797-4bf7-9ddb-84539b1e6efa",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "c1e0bafb-e23c-4b8e-bfa1-7556c9c4474f",
+    "skill_id": "fb6ea1f8-03a6-4ac1-b4ab-38599ec171e6",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "c1e0bafb-e23c-4b8e-bfa1-7556c9c4474f",
+    "skill_id": "761f33af-6586-420e-bd03-2467eda2f418",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "c1e0bafb-e23c-4b8e-bfa1-7556c9c4474f",
+    "skill_id": "0718bcc3-dce6-4a5d-b2f6-09dd047507f5",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd2e4249-32d5-441b-acea-7412741c5f81",
+    "skill_id": "fadac164-1f37-4d37-8d4c-2f3217aa5f2f",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd2e4249-32d5-441b-acea-7412741c5f81",
+    "skill_id": "3867a062-6b3e-4e53-b03f-c99c237c69cb",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd2e4249-32d5-441b-acea-7412741c5f81",
+    "skill_id": "1e30f52f-63b4-4952-a7b4-9ffda590decb",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd2e4249-32d5-441b-acea-7412741c5f81",
+    "skill_id": "356e0040-8400-49a0-b772-6f6475776612",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd2e4249-32d5-441b-acea-7412741c5f81",
+    "skill_id": "59bc2dff-101a-4d75-9a40-bbdf0eee774d",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "adbbaefb-8eea-4780-823c-ca01b74e00f1",
+    "skill_id": "dfb46f00-0223-46f9-b604-b17d208ea21e",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "adbbaefb-8eea-4780-823c-ca01b74e00f1",
+    "skill_id": "356e0040-8400-49a0-b772-6f6475776612",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "adbbaefb-8eea-4780-823c-ca01b74e00f1",
+    "skill_id": "9c4ccc17-2e67-4b52-9629-5309d681d066",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "adbbaefb-8eea-4780-823c-ca01b74e00f1",
+    "skill_id": "3a532a7f-5b76-4278-a800-58c15f107901",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "adbbaefb-8eea-4780-823c-ca01b74e00f1",
+    "skill_id": "1e30f52f-63b4-4952-a7b4-9ffda590decb",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "da6bb414-f327-412e-8e2e-751028510179",
+    "skill_id": "8f1ce903-38c3-428c-8e40-ed258f4b9710",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "da6bb414-f327-412e-8e2e-751028510179",
+    "skill_id": "59bc2dff-101a-4d75-9a40-bbdf0eee774d",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "da6bb414-f327-412e-8e2e-751028510179",
+    "skill_id": "1e30f52f-63b4-4952-a7b4-9ffda590decb",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "da6bb414-f327-412e-8e2e-751028510179",
+    "skill_id": "356e0040-8400-49a0-b772-6f6475776612",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "da6bb414-f327-412e-8e2e-751028510179",
+    "skill_id": "f66dcfe8-2b30-4da9-8203-00c592587208",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "3667d0e0-4778-4a53-ab23-f8657a2bf0b7",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "8f1ce903-38c3-428c-8e40-ed258f4b9710",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "a22cd36e-d789-4d87-8271-ddfcc7fa4a52",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "e21124b3-988b-4688-8e11-ab9dea15c28a",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "fb490437-de0d-4ce2-b3fe-9ad9998960a5",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "b5adf2c3-b240-4f1b-b492-589b92897cb1",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "93312f2a-3018-4270-aa2c-47f0c495fe35",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "62b83a93-136e-4c94-9704-476d12fcc27a",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "0c93e319-231d-47ee-bed3-35f1a9172cd7",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "84b6b1cb-de6c-4970-b5ee-19e546156f47",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "7a770bce-b551-4bd3-b43f-0bb4e4367695",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "c9311e2d-be8b-471c-9063-0888792d2f6a",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "03415605-edd9-496d-9bb7-0555319cff71",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "de8cedd0-e9d1-4bf6-8216-04ead2b0aac0",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "7c3ea55b-97f5-4a58-a373-0402df0cfc1f",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "cb635e16-3308-4ff3-a16c-02fa5f521dd8",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "1902911e-1fa6-4bb0-b609-02d8e662a5e2",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "32acb3e4-a4a0-4768-b1b1-00eaa57a8c02",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "cd51dd92-f3f4-40b7-8b4f-5b51d9ddddef",
+    "skill_id": "81fb0d2a-e8ac-4a1b-8858-00a4b0eb6f0a",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "28f61e5f-ca11-4626-b34d-c1e8e07db94b",
+    "skill_id": "320909ba-bfb0-4239-8369-41a1c26a446f",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "28f61e5f-ca11-4626-b34d-c1e8e07db94b",
+    "skill_id": "dfb46f00-0223-46f9-b604-b17d208ea21e",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "28f61e5f-ca11-4626-b34d-c1e8e07db94b",
+    "skill_id": "1e30f52f-63b4-4952-a7b4-9ffda590decb",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "28f61e5f-ca11-4626-b34d-c1e8e07db94b",
+    "skill_id": "356e0040-8400-49a0-b772-6f6475776612",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "28f61e5f-ca11-4626-b34d-c1e8e07db94b",
+    "skill_id": "f505ff54-2892-4dfc-99f6-55396e149862",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "bef9e033-31d5-4efa-9d17-e70d0f416c74",
+    "skill_id": "bd854c25-dc07-473b-bb50-0e00a0f75660",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "bef9e033-31d5-4efa-9d17-e70d0f416c74",
+    "skill_id": "81ed6665-acd3-4bd4-8c38-f652e1f06e88",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "bef9e033-31d5-4efa-9d17-e70d0f416c74",
+    "skill_id": "59bc2dff-101a-4d75-9a40-bbdf0eee774d",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "bef9e033-31d5-4efa-9d17-e70d0f416c74",
+    "skill_id": "320909ba-bfb0-4239-8369-41a1c26a446f",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "jobseeker_id": "bef9e033-31d5-4efa-9d17-e70d0f416c74",
+    "skill_id": "1e30f52f-63b4-4952-a7b4-9ffda590decb",
+    "updatedAt": "2025-06-25T19:21:59.186Z",
+    "createdAt": "2025-06-25T19:21:59.186Z"
+  }
+]

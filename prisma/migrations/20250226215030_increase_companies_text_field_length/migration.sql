@@ -1,0 +1,22 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- AlterTable
+ALTER TABLE [dbo].[companies] ALTER COLUMN [about_us] VARCHAR(2083) NOT NULL;
+ALTER TABLE [dbo].[companies] ALTER COLUMN [company_mission] VARCHAR(2083) NULL;
+ALTER TABLE [dbo].[companies] ALTER COLUMN [company_vision] VARCHAR(2083) NULL;
+
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH

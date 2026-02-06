@@ -1,0 +1,191 @@
+[
+  {
+    "company_address_id": "61adaf55-5540-4a56-bc2a-6a67bd060ec6",
+    "company_id": "9fdecba4-64f8-4361-98c0-6a67905d0d6c",
+    "zip": "97818",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "10f7ff42-9de4-49bd-9552-85abc6f98887",
+    "company_id": "dcdcaf24-68a5-40b8-8b5d-3bbd6967c782",
+    "zip": "98121",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "c9f7d9e2-77c5-46bb-a273-0485a9019686",
+    "company_id": "6f329f8d-7ca7-4266-8ba3-2feb4382a410",
+    "zip": "98104",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "9f1f0fb1-8f0c-4280-ae9e-8606a95181b1",
+    "company_id": "22251a8d-abe0-4953-a520-89ac80e1bf72",
+    "zip": "98195",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "e94fc8b3-f8e9-4f7b-b651-6eb22c56763f",
+    "company_id": "301a757f-0f60-4c79-8bde-535626f6050a",
+    "zip": "97838",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "51d5adb2-a988-474a-9b68-36ca0da4b5d5",
+    "company_id": "301a757f-0f60-4c79-8bde-535626f6050a",
+    "zip": "98103",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "59764995-4c3e-44c6-86da-15926812346a",
+    "company_id": "25ffbe4c-92b8-4c89-a8f0-3b2664dc336b",
+    "zip": "98195",
+    "createdAt": "2025-07-22T17:45:03.550Z",
+    "updatedAt": "2025-07-22T17:45:03.550Z"
+  },
+  {
+    "company_address_id": "e0c0e860-6d12-450a-884d-56838120b57e",
+    "company_id": "a6ab4f80-8c6c-466e-8e41-bc6c71a7c418",
+    "zip": "98005",
+    "createdAt": "2025-08-08T21:35:17.113Z",
+    "updatedAt": "2025-08-08T21:35:17.113Z"
+  },
+  {
+    "company_address_id": "948997da-543f-4a87-b4ce-4cd11b95b6e5",
+    "company_id": "a6ab4f80-8c6c-466e-8e41-bc6c71a7c418",
+    "zip": "98108",
+    "createdAt": "2025-10-20T19:20:43.270Z",
+    "updatedAt": "2025-10-20T19:20:43.270Z"
+  },
+  {
+    "company_address_id": "c0b2691e-22b4-4df8-b741-252ea86ce52d",
+    "company_id": "301a757f-0f60-4c79-8bde-535626f6050a",
+    "zip": "98848",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "7a4b4bb6-1e95-4323-8f65-073be9e0aa9a",
+    "company_id": "a6ab4f80-8c6c-466e-8e41-bc6c71a7c418",
+    "zip": "98848",
+    "createdAt": "2025-07-31T18:16:08.013Z",
+    "updatedAt": "2025-07-31T18:16:08.013Z"
+  },
+  {
+    "company_address_id": "27ecf859-3793-4e88-95de-8ca1f1746367",
+    "company_id": "25ffbe4c-92b8-4c89-a8f0-3b2664dc336b",
+    "zip": "98004",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "6d5402b2-ecf8-438b-a092-d19a4494134c",
+    "company_id": "b144279d-8540-4884-ab39-c9e227ad9137",
+    "zip": "06103",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "34fa4192-2f50-4b54-97df-f2f534bdc79d",
+    "company_id": "9fdecba4-64f8-4361-98c0-6a67905d0d6c",
+    "zip": "98848",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "32ff691b-4ed8-4a3a-9a00-c3e3d87e6823",
+    "company_id": "a6ab4f80-8c6c-466e-8e41-bc6c71a7c418",
+    "zip": "98104",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "f8e32c04-6ab4-4b74-8d7c-d631c7d94923",
+    "company_id": "5439d59e-ae77-4936-aa7b-2f11dd4eff14",
+    "zip": "98105",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "c3f37ea0-e68f-4eed-9f07-ff08a8134b44",
+    "company_id": "301a757f-0f60-4c79-8bde-535626f6050a",
+    "zip": "98121",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "63d25776-da39-45c2-b868-a6d375759cef",
+    "company_id": "519b613d-0f99-4c32-9bda-9a468997a09c",
+    "zip": "98005",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "eb0efce6-0183-4cb1-98d3-e99bc45d0761",
+    "company_id": "301a757f-0f60-4c79-8bde-535626f6050a",
+    "zip": "97818",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "8c1130c0-9454-4323-bc87-d3147c9c0b55",
+    "company_id": "9fdecba4-64f8-4361-98c0-6a67905d0d6c",
+    "zip": "98004",
+    "createdAt": "2025-07-30T16:50:40.976Z",
+    "updatedAt": "2025-07-30T16:50:40.976Z"
+  },
+  {
+    "company_address_id": "c0a6fa55-4ba8-4f98-b05b-9717a195bb34",
+    "company_id": "9fdecba4-64f8-4361-98c0-6a67905d0d6c",
+    "zip": "98390",
+    "createdAt": "2025-06-29T23:30:27.346Z",
+    "updatedAt": "2025-06-29T23:30:27.346Z"
+  },
+  {
+    "company_address_id": "01232ee2-203c-42d5-aa4d-5c240abb6b16",
+    "company_id": "44ba2d57-3013-49af-a98c-acad3d004782",
+    "zip": "98501",
+    "createdAt": "2025-06-25T19:21:59.186Z",
+    "updatedAt": "2025-06-25T19:21:59.186Z"
+  },
+  {
+    "company_address_id": "c3b2d82a-c1ea-4dd1-bb17-192f77a7d2f6",
+    "company_id": "44ba2d57-3013-49af-a98c-acad3d004782",
+    "zip": "98101",
+    "createdAt": "2025-10-12T23:30:21.450Z",
+    "updatedAt": "2025-10-12T23:30:21.450Z"
+  },
+  {
+    "company_address_id": "0105babc-984a-4eb2-b551-48f0c5c92bdc",
+    "company_id": "44ba2d57-3013-49af-a98c-acad3d004782",
+    "zip": "98045",
+    "createdAt": "2025-11-09T23:30:32.300Z",
+    "updatedAt": "2025-11-09T23:30:32.300Z"
+  },
+  {
+    "company_address_id": "f95c2cba-5e87-439b-b709-248d5b09abf6",
+    "company_id": "44ba2d57-3013-49af-a98c-acad3d004782",
+    "zip": "83843",
+    "createdAt": "2025-11-16T23:30:28.240Z",
+    "updatedAt": "2025-11-16T23:30:28.240Z"
+  },
+  {
+    "company_address_id": "08d15561-9a05-434b-ae65-7bf73263caa6",
+    "company_id": "44ba2d57-3013-49af-a98c-acad3d004782",
+    "zip": "99352",
+    "createdAt": "2025-11-16T23:30:24.860Z",
+    "updatedAt": "2025-11-16T23:30:24.860Z"
+  },
+  {
+    "company_address_id": "81526d4a-09e5-4680-9158-bf2de450597c",
+    "company_id": "74cb45fc-b9d5-4db2-aba9-ca7121de7684",
+    "zip": "98402",
+    "createdAt": "2025-10-05T23:30:23.416Z",
+    "updatedAt": "2025-10-05T23:30:23.416Z"
+  }
+]

@@ -1,0 +1,20 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- AlterTable
+ALTER TABLE [dbo].[companies] DROP CONSTRAINT [DF__companies__size__3F466844];
+ALTER TABLE [dbo].[companies] ADD CONSTRAINT [DF__companies__size__3F466844] DEFAULT '1-10' FOR [size];
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH

@@ -1,0 +1,99 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+/reports
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+# Local docker env (never commit)
+.env.docker
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# temp git hash file
+app/generatedGitInfo.json
+/.idea/codeStyles/codeStyleConfig.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/.gitignore
+/.idea/AICommit.xml
+/.idea/compiler.xml
+/.idea/data_source_mapping.xml
+/.idea/dataSources.xml
+/.idea/frontend-cfa.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/prettier.xml
+/.idea/sqldialects.xml
+/.idea/vcs.xml
+
+# Development and planning files
+ai-workforce-form-submissions.plan.md
+develop-git-history.txt
+git-history-develop.txt
+scratch.md
+
+# Image and asset files
+Jobseeker flyer_V6_KMAdams.pdf
+cfa-logo-sm.png
+img.png
+
+# Test and development files
+blobTest.ts
+listBlobBlocks.ts
+testBlobStorage.ts
+tsconfig.scripts.json
+
+# Data schema files
+data/dynamics-schema/dynamics_parser.js
+data/dynamics-schema/dynamics_parser.ts
+data/dynamics-schema/lightcast-data-schema/
+
+# SQL development files
+prisma/sql/cip-socc-inserts/find_missing_cips.sql
+
+# Cursor / local IDE state
+.cursor/
+*.log
+
+# Stop tracking docs/ going forward (no history rewrite)
+docs/
+
+
+
+# Large/local database artifacts
+*.bacpac
+
+# Local diagnostics
+sqlpackage-*.txt
+
+# Local incident reports
+incident-report_*.md
+/.idea/

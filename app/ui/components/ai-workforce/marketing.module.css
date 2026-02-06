@@ -1,0 +1,1419 @@
+/* Page-level grid layout for consistent alignment */
+.aiWorkforcePage {
+  display: grid;
+  grid-template-columns: 1fr min(1200px, 100% - 48px) 1fr;
+  gap: 0;
+}
+
+.aiWorkforcePage > * {
+  grid-column: 2;
+}
+
+/* Layout container */
+.heroWrap {
+  padding: 130px 0 0 0; /* Figma: 130px top, no bottom padding */
+}
+
+.heroInner {
+  width: 100%;
+}
+
+/* H1 — from Figma: width 936px, Pretendard, 40px, 600, normal line-height */
+.heroTitle {
+  width: 936px; /* Figma exact width */
+  max-width: 100%;
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol";
+  font-weight: 600;
+  font-size: 40px; /* Figma exact size */
+  line-height: normal; /* Figma normal line-height */
+  margin: 0 0 40px 0; /* Figma: 40px gap to content below */
+}
+
+/* Two-column hero body */
+.heroGrid {
+  display: grid;
+  grid-template-columns: 645px 1fr; /* image fixed per spec, text flexes */
+  align-items: center; /* center-align text relative to image */
+  gap: 59px; /* Figma: 59px gap between image and text */
+}
+
+/* ======= COMPREHENSIVE RESPONSIVE DESIGN ======= */
+/* Project Standard Breakpoints: 430px, 600px, 904px, 1240px, 1440px */
+
+/* Page-level responsive adjustments */
+@media (max-width: 904px) {
+  .aiWorkforcePage {
+    grid-template-columns: 1fr min(100% - 32px, 1200px) 1fr;
+  }
+}
+
+@media (max-width: 430px) {
+  .aiWorkforcePage {
+    grid-template-columns: 1fr min(100% - 40px, 1200px) 1fr;
+  }
+}
+
+@media (max-width: 375px) {
+  .aiWorkforcePage {
+    grid-template-columns: 1fr min(100% - 32px, 1200px) 1fr;
+  }
+}
+
+/* Hero Component Responsive */
+@media (max-width: 904px) {
+  .heroWrap {
+    padding: 80px 0 0 0;
+  }
+  .heroTitle {
+    width: 100%;
+    font-size: 36px;
+  }
+  .heroGrid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .heroDeck {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .heroWrap {
+    padding: 60px 0 0 0;
+  }
+  .heroTitle {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 430px) {
+  .heroWrap {
+    padding: 40px 0 0 0;
+  }
+  .heroTitle {
+    font-size: 28px;
+  }
+  .heroDeck {
+    font-size: 20px;
+  }
+  .heroImageFrame {
+    border-radius: 16px;
+  }
+}
+
+/* Image frame — from Figma: 645x426.667, radius 25px, background cover; no shrink */
+.heroImageFrame {
+  width: 645px;
+  height: 426.667px;
+  border-radius: 25px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+@media (max-width: 904px) {
+  .heroImageFrame {
+    width: 100%;
+    height: auto;
+    border-radius: 20px;
+  }
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* “cover no-repeat center” from Figma */
+  object-position: 50% 50%;
+  display: block;
+}
+
+/* Right column body copy */
+.heroDeck {
+  width: 100%; /* Use full available width instead of fixed 666px */
+  max-width: 500px; /* Constrain to prevent overflow */
+  color: var(--color-neutral-black);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
+  font-size: 24px; /* Figma exact size */
+  font-weight: 400; /* Figma weight */
+  line-height: normal; /* Figma normal line-height */
+  margin: 0;
+}
+
+/* Section heading — from Figma: 72px, 600, letter-spacing: -3.6px, capitalize */
+.sectionHeadingWrap {
+  padding: 160px 0 80px 0; /* Figma: 160px total gap from hero, 80px bottom */
+}
+
+.sectionHeading {
+  width: 100%;
+  max-width: 1200px;
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
+  font-weight: 600;
+  font-size: 72px; /* Figma exact size */
+  line-height: 120%; /* Figma: 120% (86.4px) */
+  letter-spacing: -3.6px; /* Figma exact letter-spacing */
+  text-transform: capitalize;
+  text-align: right; /* Figma: right-aligned heading */
+  margin: 0;
+}
+
+/* Pillars (4 columns @ ≥1200) */
+.pillarsGrid {
+  display: grid;
+  gap: 24px 40px;
+  grid-template-columns: repeat(4, 240px); /* Figma: 240px width per pillar */
+  justify-content: center;
+  padding: 0; /* Remove all padding to eliminate green sections */
+}
+
+/* Pillars Component Responsive */
+@media (max-width: 1240px) {
+  .pillarsGrid {
+    grid-template-columns: repeat(2, 240px);
+    gap: 24px 40px;
+  }
+}
+
+@media (max-width: 904px) {
+  .sectionHeadingWrap {
+    padding: 120px 0 60px 0;
+  }
+  .sectionHeading {
+    font-size: 56px;
+    letter-spacing: -2.8px;
+  }
+  .pillarsGrid {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  .pillar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .sectionHeadingWrap {
+    padding: 80px 0 40px 0;
+  }
+  .sectionHeading {
+    font-size: 40px;
+    letter-spacing: -2px;
+  }
+  .pillarTitle {
+    font-size: 20px;
+  }
+  .pillarBody {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 430px) {
+  .sectionHeadingWrap {
+    padding: 60px 0 32px 0;
+  }
+  .sectionHeading {
+    font-size: 32px;
+    letter-spacing: -1.6px;
+  }
+  .pillarTitle {
+    font-size: 18px;
+  }
+  .pillarBody {
+    font-size: 18px;
+  }
+  .pillarsGrid {
+    gap: 16px;
+  }
+}
+
+.pillar {
+  width: 240px; /* Figma exact width */
+  max-width: 100%;
+}
+
+.pillarTitle {
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 24px; /* Figma exact size */
+  line-height: normal; /* Figma normal line-height */
+  font-weight: 700; /* Figma weight 700 */
+  margin-bottom: 2px;
+}
+
+.pillarBody {
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 24px; /* Figma exact size */
+  line-height: normal; /* Figma normal line-height */
+  font-weight: 400; /* Figma weight 400 */
+}
+
+/* Missing wrapper classes */
+.sectionWrapCompact {
+  padding: 56px 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* Banner */
+.banner {
+  position: relative;
+  width: 100%; /* Extend to full grid width */
+  height: 289px; /* Figma exact height */
+  border-radius: 25px; /* Figma exact border-radius */
+  overflow: hidden;
+  margin: 80px 0 181px 0; /* Figma: 80px top, 181px bottom, no auto margins */
+}
+
+.bannerImg {
+  object-fit: cover;
+  object-position: center;
+}
+
+.bannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4); /* Figma: 40% black overlay */
+}
+
+.bannerText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 40px; /* Consistent horizontal padding */
+  color: #fff; /* Figma: white text */
+  text-align: center; /* Figma: center-aligned */
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 32px; /* Reduced from 40px to fit 2 lines */
+  font-weight: 600; /* Figma weight */
+  line-height: 1.2; /* Tighter line height for 2 lines */
+  width: 100%; /* Use full available width */
+  max-width: 100%;
+  margin: 0 auto; /* Center the text block horizontally */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+/* Banner Component Responsive */
+@media (max-width: 904px) {
+  .banner {
+    height: 240px;
+    margin: 60px 0 120px 0;
+  }
+  .bannerText {
+    font-size: 28px;
+    padding: 0 32px;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 600px) {
+  .banner {
+    height: 200px;
+    margin: 40px 0 80px 0;
+  }
+  .bannerText {
+    font-size: 24px;
+    padding: 0 28px;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 430px) {
+  .banner {
+    height: 180px;
+    border-radius: 20px;
+  }
+  .bannerText {
+    font-size: 20px;
+    padding: 0 24px;
+    line-height: 1.4;
+  }
+}
+
+/* Employer Signaling section (H2 left, emphasized sentence right) */
+.essGrid {
+  display: grid;
+  grid-template-columns: 600px 1fr; /* Increase left column to 600px to prevent wrapping */
+  gap: 40px; /* Figma: 40px gap */
+  align-items: start; /* Align both columns to top */
+  margin: 0 0 80px 0; /* 80px bottom margin to Steps section */
+  padding: 0; /* Remove all padding */
+}
+
+/* EmployerSignaling Component Responsive */
+@media (max-width: 904px) {
+  .essGrid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin: 0 0 60px 0;
+  }
+  .essHeading {
+    width: 100%;
+    max-width: 100%;
+    font-size: 56px;
+    letter-spacing: -2.8px;
+  }
+  .essDek {
+    width: 100%;
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 600px) {
+  .essHeading {
+    font-size: 40px;
+    letter-spacing: -2px;
+  }
+  .essDek {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 430px) {
+  .essHeading {
+    font-size: 32px;
+  }
+  .essDek {
+    font-size: 24px;
+  }
+  .essGrid {
+    gap: 16px;
+  }
+}
+
+/* H2 — from Figma: 72px, 600, letter-spacing -3.6px, capitalize, width 520px */
+.essHeading {
+  width: 100%; /* Use full available width to prevent forced wrapping */
+  max-width: 600px; /* Increase max-width to allow "How The Employer" on one line */
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
+  font-weight: 600;
+  font-size: 72px; /* Figma exact size */
+  line-height: 120%; /* Figma: 120% */
+  letter-spacing: -3.6px; /* Figma exact letter-spacing */
+  text-transform: capitalize;
+  margin: 0; /* Remove all margins */
+  padding: 0; /* Remove all padding */
+}
+
+/* Right copy — base gray, 40px, 600; specific phrase in black */
+.essDek {
+  width: 100%; /* Use full available width of parent grid */
+  max-width: 100%;
+  color: #999; /* var(--Gray-500, #999) */
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 40px; /* Figma exact size */
+  font-weight: 600; /* Figma weight */
+  line-height: normal; /* Figma normal line-height */
+  margin: 0; /* Remove all margins */
+  padding: 0; /* Remove all padding */
+}
+
+.essEmph {
+  color: var(--color-neutral-black); /* Figma: black for emphasized text */
+}
+
+/* Steps board (4 columns inside a rounded frame with dividers) */
+.stepsBoard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid #e5e7eb; /* light border */
+  border-radius: 16px;
+  overflow: hidden; /* keeps dividers flush with radius */
+  background: #fff;
+}
+
+.stepCol {
+  position: relative;
+  padding: 34px; /* matches Figma margin cues */
+}
+
+/* Vertical dividers between columns */
+.stepCol:not(:last-child) {
+  box-shadow: inset -1px 0 0 #e5e7eb; /* crisp 1px divider */
+}
+
+/* Kicker — "STEP 1" etc.
+   Figma: Pretendard, 40px, weight 500, uppercase, letter-spacing -2px, Gray/500 */
+.stepKicker {
+  color: #999; /* var(--Gray-500) */
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -2px;
+  text-transform: uppercase;
+  margin: 0 0 40px 0; /* Increase bottom margin to 40px */
+}
+
+/* Title — 40px, 600, -2px letter-spacing, black */
+.stepTitle {
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -2px;
+  margin: 0 0 12px 0;
+}
+
+/* Body — 24px, 400, Gray/500; Figma shows ~281px line box */
+.stepBody {
+  color: #999; /* var(--Gray-500) */
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.25;
+  max-width: 281px;
+  margin: 0;
+}
+
+/* EmployerSteps Component Responsive */
+@media (max-width: 1240px) {
+  .stepsBoard {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 904px) {
+  .stepsBoard {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .stepCol:not(:last-child) {
+    box-shadow: inset 0 -1px 0 #e5e7eb;
+    padding-bottom: 24px;
+  }
+  .stepKicker {
+    font-size: 32px;
+    margin: 0 0 24px 0;
+  }
+  .stepTitle {
+    font-size: 32px;
+  }
+  .stepBody {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .stepKicker {
+    font-size: 28px;
+  }
+  .stepTitle {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 430px) {
+  .stepKicker {
+    font-size: 24px;
+    margin: 0 0 16px 0;
+  }
+  .stepTitle {
+    font-size: 24px;
+  }
+  .stepBody {
+    font-size: 18px;
+  }
+  .stepCol {
+    padding: 24px;
+  }
+}
+
+/* Right-aligned section heading variant (72/600/−3.6px, capitalize) */
+.sectionHeadingCenter {
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-weight: 600;
+  font-size: 72px; /* Figma exact size */
+  line-height: 120%; /* Figma: 120% */
+  letter-spacing: -3.6px; /* Figma exact letter-spacing */
+  text-transform: capitalize;
+  text-align: right; /* Align text to the right within this element */
+  white-space: nowrap; /* Prevent text wrapping */
+  margin: 205px 0 80px 0; /* Top/bottom margin, no horizontal margin */
+}
+
+/* Three columns, fixed 240px cards with 40px gutters (per Figma measurements) */
+.whyCareGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 240px); /* Figma: 240px width per card */
+  justify-content: center; /* center the three fixed columns */
+  gap: 24px 40px; /* Figma: 40px gap between cards */
+  margin: 0 0 218px 0; /* Figma: 218px bottom spacing */
+}
+
+/* WhyCare Component Responsive */
+@media (max-width: 1240px) {
+  .sectionHeadingCenter {
+    font-size: 56px;
+    letter-spacing: -2.8px;
+    margin: 160px 0 60px 0;
+  }
+  .whyCareGrid {
+    grid-template-columns: repeat(2, 240px);
+    justify-content: center;
+    margin: 0 0 160px 0;
+  }
+}
+
+@media (max-width: 904px) {
+  .sectionHeadingCenter {
+    font-size: 40px;
+    letter-spacing: -2px;
+    width: 100%;
+    text-align: center;
+    margin: 120px 0 40px 0;
+  }
+  .whyCareGrid {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    margin: 0 auto 120px auto;
+  }
+  .whyCard {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .sectionHeadingCenter {
+    font-size: 32px;
+    margin: 80px 0 32px 0;
+  }
+  .whyTitle {
+    font-size: 20px;
+  }
+  .whyBody {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 430px) {
+  .sectionHeadingCenter {
+    font-size: 28px;
+    margin: 60px 0 24px 0;
+  }
+  .whyTitle {
+    font-size: 18px;
+  }
+  .whyBody {
+    font-size: 18px;
+  }
+  .whyCareGrid {
+    gap: 16px;
+  }
+}
+
+.whyCard {
+  width: 240px; /* Figma exact width */
+  max-width: 100%;
+}
+
+/* Title: Pretendard 24/700 black */
+.whyTitle {
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 24px; /* Figma exact size */
+  font-weight: 700; /* Figma weight */
+  line-height: normal; /* Figma normal line-height */
+  margin: 0 0 6px 0;
+}
+
+/* Body: Pretendard 24/400 black (arrow included in content) */
+.whyBody {
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 24px; /* Figma exact size */
+  font-weight: 400; /* Figma weight */
+  line-height: normal; /* Figma normal line-height */
+  margin: 0;
+}
+
+/* Challenge section */
+/* Top row: responsive grid that fits within 1200px container */
+.challengeTop {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+  margin: 0 0 80px 0; /* 0px top margin, 80px bottom margin */
+  max-width: 100%;
+}
+
+/* Challenge Component Responsive */
+@media (max-width: 904px) {
+  .challengeTop {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin: 0 0 60px 0;
+  }
+  .challengeHeading {
+    width: 100%;
+    font-size: 56px;
+    letter-spacing: -2.8px;
+  }
+  .challengeDek {
+    width: 100%;
+    font-size: 32px;
+  }
+  .challengeGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin: 0 0 60px 0;
+  }
+  .challengePoint {
+    width: 100%;
+    font-size: 20px;
+  }
+}
+
+/* Mobile-specific breakpoint for devices like Galaxy S20 Ultra (412px) */
+@media (max-width: 480px) {
+  .challengeGrid {
+    grid-template-columns: 1fr !important;
+    gap: 20px;
+    margin: 0 0 40px 0;
+  }
+  .challengePoint {
+    width: 100% !important;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .challengeTop {
+    margin: 0 0 40px 0;
+  }
+  .challengeHeading {
+    font-size: 40px;
+    letter-spacing: -2px;
+  }
+  .challengeDek {
+    font-size: 28px;
+  }
+  .challengeGrid {
+    margin: 0 0 40px 0;
+  }
+}
+
+@media (max-width: 430px) {
+  .challengeHeading {
+    font-size: 32px;
+  }
+  .challengeDek {
+    font-size: 24px;
+  }
+  .challengeTop {
+    gap: 16px;
+  }
+  .challengeGrid {
+    gap: 16px;
+  }
+}
+
+/* H2 left: Pretendard 72/600, -3.6px, capitalize, responsive width */
+.challengeHeading {
+  width: 100%; /* Use full available width */
+  max-width: 100%;
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-weight: 600;
+  font-size: 72px; /* Figma exact size */
+  line-height: 120%; /* Figma: 120% */
+  letter-spacing: -3.6px; /* Figma exact letter-spacing */
+  text-transform: capitalize;
+  margin: 0;
+}
+
+/* Right sentence: base Gray/500 40/600, final clause black 40/600 */
+.challengeDek {
+  width: 100%; /* Use full available width */
+  max-width: 100%;
+  color: #999; /* var(--Gray-500) */
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 40px; /* Figma exact size */
+  font-weight: 600; /* Figma weight */
+  line-height: normal; /* Figma normal line-height */
+  margin: 0;
+}
+
+.challengeDekEmph {
+  color: var(--color-neutral-black);
+}
+
+/* Bottom row: 3 columns, responsive grid that fits within container */
+.challengeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px; /* Reduced gap to fit better */
+  justify-content: center;
+  margin: 0 0 80px 0; /* 80px bottom margin, no left margin */
+  padding: 0;
+  max-width: 100%;
+  overflow: hidden; /* Prevent any overflow */
+}
+
+/* text box width: 1145px, centered, Pretendard 40/600 white */
+.changeBannerText {
+  position: absolute;
+  inset: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  color: #fff;
+  text-align: center;
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 60px;
+  box-sizing: border-box;
+}
+
+/* EmployerChangeBanner Component Responsive */
+@media (max-width: 904px) {
+  .containerWide {
+    max-width: 100%;
+    padding: 0 16px;
+  }
+  .changeBanner {
+    height: 240px;
+    margin: 0 0 120px 0;
+  }
+  .changeBannerText {
+    font-size: 32px;
+    padding: 0 48px;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 600px) {
+  .changeBanner {
+    height: 200px;
+    margin: 0 0 80px 0;
+  }
+  .changeBannerText {
+    font-size: 28px;
+    padding: 0 36px;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 430px) {
+  .changeBanner {
+    height: 180px;
+    border-radius: 20px;
+  }
+  .changeBannerText {
+    font-size: 20px;
+    padding: 0 20px;
+    line-height: 1.4;
+  }
+  .containerWide {
+    padding: 0 20px;
+  }
+}
+
+.challengePoint {
+  width: 100%; /* Use full available width */
+  max-width: 100%;
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 24px; /* Figma exact size */
+  font-weight: 400; /* Figma weight */
+  line-height: normal; /* Figma normal line-height */
+  margin: 0;
+}
+
+/* wide container for this banner (Figma width 1368px) */
+.containerWide {
+  width: 100%;
+  max-width: 1368px;
+  margin: 0 auto;
+}
+
+/* Banner: 1368×289, radius 25px, bg image with dark scrim, centered text */
+.changeBanner {
+  position: relative;
+  height: 289px;
+  border-radius: 25px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #000; /* fallback while image loads */
+  margin: 0 0 160px 0; /* Added 160px bottom margin */
+}
+
+.changeBannerImg {
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(100%) contrast(100%);
+}
+
+.changeBannerScrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4); /* #000000 40% from Figma */
+}
+
+/* ======= Be The First To Know ======= */
+/* Grid: [311px | 280px | form column], 40px gutter between left/middle, ~37px to card */
+.btfkGrid {
+  display: grid;
+  grid-template-columns: 311px 280px 1fr;
+  column-gap: 40px; /* left ↔ middle */
+  row-gap: 24px;
+  align-items: start;
+  position: relative;
+}
+
+/* Right column heading aligned over the card, with 76px spacing to card below */
+.btfkHeading {
+  grid-column: 3;
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-weight: 600;
+  font-size: clamp(36px, 6vw, 72px);
+  line-height: 1.2;
+  letter-spacing: -0.05em;
+  text-transform: capitalize;
+  text-align: left;
+  margin: 0 0 76px 0; /* Figma shows ~76px to card */
+}
+
+/* Left title block (311×288 in Figma) */
+.btfkLeftTitle {
+  grid-column: 1;
+  width: 311px;
+  max-width: 100%;
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 32px; /* looks close to Figma scale for this block */
+  font-weight: 700;
+  line-height: 1.05;
+  margin: 0;
+}
+
+/* Middle copy (24/400) with 40px gap from left per redline */
+.btfkMiddleCopy {
+  grid-column: 2;
+  width: 280px;
+  max-width: 100%;
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: normal;
+  margin: 0;
+}
+
+/* Card */
+.btfkCard {
+  grid-column: 3;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 14px;
+  padding: 24px;
+  max-width: 560px; /* visually matches the mock */
+  background: #fff;
+}
+
+/* Two-column field grid inside the card; 60px left padding in mock ≈ inner spacing here */
+.btfkCardGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 620px) {
+  .btfkCardGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Labels + inputs */
+.btfkField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btfkLabel {
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.btfkInput {
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: #f5f5f5;
+  padding: 0 12px;
+  color: #111;
+  font-family: inherit;
+  font-size: 16px;
+  outline: none;
+}
+
+.btfkInput::placeholder {
+  color: #9ca3af;
+}
+
+/* Button — outline pill (centered) */
+.btfkButton {
+  display: block;
+  margin: 6px auto 0 auto; /* ~63px bottom and ~353px center alignment from mock are visual; this centers */
+  padding: 10px 22px;
+  height: 44px;
+  border-radius: 999px;
+  border: 2px solid #08384a; /* brand-ish dark teal from mock */
+  background: transparent;
+  color: #08384a;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.btfkButton:hover {
+  filter: brightness(0.9);
+}
+
+/* Responsive collapse */
+@media (max-width: 1100px) {
+  .btfkGrid {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+  .btfkLeftTitle,
+  .btfkMiddleCopy,
+  .btfkHeading,
+  .btfkCard {
+    grid-column: 1;
+  }
+  .btfkHeading {
+    margin-bottom: 24px;
+  }
+  .btfkLeftTitle {
+    width: auto;
+  }
+  .btfkMiddleCopy {
+    width: auto;
+    margin-bottom: 8px;
+  }
+  .btfkCard {
+    max-width: 100%;
+  }
+}
+
+/* ======= NEW Be The First To Know Structure ======= */
+/* Three-column layout: title left, description middle, form right */
+.btfkContainer {
+  display: grid;
+  grid-template-columns: 311px 280px 1fr; /* Figma: 311px title, 280px description, 1fr form */
+  gap: 40px 37px; /* Figma: 40px gap left-middle, 37px gap middle-right */
+  align-items: start;
+  margin: 0 0 160px 0; /* Figma: 160px bottom margin */
+}
+
+/* Left column: Main title */
+.btfkLeftColumn {
+  width: 311px; /* Figma exact width */
+}
+
+/* Main title: Pretendard 40/600, black */
+.btfkMainTitle {
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 40px; /* Figma exact size */
+  font-weight: 600; /* Figma weight */
+  line-height: normal; /* Figma normal line-height */
+  margin: 0;
+}
+
+/* Middle column: Description text */
+.btfkMiddleColumn {
+  width: 280px; /* Figma exact width */
+}
+
+/* Description: Pretendard 24/400, black */
+.btfkDescription {
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 24px; /* Figma exact size */
+  font-weight: 400; /* Figma weight */
+  line-height: normal; /* Figma normal line-height */
+  margin: 0;
+}
+
+/* Right column: Form title and form */
+.btfkRightColumn {
+  width: 100%;
+}
+
+/* Form title: Pretendard 40/600, black */
+.btfkFormTitle {
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 40px; /* Figma exact size */
+  font-weight: 600; /* Figma weight */
+  line-height: normal; /* Figma normal line-height */
+  margin: 0 0 76px 0; /* Figma: 76px vertical spacing */
+}
+
+/* Form container: white bg, border, rounded */
+.btfkForm {
+  background: #fff;
+  border: 1px solid #000;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 2x2 grid of form fields */
+.btfkFormGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Form field styles */
+.btfkField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btfkLabel {
+  color: var(--color-neutral-black);
+  font-family:
+    Pretendard,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.btfkInput {
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  padding: 0 12px;
+  color: var(--color-neutral-black);
+  font-family: inherit;
+  font-size: 16px;
+  outline: none;
+}
+
+.btfkInput::placeholder {
+  color: #9ca3af;
+}
+
+.btfkButton {
+  display: block;
+  margin: 16px 0 0 0;
+  padding: 12px 24px;
+  height: 44px;
+  width: 100%;
+  border-radius: 22px;
+  border: 1px solid #014260;
+  background: #fff;
+  color: #014260;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.btfkButton:hover {
+  background: #f8f9fa;
+}
+
+/* BeFirstToKnow Component Responsive */
+@media (max-width: 1240px) {
+  .btfkContainer {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .btfkLeftColumn {
+    width: 100%;
+    grid-column: 1 / 2;
+  }
+  .btfkMiddleColumn {
+    width: 100%;
+    grid-column: 1 / 2;
+    grid-row: 2;
+  }
+  .btfkRightColumn {
+    grid-column: 2 / 3;
+    grid-row: 1 / 3;
+  }
+}
+
+@media (max-width: 904px) {
+  .btfkContainer {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin: 0 0 80px 0;
+  }
+  .btfkLeftColumn,
+  .btfkMiddleColumn,
+  .btfkRightColumn {
+    width: 100%;
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .btfkMainTitle {
+    font-size: 32px;
+  }
+  .btfkDescription {
+    font-size: 20px;
+  }
+  .btfkFormTitle {
+    font-size: 32px;
+    margin: 0 0 40px 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .btfkContainer {
+    margin: 0 0 60px 0;
+  }
+  .btfkMainTitle {
+    font-size: 28px;
+  }
+  .btfkFormTitle {
+    font-size: 28px;
+    margin: 0 0 32px 0;
+  }
+}
+
+@media (max-width: 430px) {
+  .btfkFormGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .btfkLabel {
+    font-size: 12px;
+  }
+  .btfkInput {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  .btfkButton {
+    font-size: 12px;
+    padding: 10px 20px;
+  }
+  .btfkForm {
+    padding: 20px;
+  }
+  .btfkContainer {
+    gap: 20px;
+  }
+}
