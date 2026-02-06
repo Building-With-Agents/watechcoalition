@@ -15,11 +15,11 @@ MSSQL_PORT=1433
 MSSQL_USER=SA
 MSSQL_PASSWORD=YourComplex!P4ssw0rd
 MSSQL_HOST=localhost
-MSSQL_DATABASE=CoreDB
+MSSQL_DATABASE=WaTechDB
 
 # Connection String for MSSQL (if using libraries that accept connection strings)
-MSSQL_CONNECTION_STRING=mssql://SA:YourComplex!P4ssw0rd@localhost:1433/CoreDB
-DATABASE_URL="sqlserver://localhost:1433;database=CoreDB;user=SA;password=YourComplex!P4ssw0rd;encrypt=false;trustServerCertificate=true"
+MSSQL_CONNECTION_STRING=mssql://SA:YourComplex!P4ssw0rd@localhost:1433/WaTechDB
+DATABASE_URL="sqlserver://localhost:1433;database=WaTechDB;user=SA;password=YourComplex!P4ssw0rd;encrypt=false;trustServerCertificate=true"
 
 # Generate this secret by running the following command: openssl rand -base64 32
 AUTH_SECRET=<your generated base64 auth secret>
@@ -43,12 +43,12 @@ docker compose ps
 
 You should see `mssql-server` with a `healthy` status.
 
-## Create the database (CoreDB)
+## Create the database (WaTechDB)
 
 Create the DB inside the container:
 
 ```bash
-docker exec -it mssql-server /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "%MSSQL_SA_PASSWORD%" -C -Q "CREATE DATABASE CoreDB"
+docker exec -it mssql-server /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "%MSSQL_SA_PASSWORD%" -C -Q "CREATE DATABASE WaTechDB"
 ```
 
 Notes:
