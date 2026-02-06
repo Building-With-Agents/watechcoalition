@@ -18,8 +18,8 @@ This repository contains the source code for the Washington Tech Workforce Coali
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/runefather/frontend-cfa.git
-cd frontend-cfa
+git clone https://github.com/Building-With-Agents/watechcoalition.git
+cd watechcoalition
 ```
 
 ### 2. Install Dependencies
@@ -30,36 +30,13 @@ npm install
 
 ### 3. Set Up Environment Variables
 
-If you are creating your own local MSSQL server, we recommend using Docker Compose. Follow our [instructions for setting up MSSQL](setup-MSSQL.md).
+We recommend using Docker Compose to run SQL Server locally. Follow our [instructions for setting up MSSQL](setup-MSSQL.md) to configure your local database and environment variables.
 
-Otherwise, if you're just working on the frontend, you can use our shared cloud dev MSSQL server! Create a `.env` file in the root directory of your project and copy the below text there. Add your generated Base64 Auth Secret and save!
+Create a `.env` file in the root directory of your project with the required configuration. See `setup-MSSQL.md` for the complete environment variable template.
 
-```env
-# Dev Test Azure DB
-DATABASE_URL="sqlserver://cfa-reactdb.database.windows.net;database=dev;user=talentfinder;password=CFA2024@Next.js;encrypt=true;trustServerCertificate=true"
+**Note**: Generate your Base64 Auth Secret by running: `openssl rand -base64 32`
 
-# Azure Services - Blob Storage
-AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=careerservicesstorage;AccountKey=Y81x4YjIyS2W2fhIR6sW/05Lom1hTgyhBhYAvDFKcxf7GYE7Fxo3D+JfMRoHShpT5XAKbi4Vjuuc+AStdQgGjA==;EndpointSuffix=core.windows.net"
-AZURE_STORAGE_ACCOUNT_KEY="Y81x4YjIyS2W2fhIR6sW/05Lom1hTgyhBhYAvDFKcxf7GYE7Fxo3D+JfMRoHShpT5XAKbi4Vjuuc+AStdQgGjA=="
-AZURE_STORAGE_NAME="careerservicesstorage"
-
-# ESS Services  ######## TODO use application user consolidate with Azure Services, if possible ########
-NEXT_PUBLIC_TENANT_ID="a3c7a257-40f2-43a9-9373-8bb5fc6862f7"
-NEXT_PUBLIC_CLIENT_ID="dfc4e746-44b7-420b-8463-ad6011728b8d"
-NEXT_PUBLIC_BASE_URL="https://cfahelpdesksandbox.api.crm.dynamics.com/api/data/v9.1"
-NEXT_PUBLIC_TOKEN_SCOPE="https://cfahelpdesksandbox.crm.dynamics.com/.default"
-
-# Shared Auth Secrets
-AUTH_GITHUB_ID=Ov23li9hwTQuo1iWqrNH
-AUTH_GITHUB_SECRET=3be8d9d590b4b30df7df1d9513eb4280e605f6fa
-GOOGLE_CLIENT_ID="896719689092-a8qllfgn2nir2uk1t3p4jf6d1tb5bsnn.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET=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
-
-# Personal Auth Secret - generate by running the following command: openssl rand -base64 32
-AUTH_SECRET=<your generated base64 auth secret>
-```
-
-If there are new changes that need to be applied to the SQL server, you can run the following commands to reset, update, and reseed everything: `npx prisma migrate reset`, then `npm run seed`.
+If there are new changes that need to be applied to the SQL server, you can run the following commands to reset, update, and reseed everything: `npx prisma migrate reset`, then `npm run db:seed:anonymized`.
 
 If you're running into unexpected issues, someone else probably changed something. Terminate your `npm run dev` and then run `npx prisma generate`.
 
@@ -90,7 +67,8 @@ Open your browser and navigate to [http://localhost:3000](http://localhost:3000)
 - `prettier`: Formats the code using Prettier.
 - `prettier:check`: Checks if the code is formatted according to Prettier.
 - `start`: Starts the application in production mode.
-- `seed`: Seeds the database with initial data.
+- `db:seed:anonymized`: Seeds the database with anonymized JSON fixtures from `prisma/mock-data/` (recommended for local dev).
+- `seed`: Seeds the database with synthetic/faker-generated data (does not use `prisma/mock-data/`).
 - `lint`: Runs ESLint to check for code issues.
 
 ## Technologies Used
