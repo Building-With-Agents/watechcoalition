@@ -1,0 +1,14 @@
+.portfolio {
+  background: var(
+    --2,
+    linear-gradient(
+      90deg,
+      var(--Secondary, #014260) 11.45%,
+      var(--Primary, #047f9c) 46.84%,
+      var(--Green-Accent-01, #61ce70) 106.62%
+    )
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

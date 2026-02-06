@@ -1,0 +1,11 @@
+{
+  "breadcrumbs.enabled": true,
+  "breadcrumbs.filePath": "on",
+  "explorer.compactFolders": false,
+  "explorer.excludeGitIgnore": false,
+  "explorer.fileNesting.enabled": false,
+  "explorer.fileNesting.expand": true,
+  "workbench.tree.indent": 16,
+  "workbench.tree.renderIndentGuides": "always",
+  "workbench.view.alwaysShowHeaderActions": false
+}

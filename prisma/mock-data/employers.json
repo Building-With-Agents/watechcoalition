@@ -1,0 +1,145 @@
+[
+  {
+    "employer_id": "e3473578-0f50-4406-a70c-d0d513928bc7",
+    "user_id": "0e8cba31-5a09-4e85-b8b9-5c1e08083772",
+    "company_id": "25ffbe4c-92b8-4c89-a8f0-3b2664dc336b",
+    "work_address_id": "27ecf859-3793-4e88-95de-8ca1f1746367",
+    "job_title": "Software Developer",
+    "linkedin_url": "https://www.linkedin.com/in/gageberz/",
+    "is_verified_employee": true,
+    "createdAt": "2025-03-18T20:11:40.843Z",
+    "updatedAt": "2025-06-25T19:21:59.230Z"
+  },
+  {
+    "employer_id": "68b7ce3d-6175-49f2-b522-6432543f870d",
+    "user_id": "85702363-8866-4544-b9a5-e1caad8a21cd",
+    "company_id": "25ffbe4c-92b8-4c89-a8f0-3b2664dc336b",
+    "work_address_id": "27ecf859-3793-4e88-95de-8ca1f1746367",
+    "job_title": "Program Manager",
+    "linkedin_url": "https://www.linkedin.com/in/bethanyvasquez/",
+    "is_verified_employee": true,
+    "createdAt": "2025-03-18T20:11:40.843Z",
+    "updatedAt": "2025-06-25T19:21:59.230Z"
+  },
+  {
+    "employer_id": "2fce8546-e721-43ee-b5e7-f65d49b89b05",
+    "user_id": "0ec8a4e9-6de3-4c03-93c6-51de3de40abf",
+    "company_id": "25ffbe4c-92b8-4c89-a8f0-3b2664dc336b",
+    "work_address_id": "27ecf859-3793-4e88-95de-8ca1f1746367",
+    "job_title": "Career Services Navigator",
+    "linkedin_url": "https://www.linkedin.com/company/digitalskillsforall/",
+    "is_verified_employee": true,
+    "createdAt": "2025-03-18T20:11:40.843Z",
+    "updatedAt": "2025-06-25T19:21:59.230Z"
+  },
+  {
+    "employer_id": "d715f0a3-6d76-4e0d-af7a-54feb5a3f5b3",
+    "user_id": "515beb03-d5bd-4133-948d-d7be1c7178a9",
+    "company_id": "25ffbe4c-92b8-4c89-a8f0-3b2664dc336b",
+    "work_address_id": "27ecf859-3793-4e88-95de-8ca1f1746367",
+    "job_title": "CEO",
+    "linkedin_url": "www.linkedin.com/ritubahl",
+    "is_verified_employee": true,
+    "createdAt": "2025-03-18T20:11:40.843Z",
+    "updatedAt": "2025-06-25T19:21:59.230Z"
+  },
+  {
+    "employer_id": "20aead81-299b-4d40-b16d-ccb36c5ae8b6",
+    "user_id": "603d84f6-2b25-4348-ac84-b290e32ccc39",
+    "company_id": "25ffbe4c-92b8-4c89-a8f0-3b2664dc336b",
+    "work_address_id": "27ecf859-3793-4e88-95de-8ca1f1746367",
+    "job_title": "Dev",
+    "linkedin_url": "linkedin.com",
+    "is_verified_employee": true,
+    "createdAt": "2025-03-18T20:11:40.843Z",
+    "updatedAt": "2025-06-25T19:21:59.230Z"
+  },
+  {
+    "employer_id": "9ae3e5ab-d770-4158-af8f-6da86b45b021",
+    "user_id": "4dab3d4b-8f10-462e-90b0-c2303c5638ee",
+    "company_id": "25ffbe4c-92b8-4c89-a8f0-3b2664dc336b",
+    "work_address_id": "27ecf859-3793-4e88-95de-8ca1f1746367",
+    "job_title": "Director, Program Development",
+    "linkedin_url": "https://www.linkedin.com/in/mandiravirmani/",
+    "is_verified_employee": true,
+    "createdAt": "2025-03-18T20:11:40.843Z",
+    "updatedAt": "2025-06-25T19:21:59.230Z"
+  },
+  {
+    "employer_id": "7cc0f20c-12bd-4f89-aa8d-cfb81116abbe",
+    "user_id": "5e7bce0e-ee46-4af6-a32a-c2bf11b99c15",
+    "company_id": null,
+    "work_address_id": null,
+    "job_title": null,
+    "linkedin_url": null,
+    "is_verified_employee": false,
+    "createdAt": "2025-03-18T20:11:40.843Z",
+    "updatedAt": "2025-06-25T19:21:59.230Z"
+  },
+  {
+    "employer_id": "e712f666-29e9-47c3-bab9-9c3951568252",
+    "user_id": "8fd8ab5b-7035-4b0a-a136-a1c0c2ccaeb8",
+    "company_id": null,
+    "work_address_id": null,
+    "job_title": null,
+    "linkedin_url": null,
+    "is_verified_employee": false,
+    "createdAt": "2025-03-18T20:11:40.843Z",
+    "updatedAt": "2025-06-25T19:21:59.230Z"
+  },
+  {
+    "employer_id": "268c91dc-51f2-4820-9288-019a2287c84f",
+    "user_id": "59dd36fc-0ac3-42c9-b7b0-60885cf65458",
+    "company_id": "25ffbe4c-92b8-4c89-a8f0-3b2664dc336b",
+    "work_address_id": null,
+    "job_title": "Project Manager",
+    "linkedin_url": null,
+    "is_verified_employee": true,
+    "createdAt": "2025-03-18T20:11:40.843Z",
+    "updatedAt": "2025-06-25T19:21:59.230Z"
+  },
+  {
+    "employer_id": "9ae4b17f-974c-4eb5-9451-21d2a3c584c0",
+    "user_id": "9d342402-0efe-4e68-873c-ca29b1e29489",
+    "company_id": null,
+    "work_address_id": null,
+    "job_title": null,
+    "linkedin_url": null,
+    "is_verified_employee": false,
+    "createdAt": "2025-03-18T20:11:40.843Z",
+    "updatedAt": "2025-06-25T19:21:59.230Z"
+  },
+  {
+    "employer_id": "332ff459-7a95-47c1-8b73-52b8e3e21201",
+    "user_id": "aa181331-0693-446d-9c2e-134782a4865e",
+    "company_id": "25ffbe4c-92b8-4c89-a8f0-3b2664dc336b",
+    "work_address_id": "27ecf859-3793-4e88-95de-8ca1f1746367",
+    "job_title": "Technical Program Manager",
+    "linkedin_url": "www.linkedin/in/theGaryLarson",
+    "is_verified_employee": true,
+    "createdAt": "2025-03-18T20:11:40.843Z",
+    "updatedAt": "2025-06-25T19:21:59.230Z"
+  },
+  {
+    "employer_id": "7e753030-884d-454f-a366-09d10dca37f5",
+    "user_id": "8db85e83-515b-472e-bb79-101a503c60e4",
+    "company_id": "25ffbe4c-92b8-4c89-a8f0-3b2664dc336b",
+    "work_address_id": "27ecf859-3793-4e88-95de-8ca1f1746367",
+    "job_title": "Employer Engagement",
+    "linkedin_url": null,
+    "is_verified_employee": true,
+    "createdAt": "2025-09-25T15:44:18.470Z",
+    "updatedAt": "2025-09-25T15:44:49.773Z"
+  },
+  {
+    "employer_id": "18df16cc-54a2-4a1f-88f8-62863c74c0a6",
+    "user_id": "285f254b-9213-4687-9be5-94edff56cece",
+    "company_id": "25ffbe4c-92b8-4c89-a8f0-3b2664dc336b",
+    "work_address_id": "59764995-4c3e-44c6-86da-15926812346a",
+    "job_title": "Business Development Manager",
+    "linkedin_url": null,
+    "is_verified_employee": true,
+    "createdAt": "2025-07-24T14:17:41.083Z",
+    "updatedAt": "2025-07-24T14:18:16.386Z"
+  }
+]

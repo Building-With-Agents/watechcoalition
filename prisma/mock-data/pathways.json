@@ -1,0 +1,34 @@
+[
+  {
+    "pathway_id": "79608104-d50e-4d0f-b541-2a9de7bc0f89",
+    "pathway_title": "Infrastructure and Operations",
+    "tooltip": "Managing and maintaining computer networks and IT infrastructure.",
+    "description": "Infrastructure and Operations roles deploy, operate, and manage a company’s technology resources. AI is transforming these roles from human-dependent functions to smarter networks that manage configurations, troubleshoot issues, and adapt to changing demands. As per the IBM Global AI Adoption Index 2022, 33% of organizations use AI to automate IT processes—freeing up time for complex problem solving, strategic decision making, and stakeholder management.",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "pathway_id": "a54f3940-301c-4e2e-85e8-bcaf244c89bb",
+    "pathway_title": "Cybersecurity",
+    "tooltip": "Protecting systems, networks, and data from security breaches and cyberattacks.",
+    "description": "With the advent of AI, the Cybersecurity job roles have witnessed transition, as 70% of Cybersecurity leaders (CISOs) believe AI gives the advantage to attackers over defenders. However, 35% of the CISOs are already experimenting with it for cyber defense, and 61% will likely use it in the next 12 months. Additionally, 86% of CISOs believe that Gen AI will help alleviate skills gaps and talent shortages on the security team. With the intervention of AI there has been an upgrade to the quality of work. Routine tasks such as log analysis and basic threat detection are being automated—potentially reducing time spent on entry-level tasks—while the right skillset can leverage AI to automate report generation and malware analysis.",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "pathway_id": "b28fbd79-c3ea-47b5-9bbf-6f7f8f9c6009",
+    "pathway_title": "Data Science",
+    "tooltip": "Analyzing and interpreting large sets of data to extract valuable insights.",
+    "description": "Data science leverages advanced statistics and machine learning to tackle business and product challenges through a structured approach encompassing problem identification, data collection, exploration, cleaning, model building, iteration, and communication. In this evolving landscape, the integration of AI marks a transformative shift in business operations and decision-making. AI technologies like NLP, LLMs, Gen AI, and automated data processing have revolutionized data analysis with complex nonlinear correlations and advanced models. While AI enhances efficiency and accelerates data processing, it emphasizes the ongoing necessity of human expertise in interpreting results, validating outputs, and making strategic decisions.",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "pathway_id": "0645cc89-e942-48b4-a34a-f7ad7e87dec3",
+    "pathway_title": "Software Development",
+    "tooltip": "Designing, coding, testing, and maintaining software applications and systems.",
+    "description": "Software Development is a crucial business element in an era of rapid digitization and evolving user needs. The role of AI in this sector has evolved from basic assistance to now helping developers design efficient and adaptive products. AI tools, including Gen AI and NLP, provide code suggestions, bug detection, and testing capabilities, ensuring developers have more time to focus on broader business requirements. A Gartner report suggests that by 2025, more than half of all software engineering leader role descriptions will explicitly require oversight of Gen AI.",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  }
+]

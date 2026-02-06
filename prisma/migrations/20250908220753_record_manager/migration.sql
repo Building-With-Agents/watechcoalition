@@ -1,0 +1,23 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- AlterTable
+ALTER TABLE [dbo].[RAGRecordManager] ALTER COLUMN [fileId] VARCHAR(128) NOT NULL;
+ALTER TABLE [dbo].[RAGRecordManager] ALTER COLUMN [hash] CHAR(64) NOT NULL;
+
+-- CreateIndex
+ALTER TABLE [dbo].[RAGRecordManager] ADD CONSTRAINT [RAGRecordManager_fileId_key] UNIQUE NONCLUSTERED ([fileId]);
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH

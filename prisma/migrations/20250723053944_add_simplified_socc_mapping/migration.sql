@@ -1,0 +1,26 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- CreateTable
+CREATE TABLE [dbo].[socc] (
+    [id] UNIQUEIDENTIFIER NOT NULL CONSTRAINT [socc_id_df] DEFAULT newid(),
+    [code] NVARCHAR(1000) NOT NULL,
+    [title] NVARCHAR(1000) NOT NULL,
+    [description] NVARCHAR(1000),
+    [version] VARCHAR(4) NOT NULL,
+    CONSTRAINT [socc_pkey] PRIMARY KEY CLUSTERED ([id])
+);
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH

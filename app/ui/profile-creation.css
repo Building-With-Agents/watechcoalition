@@ -1,0 +1,165 @@
+@import "./global.css";
+
+h1 {
+  @apply my-2 text-5xl;
+  font-weight: 700;
+
+  /* From Figma Properties */
+  /*
+  font-size: 34px;
+  font-family: Roboto;
+  line-height: 41.99px;
+  letter-spacing: 0.25px;
+  text-align: left;
+  */
+}
+
+h2 {
+  @apply my-2 text-2xl;
+  /* From Figma Properties */
+  /* font-size: 24px;
+  font-weight: 400;
+  line-height: 32.02px;
+  text-align: left; */
+}
+
+.profile-form-aside {
+  /* TODO: removed from MVP, on reimplement review xl:w-2/5 lg:block xl:pl-80 */
+  @apply hidden;
+}
+
+.profile-form-section {
+  /* TODO: removed from MVP, on reimplement review xl:w-3/5 p-5 xl:pr-80*/
+  @apply w-full max-w-3xl px-3 py-10;
+  /*   @apply hidden laptop:w-2/5 laptop:block laptop:pl-80; */
+  /*   @apply w-full laptop:w-3/5 p-5 laptop:pr-80; */
+}
+
+.profile-form-progress-btn-group {
+  @apply my-10 flex justify-between;
+}
+
+.profile-form-progress-btn-single-end {
+  @apply my-10 flex justify-end;
+}
+
+.profile-form-grid {
+  @apply my-3 grid gap-6;
+}
+
+.alert-title {
+  @apply mt-3;
+  /* font-family: Roboto; */
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: 0.15000000596046448px;
+  text-align: left;
+}
+
+.subtitle {
+  @apply my-3;
+  font-family: Roboto;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 26px;
+  letter-spacing: 0.46000000834465027px;
+  text-align: left;
+  color: var(--color-neutral-black);
+}
+
+.subtitle-congrats {
+  @apply mb-5 mt-5;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 26px;
+  letter-spacing: 0.46000000834465027px;
+  text-align: left;
+  color: var(--color-neutral-black);
+}
+
+.subtitle-optional {
+  font-family: Roboto;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 19.2px;
+  letter-spacing: 0.15000000596046448px;
+  text-align: left;
+  color: var(--color-neutral-black);
+}
+
+/* Figma Button colors */
+.custom-outline-btn {
+  color: var(--color-primary-main);
+  border-color: var(--color-primary-main);
+  background-color: transparent;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.custom-outline-btn.selected,
+.custom-outline-btn:hover.selected {
+  background-color: var(--color-primary-main) !important;
+  color: #fff;
+  border-color: var(--color-neutral-black);
+}
+
+.custom-outline-btn:hover {
+  color: var(--color-primary-main);
+  background-color: #f3f4f6 !important;
+  border-color: var(--color-primary-main);
+}
+
+.main-content {
+  position: relative;
+  z-index: 1; /* Ensure content appears above the canvas */
+  /* Add padding or margin as needed */
+  padding: 20px;
+}
+
+.spaced-lists > li {
+  @apply mb-5;
+}
+
+.snackbar-message {
+  display: flex;
+}
+
+.snackbar-message > svg {
+  margin-right: 16px;
+}
+/*
+.snackbar-message > div > div + p {
+  margin-bottom: 4px;
+} */
+
+.text-field-autocomplete > div > div,
+.select-autoload > div > div,
+.year-picker > div,
+.date-picker > div {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  border-radius: 0.5rem;
+}
+
+.text-field-autocomplete > div > label {
+  font-size: 0.875rem;
+}
+
+.phone-code > div > select,
+.year-picker > label,
+.date-picker > label {
+  @apply text-sm text-gray-500;
+}
+
+.year-picker > label,
+.date-picker > label {
+  @apply pt-1;
+}
+
+.date-picker > div > input,
+.year-picker > div > input {
+  height: 14px;
+}

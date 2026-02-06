@@ -1,0 +1,68 @@
+[
+  {
+    "id": "48d5b1e9-2f36-4c2a-89bb-3b6b063fdd77",
+    "title": "Data Science",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "id": "b77c5d72-2d8a-47e5-a13d-5d7a7893be09",
+    "title": "Software Development",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "id": "a7c1a1a1-e07e-43b8-a8eb-59b80f5c7a99",
+    "title": "Database Management",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "id": "7634a5fb-2398-4657-aab5-203c1fc84168",
+    "title": "IT Support",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "id": "7f61d839-d63a-44d7-8ef9-45726f401f16",
+    "title": "IT Project Management",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "id": "f23b7623-60ba-4a5b-a0a4-6cb588dbf6bd",
+    "title": "Other",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "id": "92ad3c59-62e6-4e84-b908-f3f4c8b089be",
+    "title": "Artificial Intelligence",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "id": "d2560874-32d3-4bc4-a5da-7b2b0dba62a0",
+    "title": "Web Development",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "id": "1e7ec76f-4b90-47d7-b9b1-d9ac38fd8d63",
+    "title": "Mobile App Development",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "id": "dd832f38-9020-42f7-b59c-fb39f9a4b28f",
+    "title": "Big Data Analytics",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  },
+  {
+    "id": "bb832f38-8172-5681-c43b-ab29f9a4b29e",
+    "title": "N/A Not an IT role",
+    "updatedAt": "2025-06-25T19:21:59.190Z",
+    "createdAt": "2025-06-25T19:21:59.190Z"
+  }
+]

@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "22.0.0"
+
+      - name: Install Dependencies
+        run: npm install # Install project dependencies.
+
+      - name: Run Build
+        env:
+          AZURE_STORAGE_ACCOUNT_KEY: "${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}"
+          AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;AccountName=mockBlobStorage;AccountKey=Ju$t@Mock|<3YJu$t@Mock|<3YJu$t@Mock|<3Y==;EndpointSuffix=core.windows.net"
+          AZURE_STORAGE_NAME: "${{ secrets.AZURE_STORAGE_NAME }}"
+        run: npm run build # Run the build script.
+
+
+      # - name: Run Tests
+      #   run: npm test  # (Optional) Run tests if you have them

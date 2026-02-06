@@ -1,0 +1,281 @@
+[
+  {
+    "zip": "06103",
+    "city": "Hartford",
+    "county": "Capitol",
+    "stateCode": "CT",
+    "state": "Connecticut",
+    "lat": 41.76477,
+    "lng": -72.67012
+  },
+  {
+    "zip": "97818",
+    "city": "Boardman",
+    "county": "Morrow",
+    "stateCode": "OR",
+    "state": "Oregon",
+    "lat": 45.7567,
+    "lng": -119.78444
+  },
+  {
+    "zip": "97838",
+    "city": "Hermiston",
+    "county": "Umatilla",
+    "stateCode": "OR",
+    "state": "Oregon",
+    "lat": 45.85266,
+    "lng": -119.28878
+  },
+  {
+    "zip": "98004",
+    "city": "Bellevue",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.61865,
+    "lng": -122.20548
+  },
+  {
+    "zip": "98005",
+    "city": "Bellevue",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.61494,
+    "lng": -122.16814
+  },
+  {
+    "zip": "98036",
+    "city": "Lynnwood",
+    "county": "Snohomish",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.81094,
+    "lng": -122.28155
+  },
+  {
+    "zip": "98043",
+    "city": "Mountlake Terrace",
+    "county": "Snohomish",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.7921,
+    "lng": -122.30758
+  },
+  {
+    "zip": "98045",
+    "city": "North Bend",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.48276,
+    "lng": -121.65678
+  },
+  {
+    "zip": "98101",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.61119,
+    "lng": -122.33454
+  },
+  {
+    "zip": "98103",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.6732,
+    "lng": -122.34258
+  },
+  {
+    "zip": "98104",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.60044,
+    "lng": -122.33004
+  },
+  {
+    "zip": "98105",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.66094,
+    "lng": -122.28321
+  },
+  {
+    "zip": "98106",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.54339,
+    "lng": -122.35366
+  },
+  {
+    "zip": "98108",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.54113,
+    "lng": -122.3126
+  },
+  {
+    "zip": "98115",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.68547,
+    "lng": -122.28234
+  },
+  {
+    "zip": "98118",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.54235,
+    "lng": -122.26872
+  },
+  {
+    "zip": "98121",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.61548,
+    "lng": -122.34668
+  },
+  {
+    "zip": "98125",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.71706,
+    "lng": -122.29969
+  },
+  {
+    "zip": "98126",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.54732,
+    "lng": -122.37454
+  },
+  {
+    "zip": "98146",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.50008,
+    "lng": -122.35768
+  },
+  {
+    "zip": "98168",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.48898,
+    "lng": -122.30175
+  },
+  {
+    "zip": "98178",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.49921,
+    "lng": -122.24735
+  },
+  {
+    "zip": "98195",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.65466,
+    "lng": -122.30752
+  },
+  {
+    "zip": "98199",
+    "city": "Seattle",
+    "county": "King",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.65139,
+    "lng": -122.40223
+  },
+  {
+    "zip": "98225",
+    "city": "Bellingham",
+    "county": "Whatcom",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 48.75461,
+    "lng": -122.50307
+  },
+  {
+    "zip": "98390",
+    "city": "Sumner",
+    "county": "Pierce",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.21195,
+    "lng": -122.22894
+  },
+  {
+    "zip": "98402",
+    "city": "Tacoma",
+    "county": "Pierce",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.25021,
+    "lng": -122.44056
+  },
+  {
+    "zip": "98501",
+    "city": "Olympia",
+    "county": "Thurston",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 46.9783,
+    "lng": -122.86989
+  },
+  {
+    "zip": "98848",
+    "city": "Quincy",
+    "county": "Grant",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 47.17182,
+    "lng": -119.84109
+  },
+  {
+    "zip": "99352",
+    "city": "Richland",
+    "county": "Benton",
+    "stateCode": "WA",
+    "state": "Washington",
+    "lat": 46.24199,
+    "lng": -119.29067
+  },
+  {
+    "zip": "83843",
+    "city": "Moscow",
+    "county": "Latah",
+    "stateCode": "ID",
+    "state": "Idaho",
+    "lat": 46.72257,
+    "lng": -116.94132
+  }
+]

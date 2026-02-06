@@ -1,0 +1,22 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- AlterTable
+ALTER TABLE [dbo].[companies] ADD [createdAt] DATETIME NOT NULL CONSTRAINT [companies_createdAt_df] DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE [dbo].[employers] ADD [createdAt] DATETIME NOT NULL CONSTRAINT [employers_createdAt_df] DEFAULT CURRENT_TIMESTAMP;
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH

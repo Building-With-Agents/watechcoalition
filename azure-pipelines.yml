@@ -1,0 +1,68 @@
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: ".env"
+
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: "$(Agent.TempDirectory)"
+      contents: "**/*.env"
+      targetFolder: "$(System.DefaultWorkingDirectory)"
+      cleanTargetFolder: false
+
+  - task: NodeTool@0
+    inputs:
+      versionSpec: "22.x"
+    displayName: "Install Node.js"
+
+  - script: |
+      npm ci
+    displayName: "Install dependencies"
+
+  - task: Cache@2
+    displayName: "Cache .next/cache"
+    inputs:
+      key: next | $(Agent.OS) | package-lock.json
+      path: "$(System.DefaultWorkingDirectory)/.next/cache"
+
+  - script: |
+      npx prisma generate
+      npx prisma migrate deploy
+      npm run build
+    displayName: "Build app"
+
+  - script: |
+      npm run coverage
+      npm run test:ci
+    displayName: "Run Vitest tests with coverage"
+
+  - task: PublishCodeCoverageResults@2
+    inputs:
+      summaryFileLocation: "$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml"
+    displayName: "Publish code coverage results"
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testRunner: "JUnit"
+      testResultsFiles: "$(System.DefaultWorkingDirectory)/reports/junit.xml"
+    displayName: "Publish test results"
+
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: "$(System.DefaultWorkingDirectory)"
+      includeRootFolder: false
+      archiveType: "zip"
+      archiveFile: "$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip"
+      replaceExistingArchive: true
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: "$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip"
+      ArtifactName: "drop"
