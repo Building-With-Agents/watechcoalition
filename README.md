@@ -30,7 +30,7 @@ npm install
 
 ### 3. Set Up Environment Variables
 
-If you are creating your own local MSSQL server, please follow our [instructions for setting up MSSQL](setup-MSSQL.md).
+If you are creating your own local MSSQL server, we recommend using Docker Compose. Follow our [instructions for setting up MSSQL](setup-MSSQL.md).
 
 Otherwise, if you're just working on the frontend, you can use our shared cloud dev MSSQL server! Create a `.env` file in the root directory of your project and copy the below text there. Add your generated Base64 Auth Secret and save!
 
