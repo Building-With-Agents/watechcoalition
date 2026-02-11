@@ -1,0 +1,33 @@
+services:
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.34.0
+    command: >
+      azurite
+      --location /data
+      --debug /data/debug.log
+      --blobHost 0.0.0.0
+      --queueHost 0.0.0.0
+      --tableHost 0.0.0.0
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - ./azure-functions/azurite-data:/data
+    restart: unless-stopped
+
+  copilot-functions:
+    build:
+      context: ./azure-functions/copilot-python
+    environment:
+      # Required for Python v2 programming model discovery
+      - AzureWebJobsFeatureFlags=${AzureWebJobsFeatureFlags:-EnableWorkerIndexing}
+      - FUNCTIONS_WORKER_RUNTIME=${FUNCTIONS_WORKER_RUNTIME:-python}
+      # Storage connection string should point at the azurite service hostname
+      - AzureWebJobsStorage=${AzureWebJobsStorage:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;}
+    ports:
+      - "7071:7071"
+    depends_on:
+      - azurite
+    restart: unless-stopped
+

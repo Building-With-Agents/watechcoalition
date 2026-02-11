@@ -11,7 +11,7 @@ This repository contains the source code for the Washington Tech Workforce Coali
 
 - Node.js >= 18.17.0
 - npm
-- MSSQL Server (optional)
+- Docker (for local SQL Server)
 
 ## Getting Started
 
@@ -22,38 +22,29 @@ git clone https://github.com/Building-With-Agents/watechcoalition.git
 cd watechcoalition
 ```
 
-### 2. Install Dependencies
+**First-time setup?** Follow the full environment setup guide:
+
+- **[ONBOARDING.md](ONBOARDING.md)** — Clone, env config, Docker SQL, database seed, and run (Windows, Linux, macOS)
+
+### Quick Start (after onboarding)
 
 ```bash
-npm install
-```
-
-### 3. Set Up Environment Variables
-
-We recommend using Docker Compose to run SQL Server locally. Follow our [instructions for setting up MSSQL](setup-MSSQL.md) to configure your local database and environment variables.
-
-Create a `.env` file in the root directory of your project with the required configuration. See `setup-MSSQL.md` for the complete environment variable template.
-
-**Note**: Generate your Base64 Auth Secret by running: `openssl rand -base64 32`
-
-If there are new changes that need to be applied to the SQL server, you can run the following commands to reset, update, and reseed everything: `npx prisma migrate reset`, then `npm run db:seed:anonymized`.
-
-If you're running into unexpected issues, someone else probably changed something. Terminate your `npm run dev` and then run `npx prisma generate`.
-
-### 4. Run the Development Server
-
-Start the development server:
-
-```bash
+npm ci
+# Configure .env.local and .env.docker (see ONBOARDING.md)
+docker compose --env-file .env.docker up -d
+npx prisma db push && npx prisma generate
+npm run db:seed:anonymized
 npm run dev
 ```
 
-Open your browser and navigate to [http://localhost:3000](http://localhost:3000) to see the application in action!
+Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
 ## Tutorials and Documentation
 
+- [Environment setup (onboarding)](ONBOARDING.md)
+- [Install Docker](docs/INSTALL_DOCKER.md)
 - [Branching Strategy](branch-strategy.md)
 - [Set up local MSSQL Server](setup-MSSQL.md)
 - [Changing the DB schema](prisma-workflow.md)

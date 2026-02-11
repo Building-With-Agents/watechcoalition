@@ -97,3 +97,19 @@ sqlpackage-*.txt
 # Local incident reports
 incident-report_*.md
 /.idea/
+
+# Azure Functions (Python) local/dev artifacts
+**/local.settings.json
+**/.python_packages/
+**/.venv/
+**/__pycache__/
+**/*.pyc
+
+# Local env override (repo convention)
+.env.local
+
+# Azurite local data (Compose volume target)
+azure-functions/azurite-data/
+
+# Local deployment artifacts
+azure-functions/*.zip
