@@ -26,12 +26,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "app/lib/placeholder-data.js",
-    "scripts/seed.js",
-    "prisma/seed.js",
-    "data/skills.js",
-    "next-auth.d.ts"
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
