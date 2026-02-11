@@ -5,6 +5,8 @@ These steps work on Windows/macOS/Linux as long as you have Docker Desktop / Doc
 
 **Docker Image**: The setup uses the official Microsoft SQL Server 2025 Docker image (`mcr.microsoft.com/mssql/server:2025-latest`) running in Developer Edition mode. This provides a full-featured SQL Server instance suitable for local development.
 
+For a full step-by-step (Windows, Linux, macOS), see [ONBOARDING.md](ONBOARDING.md) and [docs/DOCKER_SQL_SERVER_SETUP.md](docs/DOCKER_SQL_SERVER_SETUP.md).
+
 Your .env file should look similar to this:
 
 ```env
@@ -67,6 +69,8 @@ npx prisma db push
 ```
 
 Seed from the anonymized JSON fixtures in `prisma/mock-data/` (recommended for local dev):
+
+To seed the database with anonymized fixtures (recommended):
 
 ```bash
 npm run db:seed:anonymized

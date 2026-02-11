@@ -7,10 +7,12 @@ This repo uses a **training branch** to create intentionally broken code paths f
 
 ## Clone + setup (local dev)
 
+**Full step-by-step setup:** See [ONBOARDING.md](ONBOARDING.md).
+
 ### Prereqs
 
-- Node.js (use the version expected by the repo)
-- Docker Desktop
+- Node.js (use the version in `.nvmrc`)
+- Docker (see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md))
 - Azure OpenAI env vars (see `.env.local`)
 
 ### Clone
@@ -29,7 +31,8 @@ npm ci
 ### Configure env vars
 
 1. Copy `.env.example` → `.env.local`
-2. Fill in these variables (both chat + embeddings are required):
+2. Copy `.env.docker.example` → `.env.docker` (set `MSSQL_SA_PASSWORD`, etc.)
+3. Fill in Azure OpenAI variables (both chat + embeddings required):
    - `AZURE_OPENAI_ENDPOINT`
    - `AZURE_OPENAI_API_KEY`
    - `AZURE_OPENAI_API_VERSION`
@@ -41,11 +44,11 @@ npm ci
 
 ### Start Docker SQL Server
 
-- Use `docker-compose.yml` (and see `setup-MSSQL.md` / `docs/DOCKER_SQL_SERVER_SETUP.md` if you get stuck).
-
 ```bash
-docker compose up -d
+docker compose --env-file .env.docker up -d
 ```
+
+(Windows: alternatively use `.\scripts\start-sql-server.ps1`.) Set `DATABASE_URL` in `.env.local` to match your SQL config (see [ONBOARDING.md](ONBOARDING.md) step 4).
 
 ### Create schema + populate the DB
 
