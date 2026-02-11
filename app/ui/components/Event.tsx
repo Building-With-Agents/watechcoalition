@@ -9,6 +9,7 @@ import { EventTypeEnum } from "@/app/lib/events";
 import { useSession } from "next-auth/react";
 import { redirect, usePathname } from "next/navigation";
 import "quill/dist/quill.snow.css";
+import SanitizedHtml from "./SanitizedHtml";
 
 export type EventData = {
   id: string;
@@ -154,8 +155,8 @@ export default function Event({ event, registered, showLink }: EventProps) {
         <div className="self-stretch pt-6 flex-col justify-start items-start flex">
           <div className="self-stretch justify-start items-start gap-6 inline-flex">
             <div className="grow shrink basis-0 text-zinc-900 text-base font-normal leading-normal tracking-tight h-[50vh]">
-              <div
-                dangerouslySetInnerHTML={{ __html: event.description! }}
+              <SanitizedHtml
+                html={event.description ?? ""}
                 className="ql-editor"
               />
             </div>
