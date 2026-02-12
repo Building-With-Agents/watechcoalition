@@ -7,6 +7,7 @@ import ArrowDropDownOutlinedIcon from "@mui/icons-material/ArrowDropDownOutlined
 import ArrowDropUpOutlinedIcon from "@mui/icons-material/ArrowDropUpOutlined";
 import { useState } from "react";
 import { Button } from "@mui/material";
+import SanitizedHtml from "../SanitizedHtml";
 export default function NoteCard(
   props: NoteDTO & { UpdateSelectedId: (a: string, b: string) => void },
 ) {
@@ -53,10 +54,10 @@ export default function NoteCard(
       </span>
       <hr />
       {preview ? (
-        <div
+        <SanitizedHtml
+          html={props.noteContent}
           className="ql-editor border w-600"
-          dangerouslySetInnerHTML={{ __html: props.noteContent }}
-        ></div>
+        />
       ) : (
         ""
       )}

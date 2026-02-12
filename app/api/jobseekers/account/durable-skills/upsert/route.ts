@@ -166,13 +166,22 @@ export async function POST(request: Request) {
           },
         });
 
+        const rawDs =
+          careerPrep.DurableSkillsRating.length > 0
+            ? careerPrep.DurableSkillsRating[0]
+            : null;
         return {
           userId: updatedJobseeker.user_id,
           CareerPrepAssessment: {
-            durableSkills:
-              careerPrep.DurableSkillsRating.length > 0
-                ? careerPrep.DurableSkillsRating[0]
-                : null,
+            durableSkills: rawDs
+              ? {
+                  ...rawDs,
+                  overallAverage:
+                    rawDs.overallAverage != null
+                      ? Number(rawDs.overallAverage)
+                      : null,
+                }
+              : null,
           },
         };
       },

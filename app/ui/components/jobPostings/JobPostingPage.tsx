@@ -8,6 +8,7 @@ import { Alert, Box, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { Circle } from "@mui/icons-material";
 import "quill/dist/quill.snow.css";
 import BookmarkWithText from "../BookmarkWithText";
+import SanitizedHtml from "../SanitizedHtml";
 
 interface Props {
   joblisting: any;
@@ -178,10 +179,7 @@ export default async function JobPostingPage({ joblisting, params }: Props) {
             )}
             <>
               <Typography sx={{ fontWeight: "bold" }}>Description</Typography>
-              <div
-                dangerouslySetInnerHTML={{ __html: description }}
-                className="ql-editor"
-              />
+              <SanitizedHtml html={description} className="ql-editor" />
             </>
           </Stack>
         )}

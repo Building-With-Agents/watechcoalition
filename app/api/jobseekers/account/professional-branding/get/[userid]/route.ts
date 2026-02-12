@@ -68,13 +68,22 @@ export async function GET(
         { status: 404 },
       );
     }
+    const rawBranding =
+      jobseeker.CareerPrepAssessment.length > 0
+        ? jobseeker.CareerPrepAssessment[0].BrandingRating[0]
+        : null;
     const result: JsCareerPrepProfessionalBrandingDTO = {
       userId: userId,
       CareerPrepAssessment: {
-        professionalBrandingAndJobMarketReadiness:
-          jobseeker.CareerPrepAssessment.length > 0
-            ? jobseeker.CareerPrepAssessment[0].BrandingRating[0]
-            : null,
+        professionalBrandingAndJobMarketReadiness: rawBranding
+          ? {
+              ...rawBranding,
+              overallAverage:
+                rawBranding.overallAverage != null
+                  ? Number(rawBranding.overallAverage)
+                  : null,
+            }
+          : null,
       },
     };
 

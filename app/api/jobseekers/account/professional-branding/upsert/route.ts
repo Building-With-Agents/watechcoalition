@@ -262,13 +262,22 @@ export async function POST(request: Request) {
           },
         });
 
+        const rawBranding =
+          careerPrep.BrandingRating.length > 0
+            ? careerPrep.BrandingRating[0]
+            : null;
         return {
           userId: updatedJobseeker.user_id,
           CareerPrepAssessment: {
-            professionalBrandingAndJobMarketReadiness:
-              careerPrep.BrandingRating.length > 0
-                ? careerPrep.BrandingRating[0]
-                : null,
+            professionalBrandingAndJobMarketReadiness: rawBranding
+              ? {
+                  ...rawBranding,
+                  overallAverage:
+                    rawBranding.overallAverage != null
+                      ? Number(rawBranding.overallAverage)
+                      : null,
+                }
+              : null,
           },
         };
       });
