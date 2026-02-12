@@ -1,6 +1,6 @@
 # Start local Azure Functions + Azurite using Docker Compose under the same project as SQL Server.
 param(
-    [string]$EnvFile = ".env.local"
+    [string]$EnvFile = ".env"
 )
 
 $ErrorActionPreference = "Stop"
@@ -9,7 +9,7 @@ Write-Host "Starting local Functions + Azurite..." -ForegroundColor Cyan
 
 if (-not (Test-Path $EnvFile)) {
     Write-Host "Error: $EnvFile not found." -ForegroundColor Red
-    Write-Host "Create it by copying env.local.example -> .env.local and adjusting values as needed." -ForegroundColor Yellow
+    Write-Host "Create it by copying .env.example -> .env and adjusting values as needed." -ForegroundColor Yellow
     exit 1
 }
 
@@ -23,9 +23,9 @@ if (-not (Test-Path "docker-compose.functions.yml")) {
     exit 1
 }
 
-# Use the same project name (`-p frontend-cfa`) so Docker Desktop groups containers together,
-# but do NOT include docker-compose.yml to avoid recreating SQL Server.
-docker compose -p frontend-cfa -f docker-compose.functions.yml --env-file $EnvFile up -d --build
+# Use the same project name (`-p watechcoalition`) so Docker Desktop groups containers together
+# with mssql-server, but do NOT include docker-compose.yml to avoid recreating SQL Server.
+docker compose -p watechcoalition -f docker-compose.functions.yml --env-file $EnvFile up -d --build
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to start Functions stack." -ForegroundColor Red
