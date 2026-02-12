@@ -191,7 +191,7 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 | `DATABASE_URL` connection fails | Ensure SQL container is running (`docker ps`), port matches `.env.docker`, password is correct |
 | `Cannot find data type vector` during `prisma db push` | Usually means Prisma connected to the wrong SQL instance. Verify `DATABASE_URL` port and check `SELECT @@SERVERNAME, @@VERSION` |
 | Password complexity error | SQL Server requires: 8+ chars, upper, lower, number, special char |
-| Port already in use | Change `MSSQL_PORT` in `.env.docker` (e.g. to 14333) |
+| Port already in use | Change `MSSQL_PORT` in `.env.docker` (e.g. to 11433) |
 | Prisma errors after schema change | Run `npx prisma generate` |
 | Docker not found | Install Docker — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) |
 
