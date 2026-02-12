@@ -94,7 +94,7 @@ MSSQL_DATABASE=$database
 MSSQL_PORT=$port
 "@
 
-$envFilePath = Join-Path $PSScriptRoot ".." ".env.docker" | Resolve-Path -ErrorAction SilentlyContinue
+$envFilePath = Join-Path (Join-Path $PSScriptRoot "..") ".env.docker" | Resolve-Path -ErrorAction SilentlyContinue
 if (-not $envFilePath) {
     $envFilePath = Join-Path (Get-Location) ".env.docker"
 }
