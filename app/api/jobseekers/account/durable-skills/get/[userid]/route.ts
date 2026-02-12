@@ -68,13 +68,20 @@ export async function GET(
         { status: 404 },
       );
     }
+    const raw =
+      jobseeker.CareerPrepAssessment.length > 0
+        ? jobseeker.CareerPrepAssessment[0].DurableSkillsRating[0]
+        : null;
     const result: JsCareerPrepDurableSkillsDTO = {
       userId: userId,
       CareerPrepAssessment: {
-        durableSkills:
-          jobseeker.CareerPrepAssessment.length > 0
-            ? jobseeker.CareerPrepAssessment[0].DurableSkillsRating[0]
-            : null,
+        durableSkills: raw
+          ? {
+              ...raw,
+              overallAverage:
+                raw.overallAverage != null ? Number(raw.overallAverage) : null,
+            }
+          : null,
       },
     };
 

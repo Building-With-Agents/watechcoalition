@@ -15,6 +15,10 @@ import { CareerPrepGridData } from "@/app/ui/components/careerPrep/CareerPrepDat
 
 const prisma: PrismaClient = getPrismaClient();
 
+/** Convert Prisma Decimal (or number) to number for DTOs. */
+const decimalToNumber = (v: unknown): number | null =>
+  v != null ? Number(v) : null;
+
 /**
  * Enumeration representing different time frames until completion.
  * Possible values include:
@@ -1708,7 +1712,7 @@ export const getTechRatings = async (
       });
       return cybersecurityData
         ? {
-            overallAverage: cybersecurityData.overallAverage,
+            overallAverage: decimalToNumber(cybersecurityData.overallAverage),
             networking: cybersecurityData.networking,
             projectManagement: cybersecurityData.projectManagement,
             securityTools: cybersecurityData.securityTools,
@@ -1730,7 +1734,7 @@ export const getTechRatings = async (
       });
       return dataAnalyticsData
         ? {
-            overallAverage: dataAnalyticsData.overallAverage,
+            overallAverage: decimalToNumber(dataAnalyticsData.overallAverage),
             dataAnalysis: dataAnalyticsData.dataAnalysis,
             sqlProgramming: dataAnalyticsData.sqlProgramming,
             pythonPackages: dataAnalyticsData.pythonPackages,
@@ -1755,7 +1759,7 @@ export const getTechRatings = async (
       });
       return itCloudData
         ? {
-            overallAverage: itCloudData.overallAverage,
+            overallAverage: decimalToNumber(itCloudData.overallAverage),
             techSupport: itCloudData.techSupport,
             activeDirectory: itCloudData.activeDirectory,
             projectManagement: itCloudData.projectManagement,
@@ -1780,7 +1784,7 @@ export const getTechRatings = async (
       });
       return softwareDevData
         ? {
-            overallAverage: softwareDevData.overallAverage,
+            overallAverage: decimalToNumber(softwareDevData.overallAverage),
             softwareEngineering: softwareDevData.softwareEngineering,
             softwareDevelopmentLifecycle:
               softwareDevData.softwareDevelopmentLifecycle,
@@ -1826,7 +1830,7 @@ export const getDurableSkillRatings = async (
 
   return durableSkillsData
     ? {
-        overallAverage: durableSkillsData.overallAverage,
+        overallAverage: decimalToNumber(durableSkillsData.overallAverage),
         emotionManagement: durableSkillsData.emotionManagement,
         empathy: durableSkillsData.empathy,
         goalSetting: durableSkillsData.goalSetting,
@@ -1867,7 +1871,7 @@ export const getBrandingRatings = async (
 
   return brandingData
     ? {
-        overallAverage: brandingData.overallAverage,
+        overallAverage: decimalToNumber(brandingData.overallAverage),
         personalBrand: brandingData.personalBrand,
         onlinePresence: brandingData.onlinePresence,
         elevatorPitch: brandingData.elevatorPitch,
