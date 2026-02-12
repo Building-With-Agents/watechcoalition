@@ -18,6 +18,7 @@ const renderWithProviders = (ui: React.ReactElement, role: Role) => {
     data: {
       expires: "1",
       user: {
+        id: "test-user-id",
         email: "bagel@bagel.com",
         name: "Bagel",
         image: "/images/loveBagels.jpg",

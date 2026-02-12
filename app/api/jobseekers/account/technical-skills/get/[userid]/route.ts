@@ -73,27 +73,31 @@ export async function GET(
         { status: 404 },
       );
     }
+    const assessment =
+      jobseeker.CareerPrepAssessment.length > 0
+        ? jobseeker.CareerPrepAssessment[0]
+        : null;
+    const mapOverall = <T extends { overallAverage?: unknown }>(
+      r: T | null,
+    ): (T & { overallAverage: number | null }) | null =>
+      r
+        ? {
+            ...r,
+            overallAverage:
+              r.overallAverage != null ? Number(r.overallAverage) : null,
+          }
+        : null;
     const result: JsCareerPrepPathwaySkillsDTO = {
       userId: userId,
       targetedPathway:
         (jobseeker.pathways?.pathway_title as CareerPrepPathways) || null,
       CareerPrepAssessment: {
-        cybersecurity:
-          jobseeker.CareerPrepAssessment.length > 0
-            ? jobseeker.CareerPrepAssessment[0].CybersecurityRating[0]
-            : null,
-        itAndCloudComputing:
-          jobseeker.CareerPrepAssessment.length > 0
-            ? jobseeker.CareerPrepAssessment[0].ITCloudRating[0]
-            : null,
-        dataAnalytics:
-          jobseeker.CareerPrepAssessment.length > 0
-            ? jobseeker.CareerPrepAssessment[0].DataAnalyticsRating[0]
-            : null,
-        softwareDevelopment:
-          jobseeker.CareerPrepAssessment.length > 0
-            ? jobseeker.CareerPrepAssessment[0].SoftwareDevRating[0]
-            : null,
+        cybersecurity: mapOverall(assessment?.CybersecurityRating?.[0] ?? null),
+        itAndCloudComputing: mapOverall(assessment?.ITCloudRating?.[0] ?? null),
+        dataAnalytics: mapOverall(assessment?.DataAnalyticsRating?.[0] ?? null),
+        softwareDevelopment: mapOverall(
+          assessment?.SoftwareDevRating?.[0] ?? null,
+        ),
       },
     };
 
