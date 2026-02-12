@@ -508,28 +508,32 @@ export async function POST(request: Request) {
           },
         });
 
+        const mapOverall = <T extends { overallAverage?: unknown }>(r: T) =>
+          r
+            ? {
+                ...r,
+                overallAverage:
+                  r.overallAverage != null ? Number(r.overallAverage) : null,
+              }
+            : null;
         return {
           userId: updatedJobseeker.user_id,
           targetedPathway: targetedPathway
             ? (targetedPathway as CareerPrepPathways)
             : null,
           CareerPrepAssessment: {
-            cybersecurity:
-              careerPrep.CybersecurityRating.length > 0
-                ? careerPrep.CybersecurityRating[0]
-                : null,
-            dataAnalytics:
-              careerPrep.DataAnalyticsRating.length > 0
-                ? careerPrep.DataAnalyticsRating[0]
-                : null,
-            itAndCloudComputing:
-              careerPrep.ITCloudRating.length > 0
-                ? careerPrep.ITCloudRating[0]
-                : null,
-            softwareDevelopment:
-              careerPrep.SoftwareDevRating.length > 0
-                ? careerPrep.SoftwareDevRating[0]
-                : null,
+            cybersecurity: mapOverall(
+              careerPrep.CybersecurityRating[0] ?? null,
+            ),
+            dataAnalytics: mapOverall(
+              careerPrep.DataAnalyticsRating[0] ?? null,
+            ),
+            itAndCloudComputing: mapOverall(
+              careerPrep.ITCloudRating[0] ?? null,
+            ),
+            softwareDevelopment: mapOverall(
+              careerPrep.SoftwareDevRating[0] ?? null,
+            ),
           },
         };
       },

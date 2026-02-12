@@ -343,7 +343,7 @@ model CybersecurityRating {
 
   PrepAssessment CareerPrepAssessment @relation(fields: [jobseekerId], references: [jobseekerId], map: "fk_cybersecurity_rating_career_prep_assessment1", onDelete: Cascade)
 
-  overallAverage Float? @db.Float // Computed column
+  overallAverage Decimal? @db.Decimal(3, 2) // Computed column
 }
 
 model DataAnalyticsRating {
@@ -368,7 +368,7 @@ model DataAnalyticsRating {
 
   PrepAssessment CareerPrepAssessment @relation(fields: [jobseekerId], references: [jobseekerId], map: "fk_data_analytics_rating_career_prep_assessment1", onDelete: Cascade)
 
-  overallAverage Float? @db.Float // Computed column
+  overallAverage Decimal? @db.Decimal(3, 2) // Computed column
 }
 
 model ITCloudRating {
@@ -392,7 +392,7 @@ model ITCloudRating {
   createdAt             DateTime             @default(now()) @db.DateTime
   PrepAssessment        CareerPrepAssessment @relation(fields: [jobseekerId], references: [jobseekerId], map: "fk_it_cloud_rating_career_prep_assessment1", onDelete: Cascade)
 
-  overallAverage Float? @db.Float // Computed column
+  overallAverage Decimal? @db.Decimal(3, 2) // Computed column
 }
 
 model SoftwareDevRating {
@@ -417,7 +417,7 @@ model SoftwareDevRating {
 
   PrepAssessment CareerPrepAssessment @relation(fields: [jobseekerId], references: [jobseekerId], map: "fk_software_dev_rating_career_prep_assessment1", onDelete: Cascade)
 
-  overallAverage Float? @db.Float // Computed column
+  overallAverage Decimal? @db.Decimal(3, 2) // Computed column
 }
 
 model DurableSkillsRating {
@@ -446,7 +446,7 @@ model DurableSkillsRating {
 
   PrepAssessment CareerPrepAssessment @relation(fields: [jobseekerId], references: [jobseekerId], map: "fk_durable_skills_rating_career_prep_assessment1", onDelete: Cascade)
 
-  overallAverage Float? @db.Float // Computed column
+  overallAverage Decimal? @db.Decimal(3, 2) // Computed column
 }
 
 model BrandingRating {
@@ -473,7 +473,7 @@ model BrandingRating {
 
   PrepAssessment CareerPrepAssessment @relation(fields: [jobseekerId], references: [jobseekerId], map: "fk_branding_rating_career_prep_assessment1", onDelete: Cascade)
 
-  overallAverage Float? @db.Float // Computed column
+  overallAverage Decimal? @db.Decimal(3, 2) // Computed column
 }
 
 model CaseMgmt {
