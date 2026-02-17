@@ -1,176 +1,106 @@
-# Job Ingestion & Intelligence Agent — Introduction
+# Job Ingestion & Intelligence Agent — Introduction (Agent-First)
 
 ## 1. Purpose and Scope
-This document introduces the Job Ingestion & Intelligence Agent and explains how to use the BRD and TRD together to guide architecture and implementation for the watechcoalition codebase. It also aligns the plan to the 12-week internship project plan while preserving BRD/TRD scope, success criteria, and constraints.
+This document reframes the Job Ingestion & Intelligence Agent as an agent-first system. It aligns the internship plan as the delivery cadence while preserving BRD and TRD requirements and constraints. This version supersedes prior stack recommendations and is the finalized planning baseline.
 
 ## 2. Source of Truth and Alignment
-Primary source of truth for delivery cadence and weekly milestones:
-- `c:\Users\garyl\Desktop\BWA - Copilot Studio\internship project plan.docx`
+Primary source of truth for schedule and weekly milestones:
+- `c:\Users\garyl\Desktop\BWA - Copilot Studio\internship project plan agent first.docx`
 
 Authoritative requirements and constraints:
 - `docs/planning/JOB_INGESTION_AGENT_BRD.md`
 - `docs/planning/JOB_INGESTION_AGENT_TRD.md`
 
 Alignment rules
-- The internship plan defines the schedule, weekly deliverables, and learning outcomes.
-- The BRD defines business scope, success criteria, and design decisions.
-- The TRD defines architecture, integration points, and non-functional requirements.
-- If the internship plan conflicts with BRD/TRD constraints, BRD/TRD wins for implementation details.
+- The internship plan sets delivery cadence, weekly milestones, and build order.
+- The BRD sets business scope, success criteria, and design decisions.
+- The TRD sets architecture, integration points, and NFRs.
+- If the internship plan conflicts with BRD or TRD constraints, BRD and TRD win.
 
 ## 3. Current Project Environment
 - Primary app stack: Node.js/TypeScript with Prisma and MSSQL.
-- LLM provider: Azure OpenAI (already integrated via `app/lib/openAiClients.ts`).
-- Data model: `job_postings`, `companies`, `company_addresses`, `skills`, `technology_areas`, `industry_sectors`.
+- Existing LLM integration: Azure OpenAI client in `app/lib/openAiClients.ts`.
+- Core schema: `job_postings`, `companies`, `company_addresses`, `skills`, `technology_areas`, `industry_sectors`.
 - Existing job creation flow: `app/lib/joblistings.ts` and `app/api/joblistings/add/route.ts`.
-- Planning artifacts: BRD and TRD in `docs/planning/` define scope, success criteria, and technical requirements.
 
-## 4. How to Use BRD and TRD Together
-- Start with BRD to confirm scope, success criteria, and unresolved design decisions.
-- Use the TRD to translate BRD choices into concrete architecture, data flow, and integrations.
-- Implement iteratively and validate against BRD metrics and TRD NFRs.
+## 4. Agent-First Architecture
+Agents are bounded services with explicit inputs, outputs, tools, and policies. Deterministic agents are built first. LLM agents are added only where deterministic logic is insufficient.
 
-## 5. Architecture Overview (High Level)
-Pipeline stages: Sources -> Ingestion -> Deduplication -> LLM Extraction -> ML Classification -> Post-Processing and Validation -> Persistence.
+Core pipeline agents
+- Ingestion Agent (deterministic). Pulls from sources, normalizes payloads, writes raw data with idempotency keys and batch IDs.
+- Dedup and Normalization Agent (deterministic plus embeddings optional). Exact and fuzzy dedup, canonical record creation.
+- Extraction Agent (LLM optional). Produces structured fields with confidence and field-level provenance.
+- Classification Agent (ML optional). Role, seniority, quality, and spam scoring with clear fallbacks.
+- Validation Agent (deterministic). Enforces required fields and schema mapping to `job_postings`.
 
-Key data artifacts
-- Raw job: source payload and metadata, idempotent and replayable.
-- Canonical job: structured output with normalized fields and confidence scores.
-- Persisted job: mapped to `job_postings` plus new ingestion-specific fields (per TRD decisions).
+Operational agents
+- Analysis Agent (LLM optional). Summarizes weekly trends and generates operational insights.
+- Q&A Agent (LLM optional). Natural language questions mapped to SQL and verified outputs.
+- Alert Agent (deterministic). Triggers alerts for quality issues, spam spikes, or demand changes.
 
-## 6. Recommended Stack (Pros, Cons, and Feedback)
+## 5. Stack Refactor (Agent-First)
+This plan intentionally revises the stack to optimize for agent development and observability. It does not preserve backward compatibility with the previous stack plan.
 
-### 6.1 Orchestration and Runtime
-Recommendation: Keep ingestion, dedup, and post-processing in Node/TypeScript. Add a Python service for ML inference only when you need model training or heavier ML workloads.
+Recommended stack for first implementation
+- Agent runtime: Python for agent services and dashboards to align with agent frameworks and Streamlit.
+- Data access: MSSQL via SQLAlchemy + `pyodbc` for agents; Prisma remains for the main app.
+- Orchestration: APScheduler for predictable batch runs; add a queue if required later.
+- LLM integration: provider-agnostic adapter layer with runtime selection.
+- Observability: LangSmith optional for LLM calls; OpenTelemetry or structured logs for deterministic agents.
+- Dashboards: Streamlit as a separate read-only analytics app.
 
-Pros
-- Reuses existing Node/TS, Prisma, and API integration.
-- Keeps ingestion and persistence logic in one runtime.
-- Supports batch-first workflows aligned with BRD performance targets.
+## 6. LLM Provider Strategy (No Lock-In)
+LLM usage is limited to agents that require reasoning or language generation. Provider selection must be configuration-based, not hard-coded.
 
-Cons
-- Dual-runtime (Node + Python) adds deployment and interface complexity.
-- Temporal adds infrastructure and onboarding overhead compared to BullMQ.
-
-Feedback
-- Start with BullMQ for batch workflows and retries. If workflows grow more complex, evaluate Temporal later.
-
-### 6.2 LLM Extraction
-Recommendation: Use Azure OpenAI for production extraction. Use local open-source models for testing and prompt iteration only.
-
-Pros
-- Azure OpenAI already integrated and compliant with current environment.
-- Structured output reduces parsing fragility.
-
-Cons
-- Cost and vendor dependency at scale.
-- OSS models may struggle with noisy job postings.
-
-Feedback
-- Keep schema, prompt versions, and retry logic in-repo to enable model swaps later.
-
-### 6.3 ML Classification and Scoring
-Recommendation: Start with scikit-learn or LightGBM in Python for role, seniority, quality, and spam. Serve via a minimal FastAPI service or export to ONNX for Node inference.
-
-Pros
-- Strong baseline performance with modest effort.
-- Clear separation of training and inference concerns.
-
-Cons
-- Requires labeled data and an evaluation harness (TBD in BRD).
-- Drift monitoring adds ongoing work.
-
-Feedback
-- Prioritize building a small, high-quality evaluation dataset before optimizing model complexity.
-
-### 6.4 Deduplication
-Recommendation: Use a tiered approach: exact hash -> fuzzy matching -> semantic similarity. Keep this in Node for the initial phase.
-
-Pros
-- Fast and cost-effective for most duplicates.
-- Semantic layer improves recall.
-
-Cons
-- Semantic similarity can produce false positives without strong thresholds.
-- Embedding calls add latency and cost.
-
-Feedback
-- Log dedup decisions and store thresholds in config to support tuning against BRD metrics.
-
-### 6.5 Vector Store (Optional)
-Recommendation: Defer vector DB until scale or product needs justify it.
-
-Pros
-- Persistent similarity search and clustering at scale.
-
-Cons
-- Adds operational overhead and extra infrastructure.
-
-Feedback
-- Start in-process; revisit if dataset size or query patterns demand it.
-
-### 6.6 Observability
-Recommendation: Use JSON logging (Pino) and metrics and tracing (OpenTelemetry) aligned with TRD NFRs.
-
-Pros
-- Enables SLO tracking and model quality monitoring.
-
-Cons
-- Instrumentation adds initial setup and ongoing tuning.
-
-Feedback
-- Track a small, high-signal set of metrics first: throughput, LLM failures, dedup rates, model confidence distributions.
+LLM policy
+- Provide a single interface for prompts, tools, and structured outputs.
+- Allow runtime provider selection (Azure OpenAI, Anthropic, OpenAI, or local models).
+- Log prompts, model versions, and outputs for audit and evaluation.
+- Use deterministic alternatives when comparable quality is achievable.
 
 ## 7. Streamlit for Dashboards and Analysis
-Streamlit is a separate Python app that reads from the same data sources for dashboards, evaluation, and operational review. It does not replace the Next.js app and should be treated as a read-only analytics surface.
+Streamlit is a separate Python app that reads from the same data sources for dashboards, evaluation, and operational review. It does not replace the Next.js app.
 
 Where Streamlit fits
 - Observability dashboards: LLM latency, extraction failure rates, classification confidence, dedup stats, spam and quality distributions.
-- Evaluation and analysis: precision and recall, F1, quality vs human rating correlation, extraction error analysis.
-- Operational review: low-confidence jobs, spam-flagged items, duplicate clusters for manual review.
-- Ad hoc analysis: one-off queries on ingested jobs, skill coverage, source mix.
+- Evaluation and analysis: precision, recall, F1, quality correlation, extraction error analysis.
+- Operational review: low-confidence jobs, spam-flagged items, duplicate clusters.
+- Ad hoc analysis: source mix, skill coverage, and trend exploration.
 
 Data access options
 | Option | Pros | Cons |
 |--------|------|------|
 | Direct MSSQL from Python | One source of truth, real-time. | Requires DB credentials and network access for Streamlit; schema coupling. |
-| `pyodbc` / `pymssql` / `sqlalchemy` | Standard, works with Pandas. | Must maintain connection string and auth. |
+| `pyodbc` / `sqlalchemy` | Standard, works with Pandas. | Must maintain connection string and auth. |
 | Read-only DB user | Safe for dashboards. | Another user to manage. |
 | Export to file (CSV/Parquet) | No DB access from Streamlit; good for eval datasets. | Not real-time; needs export job. |
 | REST API from Next.js | Reuse auth and business logic. | Requires new internal API routes. |
 
-Practical approach
-- Use SQLAlchemy + `pyodbc` (or `pymssql`) with a read-only connection string in Streamlit env.
-- Use Pandas for transformations and Plotly or Altair for charts.
-- Keep evaluation datasets in CSV or Parquet for offline analysis.
-- If restricted access is required, add a reverse proxy with auth or use Streamlit authentication.
-
 ## 8. Internship Plan Alignment (12 Weeks)
-The internship plan provides the delivery cadence and milestones. The BRD and TRD define what must be built and how it integrates with the existing application.
-
 Phase 1 (Weeks 1-2): Thin vertical slice
-- Deliver a working end-to-end pipeline that ingests a small sample, extracts structured fields, and displays results.
-- Aligns to TRD Sections 4.1, 4.3, and 5.1.
+- Deliver a working end-to-end pipeline with one source, basic extraction, and Streamlit display.
 
-Phase 2 (Weeks 3-6): Data expansion, NLP improvements, and dashboards
-- Scale ingestion sources, add structured extraction quality checks, and build Streamlit dashboards for observability.
-- Aligns to TRD Sections 4.1 through 4.5 and Section 7.
+Phase 2 (Weeks 3-6): Deterministic agents and NLP upgrades
+- Build the Ingestion Agent and Alert Agent without LLMs.
+- Improve extraction and taxonomy mapping.
 
-Phase 3 (Weeks 7-10): Hardening, evaluation, and advanced features
-- Improve reliability, add evaluation harnesses, and refine classification and dedup performance.
-- Aligns to TRD Sections 7 and 8.
+Phase 3 (Weeks 7-10): LLM agents and scale
+- Add Analysis and Q&A agents with provider-agnostic LLM integration.
+- Harden pipelines, improve dedup accuracy, and scale data volume.
 
 Phase 4 (Weeks 11-12): Documentation and demo
-- Produce documentation, conduct stakeholder reviews, and complete a final demo.
-- Aligns to BRD Section 10 and TRD Section 10.
+- Complete documentation, finalize dashboards, and deliver capstone demo.
+
+Build order
+- Ingestion Agent -> Alert Agent -> Analysis Agent -> Q&A Agent.
 
 ## 9. Integration Points in the Codebase
-- Azure OpenAI clients: `app/lib/openAiClients.ts`.
+- Azure OpenAI client: `app/lib/openAiClients.ts`.
 - Job creation flow: `app/lib/joblistings.ts` and `app/api/joblistings/add/route.ts`.
 - Schema references: `prisma/schema.prisma`.
 - Planning docs: `docs/planning/JOB_INGESTION_AGENT_BRD.md`, `docs/planning/JOB_INGESTION_AGENT_TRD.md`.
 
 ## 10. Key Design Decisions and Open Questions
-These are required per BRD Section 9 and must be resolved before final implementation details:
 - Taxonomy (SOC vs internal taxonomy).
 - ML hosting (in-repo vs separate service).
 - Batch-first vs real-time-first.
@@ -181,11 +111,13 @@ These are required per BRD Section 9 and must be resolved before final implement
 - Spam threshold policy (reject vs flag).
 - Deduplication source priority.
 - Versioning strategy for prompts and models.
+- LLM provider selection and fallback policy.
+- Scraping implementation for the Ingestion Agent (Firecrawl, Crawl4AI, ScrapeGraphAI, Browser-use, Spider).
 
 ## 11. Risks and Constraints
 - LLM variability requires schema, retries, and confidence scoring.
-- Model availability requires fallbacks if ML service is unavailable.
-- Source API changes require versioned adapters and monitoring.
+- Model availability requires fallbacks if LLM services are unavailable.
+- Source changes (JSearch, scraping targets) require versioned adapters and monitoring.
 - Schema drift requires validation and enforcement of required fields.
 - Performance constraints: batch 1,000 jobs < 5 minutes; individual scoring < 2 seconds.
 
@@ -193,16 +125,14 @@ These are required per BRD Section 9 and must be resolved before final implement
 - Metrics: dedup precision and recall, extraction F1, classification accuracy, spam precision, quality correlation.
 - Logging: LLM latency, extraction failures, retry counts, dedup decisions.
 - Dashboards: Streamlit provides visibility into model performance and operational queues.
-- Feedback loop: use evaluation results to adjust prompts, thresholds, and models.
+- Feedback loop: evaluation results adjust prompts, thresholds, and models.
 
-## 13. Roadmap and Next Steps
-1. Resolve BRD design decisions.
-2. Build ingestion adapters and raw storage with idempotency.
-3. Implement dedup (exact + fuzzy) and LLM extraction.
-4. Add scoring models and evaluation harness.
-5. Map canonical output to `job_postings` and related tables.
-6. Instrument observability and stand up Streamlit dashboards.
-7. Iterate based on evaluation metrics and stakeholder review.
+## 13. First Implementation Approach (Based on Current State)
+- Stand up agent services in Python that read and write MSSQL.
+- Add ingestion and staging tables as needed to preserve existing `job_postings` usage.
+- Keep Next.js as the primary user-facing surface; agents populate data behind it.
+- Defer vector DB until scale requires persistent semantic search.
+- Keep LLM provider selection in environment config.
 
 ## 14. Appendix: Suggested Streamlit Views
 - Ingestion overview by source and run.
@@ -211,4 +141,16 @@ These are required per BRD Section 9 and must be resolved before final implement
 - Dedup clusters and merge counts.
 - Review queue for low-confidence or spam-flagged jobs.
 - Evaluation summary (precision, recall, and F1 trends).
+
+## 15. Appendix: Scraping Tool Options (Ingestion Agent)
+
+These tools are candidate implementations for the Ingestion Agent's scraping capability. The agent contract (raw job shape, idempotency, source identifier) is independent of tool choice.
+
+| Tool | Core Strength | Primary Use Case |
+|------|---------------|------------------|
+| **Firecrawl** | Managed infrastructure, /agent endpoint | Rapid, reliable extraction for AI assistants |
+| **Crawl4AI** | Local-first, adaptive pattern learning | Privacy-focused or heavy-volume local scraping |
+| **ScrapeGraphAI** | Natural language definitions | No-code scraping logic for changing layouts |
+| **Browser-use** | Direct browser control | Sites requiring complex interactions or logins |
+| **Spider** | Extreme speed (Rust-based) | Mass aggregation across thousands of URLs |
 

@@ -24,39 +24,44 @@
 
 ## 2. Architecture Overview
 
-End-to-end pipeline: **Sources → Ingestion → Deduplication → LLM Extraction → ML Classification → Post-Process & Validation → Output (storage).**
+Agent-first pipeline: **Sources → Ingestion Agent → Dedup Agent → Extraction Agent (LLM optional) → Classification Agent → Validation Agent → Output (storage).**
 
 ```mermaid
-flowchart LR
-  subgraph sources [Sources]
-    WaTech[WaTech API]
-    WorkInTexas[WorkInTexas API]
-    Batch[Batch Feeds]
+flowchart TB
+  subgraph sources["Sources"]
+    JSearch["JSearch Web API"]
+    Scraping["Scraping"]
   end
-  subgraph ingestion [Ingestion Layer]
-    Ingest[Store Raw plus Metadata]
+  subgraph ingestion["Ingestion Layer"]
+    Ingest["Store Raw plus Metadata"]
   end
-  subgraph dedup [Deduplication]
-    Dedup[Dedup Engine]
+  subgraph dedup["Deduplication"]
+    Dedup["Dedup Engine"]
   end
-  subgraph llm [LLM Extraction]
-    LLM[Azure OpenAI]
+  subgraph llm["LLM Extraction"]
+    LLM["LLM Provider Adapter"]
   end
-  subgraph ml [ML Classification]
-    ML[Role Quality Spam]
+  subgraph ml["ML Classification"]
+    ML["Role Quality Spam"]
   end
-  subgraph post [Post-Process]
-    Val[Validation and Norm]
+  subgraph post["Post-Process"]
+    Val["Validation and Norm"]
   end
-  subgraph out [Output]
-    Store[(MSSQL job_postings)]
+  subgraph out["Output"]
+    Store[("MSSQL job_postings")]
   end
-  sources --> Ingest --> Dedup --> LLM --> ML --> Val --> Store
+  JSearch --> Ingest
+  Scraping --> Ingest
+  Ingest --> Dedup
+  Dedup --> LLM
+  LLM --> ML
+  ML --> Val
+  Val --> Store
 ```
 
 - **Ingestion:** Store raw text + metadata + source + timestamp; idempotency key (e.g. `source` + `external_id`). *FR 5.1*
 - **Deduplication:** Exact (hash) + near-duplicate (semantic/fuzzy); canonical ID and lineage. *FR 5.2*
-- **LLM extraction:** Azure OpenAI; structured JSON + per-field confidence. *FR 5.3*
+- **LLM extraction:** Provider-agnostic adapter; structured JSON + per-field confidence. *FR 5.3*
 - **ML classification:** Job role, seniority, quality score, spam. *FR 5.4*
 - **Post-processing:** Normalize title/location/salary; validate required fields; flag low-confidence; overall confidence. *FR 5.5*
 - **Output:** Canonical structured job object persisted per BRD “Source of truth” decision. *Section 6 foundation doc*
@@ -114,20 +119,32 @@ TRD defers exact mapping tables to implementation; BRD decision drives which tab
 
 ### 4.1 Ingestion Layer
 
-- **API clients:** WaTech API, WorkInTexas API; response normalized to common “raw job” shape (title, body, metadata, source identifier).
-- **Batch loader:** Accept batch feeds (e.g. scraped files); same raw shape.
+- **API clients:** JSearch Web API; response normalized to common “raw job” shape (title, body, metadata, source identifier).
+- **Scraping / batch loader:** Accept scraped content (e.g. from web scraping); same raw shape.
 - **Storage:** Persist raw text + metadata + `source` + `ingestion_timestamp`. Idempotency key: `(source, external_id)` to avoid duplicate raw inserts. *FR 5.1*
+
+#### 4.1.1 Scraping (Ingestion Agent implementation options)
+
+The Ingestion Agent shall obtain scraped content via one or more of the following; output must conform to the common raw job shape (title, body, metadata, source identifier). Tool choice is per BRD design decision #12.
+
+| Tool | Core Strength | Primary Use Case |
+|------|---------------|------------------|
+| **Firecrawl** | Managed infrastructure, /agent endpoint | Rapid, reliable extraction for AI assistants |
+| **Crawl4AI** | Local-first, adaptive pattern learning | Privacy-focused or heavy-volume local scraping |
+| **ScrapeGraphAI** | Natural language definitions | No-code scraping logic for changing layouts |
+| **Browser-use** | Direct browser control | Sites requiring complex interactions or logins |
+| **Spider** | Extreme speed (Rust-based) | Mass aggregation across thousands of URLs |
 
 ### 4.2 Deduplication Engine
 
 - **Exact duplicates:** Hash-based (e.g. on normalized title + company + location or on raw body hash).
-- **Near-duplicates:** Semantic similarity (embeddings via existing Azure OpenAI embeddings client) and/or fuzzy title/company matching (e.g. Levenshtein or similar).
+- **Near-duplicates:** Semantic similarity (embeddings via a provider-agnostic embeddings adapter) and/or fuzzy title/company matching (e.g. Levenshtein or similar).
 - **Output:** Canonical job ID; track duplicate lineage (which record is canonical; which are merged/dropped). Target ≥90% duplicate detection accuracy (per BRD). *FR 5.2*
-- **Source priority:** Per BRD design decision #9 (Deduplication): source-agnostic vs source-prioritized (e.g. prefer WaTech over scraped when duplicate).
+- **Source priority:** Per BRD design decision #9 (Deduplication): source-agnostic vs source-prioritized (e.g. prefer JSearch over scraped when duplicate).
 
 ### 4.3 LLM Extraction Layer
 
-- **Provider:** Azure OpenAI (GPT-4 Turbo or deployment per env: `AZURE_OPENAI_*` in [.env.example](../../.env.example)). Use existing completions client where applicable.
+- **Provider:** LLM adapter with runtime selection (Azure OpenAI, Anthropic, OpenAI, or local). Existing Azure OpenAI client can serve as one adapter where applicable.
 - **Output:** Structured JSON with fields: job title, company, location, salary, skills (normalized list), responsibilities, seniority, industry, AI relevance indicators. Include **per-field confidence** (e.g. 0–1). *FR 5.3*
 - **Behavior:** Fail gracefully on missing/unparseable data; retries with backoff; do not block pipeline (flag for review or skip).
 
@@ -145,6 +162,12 @@ TRD defers exact mapping tables to implementation; BRD decision drives which tab
 - Validate salary ranges (format; optional range checks).
 - Enforce required fields for persistence (e.g. title, company, location).
 - Flag low-confidence entries; generate overall confidence score (e.g. weighted average of field-level and model confidence). *FR 5.5*
+
+### 4.6 Operational Agents (Optional but Recommended)
+
+- **Analysis Agent (LLM optional):** Generates weekly insight summaries from structured metrics; read-only access to data.
+- **Q&A Agent (LLM optional):** Translates natural language questions to SQL with validation and guardrails; read-only access.
+- **Alert Agent (deterministic):** Monitors thresholds (quality drops, spam spikes, demand changes) and sends notifications.
 
 ---
 
@@ -166,7 +189,7 @@ All numeric scores normalized to [0,1].
   "ai_relevance_score": 0.87,
   "quality_score": 0.92,
   "is_spam": false,
-  "source": "WaTech API",
+  "source": "JSearch",
   "confidence": {
     "title": 0.95,
     "skills": 0.88,
@@ -217,6 +240,9 @@ Employer-created jobs leave new columns null; ingested jobs leave `employer_id` 
 - Classification confidence distribution
 - Deduplication decisions (merged/dropped counts)
 - Spam flags and quality score distribution
+- Agent run status and duration per stage
+- Q&A agent SQL validation errors and corrections
+- Alert triggers and thresholds
 
 **Metrics / SLOs:** *NFR Performance, Reliability*
 
@@ -245,9 +271,9 @@ Employer-created jobs leave new columns null; ingested jobs leave `employer_id` 
 
 ## 9. Security and Operations
 
-- **Credentials:** WaTech, WorkInTexas, and Azure OpenAI (existing) in env; never in code or logs.
+- **Credentials:** JSearch (if required), scraping config, and LLM provider credentials in env; never in code or logs.
 - **PII:** Do not log PII from job content; log only aggregate metrics and non-PII identifiers.
-- **Rate limits and backoff:** Respect source API limits and Azure OpenAI quotas; exponential backoff on transient failures.
+- **Rate limits and backoff:** Respect source API limits and LLM provider quotas; exponential backoff on transient failures.
 
 ---
 
@@ -267,6 +293,8 @@ Each item below is **blocked or shaped by** a BRD design decision. Implementatio
 | 8 | Spam threshold | Reject vs flag; threshold value (Section 5.2, 4.4). |
 | 9 | Deduplication source priority | Which source wins when duplicate (Section 4.2). |
 | 10 | Versioning | Prompts and model versioning (Section 4.3, 4.4, 8). |
+| 11 | LLM provider policy | Provider selection, model choice, and fallback behavior (Section 4.3, 7, 9). |
+| 12 | Scraping implementation (Ingestion Agent) | Ingestion Layer 4.1.1; adapter interface and rate/backoff behavior for chosen tool(s). |
 
 ---
 
