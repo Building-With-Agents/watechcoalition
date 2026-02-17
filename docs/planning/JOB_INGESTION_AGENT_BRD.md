@@ -19,16 +19,17 @@
 
 **Objective:** Build a production-grade agent system that:
 
-- Ingests job postings from multiple external sources (e.g. WaTech API, WorkInTexas, batch feeds)
+- Ingests job postings from external sources (JSearch Web API and web scraping; no paid job-feed services)
 - Extracts structured data using LLMs
 - Classifies and scores jobs using ML models
 - Deduplicates and normalizes postings
 - Outputs a validated, high-signal, structured job object
 - Surfaces AI-relevant, high-quality jobs
+- Operates as an agent-first pipeline with deterministic agents first and LLM agents only where required
 
 **Value to Tech Talent Showcase (watechcoalition):** The system will feed the **same** job-seeker-facing surface (existing job listing APIs and UI). Ingested jobs may live in the same `job_postings` table or a linked store, per resolved design. Benefits include: more job inventory, improved AI relevance signal, reduced noise and spam, and a single source for employer-created and externally ingested jobs.
 
-**System attributes:** Robust to noisy or incomplete upstream data; deterministic where possible; observable and measurable; extensible for future intelligence features.
+**System attributes:** Agent-first and robust to noisy or incomplete upstream data; deterministic where possible; observable and measurable; extensible for future intelligence features.
 
 ---
 
@@ -42,7 +43,7 @@
 - Low signal regarding AI relevance
 - Unreliable for downstream analytics
 
-**Current state in watechcoalition:** Job postings are **employer-created only**. There is no external job ingestion (no WaTech or WorkInTexas integration). Jobs are created via authenticated employer/admin flows and require existing company and location records.
+**Current state in watechcoalition:** Job postings are **employer-created only**. There is no external job ingestion (no JSearch or scraping pipeline yet). Jobs are created via authenticated employer/admin flows and require existing company and location records.
 
 **Driver:** A hybrid LLM + ML pipeline is required to improve reliability, classification, and trustworthiness of job data when external sources are introduced.
 
@@ -52,7 +53,7 @@
 
 ### In scope (initial phase)
 
-- Multi-source ingestion (WaTech API, WorkInTexas API, batch/scraped feeds)
+- Multi-source ingestion (JSearch Web API and scraping)
 - Deduplication (exact and near-duplicate detection)
 - LLM field extraction (title, company, location, salary, skills, seniority, industry, AI relevance indicators)
 - ML classification and scoring (job role, seniority, quality, spam)
@@ -62,6 +63,7 @@
 - Structured job object output
 - AI relevance scoring
 - Integration with watechcoalition job listing APIs and UI (same surface as employer-created jobs)
+- Operational analysis and alerting for internal review (agent-driven summaries, review queues, thresholds)
 
 ### Out of scope (initial phase)
 
@@ -103,7 +105,7 @@
 
 ## 7. Constraints and Assumptions
 
-- **Azure OpenAI** is already in use in watechcoalition (completions and embeddings); the agent will use the same or designated deployments.
+- **LLM provider is configurable**. Azure OpenAI is currently integrated, but provider selection is not locked and must be runtime-configurable.
 - **MSSQL** is the primary database; no change to primary store for initial phase unless a design decision approves a vector DB for semantic dedup.
 - **First phase is batch-first** for ingestion and scoring unless BRD design decisions specify real-time-first.
 - **Existing taxonomy** (technology_areas, industry_sectors, pathways, skills) may be used for mapping; SOC or other taxonomy is TBD per design decisions below.
@@ -117,7 +119,7 @@
 |------|------------|
 | LLM output variability | Structured output schema, per-field confidence, retries and graceful failure |
 | ML model unavailable | Fallback behavior (e.g. skip scoring, flag for review) |
-| Source API changes (WaTech, WorkInTexas) | Versioned adapters, monitoring, idempotent ingestion |
+| Source changes (JSearch, scraping targets) | Versioned adapters, monitoring, idempotent ingestion |
 | Schema drift (upstream vs canonical) | Validation layer, required-field enforcement, low-confidence flagging |
 | Duplicate detection accuracy below target | Evaluation dataset, tuning of hash/semantic/fuzzy strategy |
 
@@ -137,8 +139,10 @@ The following decisions must be resolved (with owner and option selected) before
 | 6 | **Evaluation dataset** | None today — who provides; format and size | Data / Product |
 | 7 | **AI relevance ground truth** | Who defines "AI relevance"; how to label for training and evaluation | Product / Data |
 | 8 | **Spam threshold** | Score threshold and policy: reject vs flag for review | Product |
-| 9 | **Deduplication** | Source-agnostic vs source-prioritized (e.g. WaTech over scraped when duplicate) | Product |
+| 9 | **Deduplication** | Source-agnostic vs source-prioritized (e.g. JSearch over scraped when duplicate) | Product |
 | 10 | **Versioning** | Prompts (e.g. in repo + env) and ML models (tags, A/B) | Engineering |
+| 11 | **LLM provider policy** | Provider-agnostic adapter vs fixed provider; model selection and fallback rules | Engineering |
+| 12 | **Scraping implementation (Ingestion Agent)** | Firecrawl (managed, /agent) vs Crawl4AI (local, adaptive) vs ScrapeGraphAI (NL definitions) vs Browser-use (browser control) vs Spider (Rust, mass URLs). Choice determines how the Ingestion Agent acquires scraped content; agent interface (inputs/outputs) remains fixed. See Appendix A: Scraping Tool Options. | Engineering / Product |
 
 ---
 
@@ -148,6 +152,20 @@ The following decisions must be resolved (with owner and option selected) before
 |------|------|------|-----------|
 | Product lead | | | |
 | Tech lead | | | |
+
+---
+
+## Appendix A: Scraping Tool Options (Ingestion Agent)
+
+The Ingestion Agent uses one or more of the following as **tools** to fetch and normalize scraped job content. The agent contract (raw job shape, idempotency, source identifier) is independent of tool choice.
+
+| Tool | Core Strength | Primary Use Case |
+|------|---------------|------------------|
+| **Firecrawl** | Managed infrastructure, /agent endpoint | Rapid, reliable extraction for AI assistants |
+| **Crawl4AI** | Local-first, adaptive pattern learning | Privacy-focused or heavy-volume local scraping |
+| **ScrapeGraphAI** | Natural language definitions | No-code scraping logic for changing layouts |
+| **Browser-use** | Direct browser control | Sites requiring complex interactions or logins |
+| **Spider** | Extreme speed (Rust-based) | Mass aggregation across thousands of URLs |
 
 ---
 

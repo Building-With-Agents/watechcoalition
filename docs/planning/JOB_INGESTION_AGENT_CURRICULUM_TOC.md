@@ -1,111 +1,162 @@
-# Job Ingestion & Intelligence Agent — Curriculum and 12-Week Plan
+# Job Ingestion & Intelligence Agent — Agent-First Curriculum and 12-Week Plan
 
-This curriculum aligns to the internship project plan while conforming to the BRD and TRD requirements for the watechcoalition environment.
+This curriculum aligns to the agent-first internship plan while conforming to BRD and TRD requirements for the watechcoalition environment. It is final and replaces prior stack assumptions.
 
 ## 1. Source of Truth and Alignment
 Primary source of truth for schedule and weekly milestones:
-- `c:\Users\garyl\Desktop\BWA - Copilot Studio\internship project plan.docx`
+- `c:\Users\garyl\Desktop\BWA - Copilot Studio\internship project plan agent first.docx`
 
 Authoritative requirements and constraints:
 - `docs/planning/JOB_INGESTION_AGENT_BRD.md`
 - `docs/planning/JOB_INGESTION_AGENT_TRD.md`
 
 Alignment rules
-- The internship plan sets weekly goals and deliverables.
+- The internship plan sets weekly deliverables and build order.
 - The BRD sets business scope, success criteria, and design decisions.
 - The TRD sets architecture, integration points, and NFRs.
-- When conflicts occur, BRD and TRD constraints supersede implementation details in the internship plan.
+- Conflicts are resolved in favor of BRD and TRD.
 
-## 2. Audience and Goals
-This content is for engineers, data and ML practitioners, and curriculum designers who need a structured path from requirements to a working ingestion pipeline with evaluation and observability.
+## 2. Agent-First Principles
+- Build deterministic agents before any LLM agents.
+- Use LLMs only where deterministic logic is insufficient.
+- Keep LLM providers configurable and swappable.
+- Enforce explicit inputs, outputs, and evaluation for each agent.
 
-## 3. Prerequisites
-- Familiarity with Node.js/TypeScript and REST APIs.
-- Working knowledge of SQL and relational schemas.
-- Basic understanding of ML classification and evaluation metrics.
-- Basic knowledge of LLM prompting and structured output.
+## 3. Stack Adaptation for watechcoalition
+- Agent runtime: Python services for agent workflows and Streamlit dashboards.
+- Data access: MSSQL via SQLAlchemy + `pyodbc` for agents; Prisma remains for the app.
+- LLM integration: provider-agnostic adapter with runtime selection.
+- Scheduling: APScheduler for batch runs; queue later if needed.
+- Dashboards: Streamlit as separate read-only analytics surface.
 
-## 4. Program Structure
-- Four pods: Backend, NLP, Frontend and Visualization, Data and QA.
-- Weekly cadence: kickoff, daily standups, and end-of-week demo and retro.
-- Rotation is encouraged between Weeks 4 and 6 to build cross-functional skills.
+## 3.1 Scraping options (Ingestion Agent)
 
-## 5. Stack Adaptation for watechcoalition
-- Ingestion and persistence: Node/TypeScript with Prisma and MSSQL.
-- LLM extraction: Azure OpenAI in Node with structured output.
-- ML classification: Python service or ONNX inference in Node.
-- Dashboards: Streamlit as a separate Python app with read-only data access.
+These tools are candidate implementations for the Ingestion Agent's scraping capability. Week 1 delivers a thin slice using one chosen option per BRD/TRD.
 
-## 6. 12-Week Plan (Aligned to BRD and TRD)
+| Tool | Core Strength | Primary Use Case |
+|------|---------------|------------------|
+| **Firecrawl** | Managed infrastructure, /agent endpoint | Rapid, reliable extraction for AI assistants |
+| **Crawl4AI** | Local-first, adaptive pattern learning | Privacy-focused or heavy-volume local scraping |
+| **ScrapeGraphAI** | Natural language definitions | No-code scraping logic for changing layouts |
+| **Browser-use** | Direct browser control | Sites requiring complex interactions or logins |
+| **Spider** | Extreme speed (Rust-based) | Mass aggregation across thousands of URLs |
 
-Week 1: Foundations and thin vertical slice, part 1
-- Outcomes: dev environment ready, first job posting ingested, Streamlit prototype running.
-- Deliverables: working scraper or source adapter, minimal Streamlit page showing raw text.
-- BRD and TRD alignment: TRD Sections 4.1 and 5.1.
+## 4. 12-Week Plan (Agent-First Build Order)
 
-Week 2: Thin vertical slice, part 2
-- Outcomes: end-to-end flow from ingestion to extraction to display.
-- Deliverables: structured extraction output, basic filters, initial unit tests.
-- BRD and TRD alignment: TRD Sections 4.3 and 5.1.
+Week 1: Foundations and toolchain
+Outcomes
+- Environment ready, first scrape working, Streamlit prototype running.
+Deliverables
+- Basic scraper output and Streamlit raw text display.
+- Scraping tool selection for the Ingestion Agent per BRD/TRD (options: Firecrawl, Crawl4AI, ScrapeGraphAI, Browser-use, Spider).
+Alignment
+- TRD Sections 4.1, 4.1.1, and 5.1.
 
-Week 3: Data collection and storage
-- Outcomes: raw storage schema defined and populated, scheduled ingestion runs.
-- Deliverables: ingestion run metadata, idempotency strategy, data quality report.
-- BRD and TRD alignment: TRD Sections 4.1 and 6.
+Week 2: End-to-end thin slice
+Outcomes
+- Scrape -> extract -> display flow works on a small sample.
+Deliverables
+- Initial extraction output and basic UI filters.
+Alignment
+- TRD Sections 4.3 and 5.1.
 
-Week 4: NLP pipeline improvements
-- Outcomes: improved extraction or classification accuracy with evaluation harness.
-- Deliverables: evaluation dataset, precision and recall report, confidence scoring.
-- BRD and TRD alignment: TRD Sections 4.3, 4.4, and 8.
+Week 3: Ingestion Agent (deterministic)
+Outcomes
+- MSSQL schema for raw ingestion and batch tracking.
+- Ingestion Agent runs on a schedule and writes data reliably.
+Deliverables
+- Ingestion Agent, idempotency rules, batch IDs, error logging.
+Alignment
+- TRD Sections 4.1 and 6.
+
+Week 4: Extraction upgrades and evaluation
+Outcomes
+- Improved extraction quality and an evaluation harness.
+Deliverables
+- Evaluation dataset, precision and recall report, confidence scoring.
+Alignment
+- TRD Sections 4.3 and 8.
 
 Week 5: Visualization layer
-- Outcomes: Streamlit dashboards for top metrics and distributions.
-- Deliverables: charts for extraction confidence and classification distributions.
-- BRD and TRD alignment: TRD Section 7.
+Outcomes
+- Streamlit dashboards for core pipeline metrics.
+Deliverables
+- Charts for extraction confidence and classification distributions.
+Alignment
+- TRD Section 7.
 
-Week 6: Regional and source analysis
-- Outcomes: source mix and regional trends visible in dashboards.
-- Deliverables: comparison views, data quality insights, stakeholder demo.
-- BRD and TRD alignment: BRD Sections 3 and 6.
+Week 6: Alert Agent (deterministic)
+Outcomes
+- Alerts for spikes, quality drops, or spam thresholds.
+Deliverables
+- Alert Agent and operational review dashboards.
+Alignment
+- TRD Sections 4.5 and 7.
 
-Week 7: Pipeline hardening
-- Outcomes: robust error handling, batching, and retries.
-- Deliverables: queue or workflow implementation, run logs, alerts.
-- BRD and TRD alignment: TRD Sections 4.1 and 7.
+Week 7: Analysis Agent (LLM optional)
+Outcomes
+- Weekly insight summaries generated from structured data.
+Deliverables
+- Analysis Agent with provider-agnostic LLM adapter and audit logs.
+Alignment
+- TRD Sections 4.3 and 7.
 
-Week 8: Dedup and semantic similarity
-- Outcomes: exact and fuzzy dedup live, semantic similarity evaluated.
-- Deliverables: dedup thresholds, duplicate cluster review dashboard.
-- BRD and TRD alignment: TRD Section 4.2.
+Week 8: Q&A Agent (LLM optional)
+Outcomes
+- Natural language questions over the database with SQL verification.
+Deliverables
+- Q&A Agent and Streamlit chat interface with guardrails.
+Alignment
+- TRD Sections 7 and 9.
 
-Week 9: UX and accessibility
-- Outcomes: dashboards polished and usable for review workflows.
-- Deliverables: accessibility checklist, exportable reports.
-- BRD and TRD alignment: TRD Section 7.
+Week 9: Pipeline hardening and scale
+Outcomes
+- Dedup accuracy improved and pipeline reliability increased.
+Deliverables
+- Dedup thresholds, retry policies, and performance monitoring.
+Alignment
+- TRD Sections 4.2 and 7.
 
-Week 10: Integration, testing, performance
-- Outcomes: end-to-end pipeline validated against BRD metrics.
-- Deliverables: evaluation results, performance report, staging deployment.
-- BRD and TRD alignment: BRD Section 6 and TRD Section 7.
+Week 10: Testing, security, performance
+Outcomes
+- End-to-end evaluation and load testing complete.
+Deliverables
+- Test suite, security review, and staging deployment.
+Alignment
+- BRD Section 6 and TRD Section 7.
 
 Week 11: Documentation and handoff prep
-- Outcomes: documentation complete, demo script prepared.
-- Deliverables: architecture diagram, operating guide, model and prompt versioning notes.
-- BRD and TRD alignment: BRD Section 10 and TRD Section 10.
+Outcomes
+- Documentation, agent diagrams, and operational guides complete.
+Deliverables
+- README updates, agent docs, and demo script.
+Alignment
+- BRD Section 10 and TRD Section 10.
 
 Week 12: Capstone demo and retrospective
-- Outcomes: live demo delivered and handoff completed.
-- Deliverables: final demo, retrospective, handoff package.
-- BRD and TRD alignment: BRD Section 10.
+Outcomes
+- Live demo, final handoff, and retrospective.
+Deliverables
+- Final demo, release tag, and handoff package.
+Alignment
+- BRD Section 10.
 
-## 7. Cross-Cutting Skills and Artifacts
-- Evaluation: datasets, harnesses, and metrics reporting.
-- Observability: logs, metrics, traces, and dashboards.
-- Governance: versioning for prompts and ML models.
-- Quality: test coverage, data validation, and schema checks.
+## 5. Agent Build Order and Dependencies
+Build order
+- Ingestion Agent -> Alert Agent -> Analysis Agent -> Q&A Agent.
 
-## 8. Capstone Outcomes
+Dependencies
+- Analysis and Q&A require clean, structured, and deduplicated data.
+- Alerting requires stable batch tracking and quality metrics.
+
+## 6. Cross-Cutting Skills and Artifacts
+- Evaluation datasets and harnesses.
+- Observability dashboards and logs.
+- Prompt and model versioning with provider-agnostic adapters.
+- Security and PII-safe logging.
+
+## 7. Capstone Outcomes
 - End-to-end ingestion pipeline aligned to BRD success criteria.
-- Streamlit dashboard for observability and evaluation.
-- Documentation, demo assets, and handoff materials.
+- Streamlit dashboards for observability and analysis.
+- Agent documentation, demo assets, and handoff materials.
 
