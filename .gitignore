@@ -84,7 +84,10 @@ prisma/sql/cip-socc-inserts/find_missing_cips.sql
 *.log
 
 # Stop tracking docs/ going forward (no history rewrite)
-docs/
+docs/*
+docs/planning/docx/**
+!docs/planning
+!docs/planning/**
 
 
 
