@@ -83,11 +83,19 @@ prisma/sql/cip-socc-inserts/find_missing_cips.sql
 .cursor/
 *.log
 
-# Stop tracking docs/ going forward (no history rewrite)
-docs/*
-docs/planning/docx/**
-!docs/planning
-!docs/planning/**
+
+docs/azure-resource-termination-runbook.md
+docs/VM_CONFIGURATION_STEPS.md
+docs/VM_AUTO_STARTUP.md
+docs/REFRESH_ANONYMIZED_FIXTURES.md
+docs/VM_ADD_USER.md
+docs/SECURITY_INCIDENT_RESPONSE_REPORT.md
+docs/DOCKER_SQL_SERVER_SETUP.md
+docs/REBUILD_STATUS.md
+docs/INSTALL_DOCKER.md
+docs/DB_ANONYMIZATION.md
+docs/AZURE_FILE_SHARE_ACCESS.md
+docs/planning/docx/
 
 
 
@@ -101,18 +109,18 @@ sqlpackage-*.txt
 incident-report_*.md
 /.idea/
 
-# Azure Functions (Python) local/dev artifacts
-**/local.settings.json
-**/.python_packages/
+# Python agent pipeline artifacts
 **/.venv/
 **/__pycache__/
 **/*.pyc
+**/.python_packages/
 
-# Local env override (repo convention)
-.env.local
-
-# Azurite local data (Compose volume target)
-azure-functions/azurite-data/
-
-# Local deployment artifacts
-azure-functions/*.zip
+# Agent data directories (local only — not committed)
+agents/data/staging/*
+agents/data/normalized/*
+agents/data/enriched/*
+agents/data/analytics/*
+agents/data/demand_signals/*
+agents/data/rendered/*
+agents/data/dead_letter/*
+!agents/data/**/.gitkeep
