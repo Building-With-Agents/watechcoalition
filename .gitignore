@@ -84,15 +84,13 @@ prisma/sql/cip-socc-inserts/find_missing_cips.sql
 *.log
 
 
+# Infrastructure/ops docs (environment-specific, not needed for onboarding)
 docs/azure-resource-termination-runbook.md
 docs/VM_CONFIGURATION_STEPS.md
 docs/VM_AUTO_STARTUP.md
-docs/REFRESH_ANONYMIZED_FIXTURES.md
 docs/VM_ADD_USER.md
 docs/SECURITY_INCIDENT_RESPONSE_REPORT.md
-docs/DOCKER_SQL_SERVER_SETUP.md
 docs/REBUILD_STATUS.md
-docs/INSTALL_DOCKER.md
 docs/DB_ANONYMIZATION.md
 docs/AZURE_FILE_SHARE_ACCESS.md
 docs/planning/docx/
