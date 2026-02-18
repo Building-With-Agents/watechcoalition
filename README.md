@@ -10,6 +10,7 @@ This repository contains the source code for the Washington Tech Workforce Coali
 ## Prerequisites
 
 - Node.js >= 18.17.0
+- Python >= 3.11 (for the agent pipeline)
 - npm
 - Docker (for local SQL Server)
 
@@ -62,13 +63,32 @@ Open [http://localhost:3000](http://localhost:3000).
 - `seed`: Seeds the database with synthetic/faker-generated data (does not use `prisma/mock-data/`).
 - `lint`: Runs ESLint to check for code issues.
 
+## Agent Pipeline
+
+This project includes a **Job Intelligence Engine** — an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings. The agent layer lives in `agents/` and runs alongside the Next.js app.
+
+See [CLAUDE.md](CLAUDE.md) for full architecture details, agent specs, and run instructions.
+
+```bash
+cd agents && pip install -r requirements.txt
+streamlit run agents/dashboard/streamlit_app.py
+```
+
 ## Technologies Used
 
+### Next.js App
 - **Next.js**: React framework for server-side rendering. [Next.js Documentation](https://nextjs.org/docs)
 - **Prisma**: Database ORM for TypeScript and Node.js. [Prisma Documentation](https://www.prisma.io/docs)
 - **TailwindCSS**: Utility-first CSS framework. [TailwindCSS Documentation](https://tailwindcss.com/docs)
 - **Auth.js**: Authentication library for Next.js. [Auth.js Documentation](https://authjs.dev/docs)
 - **MSSQL**: Microsoft SQL Server database. [MSSQL Documentation](https://docs.microsoft.com/en-us/sql/sql-server)
+
+### Agent Pipeline (Python)
+- **LangGraph**: Multi-agent framework for StateGraph routing. [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
+- **LangChain**: LLM adapter layer. [LangChain Documentation](https://python.langchain.com/)
+- **SQLAlchemy**: Python database access (MSSQL via pyodbc). [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
+- **Streamlit**: Read-only analytics dashboards. [Streamlit Documentation](https://docs.streamlit.io/)
+- **LangSmith**: Agent tracing and evaluation. [LangSmith Documentation](https://docs.smith.langchain.com/)
 
 ## License
 

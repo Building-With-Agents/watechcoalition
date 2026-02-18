@@ -5,6 +5,7 @@ This guide walks through setting up the Tech Talent Showcase app after cloning t
 ## Prerequisites
 
 - **Node.js** 18.17 or later ([nodejs.org](https://nodejs.org/) or use [nvm](https://github.com/nvm-sh/nvm))
+- **Python** 3.11 or later ([python.org](https://www.python.org/downloads/))
 - **Docker** (for local SQL Server) — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) for installation instructions
 - **Git**
 
@@ -139,40 +140,40 @@ SELECT @@SERVERNAME, @@VERSION;
 
 Need to refresh fixtures from production? See [docs/REFRESH_ANONYMIZED_FIXTURES.md](docs/REFRESH_ANONYMIZED_FIXTURES.md) (maintainers only).
 
-## 7. Optional: Azure Functions (Copilot Studio Backend)
+## 7. Python Agent Environment
 
-If you need the local Python Functions endpoint for Copilot Studio:
-
-1. Add required Azure Functions/Azurite vars to `.env` (from `.env.example` or your team-provided values)
-2. Start Functions + Azurite:
-
-**Windows:**
-
-```powershell
-.\scripts\start-functions.ps1
-```
-
-**Linux / macOS:**
+The Job Intelligence Engine agent pipeline runs as a separate Python layer alongside the Next.js app. See [CLAUDE.md](CLAUDE.md) for full architecture details.
 
 ```bash
-docker compose -p watechcoalition -f docker-compose.functions.yml --env-file .env up -d --build
+cd agents
+pip install -r requirements.txt
 ```
 
-Test the endpoint:
-
-**Windows (PowerShell):**
-
-```powershell
-Invoke-RestMethod -Method POST -Uri "http://localhost:7071/api/copilot" -ContentType "application/json" -Body '{"prompt":"hi"}'
-```
-
-**Linux / macOS:**
+**Run the Streamlit dashboard:**
 
 ```bash
-curl -X POST http://localhost:7071/api/copilot -H "Content-Type: application/json" -d '{"prompt":"hi"}'
+streamlit run agents/dashboard/streamlit_app.py
 ```
 
-## 7. Run the App
+**Run the full pipeline (via Orchestration Agent scheduler):**
+
+```bash
+python -m agents.orchestration.scheduler
+```
+
+**Run a single agent manually:**
+
+```bash
+python -m agents.ingestion.agent --source jsearch --limit 50
+```
+
+**Run agent tests:**
+
+```bash
+cd agents && pytest tests/
+```
+
+## 8. Run the App
 
 ```bash
 npm run dev
@@ -180,7 +181,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## 8. Optional: Generate Skill Embeddings
+## 9. Optional: Generate Skill Embeddings
 
 If you need vector search (skill autocomplete), visit `/admin/dashboard/generate-embeddings` as an admin and click **Generate**.
 
