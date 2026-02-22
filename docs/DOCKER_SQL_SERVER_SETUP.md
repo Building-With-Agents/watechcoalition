@@ -1,12 +1,10 @@
 # SQL Server Docker Setup Guide
 
-This guide explains how to set up SQL Server Developer edition in a Docker container. **New developers** should follow [ONBOARDING.md](../ONBOARDING.md) and use `npm run db:seed:anonymized` with existing fixtures—no BACPAC import needed. **BACPAC import** is optional and used by maintainers when refreshing anonymized fixtures (see [REFRESH_ANONYMIZED_FIXTURES.md](REFRESH_ANONYMIZED_FIXTURES.md)).
+This guide explains how to set up SQL Server Developer edition in a Docker container. Use [ONBOARDING.md](../ONBOARDING.md) for full setup; after the container is running, seed the database with `npm run db:seed:anonymized` (fixtures in **prisma/mock-data/**).
 
 ## Prerequisites
 
 - Docker Desktop installed and running
-- PowerShell (for Windows)
-- SqlPackage.exe installed (see installation instructions below)
 
 ## Quick Start
 
@@ -29,12 +27,7 @@ This guide explains how to set up SQL Server Developer edition in a Docker conta
    docker compose --env-file .env.docker up -d
    ```
 
-3. **Import BACPAC File** (optional, for maintainers refreshing fixtures)
-
-   **Windows only** (requires SqlPackage.exe):
-   ```powershell
-   .\scripts\import-bacpac.ps1
-   ```
+3. **Apply schema and seed database** — See [ONBOARDING.md](../ONBOARDING.md) for `npx prisma db push`, `npx prisma generate`, and `npm run db:seed:anonymized` (uses JSON fixtures in **prisma/mock-data/**).
 
 ## Detailed Steps
 
@@ -81,45 +74,9 @@ Alternatively, use Docker Compose directly (all platforms):
 docker compose --env-file .env.docker up -d
 ```
 
-### Step 3: Install SqlPackage.exe (if not already installed)
+### Step 3: Verify Database
 
-The BACPAC import requires SqlPackage.exe. Install it using one of these methods:
-
-**Option 1: Download from Microsoft**
-- Visit: https://aka.ms/sqlpackage
-- Download the Windows x64 version
-- Extract and add to your PATH, or note the location
-
-**Option 2: Install via winget**
-```powershell
-winget install Microsoft.SqlPackage
-```
-
-**Option 3: Install SQL Server Data Tools (SSDT)**
-- SSDT includes SqlPackage.exe
-- Download from: https://aka.ms/ssdt
-
-The import script will automatically search common installation locations.
-
-### Step 4: Import BACPAC File
-
-Once SQL Server is running and SqlPackage.exe is installed, import the database:
-
-```powershell
-.\scripts\import-bacpac.ps1
-```
-
-This script will:
-- Verify SQL Server container is ready
-- Locate SqlPackage.exe
-- Import `prod-backup-20251117.bacpac` into the database
-- Provide progress feedback
-
-**Note:** The import process may take several minutes depending on the database size.
-
-### Step 5: Verify Database
-
-You can verify the database was imported successfully by connecting to SQL Server:
+You can verify SQL Server is running by connecting:
 
 ```powershell
 # Using sqlcmd (if installed)
@@ -164,21 +121,6 @@ Waits for the SQL Server container to be ready and healthy.
 - `-TimeoutSeconds` - Maximum time to wait (default: 300)
 - `-ContainerName` - Container name (default: `mssql-server`)
 
-### import-bacpac.ps1
-Imports a BACPAC file into the SQL Server database.
-
-**Usage:**
-```powershell
-.\scripts\import-bacpac.ps1
-```
-
-**Options:**
-- `-BacpacPath` - Path to BACPAC file (default: `prod-backup-20251117.bacpac`)
-- `-EnvFile` - Path to env file (default: `.env.docker`)
-- `-SkipDrop` - Skip dropping existing database if it exists (not recommended)
-
-**Note:** The script will automatically check if the target database exists and drop it before importing. This ensures a clean import. Use `-SkipDrop` only if you want to preserve the existing database (import will fail if database contains objects).
-
 ## Connection Strings
 
 After setup, update your application's `.env` file to connect to the Docker SQL Server:
@@ -196,12 +138,6 @@ MSSQL_CONNECTION_STRING=mssql://SA:YourComplex!P4ssw0rd@localhost:1433/talent_fi
 DATABASE_URL="sqlserver://localhost:1433;database=talent_finder;user=SA;password=YourComplex!P4ssw0rd;encrypt=false;trustServerCertificate=true"
 ```
 
-## DB Anonymization (PII)
-
-If you imported a production BACPAC locally, you can anonymize PII in your Docker DB using:
-
-- [`docs/DB_ANONYMIZATION.md`](docs/DB_ANONYMIZATION.md)
-
 ## Docker Compose Configuration
 
 The `docker-compose.yml` file includes:
@@ -210,7 +146,6 @@ The `docker-compose.yml` file includes:
 - **Port:** Mapped from container 1433 to host (configurable via `MSSQL_PORT`)
 - **Volumes:**
   - `mssql_data` - Persistent storage for database files
-  - BACPAC file mounted as read-only
 - **Health Check:** Automatically verifies SQL Server is ready
 - **Restart Policy:** `unless-stopped`
 
@@ -231,26 +166,6 @@ docker logs mssql-server
 **Verify environment variables:**
 - Ensure `.env.docker` exists and has valid values
 - Password must meet complexity requirements
-
-### SqlPackage.exe not found
-
-The import script searches common installation locations. If not found:
-
-1. Verify SqlPackage.exe is installed
-2. Add SqlPackage.exe location to your PATH
-3. Or specify the full path in the import script
-
-**Common locations:**
-- `C:\Program Files\Microsoft SQL Server\160\DAC\bin\SqlPackage.exe`
-- `C:\Program Files (x86)\Microsoft SQL Server\160\DAC\bin\SqlPackage.exe`
-
-### Import fails with timeout
-
-Large databases may take time to import. The script sets `CommandTimeout=0` to allow unlimited time. If issues persist:
-
-1. Check SQL Server container is healthy: `docker ps`
-2. Verify sufficient disk space
-3. Check container logs: `docker logs mssql-server`
 
 ### Connection refused errors
 
@@ -285,30 +200,6 @@ SQL Server requires strong passwords. Ensure your `MSSQL_SA_PASSWORD` includes:
 - Lowercase letters
 - Numbers
 - Special characters (!, @, #, $, etc.)
-
-### Database already exists error
-
-The import script automatically handles this by dropping the existing database before import. If you see this error:
-
-```
-Error SQL71659: Data cannot be imported into target because it contains one or more user objects.
-```
-
-This means the automatic drop failed. You can manually drop the database:
-
-**Option 1: Use the import script (automatic)**
-The script will automatically detect and drop the database. Just run:
-```powershell
-.\scripts\import-bacpac.ps1
-```
-
-**Option 2: Manually drop via Docker**
-```powershell
-docker exec mssql-server /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P YourPassword -d master -C -Q "ALTER DATABASE [talent_finder] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE [talent_finder];"
-```
-
-**Option 3: Use a different database name**
-Change `MSSQL_DATABASE` in `.env.docker` to a different name.
 
 ## Data Persistence
 
@@ -346,8 +237,6 @@ docker compose --env-file .env.docker down -v
 
 - [SQL Server on Linux Documentation](https://docs.microsoft.com/en-us/sql/linux/)
 - [Docker Compose Documentation](https://docs.docker.com/compose/)
-- [SqlPackage.exe Documentation](https://docs.microsoft.com/en-us/sql/tools/sqlpackage)
-- [BACPAC Import/Export](https://docs.microsoft.com/en-us/sql/relational-databases/data-tier-applications/data-tier-applications)
 
 ## Security Notes
 

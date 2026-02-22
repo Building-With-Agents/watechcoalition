@@ -93,7 +93,17 @@ docs/SECURITY_INCIDENT_RESPONSE_REPORT.md
 docs/REBUILD_STATUS.md
 docs/DB_ANONYMIZATION.md
 docs/AZURE_FILE_SHARE_ACCESS.md
-docs/planning/docx/
+docs/CLAUDE_CODE_SETUP.md
+
+# Planning and curriculum (keep only ARCHITECTURE_DEEP and ARCHITECTURAL_DECISIONS in repo)
+docs/planning/*
+!docs/planning/ARCHITECTURE_DEEP.md
+!docs/planning/ARCHITECTURAL_DECISIONS.md
+docs/planning/curriculum/
+docs/lesson-framework/
+
+# Admin-only (keep local copy; do not commit)
+docs/REFRESH_ANONYMIZED_FIXTURES.md
 
 
 
