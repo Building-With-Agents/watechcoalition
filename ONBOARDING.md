@@ -138,40 +138,25 @@ SELECT @@SERVERNAME, @@VERSION;
 
 `@@SERVERNAME` should be the container hostname, not your Windows host name (for example `DESKTOP-PC`).
 
-Need to refresh fixtures from production? See [docs/REFRESH_ANONYMIZED_FIXTURES.md](docs/REFRESH_ANONYMIZED_FIXTURES.md) (maintainers only).
+## 7. Python Agent Environment (Pipeline — Not Yet Implemented)
 
-## 7. Python Agent Environment
+The **Job Intelligence Engine** is an eight-agent Python pipeline that will ingest, normalize, enrich, and analyze external job postings alongside the Next.js app. **It is not yet implemented.** The `agents/` directory is scaffolded (structure and `requirements.txt`); the pipeline will be built out over the **12-week curriculum** as specified in [CLAUDE.md](CLAUDE.md) and [docs/planning/ARCHITECTURE_DEEP.md](docs/planning/ARCHITECTURE_DEEP.md).
 
-The Job Intelligence Engine agent pipeline runs as a separate Python layer alongside the Next.js app. See [CLAUDE.md](CLAUDE.md) for full architecture details.
+Set up the Python environment now so you’re ready to develop agents as you follow the weekly deliverables:
 
 ```bash
 cd agents
 pip install -r requirements.txt
 ```
 
-**Run the Streamlit dashboard:**
+**When the pipeline is implemented**, you will use commands like the following (included here for reference; they will not work until the corresponding agents exist):
 
-```bash
-streamlit run agents/dashboard/streamlit_app.py
-```
+- **Streamlit dashboard:** `streamlit run agents/dashboard/streamlit_app.py`
+- **Full pipeline (Orchestration Agent scheduler):** `python -m agents.orchestration.scheduler`
+- **Single agent (e.g. Ingestion):** `python -m agents.ingestion.agent --source jsearch --limit 50`
+- **Agent tests:** `cd agents && pytest tests/`
 
-**Run the full pipeline (via Orchestration Agent scheduler):**
-
-```bash
-python -m agents.orchestration.scheduler
-```
-
-**Run a single agent manually:**
-
-```bash
-python -m agents.ingestion.agent --source jsearch --limit 50
-```
-
-**Run agent tests:**
-
-```bash
-cd agents && pytest tests/
-```
+See [CLAUDE.md](CLAUDE.md) for architecture, rules, and the 12-week build order; see [docs/planning/ARCHITECTURE_DEEP.md](docs/planning/ARCHITECTURE_DEEP.md) for per-agent implementation specs.
 
 ## 8. Run the App
 
@@ -199,8 +184,7 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 ## Further Documentation
 
 - [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) — Docker installation (Windows, macOS, Linux)
-- [docs/DOCKER_SQL_SERVER_SETUP.md](docs/DOCKER_SQL_SERVER_SETUP.md) — Detailed SQL Server Docker setup (incl. optional BACPAC import)
-- [docs/REFRESH_ANONYMIZED_FIXTURES.md](docs/REFRESH_ANONYMIZED_FIXTURES.md) — Maintainer workflow to refresh seed data
+- [docs/DOCKER_SQL_SERVER_SETUP.md](docs/DOCKER_SQL_SERVER_SETUP.md) — Detailed SQL Server Docker setup
 - [setup-MSSQL.md](setup-MSSQL.md) — Native MSSQL install (alternative to Docker)
 - [prisma-workflow.md](prisma-workflow.md) — DB schema workflow
 - [API-routes.md](API-routes.md) — API reference

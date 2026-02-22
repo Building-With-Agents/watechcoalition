@@ -1,6 +1,6 @@
 # Installing Docker
 
-This guide covers installing Docker for Windows, macOS, and Linux. The app uses Docker to run SQL Server and (optionally) Azure Functions locally.
+This guide covers installing Docker for Windows, macOS, and Linux. The app uses Docker to run SQL Server locally.
 
 ## Verify Installation
 

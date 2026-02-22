@@ -1,15 +1,11 @@
-# Computing for All - _Tech Talent Showcase_
+# Computing for All — WaTech Coalition
 
-This repository contains the source code for the Washington Tech Workforce Coalition Tech Talent Showcase website, built with Next.js and Prisma ORM, styled with TailwindCSS. This application helps match employers with jobseekers in the tech industry.
-
-## Reference Designs
-
-- [Jobseeker-UX](https://www.figma.com/design/g54drsZOvLMZNvrAIrpJkH/MVP-R2-09%2F10?node-id=20-13140&node-type=SECTION&t=fBQRgvGKBt9RLMPO-0)
-- [Employer-Flow--MVP](https://www.figma.com/design/g54drsZOvLMZNvrAIrpJkH/MVP-R2-09%2F10?node-id=1-285&node-type=CANVAS&t=1e2jUf2kdpkjDTUi-0)
+This repository contains the source code for the **Washington Tech Workforce Coalition** platform: a Next.js and Prisma application that supports employers and job seekers in the tech industry (job listings, employer flows, and jobseeker experience). The stack includes TailwindCSS for styling. A key goal is to add the **Job Intelligence Engine** — an eight-agent Python pipeline to ingest, normalize, enrich, and analyze external job postings — which is planned and scaffolded in `agents/` but not yet implemented.
 
 ## Prerequisites
 
 - Node.js >= 18.17.0
+
 - Python >= 3.11 (for the agent pipeline)
 - npm
 - Docker (for local SQL Server)
@@ -26,19 +22,6 @@ cd watechcoalition
 **First-time setup?** Follow the full environment setup guide:
 
 - **[ONBOARDING.md](ONBOARDING.md)** — Clone, env config, Docker SQL, database seed, and run (Windows, Linux, macOS)
-
-### Quick Start (after onboarding)
-
-```bash
-npm ci
-# Configure .env.local and .env.docker (see ONBOARDING.md)
-docker compose --env-file .env.docker up -d
-npx prisma db push && npx prisma generate
-npm run db:seed:anonymized
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
@@ -65,7 +48,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Agent Pipeline
 
-This project includes a **Job Intelligence Engine** — an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings. The agent layer lives in `agents/` and runs alongside the Next.js app.
+This project is designed to include a **Job Intelligence Engine** — an eight-agent Python pipeline that will ingest, normalize, enrich, and analyze external job postings (pipeline not yet implemented). The agent layer is scaffolded in `agents/` and will run alongside the Next.js app.
 
 See [CLAUDE.md](CLAUDE.md) for full architecture details, agent specs, and run instructions.
 
@@ -92,4 +75,6 @@ streamlit run agents/dashboard/streamlit_app.py
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+Copyright (c) 2026 Computing For All. All rights reserved.
+
+This software is proprietary and not licensed for use, distribution, or modification without explicit permission. The source is available for transparency and collaboration within the project only. Commercial licensing may be available; contact Computing For All for inquiries. See [LICENSE](LICENSE) for details.
