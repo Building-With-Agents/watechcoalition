@@ -66,7 +66,7 @@ This document describes the **current state** (the production Next.js applicatio
 
 ## Future State -- Job Intelligence Engine
 
-The Job Intelligence Engine is an eight-agent Python pipeline that will run alongside the Next.js app. It ingests external job postings (JSearch API, web scraping via Crawl4AI), normalizes them, extracts skills, enriches records, computes analytics, and renders dashboards -- all orchestrated by a central Orchestration Agent. The pipeline is scaffolded in `agents/` but **not yet implemented**; it will be built over a 12-week curriculum (see the Build Order table in [CLAUDE.md](../CLAUDE.md)).
+The Job Intelligence Engine is an eight-agent Python pipeline that will run alongside the Next.js app. It ingests external job postings (JSearch API, web scraping via Crawl4AI), normalizes them, extracts skills, enriches records, computes analytics, and renders dashboards -- all orchestrated by a central Orchestration Agent. The pipeline is scaffolded in `agents/` but **not yet implemented**; it will be built over a 12-week curriculum (see the Build Order table in [CLAUDE.md](../CLAUDE.md#build-order-12-week-curriculum)).
 
 ### Agent Pipeline Tech Stack
 
