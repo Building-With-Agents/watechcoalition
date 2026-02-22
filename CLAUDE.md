@@ -415,7 +415,7 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 
 ## Resolved Design Decisions
 
-Copy here when a decision is locked in `DESIGN_DECISIONS.md`.
+Copy here when a decision is locked in `docs/planning/ARCHITECTURAL_DECISIONS.md`.
 
 | # | Decision | Resolution |
 |---|----------|------------|
@@ -487,7 +487,7 @@ cd agents && pytest tests/test_pipeline_integration.py
 
 For complete implementation specs, read in this order:
 
-1. `ARCHITECTURE_DEEP.md` — canonical implementation reference (per-agent specs, JobRecord schema, event catalog, DB migrations, error-handling)
+1. `docs/planning/ARCHITECTURE_DEEP.md` — canonical implementation reference (per-agent specs, JobRecord schema, event catalog, DB migrations, error-handling)
 2. `docs/planning/TRD.md` — technical requirements, inter-agent contracts, NFRs
 3. `docs/planning/BRD.md` — business scope, success criteria, design decisions
 4. `docs/planning/PRD.md` — user stories, feature list, UX requirements
