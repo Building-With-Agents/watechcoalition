@@ -2,6 +2,8 @@
 
 This repository contains the source code for the **Washington Tech Workforce Coalition** platform: a Next.js and Prisma application that supports employers and job seekers in the tech industry (job listings, employer flows, and jobseeker experience). The stack includes TailwindCSS for styling. A key goal is to add the **Job Intelligence Engine** — an eight-agent Python pipeline to ingest, normalize, enrich, and analyze external job postings — which is planned and scaffolded in `agents/` but not yet implemented.
 
+For a visual overview of the platform architecture (current and planned), see [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md).
+
 ## Prerequisites
 
 - Node.js >= 18.17.0
