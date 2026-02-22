@@ -80,7 +80,7 @@ The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **s
     │   └── tests/
     ├── common/
     │   ├── events/            ← AgentEvent dataclass + all typed event definitions
-    │   ├── message_bus/       ← In-process pub/sub (Phase 1)
+    │   ├── message_bus/       ← In-process Python pub/sub (Phase 1); bus-agnostic contracts
     │   ├── llm_adapter.py
     │   ├── data_store/
     │   ├── config/
@@ -94,13 +94,13 @@ The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **s
     │   ├── monitoring/
     │   └── runbooks/
     ├── data/
-    │   ├── staging/
-    │   ├── normalized/
-    │   ├── enriched/
-    │   ├── analytics/
+    │   ├── staging/           ← raw_ingested_jobs output
+    │   ├── normalized/        ← normalized_jobs output
+    │   ├── enriched/          ← enriched records pre-promotion
+    │   ├── analytics/         ← computed aggregates
     │   ├── demand_signals/    ← Phase 2
-    │   ├── rendered/
-    │   └── dead_letter/
+    │   ├── rendered/          ← Visualization artifact cache
+    │   └── dead_letter/       ← quarantined records (retry-exhausted)
     ├── eval/                  ← 30–50 hand-labeled JSON records (Week 4)
     ├── docs/
     │   ├── architecture/
@@ -415,7 +415,7 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 
 ## Resolved Design Decisions
 
-Copy here when a decision is locked in `docs/planning/ARCHITECTURAL_DECISIONS.md`.
+Copy here when a decision is locked in `DESIGN_DECISIONS.md`.
 
 | # | Decision | Resolution |
 |---|----------|------------|
@@ -434,6 +434,13 @@ Copy here when a decision is locked in `docs/planning/ARCHITECTURAL_DECISIONS.md
 | 19 | Database engine | **MSSQL** — stay on existing instance for Phase 1 |
 | 20 | Enrichment phase split | **Lite (Phase 1) + Full (Phase 2)** |
 | 21 | PDF export scope | **Standard Phase 1 deliverable** — not a stretch goal |
+
+****Open decisions (do not implement — deferred to Phase 2):**
+
+| # | Decision | Recommendation |
+|---|----------|----------------|
+| 22 | Multi-tenancy | Single shared pipeline for Phase 1; revisit before Phase 2 multi-org work |
+| 23 | Feedback loop agent | Defer to Phase 2; requires ground truth, training pipeline, model versioning |
 
 ---
 
@@ -480,7 +487,7 @@ cd agents && pytest tests/test_pipeline_integration.py
 
 For complete implementation specs, read in this order:
 
-1. `docs/planning/ARCHITECTURE_DEEP.md` — canonical implementation reference (per-agent specs, JobRecord schema, event catalog, DB migrations, error-handling)
+1. `ARCHITECTURE_DEEP.md` — canonical implementation reference (per-agent specs, JobRecord schema, event catalog, DB migrations, error-handling)
 2. `docs/planning/TRD.md` — technical requirements, inter-agent contracts, NFRs
 3. `docs/planning/BRD.md` — business scope, success criteria, design decisions
 4. `docs/planning/PRD.md` — user stories, feature list, UX requirements
