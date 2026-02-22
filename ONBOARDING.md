@@ -116,7 +116,7 @@ If Docker is mapped to `11433`, your URL must use `localhost:11433`.
 
 ## 6. Database Schema and Seed (Anonymized Fixtures)
 
-The repo includes **pre-anonymized JSON fixtures** in `prisma/mock-data/`. Populate the database from these (no BACPAC import or anonymization step):
+The repo includes **pre-anonymized JSON fixtures** in `prisma/mock-data/`. Populate the database from these:
 
 ```bash
 npx prisma db push
