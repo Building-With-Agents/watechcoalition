@@ -5,7 +5,7 @@ This guide walks through setting up the Tech Talent Showcase app after cloning t
 ## Prerequisites
 
 - **Node.js** 18.17 or later ([nodejs.org](https://nodejs.org/) or use [nvm](https://github.com/nvm-sh/nvm))
-- **Python** 3.11 or later ([python.org](https://www.python.org/downloads/))
+- **Python** 3.11 or later — [python.org/downloads](https://www.python.org/downloads/); on Windows, enable **"Add python.exe to PATH"** during install
 - **Docker** (for local SQL Server) — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) for installation instructions
 - **Git**
 
@@ -142,10 +142,49 @@ SELECT @@SERVERNAME, @@VERSION;
 
 The **Job Intelligence Engine** is an eight-agent Python pipeline that will ingest, normalize, enrich, and analyze external job postings alongside the Next.js app. **It is not yet implemented.** The `agents/` directory is scaffolded (structure and `requirements.txt`); the pipeline will be built out over the **12-week curriculum** as specified in [CLAUDE.md](CLAUDE.md) and [docs/planning/ARCHITECTURE_DEEP.md](docs/planning/ARCHITECTURE_DEEP.md).
 
-Set up the Python environment now so you’re ready to develop agents as you follow the weekly deliverables:
+Set up the Python environment now so you’re ready to develop agents as you follow the weekly deliverables.
 
+### 7.1 Install Python 3.11 (if not already installed)
+
+1. Download from [python.org/downloads](https://www.python.org/downloads/) (Python 3.11 or later).
+2. Run the installer. **On Windows**, check **"Add python.exe to PATH"** at the bottom.
+3. Verify installation:
+
+   **Windows (PowerShell):**
+   ```powershell
+   py -3.11 --version
+   ```
+
+   **Linux / macOS:**
+   ```bash
+   python3 --version
+   ```
+
+   If you see a version number (e.g. `Python 3.11.5`), you're good.
+
+### 7.2 Create and activate a virtual environment
+
+Create a venv in `agents/.venv` so dependencies stay isolated. Activate it before running any Python commands.
+
+**Windows (PowerShell):**
+```powershell
+cd agents
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+**Linux / macOS:**
 ```bash
 cd agents
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+After activation, your prompt will show `(.venv)` and `pip` will work directly.
+
+### 7.3 Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
@@ -180,6 +219,7 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 | Port already in use | Change `MSSQL_PORT` in `.env.docker` (e.g. to 11433) |
 | Prisma errors after schema change | Run `npx prisma generate` |
 | Docker not found | Install Docker — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) |
+| `pip` not recognized / Python not found | Install Python 3.11, enable "Add python.exe to PATH", then use a venv (section 7). On Windows, use `py -3.11 -m venv .venv` and activate it before running `pip` |
 
 ## Further Documentation
 
