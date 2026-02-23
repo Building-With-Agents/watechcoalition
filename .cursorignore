@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+node_modules/.prisma/
+
+# Build output
+.next/
+out/
+build/
+coverage/
+reports/
+package-lock.json
+
+# Python artifacts
+**/__pycache__/
+**/*.pyc
+**/.venv/
+**/.python_packages/
+
+# Agent data directories (local runtime output)
+agents/data/staging/*
+agents/data/normalized/*
+agents/data/enriched/*
+agents/data/analytics/*
+agents/data/demand_signals/*
+agents/data/rendered/*
+agents/data/dead_letter/*
+
+# Binary / large files
+*.bacpac
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.woff
+*.woff2
+*.ttf
+*.eot
+
+# IDE state
+.idea/
+.cursor/plans/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.docker.example
+
+# Git internals
+.git/
+
+# Planning doc originals (Word files)
+docs/planning/docx/
