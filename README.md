@@ -32,10 +32,10 @@ cd watechcoalition
 - [Environment setup (onboarding)](ONBOARDING.md)
 - [Install Docker](docs/INSTALL_DOCKER.md)
 - [Branching Strategy](docs/branch-strategy.md)
-- [Set up local MSSQL Server](setup-MSSQL.md)
-- [Changing the DB schema](prisma-workflow.md)
-- [API Routes](API-routes.md)
-- [CSS Utilities & Styling Guide](styling-guide.md)
+- [Set up local MSSQL Server](docs/setup-MSSQL.md)
+- [Changing the DB schema](docs/prisma-workflow.md)
+- [API Routes](docs/API-routes.md)
+- [CSS Utilities & Styling Guide](docs/styling-guide.md)
 
 ## Available `npm run` Scripts
 
