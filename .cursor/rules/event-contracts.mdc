@@ -1,0 +1,63 @@
+---
+description: "Event catalog and inter-agent communication contracts for the pipeline"
+alwaysApply: false
+globs:
+  - "agents/common/events/**"
+  - "agents/common/message_bus/**"
+  - "agents/*/agent.py"
+---
+
+# Event Contracts
+
+## Core Rules
+
+1. **Events only.** Agents communicate exclusively via `AgentEvent` objects through the message bus. Never call another agent's methods directly.
+2. **Orchestrator is sole failure consumer.** Only the Orchestration Agent subscribes to `*Failed` and `*Alert` events.
+3. **Propagate `correlation_id`.** Every event in a pipeline run shares the same `correlation_id`, set by the initial `IngestBatch` and passed unchanged through all downstream events.
+4. **Version payloads.** Use `schema_version` field. Increment on breaking payload changes.
+5. **Phase 1 bus:** In-process Python pub/sub (`agents/common/message_bus/`). External bus deferred to Phase 2.
+
+## Event Catalog
+
+| Event | Producer | Consumers | Phase |
+|-------|----------|-----------|-------|
+| `IngestBatch` | Ingestion | Normalization, Orchestrator | 1 |
+| `NormalizationComplete` | Normalization | Skills Extraction, Orchestrator | 1 |
+| `SkillsExtracted` | Skills Extraction | Enrichment, Orchestrator | 1 |
+| `RecordEnriched` | Enrichment | Analytics, Orchestrator | 1 |
+| `AnalyticsRefreshed` | Analytics | Visualization, Orchestrator | 1 |
+| `RenderComplete` | Visualization | Orchestrator | 1 |
+| `SourceFailure` | Ingestion | Orchestrator | 1 |
+| `*Failed` | Any agent | **Orchestrator only** | 1 |
+| `*Alert` | Any agent | **Orchestrator only** | 1 |
+| `DemandSignalsUpdated` | Demand Analysis | Analytics, Visualization, Orchestrator | 2 |
+| `DemandAnomaly` | Demand Analysis | Orchestrator | 2 |
+
+## Pipeline Flow
+
+```
+Ingestion → IngestBatch → Normalization → NormalizationComplete → Skills Extraction
+→ SkillsExtracted → Enrichment → RecordEnriched → Analytics → AnalyticsRefreshed
+→ Visualization → RenderComplete
+```
+
+All `*Failed`/`*Alert` events flow to the Orchestration Agent only.
+
+## Event Payload Conventions
+
+Each event's `payload` dict should include:
+
+- **`IngestBatch`**: `batch_id`, `record_count`, `source`, `dedup_count`, `run_id`
+- **`NormalizationComplete`**: `batch_id`, `record_count`, `quarantine_count`
+- **`SkillsExtracted`**: `batch_id`, `record_count`, `skills_count`, `avg_confidence`
+- **`RecordEnriched`**: `batch_id`, `record_count`, `spam_rejected`, `flagged_for_review`
+- **`AnalyticsRefreshed`**: `aggregate_types`, `record_count`, `refresh_duration_ms`
+- **`RenderComplete`**: `pages_rendered`, `exports_generated`
+- **`*Failed`**: `error_type`, `error_message`, `retry_count`, `max_retries`
+
+## Adding a New Event Type
+
+1. Define it in `agents/common/events/` following the `AgentEvent` dataclass
+2. Add it to the event catalog (this doc and `ARCHITECTURE_DEEP.md`)
+3. Register the Orchestrator as a consumer
+4. If it's a failure event, only Orchestrator may consume it

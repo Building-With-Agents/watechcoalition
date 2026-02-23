@@ -1,0 +1,99 @@
+---
+description: "Streamlit dashboard patterns: pages, caching, read-only DB, exports, staleness handling"
+alwaysApply: false
+globs:
+  - "agents/dashboard/**"
+  - "agents/visualization/**/*.py"
+---
+
+# Streamlit Dashboard Patterns
+
+## Dashboard Pages (Phase 1)
+
+| Page | Key Features |
+|------|-------------|
+| Ingestion Overview | Runs per day, records ingested, dedup rate, error rate, recent runs table |
+| Normalization Quality | Quarantine count by error type, field mapping spot-check, salary coverage |
+| Skill Taxonomy Coverage | % mapped vs unmapped (gauge), skill type distribution, unmapped list |
+| Weekly Insights | LLM or template summary + supporting charts |
+| Ask the Data | Natural language input, generated SQL code block, result table |
+| Operations & Alerts | Active alerts (severity-sorted), alert history, per-agent health |
+
+## Read-Only Database
+
+The Visualization Agent / Streamlit dashboard connection is **read-only**. Never execute INSERT, UPDATE, DELETE, or DDL from dashboard code.
+
+```python
+import os
+from sqlalchemy import create_engine
+
+# Read-only connection
+engine = create_engine(os.getenv("DATABASE_URL"), echo=False)
+```
+
+## Caching with Staleness Banner
+
+Use TTL-based caching. When data is stale, serve cached data with a visible banner. **Never show a blank page.**
+
+```python
+import streamlit as st
+from datetime import datetime, timedelta
+
+@st.cache_data(ttl=300)  # 5-minute TTL
+def load_ingestion_metrics():
+    """Cached query — returns stale data rather than nothing."""
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT ..."))
+        return result.fetchall()
+
+# Staleness banner
+data, last_refresh = load_ingestion_metrics()
+if datetime.utcnow() - last_refresh > timedelta(minutes=10):
+    st.warning("Data may be stale. Last refreshed: " + last_refresh.isoformat())
+```
+
+## Exports — Standard Phase 1 Deliverables
+
+PDF, CSV, and JSON exports are all standard deliverables (not stretch goals).
+
+```python
+import streamlit as st
+
+# CSV download
+st.download_button(
+    label="Export CSV",
+    data=df.to_csv(index=False),
+    file_name="analytics_export.csv",
+    mime="text/csv",
+)
+
+# JSON download
+st.download_button(
+    label="Export JSON",
+    data=df.to_json(orient="records"),
+    file_name="analytics_export.json",
+    mime="application/json",
+)
+```
+
+## Performance Targets
+
+| Metric | Target |
+|--------|--------|
+| Render success rate | >= 99.5% |
+| Dashboard freshness | Within 5 min of trigger |
+| Export generation p95 | < 10s |
+| Cache hit rate | >= 70% |
+
+## Error Handling
+
+- **Upstream data unavailable:** Serve stale cached data + staleness banner + emit `VisualizationDegraded` alert
+- **Render failure:** Retry once → emit `RenderFailed` → show placeholder
+- **Export timeout:** Stream partial result with truncation notice
+- **Never serve a blank page** — always fall back to cached data with a warning
+
+## Running the Dashboard
+
+```bash
+streamlit run agents/dashboard/streamlit_app.py
+```
