@@ -79,8 +79,11 @@ data/dynamics-schema/lightcast-data-schema/
 # SQL development files
 prisma/sql/cip-socc-inserts/find_missing_cips.sql
 
-# Cursor / local IDE state
-.cursor/
+# Cursor — ignore local state, keep rules (version-controlled)
+.cursor/*
+!.cursor/rules/
+# Claude Code local state
+.claude/
 *.log
 
 
