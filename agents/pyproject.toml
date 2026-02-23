@@ -1,0 +1,39 @@
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+src = ["."]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "SIM",  # simplify
+    "T20",  # print statements (use structlog instead)
+]
+ignore = [
+    "E501",  # line length handled by formatter
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["agents"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+    "ingestion/tests",
+    "normalization/tests",
+    "skills_extraction/tests",
+    "enrichment/tests",
+    "analytics/tests",
+    "visualization/tests",
+    "orchestration/tests",
+]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
