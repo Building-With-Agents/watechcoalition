@@ -1,0 +1,122 @@
+---
+description: "SQL guardrails for Analytics Agent: query validation, allowed tables, row limits, timeout enforcement"
+alwaysApply: false
+globs:
+  - "agents/analytics/query_engine/**"
+  - "agents/analytics/agent.py"
+---
+
+# SQL Guardrails
+
+The Analytics Agent supports text-to-SQL ("Ask the Data"). All generated SQL **must** pass through validation before execution. These guardrails are always enforced — no exceptions.
+
+## Validation Rules
+
+1. **SELECT only** — reject any INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, EXEC, TRUNCATE, MERGE
+2. **Allowed tables only** — queries may only reference tables in the allowlist
+3. **100-row maximum** — enforce `TOP 100` (MSSQL syntax) on all queries
+4. **30-second timeout** — kill queries exceeding this limit
+5. **Log everything** — all SQL attempts (approved and rejected) written to `llm_audit_log`
+
+## Allowed Tables
+
+```python
+ALLOWED_TABLES = {
+    "job_postings",
+    "companies",
+    "company_addresses",
+    "skills",
+    "technology_areas",
+    "industry_sectors",
+    "analytics_aggregates",
+    "normalized_jobs",
+    "raw_ingested_jobs",
+}
+```
+
+## Validation Implementation Pattern
+
+```python
+import re
+
+FORBIDDEN_KEYWORDS = re.compile(
+    r"\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|TRUNCATE|MERGE)\b",
+    re.IGNORECASE,
+)
+
+def validate_sql(query: str) -> tuple[bool, str]:
+    """Validate generated SQL before execution. Returns (is_valid, reason)."""
+    # Check for forbidden operations
+    match = FORBIDDEN_KEYWORDS.search(query)
+    if match:
+        return False, f"Forbidden keyword: {match.group()}"
+
+    # Check table allowlist
+    # (extract table names from FROM/JOIN clauses and verify against ALLOWED_TABLES)
+    ...
+
+    # Ensure row limit
+    if "TOP" not in query.upper():
+        query = query.replace("SELECT", "SELECT TOP 100", 1)
+
+    return True, "ok"
+```
+
+## Execution with Timeout
+
+```python
+from sqlalchemy import text
+
+def execute_validated_query(session, query: str, timeout_seconds: int = 30):
+    """Execute a validated SQL query with timeout."""
+    is_valid, reason = validate_sql(query)
+    if not is_valid:
+        log.warning("sql_rejected", query_hash=hash(query), reason=reason)
+        # Log to llm_audit_log
+        return {"error": reason, "is_valid": False}
+
+    try:
+        result = session.execute(
+            text(query),
+            execution_options={"timeout": timeout_seconds},
+        )
+        rows = result.fetchall()
+        return {"data": rows, "row_count": len(rows), "is_partial": False}
+    except Exception as e:
+        log.error("sql_execution_error", error=str(e))
+        return {"error": str(e), "is_partial": True}
+```
+
+## Error Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| Forbidden keyword detected | Reject immediately, log to `llm_audit_log`, return error |
+| Table not in allowlist | Reject immediately, log, return error |
+| SQL syntax error | Retry once with LLM self-correction → return error with explanation |
+| Query timeout (>30s) | Kill query, return partial result with `is_partial = true` |
+| Cardinality explosion | Cap dimensions, coalesce long-tail into "Other", emit warning |
+| LLM unavailable | Return clear error; never fall through to unvalidated SQL |
+
+## Audit Logging
+
+Every SQL attempt must be logged to `llm_audit_log`:
+
+```python
+log.info(
+    "sql_query_attempt",
+    query_hash=hashlib.sha256(query.encode()).hexdigest(),
+    is_valid=is_valid,
+    rejection_reason=reason if not is_valid else None,
+    execution_time_ms=elapsed_ms,
+    row_count=row_count,
+    model=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
+)
+```
+
+## Security Reminders
+
+- All SQL validation failures are logged — no silent rejections
+- The Visualization Agent / dashboard DB connection is read-only (separate concern from these guardrails)
+- User-provided natural language is never passed directly to SQL — always goes through LLM generation + validation
+- Generated SQL that fails validation is never retried without re-generation

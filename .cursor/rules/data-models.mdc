@@ -1,0 +1,159 @@
+---
+description: "Canonical data models (JobRecord, SkillRecord) and database schema reference for agent pipeline"
+alwaysApply: false
+globs:
+  - "agents/normalization/schema/**"
+  - "agents/enrichment/**/*.py"
+  - "agents/analytics/**/*.py"
+  - "agents/common/data_store/**"
+---
+
+# Data Models & Database Reference
+
+## Canonical JobRecord (Pydantic)
+
+This is the pipeline's core data model. Defined in `agents/normalization/schema/`.
+
+```python
+from pydantic import BaseModel
+from typing import Optional, List
+from datetime import datetime
+
+class SkillRecord(BaseModel):
+    skill_id: Optional[str] = None       # FK to skills.skill_id (null if unlinked)
+    label: str
+    type: str                            # Technical | Domain | Soft | Certification | Tool
+    confidence: float                    # 0.0–1.0
+    field_source: str                    # title | description | requirements | responsibilities
+    required_flag: Optional[bool] = None
+
+class JobRecord(BaseModel):
+    # Identity
+    external_id: str
+    source: str                          # "jsearch" | "crawl4ai"
+    ingestion_run_id: str
+    raw_payload_hash: str                # sha256(source + external_id + title + company + date_posted)
+
+    # Core fields
+    title: str
+    company: str
+    location: Optional[str] = None
+    salary_raw: Optional[str] = None
+    salary_min: Optional[float] = None
+    salary_max: Optional[float] = None
+    salary_currency: Optional[str] = None
+    salary_period: Optional[str] = None  # annual | hourly | monthly
+    employment_type: Optional[str] = None
+    date_posted: Optional[datetime] = None
+    description: Optional[str] = None
+
+    # Skills Extraction output
+    skills: List[SkillRecord] = []
+    extraction_status: Optional[str] = None  # ok | failed | partial
+
+    # Phase 1 Enrichment output
+    seniority: Optional[str] = None
+    role_classification: Optional[str] = None
+    sector_id: Optional[int] = None
+    quality_score: Optional[float] = None     # 0–1
+    is_spam: Optional[bool] = None            # null = flagged for review
+    spam_score: Optional[float] = None
+    ai_relevance_score: Optional[float] = None
+    company_id: Optional[int] = None
+    location_id: Optional[int] = None
+    overall_confidence: Optional[float] = None
+    field_confidence: Optional[dict] = None   # JSON: per-field confidence scores
+```
+
+## Existing Database Tables (read from `prisma/schema.prisma`)
+
+### `job_postings` — canonical job records
+| Column | Type | Notes |
+|--------|------|-------|
+| `job_posting_id` | UniqueIdentifier (PK) | |
+| `company_id` | UniqueIdentifier (FK) | **Required before writing** |
+| `location_id` | UniqueIdentifier (FK) | FK to company_addresses |
+| `tech_area_id` | UniqueIdentifier (FK, nullable) | FK to technology_areas |
+| `sector_id` | UniqueIdentifier (FK, nullable) | FK to industry_sectors |
+| `job_title` | VarChar(255) | |
+| `job_description` | Text | |
+| `employment_type` | NVarChar(255) | Default: 'full-time' |
+| `location` | NVarChar(255) | |
+| `salary_range` | VarChar(45) | |
+| `county` | VarChar(255) | |
+| `zip` | VarChar(45) | |
+| `publish_date` | DateTime | |
+| `unpublish_date` | DateTime | |
+| `job_post_url` | VarChar(255, nullable) | |
+| `occupation_code` | VarChar(255, nullable) | |
+| `status` | default "open" | |
+| `skills` | M:M relation | Via `_JobPostingSkills` join |
+
+### `companies`
+| Column | Type | Notes |
+|--------|------|-------|
+| `company_id` | UniqueIdentifier (PK) | |
+| `company_name` | VarChar(255) | **Unique** — match by this for `company_id` resolution |
+| `industry_sector_id` | UniqueIdentifier (FK, nullable) | FK to industry_sectors |
+| `size` | VarChar(45) | Default: "1-10" |
+
+### `skills`
+| Column | Type | Notes |
+|--------|------|-------|
+| `skill_id` | UniqueIdentifier (PK) | |
+| `skill_subcategory_id` | UniqueIdentifier (FK) | |
+| `skill_name` | VarChar(255) | Match labels against this |
+| `skill_type` | VarChar(255, nullable) | |
+| `embedding` | vector(1536) | For cosine similarity matching |
+
+### `technology_areas`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UniqueIdentifier (PK) | |
+| `title` | VarChar(255) | |
+
+### `industry_sectors`
+| Column | Type | Notes |
+|--------|------|-------|
+| `industry_sector_id` | UniqueIdentifier (PK) | |
+| `sector_title` | VarChar(255) | |
+
+### `company_addresses`
+| Column | Type | Notes |
+|--------|------|-------|
+| `company_address_id` | UniqueIdentifier (PK) | |
+| `company_id` | UniqueIdentifier (FK) | |
+| `zip` | VarChar(5) | FK to PostalGeoData |
+
+## Agent-Managed Tables (created by agents, not Prisma)
+
+| Table | Phase | Owner | Purpose |
+|-------|-------|-------|---------|
+| `raw_ingested_jobs` | 1 | Ingestion | Staging for raw scraped/API data |
+| `normalized_jobs` | 1 | Normalization | Post-normalization records |
+| `job_ingestion_runs` | 1 | Orchestration | Batch run tracking |
+| `alerts` | 1 | Orchestration | Active and historical alerts |
+| `orchestration_audit_log` | 1 | Orchestration | All decisions (100% completeness) |
+| `llm_audit_log` | 1 | Common | All LLM calls (prompt hash, model, latency, tokens) |
+| `analytics_aggregates` | 1 | Analytics | Computed aggregates |
+| `demand_signals` | 2 | Demand Analysis | Trend/forecast outputs |
+
+## Critical Constraints
+
+- **Never write to `job_postings` without a resolved `company_id`.** The Enrichment Agent resolves company by matching `companies.company_name` → no match → create placeholder.
+- **Promotion path:** `raw_ingested_jobs` → `normalized_jobs` → `job_postings`
+- **Spam handling:** `spam_score` > 0.9 → auto-reject (do NOT write to `job_postings`); 0.7–0.9 → flag for review (`is_spam = null`); < 0.7 → proceed
+
+## Phase 1 ALTER TABLE Migrations (SQLAlchemy only — never touch schema.prisma)
+
+```sql
+ALTER TABLE job_postings ADD COLUMN source NVARCHAR(50);
+ALTER TABLE job_postings ADD COLUMN external_id NVARCHAR(255);
+ALTER TABLE job_postings ADD COLUMN ingestion_run_id NVARCHAR(36);
+ALTER TABLE job_postings ADD COLUMN ai_relevance_score FLOAT;
+ALTER TABLE job_postings ADD COLUMN quality_score FLOAT;
+ALTER TABLE job_postings ADD COLUMN is_spam BIT;
+ALTER TABLE job_postings ADD COLUMN spam_score FLOAT;
+ALTER TABLE job_postings ADD COLUMN overall_confidence FLOAT;
+ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX);
+```

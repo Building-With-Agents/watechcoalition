@@ -1,0 +1,70 @@
+---
+description: "Project context and non-negotiable rules for the Job Intelligence Engine dual-stack repository"
+alwaysApply: true
+---
+
+# Job Intelligence Engine — Project Context
+
+## What This Repo Is
+
+Dual-stack repository:
+
+- **Root (`/`)** — Next.js / TypeScript / Prisma web application. **Read-only from the agent pipeline perspective.**
+- **`agents/`** — Python 3.11+ eight-agent pipeline that ingests, normalizes, enriches, and analyzes external job postings. **This is the active development focus.**
+
+## Canonical Documentation
+
+Read these before implementing anything — they are the source of truth:
+
+- `CLAUDE.md` (repo root) — architecture overview, patterns, build order
+- `docs/planning/ARCHITECTURE_DEEP.md` — per-agent specs, schemas, event catalog, DB migrations
+- `docs/planning/ARCHITECTURAL_DECISIONS.md` — locked design decisions
+
+## Non-Negotiable Rules
+
+1. **One agent = one responsibility.** Helper logic (dedup, validation, field mapping, confidence scoring) stays inside the owning agent. Never promoted to its own agent.
+2. **Events-only communication.** Agents communicate via typed, versioned `AgentEvent` objects through the message bus. Direct function calls between agents are forbidden.
+3. **Orchestration Agent is the sole consumer** of `*Failed` and `*Alert` events. No other agent reacts to another agent's failures.
+4. **No cross-agent state writes.** An agent never writes to another agent's internal state.
+5. **Every agent class exposes `health_check()`** returning `{"status": "ok"|"degraded"|"down", "agent": str, "last_run": str, "metrics": dict}`.
+6. **Python agents use SQLAlchemy + pyodbc for MSSQL.** Never import or invoke Prisma from Python.
+7. **No credentials in code or logs.** All secrets via `os.getenv()`. Use structlog with no PII.
+8. **Do NOT implement Phase 2 items** unless the user explicitly instructs you to. Phase 2 includes: demand_analysis implementation, circuit_breaker, saga, admin_api, full enrichment resolvers, external message bus.
+
+## Boundary — Do NOT Modify These
+
+Unless explicitly instructed, never modify files outside `agents/`:
+
+- `app/`, `lib/`, `types/`, `public/`, `emails/`, `scripts/`
+- `prisma/schema.prisma` (read-only reference for Python agents)
+- `middleware.ts`, `auth.ts`, `auth-edge.ts`, `next.config.js`
+- `package.json`, `tsconfig.json`, `eslint.config.mjs`
+- Any root-level `.ts`, `.js`, `.mjs`, `.cjs` files
+
+## Tech Stack (agents/)
+
+| Layer | Technology |
+|-------|-----------|
+| Runtime | Python 3.11+ |
+| Multi-agent framework | LangGraph (StateGraph) |
+| LLM adapter | LangChain + Azure OpenAI (provider-agnostic via `LLM_PROVIDER` env var) |
+| Tracing | LangSmith |
+| Scheduling | APScheduler |
+| DB access | SQLAlchemy + pyodbc → MSSQL |
+| Scraping | Crawl4AI |
+| API ingestion | httpx |
+| Dashboards | Streamlit |
+| Testing | pytest |
+| Logging | structlog (JSON, no PII) |
+
+## Phase 1 vs Phase 2
+
+**Phase 1 agents (implement):** Ingestion, Normalization, Skills Extraction, Enrichment (lite), Analytics, Visualization, Orchestration
+
+**Phase 2 (scaffold only — do NOT implement):**
+- `agents/demand_analysis/` — entire agent
+- `agents/orchestration/circuit_breaker/`
+- `agents/orchestration/saga/`
+- `agents/orchestration/admin_api/`
+- `agents/enrichment/resolvers/` — company/geo/labor-market lookups
+- External message bus migration

@@ -1,0 +1,154 @@
+---
+description: "Required Python patterns for agent pipeline code: events, logging, health checks, LLM adapter, DB access"
+alwaysApply: false
+globs:
+  - "agents/**/*.py"
+---
+
+# Python Agent Patterns
+
+All Python code in `agents/` must follow these patterns exactly.
+
+## Event Envelope
+
+Every inter-agent communication uses this shape. Never invent a different structure.
+
+```python
+# agents/common/events/base.py
+from dataclasses import dataclass, field
+from datetime import datetime
+from uuid import uuid4
+
+@dataclass
+class AgentEvent:
+    event_id: str = field(default_factory=lambda: str(uuid4()))
+    correlation_id: str = ""       # propagated UNCHANGED from IngestBatch through all downstream events
+    agent_id: str = ""             # e.g. "ingestion_agent"
+    timestamp: datetime = field(default_factory=datetime.utcnow)
+    schema_version: str = "1.0"    # increment on breaking payload changes
+    payload: dict = field(default_factory=dict)
+```
+
+## Agent Class Skeleton
+
+Every agent follows this structure:
+
+```python
+import os
+import structlog
+from agents.common.events.base import AgentEvent
+from agents.common.llm_adapter import get_adapter
+
+log = structlog.get_logger()
+
+class IngestionAgent:
+    """One agent = one responsibility. No cross-agent function calls."""
+
+    def __init__(self):
+        self.agent_id = "ingestion_agent"
+        self.last_run_at = None
+        self.last_run_metrics = {}
+
+    def process(self, event: AgentEvent | None = None) -> AgentEvent:
+        """Main processing method. Consumes an input event, returns an output event."""
+        ...
+
+    def health_check(self) -> dict:
+        """Required on every agent class."""
+        return {
+            "status": "ok",       # "ok" | "degraded" | "down"
+            "agent": "ingestion",
+            "last_run": self.last_run_at.isoformat() if self.last_run_at else None,
+            "metrics": self.last_run_metrics,
+        }
+```
+
+## LLM Adapter
+
+Always use the provider-agnostic adapter. Never call Azure OpenAI directly.
+
+```python
+from agents.common.llm_adapter import get_adapter
+
+adapter = get_adapter(provider=os.getenv("LLM_PROVIDER", "azure_openai"))
+result = adapter.complete(prompt=prompt, schema=OutputSchema)
+```
+
+**Fallback behavior:** 2 retries → log to `llm_audit_log` → set `extraction_status = "failed"` → continue batch. Never block an entire batch on LLM failure.
+
+## Structured Logging
+
+Use structlog everywhere. JSON format. **Never log PII** (no names, emails, phone numbers).
+
+```python
+import structlog
+log = structlog.get_logger()
+
+# Good — structured, no PII
+log.info("ingestion_batch_complete", batch_id=batch_id, record_count=n, dedup_count=d)
+log.warning("quarantine_record", record_id=record_id, reason="schema_violation", field="salary_raw")
+log.error("source_unreachable", source="jsearch", attempt=3, max_retries=5)
+
+# FORBIDDEN — never log personal data
+# log.info("processed_job", applicant_name="John Doe", email="john@example.com")
+```
+
+## Database Access — SQLAlchemy Only
+
+Python agents access MSSQL via SQLAlchemy. **Never import or use Prisma from Python.**
+
+```python
+import os
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import Session
+
+engine = create_engine(os.getenv("DATABASE_URL"))
+
+with Session(engine) as session:
+    result = session.execute(text("SELECT TOP 100 * FROM job_postings WHERE company_id IS NOT NULL"))
+    rows = result.fetchall()
+```
+
+## Environment Variables
+
+All credentials from `os.getenv()`. Never hardcode. Key variables:
+
+```python
+os.getenv("DATABASE_URL")                    # MSSQL connection string
+os.getenv("AZURE_OPENAI_API_KEY")            # LLM credentials
+os.getenv("AZURE_OPENAI_ENDPOINT")
+os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
+os.getenv("LLM_PROVIDER", "azure_openai")    # azure_openai | openai | anthropic
+os.getenv("JSEARCH_API_KEY")                 # Ingestion source
+os.getenv("LANGSMITH_API_KEY")               # Tracing
+os.getenv("INGESTION_SCHEDULE", "0 2 * * *") # Cron expression
+os.getenv("SPAM_FLAG_THRESHOLD", "0.7")
+os.getenv("SPAM_REJECT_THRESHOLD", "0.9")
+os.getenv("SKILL_CONFIDENCE_THRESHOLD", "0.75")
+os.getenv("BATCH_SIZE", "100")
+```
+
+## Pydantic for Data Models
+
+Use Pydantic v2 `BaseModel` for all data schemas. Validate at boundaries.
+
+```python
+from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime
+
+class SkillRecord(BaseModel):
+    skill_id: Optional[str] = None
+    label: str
+    type: str           # Technical | Domain | Soft | Certification | Tool
+    confidence: float
+    field_source: str   # title | description | requirements | responsibilities
+    required_flag: Optional[bool] = None
+```
+
+## Error Handling Pattern
+
+- Partial batch: process successful records, mark failures, do not block downstream
+- External service failure: retry with back-off, then emit `*Failed` event to Orchestrator
+- Schema violation: quarantine to `data/dead_letter/`, log, continue
+- LLM failure: 2 retries → log → set status → continue batch

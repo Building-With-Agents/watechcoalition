@@ -1,0 +1,102 @@
+---
+description: "Testing patterns and requirements for agent pipeline code using pytest"
+alwaysApply: false
+globs:
+  - "agents/**/test_*.py"
+  - "agents/**/tests/**"
+  - "agents/tests/**"
+---
+
+# Testing Standards
+
+## Test Locations
+
+- **Unit tests:** `agents/<agent_name>/tests/` — test individual agent behavior
+- **Integration tests:** `agents/tests/` — test multi-agent pipeline flows
+- **Naming:** `test_*.py` files, `Test*` classes, `test_*` methods
+
+## Running Tests
+
+```bash
+cd agents && pytest tests/                           # all tests
+cd agents && pytest ingestion/tests/                 # single agent
+cd agents && pytest tests/test_pipeline_integration.py  # integration
+cd agents && pytest -x -v                            # stop on first failure, verbose
+```
+
+## Test Structure Example
+
+```python
+import pytest
+from unittest.mock import patch, MagicMock
+from agents.ingestion.agent import IngestionAgent
+from agents.common.events.base import AgentEvent
+
+class TestIngestionAgent:
+    def setup_method(self):
+        """Runs before each test."""
+        self.agent = IngestionAgent()
+
+    def test_health_check_returns_expected_shape(self):
+        result = self.agent.health_check()
+        assert result["status"] in ("ok", "degraded", "down")
+        assert "agent" in result
+        assert "metrics" in result
+
+    def test_emits_ingest_batch_event(self):
+        event = self.agent.process()
+        assert isinstance(event, AgentEvent)
+        assert event.agent_id == "ingestion_agent"
+        assert event.schema_version == "1.0"
+        assert "batch_id" in event.payload
+
+    def test_dedup_discards_duplicates(self):
+        # Verify duplicate fingerprints are discarded silently
+        ...
+
+    @patch("agents.ingestion.sources.jsearch_adapter.fetch")
+    def test_handles_source_failure(self, mock_fetch):
+        mock_fetch.side_effect = ConnectionError("timeout")
+        # Should emit SourceFailure event, not crash
+        ...
+```
+
+## Key Rules
+
+- **Mock external services.** Never make real API calls in tests: mock JSearch, Crawl4AI, Azure OpenAI, and MSSQL.
+- **Test event contracts.** Verify emitted events conform to `AgentEvent` schema with correct `agent_id`, `schema_version`, and expected payload keys.
+- **Test error paths.** Every agent must handle: source failure, LLM timeout, schema violation, DB error.
+- **Write tests alongside code.** Every new agent method or feature gets a corresponding test.
+- **Use fixtures** for common setup: sample `AgentEvent` objects, mock DB sessions, sample `JobRecord` data.
+
+## Evaluation Targets to Validate
+
+Tests should verify these metric targets where applicable:
+
+| Agent | Metric | Target |
+|-------|--------|--------|
+| Ingestion | Duplicate rate forwarded | < 0.5% |
+| Normalization | Schema conformance | >= 99% |
+| Skills Extraction | Taxonomy coverage | >= 95% |
+| Skills Extraction | Avg confidence | >= 0.80 |
+| Analytics | Aggregate accuracy | >= 99.5% vs raw |
+| Visualization | Render success rate | >= 99.5% |
+| Orchestration | Audit log completeness | 100% |
+
+## Fixtures Pattern
+
+```python
+@pytest.fixture
+def sample_ingest_event():
+    return AgentEvent(
+        correlation_id="test-correlation-123",
+        agent_id="ingestion_agent",
+        schema_version="1.0",
+        payload={"batch_id": "batch-001", "record_count": 10, "source": "jsearch"},
+    )
+
+@pytest.fixture
+def mock_db_session():
+    with patch("sqlalchemy.orm.Session") as mock:
+        yield mock
+```
