@@ -31,7 +31,7 @@ cd watechcoalition
 
 - [Environment setup (onboarding)](ONBOARDING.md)
 - [Install Docker](docs/INSTALL_DOCKER.md)
-- [Branching Strategy](branch-strategy.md)
+- [Branching Strategy](docs/branch-strategy.md)
 - [Set up local MSSQL Server](setup-MSSQL.md)
 - [Changing the DB schema](prisma-workflow.md)
 - [API Routes](API-routes.md)

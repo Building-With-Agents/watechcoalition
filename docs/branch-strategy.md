@@ -33,7 +33,7 @@ Use this convention:
 <their-name>-<week-#>-<description>
 ```
 
-- **&lt;their-name&gt;** — Intern’s first name or agreed identifier (e.g. `jordan`, `sam`).
+- **&lt;their-name&gt;** — Intern's first name or agreed identifier (e.g. `jordan`, `sam`).
 - **&lt;week-#&gt;** — Curriculum week: `week-1`, `week-2`, … `week-12`.
 - **&lt;description&gt;** — Short, kebab-case description of the work (e.g. `ingestion-agent`, `first-scrape`).
 
@@ -123,7 +123,7 @@ The **core team** uses a GitFlow-style workflow for production releases. This ap
 
 ### 2. Creating a Feature Branch
 
-1. Ensure you’re on the `develop` branch:
+1. Ensure you're on the `develop` branch:
    ```bash
    git checkout develop
    ```
