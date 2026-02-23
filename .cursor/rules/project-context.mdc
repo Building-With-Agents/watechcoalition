@@ -57,6 +57,18 @@ Unless explicitly instructed, never modify files outside `agents/`:
 | Testing | pytest |
 | Logging | structlog (JSON, no PII) |
 
+## Commands
+
+- `cd agents && pip install -r requirements.txt` — Install Python dependencies
+- `cd agents && pytest tests/` — Run all tests
+- `cd agents && pytest <agent>/tests/` — Run single agent tests (e.g., `pytest ingestion/tests/`)
+- `cd agents && pytest -x -v` — Run tests, stop on first failure
+- `streamlit run agents/dashboard/streamlit_app.py` — Launch dashboard
+- `python -m agents.orchestration.scheduler` — Run full pipeline
+- `python -m agents.ingestion.agent --source jsearch --limit 50` — Run single agent
+- `cd agents && ruff check .` — Lint Python code
+- `cd agents && ruff format .` — Format Python code
+
 ## Phase 1 vs Phase 2
 
 **Phase 1 agents (implement):** Ingestion, Normalization, Skills Extraction, Enrichment (lite), Analytics, Visualization, Orchestration
