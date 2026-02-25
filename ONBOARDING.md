@@ -105,7 +105,7 @@ If the database already exists, you can skip this step.
 
 ## 5. Set DATABASE_URL in .env
 
-After SQL Server is running and the database is created, set `DATABASE_URL` in `.env` to match your `.env.docker` values:
+After SQL Server is running and the database is created, set `DATABASE_URL` in `.env` to match your `.env.docker` values. **This format is for Prisma/Next.js only.**
 
 ```env
 DATABASE_URL="sqlserver://localhost:1433;database=talent_finder;user=SA;password=YOUR_SA_PASSWORD;encrypt=false;trustServerCertificate=true"
@@ -113,6 +113,23 @@ DATABASE_URL="sqlserver://localhost:1433;database=talent_finder;user=SA;password
 
 Replace `YOUR_SA_PASSWORD` with your `MSSQL_SA_PASSWORD` from `.env.docker`, and adjust `1433` if you changed `MSSQL_PORT`.
 If Docker is mapped to `11433`, your URL must use `localhost:11433`.
+
+### 5.1 Python / agents (SQLAlchemy + pyodbc)
+
+The **agents pipeline** uses `agents/.env` and **SQLAlchemy + pyodbc**. The `sqlserver://` format above does **not** work with Python. Use `mssql+pyodbc://` in `agents/.env`:
+
+```env
+# In agents/.env (copy from agents/.env.example first)
+DATABASE_URL="mssql+pyodbc://SA:YOUR_SA_PASSWORD@127.0.0.1:1433/talent_finder?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
+```
+
+Replace `YOUR_SA_PASSWORD` and `talent_finder` to match your setup. Use `127.0.0.1` instead of `localhost` if you see connection errors. Verify with:
+
+```bash
+python -m agents.connectivity_test
+```
+
+Expected output: `job_postings row count: <N>`.
 
 ## 6. Database Schema and Seed (Anonymized Fixtures)
 
@@ -145,18 +162,27 @@ The **Job Intelligence Engine** is an eight-agent Python pipeline that will inge
 Set up the Python environment now so you’re ready to develop agents as you follow the weekly deliverables:
 
 ```bash
+# From project root (watechcoalition/)
 cd agents
-pip install -r requirements.txt
+python3 -m venv .venv
+cd ..
+# Linux / macOS: activate from project root
+source agents/.venv/bin/activate
+# Windows (PowerShell): .\agents\.venv\Scripts\Activate.ps1
+pip install -r agents/requirements.txt
 ```
 
-**When the pipeline is implemented**, you will use commands like the following (included here for reference; they will not work until the corresponding agents exist):
+If `python3` resolves to the wrong interpreter (e.g. Homebrew), run `deactivate`, remove `agents/.venv`, recreate it, and run `source agents/.venv/bin/activate` again from the project root.
 
+**When the pipeline is implemented**, use these commands (activate the venv first):
+
+- **Connectivity test:** `python -m agents.connectivity_test` (expect: `job_postings row count: <N>`)
 - **Streamlit dashboard:** `streamlit run agents/dashboard/streamlit_app.py`
-- **Full pipeline (Orchestration Agent scheduler):** `python -m agents.orchestration.scheduler`
-- **Single agent (e.g. Ingestion):** `python -m agents.ingestion.agent --source jsearch --limit 50`
+- **Full pipeline:** `python -m agents.orchestration.scheduler`
+- **Single agent:** `python -m agents.ingestion.agent --source jsearch --limit 50`
 - **Agent tests:** `cd agents && pytest tests/`
 
-See [CLAUDE.md](CLAUDE.md) for architecture, rules, and the 12-week build order; see [docs/planning/ARCHITECTURE_DEEP.md](docs/planning/ARCHITECTURE_DEEP.md) for per-agent implementation specs.
+See [CLAUDE.md](CLAUDE.md) and [docs/planning/ARCHITECTURE_DEEP.md](docs/planning/ARCHITECTURE_DEEP.md). See [agents/README.md](agents/README.md) for Python DATABASE_URL format.
 
 ## 8. Run the App
 
@@ -175,10 +201,12 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 | Issue | Solution |
 |-------|----------|
 | `DATABASE_URL` connection fails | Ensure SQL container is running (`docker ps`), port matches `.env.docker`, password is correct |
+| **Python `agents/`: DATABASE_URL fails** | Use `mssql+pyodbc://` in `agents/.env`, not `sqlserver://`. See [agents/README.md](agents/README.md) and section 5.1 above. Try `127.0.0.1` instead of `localhost`. |
 | `Cannot find data type vector` during `prisma db push` | Usually means Prisma connected to the wrong SQL instance. Verify `DATABASE_URL` port and check `SELECT @@SERVERNAME, @@VERSION` |
 | Password complexity error | SQL Server requires: 8+ chars, upper, lower, number, special char |
 | Port already in use | Change `MSSQL_PORT` in `.env.docker` (e.g. to 11433) |
 | Prisma errors after schema change | Run `npx prisma generate` |
+| **Python resolves to wrong interpreter** | Run `deactivate`, remove `agents/.venv`, recreate with `python3 -m venv agents/.venv`, then `source agents/.venv/bin/activate` from project root |
 | Docker not found | Install Docker — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) |
 
 ## Further Documentation

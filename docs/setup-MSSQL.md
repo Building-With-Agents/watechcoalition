@@ -24,10 +24,18 @@ MSSQL_DATABASE=WaTechDB
 
 # Connection String for MSSQL (if using libraries that accept connection strings)
 MSSQL_CONNECTION_STRING=mssql://SA:YourComplex!P4ssw0rd@localhost:1433/WaTechDB
+# Root .env: Prisma/Next.js use this format
 DATABASE_URL="sqlserver://localhost:1433;database=WaTechDB;user=SA;password=YourComplex!P4ssw0rd;encrypt=false;trustServerCertificate=true"
 
 # Generate this secret by running the following command: openssl rand -base64 32
 AUTH_SECRET=<your generated base64 auth secret>
+```
+
+**Python (agents pipeline):** Use `agents/.env` with `mssql+pyodbc://` format; `sqlserver://` does not work with SQLAlchemy. See [agents/README.md](agents/README.md) and [ONBOARDING.md](ONBOARDING.md) section 5.1.
+
+```env
+# In agents/.env (example)
+# DATABASE_URL="mssql+pyodbc://SA:YOUR_PASSWORD@127.0.0.1:1433/WaTechDB?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
 ```
 
 Don't forget to generate your Base64 Auth Secret and save!
