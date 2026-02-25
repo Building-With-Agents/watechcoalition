@@ -114,6 +114,8 @@ DATABASE_URL="sqlserver://localhost:1433;database=talent_finder;user=SA;password
 Replace `YOUR_SA_PASSWORD` with your `MSSQL_SA_PASSWORD` from `.env.docker`, and adjust `1433` if you changed `MSSQL_PORT`.
 If Docker is mapped to `11433`, your URL must use `localhost:11433`.
 
+> **Note:** This `sqlserver://` format is required by Prisma/Next.js. Python agents (SQLAlchemy) use a different format and a separate variable — see step 7.4.
+
 ## 6. Database Schema and Seed (Anonymized Fixtures)
 
 The repo includes **pre-anonymized JSON fixtures** in `prisma/mock-data/`. Populate the database from these:
@@ -164,20 +166,32 @@ Set up the Python environment now so you’re ready to develop agents as you fol
 
 ### 7.2 Create and activate a virtual environment
 
-Create a venv in `agents/.venv` so dependencies stay isolated. Activate it before running any Python commands.
+Create a venv in `agents/.venv` so dependencies stay isolated. Always activate it from the **project root** before running any Python commands, so that tools like `streamlit run agents/...` and `python -m agents...` resolve correctly.
+
+**Create the venv** (one time only):
 
 **Windows (PowerShell):**
 ```powershell
 cd agents
 py -3.11 -m venv .venv
-.\.venv\Scripts\Activate.ps1
+cd ..
 ```
 
 **Linux / macOS:**
 ```bash
-cd agents
-python3 -m venv .venv
-source .venv/bin/activate
+cd agents && python3 -m venv .venv && cd ..
+```
+
+**Activate from the project root** (every new terminal session):
+
+**Windows (PowerShell):**
+```powershell
+agents\.venv\Scripts\Activate.ps1
+```
+
+**Linux / macOS:**
+```bash
+source agents/.venv/bin/activate
 ```
 
 After activation, your prompt will show `(.venv)` and `pip` will work directly.
@@ -185,8 +199,22 @@ After activation, your prompt will show `(.venv)` and `pip` will work directly.
 ### 7.3 Install dependencies
 
 ```bash
-pip install -r requirements.txt
+pip install -r agents/requirements.txt
 ```
+
+### 7.4 Set PYTHON_DATABASE_URL in .env
+
+Python agents use SQLAlchemy + pyodbc, which requires a **different connection string format** than Prisma's `DATABASE_URL`. Add this to your `.env` file:
+
+```env
+PYTHON_DATABASE_URL=mssql+pyodbc://SA:YOUR_SA_PASSWORD@localhost:1433/talent_finder?driver=ODBC+Driver+17+for+SQL+Server
+```
+
+- Replace `YOUR_SA_PASSWORD` with your `MSSQL_SA_PASSWORD` from `.env.docker`.
+- Replace `1433` with your `MSSQL_PORT` if you changed it (e.g. `11433`).
+- Replace `talent_finder` with your `MSSQL_DATABASE` if you changed it.
+
+> **Why a separate variable?** Prisma requires `sqlserver://host:port;key=value` syntax. SQLAlchemy requires `mssql+pyodbc://user:pass@host:port/db?driver=...` syntax. They are not interchangeable — using the wrong format causes a silent connection failure.
 
 **When the pipeline is implemented**, you will use commands like the following (included here for reference; they will not work until the corresponding agents exist):
 
@@ -220,6 +248,7 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 | Prisma errors after schema change | Run `npx prisma generate` |
 | Docker not found | Install Docker — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) |
 | `pip` not recognized / Python not found | Install Python 3.11, enable "Add python.exe to PATH", then use a venv (section 7). On Windows, use `py -3.11 -m venv .venv` and activate it before running `pip` |
+| `SQLAlchemy OperationalError` / Python DB connection fails | `DATABASE_URL` uses Prisma's `sqlserver://` format and does not work with SQLAlchemy. Set `PYTHON_DATABASE_URL` in `.env` using `mssql+pyodbc://` format (see step 7.4) |
 
 ## Further Documentation
 

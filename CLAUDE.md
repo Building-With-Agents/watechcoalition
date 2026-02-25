@@ -165,7 +165,9 @@ AZURE_OPENAI_DEPLOYMENT_NAME=
 LLM_PROVIDER=azure_openai          # azure_openai | openai | anthropic
 
 # Database
-DATABASE_URL=                       # MSSQL pyodbc connection string for agents
+PYTHON_DATABASE_URL=                # SQLAlchemy pyodbc URL for agents:
+                                    #   mssql+pyodbc://user:pass@host:port/db?driver=ODBC+Driver+17+for+SQL+Server
+                                    # Note: DATABASE_URL (Prisma sqlserver:// format) is for Next.js only
 
 # Tracing
 LANGSMITH_API_KEY=
