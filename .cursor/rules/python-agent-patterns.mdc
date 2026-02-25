@@ -97,12 +97,14 @@ log.error("source_unreachable", source="jsearch", attempt=3, max_retries=5)
 
 Python agents access MSSQL via SQLAlchemy. **Never import or use Prisma from Python.**
 
+Use `PYTHON_DATABASE_URL` (not `DATABASE_URL` — that is Prisma's `sqlserver://` format and is incompatible with SQLAlchemy). `PYTHON_DATABASE_URL` uses `mssql+pyodbc://` format.
+
 ```python
 import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
-engine = create_engine(os.getenv("DATABASE_URL"))
+engine = create_engine(os.getenv("PYTHON_DATABASE_URL"))
 
 with Session(engine) as session:
     result = session.execute(text("SELECT TOP 100 * FROM job_postings WHERE company_id IS NOT NULL"))
@@ -114,7 +116,7 @@ with Session(engine) as session:
 All credentials from `os.getenv()`. Never hardcode. Key variables:
 
 ```python
-os.getenv("DATABASE_URL")                    # MSSQL connection string
+os.getenv("PYTHON_DATABASE_URL")             # SQLAlchemy pyodbc URL: mssql+pyodbc://user:pass@host:port/db?driver=...
 os.getenv("AZURE_OPENAI_API_KEY")            # LLM credentials
 os.getenv("AZURE_OPENAI_ENDPOINT")
 os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
