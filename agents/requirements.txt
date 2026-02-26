@@ -1,14 +1,36 @@
+# Job Intelligence Engine — Agent pipeline (Phase 1)
+# Install: pip install -r requirements.txt
+
+# Database
 sqlalchemy>=2.0
 pyodbc>=5.0
-structlog>=24.0
+
+# HTTP & scraping
 httpx>=0.27
-pydantic>=2.0
+crawl4ai>=0.4
+
+# Dashboard
 streamlit>=1.30
-langgraph>=0.2
+
+# Config & env
+python-dotenv>=1.0
+
+# LLM & orchestration
 langchain>=0.3
 langchain-openai>=0.2
+langchain-community>=0.3
+langgraph>=0.2
 langsmith>=0.1
-crawl4ai>=0.4
+
+# Scheduling
 apscheduler>=3.10
+
+# Data & validation
+pydantic>=2.0
+
+# Logging
+structlog>=24.0
+
+# Development & testing (optional)
 pytest>=8.0
 ruff>=0.4

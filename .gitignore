@@ -136,3 +136,7 @@ agents/data/demand_signals/*
 agents/data/rendered/*
 agents/data/dead_letter/*
 !agents/data/**/.gitkeep
+
+
+# Venv
+venv/
