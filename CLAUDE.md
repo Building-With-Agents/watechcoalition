@@ -134,22 +134,28 @@ Sources (JSearch API via httpx / Web scraping via Crawl4AI)
 
 ---
 
-## Tech Stack
+## Tech Stack (IC = infrastructure constraint; SA = student ADR with reference implementation)
 
-| Layer | Technology | Notes |
-|-------|-----------|-------|
-| Agent runtime | Python 3.11+ | Lives in `agents/` — separate from Next.js |
-| Multi-agent framework | LangGraph | **Locked** — StateGraph for routing (decision #13) |
-| LLM adapter | LangChain + Azure OpenAI | Provider-agnostic; switchable via `LLM_PROVIDER` |
-| Agent tracing | LangSmith | **Locked** — native LangGraph integration (decision #17) |
-| Scheduling | APScheduler | Inside Orchestration Agent; cron-configurable |
-| DB access (agents) | SQLAlchemy + pyodbc | → MSSQL; never via Prisma |
-| DB access (Next.js) | Prisma | Do not touch from Python |
-| Scraping | Crawl4AI | **Locked** — local, pip-installable (decision #12) |
-| API ingestion | httpx | JSearch API calls (decision #12) |
-| Dashboards | Streamlit | Read-only SQLAlchemy connection |
-| Testing | pytest | `agents/tests/` |
-| Logging | structlog | JSON-formatted, no PII ever |
+| Layer | Technology | Decision |
+|-------|-----------|---------|
+| Agent runtime | Python 3.11+ | — |
+| Multi-agent framework | LangGraph StateGraph | SA #13 |
+| LLM adapter | LangChain + Azure OpenAI (provider-agnostic) | SA #11 |
+| LLM provider default | Azure OpenAI; switchable via `LLM_PROVIDER` env var | SA #11 |
+| Agent tracing | LangSmith — native LangGraph integration | SA #17 |
+| Scheduling | APScheduler — inside Orchestration Agent | IC #3 |
+| Ingestion: API source | httpx — JSearch API calls | SA #12 |
+| Ingestion: web scraping | Crawl4AI — local, pip-installable | SA #12 |
+| DB access (agents) | SQLAlchemy + pyodbc → MSSQL | IC #19 |
+| DB access (Next.js app) | Prisma — do not touch from Python | IC #19 |
+| Message bus (Phase 1) | In-process Python pub/sub | SA #14 |
+| Message bus (Phase 2) | External bus (Kafka / RabbitMQ / Redis Streams) | SA #14 |
+| Dashboards | Streamlit — read-only SQLAlchemy connection | — |
+| Analytics query interface | REST — `POST /analytics/query` | SA #18 |
+| Logging | structlog — JSON-formatted, no PII | — |
+| Testing | pytest | — |
+
+SA-classified decisions use the **reference implementation** shown above. If your team's Week 2 ADRs select different technologies, adapt the implementation while preserving the agent contracts. All SA decisions must converge before the team implements the agent that depends on it.
 
 ---
 
@@ -298,7 +304,7 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 ### Ingestion Agent
 - Sources: JSearch via `httpx`; web scraping via Crawl4AI
 - Fingerprint: `sha256(source + external_id + title + company + date_posted)`
-- **JSearch wins over scraped** when the same job appears in both sources (decision #9)
+- **JSearch wins over scraped** when the same job appears in both sources (IC #9)
 - Dedup before staging — duplicates discarded silently, counter incremented
 - Provenance tags on every record: `source`, `external_id`, `raw_payload_hash`, `ingestion_run_id`, `ingestion_timestamp`
 
@@ -338,7 +344,7 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 - DB connection is **read-only**
 
 ### Orchestration Agent (Phase 1)
-- Framework: LangGraph StateGraph + APScheduler
+- Framework: LangGraph StateGraph [SA #13/#16] + APScheduler [IC]
 - Sole consumer of all `*Failed` / `*Alert` events
 - Alerting tiers:
   - **Warning:** logged + metric emitted
@@ -401,7 +407,7 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 | Week | Deliverable | Key outputs |
 |------|------------|-------------|
 | 1 | Environment + first scrape + basic Streamlit | Working Python env, raw JSON scrape, Streamlit prototype |
-| 2 | LLM adapter + thin-slice pipeline | `llm_adapter.py`, extraction prompt, extracted JSON, Streamlit extract view |
+| 2 | LLM adapter + walking skeleton | `llm_adapter.py`, 8 agent stubs, pipeline runner, journey dashboard |
 | 3 | Ingestion Agent + Normalization Agent | `IngestBatch`/`NormalizationComplete` events, staging tables, APScheduler |
 | 4 | Skills Extraction Agent + eval harness + Enrichment-lite | `SkillsExtracted` event, eval dataset (30–50 labeled), prompt iteration log |
 | 5 | Visualization Agent | Production Streamlit dashboards, PDF/CSV/JSON export, live MSSQL connection |
@@ -415,34 +421,36 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 
 ---
 
-## Resolved Design Decisions
+## Design Decisions (IC/SA/D Classification)
 
-Copy here when a decision is locked in `docs/planning/ARCHITECTURAL_DECISIONS.md`.
+See `docs/planning/ARCHITECTURAL_DECISIONS.md` for full classification details and evaluation criteria.
 
-| # | Decision | Resolution |
-|---|----------|------------|
-| 3 | Batch vs real-time | **Batch-first** — APScheduler, daily cron default |
-| 4 | Source of truth for ingested jobs | **Option B — staging tables + promotion** (`raw_ingested_jobs` → `normalized_jobs` → `job_postings`) |
-| 8 | Spam threshold | **Tiered** — flag at 0.7, auto-reject above 0.9 |
-| 9 | Dedup source priority | **JSearch wins over scraped** on duplicate |
-| 11 | LLM provider policy | **Provider-agnostic adapter** — Azure OpenAI default, switchable via env var |
-| 12 | Scraping tool | **Crawl4AI** + **httpx** for JSearch |
-| 13 | Multi-agent framework | **LangGraph** StateGraph |
-| 14 | Message bus | **In-process Python events** (Phase 1); external bus deferred to Phase 2 |
-| 15 | Skill taxonomy | **Internal watechcoalition primary** (`technology_areas`, `skills`); O\*NET fallback |
-| 16 | Orchestration engine | **LangGraph StateGraph** (consistent with #13) |
-| 17 | Agent tracing | **LangSmith** — native LangGraph integration |
-| 18 | Analytics query interface | **REST** — `POST /analytics/query` |
-| 19 | Database engine | **MSSQL** — stay on existing instance for Phase 1 |
-| 20 | Enrichment phase split | **Lite (Phase 1) + Full (Phase 2)** |
-| 21 | PDF export scope | **Standard Phase 1 deliverable** — not a stretch goal |
+**IC = Infrastructure Constraint (fixed).** **SA = Student ADR (reference implementation shown; open for team decision via ADR).** **D = Deferred to Phase 2.**
 
-****Open decisions (do not implement — deferred to Phase 2):**
+| # | Decision | Classification | Resolution |
+|---|----------|----------------|------------|
+| 3 | Batch vs real-time | IC | **Batch-first** — APScheduler, daily cron default (`0 2 * * *`) |
+| 4 | Source of truth for ingested jobs | IC | **Staging tables + promotion** — `raw_ingested_jobs` → `normalized_jobs` → `job_postings` |
+| 8 | Spam threshold | IC | **Tiered** — flag at 0.7, auto-reject above 0.9 |
+| 9 | Dedup source priority | IC | **JSearch wins over scraped** on duplicate |
+| 11 | LLM provider policy | SA | **Provider-agnostic adapter** — Azure OpenAI default, switchable via `LLM_PROVIDER` |
+| 12 | Scraping tool | SA | **Crawl4AI** + **httpx** for JSearch API |
+| 13 | Multi-agent framework | SA | **LangGraph** StateGraph |
+| 14 | Message bus | SA | **In-process Python events** (Phase 1); external bus upgrade path for Phase 2 |
+| 15 | Skill taxonomy | IC | **Internal watechcoalition primary** (`skills` table); O\*NET fallback |
+| 16 | Orchestration engine | SA | **LangGraph StateGraph** (consistent with #13) |
+| 17 | Agent tracing | SA | **LangSmith** — native LangGraph integration |
+| 18 | Analytics query interface | SA | **REST** — `POST /analytics/query` |
+| 19 | Database engine | IC | **MSSQL** — stay on existing watechcoalition instance |
+| 20 | Enrichment phase split | IC | **Lite (Phase 1) + Full (Phase 2)** |
+| 21 | PDF export scope | IC | **Standard Phase 1 deliverable** — not a stretch goal |
+
+### Still Open
 
 | # | Decision | Recommendation |
 |---|----------|----------------|
-| 22 | Multi-tenancy | Single shared pipeline for Phase 1; revisit before Phase 2 multi-org work |
-| 23 | Feedback loop agent | Defer to Phase 2; requires ground truth, training pipeline, model versioning |
+| 22 | Multi-tenancy | Single shared pipeline for Phase 1; revisit before any Phase 2 multi-org work |
+| 23 | Feedback loop agent | Defer to Phase 2; requires ground truth source, training pipeline, and model versioning strategy |
 
 ---
 
@@ -490,7 +498,13 @@ cd agents && pytest tests/test_pipeline_integration.py
 For complete implementation specs, read in this order:
 
 1. `docs/planning/ARCHITECTURE_DEEP.md` — canonical implementation reference (per-agent specs, JobRecord schema, event catalog, DB migrations, error-handling)
-2. `docs/planning/TRD.md` — technical requirements, inter-agent contracts, NFRs
-3. `docs/planning/BRD.md` — business scope, success criteria, design decisions
-4. `docs/planning/PRD.md` — user stories, feature list, UX requirements
-5. Week files in `docs/planning/curriculum/` — weekly deliverables and exercises
+2. `docs/planning/ARCHITECTURE_COMPLETE.md` — full intended system definition (no Phase scope reductions)
+3. `docs/planning/ARCHITECTURE_MID_LEVEL.md` — architecture reference for tech leads (diagrams, per-agent summaries, evaluation targets)
+4. `docs/planning/ARCHITECTURE_HIGH_LEVEL.md` — overview for directors and stakeholders
+5. `docs/planning/ARCHITECTURAL_DECISIONS.md` — IC/SA/D decision tracker with evaluation criteria
+6. `docs/planning/TRD.md` — technical requirements, inter-agent contracts, NFRs
+7. `docs/planning/BRD.md` — business scope, success criteria, design decisions
+8. `docs/planning/PRD.md` — user stories, feature list, UX requirements
+9. Week files in `docs/planning/curriculum/` — weekly deliverables and exercises
+
+**Visual diagrams:** `docs/planning/component-diagram.html` (full system) and `docs/planning/component-diagram-walking-skeleton.html` (Week 2 walking skeleton)
