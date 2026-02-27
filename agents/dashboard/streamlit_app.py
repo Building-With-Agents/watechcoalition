@@ -13,7 +13,7 @@ from pathlib import Path
 
 import streamlit as st
 
-RAW_SAMPLE_PATH = Path(__file__).resolve().parents[2] / "data" / "staging" / "raw_scrape_sample.json"
+RAW_SAMPLE_PATH = Path(__file__).resolve().parents[1] / "data" / "staging" / "raw_scrape_sample.json"
 
 st.set_page_config(
     page_title="Job Intelligence Engine — Raw Scrape",

@@ -186,7 +186,10 @@ After activation, your prompt will show `(.venv)` and `pip` will work directly.
 
 ```bash
 pip install -r requirements.txt
+playwright install
 ```
+
+`playwright install` downloads the browser binaries required by Crawl4AI for the Week 1 scraper. Run it once after installing Python dependencies.
 
 **When the pipeline is implemented**, you will use commands like the following (included here for reference; they will not work until the corresponding agents exist):
 

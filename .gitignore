@@ -73,6 +73,8 @@ tsconfig.scripts.json
 
 # Data schema files
 data/dynamics-schema/dynamics_parser.js
+# Scraper output at wrong path (canonical is agents/data/staging/)
+data/staging/
 data/dynamics-schema/dynamics_parser.ts
 data/dynamics-schema/lightcast-data-schema/
 

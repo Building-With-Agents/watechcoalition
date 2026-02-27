@@ -24,17 +24,25 @@ load_dotenv()
 log = structlog.get_logger()
 
 DEFAULT_SCRAPING_TARGETS = [
-    "https://jobs.lever.co/openai",
-    "https://jobs.lever.co/anthropic",
+    "https://openai.com/careers/",
+    "https://www.anthropic.com/jobs",
 ]
 
-OUTPUT_PATH = Path(__file__).resolve().parents[3] / "data" / "staging" / "raw_scrape_sample.json"
+OUTPUT_PATH = Path(__file__).resolve().parents[2] / "data" / "staging" / "raw_scrape_sample.json"
+
+
+def _valid_url(s: str) -> bool:
+    s = s.strip()
+    return s.startswith("http://") or s.startswith("https://")
 
 
 def _get_targets() -> list[str]:
     raw = os.getenv("SCRAPING_TARGETS", "")
     if raw.strip():
-        return [url.strip() for url in raw.split(",") if url.strip()]
+        candidates = [url.strip() for url in raw.split(",") if url.strip()]
+        valid = [u for u in candidates if _valid_url(u)]
+        if valid:
+            return valid
     return DEFAULT_SCRAPING_TARGETS
 
 
