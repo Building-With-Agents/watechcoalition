@@ -196,13 +196,35 @@ source agents/.venv/bin/activate
 
 After activation, your prompt will show `(.venv)` and `pip` will work directly.
 
-### 7.3 Install dependencies
+### 7.3 Install Microsoft ODBC Driver for SQL Server (required for Python agents)
+
+SQLAlchemy + pyodbc need a **system-level** ODBC driver to talk to SQL Server. It is **not** installed via pip or nvm — you must install it once per machine.
+
+**macOS (Homebrew):**
+
+```bash
+brew tap microsoft/mssql-release https://github.com/Microsoft/homebrew-mssql-release
+brew update
+brew install microsoft/mssql-release/msodbcsql17
+```
+
+Then in step 7.5 use `driver=ODBC+Driver+17+for+SQL+Server` in `PYTHON_DATABASE_URL`.
+
+**Windows:**
+
+Download and run the [Microsoft ODBC Driver 17 for SQL Server](https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server) installer (MSI). Use `driver=ODBC+Driver+17+for+SQL+Server` in `PYTHON_DATABASE_URL`.
+
+**Linux:**
+
+See [Microsoft’s Linux install guide](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server).
+
+### 7.4 Install dependencies
 
 ```bash
 pip install -r agents/requirements.txt
 ```
 
-### 7.4 Set PYTHON_DATABASE_URL in .env
+### 7.5 Set PYTHON_DATABASE_URL in .env
 
 Python agents use SQLAlchemy + pyodbc, which requires a **different connection string format** than Prisma's `DATABASE_URL`. Add this to your `.env` file:
 
@@ -213,8 +235,19 @@ PYTHON_DATABASE_URL=mssql+pyodbc://SA:YOUR_SA_PASSWORD@localhost:1433/talent_fin
 - Replace `YOUR_SA_PASSWORD` with your `MSSQL_SA_PASSWORD` from `.env.docker`.
 - Replace `1433` with your `MSSQL_PORT` if you changed it (e.g. `11433`).
 - Replace `talent_finder` with your `MSSQL_DATABASE` if you changed it.
+- Use `ODBC+Driver+17+for+SQL+Server` in the URL (required; install the driver in step 7.3 first).
 
 > **Why a separate variable?** Prisma requires `sqlserver://host:port;key=value` syntax. SQLAlchemy requires `mssql+pyodbc://user:pass@host:port/db?driver=...` syntax. They are not interchangeable — using the wrong format causes a silent connection failure.
+
+### 7.6 Verify Python database connectivity
+
+From the **project root** with the venv activated, run:
+
+```bash
+python -m agents.test_db_connectivity
+```
+
+You should see a line like `job_postings row count: 25` (the number depends on your seeded data). That confirms SQLAlchemy + pyodbc can reach the database. If you get an error, see the **Troubleshooting** table (ODBC driver, login timeout, or connection issues).
 
 **When the pipeline is implemented**, you will use commands like the following (included here for reference; they will not work until the corresponding agents exist):
 
@@ -248,7 +281,9 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 | Prisma errors after schema change | Run `npx prisma generate` |
 | Docker not found | Install Docker — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) |
 | `pip` not recognized / Python not found | Install Python 3.11, enable "Add python.exe to PATH", then use a venv (section 7). On Windows, use `py -3.11 -m venv .venv` and activate it before running `pip` |
-| `SQLAlchemy OperationalError` / Python DB connection fails | `DATABASE_URL` uses Prisma's `sqlserver://` format and does not work with SQLAlchemy. Set `PYTHON_DATABASE_URL` in `.env` using `mssql+pyodbc://` format (see step 7.4) |
+| `SQLAlchemy OperationalError` / Python DB connection fails | `DATABASE_URL` uses Prisma's `sqlserver://` format and does not work with SQLAlchemy. Set `PYTHON_DATABASE_URL` in `.env` using `mssql+pyodbc://` format (see step 7.5) |
+| `Can't open lib 'ODBC Driver 17 for SQL Server' : file not found` | The Microsoft ODBC Driver 17 is not installed. Install it per step 7.3 (macOS: `brew install ... msodbcsql17`; Windows: run the ODBC Driver 17 MSI). Then use `driver=ODBC+Driver+17+for+SQL+Server` in `PYTHON_DATABASE_URL`. |
+| `Login timeout expired` (HYT00) | The client cannot reach SQL Server. Ensure Docker is running, the SQL container is up (`docker ps --filter "name=mssql"`), and start it if needed: `docker compose --env-file .env.docker up -d`. Check that host/port in `PYTHON_DATABASE_URL` match `.env.docker` and the password matches `MSSQL_SA_PASSWORD`. |
 
 ## Further Documentation
 
