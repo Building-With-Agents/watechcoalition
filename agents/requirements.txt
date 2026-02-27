@@ -7,7 +7,10 @@ streamlit>=1.30
 langgraph>=0.2
 langchain>=0.3
 langchain-openai>=0.2
+langchain-community
 langsmith>=0.1
+python-dotenv
+cffi>=1.15
 crawl4ai>=0.4
 apscheduler>=3.10
 pytest>=8.0

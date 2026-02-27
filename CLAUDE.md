@@ -136,20 +136,22 @@ Sources (JSearch API via httpx / Web scraping via Crawl4AI)
 
 ## Tech Stack
 
-| Layer | Technology | Notes |
-|-------|-----------|-------|
-| Agent runtime | Python 3.11+ | Lives in `agents/` — separate from Next.js |
-| Multi-agent framework | LangGraph | **Locked** — StateGraph for routing (decision #13) |
-| LLM adapter | LangChain + Azure OpenAI | Provider-agnostic; switchable via `LLM_PROVIDER` |
-| Agent tracing | LangSmith | **Locked** — native LangGraph integration (decision #17) |
-| Scheduling | APScheduler | Inside Orchestration Agent; cron-configurable |
-| DB access (agents) | SQLAlchemy + pyodbc | → MSSQL; never via Prisma |
-| DB access (Next.js) | Prisma | Do not touch from Python |
-| Scraping | Crawl4AI | **Locked** — local, pip-installable (decision #12) |
-| API ingestion | httpx | JSearch API calls (decision #12) |
-| Dashboards | Streamlit | Read-only SQLAlchemy connection |
-| Testing | pytest | `agents/tests/` |
-| Logging | structlog | JSON-formatted, no PII ever |
+
+| Layer                 | Technology               | Notes                                                    |
+| --------------------- | ------------------------ | -------------------------------------------------------- |
+| Agent runtime         | Python 3.11+             | Lives in `agents/` — separate from Next.js               |
+| Multi-agent framework | LangGraph                | **Locked** — StateGraph for routing (decision #13)       |
+| LLM adapter           | LangChain + Azure OpenAI | Provider-agnostic; switchable via `LLM_PROVIDER`         |
+| Agent tracing         | LangSmith                | **Locked** — native LangGraph integration (decision #17) |
+| Scheduling            | APScheduler              | Inside Orchestration Agent; cron-configurable            |
+| DB access (agents)    | SQLAlchemy + pyodbc      | → MSSQL; never via Prisma                                |
+| DB access (Next.js)   | Prisma                   | Do not touch from Python                                 |
+| Scraping              | Crawl4AI                 | **Locked** — local, pip-installable (decision #12)       |
+| API ingestion         | httpx                    | JSearch API calls (decision #12)                         |
+| Dashboards            | Streamlit                | Read-only SQLAlchemy connection                          |
+| Testing               | pytest                   | `agents/tests/`                                          |
+| Logging               | structlog                | JSON-formatted, no PII ever                              |
+
 
 ---
 
@@ -240,6 +242,7 @@ def health_check(self) -> dict:
 ## Database Schema
 
 **Read from `prisma/schema.prisma` — key existing tables:**
+
 - `job_postings` — canonical job records; final destination for enriched jobs
 - `companies`, `company_addresses` — company reference data
 - `skills` — canonical skill taxonomy with embeddings; M:M with job_postings
@@ -261,16 +264,18 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 
 **Agent-managed tables (created by agents, not Prisma):**
 
-| Table | Phase | Purpose |
-|-------|-------|---------|
-| `raw_ingested_jobs` | 1 | Ingestion staging |
-| `normalized_jobs` | 1 | Post-normalization records |
-| `job_ingestion_runs` | 1 | Batch run tracking |
-| `alerts` | 1 | Active and historical alerts |
-| `orchestration_audit_log` | 1 | All orchestration decisions (100% completeness required) |
-| `llm_audit_log` | 1 | All LLM calls (prompt hash, model, latency, tokens) |
-| `analytics_aggregates` | 1 | Computed aggregate tables |
-| `demand_signals` | 2 | Trend and forecast outputs |
+
+| Table                     | Phase | Purpose                                                  |
+| ------------------------- | ----- | -------------------------------------------------------- |
+| `raw_ingested_jobs`       | 1     | Ingestion staging                                        |
+| `normalized_jobs`         | 1     | Post-normalization records                               |
+| `job_ingestion_runs`      | 1     | Batch run tracking                                       |
+| `alerts`                  | 1     | Active and historical alerts                             |
+| `orchestration_audit_log` | 1     | All orchestration decisions (100% completeness required) |
+| `llm_audit_log`           | 1     | All LLM calls (prompt hash, model, latency, tokens)      |
+| `analytics_aggregates`    | 1     | Computed aggregate tables                                |
+| `demand_signals`          | 2     | Trend and forecast outputs                               |
+
 
 **Important:** Write to `job_postings` only after `company_id` is resolved. Do not write a record with a null `company_id`.
 
@@ -278,22 +283,25 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 
 ## Per-Agent Quick Reference
 
-| Agent | File | Phase | Emits | Consumes |
-|-------|------|-------|-------|---------|
-| Ingestion | `agents/ingestion/agent.py` | 1 | `IngestBatch` | — |
-| Normalization | `agents/normalization/agent.py` | 1 | `NormalizationComplete` | `IngestBatch` |
-| Skills Extraction | `agents/skills_extraction/agent.py` | 1 | `SkillsExtracted` | `NormalizationComplete` |
-| Enrichment (lite) | `agents/enrichment/agent.py` | 1 | `RecordEnriched` | `SkillsExtracted` |
-| Analytics | `agents/analytics/agent.py` | 1 | `AnalyticsRefreshed` | `RecordEnriched` |
-| Visualization | `agents/visualization/agent.py` | 1 | `RenderComplete` | `AnalyticsRefreshed` |
-| Orchestration | `agents/orchestration/agent.py` | 1 | trigger/retry signals | ALL events incl. `*Failed`/`*Alert` |
-| Demand Analysis | `agents/demand_analysis/agent.py` | 2 | `DemandSignalsUpdated` | `RecordEnriched` |
+
+| Agent             | File                                | Phase | Emits                   | Consumes                            |
+| ----------------- | ----------------------------------- | ----- | ----------------------- | ----------------------------------- |
+| Ingestion         | `agents/ingestion/agent.py`         | 1     | `IngestBatch`           | —                                   |
+| Normalization     | `agents/normalization/agent.py`     | 1     | `NormalizationComplete` | `IngestBatch`                       |
+| Skills Extraction | `agents/skills_extraction/agent.py` | 1     | `SkillsExtracted`       | `NormalizationComplete`             |
+| Enrichment (lite) | `agents/enrichment/agent.py`        | 1     | `RecordEnriched`        | `SkillsExtracted`                   |
+| Analytics         | `agents/analytics/agent.py`         | 1     | `AnalyticsRefreshed`    | `RecordEnriched`                    |
+| Visualization     | `agents/visualization/agent.py`     | 1     | `RenderComplete`        | `AnalyticsRefreshed`                |
+| Orchestration     | `agents/orchestration/agent.py`     | 1     | trigger/retry signals   | ALL events incl. `*Failed`/`*Alert` |
+| Demand Analysis   | `agents/demand_analysis/agent.py`   | 2     | `DemandSignalsUpdated`  | `RecordEnriched`                    |
+
 
 ---
 
 ## Key Agent Behaviors
 
 ### Ingestion Agent
+
 - Sources: JSearch via `httpx`; web scraping via Crawl4AI
 - Fingerprint: `sha256(source + external_id + title + company + date_posted)`
 - **JSearch wins over scraped** when the same job appears in both sources (decision #9)
@@ -301,20 +309,23 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 - Provenance tags on every record: `source`, `external_id`, `raw_payload_hash`, `ingestion_run_id`, `ingestion_timestamp`
 
 ### Normalization Agent
+
 - Maps source fields → canonical `JobRecord` via per-source field mappers
 - Standardizes: dates (ISO 8601), salaries (min/max/currency/period), locations, employment types
 - Quarantines schema violations — never passes bad records downstream
 
 ### Skills Extraction Agent
+
 - Taxonomy linking order (strict):
   1. Exact name match → `skills` table
   2. Normalized name match → `skills` table
   3. Embedding cosine similarity ≥ 0.92 → `skills` table
-  4. O\*NET occupation code match
+  4. ONET occupation code match
   5. Emit as `raw_skill` (null taxonomy_id) — Enrichment resolves in Phase 2
 - Log every LLM call to `llm_audit_log`
 
 ### Enrichment Agent (Phase 1 lite)
+
 - Classify role and seniority
 - Quality score [0–1]: completeness + clarity + AI keyword density + structural coherence
 - Spam detection: `spam_score` < 0.7 → proceed | 0.7–0.9 → flag for review (`is_spam = null`) | > 0.9 → auto-reject, do NOT write to `job_postings`
@@ -322,6 +333,7 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 - Map `sector_id` → `industry_sectors`
 
 ### Analytics Agent
+
 - Aggregates across 6 dimensions: skill, role, industry, region, experience level, company size
 - Salary distributions: median, p25, p75, p95 per dimension
 - Co-occurrence matrices, posting lifecycle metrics (time-to-fill proxies, repost rates)
@@ -330,12 +342,14 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 - Cardinality explosion: cap dimensions; coalesce long-tail into “Other”; emit warning
 
 ### Visualization Agent
+
 - Dashboard pages: Ingestion Overview | Normalization Quality | Skill Taxonomy Coverage | Weekly Insights | Ask the Data | Operations & Alerts
 - Exports: PDF, CSV, JSON — **all standard Phase 1 deliverables, not stretch goals**
 - TTL cache with staleness banner — never a blank page
 - DB connection is **read-only**
 
 ### Orchestration Agent (Phase 1)
+
 - Framework: LangGraph StateGraph + APScheduler
 - Sole consumer of all `*Failed` / `*Alert` events
 - Alerting tiers:
@@ -344,12 +358,14 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
   - **Fatal:** circuit broken + human escalation required
 - Retry policies:
 
-| Agent | Max retries | Back-off |
-|-------|------------|---------|
-| Ingestion (source unreachable) | 5 | Exponential + jitter |
-| Normalization (batch failure) | 3 | Exponential |
-| Skills Extraction (LLM timeout) | 2 per record | Fixed 2s |
-| Any agent (transient DB error) | 3 | Exponential |
+
+| Agent                           | Max retries  | Back-off             |
+| ------------------------------- | ------------ | -------------------- |
+| Ingestion (source unreachable)  | 5            | Exponential + jitter |
+| Normalization (batch failure)   | 3            | Exponential          |
+| Skills Extraction (LLM timeout) | 2 per record | Fixed 2s             |
+| Any agent (transient DB error)  | 3            | Exponential          |
+
 
 - Audit log: 100% completeness required — every trigger, retry, and alert creation must be recorded
 
@@ -357,30 +373,32 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 
 ## Evaluation Targets (non-negotiable — check against these)
 
-| Agent | Metric | Target |
-|-------|--------|--------|
-| Ingestion | Success rate | ≥ 98% per 24h |
-| Ingestion | Duplicate rate forwarded | < 0.5% |
-| Ingestion | Dead-letter volume | < 1%; alert above 2% |
-| Normalization | Schema conformance | ≥ 99% |
-| Normalization | Field mapping accuracy | ≥ 97% (spot check) |
-| Normalization | Quarantine rate | < 1%; alert above 3% |
-| Skills Extraction | Taxonomy coverage | ≥ 95% |
-| Skills Extraction | Precision at taxonomy link | ≥ 92% (human eval) |
-| Skills Extraction | Recall of key skills | ≥ 88% |
-| Skills Extraction | Avg confidence score | ≥ 0.80 |
-| Analytics | Aggregate accuracy | ≥ 99.5% vs raw recount |
-| Analytics | Query p50 latency | < 500ms |
-| Analytics | Aggregate freshness | Within 15 min of new enriched batch |
-| Visualization | Render success rate | ≥ 99.5% |
-| Visualization | Dashboard freshness | Within 5 min of trigger |
-| Visualization | Export generation p95 | < 10s |
-| Visualization | Cache hit rate | ≥ 70% |
-| Orchestration | Pipeline end-to-end SLA | ≥ 95% of batches |
-| Orchestration | Mean time to detect failure | < 60s |
-| Orchestration | Mean time to recover (auto) | < 5 min |
-| Orchestration | Audit log completeness | 100% |
-| System | Batch throughput | 1,000 jobs < 5 minutes |
+
+| Agent             | Metric                      | Target                              |
+| ----------------- | --------------------------- | ----------------------------------- |
+| Ingestion         | Success rate                | ≥ 98% per 24h                       |
+| Ingestion         | Duplicate rate forwarded    | < 0.5%                              |
+| Ingestion         | Dead-letter volume          | < 1%; alert above 2%                |
+| Normalization     | Schema conformance          | ≥ 99%                               |
+| Normalization     | Field mapping accuracy      | ≥ 97% (spot check)                  |
+| Normalization     | Quarantine rate             | < 1%; alert above 3%                |
+| Skills Extraction | Taxonomy coverage           | ≥ 95%                               |
+| Skills Extraction | Precision at taxonomy link  | ≥ 92% (human eval)                  |
+| Skills Extraction | Recall of key skills        | ≥ 88%                               |
+| Skills Extraction | Avg confidence score        | ≥ 0.80                              |
+| Analytics         | Aggregate accuracy          | ≥ 99.5% vs raw recount              |
+| Analytics         | Query p50 latency           | < 500ms                             |
+| Analytics         | Aggregate freshness         | Within 15 min of new enriched batch |
+| Visualization     | Render success rate         | ≥ 99.5%                             |
+| Visualization     | Dashboard freshness         | Within 5 min of trigger             |
+| Visualization     | Export generation p95       | < 10s                               |
+| Visualization     | Cache hit rate              | ≥ 70%                               |
+| Orchestration     | Pipeline end-to-end SLA     | ≥ 95% of batches                    |
+| Orchestration     | Mean time to detect failure | < 60s                               |
+| Orchestration     | Mean time to recover (auto) | < 5 min                             |
+| Orchestration     | Audit log completeness      | 100%                                |
+| System            | Batch throughput            | 1,000 jobs < 5 minutes              |
+
 
 ---
 
@@ -396,20 +414,22 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 
 ## Build Order (12-Week Curriculum)
 
-| Week | Deliverable | Key outputs |
-|------|------------|-------------|
-| 1 | Environment + first scrape + basic Streamlit | Working Python env, raw JSON scrape, Streamlit prototype |
-| 2 | LLM adapter + thin-slice pipeline | `llm_adapter.py`, extraction prompt, extracted JSON, Streamlit extract view |
-| 3 | Ingestion Agent + Normalization Agent | `IngestBatch`/`NormalizationComplete` events, staging tables, APScheduler |
-| 4 | Skills Extraction Agent + eval harness + Enrichment-lite | `SkillsExtracted` event, eval dataset (30–50 labeled), prompt iteration log |
-| 5 | Visualization Agent | Production Streamlit dashboards, PDF/CSV/JSON export, live MSSQL connection |
-| 6 | Orchestration Agent | Scheduling, alerting tiers, retry policies, audit log, Operations & Alerts page |
-| 7 | Analytics Agent — aggregates + weekly insights | Aggregate tables, LLM summaries, template fallback, `AnalyticsRefreshed` event |
-| 8 | Analytics Agent — Ask the Data | Text-to-SQL, SQL guardrails + unit tests, “Ask the Data” Streamlit page |
-| 9 | Pipeline hardening | Near-dedup in Ingestion, event contract enforcement, enrichment tuning, perf benchmark |
-| 10 | Testing + security review + load testing | Integration test suite, security checklist, 1k-job load test, Dockerfile |
-| 11 | Documentation | ARCHITECTURE.md, EVENT_CATALOG.md, RUNBOOK.md, CONFIGURATION.md, DEMO_SCRIPT.md |
-| 12 | Capstone demo + release | Live demo to stakeholders, `v0.1.0-capstone` tag, handoff package, retrospective |
+
+| Week | Deliverable                                              | Key outputs                                                                            |
+| ---- | -------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 1    | Environment + first scrape + basic Streamlit             | Working Python env, raw JSON scrape, Streamlit prototype                               |
+| 2    | LLM adapter + thin-slice pipeline                        | `llm_adapter.py`, extraction prompt, extracted JSON, Streamlit extract view            |
+| 3    | Ingestion Agent + Normalization Agent                    | `IngestBatch`/`NormalizationComplete` events, staging tables, APScheduler              |
+| 4    | Skills Extraction Agent + eval harness + Enrichment-lite | `SkillsExtracted` event, eval dataset (30–50 labeled), prompt iteration log            |
+| 5    | Visualization Agent                                      | Production Streamlit dashboards, PDF/CSV/JSON export, live MSSQL connection            |
+| 6    | Orchestration Agent                                      | Scheduling, alerting tiers, retry policies, audit log, Operations & Alerts page        |
+| 7    | Analytics Agent — aggregates + weekly insights           | Aggregate tables, LLM summaries, template fallback, `AnalyticsRefreshed` event         |
+| 8    | Analytics Agent — Ask the Data                           | Text-to-SQL, SQL guardrails + unit tests, “Ask the Data” Streamlit page                |
+| 9    | Pipeline hardening                                       | Near-dedup in Ingestion, event contract enforcement, enrichment tuning, perf benchmark |
+| 10   | Testing + security review + load testing                 | Integration test suite, security checklist, 1k-job load test, Dockerfile               |
+| 11   | Documentation                                            | ARCHITECTURE.md, EVENT_CATALOG.md, RUNBOOK.md, CONFIGURATION.md, DEMO_SCRIPT.md        |
+| 12   | Capstone demo + release                                  | Live demo to stakeholders, `v0.1.0-capstone` tag, handoff package, retrospective       |
+
 
 ---
 
@@ -417,30 +437,34 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 
 Copy here when a decision is locked in `docs/planning/ARCHITECTURAL_DECISIONS.md`.
 
-| # | Decision | Resolution |
-|---|----------|------------|
-| 3 | Batch vs real-time | **Batch-first** — APScheduler, daily cron default |
-| 4 | Source of truth for ingested jobs | **Option B — staging tables + promotion** (`raw_ingested_jobs` → `normalized_jobs` → `job_postings`) |
-| 8 | Spam threshold | **Tiered** — flag at 0.7, auto-reject above 0.9 |
-| 9 | Dedup source priority | **JSearch wins over scraped** on duplicate |
-| 11 | LLM provider policy | **Provider-agnostic adapter** — Azure OpenAI default, switchable via env var |
-| 12 | Scraping tool | **Crawl4AI** + **httpx** for JSearch |
-| 13 | Multi-agent framework | **LangGraph** StateGraph |
-| 14 | Message bus | **In-process Python events** (Phase 1); external bus deferred to Phase 2 |
-| 15 | Skill taxonomy | **Internal watechcoalition primary** (`technology_areas`, `skills`); O\*NET fallback |
-| 16 | Orchestration engine | **LangGraph StateGraph** (consistent with #13) |
-| 17 | Agent tracing | **LangSmith** — native LangGraph integration |
-| 18 | Analytics query interface | **REST** — `POST /analytics/query` |
-| 19 | Database engine | **MSSQL** — stay on existing instance for Phase 1 |
-| 20 | Enrichment phase split | **Lite (Phase 1) + Full (Phase 2)** |
-| 21 | PDF export scope | **Standard Phase 1 deliverable** — not a stretch goal |
+
+| #   | Decision                          | Resolution                                                                                           |
+| --- | --------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 3   | Batch vs real-time                | **Batch-first** — APScheduler, daily cron default                                                    |
+| 4   | Source of truth for ingested jobs | **Option B — staging tables + promotion** (`raw_ingested_jobs` → `normalized_jobs` → `job_postings`) |
+| 8   | Spam threshold                    | **Tiered** — flag at 0.7, auto-reject above 0.9                                                      |
+| 9   | Dedup source priority             | **JSearch wins over scraped** on duplicate                                                           |
+| 11  | LLM provider policy               | **Provider-agnostic adapter** — Azure OpenAI default, switchable via env var                         |
+| 12  | Scraping tool                     | **Crawl4AI** + **httpx** for JSearch                                                                 |
+| 13  | Multi-agent framework             | **LangGraph** StateGraph                                                                             |
+| 14  | Message bus                       | **In-process Python events** (Phase 1); external bus deferred to Phase 2                             |
+| 15  | Skill taxonomy                    | **Internal watechcoalition primary** (`technology_areas`, `skills`); ONET fallback                   |
+| 16  | Orchestration engine              | **LangGraph StateGraph** (consistent with #13)                                                       |
+| 17  | Agent tracing                     | **LangSmith** — native LangGraph integration                                                         |
+| 18  | Analytics query interface         | **REST** — `POST /analytics/query`                                                                   |
+| 19  | Database engine                   | **MSSQL** — stay on existing instance for Phase 1                                                    |
+| 20  | Enrichment phase split            | **Lite (Phase 1) + Full (Phase 2)**                                                                  |
+| 21  | PDF export scope                  | **Standard Phase 1 deliverable** — not a stretch goal                                                |
+
 
 ****Open decisions (do not implement — deferred to Phase 2):**
 
-| # | Decision | Recommendation |
-|---|----------|----------------|
-| 22 | Multi-tenancy | Single shared pipeline for Phase 1; revisit before Phase 2 multi-org work |
-| 23 | Feedback loop agent | Defer to Phase 2; requires ground truth, training pipeline, model versioning |
+
+| #   | Decision            | Recommendation                                                               |
+| --- | ------------------- | ---------------------------------------------------------------------------- |
+| 22  | Multi-tenancy       | Single shared pipeline for Phase 1; revisit before Phase 2 multi-org work    |
+| 23  | Feedback loop agent | Defer to Phase 2; requires ground truth, training pipeline, model versioning |
+
 
 ---
 
@@ -492,3 +516,4 @@ For complete implementation specs, read in this order:
 3. `docs/planning/BRD.md` — business scope, success criteria, design decisions
 4. `docs/planning/PRD.md` — user stories, feature list, UX requirements
 5. Week files in `docs/planning/curriculum/` — weekly deliverables and exercises
+

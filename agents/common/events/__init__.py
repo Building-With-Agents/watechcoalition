@@ -1,0 +1,37 @@
+# agents.common.events — AgentEvent + Phase 1 event catalog
+
+from agents.common.events.base import AgentEvent
+from agents.common.events.catalog import (
+    INGEST_BATCH,
+    NORMALIZATION_COMPLETE,
+    SKILLS_EXTRACTED,
+    RECORD_ENRICHED,
+    ANALYTICS_REFRESHED,
+    RENDER_COMPLETE,
+    SOURCE_FAILURE,
+    NORMALIZATION_FAILED,
+    SKILLS_EXTRACTION_FAILED,
+    ENRICHMENT_FAILED,
+    ANALYTICS_FAILED,
+    RENDER_FAILED,
+    VISUALIZATION_DEGRADED,
+    ALERT,
+)
+
+__all__ = [
+    "AgentEvent",
+    "INGEST_BATCH",
+    "NORMALIZATION_COMPLETE",
+    "SKILLS_EXTRACTED",
+    "RECORD_ENRICHED",
+    "ANALYTICS_REFRESHED",
+    "RENDER_COMPLETE",
+    "SOURCE_FAILURE",
+    "NORMALIZATION_FAILED",
+    "SKILLS_EXTRACTION_FAILED",
+    "ENRICHMENT_FAILED",
+    "ANALYTICS_FAILED",
+    "RENDER_FAILED",
+    "VISUALIZATION_DEGRADED",
+    "ALERT",
+]

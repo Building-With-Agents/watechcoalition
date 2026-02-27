@@ -32,6 +32,7 @@ testpaths = [
     "analytics/tests",
     "visualization/tests",
     "orchestration/tests",
+    "demand_analysis/tests",
 ]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
