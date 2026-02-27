@@ -10,23 +10,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: "22.0.0"
 
       - name: Install Dependencies
-        run: npm install # Install project dependencies.
+        run: npm install
 
       - name: Run Build
         env:
           AZURE_STORAGE_ACCOUNT_KEY: "${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}"
           AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;AccountName=mockBlobStorage;AccountKey=Ju$t@Mock|<3YJu$t@Mock|<3YJu$t@Mock|<3Y==;EndpointSuffix=core.windows.net"
           AZURE_STORAGE_NAME: "${{ secrets.AZURE_STORAGE_NAME }}"
-        run: npm run build # Run the build script.
+        run: npm run build
 
+  python-tests:
+    runs-on: ubuntu-latest
 
-      # - name: Run Tests
-      #   run: npm test  # (Optional) Run tests if you have them
+    defaults:
+      run:
+        working-directory: agents
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint with ruff
+        run: ruff check .
+
+      - name: Run pytest
+        run: pytest tests/ -v
