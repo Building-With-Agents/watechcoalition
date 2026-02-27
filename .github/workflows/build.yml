@@ -34,6 +34,9 @@ jobs:
       run:
         working-directory: agents
 
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+
     steps:
       - uses: actions/checkout@v4
 
