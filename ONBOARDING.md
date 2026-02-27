@@ -140,11 +140,11 @@ SELECT @@SERVERNAME, @@VERSION;
 
 `@@SERVERNAME` should be the container hostname, not your Windows host name (for example `DESKTOP-PC`).
 
-## 7. Python Agent Environment (Pipeline — Not Yet Implemented)
+## 7. Python Agent Environment (Walking Skeleton)
 
-The **Job Intelligence Engine** is an eight-agent Python pipeline that will ingest, normalize, enrich, and analyze external job postings alongside the Next.js app. **It is not yet implemented.** The `agents/` directory is scaffolded (structure and `requirements.txt`); the pipeline will be built out over the **12-week curriculum** as specified in [CLAUDE.md](CLAUDE.md) and [docs/planning/ARCHITECTURE_DEEP.md](docs/planning/ARCHITECTURE_DEEP.md).
+The **Job Intelligence Engine** is an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings alongside the Next.js app. The **walking skeleton** (Week 2) is functional — all eight agent stubs process 10 demo job postings end-to-end with fixture data. Real agent logic is built out over the **12-week curriculum** as specified in [CLAUDE.md](CLAUDE.md) and [docs/planning/ARCHITECTURE_DEEP.md](docs/planning/ARCHITECTURE_DEEP.md).
 
-Set up the Python environment now so you’re ready to develop agents as you follow the weekly deliverables.
+Set up the Python environment now so you can run and test the walking skeleton.
 
 ### 7.1 Install Python 3.11 (if not already installed)
 
@@ -216,12 +216,38 @@ PYTHON_DATABASE_URL=mssql+pyodbc://SA:YOUR_SA_PASSWORD@localhost:1433/talent_fin
 
 > **Why a separate variable?** Prisma requires `sqlserver://host:port;key=value` syntax. SQLAlchemy requires `mssql+pyodbc://user:pass@host:port/db?driver=...` syntax. They are not interchangeable — using the wrong format causes a silent connection failure.
 
-**When the pipeline is implemented**, you will use commands like the following (included here for reference; they will not work until the corresponding agents exist):
+### 7.5 Run the walking skeleton
 
-- **Streamlit dashboard:** `streamlit run agents/dashboard/streamlit_app.py`
-- **Full pipeline (Orchestration Agent scheduler):** `python -m agents.orchestration.scheduler`
-- **Single agent (e.g. Ingestion):** `python -m agents.ingestion.agent --source jsearch --limit 50`
-- **Agent tests:** `cd agents && pytest tests/`
+With the venv activated from the project root:
+
+```bash
+# Run the pipeline (processes 10 demo postings through all 8 agents)
+python agents/pipeline_runner.py
+```
+
+Expected output: structured JSON log lines, 80 entries written to `agents/data/output/pipeline_run.json`.
+
+```bash
+# Run the Streamlit dashboard (3-page journey dashboard)
+streamlit run agents/dashboard/streamlit_app.py
+```
+
+Opens at [http://localhost:8501](http://localhost:8501) with Pipeline Run Summary, Record Journey, and Batch Insights pages.
+
+### 7.6 Run agent tests
+
+```bash
+python -m pytest agents/tests/ -v
+```
+
+Expected: 55 tests passing — covers EventEnvelope, BaseAgent, all 8 agent stubs, and pipeline runner orchestration logic.
+
+### 7.7 Later weeks (not yet available)
+
+The following commands will become available as agents are implemented in later sprints:
+
+- **Full pipeline (Orchestration Agent scheduler):** `python -m agents.orchestration.scheduler` (Week 6)
+- **Single agent (e.g. Ingestion):** `python -m agents.ingestion.agent --source jsearch --limit 50` (Week 3)
 
 See [CLAUDE.md](CLAUDE.md) for architecture, rules, and the 12-week build order; see [docs/planning/ARCHITECTURE_DEEP.md](docs/planning/ARCHITECTURE_DEEP.md) for per-agent implementation specs.
 
