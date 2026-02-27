@@ -11,7 +11,6 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 import structlog
 
@@ -32,9 +31,6 @@ OUTPUT_FILE = STAGING_DIR / "raw_scrape_sample.json"
 OUTPUT_FILE_PRETTY = STAGING_DIR / "raw_scrape_sample2.json"
 OUTPUT_FILE_PRETTY_V3 = STAGING_DIR / "raw_scrape_sample3.json"
 MAX_URLS = 10
-# Prettier output (sample2): body limit and line preview for readability
-RAW_TEXT_MAX_CHARS = int(os.getenv("SCRAPING_RAW_TEXT_MAX_CHARS", "4000"))
-RAW_TEXT_PREVIEW_MAX_LINES = 60
 
 
 def _get_target_urls() -> list[str]:
@@ -100,46 +96,45 @@ async def _scrape_urls(urls: list[str]) -> list[dict]:
 
 
 def _format_scraped_at(iso_timestamp: str) -> str:
-    """Return a clean, human-readable timestamp in Pacific time (e.g. 2026-02-26 21:13:18 PST)."""
+    """Return human-readable timestamp in UTC, matching dashboard (e.g. Feb 27, 2026 at 3:45 PM UTC)."""
     try:
-        dt_utc = datetime.fromisoformat(iso_timestamp.replace("Z", "+00:00"))
-        pacific = ZoneInfo("America/Los_Angeles")
-        dt_local = dt_utc.astimezone(pacific)
-        tz_abbrev = dt_local.strftime("%Z")  # PST or PDT
-        return dt_local.strftime(f"%Y-%m-%d %H:%M:%S {tz_abbrev}")
+        dt = datetime.fromisoformat(iso_timestamp.replace("Z", "+00:00"))
+        return dt.strftime("%b %d, %Y at %I:%M %p UTC").replace(" 0", " ")
     except (ValueError, TypeError):
         return iso_timestamp
 
 
+def _normalize_whitespace(text: str) -> str:
+    """Collapse multiple blank lines to two newlines, strip each line. Improves readability without losing content."""
+    if not text:
+        return text
+    lines = [line.rstrip() for line in text.splitlines()]
+    return "\n".join(lines)
+
+
 def _prettify_record(record: dict) -> dict:
-    """Build a readable record: truncate raw_text, add length, optional line preview."""
+    """Build a readable record: full raw_text, length, and normalized preview. No truncation."""
+    raw = record["raw_text"]
     out = {
         "source": record["source"],
         "url": record["url"],
         "timestamp": record["timestamp"],
-        "raw_text_full_length": len(record["raw_text"]),
+        "raw_text_full_length": len(raw),
+        "raw_text": _normalize_whitespace(raw),
+        "raw_text_truncated": False,
     }
-    raw = record["raw_text"]
-    if len(raw) <= RAW_TEXT_MAX_CHARS:
-        out["raw_text"] = raw
-        out["raw_text_truncated"] = False
-    else:
-        out["raw_text"] = raw[:RAW_TEXT_MAX_CHARS] + "\n\n... [truncated]"
-        out["raw_text_truncated"] = True
-    lines = [s for s in raw.splitlines() if s.strip()][:RAW_TEXT_PREVIEW_MAX_LINES]
+    lines = [s for s in raw.splitlines() if s.strip()]
     out["raw_text_preview_lines"] = lines
     return out
 
 
 def _prettify_record_v3(record: dict) -> dict:
-    """Clean metadata + truncated body only; output for raw_scrape_sample3.json."""
-    raw = record["raw_text"]
-    body = raw if len(raw) <= RAW_TEXT_MAX_CHARS else raw[:RAW_TEXT_MAX_CHARS] + "\n\n... [truncated]"
+    """Clean metadata + full body with normalized whitespace; output for raw_scrape_sample3.json. No truncation."""
     return {
         "source": record["source"],
         "url": record["url"],
         "scraped_at": _format_scraped_at(record["timestamp"]),
-        "raw_text": body,
+        "raw_text": _normalize_whitespace(record["raw_text"]),
     }
 
 
