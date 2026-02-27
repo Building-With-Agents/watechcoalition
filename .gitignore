@@ -99,10 +99,15 @@ docs/DB_ANONYMIZATION.md
 docs/AZURE_FILE_SHARE_ACCESS.md
 docs/CLAUDE_CODE_SETUP.md
 
-# Planning and curriculum (keep only ARCHITECTURE_DEEP and ARCHITECTURAL_DECISIONS in repo)
+# Planning and curriculum (keep architecture docs in repo)
 docs/planning/*
 !docs/planning/ARCHITECTURE_DEEP.md
 !docs/planning/ARCHITECTURAL_DECISIONS.md
+!docs/planning/ARCHITECTURE_COMPLETE.md
+!docs/planning/ARCHITECTURE_MID_LEVEL.md
+!docs/planning/ARCHITECTURE_HIGH_LEVEL.md
+!docs/planning/component-diagram.html
+!docs/planning/component-diagram-walking-skeleton.html
 docs/planning/curriculum/
 docs/lesson-framework/
 
