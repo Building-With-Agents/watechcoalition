@@ -208,7 +208,7 @@ brew update
 brew install microsoft/mssql-release/msodbcsql17
 ```
 
-Then in step 7.5 use `driver=ODBC+Driver+17+for+SQL+Server` in `PYTHON_DATABASE_URL`.
+Then in step 7.6 use `driver=ODBC+Driver+17+for+SQL+Server` in `PYTHON_DATABASE_URL`.
 
 **Windows:**
 
@@ -224,7 +224,17 @@ See [Microsoft’s Linux install guide](https://docs.microsoft.com/en-us/sql/con
 pip install -r agents/requirements.txt
 ```
 
-### 7.5 Set PYTHON_DATABASE_URL in .env
+### 7.5 Install Playwright browsers (required for Crawl4AI)
+
+The scraping adapter uses Crawl4AI, which depends on Playwright. Browser binaries are **not** installed via pip. Run once with the venv activated (from project root):
+
+```bash
+playwright install
+```
+
+If you skip this step, the scraper (`python -m agents.ingestion.sources.scraper_adapter`) will fail with an error about the browser executable not found.
+
+### 7.6 Set PYTHON_DATABASE_URL in .env
 
 Python agents use SQLAlchemy + pyodbc, which requires a **different connection string format** than Prisma's `DATABASE_URL`. Add this to your `.env` file:
 
@@ -239,7 +249,7 @@ PYTHON_DATABASE_URL=mssql+pyodbc://SA:YOUR_SA_PASSWORD@localhost:1433/talent_fin
 
 > **Why a separate variable?** Prisma requires `sqlserver://host:port;key=value` syntax. SQLAlchemy requires `mssql+pyodbc://user:pass@host:port/db?driver=...` syntax. They are not interchangeable — using the wrong format causes a silent connection failure.
 
-### 7.6 Verify Python database connectivity
+### 7.7 Verify Python database connectivity
 
 From the **project root** with the venv activated, run:
 
@@ -281,8 +291,9 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 | Prisma errors after schema change | Run `npx prisma generate` |
 | Docker not found | Install Docker — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) |
 | `pip` not recognized / Python not found | Install Python 3.11, enable "Add python.exe to PATH", then use a venv (section 7). On Windows, use `py -3.11 -m venv .venv` and activate it before running `pip` |
-| `SQLAlchemy OperationalError` / Python DB connection fails | `DATABASE_URL` uses Prisma's `sqlserver://` format and does not work with SQLAlchemy. Set `PYTHON_DATABASE_URL` in `.env` using `mssql+pyodbc://` format (see step 7.5) |
+| `SQLAlchemy OperationalError` / Python DB connection fails | `DATABASE_URL` uses Prisma's `sqlserver://` format and does not work with SQLAlchemy. Set `PYTHON_DATABASE_URL` in `.env` using `mssql+pyodbc://` format (see step 7.6) |
 | `Can't open lib 'ODBC Driver 17 for SQL Server' : file not found` | The Microsoft ODBC Driver 17 is not installed. Install it per step 7.3 (macOS: `brew install ... msodbcsql17`; Windows: run the ODBC Driver 17 MSI). Then use `driver=ODBC+Driver+17+for+SQL+Server` in `PYTHON_DATABASE_URL`. |
+| Playwright / Crawl4AI: "Executable doesn't exist" or browser not found | Crawl4AI uses Playwright. After `pip install -r agents/requirements.txt`, run once: `playwright install` (with venv activated). See step 7.5. |
 | `Login timeout expired` (HYT00) | The client cannot reach SQL Server. Ensure Docker is running, the SQL container is up (`docker ps --filter "name=mssql"`), and start it if needed: `docker compose --env-file .env.docker up -d`. Check that host/port in `PYTHON_DATABASE_URL` match `.env.docker` and the password matches `MSSQL_SA_PASSWORD`. |
 
 ## Further Documentation

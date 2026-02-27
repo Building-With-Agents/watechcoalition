@@ -1,3 +1,7 @@
+# Job Intelligence Engine (agents) — Python 3.11+
+# After pip install, run once:  playwright install
+# (Crawl4AI uses Playwright; browser binaries are not installed via pip.)
+
 sqlalchemy>=2.0
 pyodbc>=5.0
 streamlit>=1.30
