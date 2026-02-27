@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Job Intelligence Engine — Component Diagram</title>
+<style>
+  body {
+    margin: 0;
+    padding: 32px;
+    background: #F8FAFC;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.3px;
+  }
+  p.subtitle {
+    font-size: 13px;
+    color: #64748B;
+    margin: 0 0 28px 0;
+  }
+</style>
+</head>
+<body>
+<h1>Job Intelligence Engine — Component Diagram</h1>
+<p class="subtitle">Eight-agent Python pipeline · Phase 1 · Separate from existing Next.js platform</p>
+
+<svg width="1120" height="820" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#374151"/>
+  </marker>
+  <marker id="arr-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#7C3AED"/>
+  </marker>
+  <marker id="arr-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#047857"/>
+  </marker>
+  <marker id="arr-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#B45309"/>
+  </marker>
+  <marker id="arr-cyan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#0E7490"/>
+  </marker>
+</defs>
+
+<!-- ═══════════════════════════════════════════════════════
+     BACKGROUND REGION PANELS
+═══════════════════════════════════════════════════════ -->
+
+<!-- Pipeline region -->
+<rect x="185" y="92" width="355" height="498" rx="12" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+<text x="362" y="111" text-anchor="middle" font-size="10" fill="#93C5FD" font-weight="700" letter-spacing="1.5">AGENT PIPELINE  ·  PHASE 1</text>
+
+<!-- Database region -->
+<rect x="620" y="92" width="235" height="248" rx="12" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
+<text x="737" y="111" text-anchor="middle" font-size="10" fill="#6EE7B7" font-weight="700" letter-spacing="1.5">MSSQL DATABASE</text>
+
+<!-- LLM region -->
+<rect x="620" y="354" width="235" height="178" rx="12" fill="#FFF7ED" stroke="#FED7AA" stroke-width="1.5"/>
+<text x="737" y="373" text-anchor="middle" font-size="10" fill="#FCA5A5" font-weight="700" letter-spacing="1.5">LLM LAYER</text>
+
+<!-- Frontend region -->
+<rect x="620" y="548" width="235" height="130" rx="12" fill="#F0F9FF" stroke="#BAE6FD" stroke-width="1.5"/>
+<text x="737" y="567" text-anchor="middle" font-size="10" fill="#7DD3FC" font-weight="700" letter-spacing="1.5">FRONTEND</text>
+
+<!-- ═══════════════════════════════════════════════════════
+     EXTERNAL SOURCES
+═══════════════════════════════════════════════════════ -->
+<rect x="220" y="18" width="285" height="56" rx="8" fill="#0D9488"/>
+<text x="362" y="40" text-anchor="middle" font-size="13" fill="white" font-weight="700">External Sources</text>
+<text x="362" y="58" text-anchor="middle" font-size="10" fill="#CCFBF1">JSearch API (httpx)   ·   Web Scraping (Crawl4AI)</text>
+
+<!-- ═══════════════════════════════════════════════════════
+     ORCHESTRATION AGENT — vertical bar on left
+═══════════════════════════════════════════════════════ -->
+<rect x="18" y="120" width="128" height="465" rx="10" fill="#6D28D9"/>
+<!-- Rotated label -->
+<text transform="translate(82, 353) rotate(-90)" text-anchor="middle" font-size="13" fill="white" font-weight="700">Orchestration Agent</text>
+<text transform="translate(82, 353) rotate(-90)" dy="18" text-anchor="middle" font-size="9" fill="#DDD6FE">LangGraph · APScheduler · Retry · Audit Log</text>
+
+<!-- ═══════════════════════════════════════════════════════
+     PIPELINE AGENTS
+═══════════════════════════════════════════════════════ -->
+
+<!-- Ingestion Agent  y=120 -->
+<rect x="205" y="120" width="325" height="58" rx="7" fill="#1D4ED8"/>
+<text x="367" y="144" text-anchor="middle" font-size="13" fill="white" font-weight="700">Ingestion Agent</text>
+<text x="367" y="162" text-anchor="middle" font-size="10" fill="#BFDBFE">SHA-256 dedup  ·  provenance tags  ·  source priority</text>
+
+<!-- Normalization Agent  y=215 -->
+<rect x="205" y="215" width="325" height="58" rx="7" fill="#1D4ED8"/>
+<text x="367" y="239" text-anchor="middle" font-size="13" fill="white" font-weight="700">Normalization Agent</text>
+<text x="367" y="257" text-anchor="middle" font-size="10" fill="#BFDBFE">Field mapping  ·  schema validation  ·  quarantine</text>
+
+<!-- Skills Extraction Agent  y=310 -->
+<rect x="205" y="310" width="325" height="58" rx="7" fill="#1D4ED8"/>
+<text x="367" y="334" text-anchor="middle" font-size="13" fill="white" font-weight="700">Skills Extraction Agent</text>
+<text x="367" y="352" text-anchor="middle" font-size="10" fill="#BFDBFE">LLM-based  ·  taxonomy linking  ·  confidence scores</text>
+
+<!-- Enrichment Agent  y=405 -->
+<rect x="205" y="405" width="325" height="58" rx="7" fill="#1D4ED8"/>
+<text x="367" y="429" text-anchor="middle" font-size="13" fill="white" font-weight="700">Enrichment Agent</text>
+<text x="367" y="447" text-anchor="middle" font-size="10" fill="#BFDBFE">Quality score  ·  spam detection  ·  role classification</text>
+
+<!-- Analytics Agent  y=500  (left half) -->
+<rect x="205" y="500" width="155" height="58" rx="7" fill="#1D4ED8"/>
+<text x="282" y="524" text-anchor="middle" font-size="12" fill="white" font-weight="700">Analytics Agent</text>
+<text x="282" y="542" text-anchor="middle" font-size="9" fill="#BFDBFE">Aggregates · Text-to-SQL</text>
+
+<!-- Demand Analysis Agent  y=500  (right half, Phase 2) -->
+<rect x="370" y="500" width="160" height="58" rx="7" fill="#6B7280"/>
+<text x="450" y="521" text-anchor="middle" font-size="11" fill="white" font-weight="700">Demand Analysis</text>
+<text x="450" y="537" text-anchor="middle" font-size="9" fill="#D1D5DB">Phase 2 only</text>
+<text x="450" y="551" text-anchor="middle" font-size="9" fill="#D1D5DB">Forecasting · Trends</text>
+
+<!-- Visualization Agent  y=595 -->
+<rect x="205" y="595" width="155" height="58" rx="7" fill="#1D4ED8"/>
+<text x="282" y="619" text-anchor="middle" font-size="12" fill="white" font-weight="700">Visualization Agent</text>
+<text x="282" y="637" text-anchor="middle" font-size="9" fill="#BFDBFE">Dashboards · PDF/CSV/JSON</text>
+
+<!-- ═══════════════════════════════════════════════════════
+     DATABASE TABLES
+═══════════════════════════════════════════════════════ -->
+
+<!-- raw_ingested_jobs -->
+<rect x="633" y="118" width="209" height="38" rx="6" fill="#059669"/>
+<text x="737" y="133" text-anchor="middle" font-size="11" fill="white" font-weight="600">raw_ingested_jobs</text>
+<text x="737" y="149" text-anchor="middle" font-size="9" fill="#A7F3D0">staging</text>
+
+<!-- normalized_jobs -->
+<rect x="633" y="165" width="209" height="38" rx="6" fill="#059669"/>
+<text x="737" y="180" text-anchor="middle" font-size="11" fill="white" font-weight="600">normalized_jobs</text>
+<text x="737" y="196" text-anchor="middle" font-size="9" fill="#A7F3D0">staging</text>
+
+<!-- job_postings -->
+<rect x="633" y="212" width="209" height="38" rx="6" fill="#059669"/>
+<text x="737" y="227" text-anchor="middle" font-size="11" fill="white" font-weight="600">job_postings</text>
+<text x="737" y="243" text-anchor="middle" font-size="9" fill="#A7F3D0">production</text>
+
+<!-- skills taxonomy -->
+<rect x="633" y="259" width="100" height="65" rx="6" fill="#047857"/>
+<text x="683" y="280" text-anchor="middle" font-size="10" fill="white" font-weight="600">skills</text>
+<text x="683" y="296" text-anchor="middle" font-size="9" fill="#6EE7B7">taxonomy</text>
+<text x="683" y="312" text-anchor="middle" font-size="8" fill="#6EE7B7">read by SEA</text>
+
+<!-- companies / industry_sectors -->
+<rect x="742" y="259" width="100" height="65" rx="6" fill="#047857"/>
+<text x="792" y="278" text-anchor="middle" font-size="10" fill="white" font-weight="600">companies</text>
+<text x="792" y="294" text-anchor="middle" font-size="9" fill="#6EE7B7">industry_sectors</text>
+<text x="792" y="310" text-anchor="middle" font-size="8" fill="#6EE7B7">read by Enrichment</text>
+
+<!-- ═══════════════════════════════════════════════════════
+     LLM LAYER
+═══════════════════════════════════════════════════════ -->
+
+<!-- LLM Adapter -->
+<rect x="633" y="382" width="209" height="45" rx="6" fill="#B45309"/>
+<text x="737" y="401" text-anchor="middle" font-size="12" fill="white" font-weight="700">LLM Adapter</text>
+<text x="737" y="418" text-anchor="middle" font-size="9" fill="#FDE68A">provider-agnostic  ·  get_adapter()</text>
+
+<!-- Azure OpenAI -->
+<rect x="633" y="436" width="100" height="42" rx="6" fill="#92400E"/>
+<text x="683" y="454" text-anchor="middle" font-size="10" fill="white" font-weight="600">Azure OpenAI</text>
+<text x="683" y="470" text-anchor="middle" font-size="9" fill="#FDE68A">default provider</text>
+
+<!-- LangSmith -->
+<rect x="742" y="436" width="100" height="42" rx="6" fill="#92400E" stroke="#FDE68A" stroke-width="1.2" stroke-dasharray="4,3"/>
+<text x="792" y="454" text-anchor="middle" font-size="10" fill="white" font-weight="600">LangSmith</text>
+<text x="792" y="470" text-anchor="middle" font-size="9" fill="#FDE68A">auto-tracing</text>
+
+<!-- llm_audit_log -->
+<rect x="633" y="488" width="209" height="32" rx="6" fill="#78350F"/>
+<text x="737" y="509" text-anchor="middle" font-size="10" fill="white" font-weight="600">llm_audit_log</text>
+
+<!-- ═══════════════════════════════════════════════════════
+     FRONTEND
+═══════════════════════════════════════════════════════ -->
+
+<!-- Next.js App -->
+<rect x="633" y="576" width="209" height="45" rx="6" fill="#0E7490"/>
+<text x="737" y="595" text-anchor="middle" font-size="12" fill="white" font-weight="700">Next.js App</text>
+<text x="737" y="612" text-anchor="middle" font-size="9" fill="#A5F3FC">Prisma ORM  ·  existing platform</text>
+
+<!-- Streamlit Dashboards -->
+<rect x="633" y="630" width="209" height="38" rx="6" fill="#0E7490"/>
+<text x="737" y="649" text-anchor="middle" font-size="12" fill="white" font-weight="700">Streamlit Dashboards</text>
+<text x="737" y="664" text-anchor="middle" font-size="9" fill="#A5F3FC">SQLAlchemy  ·  read-only</text>
+
+<!-- ═══════════════════════════════════════════════════════
+     ARROWS — PIPELINE FLOW (vertical, with event labels)
+═══════════════════════════════════════════════════════ -->
+
+<!-- External Sources → Ingestion -->
+<line x1="362" y1="74" x2="362" y2="118" stroke="#374151" stroke-width="2" marker-end="url(#arr)"/>
+
+<!-- Ingestion → Normalization : IngestBatch -->
+<line x1="362" y1="178" x2="362" y2="213" stroke="#374151" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="290" y="179" width="144" height="16" rx="3" fill="#DBEAFE"/>
+<text x="362" y="191" text-anchor="middle" font-size="9" fill="#1E40AF" font-weight="700">IngestBatch</text>
+
+<!-- Normalization → Skills Extraction : NormalizationComplete -->
+<line x1="362" y1="273" x2="362" y2="308" stroke="#374151" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="265" y="274" width="194" height="16" rx="3" fill="#DBEAFE"/>
+<text x="362" y="286" text-anchor="middle" font-size="9" fill="#1E40AF" font-weight="700">NormalizationComplete</text>
+
+<!-- Skills Extraction → Enrichment : SkillsExtracted -->
+<line x1="362" y1="368" x2="362" y2="403" stroke="#374151" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="292" y="369" width="140" height="16" rx="3" fill="#DBEAFE"/>
+<text x="362" y="381" text-anchor="middle" font-size="9" fill="#1E40AF" font-weight="700">SkillsExtracted</text>
+
+<!-- Enrichment → Analytics : RecordEnriched (down-left) -->
+<path d="M 282 463 L 282 498" stroke="#374151" stroke-width="2" marker-end="url(#arr)" fill="none"/>
+<rect x="195" y="464" width="124" height="16" rx="3" fill="#DBEAFE"/>
+<text x="257" y="476" text-anchor="middle" font-size="9" fill="#1E40AF" font-weight="700">RecordEnriched</text>
+
+<!-- Enrichment → Demand Analysis : RecordEnriched (down-right, dashed gray) -->
+<path d="M 450 463 L 450 498" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)" fill="none"/>
+
+<!-- Analytics → Visualization : AnalyticsRefreshed -->
+<line x1="282" y1="558" x2="282" y2="593" stroke="#374151" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="195" y="559" width="174" height="16" rx="3" fill="#DBEAFE"/>
+<text x="282" y="571" text-anchor="middle" font-size="9" fill="#1E40AF" font-weight="700">AnalyticsRefreshed</text>
+
+<!-- ═══════════════════════════════════════════════════════
+     ARROWS — DATABASE WRITES (green)
+═══════════════════════════════════════════════════════ -->
+
+<!-- Ingestion → raw_ingested_jobs -->
+<path d="M 530 145 Q 581 145 581 137 L 631 137" stroke="#047857" stroke-width="1.5" fill="none" marker-end="url(#arr-green)"/>
+
+<!-- Normalization → normalized_jobs -->
+<path d="M 530 240 Q 581 240 581 184 L 631 184" stroke="#047857" stroke-width="1.5" fill="none" marker-end="url(#arr-green)"/>
+
+<!-- Enrichment → job_postings -->
+<path d="M 530 428 Q 610 428 610 231 L 631 231" stroke="#047857" stroke-width="1.5" fill="none" marker-end="url(#arr-green)"/>
+
+<!-- Skills Extraction → llm_audit_log -->
+<path d="M 530 340 Q 618 340 618 504 L 631 504" stroke="#047857" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#arr-green)"/>
+
+<!-- ═══════════════════════════════════════════════════════
+     ARROWS — DATABASE READS (dashed green, right to left)
+═══════════════════════════════════════════════════════ -->
+
+<!-- skills → Skills Extraction (read) -->
+<path d="M 633 285 Q 575 285 575 334 L 532 334" stroke="#059669" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#arr-green)"/>
+
+<!-- companies/sectors → Enrichment (read) -->
+<path d="M 742 291 Q 610 291 610 432 L 532 432" stroke="#059669" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#arr-green)"/>
+
+<!-- ═══════════════════════════════════════════════════════
+     ARROWS — LLM CALLS (amber dashed)
+═══════════════════════════════════════════════════════ -->
+
+<!-- Skills Extraction → LLM Adapter -->
+<path d="M 530 334 Q 597 334 597 404 L 631 404" stroke="#B45309" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#arr-amber)"/>
+
+<!-- Enrichment → LLM Adapter -->
+<path d="M 530 428 Q 610 428 610 404 L 631 404" stroke="#B45309" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#arr-amber)"/>
+
+<!-- Analytics → LLM Adapter -->
+<path d="M 360 524 Q 360 530 602 530 Q 617 530 617 404 L 631 404" stroke="#B45309" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#arr-amber)"/>
+
+<!-- LLM Adapter → Azure OpenAI (internal) -->
+<line x1="683" y1="427" x2="683" y2="434" stroke="#B45309" stroke-width="1.2" marker-end="url(#arr-amber)"/>
+
+<!-- LLM Adapter → LangSmith (dashed) -->
+<line x1="792" y1="427" x2="792" y2="434" stroke="#B45309" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#arr-amber)"/>
+
+<!-- ═══════════════════════════════════════════════════════
+     ARROWS — FRONTEND (cyan)
+═══════════════════════════════════════════════════════ -->
+
+<!-- job_postings → Next.js App -->
+<path d="M 737 250 L 737 280 L 858 280 L 858 574 L 844 574" stroke="#0E7490" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#arr-cyan)"/>
+
+<!-- Visualization Agent → Streamlit -->
+<path d="M 360 624 Q 360 649 631 649" stroke="#0E7490" stroke-width="1.5" fill="none" marker-end="url(#arr-cyan)"/>
+
+<!-- ═══════════════════════════════════════════════════════
+     ARROWS — ORCHESTRATION (purple dashed, left to right)
+═══════════════════════════════════════════════════════ -->
+<line x1="148" y1="149" x2="203" y2="149" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr-purple)"/>
+<line x1="148" y1="244" x2="203" y2="244" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr-purple)"/>
+<line x1="148" y1="339" x2="203" y2="339" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr-purple)"/>
+<line x1="148" y1="434" x2="203" y2="434" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr-purple)"/>
+<line x1="148" y1="529" x2="203" y2="529" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr-purple)"/>
+<line x1="148" y1="624" x2="203" y2="624" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr-purple)"/>
+
+<!-- Orchestration label: consumes *Failed/*Alert -->
+<text x="82" y="596" text-anchor="middle" font-size="8" fill="#C4B5FD" transform="rotate(-90, 82, 580)">↑ consumes all *Failed / *Alert events</text>
+
+<!-- ═══════════════════════════════════════════════════════
+     LEGEND
+═══════════════════════════════════════════════════════ -->
+<rect x="18" y="700" width="870" height="96" rx="10" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1.2"/>
+<text x="36" y="722" font-size="11" fill="#374151" font-weight="700">LEGEND</text>
+
+<!-- Item 1: Pipeline event -->
+<line x1="36" y1="742" x2="80" y2="742" stroke="#374151" stroke-width="2" marker-end="url(#arr)"/>
+<text x="88" y="746" font-size="10" fill="#374151">Pipeline event flow</text>
+
+<!-- Item 2: DB write -->
+<line x1="200" y1="742" x2="244" y2="742" stroke="#047857" stroke-width="1.5" marker-end="url(#arr-green)"/>
+<text x="252" y="746" font-size="10" fill="#374151">Database write</text>
+
+<!-- Item 3: DB read -->
+<line x1="340" y1="742" x2="384" y2="742" stroke="#059669" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr-green)"/>
+<text x="392" y="746" font-size="10" fill="#374151">Database read</text>
+
+<!-- Item 4: LLM call -->
+<line x1="475" y1="742" x2="519" y2="742" stroke="#B45309" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr-amber)"/>
+<text x="527" y="746" font-size="10" fill="#374151">LLM call</text>
+
+<!-- Item 5: Orchestration -->
+<line x1="600" y1="742" x2="644" y2="742" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr-purple)"/>
+<text x="652" y="746" font-size="10" fill="#374151">Orchestration schedules / monitors</text>
+
+<!-- Item 6: Frontend -->
+<line x1="36" y1="770" x2="80" y2="770" stroke="#0E7490" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr-cyan)"/>
+<text x="88" y="774" font-size="10" fill="#374151">Frontend data access</text>
+
+<!-- Item 7: Phase 2 -->
+<rect x="200" y="761" width="14" height="14" rx="3" fill="#6B7280"/>
+<text x="222" y="774" font-size="10" fill="#374151">Phase 2 (deferred — not built in 12-week curriculum)</text>
+
+<!-- Item 8: Dashed border = tracing only -->
+<rect x="475" y="761" width="36" height="14" rx="3" fill="#92400E" stroke="#FDE68A" stroke-width="1.2" stroke-dasharray="3,2"/>
+<text x="520" y="774" font-size="10" fill="#374151">Auto-traced (LangSmith)</text>
+
+</svg>
+</body>
+</html>
