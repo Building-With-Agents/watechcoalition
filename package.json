@@ -17,7 +17,9 @@
     "test": "npm run git-info && vitest",
     "test:ci": "npm run git-info && vitest run --reporter=default --reporter=junit --outputFile=reports/junit.xml",
     "coverage": "vitest run --coverage",
-    "db-reset": "prisma migrate reset"
+    "db-reset": "prisma migrate reset",
+    "db-push": "prisma db push",
+    "db-generate": "prisma generate"
   },
   "type": "module",
   "dependencies": {
@@ -33,7 +35,7 @@
     "@mui/x-charts": "^8.6.0",
     "@mui/x-data-grid": "^8.6.0",
     "@mui/x-date-pickers": "^8.6.0",
-    "@prisma/client": "^6.11.0",
+    "@prisma/client": "6.19.2",
     "@react-email/components": "^1.0.7",
     "@react-email/render": "1.0.3",
     "@react-email/tailwind": "1.0.4",
@@ -93,7 +95,7 @@
     "jsdom": "^26.0.0",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
-    "prisma": "^6.11.0",
+    "prisma": "6.19.2",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.6"
   },
