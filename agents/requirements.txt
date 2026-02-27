@@ -8,6 +8,7 @@ langchain-openai
 langchain-community
 langgraph
 langsmith
+beautifulsoup4
 crawl4ai
 apscheduler
 pydantic

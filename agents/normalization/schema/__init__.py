@@ -1,0 +1,1 @@
+# Canonical JobRecord + Pydantic validators
