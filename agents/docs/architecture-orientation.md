@@ -1,5 +1,13 @@
 # Architecture Orientation — Job Intelligence Engine
 
+**Where to read first:** [CLAUDE.md](../../CLAUDE.md) (repo root) is the primary context; [docs/planning/ARCHITECTURE_DEEP.md](../../docs/planning/ARCHITECTURE_DEEP.md) is the full implementation spec (schemas, events, DB, error handling).
+
+**Week 1 quick start (run from repository root with agents venv activated):**
+1. Scraper: `python -m agents.ingestion.sources.scraper_adapter` → writes `agents/data/staging/raw_scrape_sample.json`
+2. Streamlit: `streamlit run agents/dashboard/streamlit_app.py` → shows raw scrape view (run scraper first if the file is missing)
+
+---
+
 This document summarizes each of the eight agents in the Job Intelligence Engine pipeline: what each agent does, how they communicate, and the Phase 1 vs Phase 2 boundary.
 
 **Key principle:** Agents communicate exclusively through typed, versioned `AgentEvent` objects via the in-process message bus. Direct function calls between agents are forbidden. The Orchestration Agent is the **sole consumer** of all `*Failed` and `*Alert` events — no other agent reacts to another agent's failures.

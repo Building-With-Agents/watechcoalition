@@ -2,7 +2,10 @@
 Crawl4AI scraper adapter — Exercise 1.2
 
 Scrapes job postings from configured target URLs using Crawl4AI and writes
-raw output to agents/data/staging/raw_scrape_sample.json.
+raw output to agents/data/staging/raw_scrape_sample.json. Each record
+includes source, url, timestamp, and raw_text for downstream agents
+(normalization, enrichment). Configuration via SCRAPING_TARGETS (env);
+no hardcoded credentials; structlog only (no PII in logs).
 
 Usage:
     python -m agents.ingestion.sources.scraper_adapter
