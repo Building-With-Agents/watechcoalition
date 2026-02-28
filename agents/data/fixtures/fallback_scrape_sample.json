@@ -1,0 +1,102 @@
+[
+  {
+    "posting_id": 1,
+    "source": "web_scrape",
+    "url": "https://careers.microsoft.com/jobs/1234567",
+    "timestamp": "2026-02-24T08:15:00Z",
+    "title": "Senior Data Engineer",
+    "company": "Microsoft",
+    "location": "Redmond, WA",
+    "raw_text": "Microsoft's Azure Data platform team is hiring a Senior Data Engineer to design and operate large-scale data pipelines that power analytics across our enterprise cloud products. You will build and maintain batch and streaming pipelines using Python, Apache Spark, and SQL, with data transformations managed via dbt. The ideal candidate brings 5+ years of experience in distributed data engineering, deep expertise in Python and SQL, and hands-on experience with Azure data services including Azure Data Factory and Azure Synapse. You will collaborate closely with data scientists and product teams to deliver reliable, scalable data infrastructure. Strong data modeling skills and clear written communication are essential. Experience with Delta Lake or similar lakehouse architectures is a plus."
+  },
+  {
+    "posting_id": 2,
+    "source": "web_scrape",
+    "url": "https://www.amazon.jobs/en/jobs/2345678",
+    "timestamp": "2026-02-24T08:45:00Z",
+    "title": "Junior Software Engineer",
+    "company": "Amazon",
+    "location": "Seattle, WA",
+    "raw_text": "Amazon's Fulfillment Technology team is looking for a Junior Software Engineer to help build and maintain the backend services that keep our global delivery network running. You will write production code primarily in Python and Java, design and consume REST APIs, and work within an Agile development process. We are looking for candidates with a solid foundation in data structures and algorithms, comfort working with SQL databases, and familiarity with Git-based version control workflows. This is a great opportunity for a recent graduate or early-career engineer who wants to grow quickly in a high-scale engineering environment. Strong collaboration skills and a willingness to ask questions and learn are more important than years of experience."
+  },
+  {
+    "posting_id": 3,
+    "source": "web_scrape",
+    "url": "https://careers.google.com/jobs/results/3456789",
+    "timestamp": "2026-02-24T09:00:00Z",
+    "title": "Machine Learning Engineer",
+    "company": "Google",
+    "location": "Kirkland, WA",
+    "raw_text": "Google's Kirkland office is seeking a Machine Learning Engineer to join our Ads Relevance team, focused on improving the quality and personalisation of search and display advertising. You will develop, train, and deploy ML models using Python, TensorFlow, and PyTorch, running experiments tracked via MLflow. The role requires strong statistical foundations, experience querying large datasets with SQL, and comfort packaging and deploying models in Docker containers. You will work closely with research scientists to move models from experimentation to production, and will be expected to contribute to our internal ML platform infrastructure. 3+ years of hands-on ML engineering experience required."
+  },
+  {
+    "posting_id": 4,
+    "source": "web_scrape",
+    "url": "https://salesforce.wd12.myworkdayjobs.com/tableau/jobs/4567890",
+    "timestamp": "2026-02-24T09:30:00Z",
+    "title": "Data Scientist",
+    "company": "Tableau (Salesforce)",
+    "location": "Seattle, WA",
+    "raw_text": "Tableau's Analytics Intelligence team is hiring a Data Scientist to develop the statistical models and analytical frameworks that power our product recommendation and customer success features. You will work in Python and R, query production datasets using SQL, and build compelling data visualisations in Tableau to communicate findings to non-technical stakeholders. The ideal candidate has a strong grounding in applied statistics, experience designing and analysing A/B tests, and a track record of turning ambiguous business questions into structured analytical problems. Excellent written and verbal communication skills are required — you will present findings regularly to senior leadership. 2–4 years of industry data science experience preferred."
+  },
+  {
+    "posting_id": 5,
+    "source": "web_scrape",
+    "url": "https://jobs.boeing.com/job/renton/devops-engineer/5678901",
+    "timestamp": "2026-02-24T10:00:00Z",
+    "title": "DevOps Engineer",
+    "company": "Boeing",
+    "location": "Renton, WA",
+    "raw_text": "Boeing's Digital Aviation Services division is looking for a DevOps Engineer to modernise the CI/CD infrastructure supporting our flight operations software. You will design and maintain deployment pipelines, containerise services using Docker, orchestrate workloads on Kubernetes, and manage cloud infrastructure on AWS. The role requires strong Linux administration skills, proficiency in Python for automation scripting, and experience writing SQL queries to support operational reporting. You will work alongside software engineering teams to reduce deployment friction and improve system observability. Familiarity with infrastructure-as-code tools (Terraform or CDK) and a security-first mindset are highly valued. Active security clearance or eligibility to obtain one is preferred."
+  },
+  {
+    "posting_id": 6,
+    "source": "web_scrape",
+    "url": "https://www.zillow.com/careers/openings/6789012",
+    "timestamp": "2026-02-24T10:30:00Z",
+    "title": "Senior Software Engineer",
+    "company": "Zillow",
+    "location": "Seattle, WA",
+    "raw_text": "Zillow's Buyer Experience engineering team is seeking a Senior Software Engineer to lead the development of the APIs and backend services that power our home search and mortgage products. You will build scalable Python services using Django and Django REST Framework, design and optimise PostgreSQL schemas and queries, and deploy services on AWS. The role requires deep experience with distributed systems design, REST API design principles, and caching strategies using Redis. You will mentor junior engineers, lead technical design discussions, and contribute to our engineering standards. 6+ years of backend software engineering experience required, with a strong preference for candidates who have built high-traffic consumer-facing systems."
+  },
+  {
+    "posting_id": 7,
+    "source": "web_scrape",
+    "url": "https://lifeatexpedia.com/jobs/7890123",
+    "timestamp": "2026-02-24T11:00:00Z",
+    "title": "Junior Data Analyst",
+    "company": "Expedia",
+    "location": "Seattle, WA",
+    "raw_text": "Expedia Group's Revenue Analytics team is hiring a Junior Data Analyst to support pricing and demand forecasting across our hotel and flights business. Day-to-day work involves writing SQL queries against our data warehouse, building and maintaining dashboards in Tableau, and preparing Excel-based reporting packages for commercial leadership. You will work closely with senior analysts and business stakeholders to answer ad-hoc data questions and identify trends in booking behaviour. We are looking for a detail-oriented graduate with strong SQL fundamentals, basic Python scripting ability, and clear written communication skills. No prior industry experience required — curiosity, rigour, and a willingness to ask questions matter more."
+  },
+  {
+    "posting_id": 8,
+    "source": "web_scrape",
+    "url": "https://nvidia.wd5.myworkdayjobs.com/nvidiacareer/jobs/8901234",
+    "timestamp": "2026-02-24T11:30:00Z",
+    "title": "ML Platform Engineer",
+    "company": "NVIDIA",
+    "location": "Redmond, WA",
+    "raw_text": "NVIDIA's ML Systems team is hiring an ML Platform Engineer to build and scale the infrastructure that trains and serves our next-generation AI models. You will develop high-performance Python and C++ tooling for distributed GPU training, optimise CUDA kernels for throughput-critical workloads, and containerise training jobs using Docker for orchestration on Kubernetes clusters. Experiment tracking and model lifecycle management are handled via MLflow — you will own and extend our internal MLflow deployment. Strong Linux systems knowledge is essential, as is familiarity with NCCL and distributed training frameworks. 4+ years of ML infrastructure or systems engineering experience required."
+  },
+  {
+    "posting_id": 9,
+    "source": "web_scrape",
+    "url": "https://careers.t-mobile.com/job/bellevue/lead-backend-engineer/9012345",
+    "timestamp": "2026-02-24T12:00:00Z",
+    "title": "Lead Backend Engineer",
+    "company": "T-Mobile",
+    "location": "Bellevue, WA",
+    "raw_text": "T-Mobile's Digital Platform Engineering team is seeking a Lead Backend Engineer to drive the architecture and delivery of the APIs and data services that underpin our customer-facing mobile and web applications. You will write production services in Python and Go, design and optimise PostgreSQL databases at scale, and own the deployment and reliability of services on AWS and Kubernetes. This is a technical leadership role — you will set engineering direction, conduct design reviews, mentor a team of 4–6 engineers, and partner with product management to shape the roadmap. Strong system design skills, a track record of delivering high-availability services, and experience influencing engineering culture are all required. 8+ years of backend engineering experience, including at least 2 in a lead or staff capacity."
+  },
+  {
+    "posting_id": 10,
+    "source": "web_scrape",
+    "url": "https://convoy.com/careers/0123456",
+    "timestamp": "2026-02-24T12:30:00Z",
+    "title": "Product Data Scientist",
+    "company": "Convoy",
+    "location": "Seattle, WA",
+    "raw_text": "Convoy's Data Science team is looking for a Product Data Scientist to partner directly with our Product and Operations teams to drive data-informed decisions across our freight marketplace. You will design and analyse A/B tests to evaluate product changes, build statistical models in Python to predict carrier behaviour and shipper demand, and write SQL queries against our dbt-modelled data warehouse. You will be responsible for translating complex analytical findings into clear recommendations for non-technical stakeholders, with presentations delivered regularly to VP-level leadership. Strong applied statistics skills, comfort with experimental design, and excellent written and verbal communication are all required. Experience with Excel for executive reporting is a plus. 2–5 years of industry data science or quantitative analytics experience preferred."
+  }
+]

@@ -1,0 +1,161 @@
+[
+  {
+    "posting_id": 1,
+    "title": "Senior Data Engineer",
+    "company": "Microsoft",
+    "skills": [
+      {"name": "Python",        "type": "Technical", "confidence": 0.98},
+      {"name": "SQL",           "type": "Technical", "confidence": 0.97},
+      {"name": "Apache Spark",  "type": "Tool",      "confidence": 0.95},
+      {"name": "dbt",           "type": "Tool",      "confidence": 0.93},
+      {"name": "Azure",         "type": "Technical", "confidence": 0.94},
+      {"name": "Data Modeling", "type": "Domain",    "confidence": 0.88},
+      {"name": "Communication", "type": "Soft",      "confidence": 0.72}
+    ],
+    "seniority": "senior",
+    "extraction_status": "success"
+  },
+  {
+    "posting_id": 2,
+    "title": "Junior Software Engineer",
+    "company": "Amazon",
+    "skills": [
+      {"name": "Python",        "type": "Technical", "confidence": 0.95},
+      {"name": "Java",          "type": "Technical", "confidence": 0.93},
+      {"name": "REST APIs",     "type": "Technical", "confidence": 0.91},
+      {"name": "SQL",           "type": "Technical", "confidence": 0.88},
+      {"name": "Git",           "type": "Tool",      "confidence": 0.90},
+      {"name": "Agile",         "type": "Domain",    "confidence": 0.78},
+      {"name": "Collaboration", "type": "Soft",      "confidence": 0.70}
+    ],
+    "seniority": "junior",
+    "extraction_status": "success"
+  },
+  {
+    "posting_id": 3,
+    "title": "Machine Learning Engineer",
+    "company": "Google",
+    "skills": [
+      {"name": "Python",       "type": "Technical", "confidence": 0.97},
+      {"name": "TensorFlow",   "type": "Tool",      "confidence": 0.94},
+      {"name": "PyTorch",      "type": "Tool",      "confidence": 0.93},
+      {"name": "MLflow",       "type": "Tool",      "confidence": 0.92},
+      {"name": "SQL",          "type": "Technical", "confidence": 0.89},
+      {"name": "Docker",       "type": "Tool",      "confidence": 0.91},
+      {"name": "Statistics",   "type": "Domain",    "confidence": 0.85}
+    ],
+    "seniority": "mid",
+    "extraction_status": "success"
+  },
+  {
+    "posting_id": 4,
+    "title": "Data Scientist",
+    "company": "Tableau (Salesforce)",
+    "skills": [
+      {"name": "Python",             "type": "Technical", "confidence": 0.96},
+      {"name": "R",                  "type": "Technical", "confidence": 0.91},
+      {"name": "SQL",                "type": "Technical", "confidence": 0.95},
+      {"name": "Tableau",            "type": "Tool",      "confidence": 0.97},
+      {"name": "Statistics",         "type": "Domain",    "confidence": 0.90},
+      {"name": "Data Visualization", "type": "Domain",    "confidence": 0.88},
+      {"name": "Communication",      "type": "Soft",      "confidence": 0.75}
+    ],
+    "seniority": "mid",
+    "extraction_status": "success"
+  },
+  {
+    "posting_id": 5,
+    "title": "DevOps Engineer",
+    "company": "Boeing",
+    "skills": [
+      {"name": "Docker",     "type": "Tool",      "confidence": 0.96},
+      {"name": "Kubernetes", "type": "Tool",      "confidence": 0.95},
+      {"name": "Python",     "type": "Technical", "confidence": 0.92},
+      {"name": "SQL",        "type": "Technical", "confidence": 0.85},
+      {"name": "AWS",        "type": "Technical", "confidence": 0.94},
+      {"name": "Linux",      "type": "Technical", "confidence": 0.93},
+      {"name": "CI/CD",      "type": "Domain",    "confidence": 0.91}
+    ],
+    "seniority": "mid",
+    "extraction_status": "success"
+  },
+  {
+    "posting_id": 6,
+    "title": "Senior Software Engineer",
+    "company": "Zillow",
+    "skills": [
+      {"name": "Python",         "type": "Technical", "confidence": 0.96},
+      {"name": "PostgreSQL",     "type": "Tool",      "confidence": 0.94},
+      {"name": "Redis",          "type": "Tool",      "confidence": 0.91},
+      {"name": "AWS",            "type": "Technical", "confidence": 0.93},
+      {"name": "Django",         "type": "Tool",      "confidence": 0.92},
+      {"name": "REST APIs",      "type": "Technical", "confidence": 0.90},
+      {"name": "System Design",  "type": "Domain",    "confidence": 0.86}
+    ],
+    "seniority": "senior",
+    "extraction_status": "success"
+  },
+  {
+    "posting_id": 7,
+    "title": "Junior Data Analyst",
+    "company": "Expedia",
+    "skills": [
+      {"name": "SQL",                "type": "Technical", "confidence": 0.97},
+      {"name": "Python",             "type": "Technical", "confidence": 0.88},
+      {"name": "Tableau",            "type": "Tool",      "confidence": 0.93},
+      {"name": "Excel",              "type": "Tool",      "confidence": 0.91},
+      {"name": "Data Visualization", "type": "Domain",    "confidence": 0.83},
+      {"name": "Communication",      "type": "Soft",      "confidence": 0.76}
+    ],
+    "seniority": "junior",
+    "extraction_status": "success"
+  },
+  {
+    "posting_id": 8,
+    "title": "ML Platform Engineer",
+    "company": "NVIDIA",
+    "skills": [
+      {"name": "Python",     "type": "Technical", "confidence": 0.96},
+      {"name": "C++",        "type": "Technical", "confidence": 0.93},
+      {"name": "CUDA",       "type": "Technical", "confidence": 0.95},
+      {"name": "Docker",     "type": "Tool",      "confidence": 0.94},
+      {"name": "Kubernetes", "type": "Tool",      "confidence": 0.92},
+      {"name": "MLflow",     "type": "Tool",      "confidence": 0.91},
+      {"name": "Linux",      "type": "Technical", "confidence": 0.90}
+    ],
+    "seniority": "senior",
+    "extraction_status": "success"
+  },
+  {
+    "posting_id": 9,
+    "title": "Lead Backend Engineer",
+    "company": "T-Mobile",
+    "skills": [
+      {"name": "Python",        "type": "Technical", "confidence": 0.95},
+      {"name": "Go",            "type": "Technical", "confidence": 0.92},
+      {"name": "PostgreSQL",    "type": "Tool",      "confidence": 0.93},
+      {"name": "Kubernetes",    "type": "Tool",      "confidence": 0.94},
+      {"name": "AWS",           "type": "Technical", "confidence": 0.93},
+      {"name": "System Design", "type": "Domain",    "confidence": 0.89},
+      {"name": "Leadership",    "type": "Soft",      "confidence": 0.82}
+    ],
+    "seniority": "lead",
+    "extraction_status": "success"
+  },
+  {
+    "posting_id": 10,
+    "title": "Product Data Scientist",
+    "company": "Convoy",
+    "skills": [
+      {"name": "Python",       "type": "Technical", "confidence": 0.96},
+      {"name": "SQL",          "type": "Technical", "confidence": 0.95},
+      {"name": "dbt",          "type": "Tool",      "confidence": 0.91},
+      {"name": "Statistics",   "type": "Domain",    "confidence": 0.89},
+      {"name": "A/B Testing",  "type": "Domain",    "confidence": 0.93},
+      {"name": "Communication","type": "Soft",      "confidence": 0.77},
+      {"name": "Excel",        "type": "Tool",      "confidence": 0.75}
+    ],
+    "seniority": "mid",
+    "extraction_status": "success"
+  }
+]
