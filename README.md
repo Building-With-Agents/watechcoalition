@@ -48,15 +48,26 @@ cd watechcoalition
 - `seed`: Seeds the database with synthetic/faker-generated data (does not use `prisma/mock-data/`).
 - `lint`: Runs ESLint to check for code issues.
 
-## Agent Pipeline
+## Agent Pipeline (Walking Skeleton)
 
-This project is designed to include a **Job Intelligence Engine** — an eight-agent Python pipeline that will ingest, normalize, enrich, and analyze external job postings (pipeline not yet implemented). The agent layer is scaffolded in `agents/` and will run alongside the Next.js app.
+The **Job Intelligence Engine** is an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings. The walking skeleton (Week 2) is functional — all eight agent stubs process 10 demo job postings end-to-end with fixture data. Real agent logic is built out over the 12-week curriculum.
 
-See [CLAUDE.md](CLAUDE.md) for full architecture details, agent specs, and run instructions.
+See [CLAUDE.md](CLAUDE.md) for full architecture details, agent specs, and build order.
 
 ```bash
-cd agents && pip install -r requirements.txt
+# Setup (one time — from repo root)
+py -3.11 -m venv agents/.venv
+agents\.venv\Scripts\Activate.ps1          # Windows PowerShell
+pip install -r agents/requirements.txt
+
+# Run the pipeline (produces agents/data/output/pipeline_run.json)
+python agents/pipeline_runner.py
+
+# Run the Streamlit dashboard (http://localhost:8501)
 streamlit run agents/dashboard/streamlit_app.py
+
+# Run agent tests
+python -m pytest agents/tests/ -v
 ```
 
 ## Technologies Used
