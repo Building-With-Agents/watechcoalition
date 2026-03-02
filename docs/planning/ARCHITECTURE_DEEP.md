@@ -2,7 +2,7 @@
 **Audience:** Implementing engineers, Claude Code
 **Version:** 1.1 | **Source of truth:** `job_intelligence_engine_architecture.docx`
 **Last updated:** 2026-02-18
-**Status:** Frozen for Phase 1 implementation. Phase 2 items are marked explicitly — do not implement them in Phase 1 unless instructed.
+**Status:** Reference implementation for Phase 1. Technology choices classified as SA (Student ADR) in `ARCHITECTURAL_DECISIONS.md` are subject to team ADR decisions. If a team selects a different technology, adapt the corresponding agent implementation accordingly. Infrastructure constraints (IC) are fixed by the existing platform. Phase 2 items are marked explicitly — do not implement them in Phase 1 unless instructed.
 
 ---
 
@@ -70,7 +70,7 @@
     │   └── tests/
     ├── common/
     │   ├── events/
-    │   ├── message_bus/       ← In-process pub/sub (Phase 1)
+    │   ├── message_bus/       ← SA #14 — reference impl: in-process pub/sub (Phase 1)
     │   ├── llm_adapter.py
     │   ├── data_store/
     │   ├── config/
@@ -102,6 +102,8 @@
 ---
 
 ## Common Patterns — Follow Exactly
+
+> **Note:** The patterns below use reference implementation technologies. If your team's ADRs selected different tools for SA-classified decisions, adapt the implementation while preserving the contract (the abstract interface, event types, and method signatures). Engineering rules apply regardless of technology choices.
 
 ### Event envelope
 
@@ -213,10 +215,10 @@ class JobRecord(BaseModel):
 **File:** `agents/ingestion/agent.py` | **Emits:** `IngestBatch` | **Writes to:** `raw_ingested_jobs`
 
 **Phase 1 responsibilities:**
-- Poll JSearch via `httpx`; scrape via Crawl4AI
+- Poll JSearch via `httpx`; scrape via Crawl4AI [SA #12 — reference implementation]
 - Fingerprint: `sha256(source + external_id + title + company + date_posted)`
 - Dedup against `raw_ingested_jobs.raw_payload_hash`; discard silently; increment counter
-- JSearch wins over scraped when same job appears in both (decision #9)
+- JSearch wins over scraped when same job appears in both (IC #9)
 - Provenance tags: `source`, `external_id`, `raw_payload_hash`, `ingestion_run_id`, `ingestion_timestamp`
 
 **Error handling:**
@@ -291,7 +293,7 @@ class JobRecord(BaseModel):
 #### Phase 1 — Lite (implement now)
 - Classify job role and seniority
 - Quality score [0–1]: completeness, linguistic clarity, AI keyword density, structural coherence
-- Spam detection:
+- Spam detection (IC #8):
   - < 0.7 → proceed
   - 0.7–0.9 → flag for operator review (`is_spam = null`)
   - > 0.9 → auto-reject; do not write to `job_postings`
@@ -326,7 +328,7 @@ class JobRecord(BaseModel):
 
 ### 5. Analytics Agent
 **File:** `agents/analytics/agent.py` | **Consumes:** `RecordEnriched` | **Emits:** `AnalyticsRefreshed`
-**Exposes:** `POST /analytics/query` (REST)
+**Exposes:** `POST /analytics/query` (REST) [SA #18 — reference implementation]
 
 **Phase 1 responsibilities:**
 - Aggregates across dimensions: skill, role, industry, region, experience level, company size
@@ -393,7 +395,7 @@ class JobRecord(BaseModel):
 ---
 
 ### 7. Orchestration Agent
-**File:** `agents/orchestration/agent.py` | **Framework:** LangGraph StateGraph + APScheduler
+**File:** `agents/orchestration/agent.py` | **Framework:** LangGraph StateGraph [SA #13/#16] + APScheduler [IC]
 
 #### Phase 1 — Basic (implement now)
 - Master run schedule; trigger pipeline steps in sequence
@@ -522,19 +524,34 @@ ALTER TABLE job_postings ADD COLUMN remote_classification NVARCHAR(50);
 
 ## Environment Variables
 
+> Variables for SA-classified tools reflect the **reference implementation**. If the team selects different technologies via their ADRs, the corresponding env vars will change (e.g., a different tracing tool replaces `LANGSMITH_API_KEY`).
+
 ```bash
+# SA #11 — LLM provider (reference: Azure OpenAI)
 AZURE_OPENAI_API_KEY=
 AZURE_OPENAI_ENDPOINT=
 AZURE_OPENAI_DEPLOYMENT_NAME=
 LLM_PROVIDER=azure_openai             # azure_openai | openai | anthropic
+
+# IC #19 — Database (MSSQL — fixed)
 DATABASE_URL=                          # MSSQL pyodbc connection string
+
+# SA #17 — Agent tracing (reference: LangSmith)
 LANGSMITH_API_KEY=
 LANGCHAIN_TRACING_V2=true
+
+# SA #12 — Ingestion sources (reference: httpx + Crawl4AI)
 JSEARCH_API_KEY=
 SCRAPING_TARGETS=                      # Comma-separated URLs
+
+# IC #3 — Scheduling
 INGESTION_SCHEDULE=0 2 * * *           # Cron — default: daily at 2am
+
+# IC #8 — Spam thresholds
 SPAM_FLAG_THRESHOLD=0.7
 SPAM_REJECT_THRESHOLD=0.9
+
+# Agent configuration
 SKILL_CONFIDENCE_THRESHOLD=0.75
 BATCH_SIZE=100
 ```
@@ -545,7 +562,7 @@ BATCH_SIZE=100
 
 | Week(s) | Deliverable |
 |---------|------------|
-| 1–2 | Environment, first scrape, thin-slice pipeline, basic Streamlit |
+| 1–2 | Environment, first scrape, walking skeleton (8 agent stubs, pipeline runner, journey dashboard) |
 | 3 | Ingestion Agent + Normalization Agent |
 | 4 | Skills Extraction Agent + evaluation harness + Enrichment-lite |
 | 5 | Visualization Agent |
