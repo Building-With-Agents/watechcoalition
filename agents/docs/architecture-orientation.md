@@ -10,30 +10,53 @@ Short reference for what each agent does, how they communicate, and the Phase 1 
 
 ---
 
+## Deterministic vs LLM
+
+| Agent | Type |
+|-------|------|
+| Ingestion | **Deterministic** |
+| Normalization | **Deterministic** |
+| Skills Extraction | **LLM-required** |
+| Enrichment (lite) | **LLM-required** |
+| Analytics | **Hybrid** (deterministic aggregates + LLM summaries / text-to-SQL) |
+| Visualization | **Deterministic** |
+| Orchestration | **Deterministic** |
+| Demand Analysis (Phase 2) | *Scaffold* — would be LLM/hybrid |
+
+---
+
 ## Per-Agent Summary
 
 ### Ingestion Agent
+**Type:** Deterministic  
 Pulls job postings from external sources (JSearch API via httpx, web scraping via Crawl4AI), deduplicates by fingerprint (source + external_id + title + company + date_posted), and stages records into `raw_ingested_jobs`. JSearch wins over scraped when the same job appears in both. It emits `IngestBatch` for the Normalization Agent and, on source unreachable after retries, `SourceFailure` to the Orchestrator only.
 
 ### Normalization Agent
+**Type:** Deterministic  
 Consumes `IngestBatch`, maps source-specific fields to the canonical `JobRecord` schema via per-source field mappers, and standardizes dates (ISO 8601), salaries, locations, and employment types. It validates with Pydantic, quarantines schema violations, and writes to `normalized_jobs`. It emits `NormalizationComplete` downstream and `NormalizationFailed` to the Orchestrator on batch failure.
 
 ### Skills Extraction Agent
+**Type:** LLM-required  
 Consumes `NormalizationComplete`, runs LLM-based extraction over title/description/requirements to produce `SkillRecord` entries with taxonomy linking (exact → normalized → embedding similarity ≥ 0.92 → O*NET → raw_skill). All LLM calls are logged to `llm_audit_log`. It emits `SkillsExtracted` to Enrichment and `SkillsExtractionFailed` to the Orchestrator on failure.
 
 ### Enrichment Agent (Phase 1 lite)
+**Type:** LLM-required  
 Consumes `SkillsExtracted`, classifies role and seniority, computes quality and spam scores, and resolves `company_id` (and optionally location) before writing to `job_postings`. Spam: < 0.7 proceed, 0.7–0.9 flag for review, > 0.9 auto-reject (no write). It emits `RecordEnriched` and, on failure, `EnrichmentFailed` to the Orchestrator only.
 
 ### Analytics Agent
+**Type:** Hybrid (deterministic aggregates + LLM summaries / text-to-SQL)  
 Consumes `RecordEnriched`, builds aggregates (skill, role, industry, region, experience, company size), salary distributions, co-occurrence matrices, and posting lifecycle metrics. It offers weekly LLM summaries (with template fallback) and a text-to-SQL “Ask the Data” interface with strict guardrails (SELECT only, allowlist, row/time limits). It emits `AnalyticsRefreshed` and `AnalyticsFailed` to the Orchestrator.
 
 ### Visualization Agent
+**Type:** Deterministic  
 Consumes `AnalyticsRefreshed`, serves the Streamlit dashboards (Ingestion Overview, Normalization Quality, Skill Taxonomy Coverage, Weekly Insights, Ask the Data, Operations & Alerts) and generates PDF/CSV/JSON exports. It uses a read-only DB connection and TTL cache; stale data is shown with a banner and `VisualizationDegraded`/`RenderFailed` sent only to the Orchestrator.
 
 ### Orchestration Agent
+**Type:** Deterministic  
 Schedules the pipeline (e.g. APScheduler), routes events via LangGraph StateGraph, and applies retry/back-off policies. **It is the sole consumer of all `*Failed` and `*Alert` events** (e.g. `SourceFailure`, `NormalizationFailed`, `SkillsExtractionFailed`, `EnrichmentFailed`, `AnalyticsFailed`, `RenderFailed`, `VisualizationDegraded`, `Alert`). No other agent handles these. It maintains the orchestration audit log (100% completeness), monitors health, and implements alerting tiers (Warning, Critical, Fatal).
 
 ### Demand Analysis Agent (Phase 2 only)
+**Type:** *Scaffold* (would be LLM/hybrid)  
 Scaffolded but not implemented in Phase 1. Would consume `RecordEnriched`, produce time-series and demand signals, and emit `DemandSignalsUpdated` and `DemandAnomaly`. Phase 1 does not implement this agent.
 
 ---

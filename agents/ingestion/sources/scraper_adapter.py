@@ -212,7 +212,8 @@ def _extract_job_links(html: str, base_url: str) -> list[dict]:
     parser = _LinkExtractor()
     try:
         parser.feed(html)
-    except Exception:
+    except Exception as e:
+        log.warning("extract_job_links_failed", base_url=base_url, error=str(e))
         return []
     seen: set[str] = set()
     out: list[dict] = []
@@ -289,8 +290,8 @@ async def _crawl(listing_url: str) -> list[dict]:
                             for k, v in detail.items():
                                 if v is not None and v != "":
                                     rec[k] = v
-                except Exception:
-                    pass
+                except Exception as e:
+                    log.warning("job_detail_crawl_failed", job_url=job_url, error=str(e))
             rec["url"] = _normalize_target_url(rec.get("url") or "")
             records.append(rec)
     return records

@@ -7,7 +7,11 @@ import threading
 from collections import defaultdict
 from typing import Callable
 
+import structlog
+
 from agents.common.events import AgentEvent
+
+log = structlog.get_logger()
 
 
 class MessageBus:
@@ -28,9 +32,8 @@ class MessageBus:
         for h in handlers:
             try:
                 h(event)
-            except Exception:
-                # Log but do not break other subscribers
-                pass
+            except Exception as e:
+                log.warning("message_bus_subscriber_error", event_type=event_type, error=str(e))
 
     def clear(self) -> None:
         """For tests only."""
