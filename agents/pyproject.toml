@@ -23,6 +23,7 @@ ignore = [
 known-first-party = ["agents"]
 
 [tool.pytest.ini_options]
+pythonpath = [".."]
 testpaths = [
     "tests",
     "ingestion/tests",
@@ -37,3 +38,6 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --tb=short"
+markers = [
+    "integration: marks tests requiring a live database",
+]

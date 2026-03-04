@@ -1,8 +1,7 @@
-"""Tests for IngestionAgent — Week 2 stub."""
+"""Tests for IngestionAgent — updated for Week 3 batch-oriented implementation."""
 
 from __future__ import annotations
 
-from pathlib import Path
 from unittest.mock import patch
 
 from agents.common.event_envelope import EventEnvelope
@@ -16,34 +15,53 @@ class TestIngestionAgent:
         agent = IngestionAgent()
         assert agent.agent_id == "ingestion-agent"
 
-    def test_health_check_ok(self) -> None:
-        """Returns 'ok' when the fallback scrape fixture file exists."""
+    def test_health_check_shape(self) -> None:
+        """Health check returns dict with required keys."""
         agent = IngestionAgent()
         result = agent.health_check()
-        assert result["status"] == "ok"
+        assert "status" in result
+        assert result["status"] in ("ok", "degraded", "down")
         assert result["agent"] == "ingestion-agent"
+        assert "metrics" in result
 
-    def test_health_check_down_when_fixture_missing(self) -> None:
-        """Returns 'down' when the fixture file does not exist."""
-        agent = IngestionAgent()
-        fake_path = Path("/nonexistent/path/fallback_scrape_sample.json")
-        with patch("agents.ingestion.agent._FALLBACK_SCRAPE", fake_path):
-            result = agent.health_check()
-        assert result["status"] == "down"
-
+    @patch("agents.ingestion.agent.session_scope")
+    @patch("agents.ingestion.agent.check_db_connection", return_value=True)
+    @patch("agents.ingestion.agent.deduplicate_batch")
     def test_process_emits_ingest_batch(
-        self, sample_event: EventEnvelope
+        self, mock_dedup, mock_db, mock_session
     ) -> None:
         """Output event_type is IngestBatch."""
+        from agents.ingestion.deduplicator import DedupResult
+
+        # Mock dedup to return empty result (no DB needed)
+        mock_dedup.return_value = DedupResult(new_records=[], duplicates_skipped=0)
+
         agent = IngestionAgent()
-        out = agent.process(sample_event)
+        trigger = EventEnvelope(
+            correlation_id="test-1",
+            agent_id="test",
+            payload={"source": "crawl4ai", "limit": 2},
+        )
+        out = agent.process(trigger)
         assert out.payload["event_type"] == "IngestBatch"
         assert out.agent_id == "ingestion-agent"
 
+    @patch("agents.ingestion.agent.session_scope")
+    @patch("agents.ingestion.agent.check_db_connection", return_value=True)
+    @patch("agents.ingestion.agent.deduplicate_batch")
     def test_process_preserves_correlation_id(
-        self, sample_event: EventEnvelope
+        self, mock_dedup, mock_db, mock_session
     ) -> None:
         """Correlation ID passes through unchanged."""
+        from agents.ingestion.deduplicator import DedupResult
+
+        mock_dedup.return_value = DedupResult(new_records=[], duplicates_skipped=0)
+
         agent = IngestionAgent()
-        out = agent.process(sample_event)
-        assert out.correlation_id == sample_event.correlation_id
+        trigger = EventEnvelope(
+            correlation_id="test-1",
+            agent_id="test",
+            payload={"source": "crawl4ai", "limit": 2},
+        )
+        out = agent.process(trigger)
+        assert out.correlation_id == "test-1"
