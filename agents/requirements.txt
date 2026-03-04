@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 sqlalchemy
 pyodbc
 streamlit
@@ -15,3 +16,19 @@ pydantic
 structlog
 pytest
 ruff
+=======
+sqlalchemy>=2.0
+psycopg2-binary>=2.9
+structlog>=24.0
+httpx>=0.27
+pydantic>=2.0
+streamlit>=1.30
+langgraph>=0.2
+langchain>=0.3
+langchain-openai>=0.2
+langsmith>=0.1
+crawl4ai>=0.4
+apscheduler>=3.10
+pytest>=8.0
+ruff>=0.4
+>>>>>>> origin/main

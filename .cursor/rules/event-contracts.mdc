@@ -11,7 +11,7 @@ globs:
 
 ## Core Rules
 
-1. **Events only.** Agents communicate exclusively via `AgentEvent` objects through the message bus. Never call another agent's methods directly.
+1. **Events only.** Agents communicate exclusively via `EventEnvelope` objects through the message bus. Never call another agent's methods directly.
 2. **Orchestrator is sole failure consumer.** Only the Orchestration Agent subscribes to `*Failed` and `*Alert` events.
 3. **Propagate `correlation_id`.** Every event in a pipeline run shares the same `correlation_id`, set by the initial `IngestBatch` and passed unchanged through all downstream events.
 4. **Version payloads.** Use `schema_version` field. Increment on breaking payload changes.
@@ -57,7 +57,7 @@ Each event's `payload` dict should include:
 
 ## Adding a New Event Type
 
-1. Define it in `agents/common/events/` following the `AgentEvent` dataclass
+1. Define it in `agents/common/events/` following the `EventEnvelope` dataclass
 2. Add it to the event catalog (this doc and `ARCHITECTURE_DEEP.md`)
 3. Register the Orchestrator as a consumer
 4. If it's a failure event, only Orchestrator may consume it
