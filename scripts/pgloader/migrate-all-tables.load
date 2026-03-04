@@ -1,0 +1,48 @@
+/*
+ * pgloader configuration: MSSQL → PostgreSQL (all tables)
+ *
+ * Migrates all tables from the SQL Server Docker container to the
+ * PostgreSQL Docker container. Both containers must be running.
+ *
+ * Usage (from project root):
+ *   docker run --rm --network host dimitri/pgloader:latest \
+ *     pgloader /scripts/pgloader/migrate-all-tables.load
+ *
+ * Or if running pgloader natively:
+ *   pgloader scripts/pgloader/migrate-all-tables.load
+ *
+ * Environment variables (set these before running, or edit inline):
+ *   MSSQL_SA_PASSWORD, MSSQL_PORT (default 1433)
+ *   POSTGRES_USER (default postgres), POSTGRES_PASSWORD, POSTGRES_PORT (default 5432)
+ *   Database name defaults to talent_finder on both sides.
+ */
+
+LOAD DATABASE
+  FROM mssql://SA:YourComplex!P4ssw0rd@localhost:1433/talent_finder
+  INTO postgresql://postgres:YourPostgresP4ssw0rd@localhost:5432/talent_finder
+
+WITH
+  include drop,
+  create tables,
+  create indexes,
+  reset sequences,
+  batch rows = 1000,
+  prefetch rows = 500
+
+SET
+  work_mem to '64MB',
+  maintenance_work_mem to '512MB'
+
+CAST
+  type nvarchar to text,
+  type ntext to text,
+  type uniqueidentifier to uuid,
+  type datetime to timestamptz,
+  type datetime2 to timestamptz,
+  type bit to boolean,
+  type varbinary to bytea
+
+BEFORE LOAD DO
+  $$ CREATE EXTENSION IF NOT EXISTS vector; $$,
+  $$ CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; $$
+;
