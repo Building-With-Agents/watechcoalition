@@ -67,10 +67,18 @@ You should see `vector` in the list of installed extensions.
 
 ---
 
-## Step 3: Migrate data from MSSQL to PostgreSQL (pgloader)
+## Step 3: Migrate schema and data from MSSQL to PostgreSQL
 
-pgloader copies the entire schema and data from MSSQL to PostgreSQL in one step.
-It handles type conversions automatically.
+Migration uses a two-phase approach:
+
+1. **pgloader** creates the schema (tables, indexes, foreign keys, constraints)
+2. **Python script** copies all data with proper type conversion
+
+This two-phase approach is necessary because pgloader cannot correctly convert
+MSSQL's `uniqueidentifier` type (it emits raw bytes instead of UUID strings)
+or `vector` embeddings (scientific notation is incompatible with pgvector).
+pgloader excels at schema creation, so we use it for that and handle data
+separately.
 
 ### 3a. Edit the pgloader config
 
@@ -78,54 +86,126 @@ Open `scripts/pgloader/migrate-all-tables.load` and update the connection string
 to match your `.env.docker` credentials:
 
 ```
-FROM mssql://SA:<your-MSSQL_SA_PASSWORD>@localhost:<MSSQL_PORT>/talent_finder
-INTO postgresql://<POSTGRES_USER>:<POSTGRES_PASSWORD>@localhost:<POSTGRES_PORT>/talent_finder
+FROM mssql://SA:<your-MSSQL_SA_PASSWORD>@host.docker.internal:<MSSQL_PORT>/talent_finder
+INTO postgresql://<POSTGRES_USER>:<POSTGRES_PASSWORD>@host.docker.internal:<POSTGRES_PORT>/talent_finder
 ```
 
-### 3b. Run pgloader via Docker
+> **Important:** Use `host.docker.internal` (not `localhost`) in the connection
+> strings. pgloader runs inside a Docker container and needs to reach the host's
+> mapped ports. This works on Windows, macOS, and modern Linux Docker.
 
-pgloader is available as a Docker image — no host installation needed:
+### 3b. Run pgloader to create the schema
 
-**Linux / macOS:**
+pgloader is available as a Docker image — no host installation needed.
+
+**Windows (Git Bash):**
 
 ```bash
-docker run --rm --network host \
-  -v "$(pwd)/scripts/pgloader:/pgloader" \
+MSYS_NO_PATHCONV=1 docker run --rm \
+  -v "${PWD}/scripts/pgloader:/pgloader" \
   dimitri/pgloader:latest \
   pgloader /pgloader/migrate-all-tables.load
 ```
 
+> **Git Bash note:** The `MSYS_NO_PATHCONV=1` prefix is required to prevent
+> Git Bash from mangling the `/pgloader` container path.
+
 **Windows (PowerShell):**
 
 ```powershell
-docker run --rm --network host `
+docker run --rm `
   -v "${PWD}/scripts/pgloader:/pgloader" `
   dimitri/pgloader:latest `
   pgloader /pgloader/migrate-all-tables.load
 ```
 
-> **Note:** `--network host` allows pgloader to reach both `localhost:1433` (MSSQL)
-> and `localhost:5432` (PostgreSQL). On Docker Desktop for Windows/macOS, if
-> `--network host` does not work, use `host.docker.internal` instead of `localhost`
-> in the connection strings.
-
-### 3c. Verify migration
+**Linux / macOS:**
 
 ```bash
-# Count tables
-docker exec -it postgres-server psql -U postgres -d talent_finder -c "\dt"
+docker run --rm \
+  -v "$(pwd)/scripts/pgloader:/pgloader" \
+  dimitri/pgloader:latest \
+  pgloader /pgloader/migrate-all-tables.load
+```
+
+pgloader will report errors for data rows (UUIDs and embeddings) — this is
+expected. The important output is that **tables and indexes were created**:
+
+```
+Create tables          0        128
+Create Indexes         0        136
+Primary Keys           0         62
+Create Foreign Keys    ...       ...
+```
+
+### 3c. Copy data with the Python migration script
+
+The Python script reads from MSSQL (via `pyodbc`) and writes to PostgreSQL
+(via `psycopg2`), handling UUID and vector embedding conversions correctly.
+
+> **Prerequisite:** You need both `pyodbc` and `psycopg2-binary` installed.
+> If you haven't done Step 4 yet, run `pip install psycopg2-binary pyodbc`
+> in your activated venv first.
+
+**Windows (Git Bash or PowerShell):**
+
+```bash
+agents/.venv/Scripts/python.exe scripts/migrate_all_data.py
+```
+
+**Linux / macOS:**
+
+```bash
+source agents/.venv/bin/activate
+python scripts/migrate_all_data.py
+```
+
+The script:
+- Disables FK constraints temporarily
+- Truncates all tables (safe to re-run)
+- Copies every row from MSSQL, converting UUIDs and embeddings
+- Re-enables FK constraints
+- Reports per-table row counts and any errors
+
+Expected output:
+
+```
+Migration complete: 1185 total rows across 64 tables
+No errors!
+```
+
+### 3d. Verify migration
+
+```bash
+# Count tables in PostgreSQL
+docker exec postgres-server psql -U postgres -d talent_finder -c "\dt dbo.*"
 
 # Spot-check key tables
-docker exec -it postgres-server psql -U postgres -d talent_finder -c "SELECT count(*) FROM skills;"
-docker exec -it postgres-server psql -U postgres -d talent_finder -c "SELECT count(*) FROM companies;"
-docker exec -it postgres-server psql -U postgres -d talent_finder -c "SELECT count(*) FROM job_postings;"
+docker exec postgres-server psql -U postgres -d talent_finder -c "SELECT count(*) FROM dbo.skills;"
+docker exec postgres-server psql -U postgres -d talent_finder -c "SELECT count(*) FROM dbo.companies;"
+docker exec postgres-server psql -U postgres -d talent_finder -c "SELECT count(*) FROM dbo.job_postings;"
+
+# Verify UUID format is correct (should show standard UUID like 88FEF40B-464B-...)
+docker exec postgres-server psql -U postgres -d talent_finder -c "SELECT skill_id FROM dbo.skills LIMIT 1;"
+
+# Verify pgvector embeddings loaded correctly
+docker exec postgres-server psql -U postgres -d talent_finder -c "SELECT embedding FROM dbo.skills WHERE embedding IS NOT NULL LIMIT 1;"
 ```
 
-Compare counts with MSSQL:
+> **Note:** On Windows with Git Bash, omit the `-it` flags from `docker exec`
+> commands (use `docker exec postgres-server ...` not `docker exec -it ...`)
+> to avoid TTY errors.
+
+Compare counts with MSSQL (Windows Git Bash):
 
 ```bash
-docker exec -it mssql-server /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YOUR_SA_PASSWORD' -C -Q "SELECT count(*) FROM skills"
+MSYS_NO_PATHCONV=1 docker exec mssql-server /opt/mssql-tools18/bin/sqlcmd \
+  -S localhost -U sa -P 'YOUR_SA_PASSWORD' -C -No \
+  -Q "SELECT count(*) FROM skills"
 ```
+
+> **MSSQL sqlcmd note:** Use the `-No` flag for optional encryption. Without
+> it, login may fail on newer MSSQL images that default to mandatory encryption.
 
 ---
 
@@ -244,8 +324,13 @@ These will migrate to PostgreSQL in a future DB-unification effort.
 | `psycopg2` import error | Run `pip install psycopg2-binary>=2.9` in your activated venv |
 | Connection refused on port 5432 | Ensure PostgreSQL container is running: `docker ps --filter "name=postgres-server"` |
 | `FATAL: password authentication failed` | Verify `POSTGRES_PASSWORD` in `.env.docker` matches the password in `PYTHON_DATABASE_URL` |
-| pgvector extension not found | Check init script ran: `docker exec -it postgres-server psql -U postgres -d talent_finder -c "\dx"` |
+| pgvector extension not found | Check init script ran: `docker exec postgres-server psql -U postgres -d talent_finder -c "\dx"` |
 | Port conflict (5432 in use) | Change `POSTGRES_PORT` in `.env.docker` to another port (e.g., `15432`) and update `PYTHON_DATABASE_URL` to match |
-| pgloader `--network host` fails on macOS/Windows | Replace `localhost` with `host.docker.internal` in the pgloader config connection strings |
-| pgloader reports type conversion errors | Check for custom SQL Server types (e.g., `vector`). The pgvector extension must be enabled before migration (the `BEFORE LOAD DO` clause in the config handles this) |
-| Tables missing after pgloader | Verify MSSQL container has seeded data. Run `npm run db:seed:anonymized` first if needed |
+| Git Bash mangles Docker paths | Prefix commands with `MSYS_NO_PATHCONV=1` (e.g., `MSYS_NO_PATHCONV=1 docker run ...`) |
+| `the input device is not a TTY` | Remove `-it` flags from `docker exec` commands when running in Git Bash |
+| pgloader UUID errors (`invalid input syntax for type uuid`) | Expected — pgloader cannot convert MSSQL `uniqueidentifier` correctly. Use the Python migration script (`scripts/migrate_all_data.py`) for data |
+| pgloader vector/embedding errors | Expected — MSSQL stores embeddings in scientific notation which pgvector rejects. The Python script handles the format conversion |
+| pgloader `text(255)` type modifier error | The pgloader config casts `nvarchar` to `varchar` (not `text`) to preserve length modifiers. If you see this error, check the CAST rules in the `.load` file |
+| MSSQL sqlcmd `Login failed` | Use the `-No` flag for optional encryption: `sqlcmd -S localhost -U sa -P 'pass' -C -No -Q "..."` |
+| Tables missing after migration | Verify MSSQL container has seeded data. Run `npm run db:seed:anonymized` first if needed |
+| Python migration script column errors | pgloader lowercases all PostgreSQL identifiers. The migration script handles this automatically. If you see `column "createdAt" does not exist`, ensure you're using the latest version of `scripts/migrate_all_data.py` |
