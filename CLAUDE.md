@@ -79,7 +79,7 @@ The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **s
     │   ├── forecasting/
     │   └── tests/
     ├── common/
-    │   ├── events/            ← AgentEvent dataclass + all typed event definitions
+    │   ├── events/            ← EventEnvelope model + all typed event definitions
     │   ├── message_bus/       ← In-process Python pub/sub (Phase 1); bus-agnostic contracts
     │   ├── llm_adapter.py
     │   ├── data_store/

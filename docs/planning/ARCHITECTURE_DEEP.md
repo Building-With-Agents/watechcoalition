@@ -138,10 +138,14 @@ log.info("ingestion_batch_complete", batch_id=batch_id, record_count=n, dedup_co
 ### Health check (required on every agent)
 
 ```python
-def health_check(self) -> bool:
-    """Return True only if all dependencies are reachable."""
-    # Check DB connection, fixture files, LLM connectivity as needed
-    return True
+def health_check(self) -> dict:
+    """Return a dict describing agent readiness."""
+    return {
+        "status": "ok",       # "ok" | "degraded" | "down"
+        "agent": self.agent_id,
+        "last_run": self.last_run_at.isoformat() if self.last_run_at else None,
+        "metrics": self.last_run_metrics,
+    }
 ```
 
 ---
