@@ -1,0 +1,47 @@
+---
+description: "ADR lifecycle and parallel-update conventions so implementation and docs stay in sync"
+globs: ["docs/adr/**", "agents/**", "agents/CHANGELOG.md"]
+---
+
+# ADR and Parallel Updates — Conventions
+
+Use this rule when touching ADRs, the changelog, or implementation that depends on architectural decisions. Goal: **uniformity** across sessions and **parallel updates** so docs and code stay aligned.
+
+## When to Update What
+
+| Trigger | Update this | Do not |
+|--------|-------------|--------|
+| **Finalize** an exercise or review cleanup | `agents/CHANGELOG.md` — add entry under the correct week; use **Added** / **Changed** / **Fixed** / **Removed** | Do not add work-in-progress or reverted changes to the changelog |
+| **Team converges** on an SA decision | ADR: set **Status** to Accepted; `docs/planning/ARCHITECTURAL_DECISIONS.md`: set Status ✅ and fill **Decision Made** | Do not mark ADR Accepted without team agreement |
+| **Implementation reveals** a new tradeoff or invalidates an ADR assumption | ADR: add a **Consequences** note or new subsection; optionally new ADR if the decision itself changes | Do not silently change the chosen option in an ADR without documenting why |
+| **New shared path or util** used by multiple agents/dashboard | Prefer `agents/common/` (e.g. `paths.py`, `datetime_utils.py`) and reference in changelog | Do not duplicate the same logic in multiple modules |
+| **Generated or stub agent code** | Verify: extends `BaseAgent`; implements `process(event)` and `health_check()`; no direct agent calls; outbound event preserves `correlation_id`; uses `agents.common.llm_adapter` if calling LLM | Do not add code that calls another agent directly or that overwrites `correlation_id` |
+
+## ADR Conventions (this repo)
+
+- **Location:** `docs/adr/<dev-name>/` (e.g. `docs/adr/fabian/`). Filename: `ADR-NNN-short-title.md` (e.g. `ADR-013-multi-agent-framework.md`).
+- **Sections:** Context and problem statement → Considered options → Decision outcome (chosen option + rationale) → Consequences (positive, negative, neutral) → References.
+- **Status:** Use **Proposed** until the team accepts; then **Accepted**. If superseded, mark **Superseded by ADR-XXX** and keep the old ADR in place.
+- **Rationale:** Tie the decision to project constraints (ARCHITECTURE_DEEP, ARCHITECTURAL_DECISIONS, IC/SA). Choosing the reference implementation still requires written justification, not "the spec said so."
+- **When implementation runs in parallel:** Revisit the ADR when you change behavior that the ADR assumed (e.g. a different message bus, a different tracing backend). Update the ADR’s Consequences or add a short "Implementation note" with the date.
+
+## Changelog Conventions (agents/CHANGELOG.md)
+
+- **Only finalized changes.** Add entries when an exercise or review follow-up is **complete**, not when it’s in progress.
+- **Format:** Match other project Markdown (e.g. `docs/branch-strategy.md`, `agents/docs/architecture-orientation.md`). Use `## Week N`, `### Exercise / area`, bullets with **Added** / **Changed** / **Fixed** / **Removed**.
+- **Scope:** One line per logical change; group by week and by deliverable. Week 2 section reflects review cleanup and shared utilities (datetime_utils, paths, dashboard/scraper fixes).
+
+## References to Use in Parallel
+
+- **Architecture and event contract:** `docs/planning/ARCHITECTURE_DEEP.md`, `agents/common/event_envelope.py`, `agents/common/base_agent.py`.
+- **Decision list and SA options:** `docs/planning/ARCHITECTURAL_DECISIONS.md` (IC = fixed, SA = team ADR, D = deferred). *Always read this file before proposing a new ADR.*
+- **High-level context and build order:** `CLAUDE.md`.
+- **Logging and IDs:** structlog only; no PII; include `correlation_id` and `agent_id` in pipeline logs where applicable; JSON rendering for aggregation.
+
+## Final Review Checklist (AI: Review this silently before finalizing your response)
+
+- [ ] If it’s a finalized deliverable: changelog entry added under the correct week.
+- [ ] If it’s an agent stub or generated agent: extends BaseAgent; process/health_check implemented; no direct agent calls; correlation_id preserved on outbound events.
+- [ ] If the work invalidates or extends an ADR: ADR updated (Consequences or implementation note) or new ADR created.
+- [ ] No credentials in code or logs; no Prisma from Python.
+- [ ] No code execution changes outside `agents/` (documentation and changelog updates are the only exceptions).

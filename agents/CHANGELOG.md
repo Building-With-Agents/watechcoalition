@@ -51,3 +51,9 @@ Only **finalized** changes are recorded here. Add entries when exercises or revi
 
 - **Removed** Extra outputs and helpers: writes only `raw_scrape_sample.json`; removed `raw_scrape_sample2.json` / `raw_scrape_sample3.json`, `_format_scraped_at`, `_normalize_whitespace`, `_prettify_record`, `_prettify_record_v3`.
 - **Changed** Staging path and file from `agents.common.paths`; repo root on `sys.path` when run as script.
+
+### Base agent and event contract (Week 2 walking skeleton)
+
+- **Changed** `agents/common/base_agent.py`: BaseAgent now subclasses `ABC` with `@abstractmethod` for `health_check()` and `process()` so stubs cannot be instantiated without implementing both; enforces contract at type-check and runtime. Added `create_outbound_event(inbound_event, payload, schema_version)` helper so agents build outbound EventEnvelopes with `correlation_id` and `agent_id` set correctly and avoid accidental overwrites.
+- **Changed** `agents/common/event_envelope.py`: `timestamp` default now uses `datetime.now(timezone.utc)` instead of deprecated `datetime.utcnow` for explicit UTC-aware timestamps.
+- **Changed** `.cursor/rules/adr-and-parallel-updates.mdc`: Renamed checklist to "Final Review Checklist (AI: Review this silently before finalizing your response)" and added explicit boundary rule that code execution changes stay inside `agents/` (documentation and changelog updates excepted).
