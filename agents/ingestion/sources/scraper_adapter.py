@@ -17,6 +17,14 @@ from uuid import uuid4
 
 import structlog
 
+# Load .env from repo root when this module is run as __main__
+if __name__ == "__main__":
+    repo_root = Path(__file__).resolve().parents[3]
+    env_path = repo_root / ".env"
+    if env_path.exists():
+        from dotenv import load_dotenv
+        load_dotenv(env_path)
+
 log = structlog.get_logger()
 
 MIN_RECORDS = 5
