@@ -2,7 +2,7 @@
 **Audience:** Implementing engineers, Claude Code
 **Version:** 1.1 | **Source of truth:** `job_intelligence_engine_architecture.docx`
 **Last updated:** 2026-02-18
-**Status:** Reference implementation for Phase 1. Technology choices classified as SA (Student ADR) in `ARCHITECTURAL_DECISIONS.md` are subject to team ADR decisions. If a team selects a different technology, adapt the corresponding agent implementation accordingly. Infrastructure constraints (IC) are fixed by the existing platform. Phase 2 items are marked explicitly — do not implement them in Phase 1 unless instructed.
+**Status:** Frozen for Phase 1 implementation. Phase 2 items are marked explicitly — do not implement them in Phase 1 unless instructed.
 
 ---
 
@@ -13,7 +13,7 @@
 3. **The Orchestration Agent is the sole consumer** of `*Failed` and `*Alert` events. No other agent reacts to another agent's failures.
 4. **No agent writes to another agent's internal state.**
 5. **Every agent exposes a `health_check()` method** and emits self-evaluation metrics.
-6. **Python agents access MSSQL via SQLAlchemy only.** Prisma is Next.js-only.
+6. **Python agents access PostgreSQL via SQLAlchemy only.** Prisma is Next.js-only.
 7. **No credentials in code.** Environment variables only.
 8. **Do not modify the Next.js app or `prisma/schema.prisma`** unless explicitly instructed.
 
@@ -70,7 +70,7 @@
     │   └── tests/
     ├── common/
     │   ├── events/
-    │   ├── message_bus/       ← SA #14 — reference impl: in-process pub/sub (Phase 1)
+    │   ├── message_bus/       ← In-process pub/sub (Phase 1)
     │   ├── llm_adapter.py
     │   ├── data_store/
     │   ├── config/
@@ -103,13 +103,12 @@
 
 ## Common Patterns — Follow Exactly
 
-> **Note:** The patterns below use reference implementation technologies. If your team's ADRs selected different tools for SA-classified decisions, adapt the implementation while preserving the contract (the abstract interface, event types, and method signatures). Engineering rules apply regardless of technology choices.
-
 ### Event envelope
 
 ```python
-@dataclass
-class AgentEvent:
+from pydantic import BaseModel
+
+class EventEnvelope(BaseModel):
     event_id: str          # uuid4
     correlation_id: str    # propagated unchanged from IngestBatch onward
     agent_id: str
@@ -139,8 +138,10 @@ log.info("ingestion_batch_complete", batch_id=batch_id, record_count=n, dedup_co
 ### Health check (required on every agent)
 
 ```python
-def health_check(self) -> dict:
-    return {"status": "ok", "agent": "ingestion", "last_run": self.last_run_at.isoformat(), "metrics": self.last_run_metrics}
+def health_check(self) -> bool:
+    """Return True only if all dependencies are reachable."""
+    # Check DB connection, fixture files, LLM connectivity as needed
+    return True
 ```
 
 ---
@@ -215,10 +216,10 @@ class JobRecord(BaseModel):
 **File:** `agents/ingestion/agent.py` | **Emits:** `IngestBatch` | **Writes to:** `raw_ingested_jobs`
 
 **Phase 1 responsibilities:**
-- Poll JSearch via `httpx`; scrape via Crawl4AI [SA #12 — reference implementation]
+- Poll JSearch via `httpx`; scrape via Crawl4AI
 - Fingerprint: `sha256(source + external_id + title + company + date_posted)`
 - Dedup against `raw_ingested_jobs.raw_payload_hash`; discard silently; increment counter
-- JSearch wins over scraped when same job appears in both (IC #9)
+- JSearch wins over scraped when same job appears in both (decision #9)
 - Provenance tags: `source`, `external_id`, `raw_payload_hash`, `ingestion_run_id`, `ingestion_timestamp`
 
 **Error handling:**
@@ -293,7 +294,7 @@ class JobRecord(BaseModel):
 #### Phase 1 — Lite (implement now)
 - Classify job role and seniority
 - Quality score [0–1]: completeness, linguistic clarity, AI keyword density, structural coherence
-- Spam detection (IC #8):
+- Spam detection:
   - < 0.7 → proceed
   - 0.7–0.9 → flag for operator review (`is_spam = null`)
   - > 0.9 → auto-reject; do not write to `job_postings`
@@ -328,7 +329,7 @@ class JobRecord(BaseModel):
 
 ### 5. Analytics Agent
 **File:** `agents/analytics/agent.py` | **Consumes:** `RecordEnriched` | **Emits:** `AnalyticsRefreshed`
-**Exposes:** `POST /analytics/query` (REST) [SA #18 — reference implementation]
+**Exposes:** `POST /analytics/query` (REST)
 
 **Phase 1 responsibilities:**
 - Aggregates across dimensions: skill, role, industry, region, experience level, company size
@@ -395,7 +396,7 @@ class JobRecord(BaseModel):
 ---
 
 ### 7. Orchestration Agent
-**File:** `agents/orchestration/agent.py` | **Framework:** LangGraph StateGraph [SA #13/#16] + APScheduler [IC]
+**File:** `agents/orchestration/agent.py` | **Framework:** LangGraph StateGraph + APScheduler
 
 #### Phase 1 — Basic (implement now)
 - Master run schedule; trigger pipeline steps in sequence
@@ -477,21 +478,21 @@ class JobRecord(BaseModel):
 
 ```sql
 -- Phase 1 additions to job_postings (SQLAlchemy migration only — never touch schema.prisma)
-ALTER TABLE job_postings ADD COLUMN source NVARCHAR(50);
-ALTER TABLE job_postings ADD COLUMN external_id NVARCHAR(255);
-ALTER TABLE job_postings ADD COLUMN ingestion_run_id NVARCHAR(36);
-ALTER TABLE job_postings ADD COLUMN ai_relevance_score FLOAT;
-ALTER TABLE job_postings ADD COLUMN quality_score FLOAT;
-ALTER TABLE job_postings ADD COLUMN is_spam BIT;
-ALTER TABLE job_postings ADD COLUMN spam_score FLOAT;
-ALTER TABLE job_postings ADD COLUMN overall_confidence FLOAT;
-ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS source TEXT;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS external_id TEXT;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS ingestion_run_id TEXT;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS ai_relevance_score DOUBLE PRECISION;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS quality_score DOUBLE PRECISION;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS is_spam BOOLEAN;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS spam_score DOUBLE PRECISION;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS overall_confidence DOUBLE PRECISION;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;  -- JSON object
 
 -- Phase 2 additions
-ALTER TABLE job_postings ADD COLUMN enrichment_quality_score FLOAT;
-ALTER TABLE job_postings ADD COLUMN enrichment_partial BIT;
-ALTER TABLE job_postings ADD COLUMN soc_code NVARCHAR(20);
-ALTER TABLE job_postings ADD COLUMN remote_classification NVARCHAR(50);
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS enrichment_quality_score DOUBLE PRECISION;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS enrichment_partial BOOLEAN;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS soc_code TEXT;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS remote_classification TEXT;
 ```
 
 **Agent-managed tables:**
@@ -524,34 +525,40 @@ ALTER TABLE job_postings ADD COLUMN remote_classification NVARCHAR(50);
 
 ## Environment Variables
 
-> Variables for SA-classified tools reflect the **reference implementation**. If the team selects different technologies via their ADRs, the corresponding env vars will change (e.g., a different tracing tool replaces `LANGSMITH_API_KEY`).
+<!-- Variable names must match watechcoalition/.env.example (canonical source) -->
 
 ```bash
-# SA #11 — LLM provider (reference: Azure OpenAI)
+# LLM / Azure OpenAI
 AZURE_OPENAI_API_KEY=
 AZURE_OPENAI_ENDPOINT=
+AZURE_OPENAI_API_VERSION="2025-01-01-preview"
 AZURE_OPENAI_DEPLOYMENT_NAME=
 LLM_PROVIDER=azure_openai             # azure_openai | openai | anthropic
 
-# IC #19 — Database (MSSQL — fixed)
-DATABASE_URL=                          # MSSQL pyodbc connection string
+# Embeddings
+AZURE_OPENAI_EMBEDDING_ENDPOINT=
+AZURE_OPENAI_EMBEDDING_API_KEY=
+AZURE_OPENAI_EMBEDDING_API_VERSION="2024-02-01"
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME=
 
-# SA #17 — Agent tracing (reference: LangSmith)
+# Database
+# POSTGRES MIGRATION: change from sqlserver:// to postgresql://
+DATABASE_URL=                          # Prisma / Next.js connection string
+# POSTGRES MIGRATION: change from mssql+pyodbc:// to postgresql+psycopg2://
+PYTHON_DATABASE_URL=                   # SQLAlchemy connection string (Python agents)
+
+# Observability
 LANGSMITH_API_KEY=
 LANGCHAIN_TRACING_V2=true
 
-# SA #12 — Ingestion sources (reference: httpx + Crawl4AI)
+# Ingestion
 JSEARCH_API_KEY=
 SCRAPING_TARGETS=                      # Comma-separated URLs
-
-# IC #3 — Scheduling
 INGESTION_SCHEDULE=0 2 * * *           # Cron — default: daily at 2am
 
-# IC #8 — Spam thresholds
+# Pipeline thresholds
 SPAM_FLAG_THRESHOLD=0.7
 SPAM_REJECT_THRESHOLD=0.9
-
-# Agent configuration
 SKILL_CONFIDENCE_THRESHOLD=0.75
 BATCH_SIZE=100
 ```
