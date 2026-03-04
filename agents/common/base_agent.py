@@ -9,11 +9,12 @@ All inter-agent communication is through EventEnvelope objects only.
 """
 
 from __future__ import annotations
+from abc import ABC, abstractmethod
 
 from agents.common.event_envelope import EventEnvelope
 
 
-class BaseAgent:
+class BaseAgent(ABC):
     """
     Abstract base class for all Job Intelligence Engine agents.
 
@@ -25,6 +26,7 @@ class BaseAgent:
     def __init__(self, agent_id: str) -> None:
         self.agent_id = agent_id
 
+    @abstractmethod
     def health_check(self) -> dict:
         """
         Return a dict describing agent readiness.
@@ -42,10 +44,9 @@ class BaseAgent:
         status, the pipeline aborts.  Phase 2 agents returning non-"ok"
         produce a warning, not an abort.
         """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement health_check()"
-        )
+        pass
 
+    @abstractmethod
     def process(self, event: EventEnvelope) -> EventEnvelope | None:
         """
         Consume an inbound EventEnvelope, perform this agent's work, and
@@ -58,6 +59,16 @@ class BaseAgent:
         - Return None ONLY for Phase 2 agents not yet implemented.
           The pipeline runner handles None returns gracefully.
         """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement process()"
+        pass
+
+    def create_outbound_event(self, inbound_event: EventEnvelope, payload: dict, schema_version: str = "1.0") -> EventEnvelope:
+        """
+        Helper method to guarantee strict adherence to the event contract.
+        Automatically propagates the correlation_id and injects this agent's ID.
+        """
+        return EventEnvelope(
+            correlation_id=inbound_event.correlation_id,
+            agent_id=self.agent_id,
+            schema_version=schema_version,
+            payload=payload
         )
