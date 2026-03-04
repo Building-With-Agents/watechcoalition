@@ -8,7 +8,7 @@ Source of truth: `job_intelligence_engine_architecture.docx` — see `docs/plann
 
 ## Project Summary
 
-**Job Intelligence Engine** — an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings for the watechcoalition platform (Next.js + MSSQL).
+**Job Intelligence Engine** — an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings for the watechcoalition platform. The Next.js app uses MSSQL (via Prisma); the Python agent pipeline uses PostgreSQL (via SQLAlchemy). A future Phase 2 migration will unify both layers on PostgreSQL.
 
 The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **separate Python layer** that lives in `agents/` and runs alongside it.
 
@@ -23,7 +23,7 @@ The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **s
 3. **The Orchestration Agent is the sole consumer** of `*Failed` and `*Alert` events. No other agent reacts to another agent’s failures.
 4. **No agent writes to another agent’s internal state.**
 5. **Every agent exposes a `health_check()` method** and emits self-evaluation metrics.
-6. **Python agents access MSSQL via SQLAlchemy only.** Prisma is Next.js-only — never import or invoke it from Python.
+6. **Python agents access PostgreSQL via SQLAlchemy only.** Prisma is Next.js-only — never import or invoke it from Python.
 7. **No credentials in code or logs.** Environment variables only.
 8. **Do NOT implement Phase 2 items during Phase 1** unless explicitly instructed.
 
@@ -146,7 +146,7 @@ Sources (JSearch API via httpx / Web scraping via Crawl4AI)
 | Scheduling | APScheduler — inside Orchestration Agent | IC #3 |
 | Ingestion: API source | httpx — JSearch API calls | SA #12 |
 | Ingestion: web scraping | Crawl4AI — local, pip-installable | SA #12 |
-| DB access (agents) | SQLAlchemy + pyodbc → MSSQL | IC #19 |
+| DB access (agents) | SQLAlchemy + psycopg2 → PostgreSQL | IC #19 |
 | DB access (Next.js app) | Prisma — do not touch from Python | IC #19 |
 | Message bus (Phase 1) | In-process Python pub/sub | SA #14 |
 | Message bus (Phase 2) | External bus (Kafka / RabbitMQ / Redis Streams) | SA #14 |
@@ -171,8 +171,8 @@ AZURE_OPENAI_DEPLOYMENT_NAME=
 LLM_PROVIDER=azure_openai          # azure_openai | openai | anthropic
 
 # Database
-PYTHON_DATABASE_URL=                # SQLAlchemy pyodbc URL for agents:
-                                    #   mssql+pyodbc://user:pass@host:port/db?driver=ODBC+Driver+17+for+SQL+Server
+PYTHON_DATABASE_URL=                # SQLAlchemy psycopg2 URL for agents:
+                                    #   postgresql+psycopg2://user:pass@host:port/db
                                     # Note: DATABASE_URL (Prisma sqlserver:// format) is for Next.js only
 
 # Tracing
@@ -256,15 +256,15 @@ def health_check(self) -> dict:
 **New columns on `job_postings` (Phase 1 — SQLAlchemy migration only, never touch schema.prisma):**
 
 ```sql
-ALTER TABLE job_postings ADD COLUMN source NVARCHAR(50);
-ALTER TABLE job_postings ADD COLUMN external_id NVARCHAR(255);
-ALTER TABLE job_postings ADD COLUMN ingestion_run_id NVARCHAR(36);
-ALTER TABLE job_postings ADD COLUMN ai_relevance_score FLOAT;
-ALTER TABLE job_postings ADD COLUMN quality_score FLOAT;
-ALTER TABLE job_postings ADD COLUMN is_spam BIT;
-ALTER TABLE job_postings ADD COLUMN spam_score FLOAT;
-ALTER TABLE job_postings ADD COLUMN overall_confidence FLOAT;
-ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS source TEXT;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS external_id TEXT;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS ingestion_run_id TEXT;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS ai_relevance_score DOUBLE PRECISION;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS quality_score DOUBLE PRECISION;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS is_spam BOOLEAN;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS spam_score DOUBLE PRECISION;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS overall_confidence DOUBLE PRECISION;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 ```
 
 **Agent-managed tables (created by agents, not Prisma):**
@@ -410,7 +410,7 @@ ALTER TABLE job_postings ADD COLUMN field_confidence NVARCHAR(MAX); -- JSON
 | 2 | LLM adapter + walking skeleton | `llm_adapter.py`, 8 agent stubs, pipeline runner, journey dashboard |
 | 3 | Ingestion Agent + Normalization Agent | `IngestBatch`/`NormalizationComplete` events, staging tables, APScheduler |
 | 4 | Skills Extraction Agent + eval harness + Enrichment-lite | `SkillsExtracted` event, eval dataset (30–50 labeled), prompt iteration log |
-| 5 | Visualization Agent | Production Streamlit dashboards, PDF/CSV/JSON export, live MSSQL connection |
+| 5 | Visualization Agent | Production Streamlit dashboards, PDF/CSV/JSON export, live PostgreSQL connection |
 | 6 | Orchestration Agent | Scheduling, alerting tiers, retry policies, audit log, Operations & Alerts page |
 | 7 | Analytics Agent — aggregates + weekly insights | Aggregate tables, LLM summaries, template fallback, `AnalyticsRefreshed` event |
 | 8 | Analytics Agent — Ask the Data | Text-to-SQL, SQL guardrails + unit tests, “Ask the Data” Streamlit page |
@@ -441,7 +441,7 @@ See `docs/planning/ARCHITECTURAL_DECISIONS.md` for full classification details a
 | 16 | Orchestration engine | SA | **LangGraph StateGraph** (consistent with #13) |
 | 17 | Agent tracing | SA | **LangSmith** — native LangGraph integration |
 | 18 | Analytics query interface | SA | **REST** — `POST /analytics/query` |
-| 19 | Database engine | IC | **MSSQL** — stay on existing watechcoalition instance |
+| 19 | Database engine | IC | **PostgreSQL** — single instance, pgvector-enabled; see `ARCHITECTURAL_DECISIONS.md` #19 |
 | 20 | Enrichment phase split | IC | **Lite (Phase 1) + Full (Phase 2)** |
 | 21 | PDF export scope | IC | **Standard Phase 1 deliverable** — not a stretch goal |
 

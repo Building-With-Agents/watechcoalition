@@ -63,6 +63,12 @@ Edit `.env.docker` and set:
 - `MSSQL_DATABASE` — Default: `talent_finder`
 - `MSSQL_PORT` — Default: `1433`
 
+For the Python agent pipeline (PostgreSQL), also set:
+- `POSTGRES_USER` — Default: `postgres`
+- `POSTGRES_PASSWORD` — Strong password
+- `POSTGRES_DB` — Default: `talent_finder`
+- `POSTGRES_PORT` — Default: `5432`
+
 ## 3. Start SQL Server (Docker)
 
 This project uses SQL Server `mcr.microsoft.com/mssql/server:2025-latest` in [docker-compose.yml](docker-compose.yml).
@@ -85,6 +91,28 @@ Wait for the container to be healthy. To verify:
 ```bash
 docker ps --filter "name=mssql-server"
 ```
+
+## 3.5 Start PostgreSQL (Docker) — for agent pipeline
+
+The Python agent pipeline uses PostgreSQL (separate from the MSSQL instance used by Next.js). After configuring `.env.docker` with PostgreSQL variables (see section 2.2):
+
+**All platforms:**
+
+```bash
+docker compose --env-file .env.docker up postgres -d
+```
+
+Wait for the container to be healthy:
+
+```bash
+docker ps --filter "name=postgres-server"
+```
+
+The pgvector extension is automatically enabled on first container creation (via the init script in `scripts/postgres-init/`).
+
+> **Note:** You need both SQL Server (for Next.js) and PostgreSQL (for agents) running during development. Use `docker compose --env-file .env.docker up -d` to start both at once.
+
+> **Migrating from MSSQL?** If you previously ran agents against MSSQL, see [docs/MIGRATION_MSSQL_TO_POSTGRES.md](docs/MIGRATION_MSSQL_TO_POSTGRES.md) for data migration steps using pgloader.
 
 ## 4. Create the database (all platforms)
 
@@ -204,17 +232,19 @@ pip install -r agents/requirements.txt
 
 ### 7.4 Set PYTHON_DATABASE_URL in .env
 
-Python agents use SQLAlchemy + pyodbc, which requires a **different connection string format** than Prisma's `DATABASE_URL`. Add this to your `.env` file:
+Python agents use SQLAlchemy + psycopg2, which connects to **PostgreSQL** (not the MSSQL instance used by Next.js). Add this to your `.env` file:
 
 ```env
-PYTHON_DATABASE_URL=mssql+pyodbc://SA:YOUR_SA_PASSWORD@localhost:1433/talent_finder?driver=ODBC+Driver+17+for+SQL+Server
+PYTHON_DATABASE_URL=postgresql+psycopg2://postgres:YOUR_POSTGRES_PASSWORD@localhost:5432/talent_finder
 ```
 
-- Replace `YOUR_SA_PASSWORD` with your `MSSQL_SA_PASSWORD` from `.env.docker`.
-- Replace `1433` with your `MSSQL_PORT` if you changed it (e.g. `11433`).
-- Replace `talent_finder` with your `MSSQL_DATABASE` if you changed it.
+- Replace `YOUR_POSTGRES_PASSWORD` with your `POSTGRES_PASSWORD` from `.env.docker`.
+- Replace `5432` with your `POSTGRES_PORT` if you changed it.
+- Replace `talent_finder` with your `POSTGRES_DB` if you changed it.
 
-> **Why a separate variable?** Prisma requires `sqlserver://host:port;key=value` syntax. SQLAlchemy requires `mssql+pyodbc://user:pass@host:port/db?driver=...` syntax. They are not interchangeable — using the wrong format causes a silent connection failure.
+> **Why a separate database?** The Python agent pipeline uses PostgreSQL (with pgvector for embedding similarity search). The Next.js app still uses MSSQL via Prisma. These are independent database connections. A future Phase 2 migration will unify both layers on PostgreSQL.
+
+> **Migrating from MSSQL?** If you previously had the Python agents configured to use MSSQL, see [docs/MIGRATION_MSSQL_TO_POSTGRES.md](docs/MIGRATION_MSSQL_TO_POSTGRES.md) for step-by-step migration instructions.
 
 **When the pipeline is implemented**, you will use commands like the following (included here for reference; they will not work until the corresponding agents exist):
 
@@ -248,12 +278,14 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 | Prisma errors after schema change | Run `npx prisma generate` |
 | Docker not found | Install Docker — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) |
 | `pip` not recognized / Python not found | Install Python 3.11, enable "Add python.exe to PATH", then use a venv (section 7). On Windows, use `py -3.11 -m venv .venv` and activate it before running `pip` |
-| `SQLAlchemy OperationalError` / Python DB connection fails | `DATABASE_URL` uses Prisma's `sqlserver://` format and does not work with SQLAlchemy. Set `PYTHON_DATABASE_URL` in `.env` using `mssql+pyodbc://` format (see step 7.4) |
+| `SQLAlchemy OperationalError` / Python DB connection fails | `DATABASE_URL` uses Prisma's `sqlserver://` format and does not work with SQLAlchemy. Set `PYTHON_DATABASE_URL` in `.env` using `postgresql+psycopg2://` format (see step 7.4) |
+| `PYTHON_DATABASE_URL` connection fails (PostgreSQL) | Ensure PostgreSQL container is running (`docker ps --filter "name=postgres-server"`), port matches `.env.docker`, password is correct |
 
 ## Further Documentation
 
 - [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) — Docker installation (Windows, macOS, Linux)
 - [docs/DOCKER_SQL_SERVER_SETUP.md](docs/DOCKER_SQL_SERVER_SETUP.md) — Detailed SQL Server Docker setup
 - [setup-MSSQL.md](setup-MSSQL.md) — Native MSSQL install (alternative to Docker)
+- [docs/MIGRATION_MSSQL_TO_POSTGRES.md](docs/MIGRATION_MSSQL_TO_POSTGRES.md) — MSSQL to PostgreSQL migration guide (agent pipeline)
 - [prisma-workflow.md](prisma-workflow.md) — DB schema workflow
 - [API-routes.md](API-routes.md) — API reference
