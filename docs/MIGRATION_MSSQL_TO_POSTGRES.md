@@ -2,8 +2,8 @@
 
 This document covers the migration of the **Python agent pipeline** database from
 MSSQL (SQL Server) to PostgreSQL. The Next.js app continues to use MSSQL via
-Prisma in this phase. A future Phase 2 migration will unify both layers on
-PostgreSQL.
+Prisma in this phase. A future DB-unification effort will consolidate both
+layers on PostgreSQL.
 
 **Why PostgreSQL?** See `docs/planning/ARCHITECTURAL_DECISIONS.md`, Decision #19
 for the full rationale (pgvector for embedding similarity search, Python ecosystem
@@ -233,7 +233,7 @@ These are **not affected** by this migration:
 - All existing Next.js API routes
 - The `scripts/start-sql-server.ps1` and related MSSQL scripts
 
-These will migrate to PostgreSQL in a future Phase 2 effort.
+These will migrate to PostgreSQL in a future DB-unification effort.
 
 ---
 

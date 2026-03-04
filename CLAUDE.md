@@ -8,7 +8,7 @@ Source of truth: `job_intelligence_engine_architecture.docx` — see `docs/plann
 
 ## Project Summary
 
-**Job Intelligence Engine** — an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings for the watechcoalition platform. The Next.js app uses MSSQL (via Prisma); the Python agent pipeline uses PostgreSQL (via SQLAlchemy). A future Phase 2 migration will unify both layers on PostgreSQL.
+**Job Intelligence Engine** — an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings for the watechcoalition platform. The Next.js app uses MSSQL (via Prisma); the Python agent pipeline uses PostgreSQL (via SQLAlchemy). A future DB-unification effort will consolidate both layers on PostgreSQL.
 
 The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **separate Python layer** that lives in `agents/` and runs alongside it.
 

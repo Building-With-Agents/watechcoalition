@@ -242,7 +242,7 @@ PYTHON_DATABASE_URL=postgresql+psycopg2://postgres:YOUR_POSTGRES_PASSWORD@localh
 - Replace `5432` with your `POSTGRES_PORT` if you changed it.
 - Replace `talent_finder` with your `POSTGRES_DB` if you changed it.
 
-> **Why a separate database?** The Python agent pipeline uses PostgreSQL (with pgvector for embedding similarity search). The Next.js app still uses MSSQL via Prisma. These are independent database connections. A future Phase 2 migration will unify both layers on PostgreSQL.
+> **Why a separate database?** The Python agent pipeline uses PostgreSQL (with pgvector for embedding similarity search). The Next.js app still uses MSSQL via Prisma. These are independent database connections. A future DB-unification effort will consolidate both layers on PostgreSQL.
 
 > **Migrating from MSSQL?** If you previously had the Python agents configured to use MSSQL, see [docs/MIGRATION_MSSQL_TO_POSTGRES.md](docs/MIGRATION_MSSQL_TO_POSTGRES.md) for step-by-step migration instructions.
 
