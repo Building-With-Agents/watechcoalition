@@ -1,0 +1,53 @@
+/*
+ * pgloader configuration: MSSQL -> PostgreSQL (schema creation)
+ *
+ * This config is used for SCHEMA CREATION ONLY (tables, indexes, FKs).
+ * Data migration is handled separately by scripts/migrate_all_data.py
+ * because pgloader cannot correctly convert MSSQL uniqueidentifier
+ * (emits raw bytes) or vector embeddings (scientific notation).
+ *
+ * Usage (from project root, Git Bash on Windows):
+ *   MSYS_NO_PATHCONV=1 docker run --rm \
+ *     -v "${PWD}/scripts/pgloader:/pgloader" \
+ *     dimitri/pgloader:latest \
+ *     pgloader /pgloader/migrate-all-tables.load
+ *
+ * Before running, update the connection strings below to match your
+ * .env.docker credentials. Use host.docker.internal (not localhost)
+ * since pgloader runs inside a Docker container.
+ *
+ * After pgloader completes, run the Python data migration:
+ *   agents/.venv/Scripts/python.exe scripts/migrate_all_data.py
+ *
+ * See docs/MIGRATION_MSSQL_TO_POSTGRES.md for the full procedure.
+ */
+
+LOAD DATABASE
+  FROM mssql://SA:<MSSQL_SA_PASSWORD>@host.docker.internal:<MSSQL_PORT>/talent_finder
+  INTO postgresql://<POSTGRES_USER>:<POSTGRES_PASSWORD>@host.docker.internal:<POSTGRES_PORT>/talent_finder
+
+WITH
+  include drop,
+  create tables,
+  create indexes,
+  reset sequences,
+  batch rows = 1000,
+  prefetch rows = 500
+
+SET
+  work_mem to '64MB',
+  maintenance_work_mem to '512MB'
+
+CAST
+  type nvarchar to varchar,
+  type ntext to text,
+  type uniqueidentifier to text,
+  type datetime to timestamptz,
+  type datetime2 to timestamptz,
+  type bit to boolean,
+  type varbinary to bytea
+
+BEFORE LOAD DO
+  $$ CREATE EXTENSION IF NOT EXISTS vector; $$,
+  $$ CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; $$
+;
