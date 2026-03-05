@@ -5,12 +5,14 @@ to instantiate them by name.
 """
 
 from agents.ingestion.sources.base_adapter import SourceAdapter
+from agents.ingestion.sources.crawl4ai_indeed import Crawl4AIIndeedAdapter
+from agents.ingestion.sources.crawl4ai_usajobs import Crawl4AIUSAJobsAdapter
 from agents.ingestion.sources.jsearch_adapter import JSearchAdapter
-from agents.ingestion.sources.scraper_adapter import Crawl4AIAdapter, ScraperAdapter
 
 ADAPTER_REGISTRY: dict[str, type[SourceAdapter]] = {
     "jsearch": JSearchAdapter,
-    "crawl4ai": Crawl4AIAdapter,
+    "crawl4ai_indeed": Crawl4AIIndeedAdapter,
+    "crawl4ai_usajobs": Crawl4AIUSAJobsAdapter,
 }
 
 
@@ -27,9 +29,9 @@ def get_adapter(source_name: str) -> SourceAdapter:
 
 __all__ = [
     "ADAPTER_REGISTRY",
-    "Crawl4AIAdapter",
+    "Crawl4AIIndeedAdapter",
+    "Crawl4AIUSAJobsAdapter",
     "JSearchAdapter",
-    "ScraperAdapter",
     "SourceAdapter",
     "get_adapter",
 ]
