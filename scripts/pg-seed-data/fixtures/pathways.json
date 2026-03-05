@@ -1,0 +1,66 @@
+[
+  {
+    "pathway_id": "79608104-D50E-4D0F-B541-2A9DE7BC0F89",
+    "pathway_title": "Infrastructure and Operations",
+    "description": "Infrastructure and Operations roles deploy, operate, and manage a company’s technology resources. AI is transforming these roles from human-dependent functions to smarter networks that manage configurations, troubleshoot issues, and adapt to changing demands. As per the IBM Global AI Adoption Index 2022, 33% of organizations use AI to automate IT processes—freeing up time for complex problem solving, strategic decision making, and stakeholder management.",
+    "tooltip": "Managing and maintaining computer networks and IT infrastructure.",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "pathway_id": "A54F3940-301C-4E2E-85E8-BCAF244C89BB",
+    "pathway_title": "Cybersecurity",
+    "description": "With the advent of AI, the Cybersecurity job roles have witnessed transition, as 70% of Cybersecurity leaders (CISOs) believe AI gives the advantage to attackers over defenders. However, 35% of the CISOs are already experimenting with it for cyber defense, and 61% will likely use it in the next 12 months. Additionally, 86% of CISOs believe that Gen AI will help alleviate skills gaps and talent shortages on the security team. With the intervention of AI there has been an upgrade to the quality of work. Routine tasks such as log analysis and basic threat detection are being automated—potentially reducing time spent on entry-level tasks—while the right skillset can leverage AI to automate report generation and malware analysis.",
+    "tooltip": "Protecting systems, networks, and data from security breaches and cyberattacks.",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "pathway_id": "B28FBD79-C3EA-47B5-9BBF-6F7F8F9C6009",
+    "pathway_title": "Data Science",
+    "description": "Data science leverages advanced statistics and machine learning to tackle business and product challenges through a structured approach encompassing problem identification, data collection, exploration, cleaning, model building, iteration, and communication. In this evolving landscape, the integration of AI marks a transformative shift in business operations and decision-making. AI technologies like NLP, LLMs, Gen AI, and automated data processing have revolutionized data analysis with complex nonlinear correlations and advanced models. While AI enhances efficiency and accelerates data processing, it emphasizes the ongoing necessity of human expertise in interpreting results, validating outputs, and making strategic decisions.",
+    "tooltip": "Analyzing and interpreting large sets of data to extract valuable insights.",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "pathway_id": "79608104-C3EA-47B5-9BBF-6F7F8F9C6009",
+    "pathway_title": "Profession Skills Training",
+    "description": null,
+    "tooltip": null,
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "pathway_id": "6C90FA93-B66F-44AD-BE80-7A161EB178AB",
+    "pathway_title": "Business and Management",
+    "description": "The role of AI in Business and Management has undergone a profound evolution since IBM's 1979 declaration that \"A computer can never be held accountable; therefore, a computer must never make a management decision.\" Fast forward to today, while AI has made significant strides, human oversight remains paramount. AI today can help to create product strategies, provide predictive analytics, automate processes, develop reports, manage large-scale projects, and improve customer satisfaction. However, this reliance on AI necessitates robust contingency plans to mitigate risks associated with business decisions, system failures or technical glitches. The increasing integration of AI underscores the demand for skilled workers in the field. Organizations may encounter challenges in recruiting and retaining AI talent, highlighting the need for skill development initiatives. Despite AI's capabilities, management decisions ultimately remain within the purview of human expertise and judgment, even as AI continues to reshape business operations.",
+    "tooltip": "Managing the development, business analysis and marketing of technology products and services.",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "pathway_id": "F66292E2-1B53-4E14-9E44-7D04213F5A68",
+    "pathway_title": "Design and User Experience",
+    "description": "Effective design hinges on understanding human needs and emotions. This user-centric approach is critical for creating products that resonate with users and achieve desired outcomes. The significance of Design and UX skills is underscored by the World Economic Forum's Future of Jobs Report 2023, which identifies these skills as top priorities for reskilling and upskilling between 2023 and 2027. Although AI automates routine tasks within UX—streamlining workflows and facilitating data analysis—the human touch remains essential in creating empathetic, innovative designs.",
+    "tooltip": "Designing the user experience and interface.",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "pathway_id": "58E737AC-F2FB-4A5A-A786-3C8F28AF4CDB",
+    "pathway_title": "Testing and Quality Assurance",
+    "description": "Testing and Quality Assurance (QA) workers are crucial for ensuring software reliability and functionality. They plan and execute tests rigorously to detect defects and collaborate with various teams to resolve issues. AI has transformed these roles through automated tools such as Selenium and Appium, enhancing accuracy and speed in defect identification. As AI continues to assume routine tasks like documentation and error detection, upskilling in AI-driven testing tools becomes imperative.",
+    "tooltip": "Providing technical support and assistance to users through rigorous software testing and QA.",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "pathway_id": "0645CC89-E942-48B4-A34A-F7AD7E87DEC3",
+    "pathway_title": "Software Development",
+    "description": "Software Development is a crucial business element in an era of rapid digitization and evolving user needs. The role of AI in this sector has evolved from basic assistance to now helping developers design efficient and adaptive products. AI tools, including Gen AI and NLP, provide code suggestions, bug detection, and testing capabilities, ensuring developers have more time to focus on broader business requirements. A Gartner report suggests that by 2025, more than half of all software engineering leader role descriptions will explicitly require oversight of Gen AI.",
+    "tooltip": "Designing, coding, testing, and maintaining software applications and systems.",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  }
+]

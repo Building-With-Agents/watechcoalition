@@ -69,32 +69,11 @@ For the Python agent pipeline (PostgreSQL), also set:
 - `POSTGRES_DB` — Default: `talent_finder`
 - `POSTGRES_PORT` — Default: `5432`
 
-## 3. Start SQL Server (Docker)
+## 3. Start PostgreSQL (Docker) — Primary Database
 
-This project uses SQL Server `mcr.microsoft.com/mssql/server:2025-latest` in [docker-compose.yml](docker-compose.yml).
-If you also run a local SQL Server instance on your machine, set `MSSQL_PORT` in `.env.docker` to a non-default host port (for example `11433`) so Prisma targets Docker, not the local instance.
+PostgreSQL is the **primary database** for all development. The Python agent pipeline uses it exclusively via SQLAlchemy + psycopg2, with pgvector for embedding similarity search.
 
-**Windows:**
-
-```powershell
-.\scripts\start-sql-server.ps1
-```
-
-**Linux / macOS:**
-
-```bash
-docker compose --env-file .env.docker up -d
-```
-
-Wait for the container to be healthy. To verify:
-
-```bash
-docker ps --filter "name=mssql-server"
-```
-
-## 3.5 Start PostgreSQL (Docker) — for agent pipeline
-
-The Python agent pipeline uses PostgreSQL (separate from the MSSQL instance used by Next.js). After configuring `.env.docker` with PostgreSQL variables (see section 2.2):
+After configuring `.env.docker` with PostgreSQL variables (see section 2.2):
 
 **All platforms:**
 
@@ -110,9 +89,31 @@ docker ps --filter "name=postgres-server"
 
 The pgvector extension is automatically enabled on first container creation (via the init script in `scripts/postgres-init/`).
 
-> **Note:** You need both SQL Server (for Next.js) and PostgreSQL (for agents) running during development. Use `docker compose --env-file .env.docker up -d` to start both at once.
+## 3.5 Start SQL Server (Docker) — Deprecated
 
-> **Migrating from MSSQL?** If you previously ran agents against MSSQL, see [docs/MIGRATION_MSSQL_TO_POSTGRES.md](docs/MIGRATION_MSSQL_TO_POSTGRES.md) for data migration steps using pgloader.
+> **MSSQL is deprecated.** It is only needed for the legacy Next.js/Prisma layer and is being phased out. New development should target PostgreSQL exclusively. You do **not** need MSSQL for the Python agent pipeline.
+
+If you need the Next.js app running locally, start SQL Server:
+
+**Windows:**
+
+```powershell
+.\scripts\start-sql-server.ps1
+```
+
+**Linux / macOS:**
+
+```bash
+docker compose --env-file .env.docker up mssql -d
+```
+
+Wait for the container to be healthy:
+
+```bash
+docker ps --filter "name=mssql-server"
+```
+
+If you also run a local SQL Server instance on your machine, set `MSSQL_PORT` in `.env.docker` to a non-default host port (for example `11433`) so Prisma targets Docker, not the local instance.
 
 ## 4. Create the database (all platforms)
 
@@ -144,21 +145,42 @@ If Docker is mapped to `11433`, your URL must use `localhost:11433`.
 
 > **Note:** This `sqlserver://` format is required by Prisma/Next.js. Python agents (SQLAlchemy) use a different format and a separate variable — see step 7.4.
 
-## 6. Database Schema and Seed (Anonymized Fixtures)
+## 6. Seed PostgreSQL (Primary)
 
-The repo includes **pre-anonymized JSON fixtures** in `prisma/mock-data/`. Populate the database from these:
+The repo includes **JSON fixtures** in `scripts/pg-seed-data/fixtures/` with all reference data (~56,000 rows across 40 tables). Seed the database with one command:
+
+```bash
+# Activate venv first (see step 7.2 if not done yet)
+agents\.venv\Scripts\Activate.ps1          # Windows PowerShell
+# source agents/.venv/bin/activate         # macOS / Linux
+
+# Install dependencies (if not done yet)
+pip install -r agents/requirements.txt
+
+# Seed PostgreSQL
+python scripts/pg-seed-data/seed_pg_database.py
+```
+
+The seed script:
+- Creates the `dbo` schema with all tables, indexes, and constraints
+- Loads all reference data (skills, companies, job postings, taxonomies, etc.)
+- Creates agent-managed tables (`raw_ingested_jobs`, `normalized_jobs`, `job_ingestion_runs`)
+- Adds Phase 1 columns to `job_postings`
+- Is **idempotent** — safe to run multiple times (drops and recreates schema each time)
+
+See [scripts/pg-seed-data/README.md](scripts/pg-seed-data/README.md) for details and troubleshooting.
+
+### 6.5 Seed MSSQL (Deprecated — only if running Next.js)
+
+> **Skip this unless you need the Next.js app.** MSSQL is deprecated and being phased out.
+
+If you need the Next.js/Prisma layer, seed MSSQL from the anonymized fixtures in `prisma/mock-data/`:
 
 ```bash
 npx prisma db push
 npx prisma generate
 npm run db:seed:anonymized
 ```
-
-Seeding behavior notes:
-
-- Seed runs in dependency-safe order (parents before children) to satisfy FK constraints.
-- If fixture references are orphaned, the seed script auto-repairs those FK fields to deterministic fallback parent IDs before insert.
-- FK violations are not skipped at insert time; unresolved references after repair fail fast with a clear error.
 
 Tip: if `prisma db push` errors and your machine has local SQL Server installed, verify you are connected to Docker SQL first:
 
@@ -242,9 +264,7 @@ PYTHON_DATABASE_URL=postgresql+psycopg2://postgres:YOUR_POSTGRES_PASSWORD@localh
 - Replace `5432` with your `POSTGRES_PORT` if you changed it.
 - Replace `talent_finder` with your `POSTGRES_DB` if you changed it.
 
-> **Why a separate database?** The Python agent pipeline uses PostgreSQL (with pgvector for embedding similarity search). The Next.js app still uses MSSQL via Prisma. These are independent database connections. A future DB-unification effort will consolidate both layers on PostgreSQL.
-
-> **Migrating from MSSQL?** If you previously had the Python agents configured to use MSSQL, see [docs/MIGRATION_MSSQL_TO_POSTGRES.md](docs/MIGRATION_MSSQL_TO_POSTGRES.md) for step-by-step migration instructions.
+> **Why PostgreSQL?** PostgreSQL is the primary database for the agent pipeline, with pgvector for embedding similarity search. MSSQL is deprecated — it is only used by the legacy Next.js/Prisma layer and is being phased out. A future DB-unification effort will consolidate both layers on PostgreSQL.
 
 **When the pipeline is implemented**, you will use commands like the following (included here for reference; they will not work until the corresponding agents exist):
 
@@ -284,8 +304,9 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 ## Further Documentation
 
 - [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) — Docker installation (Windows, macOS, Linux)
-- [docs/DOCKER_SQL_SERVER_SETUP.md](docs/DOCKER_SQL_SERVER_SETUP.md) — Detailed SQL Server Docker setup
-- [setup-MSSQL.md](setup-MSSQL.md) — Native MSSQL install (alternative to Docker)
-- [docs/MIGRATION_MSSQL_TO_POSTGRES.md](docs/MIGRATION_MSSQL_TO_POSTGRES.md) — MSSQL to PostgreSQL migration guide (agent pipeline)
-- [prisma-workflow.md](prisma-workflow.md) — DB schema workflow
+- [scripts/pg-seed-data/README.md](scripts/pg-seed-data/README.md) — PostgreSQL seed data guide
+- [docs/MIGRATION_MSSQL_TO_POSTGRES.md](docs/MIGRATION_MSSQL_TO_POSTGRES.md) — Admin MSSQL-to-PostgreSQL migration guide (not needed for junior devs)
+- [docs/DOCKER_SQL_SERVER_SETUP.md](docs/DOCKER_SQL_SERVER_SETUP.md) — Detailed SQL Server Docker setup (deprecated)
+- [setup-MSSQL.md](setup-MSSQL.md) — Native MSSQL install (deprecated)
+- [prisma-workflow.md](prisma-workflow.md) — DB schema workflow (Prisma/MSSQL — deprecated)
 - [API-routes.md](API-routes.md) — API reference

@@ -1,0 +1,146 @@
+[
+  {
+    "industry_sector_id": "150D974E-80FF-406C-A85D-5337A62DB5A6",
+    "sector_title": "Automotive",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "87880873-8C96-48BA-BF84-A11032FABE34",
+    "sector_title": "Banking and Financial Services",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "AC617BF4-6B07-403B-8854-17842B17CC29",
+    "sector_title": "Construction",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "6DE96C6D-1250-4F25-90D8-6E637A9278A0",
+    "sector_title": "Consumer Goods",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "DB5D97BE-8EF2-4D6D-AD6F-06B780F73598",
+    "sector_title": "Education",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "417B38A8-C128-4BA3-A865-83B95C599A85",
+    "sector_title": "Government",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "5398F0B3-7775-4276-8708-0299B38AD725",
+    "sector_title": "Healthcare",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "534DD4B8-2211-4C09-BD76-7C0C1E3D0759",
+    "sector_title": "Insurance",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "16895C25-F3A5-4D50-88EA-45256C2F7C63",
+    "sector_title": "Media and Entertainment",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "966063C2-9E94-4FC0-B687-81236A03E0BF",
+    "sector_title": "Nonprofit",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "3033DF07-DE51-483E-A57C-9AEB060D8F32",
+    "sector_title": "Pharmaceuticals",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "5664D2F1-4A7A-41C1-B55F-434FF7BD5FEF",
+    "sector_title": "Transportation and Logistics",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "B7A42237-ABE2-4C67-8812-7613EC6B9125",
+    "sector_title": "Travel and Hospitality",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "9AEBFA65-6D13-44F5-8386-A445118B4862",
+    "sector_title": "Utilities",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "B05B61AF-4D2E-4A53-A51C-96E8F0E6E0D2",
+    "sector_title": "Other",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "3D1924E2-FD93-428E-BB3D-A8C4D4703A23",
+    "sector_title": "Agriculture",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "D01B1D93-C7AD-4D50-A2B1-D4D9A340C443",
+    "sector_title": "Biotechnology",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "718A2D3E-D3E7-439D-BB00-D3E02DE9AFD9",
+    "sector_title": "Energy",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "B6D61694-DBB3-4695-A888-F89CD0420EC5",
+    "sector_title": "Information Technology",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "2AD4593D-CE82-4156-A83B-F7D0D30F98E7",
+    "sector_title": "Manufacturing",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "ADC7A2E4-7BD0-4B46-B5FD-AFC05767E117",
+    "sector_title": "Real Estate",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "6C39CC16-4ECC-4BF6-9B8A-E97988ED7815",
+    "sector_title": "Retail",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "DAE571B1-7B5B-4D48-B17C-E6838B8D6B49",
+    "sector_title": "Telecommunications",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  },
+  {
+    "industry_sector_id": "D07B22BD-B1F9-465D-BA02-DFB2BF533D9D",
+    "sector_title": "Aerospace",
+    "createdat": "2025-06-25T19:21:59.187000+00:00",
+    "updatedat": "2025-06-25T19:21:59.187000+00:00"
+  }
+]
