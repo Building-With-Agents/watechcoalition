@@ -33,7 +33,7 @@ from agents.common.event_envelope import EventEnvelope
 from agents.common.types import RawJobRecord, RegionConfig
 from agents.ingestion.deduplicator import deduplicate_batch
 from agents.ingestion.events import ingest_batch_payload, source_failure_payload
-from agents.ingestion.sources import get_adapter
+from agents.ingestion.sources import ADAPTER_REGISTRY, SourceAdapter, get_adapter
 from agents.ingestion.state import IngestionState, SourceResult
 
 log = structlog.get_logger()
@@ -51,7 +51,7 @@ def initialize_run(state: IngestionState) -> IngestionState:
     run_id = state.get("run_id", str(uuid.uuid4()))
     region_cfg = state.get("region_config", {})
     region_id = region_cfg.get("region_id", "")
-    source = region_cfg.get("sources", ["crawl4ai"])[0] if region_cfg.get("sources") else "crawl4ai"
+    source = region_cfg.get("sources", ["crawl4ai_indeed"])[0] if region_cfg.get("sources") else "crawl4ai_indeed"
 
     with session_scope() as session:
         run_record = JobIngestionRun(
@@ -75,10 +75,53 @@ def initialize_run(state: IngestionState) -> IngestionState:
     }
 
 
+async def _fetch_all_sources(
+    sources: list[str], region: RegionConfig
+) -> tuple[list[RawJobRecord], list[SourceResult], list[str]]:
+    """Fetch from all source adapters in parallel via asyncio.gather."""
+    adapters: list[tuple[str, SourceAdapter]] = []
+    for name in sources:
+        try:
+            adapters.append((name, get_adapter(name)))
+        except ValueError as exc:
+            log.warning("adapter_not_found", source=name, error=str(exc))
+
+    if not adapters:
+        return [], [], [f"No valid adapters for sources: {sources}"]
+
+    # Launch all fetches concurrently
+    tasks = [adapter.fetch(region) for _, adapter in adapters]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    all_records: list[RawJobRecord] = []
+    source_results: list[SourceResult] = []
+    errors: list[str] = []
+
+    for (name, _adapter), result in zip(adapters, results):
+        if isinstance(result, BaseException):
+            err_msg = f"{name}: {result}"
+            errors.append(err_msg)
+            source_results.append(SourceResult(
+                source_name=name,
+                records_fetched=0,
+                error=str(result),
+            ))
+            log.warning("source_fetch_failed", source=name, error=str(result))
+        else:
+            all_records.extend(result)
+            source_results.append(SourceResult(
+                source_name=name,
+                records_fetched=len(result),
+            ))
+            log.info("source_fetch_ok", source=name, count=len(result))
+
+    return all_records, source_results, errors
+
+
 def fetch_sources(state: IngestionState) -> IngestionState:
-    """Fetch records from all configured source adapters."""
+    """Fetch records from all configured source adapters in parallel."""
     region_cfg = state.get("region_config", {})
-    sources = region_cfg.get("sources", ["crawl4ai"])
+    sources = region_cfg.get("sources", ["crawl4ai_indeed"])
 
     try:
         region = RegionConfig(**region_cfg)
@@ -95,29 +138,9 @@ def fetch_sources(state: IngestionState) -> IngestionState:
             keywords=region_cfg.get("keywords", [region_cfg.get("query", "software engineer")]),
         )
 
-    all_records: list[RawJobRecord] = []
-    source_results: list[SourceResult] = []
-    errors: list[str] = []
-
-    for source_name in sources:
-        try:
-            adapter = get_adapter(source_name)
-            records = asyncio.run(adapter.fetch(region))
-            all_records.extend(records)
-            source_results.append(SourceResult(
-                source_name=source_name,
-                records_fetched=len(records),
-            ))
-            log.info("source_fetch_ok", source=source_name, count=len(records))
-        except Exception as exc:
-            err_msg = f"{source_name}: {exc}"
-            errors.append(err_msg)
-            source_results.append(SourceResult(
-                source_name=source_name,
-                records_fetched=0,
-                error=str(exc),
-            ))
-            log.warning("source_fetch_failed", source=source_name, error=str(exc))
+    all_records, source_results, errors = asyncio.run(
+        _fetch_all_sources(sources, region)
+    )
 
     return {
         "fetched_records": all_records,
@@ -227,7 +250,7 @@ def stage_records(state: IngestionState) -> IngestionState:
 def emit_ingest_batch(state: IngestionState) -> IngestionState:
     """Build the IngestBatch event payload."""
     region_cfg = state.get("region_config", {})
-    source_names = region_cfg.get("sources", ["crawl4ai"])
+    source_names = region_cfg.get("sources", ["crawl4ai_indeed"])
     source_label = ",".join(source_names) if len(source_names) > 1 else source_names[0]
 
     original_fetched = sum(
@@ -325,27 +348,68 @@ class IngestionAgent(AgentBase):
     Internally powered by a LangGraph state machine.
     """
 
+    def __init__(self) -> None:
+        self._last_run_at: datetime | None = None
+        self._last_run_metrics: dict = {}
+
     @property
     def agent_id(self) -> str:
         return "ingestion-agent"
 
+    def _get_last_run(self) -> dict | None:
+        """Return last run info from instance state or DB."""
+        if self._last_run_at is not None:
+            return {
+                "timestamp": self._last_run_at.isoformat(),
+                "metrics": self._last_run_metrics,
+            }
+        # Fall back to DB query for most recent completed run
+        try:
+            with session_scope() as session:
+                row = (
+                    session.query(JobIngestionRun)
+                    .filter(JobIngestionRun.status.in_(["completed", "completed_with_errors"]))
+                    .order_by(JobIngestionRun.completed_at.desc())
+                    .first()
+                )
+                if row and row.completed_at:
+                    return {
+                        "timestamp": row.completed_at.isoformat(),
+                        "metrics": {
+                            "total_fetched": row.total_fetched,
+                            "staged_count": row.staged_count,
+                            "dedup_count": row.dedup_count,
+                            "error_count": row.error_count,
+                        },
+                    }
+        except Exception:
+            pass
+        return None
+
     def health_check(self) -> dict:
         """Check DB connectivity and source adapter availability."""
         db_ok = check_db_connection()
-        fixture_ok = (Path(__file__).parent.parent / "data" / "fixtures" / "fallback_scrape_sample.json").exists()
 
-        if db_ok and fixture_ok:
+        # Build per-source availability dict
+        sources: dict[str, bool] = {}
+        for key in ADAPTER_REGISTRY:
+            try:
+                adapter = get_adapter(key)
+                sources[key] = adapter is not None
+            except Exception:
+                sources[key] = False
+
+        if db_ok:
             status = "ok"
-        elif db_ok or fixture_ok:
-            status = "degraded"
         else:
-            status = "down"
+            status = "degraded"
 
         return {
             "status": status,
             "agent": self.agent_id,
             "db_reachable": db_ok,
-            "sources": {"fixture_available": fixture_ok},
+            "sources": sources,
+            "last_run": self._get_last_run(),
         }
 
     def process(self, event: EventEnvelope) -> EventEnvelope:
@@ -353,11 +417,9 @@ class IngestionAgent(AgentBase):
         payload = event.payload
         run_id = str(uuid.uuid4())
 
-        # Build region_config from payload (supports both old and new format)
+        # Build region_config from payload
         region_config = payload.get("region_config")
         if region_config is None:
-            # Backward compat: old-style payload with source/limit/query/location
-            source = payload.get("source", "crawl4ai")
             region_config = {
                 "region_id": "default",
                 "display_name": "Default Region",
@@ -365,8 +427,8 @@ class IngestionAgent(AgentBase):
                 "radius_miles": 50,
                 "states": ["WA"],
                 "countries": ["US"],
-                "sources": [source] if source != "all" else ["jsearch", "crawl4ai"],
-                "role_categories": [],
+                "sources": payload.get("sources", ["jsearch", "crawl4ai_indeed", "crawl4ai_usajobs"]),
+                "role_categories": payload.get("role_categories", []),
                 "keywords": [payload.get("query", "software engineer")],
             }
 
@@ -379,15 +441,26 @@ class IngestionAgent(AgentBase):
 
         result = _COMPILED_GRAPH.invoke(initial_state)
 
+        result_payload = result.get("ingest_batch_event", {
+            "event_type": "IngestBatch",
+            "batch_id": run_id,
+            "total_fetched": 0,
+            "staged_count": 0,
+        })
+
+        # Update instance-level last_run tracking
+        self._last_run_at = datetime.now(UTC)
+        self._last_run_metrics = {
+            "total_fetched": result_payload.get("total_fetched", 0),
+            "staged_count": result_payload.get("staged_count", 0),
+            "dedup_count": result_payload.get("dedup_count", 0),
+            "error_count": result_payload.get("error_count", 0),
+        }
+
         return EventEnvelope(
             correlation_id=event.correlation_id,
             agent_id=self.agent_id,
-            payload=result.get("ingest_batch_event", {
-                "event_type": "IngestBatch",
-                "batch_id": run_id,
-                "total_fetched": 0,
-                "staged_count": 0,
-            }),
+            payload=result_payload,
         )
 
 
@@ -435,8 +508,14 @@ def _cli() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="Run the Ingestion Agent")
-    parser.add_argument("--source", choices=["jsearch", "crawl4ai", "all"], default="all")
-    parser.add_argument("--limit", type=int, default=50)
+    all_sources = ["jsearch", "crawl4ai_indeed", "crawl4ai_usajobs"]
+
+    parser.add_argument(
+        "--sources", nargs="+",
+        choices=all_sources,
+        default=all_sources,
+        help="Source adapters to fetch from",
+    )
     parser.add_argument("--query", default="software engineer")
     parser.add_argument("--location", default="Washington state")
     parser.add_argument("--migrate", action="store_true", help="Run DB migrations before ingestion")
@@ -456,8 +535,7 @@ def _cli() -> None:
         correlation_id=str(uuid.uuid4()),
         agent_id="cli",
         payload={
-            "source": args.source,
-            "limit": args.limit,
+            "sources": args.sources,
             "query": args.query,
             "location": args.location,
         },

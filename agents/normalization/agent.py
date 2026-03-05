@@ -13,6 +13,7 @@ Consumes: IngestBatch
 from __future__ import annotations
 
 import uuid
+from datetime import UTC, datetime
 
 import structlog
 from langgraph.graph import END, StateGraph
@@ -31,7 +32,7 @@ from agents.normalization.events import (
     normalization_complete_payload,
     normalization_failed_payload,
 )
-from agents.normalization.mappers import get_mapper
+from agents.normalization.mappers import MAPPER_REGISTRY, get_mapper
 from agents.normalization.state import NormalizationState
 
 log = structlog.get_logger()
@@ -166,10 +167,10 @@ def normalize_records(state: NormalizationState) -> NormalizationState:
                     raw_payload=raw_dict.get("raw_payload") or {},
                 )
 
-                # Look up mapper from registry
+                # Look up mapper from registry — quarantine if not found
                 mapper = get_mapper(source)
                 if mapper is None:
-                    mapper = get_mapper("crawl4ai")  # fallback
+                    raise ValueError(f"no_mapper_registered for source: {source}")
 
                 # Map raw → JobRecord (mapper applies cleaners internally)
                 job_record = mapper.map(raw_record)
@@ -340,17 +341,42 @@ class NormalizationAgent(AgentBase):
     Internally powered by a LangGraph state machine.
     """
 
+    def __init__(self) -> None:
+        self._last_run_at: datetime | None = None
+        self._last_run_metrics: dict = {}
+
     @property
     def agent_id(self) -> str:
         return "normalization-agent"
 
+    def _get_last_run(self) -> dict | None:
+        """Return last run info from instance state or DB."""
+        if self._last_run_at is not None:
+            return {
+                "timestamp": self._last_run_at.isoformat(),
+                "metrics": self._last_run_metrics,
+            }
+        # Fall back to DB — most recent normalized_jobs created_at
+        try:
+            from sqlalchemy import func
+
+            with session_scope() as session:
+                last_ts = session.query(func.max(NormalizedJob.created_at)).scalar()
+                if last_ts:
+                    return {"timestamp": last_ts.isoformat(), "metrics": {}}
+        except Exception:
+            pass
+        return None
+
     def health_check(self) -> dict:
-        """Check DB connectivity."""
+        """Check DB connectivity and mapper availability."""
         db_ok = check_db_connection()
         return {
             "status": "ok" if db_ok else "degraded",
             "agent": self.agent_id,
             "db_reachable": db_ok,
+            "mappers_registered": list(MAPPER_REGISTRY.keys()),
+            "last_run": self._get_last_run(),
         }
 
     def process(self, event: EventEnvelope) -> EventEnvelope:
@@ -369,14 +395,23 @@ class NormalizationAgent(AgentBase):
 
         result = _COMPILED_GRAPH.invoke(initial_state)
 
+        result_payload = result.get("normalization_complete_event", {
+            "event_type": "NormalizationComplete",
+            "batch_id": batch_id,
+            "normalized_count": 0,
+            "quarantined_count": 0,
+            "normalization_status": "success",
+        })
+
+        # Update instance-level last_run tracking
+        self._last_run_at = datetime.now(UTC)
+        self._last_run_metrics = {
+            "normalized_count": result_payload.get("normalised_count", 0),
+            "quarantined_count": result_payload.get("quarantined_count", 0),
+        }
+
         return EventEnvelope(
             correlation_id=event.correlation_id,
             agent_id=self.agent_id,
-            payload=result.get("normalization_complete_event", {
-                "event_type": "NormalizationComplete",
-                "batch_id": batch_id,
-                "normalized_count": 0,
-                "quarantined_count": 0,
-                "normalization_status": "success",
-            }),
+            payload=result_payload,
         )

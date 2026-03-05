@@ -1,20 +1,36 @@
-"""Integration tests for the Normalization Agent (require PostgreSQL)."""
+"""Integration tests for the Normalization Agent (require PostgreSQL with tables)."""
 
 from __future__ import annotations
 
 import pytest
 
-from agents.common.data_store.database import check_db_connection
+from agents.common.data_store.database import check_db_connection, session_scope
 from agents.common.event_envelope import EventEnvelope
 from agents.normalization.agent import NormalizationAgent
 
 pytestmark = pytest.mark.integration
 
 
+def _tables_exist() -> bool:
+    """Check if required DB tables exist."""
+    try:
+        with session_scope() as session:
+            session.execute(
+                __import__("sqlalchemy").text(
+                    "SELECT 1 FROM dbo.raw_ingested_jobs LIMIT 1"
+                )
+            )
+        return True
+    except Exception:
+        return False
+
+
 @pytest.fixture(autouse=True)
 def _skip_if_no_db():
     if not check_db_connection():
         pytest.skip("PostgreSQL not available")
+    if not _tables_exist():
+        pytest.skip("Required tables not created — run migrations first")
 
 
 class TestNormalizationAgentIntegration:
@@ -23,10 +39,10 @@ class TestNormalizationAgentIntegration:
         agent = NormalizationAgent()
         result = agent.health_check()
         assert result["status"] == "ok"
-        assert result["metrics"]["db_connected"] is True
+        assert result["db_reachable"] is True
 
     def test_empty_batch(self) -> None:
-        """Empty staged_record_ids produces NormalizationComplete with 0 counts."""
+        """Empty batch produces NormalizationComplete with 0 counts."""
         agent = NormalizationAgent()
         event = EventEnvelope(
             correlation_id="norm-test-1",

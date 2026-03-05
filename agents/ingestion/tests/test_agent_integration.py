@@ -25,19 +25,19 @@ class TestIngestionAgentIntegration:
         agent = IngestionAgent()
         result = agent.health_check()
         assert result["status"] in ("ok", "degraded")
-        assert result["metrics"]["db_connected"] is True
+        assert result["db_reachable"] is True
 
-    def test_full_cycle_fixture_fallback(self) -> None:
-        """Full ingestion cycle using fixture data."""
+    def test_full_cycle_crawl4ai_indeed(self) -> None:
+        """Full ingestion cycle using crawl4ai_indeed source."""
         agent = IngestionAgent()
         trigger = EventEnvelope(
             correlation_id="integration-test-1",
             agent_id="test",
-            payload={"source": "crawl4ai", "limit": 3},
+            payload={"sources": ["crawl4ai_indeed"]},
         )
         result = agent.process(trigger)
         assert result.payload["event_type"] == "IngestBatch"
-        assert result.payload["records_staged"] >= 0
+        assert result.payload["staged_count"] >= 0
         assert result.correlation_id == "integration-test-1"
 
     def test_ingest_batch_event_shape(self) -> None:
@@ -46,14 +46,13 @@ class TestIngestionAgentIntegration:
         trigger = EventEnvelope(
             correlation_id="shape-test",
             agent_id="test",
-            payload={"source": "crawl4ai", "limit": 2},
+            payload={"sources": ["crawl4ai_indeed"]},
         )
         result = agent.process(trigger)
         p = result.payload
         assert "batch_id" in p
         assert "source" in p
         assert "total_fetched" in p
-        assert "duplicates_skipped" in p
-        assert "records_staged" in p
-        assert "dead_letter_count" in p
-        assert "staged_record_ids" in p
+        assert "staged_count" in p
+        assert "dedup_count" in p
+        assert "error_count" in p

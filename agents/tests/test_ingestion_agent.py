@@ -23,7 +23,6 @@ class TestIngestionAgent:
         assert result["status"] in ("ok", "degraded", "down")
         assert result["agent"] == "ingestion-agent"
         assert "db_reachable" in result
-        assert "sources" in result
 
     @patch("agents.ingestion.agent.session_scope")
     @patch("agents.ingestion.agent.check_db_connection", return_value=True)
@@ -46,7 +45,7 @@ class TestIngestionAgent:
         trigger = EventEnvelope(
             correlation_id="test-1",
             agent_id="test",
-            payload={"source": "crawl4ai", "limit": 2},
+            payload={"sources": ["crawl4ai_indeed"]},
         )
         out = agent.process(trigger)
         assert out.payload["event_type"] == "IngestBatch"
@@ -71,7 +70,7 @@ class TestIngestionAgent:
         trigger = EventEnvelope(
             correlation_id="test-1",
             agent_id="test",
-            payload={"source": "crawl4ai", "limit": 2},
+            payload={"sources": ["crawl4ai_indeed"]},
         )
         out = agent.process(trigger)
         assert out.correlation_id == "test-1"

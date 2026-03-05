@@ -259,7 +259,7 @@ def main() -> None:
             "radius_miles": 50,
             "states": ["WA"],
             "countries": ["US"],
-            "sources": ["crawl4ai"],
+            "sources": ["jsearch", "crawl4ai_indeed", "crawl4ai_usajobs"],
             "role_categories": ["Software Engineering"],
             "keywords": ["software engineer"],
         },
