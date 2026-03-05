@@ -30,7 +30,7 @@ cd agents && pytest -x -v                            # stop on first failure, ve
 import pytest
 from unittest.mock import patch, MagicMock
 from agents.ingestion.agent import IngestionAgent
-from agents.common.events.base import AgentEvent
+from agents.common.event_envelope import EventEnvelope
 
 class TestIngestionAgent:
     def setup_method(self):
@@ -45,7 +45,7 @@ class TestIngestionAgent:
 
     def test_emits_ingest_batch_event(self):
         event = self.agent.process()
-        assert isinstance(event, AgentEvent)
+        assert isinstance(event, EventEnvelope)
         assert event.agent_id == "ingestion_agent"
         assert event.schema_version == "1.0"
         assert "batch_id" in event.payload
@@ -64,10 +64,10 @@ class TestIngestionAgent:
 ## Key Rules
 
 - **Mock external services.** Never make real API calls in tests: mock JSearch, Crawl4AI, Azure OpenAI, and MSSQL.
-- **Test event contracts.** Verify emitted events conform to `AgentEvent` schema with correct `agent_id`, `schema_version`, and expected payload keys.
+- **Test event contracts.** Verify emitted events conform to `EventEnvelope` schema with correct `agent_id`, `schema_version`, and expected payload keys.
 - **Test error paths.** Every agent must handle: source failure, LLM timeout, schema violation, DB error.
 - **Write tests alongside code.** Every new agent method or feature gets a corresponding test.
-- **Use fixtures** for common setup: sample `AgentEvent` objects, mock DB sessions, sample `JobRecord` data.
+- **Use fixtures** for common setup: sample `EventEnvelope` objects, mock DB sessions, sample `JobRecord` data.
 
 ## Evaluation Targets to Validate
 
@@ -88,7 +88,7 @@ Tests should verify these metric targets where applicable:
 ```python
 @pytest.fixture
 def sample_ingest_event():
-    return AgentEvent(
+    return EventEnvelope(
         correlation_id="test-correlation-123",
         agent_id="ingestion_agent",
         schema_version="1.0",
