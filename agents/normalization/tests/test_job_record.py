@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
@@ -32,7 +32,7 @@ class TestJobRecord:
             location="Seattle, WA",
             normalized_location="Seattle, WA",
             employment_type="full_time",
-            date_posted=datetime(2026, 1, 15, tzinfo=timezone.utc),
+            date_posted=datetime(2026, 1, 15, tzinfo=UTC),
             salary_raw="$120k-$160k/year",
             salary_min=120000.0,
             salary_max=160000.0,

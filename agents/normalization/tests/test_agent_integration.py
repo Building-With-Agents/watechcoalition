@@ -8,7 +8,6 @@ from agents.common.data_store.database import check_db_connection
 from agents.common.event_envelope import EventEnvelope
 from agents.normalization.agent import NormalizationAgent
 
-
 pytestmark = pytest.mark.integration
 
 

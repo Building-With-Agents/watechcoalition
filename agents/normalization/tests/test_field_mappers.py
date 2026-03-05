@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from agents.normalization.field_mappers.jsearch_mapper import JSearchMapper
 from agents.normalization.field_mappers.scraper_mapper import ScraperMapper
 

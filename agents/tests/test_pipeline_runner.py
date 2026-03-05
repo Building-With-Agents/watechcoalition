@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from agents.common.data_store.database import check_db_connection
 from agents.pipeline_runner import PIPELINE, run_health_checks, run_pipeline
 
 
@@ -68,11 +67,11 @@ class TestRunPipelineStubs:
 
     def test_stub_pipeline_produces_entries(self) -> None:
         """A pipeline of stub agents that don't need DB still produces entries."""
-        from agents.skills_extraction.agent import SkillsExtractionAgent
-        from agents.enrichment.agent import EnrichmentAgent
         from agents.analytics.agent import AnalyticsAgent
-        from agents.visualization.agent import VisualizationAgent
+        from agents.enrichment.agent import EnrichmentAgent
         from agents.orchestration.agent import OrchestrationAgent
+        from agents.skills_extraction.agent import SkillsExtractionAgent
+        from agents.visualization.agent import VisualizationAgent
 
         stub_pipeline = [
             (SkillsExtractionAgent(), False),
@@ -87,11 +86,11 @@ class TestRunPipelineStubs:
 
     def test_correlation_id_consistency(self) -> None:
         """All entries share the same correlation_id."""
-        from agents.skills_extraction.agent import SkillsExtractionAgent
-        from agents.enrichment.agent import EnrichmentAgent
         from agents.analytics.agent import AnalyticsAgent
-        from agents.visualization.agent import VisualizationAgent
+        from agents.enrichment.agent import EnrichmentAgent
         from agents.orchestration.agent import OrchestrationAgent
+        from agents.skills_extraction.agent import SkillsExtractionAgent
+        from agents.visualization.agent import VisualizationAgent
 
         stub_pipeline = [
             (SkillsExtractionAgent(), False),

@@ -9,7 +9,6 @@ from __future__ import annotations
 import asyncio
 import os
 import random
-from datetime import UTC, datetime
 
 import httpx
 import structlog
@@ -64,7 +63,6 @@ class JSearchAdapter(SourceAdapter):
 
         all_records: list[dict] = []
         page = 1
-        per_page = min(limit, 10)  # JSearch returns max 10 per page
 
         async with httpx.AsyncClient(timeout=30.0) as client:
             while len(all_records) < limit:

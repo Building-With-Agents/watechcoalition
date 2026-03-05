@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import asyncio
 
-import pytest
-
 from agents.ingestion.sources.scraper_adapter import ScraperAdapter
 
 

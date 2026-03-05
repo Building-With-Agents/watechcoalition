@@ -7,13 +7,12 @@ validation against this schema are quarantined — they never proceed downstream
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
-from typing import Optional
+from enum import StrEnum
 
 from pydantic import BaseModel, field_validator
 
 
-class EmploymentType(str, Enum):
+class EmploymentType(StrEnum):
     full_time = "full_time"
     part_time = "part_time"
     contract = "contract"
@@ -22,7 +21,7 @@ class EmploymentType(str, Enum):
     unknown = "unknown"
 
 
-class SalaryPeriod(str, Enum):
+class SalaryPeriod(StrEnum):
     annual = "annual"
     hourly = "hourly"
     monthly = "monthly"
@@ -40,27 +39,26 @@ class JobRecord(BaseModel):
     # Core fields (normalized by Normalization Agent)
     title: str
     company: str
-    location: Optional[str] = None
-    normalized_location: Optional[str] = None
-    employment_type: Optional[EmploymentType] = None
-    date_posted: Optional[datetime] = None
-    description: Optional[str] = None
+    location: str | None = None
+    normalized_location: str | None = None
+    employment_type: EmploymentType | None = None
+    date_posted: datetime | None = None
+    description: str | None = None
 
     # Salary (parsed by cleaners.parse_salary)
-    salary_raw: Optional[str] = None
-    salary_min: Optional[float] = None
-    salary_max: Optional[float] = None
-    salary_currency: Optional[str] = None
-    salary_period: Optional[SalaryPeriod] = None
+    salary_raw: str | None = None
+    salary_min: float | None = None
+    salary_max: float | None = None
+    salary_currency: str | None = None
+    salary_period: SalaryPeriod | None = None
 
     @field_validator("salary_max")
     @classmethod
     def salary_max_gte_min(cls, v: float | None, info) -> float | None:
         """Ensure salary_max >= salary_min when both are present."""
-        if v is not None and info.data.get("salary_min") is not None:
-            if v < info.data["salary_min"]:
-                msg = f"salary_max ({v}) < salary_min ({info.data['salary_min']})"
-                raise ValueError(msg)
+        if v is not None and info.data.get("salary_min") is not None and v < info.data["salary_min"]:
+            msg = f"salary_max ({v}) < salary_min ({info.data['salary_min']})"
+            raise ValueError(msg)
         return v
 
     @field_validator("title")
