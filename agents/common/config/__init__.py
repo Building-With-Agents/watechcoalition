@@ -2,8 +2,7 @@
 Pipeline config from environment only. No secrets in code; safe path resolution.
 
 This package path is the canonical import target for walking-skeleton config
-helpers because `agents.common.config` resolves to this package, not the
-adjacent legacy `config.py` module.
+helpers.
 """
 
 from __future__ import annotations

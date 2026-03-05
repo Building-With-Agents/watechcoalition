@@ -1,6 +1,6 @@
 # Computing for All — WaTech Coalition
 
-This repository contains the source code for the **Washington Tech Workforce Coalition** platform: a Next.js and Prisma application that supports employers and job seekers in the tech industry (job listings, employer flows, and jobseeker experience). The stack includes TailwindCSS for styling. A key goal is to add the **Job Intelligence Engine** — an eight-agent Python pipeline to ingest, normalize, enrich, and analyze external job postings — which is planned and scaffolded in `agents/` but not yet implemented.
+This repository contains the source code for the **Washington Tech Workforce Coalition** platform: a Next.js and Prisma application that supports employers and job seekers in the tech industry (job listings, employer flows, and jobseeker experience). The stack includes TailwindCSS for styling. The **Job Intelligence Engine** Python layer now includes a Week 2 walking skeleton in `agents/` (LLM adapter, agent stubs, sequential runner, and Streamlit journey dashboard).
 
 For a visual overview of the platform architecture (current and planned), see [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md).
 
@@ -50,14 +50,17 @@ cd watechcoalition
 
 ## Agent Pipeline
 
-This project is designed to include a **Job Intelligence Engine** — an eight-agent Python pipeline that will ingest, normalize, enrich, and analyze external job postings (pipeline not yet implemented). The agent layer is scaffolded in `agents/` and will run alongside the Next.js app.
+This project includes a Week 2 **Job Intelligence Engine** walking skeleton: event-based agent stubs, provider-agnostic LLM adapter contract, and a Streamlit journey dashboard. The full production pipeline is still in progress.
 
 See [CLAUDE.md](CLAUDE.md) for full architecture details, agent specs, and run instructions.
 
 ```bash
 cd agents && pip install -r requirements.txt
+python -m agents.run_pipeline --save-events agents/data/rendered/last_pipeline_events.json
 streamlit run agents/dashboard/streamlit_app.py
 ```
+
+LLM adapter config is environment-driven (`LLM_PROVIDER`, `AZURE_OPENAI_*`, etc.). See [.env.example](.env.example) for required values.
 
 ## Technologies Used
 

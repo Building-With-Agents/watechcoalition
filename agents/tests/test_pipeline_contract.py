@@ -27,9 +27,10 @@ def test_run_pipeline_emits_six_events_with_one_correlation_id() -> None:
 def test_health_check_all_reports_all_pipeline_agents() -> None:
     health = health_check_all()
 
-    assert list(health) == EXPECTED_AGENT_IDS
+    assert set(health) == set(EXPECTED_AGENT_IDS)
     assert all(result["status"] == "ok" for result in health.values())
     assert all("last_run" in result for result in health.values())
+    assert all(result.get("agent") in EXPECTED_AGENT_IDS for result in health.values())
 
 
 def test_all_stages_extend_base_agent_and_expose_serializers() -> None:

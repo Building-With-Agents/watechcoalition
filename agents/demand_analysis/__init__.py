@@ -1,1 +1,5 @@
-# Phase 2 — scaffold only in Phase 1
+"""Demand Analysis package."""
+
+from agents.demand_analysis.agent import DemandAnalysisAgent
+
+__all__ = ["DemandAnalysisAgent"]
