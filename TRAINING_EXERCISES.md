@@ -57,7 +57,7 @@ Recommended (anonymized fixtures):
 ```bash
 npx prisma db push
 npx prisma generate
-npm run db:seed:anonymized
+node prisma/seed-anonymized.mjs --idempotent
 ```
 
 Optional (if you need skill embeddings populated in `skills.embedding`):

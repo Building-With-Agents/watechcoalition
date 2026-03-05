@@ -23,11 +23,11 @@ Read these before implementing anything — they are the source of truth:
 ## Non-Negotiable Rules
 
 1. **One agent = one responsibility.** Helper logic (dedup, validation, field mapping, confidence scoring) stays inside the owning agent. Never promoted to its own agent.
-2. **Events-only communication.** Agents communicate via typed, versioned `AgentEvent` objects through the message bus. Direct function calls between agents are forbidden.
+2. **Events-only communication.** Agents communicate via typed, versioned `EventEnvelope` objects through the message bus. Direct function calls between agents are forbidden.
 3. **Orchestration Agent is the sole consumer** of `*Failed` and `*Alert` events. No other agent reacts to another agent's failures.
 4. **No cross-agent state writes.** An agent never writes to another agent's internal state.
 5. **Every agent class exposes `health_check()`** returning `{"status": "ok"|"degraded"|"down", "agent": str, "last_run": str, "metrics": dict}`.
-6. **Python agents use SQLAlchemy + pyodbc for MSSQL.** Never import or invoke Prisma from Python.
+6. **Python agents use SQLAlchemy + psycopg2 for PostgreSQL.** Never import or invoke Prisma from Python.
 7. **No credentials in code or logs.** All secrets via `os.getenv()`. Use structlog with no PII.
 8. **Do NOT implement Phase 2 items** unless the user explicitly instructs you to. Phase 2 includes: demand_analysis implementation, circuit_breaker, saga, admin_api, full enrichment resolvers, external message bus.
 
@@ -50,7 +50,7 @@ Unless explicitly instructed, never modify files outside `agents/`:
 | LLM adapter | LangChain + Azure OpenAI (provider-agnostic via `LLM_PROVIDER` env var) |
 | Tracing | LangSmith |
 | Scheduling | APScheduler |
-| DB access | SQLAlchemy + pyodbc → MSSQL |
+| DB access | SQLAlchemy + psycopg2 → PostgreSQL |
 | Scraping | Crawl4AI |
 | API ingestion | httpx |
 | Dashboards | Streamlit |

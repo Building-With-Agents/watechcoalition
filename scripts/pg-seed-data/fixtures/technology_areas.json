@@ -1,0 +1,104 @@
+[
+  {
+    "id": "F18B7623-60BA-4A5B-A0A4-6CB588BDF6DB",
+    "title": "Cybersecurity",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "48D5B1E9-2F36-4C2A-89BB-3B6B063FDD77",
+    "title": "Data Science",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B77C5D72-2D8A-47E5-A13D-5D7A7893BE09",
+    "title": "Software Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A7C1A1A1-E07E-43B8-A8EB-59B80F5C7A99",
+    "title": "Database Management",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4B303F74-D3F1-4C25-9E32-3CC585B47814",
+    "title": "DevOps",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "7634A5FB-2398-4657-AAB5-203C1FC84168",
+    "title": "IT Support",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "907A2F50-BECB-472F-B045-03F22CC92611",
+    "title": "System Analysis",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "7F61D839-D63A-44D7-8EF9-45726F401F16",
+    "title": "IT Project Management",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "C4D5C8A8-79D2-4429-960B-4991F1175462",
+    "title": "Machine Learning",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "F23B7623-60BA-4A5B-A0A4-6CB588DBF6BD",
+    "title": "Other",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "7E3B01FC-7C6A-4BAF-B755-E47B07AD9191",
+    "title": "Cloud Computing",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "92AD3C59-62E6-4E84-B908-F3F4C8B089BE",
+    "title": "Artificial Intelligence",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "AD4F37E4-6E7F-4110-ABA3-6DD591E4D733",
+    "title": "Network Administration",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D2560874-32D3-4BC4-A5DA-7B2B0DBA62A0",
+    "title": "Web Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "1E7EC76F-4B90-47D7-B9B1-D9AC38FD8D63",
+    "title": "Mobile App Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "DD832F38-9020-42F7-B59C-FB39F9A4B28F",
+    "title": "Big Data Analytics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "BB832F38-8172-5681-C43B-AB29F9A4B29E",
+    "title": "N/A Not an IT role",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  }
+]

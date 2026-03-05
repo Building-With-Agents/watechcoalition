@@ -1,12 +1,12 @@
 # Environment Setup (First-Time Clone)
 
-This guide walks through setting up the Tech Talent Showcase app after cloning the repository. It supports **Windows**, **Linux**, and **macOS**.
+This guide walks through setting up the watechcoalition platform after cloning the repository. It supports **Windows**, **Linux**, and **macOS**.
 
 ## Prerequisites
 
 - **Node.js** 18.17 or later ([nodejs.org](https://nodejs.org/) or use [nvm](https://github.com/nvm-sh/nvm))
 - **Python** 3.11 or later — [python.org/downloads](https://www.python.org/downloads/); on Windows, enable **"Add python.exe to PATH"** during install
-- **Docker** (for local SQL Server) — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) for installation instructions
+- **Docker** (for local PostgreSQL) — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md)
 - **Git**
 
 ## 1. Clone and Install Dependencies
@@ -24,7 +24,6 @@ npm ci
 Copy the example file and fill in required values:
 
 ```bash
-# All platforms
 cp .env.example .env
 ```
 
@@ -33,7 +32,7 @@ Edit `.env` and set at minimum:
 | Variable | Description |
 |----------|-------------|
 | `AUTH_SECRET` | Generate with `openssl rand -base64 32` |
-| `DATABASE_URL` | See step 4 — you'll set this after starting SQL |
+| `PYTHON_DATABASE_URL` | PostgreSQL connection string (see step 5) |
 | `AZURE_OPENAI_ENDPOINT` | Azure OpenAI resource URL |
 | `AZURE_OPENAI_API_KEY` | Azure OpenAI API key |
 | `AZURE_OPENAI_API_VERSION` | e.g. `2025-01-01-preview` |
@@ -43,13 +42,7 @@ Edit `.env` and set at minimum:
 | `AZURE_OPENAI_EMBEDDING_API_VERSION` | e.g. `2024-02-01` |
 | `AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME` | Embeddings deployment name |
 
-### 2.2 Docker SQL environment (.env.docker)
-
-**Windows:** Run the interactive setup script (recommended):
-
-```powershell
-.\scripts\setup-env-docker.ps1
-```
+### 2.2 Docker environment (.env.docker)
 
 **Linux / macOS:** Copy the example and edit manually:
 
@@ -57,46 +50,26 @@ Edit `.env` and set at minimum:
 cp .env.docker.example .env.docker
 ```
 
-Edit `.env.docker` and set:
-
-- `MSSQL_SA_PASSWORD` — Strong password (min 8 chars, uppercase, lowercase, number, special char)
-- `MSSQL_DATABASE` — Default: `talent_finder`
-- `MSSQL_PORT` — Default: `1433`
-
-For the Python agent pipeline (PostgreSQL), also set:
-- `POSTGRES_USER` — Default: `postgres`
-- `POSTGRES_PASSWORD` — Strong password
-- `POSTGRES_DB` — Default: `talent_finder`
-- `POSTGRES_PORT` — Default: `5432`
-
-## 3. Start SQL Server (Docker)
-
-This project uses SQL Server `mcr.microsoft.com/mssql/server:2025-latest` in [docker-compose.yml](docker-compose.yml).
-If you also run a local SQL Server instance on your machine, set `MSSQL_PORT` in `.env.docker` to a non-default host port (for example `11433`) so Prisma targets Docker, not the local instance.
-
-**Windows:**
+**Windows:** You can also use the interactive setup script:
 
 ```powershell
-.\scripts\start-sql-server.ps1
+.\scripts\setup-env-docker.ps1
 ```
 
-**Linux / macOS:**
+Edit `.env.docker` and set the PostgreSQL variables:
 
-```bash
-docker compose --env-file .env.docker up -d
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `POSTGRES_USER` | `postgres` | PostgreSQL superuser name |
+| `POSTGRES_PASSWORD` | — | Strong password |
+| `POSTGRES_DB` | `talent_finder` | Database name |
+| `POSTGRES_PORT` | `5432` | Host port mapping |
 
-Wait for the container to be healthy. To verify:
+> **MSSQL variables** (`MSSQL_SA_PASSWORD`, `MSSQL_DATABASE`, `MSSQL_PORT`) are only needed if you run the legacy Next.js app — see [section 8](#8-optional-mssql--nextjs-setup).
 
-```bash
-docker ps --filter "name=mssql-server"
-```
+## 3. Start PostgreSQL (Docker)
 
-## 3.5 Start PostgreSQL (Docker) — for agent pipeline
-
-The Python agent pipeline uses PostgreSQL (separate from the MSSQL instance used by Next.js). After configuring `.env.docker` with PostgreSQL variables (see section 2.2):
-
-**All platforms:**
+PostgreSQL with pgvector is the primary database. The agent pipeline uses it exclusively via SQLAlchemy + psycopg2.
 
 ```bash
 docker compose --env-file .env.docker up postgres -d
@@ -108,77 +81,17 @@ Wait for the container to be healthy:
 docker ps --filter "name=postgres-server"
 ```
 
-The pgvector extension is automatically enabled on first container creation (via the init script in `scripts/postgres-init/`).
+You should see `(healthy)` in the STATUS column. The pgvector extension is automatically enabled on first container creation (via `scripts/postgres-init/01-enable-pgvector.sql`).
 
-> **Note:** You need both SQL Server (for Next.js) and PostgreSQL (for agents) running during development. Use `docker compose --env-file .env.docker up -d` to start both at once.
+See [docs/DOCKER_POSTGRESQL_SETUP.md](docs/DOCKER_POSTGRESQL_SETUP.md) for detailed setup, troubleshooting, and connection info.
 
-> **Migrating from MSSQL?** If you previously ran agents against MSSQL, see [docs/MIGRATION_MSSQL_TO_POSTGRES.md](docs/MIGRATION_MSSQL_TO_POSTGRES.md) for data migration steps using pgloader.
+## 4. Python Environment Setup
 
-## 4. Create the database (all platforms)
-
-**You must create the database before pushing the Prisma schema (step 5).**  
-Replace `YOUR_SA_PASSWORD` with your `MSSQL_SA_PASSWORD` and `talent_finder` with your `MSSQL_DATABASE` if different.
-
-**Windows (PowerShell):**
-```powershell
-docker exec -it mssql-server /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YOUR_SA_PASSWORD' -C -Q "CREATE DATABASE talent_finder"
-```
-
-**Linux / macOS:**
-```bash
-docker exec -it mssql-server /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YOUR_SA_PASSWORD' -C -Q "CREATE DATABASE talent_finder"
-```
-
-If the database already exists, you can skip this step.
-
-## 5. Set DATABASE_URL in .env
-
-After SQL Server is running and the database is created, set `DATABASE_URL` in `.env` to match your `.env.docker` values:
-
-```env
-DATABASE_URL="sqlserver://localhost:1433;database=talent_finder;user=SA;password=YOUR_SA_PASSWORD;encrypt=false;trustServerCertificate=true"
-```
-
-Replace `YOUR_SA_PASSWORD` with your `MSSQL_SA_PASSWORD` from `.env.docker`, and adjust `1433` if you changed `MSSQL_PORT`.
-If Docker is mapped to `11433`, your URL must use `localhost:11433`.
-
-> **Note:** This `sqlserver://` format is required by Prisma/Next.js. Python agents (SQLAlchemy) use a different format and a separate variable — see step 7.4.
-
-## 6. Database Schema and Seed (Anonymized Fixtures)
-
-The repo includes **pre-anonymized JSON fixtures** in `prisma/mock-data/`. Populate the database from these:
-
-```bash
-npx prisma db push
-npx prisma generate
-npm run db:seed:anonymized
-```
-
-Seeding behavior notes:
-
-- Seed runs in dependency-safe order (parents before children) to satisfy FK constraints.
-- If fixture references are orphaned, the seed script auto-repairs those FK fields to deterministic fallback parent IDs before insert.
-- FK violations are not skipped at insert time; unresolved references after repair fail fast with a clear error.
-
-Tip: if `prisma db push` errors and your machine has local SQL Server installed, verify you are connected to Docker SQL first:
-
-```sql
-SELECT @@SERVERNAME, @@VERSION;
-```
-
-`@@SERVERNAME` should be the container hostname, not your Windows host name (for example `DESKTOP-PC`).
-
-## 7. Python Agent Environment (Pipeline — Not Yet Implemented)
-
-The **Job Intelligence Engine** is an eight-agent Python pipeline that will ingest, normalize, enrich, and analyze external job postings alongside the Next.js app. **It is not yet implemented.** The `agents/` directory is scaffolded (structure and `requirements.txt`); the pipeline will be built out over the **12-week curriculum** as specified in [CLAUDE.md](CLAUDE.md) and [docs/planning/ARCHITECTURE_DEEP.md](docs/planning/ARCHITECTURE_DEEP.md).
-
-Set up the Python environment now so you’re ready to develop agents as you follow the weekly deliverables.
-
-### 7.1 Install Python 3.11 (if not already installed)
+### 4.1 Install Python 3.11 (if not already installed)
 
 1. Download from [python.org/downloads](https://www.python.org/downloads/) (Python 3.11 or later).
-2. Run the installer. **On Windows**, check **"Add python.exe to PATH"** at the bottom.
-3. Verify installation:
+2. Run the installer. **On Windows**, check **"Add python.exe to PATH"**.
+3. Verify:
 
    **Windows (PowerShell):**
    ```powershell
@@ -190,13 +103,11 @@ Set up the Python environment now so you’re ready to develop agents as you fol
    python3 --version
    ```
 
-   If you see a version number (e.g. `Python 3.11.5`), you're good.
+### 4.2 Create and activate a virtual environment
 
-### 7.2 Create and activate a virtual environment
+Create a venv in `agents/.venv`. Always activate from the **project root** so tools like `streamlit` and `python -m agents...` resolve correctly.
 
-Create a venv in `agents/.venv` so dependencies stay isolated. Always activate it from the **project root** before running any Python commands, so that tools like `streamlit run agents/...` and `python -m agents...` resolve correctly.
-
-**Create the venv** (one time only):
+**Create (one time):**
 
 **Windows (PowerShell):**
 ```powershell
@@ -210,7 +121,7 @@ cd ..
 cd agents && python3 -m venv .venv && cd ..
 ```
 
-**Activate from the project root** (every new terminal session):
+**Activate (every new terminal):**
 
 **Windows (PowerShell):**
 ```powershell
@@ -222,66 +133,147 @@ agents\.venv\Scripts\Activate.ps1
 source agents/.venv/bin/activate
 ```
 
-After activation, your prompt will show `(.venv)` and `pip` will work directly.
+After activation, your prompt shows `(.venv)` and `pip` works directly.
 
-### 7.4 Install dependencies
+### 4.3 Install dependencies
 
 ```bash
 pip install -r agents/requirements.txt
 ```
 
-### 7.5 Install Playwright browsers (required for Crawl4AI)
+## 5. Set PYTHON_DATABASE_URL in .env
 
-The scraping adapter uses Crawl4AI, which depends on Playwright. Browser binaries are **not** installed via pip. Run once with the venv activated (from project root):
-
-```bash
-playwright install
-```
-
-If you skip this step, the scraper (`python -m agents.ingestion.sources.scraper_adapter`) will fail with an error about the browser executable not found.
-
-### 7.6 Set PYTHON_DATABASE_URL in .env
-
-Python agents use SQLAlchemy + psycopg2, which connects to **PostgreSQL** (not the MSSQL instance used by Next.js). Add this to your `.env` file:
+Add this to your `.env` file:
 
 ```env
 PYTHON_DATABASE_URL=postgresql+psycopg2://postgres:YOUR_POSTGRES_PASSWORD@localhost:5432/talent_finder
 ```
 
-- Replace `YOUR_POSTGRES_PASSWORD` with your `POSTGRES_PASSWORD` from `.env.docker`.
-- Replace `5432` with your `POSTGRES_PORT` if you changed it.
-- Replace `talent_finder` with your `POSTGRES_DB` if you changed it.
+- Replace `YOUR_POSTGRES_PASSWORD` with `POSTGRES_PASSWORD` from `.env.docker`
+- Replace `5432` with `POSTGRES_PORT` if changed
+- Replace `talent_finder` with `POSTGRES_DB` if changed
 
-> **Why a separate database?** The Python agent pipeline uses PostgreSQL (with pgvector for embedding similarity search). The Next.js app still uses MSSQL via Prisma. These are independent database connections. A future DB-unification effort will consolidate both layers on PostgreSQL.
+## 6. Seed PostgreSQL
 
-> **Migrating from MSSQL?** If you previously had the Python agents configured to use MSSQL, see [docs/MIGRATION_MSSQL_TO_POSTGRES.md](docs/MIGRATION_MSSQL_TO_POSTGRES.md) for step-by-step migration instructions.
-
-### 7.7 Verify Python database connectivity
-
-From the **project root** with the venv activated, run:
+The repo includes **JSON fixtures** in `scripts/pg-seed-data/fixtures/` with all reference data (~56,000 rows across 40 tables):
 
 ```bash
-python -m agents.test_db_connectivity
+# With venv activated (see step 4.2)
+python scripts/pg-seed-data/seed_pg_database.py
 ```
 
-You should see a line like `job_postings row count: 25` (the number depends on your seeded data). That confirms SQLAlchemy + pyodbc can reach the database. If you get an error, see the **Troubleshooting** table (ODBC driver, login timeout, or connection issues).
+Or via npm:
 
-**When the pipeline is implemented**, you will use commands like the following (included here for reference; they will not work until the corresponding agents exist):
+```bash
+npm run db:seed
+```
 
-- **Streamlit dashboard:** `streamlit run agents/dashboard/streamlit_app.py`
-- **Full pipeline (Orchestration Agent scheduler):** `python -m agents.orchestration.scheduler`
-- **Single agent (e.g. Ingestion):** `python -m agents.ingestion.agent --source jsearch --limit 50`
-- **Agent tests:** `cd agents && pytest tests/`
+The seed script:
+- Creates the `dbo` schema with all tables, indexes, and constraints
+- Loads all reference data (skills, companies, job postings, taxonomies, etc.)
+- Creates agent-managed tables (`raw_ingested_jobs`, `normalized_jobs`, `job_ingestion_runs`)
+- Adds Phase 1 columns to `job_postings`
+- Is **idempotent** — safe to run multiple times (drops and recreates schema each time)
+
+See [scripts/pg-seed-data/README.md](scripts/pg-seed-data/README.md) for details and troubleshooting.
+
+## 7. Run the App
+
+### Agent Pipeline
+
+The **Job Intelligence Engine** is an eight-agent Python pipeline that will ingest, normalize, enrich, and analyze external job postings alongside the Next.js app. The `agents/` directory is scaffolded; the pipeline is built out over the **12-week curriculum** as specified in [CLAUDE.md](CLAUDE.md).
+
+**Walking skeleton (Week 2+):**
+
+```bash
+python agents/pipeline_runner.py
+```
+
+**Streamlit dashboard:**
+
+```bash
+streamlit run agents/dashboard/streamlit_app.py
+```
+
+**Agent tests:**
+
+```bash
+cd agents && pytest tests/
+```
 
 See [CLAUDE.md](CLAUDE.md) for architecture, rules, and the 12-week build order; see [docs/planning/ARCHITECTURE_DEEP.md](docs/planning/ARCHITECTURE_DEEP.md) for per-agent implementation specs.
 
-## 8. Run the App
+### Next.js App
+
+> Requires MSSQL setup — see [section 8](#8-optional-mssql--nextjs-setup) first.
 
 ```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+## 8. (Optional) MSSQL + Next.js Setup
+
+> **MSSQL is being phased out.** It is only needed for the legacy Next.js/Prisma layer. You do **not** need MSSQL for the Python agent pipeline.
+
+### 8.1 Start SQL Server (Docker)
+
+Ensure `MSSQL_SA_PASSWORD`, `MSSQL_DATABASE`, and `MSSQL_PORT` are set in `.env.docker`.
+
+**Windows:**
+
+```powershell
+.\scripts\start-sql-server.ps1
+```
+
+**Linux / macOS:**
+
+```bash
+docker compose --env-file .env.docker up mssql -d
+```
+
+Wait for the container to be healthy:
+
+```bash
+docker ps --filter "name=mssql-server"
+```
+
+If you also run a local SQL Server instance, set `MSSQL_PORT` to a non-default port (e.g. `11433`) so Prisma targets Docker.
+
+### 8.2 Create the MSSQL Database
+
+Replace `YOUR_SA_PASSWORD` with your `MSSQL_SA_PASSWORD` and `talent_finder` with your `MSSQL_DATABASE` if different.
+
+**Windows (PowerShell):**
+
+```powershell
+docker exec -it mssql-server /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YOUR_SA_PASSWORD' -C -Q "CREATE DATABASE talent_finder"
+```
+
+**Linux / macOS:**
+
+```bash
+docker exec -it mssql-server /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YOUR_SA_PASSWORD' -C -Q "CREATE DATABASE talent_finder"
+```
+
+### 8.3 Set DATABASE_URL in .env
+
+```env
+DATABASE_URL="sqlserver://localhost:1433;database=talent_finder;user=SA;password=YOUR_SA_PASSWORD;encrypt=false;trustServerCertificate=true"
+```
+
+Replace `YOUR_SA_PASSWORD` and adjust port if needed. This `sqlserver://` format is required by Prisma/Next.js only.
+
+### 8.4 Push Prisma Schema + Seed MSSQL
+
+```bash
+npx prisma db push
+npx prisma generate
+node prisma/seed-anonymized.mjs --idempotent
+```
+
+Tip: if `prisma db push` errors and your machine has a local SQL Server, verify `SELECT @@SERVERNAME, @@VERSION;` shows the container hostname, not your Windows machine name.
 
 ## 9. Optional: Generate Skill Embeddings
 
@@ -291,22 +283,24 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 
 | Issue | Solution |
 |-------|----------|
-| `DATABASE_URL` connection fails | Ensure SQL container is running (`docker ps`), port matches `.env.docker`, password is correct |
-| `Cannot find data type vector` during `prisma db push` | Usually means Prisma connected to the wrong SQL instance. Verify `DATABASE_URL` port and check `SELECT @@SERVERNAME, @@VERSION` |
-| Password complexity error | SQL Server requires: 8+ chars, upper, lower, number, special char |
-| Port already in use | Change `MSSQL_PORT` in `.env.docker` (e.g. to 11433) |
-| Prisma errors after schema change | Run `npx prisma generate` |
+| PostgreSQL container won't start | Check Docker is running: `docker ps`. Check logs: `docker logs postgres-server` |
+| `PYTHON_DATABASE_URL` connection fails | Ensure PostgreSQL container is running (`docker ps --filter "name=postgres-server"`), port matches `.env.docker`, password is correct |
+| `ERROR: Set PYTHON_DATABASE_URL` | Add `PYTHON_DATABASE_URL=postgresql+psycopg2://postgres:YourPassword@localhost:5432/talent_finder` to `.env` |
+| Port 5432 already in use | Change `POSTGRES_PORT` in `.env.docker` (e.g. to `15432`) and update `PYTHON_DATABASE_URL` |
+| `pip` not recognized / Python not found | Install Python 3.11, enable "Add python.exe to PATH", then use a venv (section 4). On Windows, use `py -3.11 -m venv .venv` and activate before running `pip` |
+| `SQLAlchemy OperationalError` | `DATABASE_URL` uses Prisma's `sqlserver://` format. Set `PYTHON_DATABASE_URL` using `postgresql+psycopg2://` format (see step 5) |
 | Docker not found | Install Docker — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) |
-| `pip` not recognized / Python not found | Install Python 3.11, enable "Add python.exe to PATH", then use a venv (section 7). On Windows, use `py -3.11 -m venv .venv` and activate it before running `pip` |
-| `SQLAlchemy OperationalError` / Python DB connection fails | `DATABASE_URL` uses Prisma's `sqlserver://` format and does not work with SQLAlchemy. Set `PYTHON_DATABASE_URL` in `.env` using `postgresql+psycopg2://` format (see step 7.4) |
-| `PYTHON_DATABASE_URL` connection fails (PostgreSQL) | Ensure PostgreSQL container is running (`docker ps --filter "name=postgres-server"`), port matches `.env.docker`, password is correct |
-| Playwright / Crawl4AI: "Executable doesn't exist" or browser not found | Crawl4AI uses Playwright. After `pip install -r agents/requirements.txt`, run once: `playwright install` (with venv activated). See step 7.5. |
+| `DATABASE_URL` connection fails (MSSQL) | Ensure SQL container is running (`docker ps`), port matches `.env.docker`, password is correct |
+| `Cannot find data type vector` during `prisma db push` | Prisma connected to wrong SQL instance. Verify `DATABASE_URL` port and check `SELECT @@SERVERNAME, @@VERSION` |
+| Password complexity error (MSSQL) | SQL Server requires: 8+ chars, upper, lower, number, special char |
+| MSSQL port already in use | Change `MSSQL_PORT` in `.env.docker` (e.g. to `11433`) |
+| Prisma errors after schema change | Run `npx prisma generate` |
 
 ## Further Documentation
 
 - [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) — Docker installation (Windows, macOS, Linux)
-- [docs/DOCKER_SQL_SERVER_SETUP.md](docs/DOCKER_SQL_SERVER_SETUP.md) — Detailed SQL Server Docker setup
-- [setup-MSSQL.md](setup-MSSQL.md) — Native MSSQL install (alternative to Docker)
-- [docs/MIGRATION_MSSQL_TO_POSTGRES.md](docs/MIGRATION_MSSQL_TO_POSTGRES.md) — MSSQL to PostgreSQL migration guide (agent pipeline)
-- [prisma-workflow.md](prisma-workflow.md) — DB schema workflow
-- [API-routes.md](API-routes.md) — API reference
+- [docs/DOCKER_POSTGRESQL_SETUP.md](docs/DOCKER_POSTGRESQL_SETUP.md) — Detailed PostgreSQL Docker setup
+- [scripts/pg-seed-data/README.md](scripts/pg-seed-data/README.md) — PostgreSQL seed data guide
+- [docs/setup-MSSQL.md](docs/setup-MSSQL.md) — Native MSSQL install (legacy — Next.js only)
+- [docs/prisma-workflow.md](docs/prisma-workflow.md) — DB schema workflow (Prisma/MSSQL)
+- [docs/API-routes.md](docs/API-routes.md) — API reference

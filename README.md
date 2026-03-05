@@ -10,7 +10,7 @@ For a visual overview of the platform architecture (current and planned), see [d
 
 - Python >= 3.11 (for the agent pipeline)
 - npm
-- Docker (for local SQL Server)
+- Docker (for local PostgreSQL)
 
 ## Getting Started
 
@@ -23,7 +23,7 @@ cd watechcoalition
 
 **First-time setup?** Follow the full environment setup guide:
 
-- **[ONBOARDING.md](ONBOARDING.md)** — Clone, env config, Docker SQL, database seed, and run (Windows, Linux, macOS)
+- **[ONBOARDING.md](ONBOARDING.md)** — Clone, env config, Docker PostgreSQL, database seed, and run (Windows, Linux, macOS)
 
 ---
 
@@ -32,7 +32,7 @@ cd watechcoalition
 - [Environment setup (onboarding)](ONBOARDING.md)
 - [Install Docker](docs/INSTALL_DOCKER.md)
 - [Branching Strategy](docs/branch-strategy.md)
-- [Set up local MSSQL Server](docs/setup-MSSQL.md)
+- [PostgreSQL Docker Setup](docs/DOCKER_POSTGRESQL_SETUP.md)
 - [Changing the DB schema](docs/prisma-workflow.md)
 - [API Routes](docs/API-routes.md)
 - [CSS Utilities & Styling Guide](docs/styling-guide.md)
@@ -44,8 +44,8 @@ cd watechcoalition
 - `prettier`: Formats the code using Prettier.
 - `prettier:check`: Checks if the code is formatted according to Prettier.
 - `start`: Starts the application in production mode.
-- `db:seed:anonymized`: Seeds the database with anonymized JSON fixtures from `prisma/mock-data/` (recommended for local dev).
-- `seed`: Seeds the database with synthetic/faker-generated data (does not use `prisma/mock-data/`).
+- `db:seed`: Seeds the PostgreSQL database with anonymized fixtures via `scripts/pg-seed-data/seed_pg_database.py` (recommended for local dev).
+- `seed`: Seeds the MSSQL database with synthetic/faker-generated data via Prisma (deprecated).
 - `lint`: Runs ESLint to check for code issues.
 
 ## Agent Pipeline
@@ -66,12 +66,12 @@ streamlit run agents/dashboard/streamlit_app.py
 - **Prisma**: Database ORM for TypeScript and Node.js. [Prisma Documentation](https://www.prisma.io/docs)
 - **TailwindCSS**: Utility-first CSS framework. [TailwindCSS Documentation](https://tailwindcss.com/docs)
 - **Auth.js**: Authentication library for Next.js. [Auth.js Documentation](https://authjs.dev/docs)
-- **MSSQL**: Microsoft SQL Server database. [MSSQL Documentation](https://docs.microsoft.com/en-us/sql/sql-server)
+- **MSSQL**: Microsoft SQL Server database (deprecated — being phased out). [MSSQL Documentation](https://docs.microsoft.com/en-us/sql/sql-server)
 
 ### Agent Pipeline (Python)
 - **LangGraph**: Multi-agent framework for StateGraph routing. [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
 - **LangChain**: LLM adapter layer. [LangChain Documentation](https://python.langchain.com/)
-- **SQLAlchemy**: Python database access (MSSQL via pyodbc). [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
+- **SQLAlchemy**: Python database access (PostgreSQL via psycopg2). [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
 - **Streamlit**: Read-only analytics dashboards. [Streamlit Documentation](https://docs.streamlit.io/)
 - **LangSmith**: Agent tracing and evaluation. [LangSmith Documentation](https://docs.smith.langchain.com/)
 
