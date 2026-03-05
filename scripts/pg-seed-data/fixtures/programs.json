@@ -1,0 +1,4544 @@
+[
+  {
+    "id": "FFACC8E8-47AA-45A9-A3EA-0138F9C61F71",
+    "title": "Instructing Code 301: Intermediate Software Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "71B5AF86-B526-46A9-8431-01BD8CFF184C",
+    "title": "AWS Certified Solutions Architect",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "056F90B5-2775-45CF-A723-01E7AE784E18",
+    "title": "Intro to Computers Microsoft Access",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "46815EF5-CD4B-424F-B0E6-025A5F4D49FE",
+    "title": "Instructing Data 201: Foundations of Data Analysis",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "611467DA-64E3-43DE-BD85-0291F56F6345",
+    "title": "Intro to Advanced ASP.NET Core",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8DB08092-9EBC-468B-AF6E-034DDF46813D",
+    "title": "Information Technology - Scripting Fundamentals",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CF288AEE-4DAA-481C-88FC-03A26904A080",
+    "title": "Introduction to Data Analytics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "77C91408-C9EC-4898-ADD7-03A507486718",
+    "title": "Web Application and Cloud Developer",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "65AF1C13-91DA-44B9-BB23-03A66E88C870",
+    "title": "Information Tech Systems",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "7FEC2F2B-BA81-450C-92CD-03F57F049FFE",
+    "title": "Linux Operating Systems Support",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "ABF3DAE8-9829-4EB8-B408-04F2B640D8F4",
+    "title": "Computer Networking Articulation to WWU Cybersecurity B.S.",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "90E61A07-209F-4538-B61B-065EA905A756",
+    "title": "Python Programming",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "5CAF982D-7475-4DA5-86C9-0687B8B37328",
+    "title": "Certified Information Security Manager CISM (Voucher Included) GES345",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "34C2FA9A-A5D6-49A2-86F8-06B6AAEB1C19",
+    "title": "Full Stack Software Developer GES375",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "473F78AC-9AE9-44F9-A5BE-06BF1F6AF492",
+    "title": "Data Analytics and Machine Learning",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B7C2D58C-0278-4971-90E2-06D4B2634A95",
+    "title": "Criminology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B6C9EF2F-1A72-4831-BD77-06E246C3EEB9",
+    "title": "Multimedia & Interactive Technology-Web Developer",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "04AAEA7B-C509-475F-8A60-07814606B827",
+    "title": "Multimedia & Interactive Technology - Web Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CBDC7E78-0A30-4B32-95F7-0855B16BC445",
+    "title": "Certified Information Security Manager (CISM) GES343",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9D4AB881-AEA9-41D1-B65A-085F8885ECBA",
+    "title": "Business Applications for Small Business",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "35628CC6-143D-4247-9A7E-0893A81B63DD",
+    "title": "Computer Systems Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E749F2C3-A307-4EDA-9B7B-09F0942B0ACD",
+    "title": "Career Prep",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "EFCEE643-C56F-46B8-938E-0A0A28AF1C74",
+    "title": "AWS Certified SysOps Admin Associate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4EBDCF59-FD8A-44D0-85F0-0A0D73AFA757",
+    "title": "Bachelor of Applied Science - Information Technology: Computing and Software Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D718EF31-75F9-4894-9406-0A1FC22CBB4C",
+    "title": "Python Programming Certificate of Completion",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "385127B8-4345-45E6-9FAD-0A26FD1501A8",
+    "title": "Associates in Arts and Science",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "F53E4D6F-6E09-4CBC-A168-0A57335B2F03",
+    "title": "Computer Science, BS",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "EF5B8352-80D7-467C-B471-0B1457A43762",
+    "title": "User Experience (UX) Design ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D7E58E9B-006C-44DF-87B3-0B39893C4B3C",
+    "title": "Cybersecurity Foundations",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "67B2FBC3-24D5-4CC9-A9CA-0B4A4626D070",
+    "title": "Bachelor of Applied Science - Information Technology: Application Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "ABBDA4A5-443F-4293-A4B5-0B6281119ECB",
+    "title": "Computer and Information Technology",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E1EA0714-DC05-4286-A7A0-0BC85E62AD9B",
+    "title": "Cisco Networking Academy",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "08BA34BB-22D8-4129-8E1B-0BFB477D3E3A",
+    "title": "CompTIA IT Fundamentals Certificate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "434497F5-0449-4CCD-B3F1-0C14F013C6CD",
+    "title": "Computer Forensics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "EC9B24D1-C1B5-4263-8140-0C905AFADB11",
+    "title": "Software Development Program",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "17B5CF21-5592-4622-8614-0CC163160A27",
+    "title": "Cybersecurity & Computer Forensics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "2C1F9E4A-F04D-47D3-A2D4-0CC258F282BE",
+    "title": "Year Up",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B956F037-11A6-4163-BBF8-0E22B3ABE21E",
+    "title": "Big Data Coding Bootcamp",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B910EA76-13AE-4136-8DB0-0FC222D72660",
+    "title": "Software Analyst",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "714BB6A1-E0ED-44EF-A121-100F307E9664",
+    "title": "Computer Science",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "462E48B7-1FAC-42B1-A5B5-103BA4BC157B",
+    "title": "Upskilling Training",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "6AFF3573-5CE3-4629-B680-10AAFA7DF9CA",
+    "title": "Linux/Unix Networking",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6F8D56CE-6C9E-49A0-8B24-10BA386ADEF5",
+    "title": "Google Project Management",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "1E8D07AC-22ED-4F93-BD26-11517561D87A",
+    "title": "Information Technology Systems Administration",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D88FBC90-14C2-4CA7-BE5E-11A66921782C",
+    "title": "Controls Programmer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E959E82A-391B-4E5B-A0BD-122E23D1A359",
+    "title": "Applications Server Support",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2835B448-8772-4782-BA0B-124FF581E366",
+    "title": "Intro to Computer & Information Technology Concepts",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AE847699-AAF5-4D8A-9E87-125D5ADB0DC4",
+    "title": "Cisco Networking",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "11FC573E-24BA-47CD-81FF-1295653C276C",
+    "title": "Augmented Reality and Virtual Reality Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0E1B802A-9D04-40BC-8A64-12FBE47C97E9",
+    "title": "International Relation and Diplomacy",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "380B5BD0-1B46-475A-A77C-12FDF1A234E3",
+    "title": "UNIX-C++ Specialization",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CA22D529-0A7E-49BF-B2C8-13966817377B",
+    "title": "Business Computer Technology - Administrative Assistant",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "EBF83E79-AD00-4512-9116-13A939F787D4",
+    "title": "Java Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AF289AE9-009C-4EDD-96DA-13B998002AF2",
+    "title": "Hack Reactor Software Engineering Online Immersive",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "5DDA6918-E5A6-4970-B316-13F1DFBA4E75",
+    "title": "Information Technology - PowerPoint",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2D084B9A-DEA5-49ED-BB5A-14216462FF54",
+    "title": "JavaScript Development Short Course Online",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "685E7E9F-6E36-4D4E-9D73-1433DDA03D75",
+    "title": "Data 301: Database Systems",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B00F8D4E-DB13-4CA6-84DF-14446F7FFE6E",
+    "title": "CompTIA Pen Test+",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4C96AA6A-1F90-4D76-92B7-1483E67D4127",
+    "title": "Enterprise Data Management Professional EDMP -1 - Power BI",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6EEAF859-E302-4B84-AAD4-14BFEB797A35",
+    "title": "Code 401: Advanced Software Development for Mobile Devices",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "71C7BE0D-FFCB-4A22-9FC8-14CD38BEA1AB",
+    "title": "CompTIa Network+",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "39344F8E-4CAF-4B5D-B343-14EC273C7960",
+    "title": "Intermediate Applications Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "ACBB60F3-3686-4C1E-89D0-155D88027847",
+    "title": "Application Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "DD707C12-B8BA-4E04-8654-159C80A1F69A",
+    "title": "VCT: Business Foundation",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "ACB90DAF-09A9-417C-BE84-15D476A1DB73",
+    "title": "Washington Veterans to Technology (WaV2T) Program",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1ACFB665-F93B-4791-B2AD-163ED980930C",
+    "title": "Programming",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9B438A3D-C2B6-4DA0-9878-16C5AE0E4552",
+    "title": "Intro to Computers Microsoft Excel",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E4EDE949-68C9-4512-98C9-16DB6CE8D32C",
+    "title": "Bachelor of Applied Science - Information Systems",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A0DFABD8-1F11-48E4-9507-171FBAFDC044",
+    "title": "Cyber Defense and Digital Forensics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "F8DAEB8C-0486-4204-A094-17610EA7DE7A",
+    "title": "Information Technology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E535AC3A-0F5E-421B-9B6F-17B03006107D",
+    "title": "Cybersecurity and Networking",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9CC1ADA1-18CC-4C0C-8F66-17D351BD22E0",
+    "title": "Full Stack Software Engineer",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "519202AB-E2E6-4C26-AB31-18D9C21D9ACC",
+    "title": "Computing and Software Development: Web Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4D466B30-48E6-412D-9231-18F3F65F6801",
+    "title": "Data Science Short Course Online",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F980A4BA-7DED-46E6-AA42-193492318FB9",
+    "title": "Information Technology - Networking (IT-NW)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "63315CAA-637A-4A74-A9AB-19486B233F70",
+    "title": "Instructing Code 401: Advanced Software Development for Mobile Devices",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BBD7B88B-7448-4DBE-A72D-19B0E8D485F3",
+    "title": "Back-End Coding Bootcamp ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "693C210D-A2CC-47AD-B035-19BC059EE112",
+    "title": "Computer Information Systems - Network Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BF374DC4-0EFA-4E26-B03C-19C647366CC9",
+    "title": "Security Enhancement and Compliance Initiative (micro-internship)",
+    "createdat": "2025-08-28T20:20:15.687000+00:00",
+    "updatedat": "2025-08-28T20:20:15.687000+00:00"
+  },
+  {
+    "id": "90F9A98F-5FE6-4B55-9818-1A0A2077D07E",
+    "title": "Criminal Justice",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "8EBBDF26-46A5-4676-946D-1A500E6FF7F0",
+    "title": "Information Systems Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "430A1A69-1966-4160-A53A-1A8E5C5011CB",
+    "title": "User Interface Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "061C8413-78C7-41E7-BD8E-1B5BEC74C833",
+    "title": "Certified Network Defender (CND) (Voucher Included) GES3031",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A2031BC3-5CC2-45AD-8C8F-1BB689276722",
+    "title": "Database and Software Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "DC4BA8D3-97CC-4100-9E38-1BC38A9C812B",
+    "title": "Database Management & Design",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "BA19649F-175B-432B-93D0-1C8F29A07313",
+    "title": "Intro to Computers Microsoft Word",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CF3B7332-7101-43E1-A094-1CECE4026F35",
+    "title": "Computer Science and Computing Equipment Technology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9A907A7A-1846-47E7-AC5B-1D046083D9B4",
+    "title": "Bachelor of Applied Science - Computer Network Engineering",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "6A226248-2851-4818-9C6A-1D7881DAB4D5",
+    "title": "Multimedia Communications - Digital Photography",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "154A6B04-6591-4D99-8A1D-1D8ADE6E79F9",
+    "title": "Web Design Professional",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "10DD74FC-E4BA-49BE-ADDC-1DF6F602D844",
+    "title": "Psychology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "7FF142DB-419A-4E33-B0A4-1EB29EDA297F",
+    "title": "Instructing Code 401: Advanced Software Development in Python",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "46C64480-1F68-4E48-BB8B-1EB5FF7B8398",
+    "title": "Advanced Diploma Game Programming ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D0AE4FDE-06CB-4262-B6B5-1EC983F56449",
+    "title": "Information Technology, Cybersecurity",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4EAC2225-F428-4595-B324-20019E8E7D09",
+    "title": "Computer Science Cyber Operations",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0B442B69-5972-464A-8DDA-203BAA839EB0",
+    "title": "Full Stack Java Developer",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "FA7D105E-EF36-400E-891C-203ED55B4A84",
+    "title": "Computer Science DTA/MRP",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "BDC01AEC-16AB-40C1-BA0C-2128B4F636D6",
+    "title": "Biology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "FF57A432-BCB3-48F6-8D77-216DB8A0D0F5",
+    "title": "Business and Data Analytics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "5438A6B7-05FD-4850-871F-217BC8879C2D",
+    "title": "Instructing Code 401: Advanced Software Development in ASP.NET Core",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F308B3EE-27C5-4420-9494-21B06BB1E73B",
+    "title": "IT Fundamentals",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3FF6EB3F-99A7-496D-83EF-221C4A6E0C2F",
+    "title": "Network System Support",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "129A1D79-63A8-4B0C-B787-224F78FF6960",
+    "title": "Certified AWS Cloud Practitioner Developer Associate (Vouchers Included) GES3072",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "03A7D0EE-3C61-4B68-80FE-227A4FBF6DCB",
+    "title": "Digital Forensics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F6E8261B-B795-467B-A5F2-22B8CF05B700",
+    "title": "Certified Kubernetes Administrator (CKA) (Voucher Included) - GES3080",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F0428025-746B-4377-9594-22BD624C19FB",
+    "title": "Certified AWS Cloud Practitioner (Voucher Included) - GES3067",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CD2D5FAF-0E83-4096-AB94-22D5B127CBB0",
+    "title": "Certified Information Security Systems Professionals (CISSP)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E3F2E5BE-CEE2-4A63-804B-234A6A753A06",
+    "title": "Network Development Engineer AWS Solution Architect - ALP",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "08706365-2237-4376-B493-235948DB7137",
+    "title": "Systems Administration",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "62D3CA4B-CFCB-40D4-9096-2365EEE8E4FA",
+    "title": "Design",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "FC95B494-48D9-4FB9-8F95-23664B57374A",
+    "title": "Network Engineering and Security",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "52B850DB-201F-4469-BF14-2391DF3191F8",
+    "title": "Cisco Network Certification (CCNA)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "793C8ECF-A858-4D42-AF4C-23DE8B2D47C1",
+    "title": "IT Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "056A60BB-8B4E-4C7C-8969-2439BBD7FCCE",
+    "title": "IT Controlled Electronic Systems",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CCC7FEE2-03A5-4065-A768-24FB0D730D24",
+    "title": "Finance and economics Development ",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "F997BF8C-B455-4FF8-8F78-251221B2E79D",
+    "title": "Linux Foundation Certified System Administrator (LFCS) (Voucher Included)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A4380C9F-A3F4-40E2-8E58-2578459F5C7A",
+    "title": "VCT: Digital Illustration/Animation Level II",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D4FB4ECA-A1A9-42B2-8B90-261C608A1759",
+    "title": "IT Networking - Cybersecurity",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "14A8281D-9F3A-47A1-A412-2657F78D2103",
+    "title": "Azure Data Administrator",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "40A71F67-BB17-4C87-8925-2689979BCA5D",
+    "title": "Systems Administrator",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "74D9A70F-1993-438E-9E4C-2773619B5C84",
+    "title": "Computer Information Systems - Technical Support ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CC835A29-6AEC-4E1F-8F25-279E6A3CD50D",
+    "title": "Full Stack Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9FDD0FDA-8D9A-4EB0-A47A-27A348D2B334",
+    "title": "Computer Engineering & Systems",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7A5D3B64-5D44-4B3A-B545-27E5D7A34D9E",
+    "title": "Computer Application (BCA) and Management",
+    "createdat": "2025-08-31T23:26:32.547000+00:00",
+    "updatedat": "2025-08-31T23:26:32.547000+00:00"
+  },
+  {
+    "id": "ADCA883F-1218-45BA-9DC0-28895419A8B5",
+    "title": "Game Art & Design",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "02A711FE-1A2A-40CB-9775-28BC10D3EAE6",
+    "title": "Data Center Technician -  ALP",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1272950D-CF88-4E05-9F03-28F607552224",
+    "title": "ASP Server Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6C7E4BD8-95D7-4F1B-B343-29EA2F9A373C",
+    "title": "Information Technology: Application Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "DBFABCC7-4C71-4086-81E2-2A198CDFD406",
+    "title": "Web Applications",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FA8EE3F5-9758-441D-9DCA-2A50BCC05ABA",
+    "title": "Development Policy",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "004D2BDD-AE3B-4A0E-A699-2A6055E083AE",
+    "title": "Networking",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E9AC779F-ED51-4D48-ADF9-2AE88A64D747",
+    "title": "Intro to Computers Microsoft Powerpoint",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "55E4B4D1-DC45-4FE0-B9B4-2B996FBB6745",
+    "title": "Software Development - Artificial Intelligence Concentration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D9E3CF4F-BD8C-4A5D-8273-2C052FFEF222",
+    "title": "Cybersecurity Program",
+    "createdat": "2025-08-31T23:26:32.507000+00:00",
+    "updatedat": "2025-08-31T23:26:32.507000+00:00"
+  },
+  {
+    "id": "F879B76D-D04A-4DED-A057-2C5227BF68A3",
+    "title": "Computer Security and Network Technnology: Network Support Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "ECE938A7-0983-413F-9F4F-2C5D4C0EA0F7",
+    "title": "Business Administration and Computer Science",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "7A90F257-1B49-4879-B44D-2C6A74E2283D",
+    "title": "Cloud Technologies",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CD9C70B2-C584-477B-B074-2CC26C271B8C",
+    "title": "Multimedia Communications",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "35EF3A80-6A35-4F27-995B-2CD2894A4564",
+    "title": "Computer Technology Systems (CTS)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "73D6C180-6D8A-4A0E-AB17-2D21E79F1182",
+    "title": "SQL Server Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9E8B1901-5F85-4973-80FB-2D8E15D30ACA",
+    "title": "Web Page Development Essentials",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "14045730-2C67-4FA6-90D7-2D9760A79561",
+    "title": "Applied Computer Science",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FC81F8CD-AE2E-4EDE-AC25-2D9812EF3914",
+    "title": "Android Application Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "452C4733-B9D0-4AFA-83A5-2DED264B79BE",
+    "title": "Computer Engineering",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A849E5D7-ABDD-4A4B-9575-2E9F84475BC2",
+    "title": "Foundations of System Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "82928C16-B091-4AB0-9F3E-2EB0D298107E",
+    "title": "Digital Video",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "346F9F7A-9ADD-47A7-9975-2FA559F895B9",
+    "title": "Instructing Code 401: Advanced Software Development in Java with SpringMVC & Android",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "627C6EDA-FA98-4663-B24D-2FBC99B4DA27",
+    "title": "Computer Network Design and Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D3A85332-3868-422E-9FF8-2FEBA1EC8CEF",
+    "title": "IT Software Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "DD8B6EA3-9823-4A05-88AE-3023F7365465",
+    "title": "Programming and Software Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "3A2F9C7D-B57B-4E52-B6FF-304D33DB05FE",
+    "title": "Community Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "69F9728A-B9EA-47EF-BD0D-30738A838DB4",
+    "title": "Foundations of UX Writing",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4931F0A6-A2DE-4DC6-A455-30C14F96BBBB",
+    "title": "Software Development and Design Essentials",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "EEB5882F-24FD-466E-9410-30F86C13E763",
+    "title": "Windows Network Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6247C484-D42A-4E15-AF6A-311573C4BFE8",
+    "title": "Apprenticeship",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "1D2792C7-87C4-440F-8107-317D7D2350E3",
+    "title": "Info Tech - Network Administrator",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "CB887EA3-415A-4EF5-9508-319C47D188A6",
+    "title": "Computer Game Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2DBF3D58-5E97-4A64-B9BF-31B794363E1D",
+    "title": "Digital Filmmaking",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2F5B0387-4BAC-4E96-80D8-3292A35F8D28",
+    "title": "Web Developer Certificate",
+    "createdat": "2025-07-27T22:46:17.400000+00:00",
+    "updatedat": "2025-07-27T22:46:17.400000+00:00"
+  },
+  {
+    "id": "468646B5-F84B-4818-8D8A-32ABAB768B02",
+    "title": "Computer Support",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "76B37B6A-07D5-4D22-98B7-32ACB21D601A",
+    "title": "Bachelor of Applied Science - Information Systems & Technology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "72F097CC-2CAB-4477-9AD1-32F64EF33129",
+    "title": "Code 401: Advanced Software Development in Python",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B415E7A2-B8BC-4AAA-9ADC-3328F4740EEB",
+    "title": "Frontend Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "91925A77-4486-4DCF-B6EA-3398B0C1F5BF",
+    "title": "Build a Website with HTML, CSS",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "BE46075E-12FC-4391-AC31-34E75ED02BDF",
+    "title": "Network Security and Cisco CCNA",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "83895609-9A71-4CA2-8CB5-350171A16BFB",
+    "title": "Business Technology: Microsoft Office Core",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3EB3B876-A211-47BF-B122-357E1FC13319",
+    "title": "Bachelor of Applied Science-Information Technology: Software Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "CF17737C-D42B-44DE-A90F-35820E32FE67",
+    "title": "Cyber-Security",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E5C1450C-6CD2-4EF6-AB29-35D31F65F2B0",
+    "title": "General Studies",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "88B18BF9-2EF9-42C1-AF53-367AF0DB14B3",
+    "title": "Bachelor of Applied Science - IT Networking: Information Systems and Technology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "CA76FF21-23D0-4245-AC74-36910D811386",
+    "title": "Information Technology: Application Development-Mobile Platforms",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "22D2F805-39DE-462D-843E-36C4B4300168",
+    "title": "F5 Certified BIG-IP Administrator",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A4E5D91E-3A9C-4261-8E8A-37136242AC24",
+    "title": "IT Specialist - Level 2",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "94FBEDCF-C9D8-4A82-A8BF-3799B841112C",
+    "title": "Database",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1E90E8B7-E01B-4C21-8007-382EF51B4402",
+    "title": "Microsoft Access Certification Training (Voucher Included)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2EE574BF-0C7F-4AD1-AA74-3846EE60B9DC",
+    "title": "Bachelor of Applied Science in IT Networking System Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9CA2B311-DA5B-4E8E-9889-39168B8E8FCF",
+    "title": "Data Analytics: Techniques for Decision Making",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D8BC1371-1F88-4381-802A-39285C7E138B",
+    "title": "Code 102: Intro to Software Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "EC9451D3-FA89-4E9B-A13E-3965D6606134",
+    "title": "Satellite Communications",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "7F33FAA6-A7B4-472C-8685-397D6A75BEA5",
+    "title": "Cybersecurity Risk Management",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4DBE1B1B-0E63-4125-8BC3-3995D15DE896",
+    "title": "Information Technology - Systems Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0B769DC9-8379-4247-8DE4-39E0353CCD6F",
+    "title": "Information Systems",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "BD519575-D1C5-4797-98BD-39F3348165EB",
+    "title": "Microsoft Office Specialist (MOS) Associate Certification Training (Vouchers Included)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4BD13412-9955-4073-A53C-3A0910E9155E",
+    "title": "Business Intelligence Coordinator",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "304774D5-CF2A-4F87-8AAE-3A1B182F31C8",
+    "title": "Help Desk Tier 1 Support Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BB57364D-F0AE-4B5E-A29A-3A6FA77F6D25",
+    "title": "Ops 301: Networking and System Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F69B14DB-1F8A-4218-B1F0-3AC92150BE8C",
+    "title": "Network Technologies",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "AEB73255-B9ED-4A57-84AD-3B1E0F54D325",
+    "title": "Bachelor of Applied Science - IT Networking - Cybersecurity",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E5A43B5E-8D68-4023-93F7-3C370B36FD0D",
+    "title": "Business and Data Analytics Certificate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "89E9A479-7EA0-4237-A97A-3C80023CBA89",
+    "title": "Data Science & Machine Learning",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "14CBB380-021E-4CE6-BE6A-3CD45BCB5EC8",
+    "title": "Front End Website Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6E314F79-24E1-4301-BD1C-3D7867E879F4",
+    "title": "SQL Server & Database Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "01AB7EE1-CEA9-4C69-A617-3D8E98F8F9D3",
+    "title": "Code 201: Foundations of Software Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6DA12BC9-CC8C-438B-BFF9-3DAFC0E634C4",
+    "title": "Computer Network Engineering (JBLM)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "8FB15AF4-CFF0-484C-8528-3DE6DA3D9AD1",
+    "title": "Certified AWS Cloud Practitioner Developer Associate (Vouchers Included) - GES3072",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "C4DE5434-9EE4-47B0-98A1-3DF8B75E4FBD",
+    "title": "Computer Network Engineering",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4AFB378F-171E-41E5-B948-3E04A49195E6",
+    "title": "Geography: Data Science Track",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "DD986605-72DE-49ED-A33E-3EE949F9424A",
+    "title": "C# & Azure Cloud",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4C70F04A-A844-4CD1-A7C8-3EF4A0EC627B",
+    "title": "Cloud Computing",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0EB3AEBC-BC0B-4C23-A6A0-3EFE4E8B5AFD",
+    "title": "Certified Ethical Hacker (Voucher Included) GES338",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D4FA321B-3316-4B80-9C3F-3F01D2B49C74",
+    "title": "Bachelor of Applied Science in Cybersecurity Degree",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "88F3BF83-2359-4054-A6B7-3F4B9D69BE2A",
+    "title": "C/C++ Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "18BC54B4-9672-43BB-B7CE-85CEDAE19986",
+    "title": "IT Security",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "193ECED0-B116-4679-9374-3F88C9119A53",
+    "title": "Cloud Operations Specialist 1",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BD00809C-537F-4697-97A8-4017583B306D",
+    "title": "Data Management and Analytics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F9A34B55-E6E0-4FD1-9156-407524EA59E4",
+    "title": "Interactive Web Design Essentials",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "90B438AD-10CF-4FB6-838B-40D64CDFD73D",
+    "title": "Project Coordinator",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0B06FB92-00CC-4088-97EB-4196E6A53102",
+    "title": "Network Operations & System Security: Security Professional ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3E0E2A31-651D-41DF-AE30-419C0AF62095",
+    "title": "Information System Project Coordinator",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "76B79CC5-FFD9-42E8-8582-41E468C88225",
+    "title": "Virtual Reality",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2931B8A9-29A0-4EB6-B064-42844300C2CD",
+    "title": "Intro to Advanced Data Analysis",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "60A2F1B7-468C-4FFB-B9AB-43E27EB8FD5F",
+    "title": "Advancement of Computing - Information Technology",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1D0D0962-6D8A-418C-92ED-441FE8DF7768",
+    "title": "Security Support Certificate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "55A5346C-3EB3-401B-8340-44631230C2ED",
+    "title": "Network Design & Admin–CISCO",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E7527DC7-8170-428A-AF59-44BF682B835E",
+    "title": "UX/UI Design Certificate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7A8CCD67-6AEC-4CAD-8F5D-44D6084DB9A2",
+    "title": "Mobile Technologies",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "ADF1B283-7B78-4204-8746-4504E5E3980B",
+    "title": "Master of Science in the Technology Innovation",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "ADB3B027-86F2-479B-A8E0-452A7679FCCA",
+    "title": "Cisco Certified Network Associate (CCNA)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "01D220A9-4B23-4F33-9FCD-46BFBA9EBE6B",
+    "title": "Cybersecurity Bootcamp (Part-Time)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E3FAFB81-1602-4518-842D-475984A09C77",
+    "title": "Foundations of Databases & SQL Programming",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8695DCC1-6F55-4E73-8896-479328F941E2",
+    "title": "Software Developer Training",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3FC0EEC4-4203-4515-9600-47A625147DCF",
+    "title": "Emerging Technology Apprenticeship Program",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F7DE7D96-8C27-4E54-AC2E-47A76625D21A",
+    "title": "Instructing Code 401: Advanced Software Development in iOS",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3A0E6308-63CA-474A-A67C-47DC2D5C0085",
+    "title": "UX and Visual Interface Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B765DDBA-A813-4FE4-A47B-48557AA1E4E5",
+    "title": "Network Support",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6D453E62-5662-4029-A28F-48A7741EAC76",
+    "title": "Systems Security",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BCC70BCB-7921-4045-B177-491F9813DD24",
+    "title": "Mobile Backend Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0C7F1AFD-8DDB-46D1-9E16-49E812D3E564",
+    "title": "Data Analytics and Software Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A688F09A-167D-4B8C-839C-4A3DBC79B55D",
+    "title": "Cybersecurity and Network Administration",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A632E91F-570E-4332-B3C6-4A9DFCC41AD4",
+    "title": "English: Writing with Technical Writing",
+    "createdat": "2025-09-18T00:16:34.627000+00:00",
+    "updatedat": "2025-09-18T00:16:34.627000+00:00"
+  },
+  {
+    "id": "7C3C056B-574E-4D12-879D-4B3C575DF141",
+    "title": "Code 401: Advanced Software Development in Java with SpringMVC & Android",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2AFF8A8B-853B-4AF4-873B-4BF5AAC14641",
+    "title": "Fundamentals of Cybersecurity",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E5D99CB4-0EF4-4CC3-91A4-4C0F4768F555",
+    "title": "Localization: Customizing Software for the World",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "22085EC7-308C-4930-A1D4-4C12F85303F1",
+    "title": "Network Design and Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "31039F7B-13FE-4041-BE19-4C231C19704B",
+    "title": "Cloud DevOps",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "43B490D9-C51F-4427-BCB5-4C7442FDA3BE",
+    "title": "Software Developer Pre-Apprenticeship",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F727F45D-968C-4DF4-AD4D-4CDD84AE967A",
+    "title": "AWS Certified DevOps Engineer  Professional",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "97B44F89-4274-4799-A19D-4CEE2471427A",
+    "title": "Foundations of Data Analysis",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "676D39F2-7B0C-4E3B-985B-4D00641C637A",
+    "title": "Mobile App Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A666AE41-041A-4F75-840F-4D439364515C",
+    "title": "Japanese Studies",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "23D5913B-D6DA-471B-8823-4D4B0AB7FCAA",
+    "title": "Business Intelligence & Data Migration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CC982F68-30BE-4146-BB7E-4D8FECC7F98F",
+    "title": "VCT: Computer Graphics Foundation",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "DDC84D60-5390-49BB-93AD-4DACA9963FCC",
+    "title": "Ethical Hacking Dual Certification Boot Camp (CEH and PenTest+)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4FD38D87-5629-4330-9452-4DBFFE3989D7",
+    "title": "Foundations of Computing",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "92CCF088-1712-4250-9818-4E1CA60E91CA",
+    "title": "Computer Science and Systems",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B0B4E5ED-E2C2-4CF5-BBF7-4E51FACF58C0",
+    "title": "Microsoft Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3171495B-003C-4828-9960-4E823D23E6D7",
+    "title": "Bachelor of Applied Science - Cybersecurity & Forensics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "6539CF19-158F-4ADC-BC18-4ECE098F86EB",
+    "title": "Information Technology - Interactive Web Design",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "407E462F-9E7F-477B-9B56-4F79F39D3EB6",
+    "title": "Code 401: Advanced Software Development in iOS",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1173A330-CE61-4EC7-B2AD-4FA4889AA534",
+    "title": "Web Programming",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9C59F078-5C14-4133-ACE7-4FD1E3FC94E8",
+    "title": "Server Administrator",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F307981E-A6AF-43CA-B61B-4FF33A2212BC",
+    "title": "CompTIA Certified Professional - Linux+",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E4F3826D-37E3-4E1B-873C-50793EF5AFF5",
+    "title": "Online Marketing & Social Media Architect",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "75786351-060C-4B01-A5E0-508135A89D76",
+    "title": "Help Desk Support",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8361FB58-EBFE-4401-AE17-514DE796276A",
+    "title": "Computational Linguistics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "92E9209A-9894-4815-A470-516533042872",
+    "title": "Certificate of Software Development Program",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "080889CA-A442-4442-B4A5-523BA662DADB",
+    "title": "Office Productivity - Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D56C2CE8-E710-485E-A8F5-526A44AE3E92",
+    "title": "Computer Science Engineering",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "EF105710-6D16-4849-AFFA-52B5FB2782B9",
+    "title": "Information Technology - Computer User",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "59B31BE3-26CE-4DE2-98EE-537B67072A1A",
+    "title": "UX/UI Design Bootcamp",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "58A6C3F5-7C52-40EC-8255-53A688C684D3",
+    "title": "Aviation Maintenance Technology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "715109CB-5DB0-4B48-8ECA-53AD88F14A15",
+    "title": "Information Technology - Networking ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "EFFD6F40-568B-4D9F-BF30-53C6CE64E246",
+    "title": "Multimedia & Interactive Technology - Web Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9F10157E-C7B9-406D-9213-54860797D746",
+    "title": "Desktop Support Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A36EF67B-D2B4-47A4-9BF4-54C38D2AC0FC",
+    "title": "Data Analyst",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4C3EC956-D692-4FA9-AEA0-54E14569EFCE",
+    "title": "Computer Applications Technology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A4E6EDA5-9631-47C1-AC0B-550DEFE32163",
+    "title": "Java Programmer - GES337",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "95884CF3-6967-44DE-B868-552C4CC3C212",
+    "title": "Statistics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4D1C4CB9-4D71-4A37-95AE-553EF7F2179D",
+    "title": "Microcomputer Applications",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7B279F6E-ACDF-4CC2-95D3-555EF451F2F7",
+    "title": "Project Management for Professionals ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B87C3EBA-741F-42C1-A852-5590083EC0B2",
+    "title": "Microsoft Office Specialist (MOS)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "334DD643-83C8-453B-B2EA-56BC445A6486",
+    "title": "Intro to Advanced Java with SpringMVC & Android",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9DCDBAAD-C9BF-461E-96D1-572AF944AA94",
+    "title": "AWS Certified Solutions Architect Associate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F8A3C040-0AB9-4C8C-8F48-573ED045DD1C",
+    "title": "Certificate in Data Analysis - MDG 2473",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CB69BB41-E1DD-465D-9EF3-576075AF1CAD",
+    "title": "Information Technology - Support Specialist",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "8B56FD18-3020-453B-9A51-57AD572BF77F",
+    "title": "Multimedia Communications - Digital Storytelling & 3D Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D343F36F-D5E8-4BD9-89E2-57AFF2C0C438",
+    "title": "Networking Infrastructure Technology",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2FC18CAB-3C5F-45DE-B6EB-582FD5261F39",
+    "title": "Cloud Architecture and Services",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "082826C3-DDBD-4E6C-9BB3-5838A9EDB166",
+    "title": "Programming & IT Network Support",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "24FCEEBE-503D-483E-90E4-585269C1987C",
+    "title": "Bachelor of Applied Science - Data Management and Analysis",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "DAE160DA-71CF-47AE-8DF5-5908E73005E9",
+    "title": "Enviromental Systems & Refrigeration Technology (ESRT)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "CA198233-A12B-44C0-8948-59A65FE7D515",
+    "title": "Business Applications Specialist",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E31FC07D-7A0B-4A68-A1E4-5A55C821C8FD",
+    "title": "Manufacturing & Process Technology Associate in Applied Science",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4A750DB5-66FA-4C0A-8CBF-5A98F77525F3",
+    "title": "Game Design ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B3568745-439E-4E16-9755-5ACD40528D9F",
+    "title": "Bachelor of Science Computer Science",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B6AFDDCD-5643-4DE1-9B70-5B36E2086D29",
+    "title": "AWS Certified Solutions Architect  Professional",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "C075970C-F31D-4BB6-A7AB-5B863653C9F2",
+    "title": "IT Interactive Web Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9C80597F-36A2-4435-AB02-5C32D6E1ADC5",
+    "title": "e-HIM",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "18E89A9D-EFCD-41AD-9DC7-5C7F20935C53",
+    "title": "Cisco CCENT & A+ Certificate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "544C03D5-E1B2-4257-9499-5CD5B37E0E65",
+    "title": "Network Administrator",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "900CD441-2370-4E50-82DB-5CDE345EB044",
+    "title": "Bachelor of Applied Science - Information Technology: Cybersecurity and Networking",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "FD170D24-444C-48DA-90E2-5DC212E45A61",
+    "title": "Cybersecurity Analyst Program",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "ACAED486-7E6F-44B1-BB4E-5E29A25B92D4",
+    "title": "Software Engineering Bootcamp Online",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8B71A8DE-60A8-4EF8-A1B4-5E2B588D9B38",
+    "title": "Certified Penetration Testing Professional (CPENT) (Voucher Included)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F981B24C-AEC6-4DC7-8A30-5EAA50FE4922",
+    "title": "Data 102: Intro to Data Analysis",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B96B59DE-27B3-4047-ADE3-5F238865B440",
+    "title": "Certified AWS Cloud Practitioner Solutions Architect (Vouchers Included) - GES3073",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2794E6E2-E772-48B0-8CB6-5F5573EF1938",
+    "title": "LAN Administration Cyber Security Specialization",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "77693124-1B4D-4009-808B-5F5CC49F3339",
+    "title": "DevOps Engineer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "594375F0-F928-4401-9681-5F66A75E4E80",
+    "title": "Microsoft Excel Certification Training (Voucher Included)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9E31292E-0F28-4807-9B2B-5F7A787E6FE9",
+    "title": "Information Technology - General",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E31C2DE2-0BD5-470F-BF77-603BD8E5B811",
+    "title": "Computer Technology Virtualization ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6222E67E-A0AB-46CF-BD51-605FC0BDC2E9",
+    "title": "CompTIA Security+",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A071A493-7457-402E-AC95-60B6C53C822C",
+    "title": "Instructing Code 401: Advanced Software Development in Full-Stack JavaScript",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8A3CD592-29BF-4F92-A670-60C3A2CC3E38",
+    "title": "FOUR18 Micro-Upskilling Micro-Internship",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "33F54EA1-E386-4F41-A4D5-6123399942C1",
+    "title": "Info Tech - Support Specialist",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "1D615CCD-A443-44B3-BADD-6135C6D8D5C3",
+    "title": "AWS Certified Systems Operations",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4B0A9705-8B59-4BE9-858C-63241411CE86",
+    "title": "Microsoft Excel Certification Training (Voucher Included) GES896",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3C7C65DA-B6B0-4428-AB41-63309B91EDF8",
+    "title": "Windows/C++ Specialization",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "C876FEA3-3E58-4EF2-83B1-642FDA533E82",
+    "title": "Information Technology & Administrative Management",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6AB55B47-3916-4F11-8798-6490EC82022B",
+    "title": "Statistical Analysis with R Programming",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "530C0B01-3411-49D8-BC80-6582E6AFD158",
+    "title": "Regional Planning",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "157F6186-FA8A-41BF-BC68-65CB9A6C8895",
+    "title": "Business Management",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "8FBD25FD-1C39-401B-A271-6606BE609F54",
+    "title": "Ops 401: Cybersecurity Engineering",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "86E9DCF2-E89E-4A34-B3D4-667CE0615435",
+    "title": "Computer Programming Foundations",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FB12834E-4D45-4394-8563-66882C62753E",
+    "title": "Intro to Advanced iOS",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7C2A682E-849A-4189-9209-668D4F257CCD",
+    "title": "Bachelor of Applied Science - Application Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "537E22A2-E4A6-427E-82B5-669661CF0D66",
+    "title": "Digital Forensics & Investigations",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B9F495D6-8F22-4746-B3BA-66EC17696834",
+    "title": "Information Technology Management",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A0F9348D-E499-4E61-B1D9-675C00A9F16C",
+    "title": "Computer Information Technology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "3F905ED8-629A-4793-A611-6885F1BEE5D8",
+    "title": "Web Database Developer Technologies",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AC7EA62B-286A-4C94-910E-691F9AAF5086",
+    "title": "iOS Application Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B1CBA262-C621-4ECE-A832-694515AA97F7",
+    "title": "UX Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "11BA72CB-C575-499B-83F9-6966B08F94C6",
+    "title": "Certified AWS Cloud Practitioner SysOps Administrator (Vouchers Included)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3CE74334-3BA8-407F-B795-6A8A7A0ACB87",
+    "title": "VCT: Web Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6C50095C-5B46-494B-AA33-6AA5B025D74E",
+    "title": "Network Services and Computing Systems",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "75F4B1C3-AB6F-41C0-83B7-6AAC3EC9F0C9",
+    "title": "Graphic Design Fundamentals",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9C8FC116-4DD9-476F-AA30-6C24C4826939",
+    "title": "Computer Science and Computational Thinking",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "3DD9B92B-7973-4923-8DCF-6C30B8222CD2",
+    "title": "Cloud Support Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3A0E6B11-DE3B-455F-ACD6-6C9CBA85A6E3",
+    "title": "College Technical Pathway (CTE)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "80FB09C2-D3EB-45E9-8889-6CAB182AF969",
+    "title": "Microsoft Office Suite",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "972F87D6-87B3-4448-B63A-6CDD6794C88E",
+    "title": "Cybersecurity Bootcamp (Full-Time)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F27AFCE9-5543-401E-873E-6CF80C48C7B5",
+    "title": "Full Stack Development",
+    "createdat": "2025-07-17T19:58:55.357000+00:00",
+    "updatedat": "2025-07-17T19:58:55.357000+00:00"
+  },
+  {
+    "id": "5CB9005C-4F54-4F80-981A-6D34251C5CA3",
+    "title": "Intro to Computers Windows Operating System",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AA6D3D24-B096-4D40-BD99-6D46C84A032B",
+    "title": "Healthcare IT Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6A3C6C59-D948-4158-8E3B-6D7B5607F059",
+    "title": "High School Diploma",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "51147870-A1B2-4EDB-9A4E-6DF8629E05FB",
+    "title": "Computer Science in Machine Learning",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3C56E5F2-2771-4A23-BCEA-6ED72B3A6A21",
+    "title": "Advancement of Computing - Cybersecurity",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AED85E3F-E1BE-49F3-A012-6F525C0DC17E",
+    "title": "Microsoft Azure Dual Certification Boot Camp",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A1BB9235-7770-429E-964B-6FA90323DDFC",
+    "title": "Certified Ethical Hacker ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E906FFF1-AD8B-429F-ABB4-7025D5BAA5BC",
+    "title": "Data Analytics Bootcamp (Full-Time)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "22A22F4E-4888-4802-B440-70534E5CEAC9",
+    "title": "Information Security Training (Vouchers Included) GES359",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1794D28A-135B-4F96-8855-7130A91CB3AE",
+    "title": "AWS Certified Cloud Practitioner",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B58130F6-D31F-4939-A3BB-717E2A5EA574",
+    "title": "Information Technology Fundamentals",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "14B6E49E-7F97-4E8D-91F1-718B35104AA9",
+    "title": "Foundations of Programming (Python)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6C29F5C3-3736-4F3F-A28F-7253D773699A",
+    "title": "Information Technology Support Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "979158AE-6A59-47B8-8EA3-73518EC10252",
+    "title": "Bachelor of Applied Science - Information Technology: Networking-Systems",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "87DEA477-8DE4-4166-8BE1-73815490A896",
+    "title": "Information Technology: Computing and Software Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "5188F021-8D7B-4BD1-A339-73BA68925682",
+    "title": "Microsoft Access Certification Training (Voucher Included) GES892",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "16FAFAB7-77A1-47C2-A5DB-73F29E9E058C",
+    "title": "Instructing Ops 401: Cybersecurity Engineering",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7B4B5F36-941C-4A0B-9542-744F356D3835",
+    "title": "Adobe Certified Professional (Vouchers Included)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7549841F-EDA0-4CF4-8265-746341195070",
+    "title": "Information Technology & Systems",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "76B8663C-3D75-49F9-A978-74D37E2EBFCE",
+    "title": "AI Prompt Engineer course ",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D13C1162-925E-42A8-9F25-74E79A9768B3",
+    "title": "PNW Cyber Challenge Games",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "671CDE1A-5FE4-4E00-AD34-75980F5392A5",
+    "title": "Advanced Certificate in IT Operations",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "417A045D-EC05-4B8D-AD5D-75A809670857",
+    "title": "Cybersecurity and Forensics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A98DA349-8EE9-4FDA-9579-764A4F1BACFE",
+    "title": "Digital Entertainment Design & Production",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "645404F8-D6C1-4A4C-B10B-76C01424426A",
+    "title": "Electronics and Communication",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B034D09D-77E8-4F61-91E2-774D2F8AF13E",
+    "title": "Management for IT Professionals",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A0D92BF3-B694-4135-B22D-776474412F46",
+    "title": "Java & Cloud Computing",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "88081A57-3907-4290-9FE5-77CC97426772",
+    "title": "Multimedia - Digital Video ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A02CE7C5-0239-45D4-A8EC-780180B18650",
+    "title": "Design: Web and Mobile Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "96ED1852-9387-4E39-800A-781E28AB62E4",
+    "title": "Data Network Operations Specialist  ALP",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BC55999A-D677-4662-9C00-798E29F5670F",
+    "title": "Microsoft Office Specialist (MOS) Expert Certification Training",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7A8B19BC-4D43-41B1-8535-7A16788A375F",
+    "title": "Digital Media Arts",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "696592FD-E2BD-432A-B5D6-7A17932272E7",
+    "title": "Information Technology - Software Development (IT-SW)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E552D739-031D-4923-8A3C-7A560459CE2D",
+    "title": "Business Operations",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "94C37A2B-9BB0-4AAA-9491-7A7EBA599D44",
+    "title": "CompTIA A+ Certification Training",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9705A656-1625-4B91-B07E-7AE2EF148C82",
+    "title": "Computer Information Systems",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "8FE8AFB8-2871-428E-A8F9-7B2141938492",
+    "title": "Production Management in Digital Entertainment",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BCCC4B44-E22A-4F93-A938-7B42ED96CCF4",
+    "title": "Database Theory and Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3B1A4023-2E7B-467E-B6E4-7B5C31E7A459",
+    "title": "UI/UX Bootcamp (Part-Time)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "68FD67A9-6757-4EC5-A234-7B74004A6414",
+    "title": "Software Development, Artificial Intelligence",
+    "createdat": "2025-10-17T06:10:01.067000+00:00",
+    "updatedat": "2025-10-17T06:10:01.067000+00:00"
+  },
+  {
+    "id": "A8B69D90-3B98-4301-8869-7BA723534EC2",
+    "title": "Animation",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "81E160D5-316B-4593-A534-7BD910E039B4",
+    "title": "Information Systems and Technology",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "57382BD8-85FF-49FA-A871-7D1683550A7E",
+    "title": "VCT: Computer Foundation",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "61C6E3B3-1D24-4BFF-A1C2-7D1846BE460A",
+    "title": "C# Programming Using .NET Core",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "399846FD-2EAD-405D-B138-7D6D0D5B7392",
+    "title": "AZ-500: Microsoft Azure Security Technologies (Voucher Included)- GES3076",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4A5AB50E-E536-45AC-BB94-7DA5AADC375D",
+    "title": "Interaction Design",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9B499A96-873B-46C5-89E3-7DC3372FC52F",
+    "title": "Certified Information Systems Security Professional (CISSP) GES367",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "847DAD9A-95AF-4A21-B2B7-7E178C8CD1AE",
+    "title": "Data Analytics Bootcamp",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FD8B0628-BAFE-4096-9A31-7E3B6EFB8AD3",
+    "title": "Information Security & Digital Forensics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "ECF86AD2-64CE-4F75-9943-7E4311F619B1",
+    "title": "UAS Fleet Management",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "89A78701-7D0A-45DE-A58D-7E5E46C3B4A6",
+    "title": "ITIL Foundations Certification",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AACA920E-2EFF-4338-9CE4-7F034734DD18",
+    "title": "Computing and Software Development: Web Applications Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "C4239099-E628-47AA-B2F9-7F7F45E558C7",
+    "title": "User-Centered Design",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B1655B5D-B957-4171-9448-7FB8CEBD7706",
+    "title": "Data Science",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "CEE22DC7-5828-4E07-A825-800E7BB1CD6F",
+    "title": "Full Stack Web Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "8F5FD853-FD36-462D-A9B5-802ABD005555",
+    "title": "Applications Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D5CAC945-9DBC-4ECC-BEE5-80F09AB1257F",
+    "title": "Adobe Certificate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A6A8994C-E141-4F6E-A986-817F8378199B",
+    "title": "Cisco Certified Network Professional (CCNP)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "76807AF0-C477-4443-9000-81CED984D102",
+    "title": "Software Applications",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F78353D4-5732-41D6-9F92-81E434795C92",
+    "title": "Cyber Defense Implementation",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CA84F5FB-44A6-4215-894A-81E43981431E",
+    "title": "Coding Bootcamp (Full-Time)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0A0DF9A6-B6C0-4C84-A31B-81EB16009AA8",
+    "title": "Informatics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "ABD4E5B4-51B9-4D61-B0FF-824598AFDC94",
+    "title": "Computer Networking",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "908DA870-DBE5-4118-B320-828D1BEDF5C9",
+    "title": "Mobile Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FBB33197-258F-4ECB-8F97-830DE61B4F58",
+    "title": "Information Technology and Administrative Management (ITAM)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3C818BBA-2EAE-46C8-807D-832A79E3D8C5",
+    "title": "Digital Forensic Science",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B5DC08FF-413A-4A8B-844C-836241F00456",
+    "title": "Network Management",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F92680D2-BE4B-4651-B901-83BD1C7EC1AB",
+    "title": "Industrial Cyber Security",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "78255FD5-E93D-4AB1-A6D2-84126E08B900",
+    "title": "Cyber Defense Fundamentals",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D497C4BD-D780-418C-AAF2-84CDC2395D16",
+    "title": "Intro to Advanced Software Development for Mobile Devices",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2E61D6EC-B913-4586-AEAE-84D5B0A1675F",
+    "title": "Network Design & Administration",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "0951445C-BA4B-4548-AA9F-84EDC580DDDF",
+    "title": "Pre-Apprenticeship Program (PAP)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "EEADEB1B-5B18-45B8-A939-857E373847CB",
+    "title": "F5 Certified Technology Specialist ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1B0C85B1-8944-4E64-8EA6-85A489649610",
+    "title": "Multimedia Communications - Web & Interactive Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "50C03BF5-1E41-4FF3-B26E-85D90836E62F",
+    "title": "Computer Science & Software Engineering",
+    "createdat": "2025-08-22T20:41:01.880000+00:00",
+    "updatedat": "2025-08-22T20:41:01.880000+00:00"
+  },
+  {
+    "id": "03083257-EF07-4E46-9D24-85FEE9981B30",
+    "title": "Systems Architecture",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "47A798AE-4F38-4349-A523-86191E80875B",
+    "title": "Information and Computer Science",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FABD146F-5D3C-4BA0-85CA-863662971F11",
+    "title": "Information Technology - Access",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CF35DE94-A20A-480A-B1D4-86A14D25F8E3",
+    "title": "Employer Training",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "C968EF11-02E2-497B-B04C-86D0EB4FC30B",
+    "title": "Front-End Web Development Short Course Online",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0DDD0B4B-2167-4694-8FDC-874AED84CDB0",
+    "title": "Managing & Maintaining the PC",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "792A4EBD-2D19-4A0A-9AAE-885B4BA93676",
+    "title": "Certified AWS SysOps Administrator (Voucher Included) - GES3068",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "57625272-530E-4686-96BA-88B5AB4D6D38",
+    "title": "XR (Extended Reality) Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "F04E71D0-7F24-40FA-AD8E-891A0E073613",
+    "title": "Intro to Advanced Cybersecurity Engineering",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "EBE9DF26-0B00-4337-AEF4-898D413DEF0B",
+    "title": "Network Scripting and Automation",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8CD30911-3CB9-4B9B-8A8E-8ACC184D1E85",
+    "title": "E-Marketing & Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A541E030-93CF-47B9-B446-8AE3D3D4A2AF",
+    "title": "Certified AWS Solutions Architect (Voucher Included) - GES3070",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FE2A4CEE-B339-4728-853B-8B47ECDE0E89",
+    "title": "Front End Web and Mobile Development Bootcamp",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2BAC2BB1-F0D8-4AB6-A923-8B6C6930B442",
+    "title": "Network Support Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AEA36A01-1DDE-430E-B4A0-8C473A750E7C",
+    "title": "Cyber Security Training",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0B213920-6E7E-4FCE-A9ED-8C6F2F26123E",
+    "title": "C# Programming",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "C2903398-27AA-42B4-A866-8C82E8F700AE",
+    "title": "desktop support",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "2582D858-FCC8-4FC2-B052-8CB74DB00683",
+    "title": "Data Analysis Short Course Online",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "5B85A057-4A6E-4E9A-9ED4-8CE0D5CDC274",
+    "title": "Adobe Certified Professional (Vouchers) - GES3051",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9040E033-97E3-4D90-96AF-8CE4047A4735",
+    "title": "Web Design",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A0D9C8A8-94AF-476E-B292-8D0EB7BE35FB",
+    "title": "SEO",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "46E7E00E-854A-45DE-AFFF-8D3A2C22C26A",
+    "title": "IT Networking & Cybersecurity",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "FE24B550-819F-4C8E-9EE5-8D45BA90DAD9",
+    "title": "Leadership & Management",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "3B8A42FD-8B50-45E5-AAE0-8D4AD5592A2A",
+    "title": "Help Desk Analyst: Tier 1 Support Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "81F58206-62DF-4023-81F9-8E1B99B315AD",
+    "title": "Information Technology - Security ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FDA74E95-C485-4C00-8D73-8E35FE4CA55F",
+    "title": "Hack Reactor Software Engineering with JavaScript and Python",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "EAFB3D34-82FC-4DFE-AC09-8ED85FEBAB6D",
+    "title": "Design: User-Centered Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "82CFDBE0-2D9C-4D69-9D51-8F24F5289474",
+    "title": "Business Studies",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B89B4395-879C-4EAE-85E4-8F851EE38EF5",
+    "title": "AWS Certified Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8F506DD7-B8E3-40D4-AEFB-8FABE8006D0F",
+    "title": "Multimedia Communications - Digital Layout and Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "32B40F30-1E40-4FE9-931A-8FECB48EE3ED",
+    "title": "Data Analytics with Digital Marketing Certification (VU) - MDG 8359",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4B35B99D-7B0D-45CF-B763-907BEDE6DFA7",
+    "title": "Virtualization Specialist Certificate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "259F4ECA-DD6A-4848-9C23-90B5BCBD7582",
+    "title": "Cybersecurity Fundamentals",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AA1B2AF7-CB85-46B1-B9AC-90ECE2799BAA",
+    "title": "Computer Science and Game Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "C5F03A27-DCF5-4E68-B0FC-9112CBC14274",
+    "title": "Computer Security and Network Technology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "EB9AAB24-777C-4994-BA4A-914CAF5EC5C5",
+    "title": "Digital Media",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "673BA028-4F84-4A77-B881-91A5657C1A5A",
+    "title": "Cloud Bootcamp",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "52DCB13A-C3E2-4C36-8A4F-91FA2B4F9B3B",
+    "title": "Information Technology Support",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B3601407-960B-4124-9AE1-91FDA97A5027",
+    "title": "Computer Applications Technology - Excel Proficiency ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E49380A9-1E3B-4D07-88F2-928F19C030CD",
+    "title": "Application Support Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "62DE24C4-2DFA-4C09-9766-9324F09FD334",
+    "title": "Application & Desktop Support Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8A77D6BE-8EA3-43ED-A39C-936BCC16A571",
+    "title": "IT Support Technician",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "49E49EC6-2121-45BB-B3AD-942174A53EE7",
+    "title": "MFA in Filmmaking & Producing: Digital Arts, Animation and Game Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4758E966-33FC-4445-82C0-945AA5C9C810",
+    "title": "Microsoft Office Applications",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9E0CF22F-84B7-43AF-80BF-9521123BC87C",
+    "title": "Instructing Ops 301: Networking and System Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "020F487D-5915-41C5-9FD3-96458691A002",
+    "title": "Computer Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "47C4F8B9-F14C-4641-B86C-9672E4EC3098",
+    "title": "Network Operations and Systems Security",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E8E803DF-99CD-46BB-AA8D-9677993D81EB",
+    "title": "Full-Stack Development with JavaScript",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "5D702E71-1622-4DF2-9E0A-97074FB04FD1",
+    "title": "Web Applications Programming Technology",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7D83B071-9DC5-41CD-9D05-975D676B3D56",
+    "title": "Instructing Ops 401: DevOps and Cloud Services",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FB7951D7-5379-40E7-B58B-975F65503F2F",
+    "title": "Networking and Cybersecurity",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "F86DDCDC-D3D0-4269-A9C2-97B5F052A736",
+    "title": "Microsoft Word Certification Training (Voucher Included) GES895",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D1B730F5-C688-49DF-91A8-97BF03788D0C",
+    "title": "Specialist, MCP, MCSE",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6C7EB9C8-7F8A-4CF7-8DEA-97C3E08284E6",
+    "title": "Introduction to Industry: IT Fundamentals",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "C4A978F1-E93F-418E-9255-97D2F5CB4FF6",
+    "title": "Visual Design ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "24793A61-D4BE-431E-83AD-98094AE4C4F6",
+    "title": "Technical Support and PC Technician",
+    "createdat": "2025-09-27T23:59:27.433000+00:00",
+    "updatedat": "2025-09-27T23:59:27.433000+00:00"
+  },
+  {
+    "id": "B2FDFA66-464A-48DD-A338-98202A46D97F",
+    "title": "Cloud Application Development (CAD)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "270F8C68-B664-457A-9A70-984917A0D63F",
+    "title": "Intelligence Operations Studies",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "734C8530-E71B-4170-A0FF-98C82D49ACCD",
+    "title": "Storytelling and Content Strategy",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "ACDE50D6-42C7-4033-8BCD-99198D97A1E2",
+    "title": "Computer Science & Systems",
+    "createdat": "2025-08-22T20:41:01.907000+00:00",
+    "updatedat": "2025-08-22T20:41:01.907000+00:00"
+  },
+  {
+    "id": "45A3C188-3582-4E17-83B8-99347AB7A1BE",
+    "title": "Advanced Diploma Game Art and Animation",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "88762903-DBC8-480F-936E-995D82F18D95",
+    "title": "Networking & Cyber Security",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2293540D-CE2A-4B2A-BC84-99C03ED299F4",
+    "title": "Data Management/Data Analytics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E3040ED9-D330-4615-B027-9A898B0E978C",
+    "title": "Database Analyst",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4D15B649-1B2C-4AF9-A566-9AE8E407158A",
+    "title": "Cloud Operations Specialist 2",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4242D77D-E3C8-4CBF-9624-9BAA6B1DEF77",
+    "title": "Data Analytics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "354DA5BD-E8C5-4E32-BB99-9C280338EF91",
+    "title": "Network Security Engineer",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "37126F50-4B98-4EF4-94B5-E887763BDF09",
+    "title": "Help Desk",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7BCC0967-1CC3-4D02-8CB6-9D822BA2E8AF",
+    "title": "Multimedia & Interactive Technology-Web Designer",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9B76DC85-5901-4ABD-9141-9D8E694CF0DD",
+    "title": "Network Engineer Certificate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CC183BD2-6A6D-4D7A-94F2-9E14522D88D1",
+    "title": "Information Technology - Cloud Fundamentals",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "22BC027A-B4A1-4EDB-BB38-9E2A82BE8A17",
+    "title": "Instructing Data 301: Database Systems",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "DA448FC7-786E-4554-9F33-9E7A350AE7F5",
+    "title": "Cybersecurity and Information Assurance",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A08C8D71-0124-4AAA-BD98-9ED140DCABDD",
+    "title": "Digital Media - Motion Graphics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2F6581CA-68AA-48A4-96EF-A0D9AD8EF095",
+    "title": "Application Development and Analytics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7D32094E-11DD-4657-9ACD-A128D0E1F124",
+    "title": "Web Technology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "69D7A4CE-C0E3-471F-BCD4-A19069680FE3",
+    "title": "Information Technologies Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "40567EE0-6A9B-43CB-BA61-A19DC96966D7",
+    "title": "Information Technology - System Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "53AFE1CE-5C98-4047-843E-A234201797AF",
+    "title": "BA in Film: Digital Arts, Animation & Game Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A3645EC3-B0A0-412C-B70D-A2790F0CCA30",
+    "title": "Certificate in Film: Digital Arts, Animation & Game Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "77246E97-6572-4DD6-9BBE-A2DAF5A7602E",
+    "title": "Technical Project Management",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "ADD08899-EDF4-4486-9283-A2E32E3A683F",
+    "title": "Bachelor of Applied Science - Cybersecurity",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "BF835EA5-2B58-4F6F-B663-A323320275E4",
+    "title": "Technical Writing Certificate",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B89A93F2-5642-4F03-8CE9-A3501B8FECD9",
+    "title": "Digital Forensics and Investigations",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "78D66DE5-2640-44C3-AEC4-A3793DB4E72F",
+    "title": "IT Support Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F3A32EF5-1B56-4DC0-8C10-A3DAE6515824",
+    "title": "Full-Stack Java Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "63CA16A8-816D-4869-8F35-A3DDD689124C",
+    "title": "Intro to Advanced DevOps and Cloud Services",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3AD31F29-1018-42A0-AA92-A3E34399D3C4",
+    "title": "Computer Science in Real-Time Interactive Simulation",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FDF07013-64F4-4B55-B601-A42855946CEF",
+    "title": "Cloud Network Technology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "36ABCA0F-6197-48F5-8FFE-A4ACF9596C66",
+    "title": "Programming and IT Support",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "EB5459D8-CB32-499B-8B7B-A4B942D5774E",
+    "title": "Computer Applications",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E9D09FCF-F584-4D2B-A522-A4C14AD56D15",
+    "title": "Data Analytics Bootcamp with Skills On Ramp",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AF48B4C0-86D5-42C4-8FA5-A4E8A5BC8195",
+    "title": "Information Systems Project Coordinator",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "ACB30F08-E329-4CA3-AB64-A5859D81FC1A",
+    "title": "Computer Networking & Information Systems Security: Server Administrator",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "41DF550F-9E0F-4F24-BE8B-A59710F8374A",
+    "title": "Business Technology: Microsoft Office Applications",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F41D0D93-A228-42F9-836C-A59D9FB1F7F3",
+    "title": "International Business",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "8D5B7B75-D24C-4644-BD4C-A5F9E47D162B",
+    "title": "Cloud Architecture and Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "DBB35D87-29EC-4C79-A857-A6EEC062455D",
+    "title": "Web Applications Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B774E05E-DEB1-41BF-A8C2-A72676EB7988",
+    "title": "Bachelor of Applied Science - Applications Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CA87F2AE-ED80-46D0-AC68-A72752F73858",
+    "title": "Computer Technology - Network Administration",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D8045CF9-1BBA-4D80-A1B4-A85E8F5F7D39",
+    "title": "Information Technology - Cybersecurity and Networking",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BABA0C53-09F2-4A40-AA30-A93E1BEB8454",
+    "title": "Network Support Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "67446893-128D-42D8-AC4E-A9CB70D725C9",
+    "title": "Cisco Internetworking",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "803F1039-4327-4E07-8F00-AA0EC43DF5B5",
+    "title": "Computer Networking Systems",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "C8ECE99D-10FE-413B-A7F4-AA9D031F3F90",
+    "title": "React Development Short Course Online",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D9358500-C8D0-4159-9B42-AAECD8C69AF4",
+    "title": "Applied Mathematics ",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E0125CF9-272F-4ACC-8C1C-AAFD0BCABE62",
+    "title": "Front-End Development with HTML, CSS & JavaScript",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9A72B15B-4C85-4FE9-95E5-ACDA4074B889",
+    "title": "Cybersecurity Administration",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "C73A3C77-0EEE-4F33-B707-AD10A09A8965",
+    "title": "Microsoft Office Computer Training",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "92C4C1F0-1617-4E4B-986A-AD4036D5A8B4",
+    "title": "Pen Testing and Ethical Hacking",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B9BCB2CC-434F-46E6-9300-AE95863F62D7",
+    "title": "Cybersecurity Analyst",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A902E6A5-4356-4A01-BDB0-AE9EC594F369",
+    "title": "Database Administrator",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "1F05F066-D3E5-4A07-8E23-AEECD14A3B74",
+    "title": "Business Computer Technology",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9D743177-3CC9-4FFD-A9BF-AEF6A7D8CFBB",
+    "title": "Embedded and Real-Time Systems Programming",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CADF3EDC-1982-4953-BE84-AF3ABDF482BA",
+    "title": "Application Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7D71A8AE-B870-4951-B069-AF67EB41CF83",
+    "title": "International Baccelaureate Diploma",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D01F0996-0DEA-4927-8112-AF856E68CCFD",
+    "title": "Technical Support ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4BB526A8-D2EA-49F5-991B-AFC5E9982F45",
+    "title": "DevOps Bootcamp",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FB368D02-78D1-490E-8877-B08411D6783E",
+    "title": "Web Foundations",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "DAD663FD-FBD0-49BA-9158-B0DD97418EC6",
+    "title": "Computing and Software Development: C++/C# Programmer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BB6B59C4-D1D8-42E2-A6DB-B1240F73CC1E",
+    "title": "Web Application Technologies Certificate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AEAC5D6A-18DE-45B7-BFBB-B196C0CBA891",
+    "title": "Systems Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6B188392-7EDC-4234-ABA5-B1B319D3CFE3",
+    "title": "Cyber Security",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8F2FF82C-7724-4BF3-ADFF-B266757FFCC6",
+    "title": "Microsoft Word Certification Training (Voucher Included)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "469AD1FD-1E14-410D-B4B4-B287F6A50C0B",
+    "title": "Bachelor of Applied Science - Information Technology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "BA09CACD-0798-4693-879C-B35D4044B8BD",
+    "title": "Industrial Control Systems (SCADA)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B723DCC3-8500-488A-B23E-B3651CF6E2A4",
+    "title": "Networking infrastructure",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "44BDEFFF-9702-4EB8-87D7-B38798D07EAF",
+    "title": "Computer Science and Software Engineering",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E36B22EC-B6E0-4641-938C-B3ED9F88DE04",
+    "title": "Japanese Language and Literature",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "DB1F8431-6248-4A8F-ABE8-B4666F8148CA",
+    "title": "Data Management and Analysis - Data Analytics Concentration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AADC0C4D-8539-4FF5-AFDE-B50C58E79FC8",
+    "title": "Bachelor of Art",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "3FD2779D-8A54-4E65-8611-B5492BD5FABB",
+    "title": "Tech Mentorship Program",
+    "createdat": "2025-08-28T20:20:15.717000+00:00",
+    "updatedat": "2025-08-28T20:20:15.717000+00:00"
+  },
+  {
+    "id": "F873C965-4F42-4EBE-9A82-B58ECE6E13D4",
+    "title": "Digital Entertainment Design and Production",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9F63AC22-979E-457D-94D7-B5D6CBEDEC94",
+    "title": "Instructing Data 401: Data Analysis",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "27AEFAB3-F577-4073-B108-B5DFFA508BA7",
+    "title": "Computing and Software Development: Software Development ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0D353344-1B35-414E-84B9-B5F8B192AF61",
+    "title": "Intro to Advanced Full-Stack JavaScript",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "333A8F3A-0B11-43AE-BF2A-B6529EBB9EFC",
+    "title": "End User Desktop Support",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "6EE81AB6-E9F1-47C8-93D7-B7070B3F9806",
+    "title": "Applied Computing",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F4CAA0E8-AAE2-4AF5-947F-B86CF737232B",
+    "title": "Full Stack Software Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B7CDB036-8D1B-4A10-AA64-B938B5760C8C",
+    "title": "Software Engineering Prep Course",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "F76DC7F5-AC89-4CE6-A060-B97CC4FB644E",
+    "title": "Code 401: Advanced Software Development in ASP.NET Core",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6A3CCB86-2A00-4FA5-BAA5-B9A98B828F19",
+    "title": "Telecommunications Systems ",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "FD290280-4FCE-48BE-AD14-B9AED63B4815",
+    "title": "Cyber Security Support Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E5E29391-7EDE-4FDA-8982-BAC4323421C5",
+    "title": "Requirements Analysis",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7F43A0FC-38C8-4859-8ECE-BAC88E61DE5F",
+    "title": "Advancement of Computing - Information Systems",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8584EC5F-D981-4669-A397-BB63171B8E0F",
+    "title": "Data Center Prep Academy",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B7A8C653-BBA2-41B2-BECD-BB709DE7D598",
+    "title": "SimuTech Group Ansys Simulation Software Training ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "37E5EA41-9606-4FF0-A082-BBB08F0F2AD2",
+    "title": "Engineering Technology (ENGR & BAS-ET)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9D910E7C-604F-4F8E-94BF-BBB828BFC8DB",
+    "title": "Electronic Discovery Analyst",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "35BF9E2B-28AD-4674-ABC1-BBFECA0064B1",
+    "title": "Video Game Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "56086EA1-08D3-47CE-A8B0-BC56D47CF51B",
+    "title": "Info Tech - Web Technologist",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "EDD14885-243E-4D65-85F6-BC91935E9249",
+    "title": "Microsoft Technologies",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "8B3803D0-BE43-46C9-A319-BD80742F030B",
+    "title": "Microsoft Office Specialist (MOS) Associate Certification Training (Vouchers Included) GES897",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D7E1BED5-FD29-4952-BD50-BDFFB8251108",
+    "title": "Information Technology Systems",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "2BD5900D-1D03-417E-B2B9-BE435B692B43",
+    "title": "Network Security Administrator",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E0E07846-B44D-42C9-A154-BE51F7255B2F",
+    "title": "Visual Design Short Course Online",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8210FB3F-EB5A-47F8-8201-BE96EA76D51B",
+    "title": "Cybersecurity",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "25113700-75B7-42EB-B2AB-BECB5C38B8A2",
+    "title": "Network System Administration",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "1545B0EC-C94B-4DB8-9EAE-BF2853066AD3",
+    "title": "Advancement of Computing - Data Science",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "269EBC25-EAAF-4AFD-8CFA-BFAAC6BD1073",
+    "title": "Ada Developers Academy",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "F2A18798-BC5A-4BD9-BF7C-BFFA22F16A37",
+    "title": "Business Technology",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B5BBFF5D-5F7D-4892-BF1E-C016FE0F28A1",
+    "title": "Mobile Product Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "78C3D613-AADB-4A04-836E-C018D30E2929",
+    "title": "Network & Computer Systems Administrator",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FB49A89F-9753-4292-BF03-C06D8CE4BC7F",
+    "title": "Instructing Ops 201: Foundations of Computer Operations",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "18CA8138-A697-401A-A6D4-C123A118515C",
+    "title": "Network Operations & Systems Security",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "02179205-46CA-49FE-81AC-C170B7C56B3E",
+    "title": "Computer Support I",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F2424FB0-4EB2-4126-9200-C182DF8069E4",
+    "title": "Code 301: Intermediate Software Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "5771CA95-43F5-494E-B09F-C1BC7946B252",
+    "title": "Data Reporting Analyst",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FA6DA0BF-EEEF-4990-8754-C2BAA35139C3",
+    "title": "End User Training",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "AA5A422D-11D6-4220-93DC-C2E244121875",
+    "title": "Javascript Programming",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "4156265B-56F1-4A50-BB72-C33F615D832E",
+    "title": "Coding Bootcamp (Part-Time)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "437C303F-9C0D-4501-BBB1-C3529B49A747",
+    "title": "Java Programmer + Python Developer GES3021",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FA8E7B63-293B-4C6A-B013-C37368630C61",
+    "title": "Management/C.I.S.",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8C1B216E-8C5D-4419-8A75-C4271569F068",
+    "title": "Network Infrastructure Technology (NIT)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9C4F3736-B2A1-4728-8F78-C43ABC0A7A8E",
+    "title": "Computing and Software Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "985AC009-7E46-46D0-872E-C4CD9B8612EC",
+    "title": "Information Technology - Network Administrator",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2A05E0A9-F501-491A-A9A3-C5068E013B82",
+    "title": "Associate in Arts and Sciences - Direct Transfer Agreement",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "2DCE65BA-7002-4A9B-9B49-C51E4BD8E2AE",
+    "title": "Instructing Code 201: Foundations of Software Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A34D1C19-D311-428C-88A6-C5399380E13F",
+    "title": "Microsoft Network and Cisco CCNA",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1644F70F-D8AE-4D5F-B6B6-C54DA3DBC313",
+    "title": "Network Design & Admin",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "77CC4B64-066B-4DF2-B988-C5A87513AB90",
+    "title": "Information Technology - Security Fundamentals",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B683717A-3C0F-453F-865B-C71D3B18C2F6",
+    "title": "Windows Unix/Linux and Network Visualization",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6916366C-8382-4D73-8C80-C72C38BBDC6F",
+    "title": "FOUR18 Micro-Upskilling Up-Cert",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F23DA3B2-695F-44B6-BC8E-C75918333C72",
+    "title": "Computer Networking & Information Systems Security: Computer Help Desk Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8ED28FF2-BE3F-45DA-9B05-C78AD1965776",
+    "title": "Cyber Resilience",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F83DC65F-F840-4BCB-B714-C8330505D291",
+    "title": "Information Technology - Excel",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "81094705-8608-4226-ACCC-C89DAE489A32",
+    "title": "Digital Forensics and Protection",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1A486D18-6C4C-4FD5-9A71-C8DDCA4840ED",
+    "title": "Information Technology - Foundations",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "951A32F1-4961-4448-B60B-C9260425EF96",
+    "title": "Liberal Arts",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "BD684836-2073-4531-AAA3-C9719C27027D",
+    "title": "Computer Support Specialist Certificate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "65967AE8-113C-4786-B72F-C9C6EEDA0EAF",
+    "title": "Computer Programming",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "1867EBAB-7C5A-461A-8759-C9C7B721A95D",
+    "title": "Information Systems and Business Analytics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "575C1DF7-F261-45B6-89EB-CA5EED9E414B",
+    "title": "CompTIA Certified Professional - Security+",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B9345D50-1672-4C12-8651-CA7C69EAA661",
+    "title": "Ops 201: Foundations of Computer Operations",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FA3A6172-D975-4F78-8292-CB40FB97ED51",
+    "title": "Back End, SQL, and DevOps with Python",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D359DCEC-211A-4043-9FCC-CB7469F3EA77",
+    "title": "Web Development & Data Science",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "369F2202-4501-4179-98DE-CB96EDC23D69",
+    "title": "IoT Embedded Systems Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F6D81739-33E1-4438-81D3-CBE2074DD408",
+    "title": "Introductory C++ Programming",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E228D320-190E-4182-8287-CC0A4BF67E69",
+    "title": "Data Analytics Bootcamp (Part-Time)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CBF216C1-2A1D-41D5-9F0B-CE262A8EF68A",
+    "title": "Software Design",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4E719691-5C29-4960-8233-CE295838E4D3",
+    "title": "Data 401: Data Analysis",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6BF995B6-7070-4989-BE2A-CE437F89F28E",
+    "title": "Server and Cloud Application (SCA)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "3DD85474-D853-4DDE-8099-D012E104A529",
+    "title": "Computer and Information Science",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "976CF493-5893-468A-8404-D085B452EFBD",
+    "title": "Web Systems Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "444738FC-9FB3-4140-ACF2-D08661BA68E8",
+    "title": "AWS Solution Architect Intensive",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BCAE349D-AD51-43E6-B512-D08C3388BB25",
+    "title": "Linux Networking & Security ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AAB13077-B9E2-4163-885A-D0EA0315AEF0",
+    "title": "Full-Stack Developer Certificate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3B6D8C6A-A3C2-470D-B1E6-D121490A7217",
+    "title": "Network and Server Administration Specialist",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D5438073-02EE-4922-891A-D126C38B9ABF",
+    "title": "Business Administration ",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "AC174603-D47B-4030-BF81-D13E7F130779",
+    "title": "Information Technology - Office Suite",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "9B7EB32E-031D-4F84-B8F7-D151D235A062",
+    "title": "Microsoft Software & Systems Academy (MSSA)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "31658A96-5848-4897-B419-D1BBAE64F1F1",
+    "title": "Database Design and Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D5B9E8D6-7460-459D-9513-D282D0F19A86",
+    "title": "Podcasting & Audio Storytelling",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8C19D5B6-F755-495F-BAA7-D31FB8BF8917",
+    "title": "Education",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "6E76BA64-63CB-444C-A1AD-D32B85010789",
+    "title": "Statistics & Computer Science",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E530D45E-68F9-4CAD-A8CD-D348149B28FF",
+    "title": "Bachelor of Applied Science - Data Analytics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D893289D-821D-448D-8150-D38AFCEDC4D2",
+    "title": "Information Security Professional",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7ADFCB9A-E7B7-4144-907D-D459A805CFF9",
+    "title": "Software Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "83FF95DB-C028-4A1E-8738-D45A723A3DC8",
+    "title": "Network & System Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2AF726A1-82A3-40C3-B9FB-D4672E9BEDD3",
+    "title": "Web Applications Programming Technology - Web Emphasis",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "3D35CEAE-B0C9-4164-929B-D5E5614F072D",
+    "title": "PHP Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BDD20212-74D6-419A-B347-D6EF05A504B8",
+    "title": "Journalism",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "EA266711-CB82-47F8-A2E6-D7122DE6DA8E",
+    "title": "CompTIA Certified Professional - Network+",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "62C1A46A-7C30-4D50-B7C6-D7CAD082E22B",
+    "title": "Software Engineering",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "94A4FC9E-F38B-438A-955A-D7CEAF9E6024",
+    "title": "Intro to Advanced Python",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7796E4AF-8281-45C7-AE2D-D8417C709781",
+    "title": "Help Desk Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "C0E63C5A-F2AB-470F-80E1-D8441EF655C9",
+    "title": "Visual Communications",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "BB774917-BC86-4FEE-899F-D893B8607BD8",
+    "title": "Business Technology: Project Management Support",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "DDFB42CE-8434-4E80-A937-D940B007C652",
+    "title": "AWS Certified Solution Architect  ALP",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "82843445-343B-4827-92A7-D9B3E1515DF3",
+    "title": "Computer Support Specialist",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "FD56E8C8-5D9A-41D9-9E3F-DA13A861870A",
+    "title": "Microsoft PowerPoint Certification Training ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "33A0FD60-EA48-4B7F-8C33-DA13CB36014E",
+    "title": "Information Technology and Administrative Management",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "5936D5F2-6933-472E-B9DA-DA53292BEA11",
+    "title": "Multimedia Communications - Journalism Foundations",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1079C2E1-6E5E-4573-8A74-DA92F68EF59D",
+    "title": "Information Technology - Security (IT-SEC)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "CE48F6F0-7ACB-4DB6-B5BA-DAE737EFF842",
+    "title": "Electronics Technology (ELTRO)",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "C5F91B9F-9963-4617-B3DB-DB12D278EA8C",
+    "title": "Python Programming Short Course Online",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BC4DEEF9-299B-4EDC-AA34-DB1F4E05FE7B",
+    "title": "Information Technology Specialist",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4DA9B001-3637-4392-A3FB-DB2CF02BE8D4",
+    "title": "Advanced Data Analytics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "5AD7B6E2-0434-4501-9467-DC51BA5DB17B",
+    "title": "Information Technology Computer Support",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "6626CF2E-D7F4-4557-A4C3-DC57BDCA9C97",
+    "title": "Associate Controls Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "08944077-868E-45FC-91BB-DC7CD360D8F0",
+    "title": "Computing & Software Systems",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "DDC32DFB-3EDA-4B14-BCB7-DCA4DE56E4F0",
+    "title": "Adobe Certified Professional",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0CF73EF6-0A6D-4A21-8A8F-DEAA4CC77358",
+    "title": "Code 101: Explore Software Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B50F32DE-FFBA-4316-83DA-DED5367A7766",
+    "title": "IT Transfer Technician I (V-DL) - EDG935",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3FCEE0A8-CD47-474D-A119-DEDBEBE53DC9",
+    "title": "Cybersecurity Operations AAS",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D6512262-B0E0-4DCB-BE64-DF16F1BCBDDC",
+    "title": "Fundamentals of Computing",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "5B9FD099-E1F3-4CCF-976C-DF44A6A295FA",
+    "title": "C# Programming Series",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "19EE3753-E0C1-4A73-8F64-DF938DC05607",
+    "title": "Graphic Design and Web Design",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9AF0D5E3-A593-45EF-9730-DFC4C3F4DEF7",
+    "title": "Office Productivity - Intro",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "67BD1E44-5E6F-4226-BDC7-E0C0EF7C7E2D",
+    "title": "Multimedia Communications - Digital Image Editing",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2A84BD2B-94A0-4699-ADA0-E0F1C669D4E1",
+    "title": "Microsoft Outlook Certification Training (Voucher Included)",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F1311BA8-0AD9-407F-820D-E16B4C67D42A",
+    "title": "Tech Talent Boost Washington",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "7C7EC557-6452-4958-B3D6-E194D613E3E0",
+    "title": "Business Systems Analyst Advanced",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "CAAAAA8E-EF84-48D5-AA28-E1E412F24CA5",
+    "title": "Intro to Computers Microsoft Outlook",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A4B04C70-783E-4E7D-A8D0-E26FBF06A63E",
+    "title": "ESD112 Rural CTE Cooperative",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "1FA01856-0EDF-4FD4-AF17-E2B9004BBFA3",
+    "title": "Ops 401: DevOps and Cloud Services",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "80E90A8F-BFF3-4849-BAE3-E2C607B3C0F6",
+    "title": "Web Developer",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "2D5D4527-BE75-442E-84E4-E3805810D223",
+    "title": "Software Engineering Immersive",
+    "createdat": "2025-07-08T09:57:33.260000+00:00",
+    "updatedat": "2025-07-08T09:57:33.260000+00:00"
+  },
+  {
+    "id": "6523438B-9318-42FC-8295-E3E95B7756ED",
+    "title": "College Technology Prep",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D8F28C59-0F19-41B0-8028-E406C10B89F1",
+    "title": "Technology Support",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "A4CB0D61-42F9-44B3-AECC-E51860D7CC18",
+    "title": "Data Network Operations Specialist ALP",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AC69E18B-41BB-4042-A412-E538FF496761",
+    "title": "Full Stack Developer Certificate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "18EB40DE-3351-4613-9381-E5ABFF85E8BB",
+    "title": "Multimedia Communications - Graphics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "C2486F91-E154-40DD-922B-E6630A0523D3",
+    "title": "Computer and Software Development ",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0E04463A-9DC3-4E41-8000-E68A0E1101E2",
+    "title": "IT Systems Specialist",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "F126AFA1-E1C9-4B2A-8BC9-E6B6842E5876",
+    "title": "Modern Languages",
+    "createdat": "2025-07-31T03:19:01.993000+00:00",
+    "updatedat": "2025-07-31T03:19:01.993000+00:00"
+  },
+  {
+    "id": "99406DC9-F511-4C94-BB06-E721A297F7B6",
+    "title": "AWS Systems Cloud Practitioner (Voucher Included) - GES3067",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "056B6CEC-5FD6-4458-8071-E78AB2969814",
+    "title": "Information Technology - Software Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "642C0CA8-BA55-4BA7-8A7E-E79A073A552A",
+    "title": "Digital Design",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "80D71E17-FACF-4A0D-8326-E7C6781C7D68",
+    "title": "Data Mining and Analytics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0A366FE0-13C6-41B0-BC23-E815146EBEA1",
+    "title": "Advanced Manufacturing ",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "5D6DECAA-831C-4560-8F27-E86B57041EDF",
+    "title": "Information Security",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F0E20593-814F-47CE-B652-E88E27974481",
+    "title": "Full Stack Web and Mobile App Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "366768EE-6894-4BA0-AA42-E99ABAB7E2E2",
+    "title": "Data Coordinator",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "DEC58F1B-5761-48C3-AA6C-E9A40DE83FF7",
+    "title": "AOS - Computer Applications Software Support",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A43A7669-CFEB-47A3-8DF9-E9B67314CF00",
+    "title": "Microsoft Networking",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8167D24E-2E0B-4686-9166-E9CAE2B1C0E9",
+    "title": "AWS Certified Solution Architect ALP",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1AAB50B7-6C66-444B-966F-EA0C17B30B42",
+    "title": "C++ Programming",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "3C834EF7-8437-4073-BD5A-EA3A442065CB",
+    "title": "Youth Apprenticeship",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "7941E880-0AEE-4D6E-8520-EAB5BB2A8074",
+    "title": "Back End Website Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "41DE08C5-733B-45AD-966E-EB5D8F3A5E17",
+    "title": "Advanced Diploma 3D Animation and Visual Effects",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F1B2E262-8477-435E-A2BD-EBCA7FC7D47F",
+    "title": "AWS re/Start",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "C6DFBE16-A48E-490B-836A-EBF59BD61457",
+    "title": "Art",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "8738AA7C-05BB-4B90-BC60-EC0A5F807812",
+    "title": "Associate in Computer Science DTA/MRP",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B2012104-1A54-4A20-86A8-EC6CA887FA1B",
+    "title": "Foundations of C Programming",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1C3B9FB1-6C38-4462-80BF-ECC00CC7F599",
+    "title": "Certified AWS Developer (Voucher Included) - GES3069",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "FCD38D28-6284-4BDF-AD75-ECEDDBF5C84C",
+    "title": "Enterprise Data Management Professional EDMP -2 - Power BI",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "5783038E-2F9C-4908-B8DD-EE7E0C5DCDFE",
+    "title": "Multimedia & Interactive Technology - Web Designer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6D8A85DB-A198-4593-A6A3-EED8E4CE2AB6",
+    "title": "Accounting",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D06201A0-AF34-4D3D-B84C-EF40F97138B3",
+    "title": "Front-End Coding Bootcamp",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "33E0C981-1F9C-43AB-9B4F-EF9BDE6CF35F",
+    "title": "Bachelor of Applied Science - Information Technology: Networking",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D471B96C-AF84-46A9-AF98-EFA923A12ABE",
+    "title": "Military Career Skills Program - Web Development Online Immersive",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "077D8206-DEE9-4155-867B-EFC5C044841A",
+    "title": "Data Analysis and Software Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "EBB48D9A-4D75-4CB4-8886-EFFA830E4D86",
+    "title": "3D",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AD1120EB-3E41-4268-B4B4-F04F0B7CC89D",
+    "title": "Web Development",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "02D8D1A6-16F9-4E0D-9314-F054E1A0A87D",
+    "title": "Design: Digital Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "76D6A0BF-F18A-448B-9D88-F17F62B15674",
+    "title": "Server Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "00F6AFF6-E25D-4B45-9808-F1BCB75116D1",
+    "title": "Application Development - Mobile Application Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0E0C7121-56B1-4C2C-BD2E-F32614262D17",
+    "title": "IT Support",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "828DE681-8803-4868-8D5E-F407EF93794B",
+    "title": "Web Development Fundamentals",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "BEFDC143-9895-4DBB-82DE-F46283B241E9",
+    "title": "Cyber Security Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1E82E51A-051E-4165-BBC8-F48D38FE24CA",
+    "title": "Code 401: Advanced Software Development in Full-Stack JavaScript",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "21BB02BF-4A1E-4F39-9AD5-F4C77A82B6E6",
+    "title": "CodeDay x MinT",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "5EBCBB09-4177-46D1-AE63-F4F857075F85",
+    "title": "Certified AWS Cloud Practitioner SysOps Administrator (Vouchers Included) GES3071",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "503639CE-8494-4ADA-9729-F5580951DB93",
+    "title": "Software Development - Application Development Concentration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AF45F647-89F0-4113-8411-F5625A4CF593",
+    "title": "Developer Operations Specialist",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B0675953-7466-4442-BA0E-F5644AE604F7",
+    "title": "Human Evolutionary Biology",
+    "createdat": "2025-08-28T19:06:36.867000+00:00",
+    "updatedat": "2025-08-28T19:06:36.867000+00:00"
+  },
+  {
+    "id": "42B59A3C-DE62-4775-912B-F58B142DD10E",
+    "title": "Management, MSc Financial Markets",
+    "createdat": "2025-09-15T06:11:54.237000+00:00",
+    "updatedat": "2025-09-15T06:11:54.237000+00:00"
+  },
+  {
+    "id": "769B4054-6EA3-419A-9078-F5947C509D27",
+    "title": "Network Development Engineer ALP",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2E7C4BE7-EE22-49FD-9154-F5A78D78B148",
+    "title": "IT Support Professional",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "F43755C8-AF84-4A2B-843B-F5C9887F1FAB",
+    "title": "Python 3 Course",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9362AB2A-FF5F-48A9-AED1-F61EFA550F60",
+    "title": "AWS Certified Developer Associate",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "702022AF-3B4F-469B-BED0-F624ACF2D856",
+    "title": "New Media and Digital Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "33DB0394-B052-4632-B070-F644A001DF58",
+    "title": "Computer Technician I",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "57F347FE-AEE0-4ED2-ABAE-F66ABC31BD65",
+    "title": "Ops 102: Intro to Computer Operations",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "518195F7-E42F-4BA2-91CB-F694428A45D0",
+    "title": "Web Application Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "23937075-DAF0-420C-BC4D-F6AD24CE750C",
+    "title": "Mobile Technology Expert",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "381A6066-00A3-4438-B998-F6C66109480A",
+    "title": "Data 201: Foundations of Data Analysis",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "6C6D911B-BC93-4C38-8E55-F6F728B2BCE0",
+    "title": "Data Center Technician - ALP",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1067FBB7-44FF-471B-9BCC-F72196DA75BD",
+    "title": "Business Intelligence Implementation",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "0B86A2A6-84C0-46D2-A9BB-F729665464A5",
+    "title": "Full Stack Web Development Immersive",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "B45BA7E3-2C86-4F36-BA96-F75005078C5C",
+    "title": "Web Content Management",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "58E04EB4-5630-4A81-B026-F78A1892B218",
+    "title": "Data Analysis and information management system ",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "383407C0-3D8C-4575-8860-F7B28992C2E6",
+    "title": "Web Applications Programming Technology - Programming Emphasis",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "8CEA9436-8317-4B29-964A-F843C2B90C2F",
+    "title": "Technology",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "AE51FF68-FCF6-4719-A11A-F880BD329859",
+    "title": "Administrative Office Systems - Computer Applications Software Support",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "73FCB86E-BC38-4BC6-A406-F9CAE83AE55C",
+    "title": "Web Applications Developer Plus GES319",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7C08F799-65B8-4E09-ABFE-FA6BB49139E6",
+    "title": "Systems Administration Associates",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "73BE402F-81A4-44F2-9EF5-FA70D176D527",
+    "title": "Software Developer 1",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "7D65992B-D02A-4EEA-BECC-FAC991821602",
+    "title": "Graphic Design",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "2D134B0A-5C7F-4ABC-A02D-FAD103499D96",
+    "title": "Cybersecurity and Computer Forensics",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "8DD5CF5C-043D-4FBD-84C5-FADC1F8AD468",
+    "title": "Open-Source Micro-Internship",
+    "createdat": "2025-08-28T20:20:15.700000+00:00",
+    "updatedat": "2025-08-28T20:20:15.700000+00:00"
+  },
+  {
+    "id": "A782E07B-0EA0-4B82-B1B3-FAE4B518B414",
+    "title": "Information Systems (CSE Major)",
+    "createdat": "2025-09-15T06:11:54.213000+00:00",
+    "updatedat": "2025-09-15T06:11:54.213000+00:00"
+  },
+  {
+    "id": "74B40A77-BEB6-4D36-95E3-FB0E232B111A",
+    "title": "Graphic Arts",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "00A0D1A5-A68F-470E-B523-FB9E931A17C5",
+    "title": "Software Development Essentials",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "09256D2B-4315-4ABD-A042-FBBD98A19B74",
+    "title": "Network & Server Administration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D2FBA655-A7EA-4F26-AE67-FBDB250B1289",
+    "title": "Software Test Engineer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "D6829D22-ABAA-47E5-92AA-FC8A755E0165",
+    "title": "Full-Stack Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "E3FCE033-D22C-4B4A-8236-FD185761B92C",
+    "title": "Computer Security and Network Technician: IT Support Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "56E0D1F9-BFCF-4585-8A60-FD4F2CE44133",
+    "title": "Ethical Hacking",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "158D8D3A-613C-402A-B58F-FD660724B784",
+    "title": "Technical Training",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A0D0EC73-F13A-4CB9-A6F8-FD8984CD1496",
+    "title": "Marketing Major",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "472D2437-549A-4102-8134-FDB1EA8C9F2B",
+    "title": "Computer Science and Engineering",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "3AA01306-7C9D-4B1C-A9D4-FE4E0A16B148",
+    "title": "Database Business Intelligence Developer",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "30726178-92F2-4E13-82B6-FE5F81CE2ABF",
+    "title": "Data Management and Analysis - Business Intelligence Concentration",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "40C857E3-ABAA-4F6B-B2FB-FF05DD61B1DF",
+    "title": "Arts and Entertainment Technologies",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "80AA466B-6A24-4A9C-99D8-FF18458295A1",
+    "title": "Civil Engineering",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "2F9B3484-0470-45BA-8F35-FF2E019A0068",
+    "title": "Network Technology and Administration",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "38CAABEE-A4CB-482C-9ABE-FF521A5E9C97",
+    "title": "Information Technology - Application Development",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  },
+  {
+    "id": "1B467086-6DC7-473D-BCA2-FFE7841FE9EF",
+    "title": "Data Center Technician",
+    "createdat": "2025-07-28T02:15:47.510000+00:00",
+    "updatedat": "2025-07-28T02:15:47.510000+00:00"
+  }
+]

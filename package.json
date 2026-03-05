@@ -8,7 +8,7 @@
     "db:anonymize:dry": "node scripts/anonymize-docker-db.mjs --dry-run",
     "db:anonymize:apply": "cross-env ANONYMIZE_CONFIRM=YES node scripts/anonymize-docker-db.mjs --apply",
     "db:fixtures:export": "node scripts/export-anonymized-fixtures.mjs --outDir prisma/mock-data",
-    "db:seed:anonymized": "node prisma/seed-anonymized.mjs --idempotent",
+    "db:seed": "python scripts/pg-seed-data/seed_pg_database.py",
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown .",
     "start": "cross-env NODE_ENV=production next start",

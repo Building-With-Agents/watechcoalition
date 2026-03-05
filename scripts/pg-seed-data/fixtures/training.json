@@ -1,0 +1,1217 @@
+[
+  {
+    "id": "8F25DE1B-B071-4D81-A966-02E65BB7409B",
+    "title": "Introduction to Artificial Intelligence",
+    "url": "https://academy.aiskills.eu/course/1-introduction-to-artificial-intelligence",
+    "provider": "DIGITALEUROPE",
+    "skillsdeveloped": "Machine Learning, Deep Learning, Natural Language Processing, Computer Vision, Data Science Fundamentals, AI Ethics and Governance",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4016FCE7-665C-4256-8949-061A43DFDE71",
+    "title": "Creating compelling Reports",
+    "url": "https://skillsforall.com/course/compelling-reports",
+    "provider": "Cisco",
+    "skillsdeveloped": "Communication, presentation",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "537DB640-888D-48B2-9362-092ED56264F1",
+    "title": "Digital Mindset",
+    "url": "https://ibm.biz/BdGpYc",
+    "provider": "IBM",
+    "skillsdeveloped": "Adaptability and flexibility, Collaboration, Creativity, Data-driven decisions, Decision making, Digital mindset, Employability skills, Entrepreneurial mindset, Growth mindset, Innovation, Lifelong learning, Managing ambiguity and change, Professional networking, Teamwork",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "12931C4F-8A17-4B2E-83DD-0D964D62F088",
+    "title": "Introduction to Retrieval Augmented Generation (RAG) (FEE)",
+    "url": "https://www.coursera.org/projects/introduction-to-rag",
+    "provider": "Duke University / Coursera",
+    "skillsdeveloped": "Python programming, machine learning, retrieval augmented generation, large language models",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "7253F0FC-CED8-4963-8408-0FC9B3D57684",
+    "title": "IT Support Technician Certificate",
+    "url": "https://skills.yourlearning.ibm.com/activity/PLAN-65C0754E684D",
+    "provider": "IBM",
+    "skillsdeveloped": "Computer assembly, wireless networking, installing programs, customer service",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "1F617CA3-5AF9-4152-9147-11FBF17542B7",
+    "title": "Career Management Essentials",
+    "url": "https://ibm.biz/BdGpZT",
+    "provider": "IBM",
+    "skillsdeveloped": "Career development, Career management, Communication skills, Generative AI tool use, Networking skills, Presentation skills, Professional interviewing skills, Professional online brand development, Resume writing, Socialmedia presence, Workplace research",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B61E470B-73F1-47A2-8733-12BE0394A0F3",
+    "title": "Data Analysis with Python",
+    "url": "https://www.coursera.org/learn/data-analysis-with-python",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Model Selection, Data Analyst, Python Programming, Data Visualization, Predictive Modelling",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "01FBAF32-8F24-4A0F-9CD5-14896992084B",
+    "title": "IBM DevOps and Software Engineering Professional Certificate",
+    "url": "https://www.coursera.org/professional-certificates/devops-and-software-engineering",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Python, Web App Dev, AI, CI/CD, Flask, Kubernetes, Test-Driven Dev",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9FF942A4-4A73-4B9A-8B85-1669FE578B92",
+    "title": "Prepare for the Google Cloud Professional Machine Learning Engineer Certification",
+    "url": "https://www.linkedin.com/learning/paths/prepare-for-the-google-cloud-professional-machine-learning-engineer-certification?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Google Cloud ML Engineer preparation, GCP tools and technologies, ML models for business problems, certification alignment, Google Vertex AI",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B3F45DDF-CC29-4584-8127-1A6613B9080A",
+    "title": "MIT Statistics and Data Science Certificate (FEE)",
+    "url": "https://micromasters.mit.edu/ds/",
+    "provider": "EDX",
+    "skillsdeveloped": "Big Data Technologies, Tools and Techniques, Data Mining, Data Modeling, Statistical Analysis Programming Languages, Machine Learning Framework",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "24D87AA8-F034-4D52-8BB5-1FF07F0FF8E1",
+    "title": "Google Cloud Platform for Machine Learning",
+    "url": "https://www.linkedin.com/learning/google-cloud-platform-for-machine-learning-essential-training-2024-revision/welcome?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Vertex AI, MLops, model training/evaluation, using Google Cloud Studio, deploying models, using Vertex AI APIs, mastering end-to-end MLops",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "10258D57-D05F-48C4-A320-20422D6E9E0A",
+    "title": "Python Essentials 1",
+    "url": "https://skillsforall.com/course/python-essentials-1",
+    "provider": "OpenEDG / Cisco",
+    "skillsdeveloped": "Algorithmic & Analytical Thinking, Basic Python Programming, Debugging, Scripting, Procedural Programming",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A41236BF-AE72-4723-A5CF-21046914F13B",
+    "title": "Preparing for Google Cloud Certification: Cloud DevOps Engineer Professional Certificate (FEE)",
+    "url": "https://www.coursera.org/professional-certificates/sre-devops-engineer-google-cloud",
+    "provider": "Google / Coursera",
+    "skillsdeveloped": "SRE, Cloud, Google App Engine, Jenkins, Continuous Delivery",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "FCDBD879-E937-4BDB-846D-28859D7CEDBE",
+    "title": "ChatGPT Prompt Engineering for Developers",
+    "url": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/",
+    "provider": "DeepLearning.AI",
+    "skillsdeveloped": "Prompt engineering, code review, software debugging",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "0A6018BF-B09E-481D-ACF6-2B10FB214B62",
+    "title": "Introduction to Cybersecurity",
+    "url": "https://skillsforall.com/course/introduction-to-cybersecurity",
+    "provider": "Cisco",
+    "skillsdeveloped": "Cybersecurity",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "374679BB-5AF9-4A5E-91F7-2C9A18024B52",
+    "title": "Applying Generative AI as a Creative Professional",
+    "url": "https://www.linkedin.com/learning/paths/applying-generative-ai-as-a-creative-professional?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Generative AI in design, streamlining creative workflows, brainstorming with AI, content generation, creative ethics of AI",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "0C14264E-B36B-42AB-B3F1-2E5B71461D4F",
+    "title": "IBM Python for Applied Data Science and AI",
+    "url": "https://www.coursera.org/learn/python-for-applied-data-science-ai/",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Python, Data Analysis, Data Science, Numpy, Pandas",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "8C7114A2-413F-4313-A44D-2EF04B7C64F7",
+    "title": "Data Analyst Certificate",
+    "url": "https://www.coursera.org/professional-certificates/google-data-analytics",
+    "provider": "Google / Coursera",
+    "skillsdeveloped": "Data analysis, data visualization, Data driven decision making, Data-driven insights, Responsible AI",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "C4DF3632-85D2-40CA-BF9A-2F0ACFDC04C2",
+    "title": "CCNA: Enterprise Networking, Security, and Automation (*)",
+    "url": "https://www.netacad.com/courses/networking/ccna-enterprise-networking-security-automation",
+    "provider": "Cisco",
+    "skillsdeveloped": "Dynamic Routing, Network Address Translation (NAT), Network Automation Basics, Basic OSPF, Quality of Service (QoS), Security Threat Mitigation, Software Driven Networks, Virtualization, Wide Area Networks",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "F3885FBB-95CE-4D9A-A99E-2F3033FE5B51",
+    "title": "Digital Literacy",
+    "url": "https://ibm.biz/BdGhnB",
+    "provider": "IBM",
+    "skillsdeveloped": "AI, Collaboration, Computer literacy, Data analysis, Data presentation, Digital communications, Digital literacy, Employability skills, Internet security, Software engineering, Web navigation",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "11341224-7F83-4A1A-B8C0-30ED10021820",
+    "title": "IBM Front-End Developer Professional Certificate",
+    "url": "https://www.coursera.org/professional-certificates/ibm-frontend-developer",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Continuous Integration, Continuous Delivery, Mongodb, agile, Devops, Software Development, React (Web Framework), Front-end Development, Front-end design, Web Development, JavaScript, Web",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4F9986B3-82EE-4D8F-ADF7-34ECA69CF641",
+    "title": "Data Engineering Pipeline Management with Apache Airflow (FEE)",
+    "url": "https://www.linkedin.com/learning/data-engineering-pipeline-management-with-apache-airflow",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Apache Airflow, role-based access control, DAGs, SLA management, CSV reader plugin, task orchestration, pipeline execution, scheduling DAGs, dataset linking",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B0820C0F-C5D6-4D98-B1F1-3609B3309718",
+    "title": "Databases and SQL for Data Science with Python",
+    "url": "https://www.coursera.org/learn/sql-data-science",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Python Programming, SQL, Cloud databases",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "DA2B67B2-8DF8-41CA-B11E-42AB9F2E3FC6",
+    "title": "Python Essentials 2",
+    "url": "https://skillsforall.com/course/python-essentials-2",
+    "provider": "OpenEDG / Cisco",
+    "skillsdeveloped": "Classes, Objects, Inheritance, Iterators, OOP, Modules, Properties, Packages, Polymorphism",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D8A41E74-1669-460B-9B0A-49BA79CF8E02",
+    "title": "AI Ecosystem overview",
+    "url": "https://academy.aiskills.eu/course/2-ai-ecosystem-overview",
+    "provider": "DIGITALEUROPE",
+    "skillsdeveloped": "AI ecosystem analysis, Understanding AI infrastructure, AI governance and regulation knowledge, Evaluating AI tools and platforms, Ethical AI decision-making",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A2FE8E78-1C47-42CA-88E2-4D903F8EE6C8",
+    "title": "Cisco - CyberOps Associate (*)",
+    "url": "https://www.netacad.com/courses/cybersecurity/cyberops-associate",
+    "provider": "Cisco",
+    "skillsdeveloped": "Attack methods, computer forensics, cryptography, cybersecurity, data and event analysis, endpoint threat analysis, host-based analysis, incident response, malware analysis, network attacks, network intrusion analysis secops, security concepts, security monitoring, security policy, security procedures, SOC metrics, threat detection",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "CC20CC1B-759A-4E9A-B4E6-4DA87819F856",
+    "title": "Cybersecurity Analyst Professional Certificate",
+    "url": "https://www.coursera.org/professional-certificates/ibm-cybersecurity-analyst",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Information security analyst, Junior cybersecurity analyst, IT security analyst, security analyst",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "25CA00E2-D943-4740-8804-4DBDB00B9104",
+    "title": "Enterprise Design Thinking Practitioner",
+    "url": "https://www.ibm.com/design/thinking/page/courses/Practitioner",
+    "provider": "IBM",
+    "skillsdeveloped": "Design Thinking, creativity, innovation",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "186F8B33-ACA3-49BD-8AD9-4DFE975F3E0A",
+    "title": "AI in Customer Service (FEE)",
+    "url": "https://www.udemy.com/course/ai-in-customer-service/",
+    "provider": "Udemy",
+    "skillsdeveloped": "Customer Service, integrating AI solutions",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "6AE49659-2B0F-4BB2-8C62-4FAB67F0605C",
+    "title": "Business Intelligence Certificate",
+    "url": "https://www.coursera.org/professional-certificates/google-business-intelligence",
+    "provider": "Google / Coursera",
+    "skillsdeveloped": "Business Intelligence, Extraction, Transformation And Loading (ETL), Bigquery, Dashboarding and Reporting, Data Analysis, Data Modeling, Business Analysis, SQL, Tableau Software, Business Process",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "5A8F4176-8F9E-4536-A477-50FC3BC460D2",
+    "title": "How to Master Database Troubleshooting",
+    "url": "https://www.linkedin.com/learning/how-to-master-database-troubleshooting",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Database troubleshooting",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "0446DE42-F429-426D-B992-538FB0947B0E",
+    "title": "Machine Learning with Python Foundations",
+    "url": "https://www.linkedin.com/learning/machine-learning-with-python-foundations",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Step-by-step guidance for machine learning using Python",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "089010FD-EC45-4DC2-8730-54288F9F10BA",
+    "title": "Agile Explorer",
+    "url": "https://ibm.biz/BdGpZ8",
+    "provider": "IBM",
+    "skillsdeveloped": "Agile thinking, Agile methodologies",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A5DAF93C-DB3E-4DE3-9C3A-54EFA9E81108",
+    "title": "Explore Emerging Tech",
+    "url": "https://www.credly.com/org/ibm-skillsbuild/badge/explore-emerging-tech",
+    "provider": "IBM",
+    "skillsdeveloped": "Artificial intelligence, data, blockchain, cloud, cybersecurity, iot",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "ADEF33D3-26FD-4BE7-9C03-55311081D4F8",
+    "title": "Cyber Threat Intelligence",
+    "url": "https://www.coursera.org/learn/ibm-cyber-threat-intelligence",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Cybersecurity, network defensive tactics, threat intelligence, Application Security, security analyst",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "1AE9DA4B-EEBB-4FFD-AB71-56A842081046",
+    "title": "System Administration and IT Infrastructure Service",
+    "url": "https://www.coursera.org/learn/system-administration-it-infrastructure-services",
+    "provider": "Google / Coursera",
+    "skillsdeveloped": "System Administration, Operating Systems, Local Area Networks, Virtualization, Backup Devices, Disaster Recovery, Access Management, Technical Support, Cloud Service, Configuration Management",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "F36A2346-C809-4CA1-961C-56C37BE2520E",
+    "title": "Azure OpenAI: Generative AI Models and How to Use Them",
+    "url": "https://www.linkedin.com/learning/azure-openai-generative-ai-models-and-how-to-use-them/welcome?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Azure OpenAI, GPT models, embedding models, DALL-E models, copyright use, model combination, OpenAI services",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "DB64B556-6A05-4C5E-88C2-58B368AB3B1F",
+    "title": "Digital Marketing and Ecommerce Certificate",
+    "url": "https://www.coursera.org/professional-certificates/google-digital-marketing-ecommerce",
+    "provider": "Google / Coursera",
+    "skillsdeveloped": "SEO, e-commerce, email marketing, Marketing",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B5ADBD49-3539-48C6-B868-5ACADB25AA22",
+    "title": "Cisco Enterprise Network Core Technologies (FEE)",
+    "url": "https://www.cisco.com/site/us/en/learn/training-certifications/training/courses/encor.html",
+    "provider": "Cisco",
+    "skillsdeveloped": "Network Engineering, Firewall, Network Management, Network Troubleshooting",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "048EC603-2BFD-4DB1-9F09-5B3CD40F9668",
+    "title": "Introduction to Data Analytics",
+    "url": "https://www.coursera.org/learn/introduction-to-data-analytics",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Data analysis, data visualization, Microsoft Excel",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B3C602C3-43DC-4550-AF76-5C024FDA1EEC",
+    "title": "Operating Systems: Overview, Administration, and Security",
+    "url": "https://www.coursera.org/learn/operating-systems-overview-administration-security",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Operating Systems, Directory and File Management, User (Computing), Virtualization, Linux, Windows, MacOS, User Accounts",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "01AD8FD0-BB7A-4E9C-9B93-5C4D35F04393",
+    "title": "Introduction to Prompt Engineering",
+    "url": "https://www.edx.org/learn/artificial-intelligence/ibm-introduction-to-prompt-engineering",
+    "provider": "IBM / EDX",
+    "skillsdeveloped": "Prompt engineering",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9229ACB9-D744-46C4-AB4A-5D72C8361226",
+    "title": "SAP analytics",
+    "url": "https://training.sap.com/content/sap-analytics-training",
+    "provider": "SAP",
+    "skillsdeveloped": "Crystal Reports, SAP BI Platform Administration, SAP Lumira",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "01318058-6F30-48EF-AB12-5EECA5D541FE",
+    "title": "Machine Learning Specialization",
+    "url": "https://www.coursera.org/specializations/machine-learning-introduction",
+    "provider": "Stanford / DeepLearning.AI",
+    "skillsdeveloped": "Logistic regression, Artificial Neural Network, Linear Regression, Decision Trees",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "30F97A08-EBC3-4E65-A868-6070CE5AA72E",
+    "title": "Cybersecurity Certificate",
+    "url": "https://www.coursera.org/professional-certificates/google-cybersecurity",
+    "provider": "Google / Coursera",
+    "skillsdeveloped": null,
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "93C9C70C-4685-4849-9105-61B223B83CDB",
+    "title": "Data Analyst Professional Certificate",
+    "url": "https://www.coursera.org/professional-certificates/ibm-data-analyst",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Data science, Spreadsheet, Data Analysis, Python Programming, Microsoft Excel, Ibm Cognos Analytics, Dashboard, SQL, Numpy, Pandas, Data Visualization, Pivot Table",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "89B1E454-7981-4505-A511-61F6B334D6B3",
+    "title": "IBM Back-End Development Professional Certificate",
+    "url": "https://www.coursera.org/professional-certificates/ibm-backend-development",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Django, MongoDB, Docker, Flask, REST, ORM, RDBMS, SQL, Back-End Applications, Observability",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E2D965CD-AF0F-43EA-A395-62B34E88E7BF",
+    "title": "Project Management Certificate",
+    "url": "https://www.coursera.org/professional-certificates/google-project-management",
+    "provider": "Google / Coursera",
+    "skillsdeveloped": "Agile Management, Change Management, Data analysis, Project management, Project planning and developing, Problem Solving and Project risk management, Strategic thinking",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "871F49C7-7FEF-495C-BABF-6414EA76298B",
+    "title": "AI Security Nuggets",
+    "url": "https://www.netacad.com/modules/ai-security-nuggets?courseLang=en-US",
+    "provider": "Cisco",
+    "skillsdeveloped": "AI regulations, AI threat modeling, AI supply chain, Retrieval Augmented Generation (RAG), LLM stack",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "FABC02FE-C0EA-4DC7-984C-65E47AFA3C99",
+    "title": "Artificial Intelligence Online Community (Resource)",
+    "url": "https://www.projectmanagement.com/topics/artificial-intelligence/",
+    "provider": "Project Management Institute",
+    "skillsdeveloped": "Artificial intelligence",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "69118971-02D8-4CC7-8F1D-6C94FACF14D0",
+    "title": "UX Design Certificate",
+    "url": "https://www.coursera.org/professional-certificates/google-ux-design",
+    "provider": "Google / Coursera",
+    "skillsdeveloped": "User Experience (UX), Prototype, Wireframe, User Experience Design (UXD), UX Research, mockup, Figma, Usability Testing, UX design jobs",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "0E142643-36C6-4762-B803-71A6D314C08B",
+    "title": "ChatGPT for Web Developers",
+    "url": "https://www.linkedin.com/learning/chatgpt-for-web-developers/accelerate-your-web-development-process?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "ChatGPT UI, CSS, JavaScript, React, AI page generation",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "BDDBF67C-BC32-4B52-850E-722C17265FAE",
+    "title": "AI Ethics",
+    "url": "https://ibm.biz/BdGpZA",
+    "provider": "IBM",
+    "skillsdeveloped": "Ethical and Responsible AI, AI ethics and governance",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D7CBF9DB-9E22-466E-8865-728C44F534A9",
+    "title": "Penetration Testing, Incident Response and Forensics",
+    "url": "https://www.coursera.org/learn/ibm-penetration-testing-incident-response-forensics",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Computer Security Incident Management, scripting, Cybersecurity, forensics, Penetration Test",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B8C7D80D-2FBF-4573-B3FB-732C1D0765B8",
+    "title": "Introduction to Responsible AI Skills",
+    "url": "https://www.netacad.com/modules/introduction-to-responsible-ai-skills?courseLang=en-US",
+    "provider": "Cisco / Intel",
+    "skillsdeveloped": "Ethical and Responsible AI, AI ethics and governance",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "2788CE01-5A97-45D3-9CD7-76B29BC75552",
+    "title": "Build a JavaScript AI App with React and the OpenAI API",
+    "url": "https://www.linkedin.com/learning/build-a-javascript-ai-app-with-react-and-the-openai-api/build-a-javascript-ai-app-with-react-and-the-openai-api?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "React integration, OpenAI API usage, authentication, tokens, prompt engineering",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "84027050-EACC-4834-BAA4-7B5DF5186358",
+    "title": "AI and Developer Productivity",
+    "url": "https://www.linkedin.com/learning/ai-and-developer-productivity/ai-and-developer-productivity?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Prompts, code optimization, automated testing, quality assurance, intelligent debugging, issue resolution, collaboration, documentation techniques, interview preparation, and more",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "46A37C24-886D-4D43-A226-7C4E413A5BFD",
+    "title": "Introduction to modern AI",
+    "url": "https://skillsforall.com/course/introduction-to-modern-ai?courseLang=en-US",
+    "provider": "Cisco",
+    "skillsdeveloped": "AI literacy",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "83CF4127-F363-45C9-8B4C-7C81856654A6",
+    "title": "AI Powered Programming with GitHub CoPilot",
+    "url": "https://www.linkedin.com/learning/ai-powered-programming-with-github-copilot-by-microsoft-press/welcome-and-course-overview?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "GitHub Copilot usage, IDE integration, comment-based generation, Copilot in unit testing, GitHub CoPilot to build and deploy apps",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "92C749EA-C1E9-48F7-BF38-80D5FB678206",
+    "title": "Building AI Literacy",
+    "url": "https://www.linkedin.com/learning/paths/building-ai-literacy?u=26890602",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "AI literacy",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "6FEFEE2C-7900-4C2F-840C-821B02033A26",
+    "title": "IT Help Desk for Beginner",
+    "url": "https://www.linkedin.com/learning/it-help-desk-for-beginners-22349140/",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Customer Service, Help Desk Support, troubleshooting, incident response",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "04D9D19A-EE18-4FDA-9F02-846254E7BBBF",
+    "title": "Prepare for the AWS Certified Machine Learning Specialty (MLS-C01)",
+    "url": "https://www.linkedin.com/learning/paths/prepare-for-the-aws-certified-machine-learning-specialty-mls-c01-exam?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "AWS Machine Learning Specialty preparation, building/training/tuning ML models, certification mapping, ML concept expansion, AWS ML tools",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "610A6DB1-F2A1-45AD-8208-8552FC4F5AD7",
+    "title": "Junior Cybersecurity Analyst Career path",
+    "url": "https://skillsforall.com/career-path/cybersecurity?courseLang=en-US",
+    "provider": "Cisco",
+    "skillsdeveloped": "Vulnerability management, risk analysis, security policies, risk management, firewall, security information and event management (SIEM), information systems security, governance, vulnerability assessments, penetration testing, access controls, malware analysis",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "680218BC-CD52-4CC5-8085-85DAF79F941D",
+    "title": "Python 3 for Scripting for System Administrators",
+    "url": "https://www.pluralsight.com/courses/python-3-scripting-for-system-administrators",
+    "provider": "Pluralsight",
+    "skillsdeveloped": "Scripting (Python), System Administration, Technical Support",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E62B752E-A524-4F92-9705-86CCBA0F6A70",
+    "title": "Develop Your Prompt Engineering Skills",
+    "url": "https://www.linkedin.com/learning/paths/develop-your-prompt-engineering-skills?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Prompt engineering",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "5351D548-04D8-4568-9C37-875E13AC38AE",
+    "title": "AI Fundamentals",
+    "url": "https://ibm.biz/BdGpZ9",
+    "provider": "IBM",
+    "skillsdeveloped": "AI Fundamentals",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "16620364-5BC6-4C3F-8C51-87C96BC1AC3F",
+    "title": "IT Support Certificate",
+    "url": "https://www.coursera.org/professional-certificates/ibm-technical-support",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Computer assembly, wireless networking, installing programs, customer service",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "C5100B6D-A85D-4920-BBE2-894C3DD77EA7",
+    "title": "Working in a Digital World: Professional Skills",
+    "url": "https://www.credly.com/org/ibm-skillsbuild/badge/working-in-a-digital-world-professional-skills",
+    "provider": "IBM",
+    "skillsdeveloped": "Agile methodologies, business acumen, creative thinking, critical thinking, communication, problem solving, solutioning",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E7FB2453-4C87-4E25-93A5-8BE51EF909C9",
+    "title": "Python for Data Science, AI & Development",
+    "url": "https://www.coursera.org/learn/python-for-applied-data-science-ai",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Python Programming, Panda, Numpy",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "981F66E4-E8D4-47C0-845F-8C461F695574",
+    "title": "Data Analytics Essentials",
+    "url": "https://skillsforall.com/course/data-analytics-essentials?courseLang=en-US",
+    "provider": "Cisco",
+    "skillsdeveloped": "Data analysis, Analytical skills",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "ACD6D06E-F5B2-479E-B914-8F863D3C073A",
+    "title": "Project Manager Professional Certificate",
+    "url": "https://www.coursera.org/professional-certificates/ibm-project-manager",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Developing project timelines, roles and responsibility matrices, stakeholder management tools, and communications plans",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A8D6628A-8358-4192-B7B5-91C1F89E7A64",
+    "title": "Power BI: Integrating AI and Machine Learning (FEE)",
+    "url": "https://www.linkedin.com/learning/power-bi-integrating-ai-and-machine-learning",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Overview of Power BI, including AI and machine learning integration",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E0389439-1ED5-4959-8A39-93F6285BFD1F",
+    "title": "Advanced Data Analytics Professional Certificate",
+    "url": "https://www.coursera.org/professional-certificates/google-advanced-data-analytics",
+    "provider": "Google / Coursera",
+    "skillsdeveloped": "Data Science, Data Analysis, Python Programming, Jupyter Notebook, Machine Learning, Statistical Analysis, Tableau Software, Data Visualization, Predictive Modelling, Kaggle",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A7F5CF9C-29EB-4143-989C-94E4F641E760",
+    "title": "Cloud Computing and Virtualization",
+    "url": "https://skills.yourlearning.ibm.com/credential/CREDLY-1261b7bb-becb-431f-bb1f-36097dac3419",
+    "provider": "IBM",
+    "skillsdeveloped": "Cloud computing; virtualization",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "DC722752-05A5-482C-9742-94F41014B7F8",
+    "title": "Java Cloud Certification",
+    "url": "https://education.oracle.com/software/java/pFamily_48",
+    "provider": "Oracle University",
+    "skillsdeveloped": "Java",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "F60AA745-3ED3-47D1-8CFE-94FE6E01317C",
+    "title": "Software and Operating Systems",
+    "url": "https://skills.yourlearning.ibm.com/credential/CREDLY-5835479c-bc29-431f-af4d-60e3bee1d7de",
+    "provider": "IBM",
+    "skillsdeveloped": "Troubleshooting software/OS, configure settings, update/install software, diagnose issues, select tools for support, perform user management tasks",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "CE56F430-DB42-403E-A2D9-9800DA6DB3E4",
+    "title": "IBM Data Science Certificate",
+    "url": "https://www.coursera.org/professional-certificates/ibm-data-science",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Big Data Technologies, Tools and Techniques, Data Mining, Data Modeling, Statistical Analysis Programming Languages, Machine Learning Frameworks",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "46AA519A-2FAF-4745-A31D-9B42994F629D",
+    "title": "IBM AI Engineering Professional Certificate",
+    "url": "https://www.coursera.org/professional-certificates/ai-engineer",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Machine Learning, Artificial Intelligence, Algorithm, Python, Data Science, Data Visualization, Big Data",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "5A2F53EB-F938-4711-99F6-9C5385A18DFF",
+    "title": "Cybersecurity Compliance Framework, Standards & Regulations",
+    "url": "https://www.coursera.org/learn/cybersecurity-compliance-framework-standards-regulations",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Risk Management, Laws and Regulations, Cybersecurity Compliance, Cybersecurity Framework, Cybersecurity Standards",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "DD0D44FB-C32D-4856-99D9-9FCC4293082C",
+    "title": "Customer Service",
+    "url": "https://skillsbuild.org/adult-learners/explore-learning/customer-service-representative",
+    "provider": "IBM",
+    "skillsdeveloped": "Customer engagement, problem solving and process controls",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "09D9B45F-16AA-4D91-B867-A693D755E7CE",
+    "title": "AI Product Manager Professional Certificate",
+    "url": "https://www.coursera.org/professional-certificates/ibm-ai-product-manager",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Artificial intelligence, Product management, AI product manager, Prompt engineering",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "2333D737-CC46-4AAB-9700-A6E9762CC10A",
+    "title": "Implementing and Administering Cisco Solutions | CCNA (FEE)",
+    "url": "https://u.cisco.com/paths/implementing-administering-cisco-solutions-248",
+    "provider": "Cisco",
+    "skillsdeveloped": "Install, operate, configure, and verify basic IPv4 and IPv6 networks; configure switches, routers, and wireless LAN controllers; manage devices, identify security threats; automation, software-defined networking",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "5CB1BB2A-D581-4238-AB7F-A700DAB7D544",
+    "title": "Responsible AI Foundations",
+    "url": "https://www.linkedin.com/learning/paths/responsible-ai-foundations",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Ethical and Responsible AI, AI ethics and governance",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "819BA6B2-EE34-4D84-8B36-A93F977126D2",
+    "title": "Designing Cisco Enterprise Networks (FEE)",
+    "url": "https://www.cisco.com/c/en/us/training-events/training-certifications/training/training-services/courses/designing-cisco-enterprise-networks-ensld.html",
+    "provider": "Cisco",
+    "skillsdeveloped": "Network Infrastructure, Routing Protocols, Network Architecture",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E67EB2A0-867F-4AE3-AC9E-ACEE614E2450",
+    "title": "Information Systems Specialization",
+    "url": "https://www.coursera.org/specializations/information-systems",
+    "provider": "Coursera / University of Minnesota",
+    "skillsdeveloped": "Analysis for Business Systems, Enterprise Systems, IT Infrastructure, IS/IT Governance",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "21886A22-1A04-4FCB-BB85-AF4953B5AEFC",
+    "title": "Java Explorer",
+    "url": "https://learn.oracle.com/ols/learning-path/java-explorer/88323/79726",
+    "provider": "Oracle University",
+    "skillsdeveloped": "Java arrays, loops, classes, exception handling, interfaces",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "8F9CAD2D-0FC6-49AC-B94B-B2062D72C7DC",
+    "title": "Getting Started with R for Data Science",
+    "url": "https://www.linkedin.com/learning/paths/getting-started-with-r-for-data-science",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Data analysis, R Programming",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9EC2FC14-085E-4711-B740-B4C4246FA84D",
+    "title": "CPA: Programming Essentials in C++ (*)",
+    "url": "https://www.netacad.com/courses/programming/essentials-programming-c-plus-plus",
+    "provider": "Cisco",
+    "skillsdeveloped": "C++",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "DA1132FE-9087-4BEF-A2FA-B8FC7A527D98",
+    "title": "Foundations of Project Management",
+    "url": "https://www.coursera.org/learn/project-management-foundations",
+    "provider": "Google / Coursera",
+    "skillsdeveloped": "Project management",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "0EED0654-70D6-4EC5-BEC8-BA8858ED9EA5",
+    "title": "Data Visualization and Dashboards with Excel and Cognos",
+    "url": "https://www.coursera.org/learn/data-visualization-dashboards-excel-cognos",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Data Analyst, Dashboard, Data visualization",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "3D0402AF-9E68-4348-AF31-BADED68131AC",
+    "title": "Advance Your Data Privacy Skills",
+    "url": "https://www.linkedin.com/learning/paths/advance-your-data-privacy-skills",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Data Privacy",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "C28A31E3-15F1-40E3-9CD8-BAEF57A9E386",
+    "title": "Implement Automation for Cisco Enterprise Solutions (FEE)",
+    "url": "https://www.cisco.com/site/us/en/learn/training-certifications/training/courses/enaui.html",
+    "provider": "Cisco",
+    "skillsdeveloped": "Network Performance Management, Automation, Python (Programming Language), Scripting, AI/ML for Networking, Data Analytics, Network Telemetry",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E68A3FD9-B254-4B46-AAD8-BC22CDA52B7C",
+    "title": "Microsoft Office Online Training Courses",
+    "url": "https://www.linkedin.com/learning/topics/microsoft-office",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Microsoft Office",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4DBF4CD4-EB57-4C4B-A365-BDBBCB23404B",
+    "title": "CCNA: Introduction to Networks (*)",
+    "url": "https://www.netacad.com/courses/networking/ccna-introduction-networks",
+    "provider": "Cisco",
+    "skillsdeveloped": "Ethernet, IP connectivity, IP services, IP Subnetting, IPv4 and IPv6, Addressing, Network Fundamentals, Security Fundamentals",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "2B8A7D7D-EF0B-41E5-8247-C30A1875EE4D",
+    "title": "Software Development Training Courses",
+    "url": "https://www.linkedin.com/learning/topics/software-development",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Object-Oriented Programming, Programming Foundations, Programming Languages, Software Design, Software Design Patterns, Software Development Tools, System architecture, Software Testing, Version Control",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D3D26A9A-F3AC-40A0-AAB6-C4913A461363",
+    "title": "SQL Server Machine Learning Services with Python",
+    "url": "https://www.linkedin.com/learning/sql-server-machine-learning-services-python/analyze-sql-server-data-with-python?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "SQL Server, Python integration, SQL ML Services, Data Science with Python, predictive modeling, bar charts, stored procedures, script execution inside SQL",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B50F8CB2-493E-46F1-93A6-C4D2E3DF8569",
+    "title": "Cybersecurity Essentials",
+    "url": "https://www.netacad.com/catalogs/learn/cybersecurity",
+    "provider": "Cisco",
+    "skillsdeveloped": "Cybersecurity literacy, Asset protection, Security response, Network protection, Product expertise, Data breach analysis, Data defense, Cybersecurity policies",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "AAC8309B-8C59-4E98-92AE-C7FDEE5FE02E",
+    "title": "Web Development",
+    "url": "https://skillsbuild.org/adult-learners/explore-learning/web-developer",
+    "provider": "IBM",
+    "skillsdeveloped": "HTML/CSS/JS, API integration, frameworks, agile collaboration",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "CA06F4D4-7048-4D2C-B903-CA7159B332D2",
+    "title": "AI Essentials Course",
+    "url": "https://grow.google/ai-essentials/",
+    "provider": "Google",
+    "skillsdeveloped": "AI literacy",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "BD1EC198-2B22-498D-AF06-CAD829D45595",
+    "title": "Designing and Implementing Cloud Connectivity (FEE)",
+    "url": "https://www.cisco.com/c/en/us/training-events/training-certifications/training/courses/encc.html",
+    "provider": "Cisco",
+    "skillsdeveloped": "Network Security, Network Monitoring, SD-WAN, QoS, Sustainability Practices, SASE, Cloud-Native Security, Digital Experience Assurance, Sustainability Metrics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "EC9AAD27-5E89-4925-91A3-CB68EB024D0C",
+    "title": "Securing the Use of Generative AI in Your Organization",
+    "url": "https://www.linkedin.com/learning/securing-the-use-of-generative-ai-in-your-organization/introduction-to-generative-ai?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Generative AI risk management, AI governance, LLM security, safeguarding sensitive information, digital resilience, compliance frameworks, mitigating attacks, cybersecurity, GRC policies, AI ethics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4DDF93D1-11AA-448C-96AC-CC50A57B1C3F",
+    "title": "Introduction to Networking and Cloud Computing",
+    "url": "https://www.coursera.org/learn/introduction-to-networking-and-cloud-computing",
+    "provider": "Microsoft / Coursera",
+    "skillsdeveloped": "Cloud computing, Network Monitoring, Network Security, Computer Network",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "0E23959C-E364-4127-A6AF-CD4106925964",
+    "title": "AI Canon",
+    "url": "https://a16z.com/ai-canon/",
+    "provider": "AI Canon",
+    "skillsdeveloped": "AI literacy",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "960DAABD-981E-4137-86F8-CDD5548453A2",
+    "title": "Data Analyst Capstone Project",
+    "url": "https://www.coursera.org/learn/ibm-data-analyst-capstone-project",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Data Analyst, Python Programming, Dashboard, Data visualization, SQL and RDBMS",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "602B1027-D295-4C56-A35F-CF197D6C73BB",
+    "title": "Data Management with Apache NiFi (FEE)",
+    "url": "https://www.linkedin.com/learning/data-management-with-apache-nifi",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Apache NiFi, flow file processing, integration with PostgreSQL, Amazon S3, data streaming, processor groups, downloading/installing NiFi, CSV ingestion, configuring back pressure, monitoring, NiFi dashboards",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "525F8831-1202-44A8-B3A2-D2EE7196A97B",
+    "title": "Generative Design Foundations",
+    "url": "https://www.linkedin.com/learning/generative-design-foundations",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Generative design in architecture and manufacturing, simulation and analysis workflows, geometry generation, topology optimization, AI-assisted CAD processes",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "215371C6-8713-40A9-8FDE-D39A7002332D",
+    "title": "IT Essentials (*)",
+    "url": "https://www.netacad.com/courses/it-essentials?courseLang=en-US",
+    "provider": "Cisco",
+    "skillsdeveloped": "Help Desk Support, Customer Service",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "822D736A-D4C7-4A22-8776-D3A51608B927",
+    "title": "AI for Everyone by Andrew Ng",
+    "url": "https://www.coursera.org/learn/ai-for-everyone",
+    "provider": "Coursera",
+    "skillsdeveloped": "AI literacy",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4F4CD135-593F-448F-A0DE-D44E82CD44F4",
+    "title": "Learning Jira",
+    "url": "https://www.linkedin.com/learning/learning-jira-cloud-edition-19890900",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Jira",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "9A02D1F0-6FCF-407C-8121-D4DC1CA56CAD",
+    "title": "Cybersecurity Certificate",
+    "url": "https://www.credly.com/org/ibm-skillsbuild/badge/ibm-skillsbuild-cybersecurity-certificate",
+    "provider": "IBM",
+    "skillsdeveloped": "Governance, Risk, Compliance and Data Privacy; Vulnerability Management; System and Network Security; Cloud Security; Security Operations Management; Incident Response and System Forensics",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "51255B17-2A2C-496A-A3CD-D68A6D80B57F",
+    "title": "Engaging Stakeholders for Success",
+    "url": "https://skillsforall.com/course/engaging-stakeholders",
+    "provider": "Cisco",
+    "skillsdeveloped": "Communication, Stakeholder engagement, Change Management",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "5C8E883C-462A-4981-B1FF-D690F6BB83C8",
+    "title": "CCNA: Switching, Routing, and Wireless Essentials (*)",
+    "url": "https://www.netacad.com/courses/networking/ccna-switching-routing-wireless-essentials",
+    "provider": "Cisco",
+    "skillsdeveloped": "Access Connectivity, Access Security, First-hop Redundancy, High Availability, IP services, Routing Switching Protocols, Wireless LAN Controllers",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "082E76DA-6A1B-41FA-9E04-DB14CC48A129",
+    "title": "Cybersecurity Fundamentals",
+    "url": "https://www.credly.com/org/ibm-skillsbuild/badge/cybersecurity-fundamentals",
+    "provider": "IBM",
+    "skillsdeveloped": "Cybersecurity literacy, Cryptography, Cyber Attacks, Cyber threat analysis, Cyber threat analysis intelligence, Cybersecurity risk management",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "AA9FC47D-DCD8-44CE-8A21-DB90AE8E9894",
+    "title": "Google LLMOps",
+    "url": "https://www.deeplearning.ai/short-courses/llmops/",
+    "provider": "Google / DeepLearning.AI",
+    "skillsdeveloped": "Operations, Version Control, Data Pipelines, Big Data",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "B847D133-F570-4C3E-A661-DC3B9D38626C",
+    "title": "IT Automation with Python",
+    "url": "https://www.coursera.org/professional-certificates/google-it-automation",
+    "provider": "Google / Coursera",
+    "skillsdeveloped": "Python Programming, Configuration Mgmt, Version Control, Troubleshooting, Automation",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "43A22CC4-1082-460A-9C34-E01DF3D93425",
+    "title": "Project Manager",
+    "url": "https://skillsbuild.org/adult-learners/explore-learning/project-manager",
+    "provider": "IBM",
+    "skillsdeveloped": "Project management, Project planning and developing, Problem Solving and Project risk management",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "E263A9D5-B63A-4E43-B848-E0B7EE963703",
+    "title": "Building Generative AI Skills for Developers",
+    "url": "https://www.linkedin.com/learning/paths/building-generative-ai-skills-for-developers?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "AI tools and frameworks for development, building and releasing apps with AI",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "936B692C-1BAF-4BDB-AB59-E0EA1C372479",
+    "title": "IT Security and Compliance",
+    "url": "https://skills.yourlearning.ibm.com/credential/CREDLY-2cd487a5-7bfa-4434-a24c-11bb3eecba8d",
+    "provider": "IBM",
+    "skillsdeveloped": "Security",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "47866EF5-6609-4298-ABDD-E2ACD5E98814",
+    "title": "AI and Machine Learning Tools for After Effects (FEE)",
+    "url": "https://www.linkedin.com/learning/ai-and-machine-learning-tools-for-after-effects",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Adobe After Effects enhancements, image generation, footage editing, color correction, motion graphics with AI, creative workflows using AI",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "A3EC906D-BD0F-477B-B769-E3BBCC4B165A",
+    "title": "Software Testing and Automation Specialization",
+    "url": "https://www.coursera.org/specializations/software-testing-automation",
+    "provider": "University of Minnesota / Coursera",
+    "skillsdeveloped": "Test automation, unit testing, static analysis, white-box testing, black-box testing",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "40BA6007-C019-4F75-8DAB-E45A7C6C0F39",
+    "title": "DevNet Associate (*)",
+    "url": "https://www.netacad.com/courses/devnet-associate?courseLang=en-US",
+    "provider": "Cisco",
+    "skillsdeveloped": "Application Deployment, Applications, Application Security, Automation, Cisco Platforms, Cisco Development, Cloud, DevOps, IoT, Python, Software Design, etc.",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "1751F3C0-8CE8-4F34-9802-E50949E20FE9",
+    "title": "Network and System Administration Online Training Courses",
+    "url": "https://www.linkedin.com/learning/topics/network-and-system-administration",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Azure Administration, Server Administration, Network Routing, Jira, Backup and Recovery, IT Architecture",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "D3DEE62D-6D41-41AB-88D4-E8400EDBFCF8",
+    "title": "Azure AI Engineering: Speech, Language, and Vision Solutions",
+    "url": "https://www.linkedin.com/learning/azure-ai-engineering-speech-language-and-vision-solutions/introduction?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Azure AI services, Microsoft Cognitive Services, speech recognition, NLP, computer vision, text-to-speech, classification models, real-time transcription and translation, image tagging, video detection and analysis",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "C90A83B5-050A-4CC8-BE20-E8C7B3F0D254",
+    "title": "Network Technician Career path",
+    "url": "https://skillsforall.com/career-path/network-technician?courseLang=en-US",
+    "provider": "Cisco",
+    "skillsdeveloped": "System Administration, Operating Systems (Linux, Windows 10), LANs, TCP/IP, Technical Support, Cybersecurity",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "0A1B0A9B-D32E-4F8F-9F39-E9CBD54CA738",
+    "title": "Training Neural Networks in Python",
+    "url": "https://www.linkedin.com/learning/training-neural-networks-in-python-17058600/creating-a-neural-network-in-python?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Neural networks, artificial neurons, deep learning, backpropagation, Python implementation of networks, use of libraries, problem-solving via biologically inspired models, choosing activation functions, training models",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "C37C5D03-4894-463A-AD65-E9FEB8FEF249",
+    "title": "Enterprise Design Thinking Co-Creator",
+    "url": "https://www.ibm.com/design/thinking/page/courses/Co-Creator/",
+    "provider": "IBM",
+    "skillsdeveloped": "Design Thinking, creativity, innovation",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "4F06B5A8-46E3-4F59-9CFB-EA303B422069",
+    "title": "Building Career Agility and Resilience in the Age of AI",
+    "url": "https://www.linkedin.com/learning/building-career-agility-and-resilience-in-the-age-of-ai/prepare-for-your-ai-enhanced-career?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "AI technologies skills to develop a \"future-proof career mindset\"",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "6D801DE3-7A50-4717-8FA2-EB38F5AB4371",
+    "title": "Introduction to Retrieval Augmented Generation (RAG)",
+    "url": "https://u.cisco.com/tutorials/5353",
+    "provider": "Cisco U",
+    "skillsdeveloped": "Retrieval-augmented Generation",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "07815A2F-01A1-43E0-8E56-EB9331F1E816",
+    "title": "Talking to AI: Prompt Engineering for Project Managers (FEE)",
+    "url": "https://www.pmi.org/shop/p-/elearning/talking-to-ai-prompt-engineering-for-project-managers/el128",
+    "provider": "Project Management Institute",
+    "skillsdeveloped": "Prompt engineering for project managers, AI readiness",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "96210EF4-D723-44C7-AF18-F062F36E4CF9",
+    "title": "Data Analytics Certificate",
+    "url": "https://www.credly.com/org/ibm/badge/ibm-skillsbuild-data-analytics-certificate",
+    "provider": "IBM",
+    "skillsdeveloped": "Data Classification; Data Usability for Organizations; Inferential and Descriptive Statistics; Data Collection and Analysis; Data Preparation for Analysis; Data Visualization and Presentation",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "0A4CA858-5399-47E4-91A9-F307B6F409FD",
+    "title": "Excel Basics for Data Analysis",
+    "url": "https://www.coursera.org/learn/excel-basics-data-analysis-ibm",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Data analysis, Pivot table",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "6693949C-6BF8-4A1C-AD31-F58EDB5C690A",
+    "title": "Network Security & Database Vulnerabilities",
+    "url": "https://www.coursera.org/learn/network-security-database-vulnerabilities",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Networking basics, Cybersecurity, Network Security, database vulnerabilities, Sql injection",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "CDFCB537-7E9D-4B64-A247-F62204CD4816",
+    "title": "Cybersecurity Capstone: Breach Response Case Studies",
+    "url": "https://www.coursera.org/learn/ibm-cybersecurity-breach-case-studies",
+    "provider": "IBM / Coursera",
+    "skillsdeveloped": "Computer Security Incident Management, Cybersecurity, Breach (Security Exploit), security analyst, cyber attack",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "430D3146-2CEA-419B-9725-FC1B26305CA5",
+    "title": "User Experience Design",
+    "url": "https://skillsbuild.org/adult-learners/explore-learning/user-experience-design",
+    "provider": "IBM",
+    "skillsdeveloped": "User-centered digital products, Product Design, User engagement",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  },
+  {
+    "id": "29E012EF-8B28-4D88-8A53-FCF0B1A12D57",
+    "title": "Machine Learning with Python Foundations",
+    "url": "https://www.linkedin.com/learning/machine-learning-with-python-foundations/machine-learning-in-our-world-23459526?u=104",
+    "provider": "LinkedIn",
+    "skillsdeveloped": "Python ML, data prep, guided examples, evaluation & interpretation",
+    "createdat": "2025-06-25T19:21:59.190000+00:00",
+    "updatedat": "2025-06-25T19:21:59.190000+00:00"
+  }
+]

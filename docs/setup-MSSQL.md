@@ -6,7 +6,7 @@ These steps work on Windows/macOS/Linux as long as you have Docker Desktop / Doc
 **Docker Image**: The setup uses SQL Server 2025 latest (`mcr.microsoft.com/mssql/server:2025-latest`) running in Developer Edition mode.
 If you also run local SQL Server on your host, use a non-default Docker host port (for example `MSSQL_PORT=11433`) so Prisma points to Docker.
 
-For a full step-by-step (Windows, Linux, macOS), see [ONBOARDING.md](ONBOARDING.md) and [docs/DOCKER_SQL_SERVER_SETUP.md](docs/DOCKER_SQL_SERVER_SETUP.md).
+For a full step-by-step (Windows, Linux, macOS), see [ONBOARDING.md](../ONBOARDING.md). For PostgreSQL setup (primary database), see [docs/DOCKER_POSTGRESQL_SETUP.md](DOCKER_POSTGRESQL_SETUP.md).
 
 Your .env file should look similar to this:
 
@@ -106,7 +106,7 @@ Seed from the anonymized JSON fixtures in `prisma/mock-data/` (recommended for l
 To seed the database with anonymized fixtures (recommended):
 
 ```bash
-npm run db:seed:anonymized
+node prisma/seed-anonymized.mjs --idempotent
 ```
 
 Alternative (generates synthetic/faker data; does NOT use `prisma/mock-data/`):
