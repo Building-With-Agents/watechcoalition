@@ -1,9 +1,21 @@
 # Migrating the Agent Pipeline from MSSQL to PostgreSQL
 
-This document covers the migration of the **Python agent pipeline** database from
-MSSQL (SQL Server) to PostgreSQL. The Next.js app continues to use MSSQL via
-Prisma in this phase. A future DB-unification effort will consolidate both
-layers on PostgreSQL.
+> **Junior devs: You do NOT need this guide.** MSSQL is deprecated. Use the PostgreSQL
+> seed script instead:
+>
+> ```bash
+> docker compose --env-file .env.docker up postgres -d
+> python scripts/pg-seed-data/seed_pg_database.py
+> ```
+>
+> See [scripts/pg-seed-data/README.md](../scripts/pg-seed-data/README.md) for the
+> full quick-start guide, or follow [ONBOARDING.md](../ONBOARDING.md) from step 3.
+
+---
+
+This document covers the **admin migration** of the Python agent pipeline database
+from MSSQL (SQL Server) to PostgreSQL. This is a one-time procedure performed by
+the admin to move existing data. MSSQL is deprecated and being phased out.
 
 **Why PostgreSQL?** See `docs/planning/ARCHITECTURAL_DECISIONS.md`, Decision #19
 for the full rationale (pgvector for embedding similarity search, Python ecosystem
@@ -304,16 +316,17 @@ directly (see `CLAUDE.md` Database Schema section):
 
 ---
 
-## What Stays on MSSQL (Phase 1)
+## What Stays on MSSQL (Deprecated)
 
-These are **not affected** by this migration:
+These legacy components still use MSSQL but are **deprecated and being phased out**:
 
 - The Next.js app (`DATABASE_URL` in `.env` — `sqlserver://` format)
 - Prisma schema and migrations (`prisma/schema.prisma` — `provider = "sqlserver"`)
 - All existing Next.js API routes
 - The `scripts/start-sql-server.ps1` and related MSSQL scripts
 
-These will migrate to PostgreSQL in a future DB-unification effort.
+These will migrate to PostgreSQL in the DB-unification effort. New development
+should target PostgreSQL exclusively.
 
 ---
 
