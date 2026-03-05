@@ -1,13 +1,12 @@
 """
-EventEnvelope — the typed event contract shared by every agent in the pipeline.
+EventEnvelope — a reserved typed event model kept for future experiments.
 
-Every agent receives an EventEnvelope and returns an EventEnvelope.
-The six fields below are required on every event, regardless of what
-is in the payload.
+Deprecated for the active pipeline implementation.
 
-Week 2 walking skeleton: all six fields are live from day one.
-The payload shape varies by agent; see each agent's module docstring
-and the fixture files for examples.
+The walking skeleton and current pipeline standardize on `AgentEvent`
+from `agents.common.events.base`. Keep this model only as a reserved
+typed wrapper for future experiments or migrations; do not use it for
+inter-agent communication in the current pipeline.
 """
 
 from __future__ import annotations
