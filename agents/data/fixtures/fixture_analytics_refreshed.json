@@ -1,0 +1,58 @@
+{
+  "run_id": "batch-run-001",
+  "total_postings": 10,
+  "top_skills": [
+    {"skill": "Python",        "count": 10, "type": "Technical"},
+    {"skill": "SQL",           "count": 7,  "type": "Technical"},
+    {"skill": "Docker",        "count": 3,  "type": "Tool"},
+    {"skill": "AWS",           "count": 3,  "type": "Technical"},
+    {"skill": "Kubernetes",    "count": 3,  "type": "Tool"},
+    {"skill": "REST APIs",     "count": 2,  "type": "Technical"},
+    {"skill": "Statistics",    "count": 3,  "type": "Domain"},
+    {"skill": "System Design", "count": 2,  "type": "Domain"},
+    {"skill": "Communication", "count": 3,  "type": "Soft"},
+    {"skill": "MLflow",        "count": 2,  "type": "Tool"},
+    {"skill": "dbt",           "count": 2,  "type": "Tool"},
+    {"skill": "PostgreSQL",    "count": 2,  "type": "Tool"},
+    {"skill": "Tableau",       "count": 2,  "type": "Tool"},
+    {"skill": "Linux",         "count": 2,  "type": "Technical"},
+    {"skill": "Excel",         "count": 2,  "type": "Tool"}
+  ],
+  "seniority_distribution": {
+    "junior": 2,
+    "mid":    4,
+    "senior": 3,
+    "lead":   1
+  },
+  "role_distribution": {
+    "Software Engineering": 3,
+    "Data Science":         2,
+    "Machine Learning":     2,
+    "Data Engineering":     1,
+    "Data Analytics":       1,
+    "DevOps":               1
+  },
+  "locations": {
+    "Seattle, WA":  5,
+    "Redmond, WA":  2,
+    "Bellevue, WA": 1,
+    "Kirkland, WA": 1,
+    "Renton, WA":   1
+  },
+  "sectors": {
+    "Technology":        5,
+    "Aerospace":         1,
+    "Real Estate Tech":  1,
+    "Travel Tech":       1,
+    "Telecommunications":1,
+    "Logistics Tech":    1
+  },
+  "skill_type_distribution": {
+    "Technical": 42,
+    "Tool":      38,
+    "Domain":    22,
+    "Soft":      12
+  },
+  "avg_quality_score": 0.891,
+  "avg_spam_score":    0.042
+}

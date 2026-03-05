@@ -5,7 +5,7 @@ This guide walks through setting up the Tech Talent Showcase app after cloning t
 ## Prerequisites
 
 - **Node.js** 18.17 or later ([nodejs.org](https://nodejs.org/) or use [nvm](https://github.com/nvm-sh/nvm))
-- **Python** 3.11 or later ([python.org](https://www.python.org/downloads/))
+- **Python** 3.11 or later — [python.org/downloads](https://www.python.org/downloads/); on Windows, enable **"Add python.exe to PATH"** during install
 - **Docker** (for local SQL Server) — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) for installation instructions
 - **Git**
 
@@ -114,6 +114,7 @@ DATABASE_URL="sqlserver://localhost:1433;database=talent_finder;user=SA;password
 Replace `YOUR_SA_PASSWORD` with your `MSSQL_SA_PASSWORD` from `.env.docker`, and adjust `1433` if you changed `MSSQL_PORT`.
 If Docker is mapped to `11433`, your URL must use `localhost:11433`.
 
+<<<<<<< HEAD
 ### 5.1 Python / agents (SQLAlchemy + pyodbc)
 
 The **agents pipeline** uses `agents/.env` and **SQLAlchemy + pyodbc**. The `sqlserver://` format above does **not** work with Python. Use `mssql+pyodbc://` in `agents/.env`:
@@ -130,6 +131,9 @@ python -m agents.connectivity_test
 ```
 
 Expected output: `job_postings row count: <N>`.
+=======
+> **Note:** This `sqlserver://` format is required by Prisma/Next.js. Python agents (SQLAlchemy) use a different format and a separate variable — see step 7.4.
+>>>>>>> origin/main
 
 ## 6. Database Schema and Seed (Anonymized Fixtures)
 
@@ -159,9 +163,62 @@ SELECT @@SERVERNAME, @@VERSION;
 
 The **Job Intelligence Engine** is an eight-agent Python pipeline that will ingest, normalize, enrich, and analyze external job postings alongside the Next.js app. **It is not yet implemented.** The `agents/` directory is scaffolded (structure and `requirements.txt`); the pipeline will be built out over the **12-week curriculum** as specified in [CLAUDE.md](CLAUDE.md) and [docs/planning/ARCHITECTURE_DEEP.md](docs/planning/ARCHITECTURE_DEEP.md).
 
-Set up the Python environment now so you’re ready to develop agents as you follow the weekly deliverables:
+Set up the Python environment now so you’re ready to develop agents as you follow the weekly deliverables.
+
+### 7.1 Install Python 3.11 (if not already installed)
+
+1. Download from [python.org/downloads](https://www.python.org/downloads/) (Python 3.11 or later).
+2. Run the installer. **On Windows**, check **"Add python.exe to PATH"** at the bottom.
+3. Verify installation:
+
+   **Windows (PowerShell):**
+   ```powershell
+   py -3.11 --version
+   ```
+
+   **Linux / macOS:**
+   ```bash
+   python3 --version
+   ```
+
+   If you see a version number (e.g. `Python 3.11.5`), you're good.
+
+### 7.2 Create and activate a virtual environment
+
+Create a venv in `agents/.venv` so dependencies stay isolated. Always activate it from the **project root** before running any Python commands, so that tools like `streamlit run agents/...` and `python -m agents...` resolve correctly.
+
+**Create the venv** (one time only):
+
+**Windows (PowerShell):**
+```powershell
+cd agents
+py -3.11 -m venv .venv
+cd ..
+```
+
+**Linux / macOS:**
+```bash
+cd agents && python3 -m venv .venv && cd ..
+```
+
+**Activate from the project root** (every new terminal session):
+
+**Windows (PowerShell):**
+```powershell
+agents\.venv\Scripts\Activate.ps1
+```
+
+**Linux / macOS:**
+```bash
+source agents/.venv/bin/activate
+```
+
+After activation, your prompt will show `(.venv)` and `pip` will work directly.
+
+### 7.3 Install dependencies
 
 ```bash
+<<<<<<< HEAD
 # From project root (watechcoalition/)
 cd agents
 python3 -m venv .venv
@@ -173,6 +230,26 @@ pip install -r agents/requirements.txt
 ```
 
 If `python3` resolves to the wrong interpreter (e.g. Homebrew), run `deactivate`, remove `agents/.venv`, recreate it, and run `source agents/.venv/bin/activate` again from the project root.
+=======
+pip install -r agents/requirements.txt
+```
+
+### 7.4 Set PYTHON_DATABASE_URL in .env
+
+Python agents use SQLAlchemy + pyodbc, which requires a **different connection string format** than Prisma's `DATABASE_URL`. Add this to your `.env` file:
+
+```env
+PYTHON_DATABASE_URL=mssql+pyodbc://SA:YOUR_SA_PASSWORD@localhost:1433/talent_finder?driver=ODBC+Driver+17+for+SQL+Server
+```
+
+- Replace `YOUR_SA_PASSWORD` with your `MSSQL_SA_PASSWORD` from `.env.docker`.
+- Replace `1433` with your `MSSQL_PORT` if you changed it (e.g. `11433`).
+- Replace `talent_finder` with your `MSSQL_DATABASE` if you changed it.
+
+> **Why a separate variable?** Prisma requires `sqlserver://host:port;key=value` syntax. SQLAlchemy requires `mssql+pyodbc://user:pass@host:port/db?driver=...` syntax. They are not interchangeable — using the wrong format causes a silent connection failure.
+
+**When the pipeline is implemented**, you will use commands like the following (included here for reference; they will not work until the corresponding agents exist):
+>>>>>>> origin/main
 
 **When the pipeline is implemented**, use these commands (activate the venv first):
 
@@ -208,6 +285,8 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 | Prisma errors after schema change | Run `npx prisma generate` |
 | **Python resolves to wrong interpreter** | Run `deactivate`, remove `agents/.venv`, recreate with `python3 -m venv agents/.venv`, then `source agents/.venv/bin/activate` from project root |
 | Docker not found | Install Docker — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) |
+| `pip` not recognized / Python not found | Install Python 3.11, enable "Add python.exe to PATH", then use a venv (section 7). On Windows, use `py -3.11 -m venv .venv` and activate it before running `pip` |
+| `SQLAlchemy OperationalError` / Python DB connection fails | `DATABASE_URL` uses Prisma's `sqlserver://` format and does not work with SQLAlchemy. Set `PYTHON_DATABASE_URL` in `.env` using `mssql+pyodbc://` format (see step 7.4) |
 
 ## Further Documentation
 
