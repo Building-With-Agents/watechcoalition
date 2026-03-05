@@ -1,89 +1,447 @@
-{
-  "aborted": false,
-  "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
-  "agents_run": 8,
-  "run_log": [
-    {
-      "agent_id": "ingestion_agent",
-      "event_id": "88852cee-1b4e-4325-a546-25e24e72e3a1",
-      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
-      "timestamp": "2026-03-05T21:52:22.694866",
-      "payload_keys": [
-        "records",
-        "source",
-        "batch_id"
-      ]
-    },
-    {
-      "agent_id": "normalization_agent",
-      "event_id": "9be6a79c-c3b5-4964-8217-1a28107becf0",
-      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
-      "timestamp": "2026-03-05T21:52:22.694866",
-      "payload_keys": [
-        "records",
-        "batch_id"
-      ]
-    },
-    {
-      "agent_id": "skills_extraction_agent",
-      "event_id": "9246f8d3-390a-40b7-b705-428999f1a2b6",
-      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
-      "timestamp": "2026-03-05T21:52:22.695861",
-      "payload_keys": [
-        "records",
-        "batch_id"
-      ]
-    },
-    {
-      "agent_id": "enrichment_agent",
-      "event_id": "063364cd-81d0-44bc-9832-bd2a83749ad9",
-      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
-      "timestamp": "2026-03-05T21:52:22.695861",
-      "payload_keys": [
-        "records",
-        "batch_id"
-      ]
-    },
-    {
-      "agent_id": "analytics_agent",
-      "event_id": "e74163fd-f355-4363-b054-3b9a1906cc4d",
-      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
-      "timestamp": "2026-03-05T21:52:22.696862",
-      "payload_keys": [
-        "analytics",
-        "batch_id"
-      ]
-    },
-    {
-      "agent_id": "visualization_agent",
-      "event_id": "1f5464e7-1f65-4ef6-a050-cfb979dbce55",
-      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
-      "timestamp": "2026-03-05T21:52:22.696862",
-      "payload_keys": [
-        "render_status",
-        "batch_id",
-        "artifacts",
-        "stale"
-      ]
-    },
-    {
-      "agent_id": "orchestration_agent",
-      "event_id": "5ecbba90-6878-4ecb-bd7f-09f73fb4ba29",
-      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
-      "timestamp": "2026-03-05T21:52:22.696862",
-      "payload_keys": [
-        "ack",
-        "inbound_agent_id",
-        "batch_id"
-      ]
-    },
-    {
-      "agent_id": "demand_analysis_agent",
-      "event_id": null,
-      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
-      "timestamp": "2026-03-05T21:52:22.696862+00:00",
-      "payload_keys": [],
-      "note": "process() returned None"
-    }
-  ]
-}
+[
+  {
+    "aborted": false,
+    "correlation_id": "15dd253f-0497-465f-b0cc-0042b920fbb1",
+    "agents_run": 8,
+    "run_log": [
+      {
+        "agent_id": "ingestion_agent",
+        "event_id": "3619a7d5-0573-439b-a483-b7e824c368c5",
+        "correlation_id": "15dd253f-0497-465f-b0cc-0042b920fbb1",
+        "timestamp": "2026-03-05T22:16:52.037028",
+        "payload_keys": [
+          "records",
+          "source",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "normalization_agent",
+        "event_id": "fb2ae5a3-119a-4de8-9236-533e46d85af1",
+        "correlation_id": "15dd253f-0497-465f-b0cc-0042b920fbb1",
+        "timestamp": "2026-03-05T22:16:52.038036",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "skills_extraction_agent",
+        "event_id": "7ab85607-febf-4ebb-bce5-e64f103b5e50",
+        "correlation_id": "15dd253f-0497-465f-b0cc-0042b920fbb1",
+        "timestamp": "2026-03-05T22:16:52.038036",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "enrichment_agent",
+        "event_id": "d4f533e8-51a3-43d1-83c0-11d3d40d805d",
+        "correlation_id": "15dd253f-0497-465f-b0cc-0042b920fbb1",
+        "timestamp": "2026-03-05T22:16:52.039037",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "analytics_agent",
+        "event_id": "b4c4fda6-7467-4548-bb26-20f433ede072",
+        "correlation_id": "15dd253f-0497-465f-b0cc-0042b920fbb1",
+        "timestamp": "2026-03-05T22:16:52.039037",
+        "payload_keys": [
+          "analytics",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "visualization_agent",
+        "event_id": "f0b4effb-6a1e-4612-b077-0502cc4a3a7f",
+        "correlation_id": "15dd253f-0497-465f-b0cc-0042b920fbb1",
+        "timestamp": "2026-03-05T22:16:52.040036",
+        "payload_keys": [
+          "render_status",
+          "batch_id",
+          "artifacts",
+          "stale"
+        ]
+      },
+      {
+        "agent_id": "orchestration_agent",
+        "event_id": "69c5c514-9dc5-41cc-899c-f289b84f68ef",
+        "correlation_id": "15dd253f-0497-465f-b0cc-0042b920fbb1",
+        "timestamp": "2026-03-05T22:16:52.040036",
+        "payload_keys": [
+          "ack",
+          "inbound_agent_id",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "demand_analysis_agent",
+        "event_id": null,
+        "correlation_id": "15dd253f-0497-465f-b0cc-0042b920fbb1",
+        "timestamp": "2026-03-05T22:16:52.040036+00:00",
+        "payload_keys": [],
+        "note": "process() returned None"
+      }
+    ]
+  },
+  {
+    "aborted": false,
+    "correlation_id": "d1c267e3-08f2-445f-9af1-fcb38145c0d3",
+    "agents_run": 8,
+    "run_log": [
+      {
+        "agent_id": "ingestion_agent",
+        "event_id": "7358b2cf-aa09-43e0-a8b6-bb957aa786b0",
+        "correlation_id": "d1c267e3-08f2-445f-9af1-fcb38145c0d3",
+        "timestamp": "2026-03-05T22:21:32.471882",
+        "payload_keys": [
+          "records",
+          "source",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "normalization_agent",
+        "event_id": "816fbb2e-bf61-4bcb-94d6-c32c541c4b2c",
+        "correlation_id": "d1c267e3-08f2-445f-9af1-fcb38145c0d3",
+        "timestamp": "2026-03-05T22:21:32.471882",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "skills_extraction_agent",
+        "event_id": "546c316e-aa68-4866-a42d-18a57b93fbdb",
+        "correlation_id": "d1c267e3-08f2-445f-9af1-fcb38145c0d3",
+        "timestamp": "2026-03-05T22:21:32.471882",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "enrichment_agent",
+        "event_id": "a08adb19-1247-4c94-9474-6143c64469d5",
+        "correlation_id": "d1c267e3-08f2-445f-9af1-fcb38145c0d3",
+        "timestamp": "2026-03-05T22:21:32.473387",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "analytics_agent",
+        "event_id": "55de0664-6f5e-48bc-b281-641502d639e7",
+        "correlation_id": "d1c267e3-08f2-445f-9af1-fcb38145c0d3",
+        "timestamp": "2026-03-05T22:21:32.473387",
+        "payload_keys": [
+          "analytics",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "visualization_agent",
+        "event_id": "b28b4cb5-03e2-4743-a863-f962d54dea3a",
+        "correlation_id": "d1c267e3-08f2-445f-9af1-fcb38145c0d3",
+        "timestamp": "2026-03-05T22:21:32.474392",
+        "payload_keys": [
+          "render_status",
+          "batch_id",
+          "artifacts",
+          "stale"
+        ]
+      },
+      {
+        "agent_id": "orchestration_agent",
+        "event_id": "9637d479-24d2-4d7b-995c-542e39a85948",
+        "correlation_id": "d1c267e3-08f2-445f-9af1-fcb38145c0d3",
+        "timestamp": "2026-03-05T22:21:32.474392",
+        "payload_keys": [
+          "ack",
+          "inbound_agent_id",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "demand_analysis_agent",
+        "event_id": null,
+        "correlation_id": "d1c267e3-08f2-445f-9af1-fcb38145c0d3",
+        "timestamp": "2026-03-05T22:21:32.474392+00:00",
+        "payload_keys": [],
+        "note": "process() returned None"
+      }
+    ]
+  },
+  {
+    "aborted": false,
+    "correlation_id": "d226456a-331f-4ddc-b0db-34a72ccdf7aa",
+    "agents_run": 8,
+    "run_log": [
+      {
+        "agent_id": "ingestion_agent",
+        "event_id": "1070e721-bb70-45ed-9e75-5c0034dcff2c",
+        "correlation_id": "d226456a-331f-4ddc-b0db-34a72ccdf7aa",
+        "timestamp": "2026-03-05T22:21:34.318470",
+        "payload_keys": [
+          "records",
+          "source",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "normalization_agent",
+        "event_id": "5eb964db-f621-4043-b20f-9f26f96bba1d",
+        "correlation_id": "d226456a-331f-4ddc-b0db-34a72ccdf7aa",
+        "timestamp": "2026-03-05T22:21:34.318470",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "skills_extraction_agent",
+        "event_id": "f1ea686a-8711-4945-903e-497118095f83",
+        "correlation_id": "d226456a-331f-4ddc-b0db-34a72ccdf7aa",
+        "timestamp": "2026-03-05T22:21:34.319472",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "enrichment_agent",
+        "event_id": "c82c42ea-260e-4fe2-a17d-d12fff41fe49",
+        "correlation_id": "d226456a-331f-4ddc-b0db-34a72ccdf7aa",
+        "timestamp": "2026-03-05T22:21:34.319982",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "analytics_agent",
+        "event_id": "e287edf8-258f-4738-8171-4027a0f40ad8",
+        "correlation_id": "d226456a-331f-4ddc-b0db-34a72ccdf7aa",
+        "timestamp": "2026-03-05T22:21:34.319982",
+        "payload_keys": [
+          "analytics",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "visualization_agent",
+        "event_id": "99fb0b2b-73d1-4974-b8dd-4ba491070ad4",
+        "correlation_id": "d226456a-331f-4ddc-b0db-34a72ccdf7aa",
+        "timestamp": "2026-03-05T22:21:34.319982",
+        "payload_keys": [
+          "render_status",
+          "batch_id",
+          "artifacts",
+          "stale"
+        ]
+      },
+      {
+        "agent_id": "orchestration_agent",
+        "event_id": "29935cca-733f-4000-874b-132592831541",
+        "correlation_id": "d226456a-331f-4ddc-b0db-34a72ccdf7aa",
+        "timestamp": "2026-03-05T22:21:34.319982",
+        "payload_keys": [
+          "ack",
+          "inbound_agent_id",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "demand_analysis_agent",
+        "event_id": null,
+        "correlation_id": "d226456a-331f-4ddc-b0db-34a72ccdf7aa",
+        "timestamp": "2026-03-05T22:21:34.319982+00:00",
+        "payload_keys": [],
+        "note": "process() returned None"
+      }
+    ]
+  },
+  {
+    "aborted": false,
+    "correlation_id": "c919f0b3-d478-4d47-b4fc-9b78df1bfc12",
+    "agents_run": 8,
+    "run_log": [
+      {
+        "agent_id": "ingestion_agent",
+        "event_id": "8d0de751-7d9d-475a-940c-81010fa30d47",
+        "correlation_id": "c919f0b3-d478-4d47-b4fc-9b78df1bfc12",
+        "timestamp": "2026-03-05T22:35:36.877590",
+        "payload_keys": [
+          "records",
+          "source",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "normalization_agent",
+        "event_id": "2f80b36a-696e-4621-b45f-bd1b1122c359",
+        "correlation_id": "c919f0b3-d478-4d47-b4fc-9b78df1bfc12",
+        "timestamp": "2026-03-05T22:35:36.877590",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "skills_extraction_agent",
+        "event_id": "96b0d713-e595-41c6-8240-d4c0cb696a04",
+        "correlation_id": "c919f0b3-d478-4d47-b4fc-9b78df1bfc12",
+        "timestamp": "2026-03-05T22:35:36.878111",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "enrichment_agent",
+        "event_id": "ca25aa4a-05f4-4f96-9bc5-7397661c07f3",
+        "correlation_id": "c919f0b3-d478-4d47-b4fc-9b78df1bfc12",
+        "timestamp": "2026-03-05T22:35:36.879121",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "analytics_agent",
+        "event_id": "3507d5b1-d238-4a88-a77c-32dbc5050d35",
+        "correlation_id": "c919f0b3-d478-4d47-b4fc-9b78df1bfc12",
+        "timestamp": "2026-03-05T22:35:36.879121",
+        "payload_keys": [
+          "analytics",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "visualization_agent",
+        "event_id": "ec185296-dc60-4939-b3c7-63fa9bce8cd0",
+        "correlation_id": "c919f0b3-d478-4d47-b4fc-9b78df1bfc12",
+        "timestamp": "2026-03-05T22:35:36.879121",
+        "payload_keys": [
+          "render_status",
+          "batch_id",
+          "artifacts",
+          "stale"
+        ]
+      },
+      {
+        "agent_id": "orchestration_agent",
+        "event_id": "95cfcdf2-2d61-425e-a435-cb612cc4b0bf",
+        "correlation_id": "c919f0b3-d478-4d47-b4fc-9b78df1bfc12",
+        "timestamp": "2026-03-05T22:35:36.880124",
+        "payload_keys": [
+          "ack",
+          "inbound_agent_id",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "demand_analysis_agent",
+        "event_id": null,
+        "correlation_id": "c919f0b3-d478-4d47-b4fc-9b78df1bfc12",
+        "timestamp": "2026-03-05T22:35:36.880124+00:00",
+        "payload_keys": [],
+        "note": "process() returned None"
+      }
+    ]
+  },
+  {
+    "aborted": false,
+    "correlation_id": "de0c6d18-e2d2-4d4a-a2b4-973d2223fcf8",
+    "agents_run": 8,
+    "run_log": [
+      {
+        "agent_id": "ingestion_agent",
+        "event_id": "cffb4bac-7755-45cf-827e-2e87c46fbf8c",
+        "correlation_id": "de0c6d18-e2d2-4d4a-a2b4-973d2223fcf8",
+        "timestamp": "2026-03-05T22:45:33.860691",
+        "payload_keys": [
+          "records",
+          "source",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "normalization_agent",
+        "event_id": "cbdccd95-9cb9-47fb-95f7-08297229be56",
+        "correlation_id": "de0c6d18-e2d2-4d4a-a2b4-973d2223fcf8",
+        "timestamp": "2026-03-05T22:45:33.860691",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "skills_extraction_agent",
+        "event_id": "a99b828a-52c6-4b7f-a03a-e725f698a14e",
+        "correlation_id": "de0c6d18-e2d2-4d4a-a2b4-973d2223fcf8",
+        "timestamp": "2026-03-05T22:45:33.861685",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "enrichment_agent",
+        "event_id": "89925851-b6a7-49a7-ab29-d598864ed64c",
+        "correlation_id": "de0c6d18-e2d2-4d4a-a2b4-973d2223fcf8",
+        "timestamp": "2026-03-05T22:45:33.861685",
+        "payload_keys": [
+          "records",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "analytics_agent",
+        "event_id": "849b058d-07c8-445a-82fc-e1689430ab87",
+        "correlation_id": "de0c6d18-e2d2-4d4a-a2b4-973d2223fcf8",
+        "timestamp": "2026-03-05T22:45:33.863194",
+        "payload_keys": [
+          "analytics",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "visualization_agent",
+        "event_id": "ce7e1c9e-84cf-4503-b83d-3d5ef2391dae",
+        "correlation_id": "de0c6d18-e2d2-4d4a-a2b4-973d2223fcf8",
+        "timestamp": "2026-03-05T22:45:33.863194",
+        "payload_keys": [
+          "render_status",
+          "batch_id",
+          "artifacts",
+          "stale"
+        ]
+      },
+      {
+        "agent_id": "orchestration_agent",
+        "event_id": "dc7214d0-978a-40f9-bc54-e7cf5af83de3",
+        "correlation_id": "de0c6d18-e2d2-4d4a-a2b4-973d2223fcf8",
+        "timestamp": "2026-03-05T22:45:33.863713",
+        "payload_keys": [
+          "ack",
+          "inbound_agent_id",
+          "batch_id"
+        ]
+      },
+      {
+        "agent_id": "demand_analysis_agent",
+        "event_id": null,
+        "correlation_id": "de0c6d18-e2d2-4d4a-a2b4-973d2223fcf8",
+        "timestamp": "2026-03-05T22:45:33.863713+00:00",
+        "payload_keys": [],
+        "note": "process() returned None"
+      }
+    ]
+  }
+]

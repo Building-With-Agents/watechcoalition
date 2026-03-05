@@ -163,6 +163,25 @@ def run_pipeline(
     }
 
 
+MAX_PERSISTED_RUNS = 50
+
+
+def _load_existing_runs(out_path: Path) -> list:
+    """Load existing runs from pipeline_run.json. Returns list of run dicts (legacy single-object → list of one)."""
+    if not out_path.exists():
+        return []
+    try:
+        text = out_path.read_text(encoding="utf-8")
+        data = json.loads(text)
+    except (OSError, json.JSONDecodeError):
+        return []
+    if isinstance(data, list):
+        return [r for r in data if isinstance(r, dict) and isinstance(r.get("run_log"), list)]
+    if isinstance(data, dict) and isinstance(data.get("run_log"), list):
+        return [data]
+    return []
+
+
 def main() -> None:
     # Stub input: empty or a couple of raw postings for a single batch
     raw_postings: list[dict] = [
@@ -174,9 +193,17 @@ def main() -> None:
     out_dir = _output_dir()
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "pipeline_run.json"
+    runs = _load_existing_runs(out_path)
+    runs.append(result)
+    runs = runs[-MAX_PERSISTED_RUNS:]
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(result, f, indent=2, default=str)
-    log.info("run_log_written", path=str(out_path), aborted=result.get("aborted", False))
+        json.dump(runs, f, indent=2, default=str)
+    log.info(
+        "run_log_written",
+        path=str(out_path),
+        aborted=result.get("aborted", False),
+        total_runs=len(runs),
+    )
     if result.get("aborted"):
         sys.exit(1)
     sys.exit(0)
