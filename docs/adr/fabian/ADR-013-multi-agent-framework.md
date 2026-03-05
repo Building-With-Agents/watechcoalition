@@ -1,6 +1,6 @@
 # ADR-013: Multi-Agent Framework
 
-**Status:** Proposed  
+**Status:** Superseded — Decision promoted to Architectural (locked). Retained for history; not ADR-eligible under the new classification.  
 **Decision makers:** Engineering  
 **Related:** ARCHITECTURAL_DECISIONS.md #13, ADR-016 (orchestration)
 
@@ -35,3 +35,5 @@ The pipeline has eight agents that communicate only via typed, versioned events.
 * docs/planning/ARCHITECTURAL_DECISIONS.md — #13 evaluation criteria
 * docs/planning/ARCHITECTURE_DEEP.md — event-only communication, Orchestration sole consumer of failures
 * https://docs.langchain.com/oss/python/langgraph/overview — LangGraph overview
+
+**Implementation note (2026-03):** Classification update: this decision is now Architectural; the ADR is no longer used for team deliberation.

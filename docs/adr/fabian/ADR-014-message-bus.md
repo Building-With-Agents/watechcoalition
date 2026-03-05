@@ -1,6 +1,6 @@
 # ADR-014: Message Bus Technology
 
-**Status:** Proposed  
+**Status:** Superseded — Decision promoted to Architectural (locked). Retained for history; not ADR-eligible under the new classification.  
 **Decision makers:** Engineering  
 **Related:** ARCHITECTURAL_DECISIONS.md #14
 
@@ -34,3 +34,5 @@ Agents communicate via typed, versioned events (EventEnvelope). We need a mechan
 * docs/planning/ARCHITECTURAL_DECISIONS.md — #14 options and evaluation criteria
 * docs/planning/ARCHITECTURE_DEEP.md — event catalog, agents communicate via events only
 * agents/common/event_envelope.py — EventEnvelope contract
+
+**Implementation note (2026-03):** Classification update: this decision is now Architectural; the ADR is no longer used for team deliberation.

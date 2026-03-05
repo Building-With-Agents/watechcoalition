@@ -28,6 +28,14 @@ The Analytics Agent exposes a query interface for “Ask the Data” (natural la
 * **Negative:** No standardized query language like GraphQL; ad-hoc request/response shape must be documented.
 * **Neutral:** If the team later needs a more expressive interface, a second endpoint or versioned API can be added without replacing the first.
 
+## Review summary (thread reply)
+
+* **Which Tool decision you reviewed:** #18 — Analytics query interface (Analytics Agent).
+* **One viable alternative:** GraphQL. Flexible query language; requires schema and resolvers; more setup for a single "run query" use case.
+* **Which tradeoff matters most:** Simple contract + guardrails in one place vs. no standardized query language (ad-hoc request/response shape).
+* **What would make the reference implementation the wrong choice:** Multiple consumers needing different field sets; need for a standardized query language; guardrails enforced at a different layer (e.g. SQL proxy).
+* **What evidence belongs in the ADR:** ARCHITECTURE_DEEP (POST /analytics/query, SQL guardrails); small consumer set (Streamlit + Orchestration); SELECT-only, allowlist, 100-row limit, 30s timeout.
+
 ## References
 
 * docs/planning/ARCHITECTURAL_DECISIONS.md — #18 options and evaluation criteria

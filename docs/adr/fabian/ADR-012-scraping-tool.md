@@ -29,6 +29,14 @@ The Ingestion Agent must scrape job postings from target URLs in addition to pul
 * **Negative:** Playwright/browser dependency for Crawl4AI; local resource use when scraping many URLs.
 * **Neutral:** If the team later needs a managed scraper, an adapter can wrap Firecrawl behind the same interface.
 
+## Review summary (thread reply)
+
+* **Which Tool decision you reviewed:** #12 — Scraping tool (Ingestion Agent).
+* **One viable alternative:** Firecrawl (API-based). Less local setup; adds external dependency and cost.
+* **Which tradeoff matters most:** Pip-installable, in-process, no extra service vs. Playwright/browser dependency and local resource use.
+* **What would make the reference implementation the wrong choice:** Need for managed scaling, no browser on runner, or compliance requiring no local browser automation; budget for paid scraping API.
+* **What evidence belongs in the ADR:** Week 1 Crawl4AI scraper; agents/ingestion/sources/scraper_adapter.py; httpx for JSearch kept separate.
+
 ## References
 
 * docs/planning/ARCHITECTURAL_DECISIONS.md — #12 options and evaluation criteria

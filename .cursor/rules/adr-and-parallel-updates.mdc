@@ -7,6 +7,16 @@ globs: ["docs/adr/**", "agents/**", "agents/CHANGELOG.md"]
 
 Use this rule when touching ADRs, the changelog, or implementation that depends on architectural decisions. Goal: **uniformity** across sessions and **parallel updates** so docs and code stay aligned.
 
+## Scope of editable paths (do not modify anything else)
+
+**During our sessions, only these paths may be updated** unless the user explicitly requests a change elsewhere:
+
+- `docs/adr/**`
+- `agents/**`
+- `agents/CHANGELOG.md`
+
+**Do not preemptively modify** root-level docs (`CLAUDE.md`, `ONBOARDING.md`, `README.md`), other `.cursor/rules/*.mdc`, `docs/planning/**`, `docs/*.md` (except under `docs/adr/`), `.github/**`, `scripts/**`, `app/**`, `prisma/**`, `.env*`, `.gitignore`, or any file outside the three globs above. Merge conflict resolution in a file outside this scope is allowed only when the user explicitly asks for it.
+
 ## When to Update What
 
 | Trigger | Update this | Do not |
@@ -44,4 +54,4 @@ Use this rule when touching ADRs, the changelog, or implementation that depends 
 - [ ] If it’s an agent stub or generated agent: extends BaseAgent; process/health_check implemented; no direct agent calls; correlation_id preserved on outbound events.
 - [ ] If the work invalidates or extends an ADR: ADR updated (Consequences or implementation note) or new ADR created.
 - [ ] No credentials in code or logs; no Prisma from Python.
-- [ ] No code execution changes outside `agents/` (documentation and changelog updates are the only exceptions).
+- [ ] No edits outside `docs/adr/**`, `agents/**`, or `agents/CHANGELOG.md` unless the user explicitly requests it (e.g. merge resolution).

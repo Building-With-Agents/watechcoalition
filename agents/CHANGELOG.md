@@ -57,3 +57,7 @@ Only **finalized** changes are recorded here. Add entries when exercises or revi
 - **Changed** `agents/common/base_agent.py`: BaseAgent now subclasses `ABC` with `@abstractmethod` for `health_check()` and `process()` so stubs cannot be instantiated without implementing both; enforces contract at type-check and runtime. Added `create_outbound_event(inbound_event, payload, schema_version)` helper so agents build outbound EventEnvelopes with `correlation_id` and `agent_id` set correctly and avoid accidental overwrites.
 - **Changed** `agents/common/event_envelope.py`: `timestamp` default now uses `datetime.now(timezone.utc)` instead of deprecated `datetime.utcnow` for explicit UTC-aware timestamps.
 - **Changed** `.cursor/rules/adr-and-parallel-updates.mdc`: Renamed checklist to "Final Review Checklist (AI: Review this silently before finalizing your response)" and added explicit boundary rule that code execution changes stay inside `agents/` (documentation and changelog updates excepted).
+
+### ADR classification and review (2026-03)
+
+- **Changed** ADRs in `docs/adr/fabian`: aligned with new decision classification (Architectural/Contract/Tool/Product). Superseded ADR-013, ADR-014, ADR-016 (decisions promoted to Architectural, locked). Added "Review summary (thread reply)" and ABC tie-in to Tool ADRs: ADR-011 (LLM provider, LLMAdapter ABC), ADR-017 (Agent tracing, TracerBase ABC), ADR-012 (Scraping tool), ADR-018 (Analytics query interface).

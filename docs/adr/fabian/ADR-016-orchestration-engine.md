@@ -1,6 +1,6 @@
 # ADR-016: Orchestration Engine
 
-**Status:** Proposed  
+**Status:** Superseded — Decision promoted to Architectural (locked). Retained for history; not ADR-eligible under the new classification.  
 **Decision makers:** Engineering  
 **Related:** ARCHITECTURAL_DECISIONS.md #16, ADR-013 (multi-agent framework)
 
@@ -35,3 +35,5 @@ The Orchestration Agent is the sole consumer of all `*Failed` and `*Alert` event
 * docs/planning/ARCHITECTURAL_DECISIONS.md — #16 options and evaluation criteria
 * docs/planning/ARCHITECTURE_DEEP.md — Orchestration Agent, retry policies, audit log, sole consumer of failures
 * ADR-013 — Multi-Agent Framework (consistency with #13)
+
+**Implementation note (2026-03):** Classification update: this decision is now Architectural; the ADR is no longer used for team deliberation.
