@@ -61,3 +61,8 @@ Only **finalized** changes are recorded here. Add entries when exercises or revi
 ### ADR classification and review (2026-03)
 
 - **Changed** ADRs in `docs/adr/fabian`: aligned with new decision classification (Architectural/Contract/Tool/Product). Superseded ADR-013, ADR-014, ADR-016 (decisions promoted to Architectural, locked). Added "Review summary (thread reply)" and ABC tie-in to Tool ADRs: ADR-011 (LLM provider, LLMAdapter ABC), ADR-017 (Agent tracing, TracerBase ABC), ADR-012 (Scraping tool), ADR-018 (Analytics query interface).
+
+### Task 2.2 — Eight agent stubs (walking skeleton)
+
+- **Added** Fixture path constants in `agents/common/paths.py`: `FIXTURES_DIR`, `FALLBACK_SCRAPE_PATH`, `FIXTURE_SKILLS_EXTRACTED_PATH`, `FIXTURE_ENRICHED_PATH`, `FIXTURE_ANALYTICS_REFRESHED_PATH`.
+- **Added** Eight agent stubs extending `BaseAgent`: `agents/ingestion/agent.py`, `agents/normalization/agent.py`, `agents/skills_extraction/agent.py`, `agents/enrichment/agent.py`, `agents/analytics/agent.py`, `agents/visualization/agent.py`, `agents/orchestration/agent.py`, `agents/demand_analysis/agent.py`. Each implements `health_check()` with a real condition (fixture/path exists or initialized) and `process()` with `correlation_id` propagated via `create_outbound_event`; Demand Analysis stub returns `None` from `process()` (Phase 2). LLM-dependent stubs (Skills Extraction, Enrichment, Analytics) load the corresponding fixture JSON.
