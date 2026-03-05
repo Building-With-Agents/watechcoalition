@@ -1,0 +1,2627 @@
+[
+  {
+    "event_id": "e532c13d-b07f-4fe9-bb82-1e2ab5bd8195",
+    "correlation_id": "0553efd4-819f-46c2-a6ce-7c75cc184fb7",
+    "agent_id": "ingestion",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 1,
+      "source": "web_scrape",
+      "url": "https://careers.microsoft.com/jobs/1234567",
+      "timestamp": "2026-02-24T08:15:00Z",
+      "title": "Senior Data Engineer",
+      "company": "Microsoft",
+      "location": "Redmond, WA",
+      "raw_text": "Microsoft's Azure Data platform team is hiring a Senior Data Engineer to design and operate large-scale data pipelines that power analytics across our enterprise cloud products. You will build and maintain batch and streaming pipelines using Python, Apache Spark, and SQL, with data transformations managed via dbt. The ideal candidate brings 5+ years of experience in distributed data engineering, deep expertise in Python and SQL, and hands-on experience with Azure data services including Azure Data Factory and Azure Synapse. You will collaborate closely with data scientists and product teams to deliver reliable, scalable data infrastructure. Strong data modeling skills and clear written communication are essential. Experience with Delta Lake or similar lakehouse architectures is a plus.",
+      "external_id": "https://careers.microsoft.com/jobs/1234567",
+      "ingestion_run_id": "c5c245c2-d972-4489-b032-a0fba8d41692",
+      "ingestion_timestamp": "2026-03-05T02:40:43.112588+00:00"
+    }
+  },
+  {
+    "event_id": "3b3f835f-552c-41df-ab01-46983b01dcfa",
+    "correlation_id": "0553efd4-819f-46c2-a6ce-7c75cc184fb7",
+    "agent_id": "normalization",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 1,
+      "source": "web_scrape",
+      "url": "https://careers.microsoft.com/jobs/1234567",
+      "timestamp": "2026-02-24T08:15:00Z",
+      "title": "Senior Data Engineer",
+      "company": "Microsoft",
+      "location": "Redmond, WA",
+      "raw_text": "Microsoft's Azure Data platform team is hiring a Senior Data Engineer to design and operate large-scale data pipelines that power analytics across our enterprise cloud products. You will build and maintain batch and streaming pipelines using Python, Apache Spark, and SQL, with data transformations managed via dbt. The ideal candidate brings 5+ years of experience in distributed data engineering, deep expertise in Python and SQL, and hands-on experience with Azure data services including Azure Data Factory and Azure Synapse. You will collaborate closely with data scientists and product teams to deliver reliable, scalable data infrastructure. Strong data modeling skills and clear written communication are essential. Experience with Delta Lake or similar lakehouse architectures is a plus."
+    }
+  },
+  {
+    "event_id": "4a1aa3fa-42e6-4ebf-a948-70b3ca1852ba",
+    "correlation_id": "0553efd4-819f-46c2-a6ce-7c75cc184fb7",
+    "agent_id": "skills_extraction",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 1,
+      "title": "Senior Data Engineer",
+      "company": "Microsoft",
+      "skills": [
+        {
+          "name": "Python",
+          "type": "Technical",
+          "confidence": 0.98
+        },
+        {
+          "name": "SQL",
+          "type": "Technical",
+          "confidence": 0.97
+        },
+        {
+          "name": "Apache Spark",
+          "type": "Tool",
+          "confidence": 0.95
+        },
+        {
+          "name": "dbt",
+          "type": "Tool",
+          "confidence": 0.93
+        },
+        {
+          "name": "Azure",
+          "type": "Technical",
+          "confidence": 0.94
+        },
+        {
+          "name": "Data Modeling",
+          "type": "Domain",
+          "confidence": 0.88
+        },
+        {
+          "name": "Communication",
+          "type": "Soft",
+          "confidence": 0.72
+        }
+      ],
+      "seniority": "senior",
+      "extraction_status": "success"
+    }
+  },
+  {
+    "event_id": "14b22bef-abea-4507-82f4-cc76bf0148ac",
+    "correlation_id": "0553efd4-819f-46c2-a6ce-7c75cc184fb7",
+    "agent_id": "enrichment",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 1,
+      "title": "Senior Data Engineer",
+      "company": "Microsoft",
+      "company_id": "co-microsoft-001",
+      "sector_id": "sec-technology",
+      "role_classification": "Data Engineering",
+      "seniority": "senior",
+      "quality_score": 0.91,
+      "spam_score": 0.04,
+      "is_spam": false,
+      "enrichment_status": "success"
+    }
+  },
+  {
+    "phase2_skipped": true,
+    "agent_id": "demand_analysis",
+    "correlation_id": "0553efd4-819f-46c2-a6ce-7c75cc184fb7",
+    "timestamp": "2026-03-05T02:40:43.112588+00:00"
+  },
+  {
+    "event_id": "59ec6b72-0645-487f-b657-a2f1441fa7a2",
+    "correlation_id": "0553efd4-819f-46c2-a6ce-7c75cc184fb7",
+    "agent_id": "analytics",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "run_id": "batch-run-001",
+      "total_postings": 10,
+      "top_skills": [
+        {
+          "skill": "Python",
+          "count": 10,
+          "type": "Technical"
+        },
+        {
+          "skill": "SQL",
+          "count": 7,
+          "type": "Technical"
+        },
+        {
+          "skill": "Docker",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "AWS",
+          "count": 3,
+          "type": "Technical"
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "REST APIs",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Statistics",
+          "count": 3,
+          "type": "Domain"
+        },
+        {
+          "skill": "System Design",
+          "count": 2,
+          "type": "Domain"
+        },
+        {
+          "skill": "Communication",
+          "count": 3,
+          "type": "Soft"
+        },
+        {
+          "skill": "MLflow",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "dbt",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "PostgreSQL",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Tableau",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Linux",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Excel",
+          "count": 2,
+          "type": "Tool"
+        }
+      ],
+      "seniority_distribution": {
+        "junior": 2,
+        "mid": 4,
+        "senior": 3,
+        "lead": 1
+      },
+      "role_distribution": {
+        "Software Engineering": 3,
+        "Data Science": 2,
+        "Machine Learning": 2,
+        "Data Engineering": 1,
+        "Data Analytics": 1,
+        "DevOps": 1
+      },
+      "locations": {
+        "Seattle, WA": 5,
+        "Redmond, WA": 2,
+        "Bellevue, WA": 1,
+        "Kirkland, WA": 1,
+        "Renton, WA": 1
+      },
+      "sectors": {
+        "Technology": 5,
+        "Aerospace": 1,
+        "Real Estate Tech": 1,
+        "Travel Tech": 1,
+        "Telecommunications": 1,
+        "Logistics Tech": 1
+      },
+      "skill_type_distribution": {
+        "Technical": 42,
+        "Tool": 38,
+        "Domain": 22,
+        "Soft": 12
+      },
+      "avg_quality_score": 0.891,
+      "avg_spam_score": 0.042
+    }
+  },
+  {
+    "event_id": "a41d8443-91c6-4070-814d-5b6809230c72",
+    "correlation_id": "0553efd4-819f-46c2-a6ce-7c75cc184fb7",
+    "agent_id": "visualization",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "fcda5df1-6106-4175-8974-c69db77b2abb",
+    "correlation_id": "0553efd4-819f-46c2-a6ce-7c75cc184fb7",
+    "agent_id": "orchestration",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "77d524ce-187a-42dc-a713-914f9cca75c8",
+    "correlation_id": "da13adeb-de05-45b3-9f0b-67f9e04e2962",
+    "agent_id": "ingestion",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 2,
+      "source": "web_scrape",
+      "url": "https://www.amazon.jobs/en/jobs/2345678",
+      "timestamp": "2026-02-24T08:45:00Z",
+      "title": "Junior Software Engineer",
+      "company": "Amazon",
+      "location": "Seattle, WA",
+      "raw_text": "Amazon's Fulfillment Technology team is looking for a Junior Software Engineer to help build and maintain the backend services that keep our global delivery network running. You will write production code primarily in Python and Java, design and consume REST APIs, and work within an Agile development process. We are looking for candidates with a solid foundation in data structures and algorithms, comfort working with SQL databases, and familiarity with Git-based version control workflows. This is a great opportunity for a recent graduate or early-career engineer who wants to grow quickly in a high-scale engineering environment. Strong collaboration skills and a willingness to ask questions and learn are more important than years of experience.",
+      "external_id": "https://www.amazon.jobs/en/jobs/2345678",
+      "ingestion_run_id": "dd9200f7-2e7b-40a1-883d-dac1f1018a74",
+      "ingestion_timestamp": "2026-03-05T02:40:43.112588+00:00"
+    }
+  },
+  {
+    "event_id": "8c7741df-7a7d-43ff-9820-421d44c4d746",
+    "correlation_id": "da13adeb-de05-45b3-9f0b-67f9e04e2962",
+    "agent_id": "normalization",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 2,
+      "source": "web_scrape",
+      "url": "https://www.amazon.jobs/en/jobs/2345678",
+      "timestamp": "2026-02-24T08:45:00Z",
+      "title": "Junior Software Engineer",
+      "company": "Amazon",
+      "location": "Seattle, WA",
+      "raw_text": "Amazon's Fulfillment Technology team is looking for a Junior Software Engineer to help build and maintain the backend services that keep our global delivery network running. You will write production code primarily in Python and Java, design and consume REST APIs, and work within an Agile development process. We are looking for candidates with a solid foundation in data structures and algorithms, comfort working with SQL databases, and familiarity with Git-based version control workflows. This is a great opportunity for a recent graduate or early-career engineer who wants to grow quickly in a high-scale engineering environment. Strong collaboration skills and a willingness to ask questions and learn are more important than years of experience."
+    }
+  },
+  {
+    "event_id": "510a3e2f-f0e7-4784-8d79-3ddf9ff4de04",
+    "correlation_id": "da13adeb-de05-45b3-9f0b-67f9e04e2962",
+    "agent_id": "skills_extraction",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 2,
+      "title": "Junior Software Engineer",
+      "company": "Amazon",
+      "skills": [
+        {
+          "name": "Python",
+          "type": "Technical",
+          "confidence": 0.95
+        },
+        {
+          "name": "Java",
+          "type": "Technical",
+          "confidence": 0.93
+        },
+        {
+          "name": "REST APIs",
+          "type": "Technical",
+          "confidence": 0.91
+        },
+        {
+          "name": "SQL",
+          "type": "Technical",
+          "confidence": 0.88
+        },
+        {
+          "name": "Git",
+          "type": "Tool",
+          "confidence": 0.9
+        },
+        {
+          "name": "Agile",
+          "type": "Domain",
+          "confidence": 0.78
+        },
+        {
+          "name": "Collaboration",
+          "type": "Soft",
+          "confidence": 0.7
+        }
+      ],
+      "seniority": "junior",
+      "extraction_status": "success"
+    }
+  },
+  {
+    "event_id": "1d119dbc-ccaa-4d43-82c2-1b7af1a9e7ad",
+    "correlation_id": "da13adeb-de05-45b3-9f0b-67f9e04e2962",
+    "agent_id": "enrichment",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 2,
+      "title": "Junior Software Engineer",
+      "company": "Amazon",
+      "company_id": "co-amazon-001",
+      "sector_id": "sec-technology",
+      "role_classification": "Software Engineering",
+      "seniority": "junior",
+      "quality_score": 0.85,
+      "spam_score": 0.06,
+      "is_spam": false,
+      "enrichment_status": "success"
+    }
+  },
+  {
+    "phase2_skipped": true,
+    "agent_id": "demand_analysis",
+    "correlation_id": "da13adeb-de05-45b3-9f0b-67f9e04e2962",
+    "timestamp": "2026-03-05T02:40:43.112588+00:00"
+  },
+  {
+    "event_id": "ab6f0b71-efad-4f32-a532-720e843595ec",
+    "correlation_id": "da13adeb-de05-45b3-9f0b-67f9e04e2962",
+    "agent_id": "analytics",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "run_id": "batch-run-001",
+      "total_postings": 10,
+      "top_skills": [
+        {
+          "skill": "Python",
+          "count": 10,
+          "type": "Technical"
+        },
+        {
+          "skill": "SQL",
+          "count": 7,
+          "type": "Technical"
+        },
+        {
+          "skill": "Docker",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "AWS",
+          "count": 3,
+          "type": "Technical"
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "REST APIs",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Statistics",
+          "count": 3,
+          "type": "Domain"
+        },
+        {
+          "skill": "System Design",
+          "count": 2,
+          "type": "Domain"
+        },
+        {
+          "skill": "Communication",
+          "count": 3,
+          "type": "Soft"
+        },
+        {
+          "skill": "MLflow",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "dbt",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "PostgreSQL",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Tableau",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Linux",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Excel",
+          "count": 2,
+          "type": "Tool"
+        }
+      ],
+      "seniority_distribution": {
+        "junior": 2,
+        "mid": 4,
+        "senior": 3,
+        "lead": 1
+      },
+      "role_distribution": {
+        "Software Engineering": 3,
+        "Data Science": 2,
+        "Machine Learning": 2,
+        "Data Engineering": 1,
+        "Data Analytics": 1,
+        "DevOps": 1
+      },
+      "locations": {
+        "Seattle, WA": 5,
+        "Redmond, WA": 2,
+        "Bellevue, WA": 1,
+        "Kirkland, WA": 1,
+        "Renton, WA": 1
+      },
+      "sectors": {
+        "Technology": 5,
+        "Aerospace": 1,
+        "Real Estate Tech": 1,
+        "Travel Tech": 1,
+        "Telecommunications": 1,
+        "Logistics Tech": 1
+      },
+      "skill_type_distribution": {
+        "Technical": 42,
+        "Tool": 38,
+        "Domain": 22,
+        "Soft": 12
+      },
+      "avg_quality_score": 0.891,
+      "avg_spam_score": 0.042
+    }
+  },
+  {
+    "event_id": "4b4f14c6-96db-4af6-ac5d-b947b23d508f",
+    "correlation_id": "da13adeb-de05-45b3-9f0b-67f9e04e2962",
+    "agent_id": "visualization",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "cf838e6f-d913-4eca-afd9-13a598fbb709",
+    "correlation_id": "da13adeb-de05-45b3-9f0b-67f9e04e2962",
+    "agent_id": "orchestration",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "2346fe68-99d0-44fd-b488-7a4340759bb7",
+    "correlation_id": "bf44d56e-ccd6-4270-9b2f-6e82cdd17245",
+    "agent_id": "ingestion",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 3,
+      "source": "web_scrape",
+      "url": "https://careers.google.com/jobs/results/3456789",
+      "timestamp": "2026-02-24T09:00:00Z",
+      "title": "Machine Learning Engineer",
+      "company": "Google",
+      "location": "Kirkland, WA",
+      "raw_text": "Google's Kirkland office is seeking a Machine Learning Engineer to join our Ads Relevance team, focused on improving the quality and personalisation of search and display advertising. You will develop, train, and deploy ML models using Python, TensorFlow, and PyTorch, running experiments tracked via MLflow. The role requires strong statistical foundations, experience querying large datasets with SQL, and comfort packaging and deploying models in Docker containers. You will work closely with research scientists to move models from experimentation to production, and will be expected to contribute to our internal ML platform infrastructure. 3+ years of hands-on ML engineering experience required.",
+      "external_id": "https://careers.google.com/jobs/results/3456789",
+      "ingestion_run_id": "f7cc62ee-277c-4f1e-82e0-2e95e2860f2d",
+      "ingestion_timestamp": "2026-03-05T02:40:43.112588+00:00"
+    }
+  },
+  {
+    "event_id": "e7e374cc-259b-4f6c-ac41-5ffb1ae3da4a",
+    "correlation_id": "bf44d56e-ccd6-4270-9b2f-6e82cdd17245",
+    "agent_id": "normalization",
+    "timestamp": "2026-03-05T02:40:43.112588",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 3,
+      "source": "web_scrape",
+      "url": "https://careers.google.com/jobs/results/3456789",
+      "timestamp": "2026-02-24T09:00:00Z",
+      "title": "Machine Learning Engineer",
+      "company": "Google",
+      "location": "Kirkland, WA",
+      "raw_text": "Google's Kirkland office is seeking a Machine Learning Engineer to join our Ads Relevance team, focused on improving the quality and personalisation of search and display advertising. You will develop, train, and deploy ML models using Python, TensorFlow, and PyTorch, running experiments tracked via MLflow. The role requires strong statistical foundations, experience querying large datasets with SQL, and comfort packaging and deploying models in Docker containers. You will work closely with research scientists to move models from experimentation to production, and will be expected to contribute to our internal ML platform infrastructure. 3+ years of hands-on ML engineering experience required."
+    }
+  },
+  {
+    "event_id": "071df8a8-e7fb-4285-83d0-3ae50d6d7684",
+    "correlation_id": "bf44d56e-ccd6-4270-9b2f-6e82cdd17245",
+    "agent_id": "skills_extraction",
+    "timestamp": "2026-03-05T02:40:43.120609",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 3,
+      "title": "Machine Learning Engineer",
+      "company": "Google",
+      "skills": [
+        {
+          "name": "Python",
+          "type": "Technical",
+          "confidence": 0.97
+        },
+        {
+          "name": "TensorFlow",
+          "type": "Tool",
+          "confidence": 0.94
+        },
+        {
+          "name": "PyTorch",
+          "type": "Tool",
+          "confidence": 0.93
+        },
+        {
+          "name": "MLflow",
+          "type": "Tool",
+          "confidence": 0.92
+        },
+        {
+          "name": "SQL",
+          "type": "Technical",
+          "confidence": 0.89
+        },
+        {
+          "name": "Docker",
+          "type": "Tool",
+          "confidence": 0.91
+        },
+        {
+          "name": "Statistics",
+          "type": "Domain",
+          "confidence": 0.85
+        }
+      ],
+      "seniority": "mid",
+      "extraction_status": "success"
+    }
+  },
+  {
+    "event_id": "72813d88-d360-4963-a026-4210c5f9a077",
+    "correlation_id": "bf44d56e-ccd6-4270-9b2f-6e82cdd17245",
+    "agent_id": "enrichment",
+    "timestamp": "2026-03-05T02:40:43.120609",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 3,
+      "title": "Machine Learning Engineer",
+      "company": "Google",
+      "company_id": "co-google-001",
+      "sector_id": "sec-technology",
+      "role_classification": "Machine Learning",
+      "seniority": "mid",
+      "quality_score": 0.93,
+      "spam_score": 0.03,
+      "is_spam": false,
+      "enrichment_status": "success"
+    }
+  },
+  {
+    "phase2_skipped": true,
+    "agent_id": "demand_analysis",
+    "correlation_id": "bf44d56e-ccd6-4270-9b2f-6e82cdd17245",
+    "timestamp": "2026-03-05T02:40:43.121358+00:00"
+  },
+  {
+    "event_id": "e1d1cc24-633b-4282-925f-054cb9432fcf",
+    "correlation_id": "bf44d56e-ccd6-4270-9b2f-6e82cdd17245",
+    "agent_id": "analytics",
+    "timestamp": "2026-03-05T02:40:43.121358",
+    "schema_version": "1.0",
+    "payload": {
+      "run_id": "batch-run-001",
+      "total_postings": 10,
+      "top_skills": [
+        {
+          "skill": "Python",
+          "count": 10,
+          "type": "Technical"
+        },
+        {
+          "skill": "SQL",
+          "count": 7,
+          "type": "Technical"
+        },
+        {
+          "skill": "Docker",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "AWS",
+          "count": 3,
+          "type": "Technical"
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "REST APIs",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Statistics",
+          "count": 3,
+          "type": "Domain"
+        },
+        {
+          "skill": "System Design",
+          "count": 2,
+          "type": "Domain"
+        },
+        {
+          "skill": "Communication",
+          "count": 3,
+          "type": "Soft"
+        },
+        {
+          "skill": "MLflow",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "dbt",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "PostgreSQL",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Tableau",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Linux",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Excel",
+          "count": 2,
+          "type": "Tool"
+        }
+      ],
+      "seniority_distribution": {
+        "junior": 2,
+        "mid": 4,
+        "senior": 3,
+        "lead": 1
+      },
+      "role_distribution": {
+        "Software Engineering": 3,
+        "Data Science": 2,
+        "Machine Learning": 2,
+        "Data Engineering": 1,
+        "Data Analytics": 1,
+        "DevOps": 1
+      },
+      "locations": {
+        "Seattle, WA": 5,
+        "Redmond, WA": 2,
+        "Bellevue, WA": 1,
+        "Kirkland, WA": 1,
+        "Renton, WA": 1
+      },
+      "sectors": {
+        "Technology": 5,
+        "Aerospace": 1,
+        "Real Estate Tech": 1,
+        "Travel Tech": 1,
+        "Telecommunications": 1,
+        "Logistics Tech": 1
+      },
+      "skill_type_distribution": {
+        "Technical": 42,
+        "Tool": 38,
+        "Domain": 22,
+        "Soft": 12
+      },
+      "avg_quality_score": 0.891,
+      "avg_spam_score": 0.042
+    }
+  },
+  {
+    "event_id": "abf1ab57-3d35-4389-a204-a9bef4e2f285",
+    "correlation_id": "bf44d56e-ccd6-4270-9b2f-6e82cdd17245",
+    "agent_id": "visualization",
+    "timestamp": "2026-03-05T02:40:43.121358",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "8e50f27c-61b3-4c71-89d4-76077824fece",
+    "correlation_id": "bf44d56e-ccd6-4270-9b2f-6e82cdd17245",
+    "agent_id": "orchestration",
+    "timestamp": "2026-03-05T02:40:43.121358",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "793b206b-e5e2-4c85-b84f-7f1398104aba",
+    "correlation_id": "a55a9d43-25e3-45eb-9979-e1fc3276b4e0",
+    "agent_id": "ingestion",
+    "timestamp": "2026-03-05T02:40:43.122602",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 4,
+      "source": "web_scrape",
+      "url": "https://salesforce.wd12.myworkdayjobs.com/tableau/jobs/4567890",
+      "timestamp": "2026-02-24T09:30:00Z",
+      "title": "Data Scientist",
+      "company": "Tableau (Salesforce)",
+      "location": "Seattle, WA",
+      "raw_text": "Tableau's Analytics Intelligence team is hiring a Data Scientist to develop the statistical models and analytical frameworks that power our product recommendation and customer success features. You will work in Python and R, query production datasets using SQL, and build compelling data visualisations in Tableau to communicate findings to non-technical stakeholders. The ideal candidate has a strong grounding in applied statistics, experience designing and analysing A/B tests, and a track record of turning ambiguous business questions into structured analytical problems. Excellent written and verbal communication skills are required \u2014 you will present findings regularly to senior leadership. 2\u20134 years of industry data science experience preferred.",
+      "external_id": "https://salesforce.wd12.myworkdayjobs.com/tableau/jobs/4567890",
+      "ingestion_run_id": "569c95cd-0a8a-4810-858a-0942f487ac15",
+      "ingestion_timestamp": "2026-03-05T02:40:43.122602+00:00"
+    }
+  },
+  {
+    "event_id": "de1c25a4-442d-4e5a-b018-fece340a4d3f",
+    "correlation_id": "a55a9d43-25e3-45eb-9979-e1fc3276b4e0",
+    "agent_id": "normalization",
+    "timestamp": "2026-03-05T02:40:43.122602",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 4,
+      "source": "web_scrape",
+      "url": "https://salesforce.wd12.myworkdayjobs.com/tableau/jobs/4567890",
+      "timestamp": "2026-02-24T09:30:00Z",
+      "title": "Data Scientist",
+      "company": "Tableau (Salesforce)",
+      "location": "Seattle, WA",
+      "raw_text": "Tableau's Analytics Intelligence team is hiring a Data Scientist to develop the statistical models and analytical frameworks that power our product recommendation and customer success features. You will work in Python and R, query production datasets using SQL, and build compelling data visualisations in Tableau to communicate findings to non-technical stakeholders. The ideal candidate has a strong grounding in applied statistics, experience designing and analysing A/B tests, and a track record of turning ambiguous business questions into structured analytical problems. Excellent written and verbal communication skills are required \u2014 you will present findings regularly to senior leadership. 2\u20134 years of industry data science experience preferred."
+    }
+  },
+  {
+    "event_id": "00ae2f32-2a40-4d46-aa89-a1296270a715",
+    "correlation_id": "a55a9d43-25e3-45eb-9979-e1fc3276b4e0",
+    "agent_id": "skills_extraction",
+    "timestamp": "2026-03-05T02:40:43.122602",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 4,
+      "title": "Data Scientist",
+      "company": "Tableau (Salesforce)",
+      "skills": [
+        {
+          "name": "Python",
+          "type": "Technical",
+          "confidence": 0.96
+        },
+        {
+          "name": "R",
+          "type": "Technical",
+          "confidence": 0.91
+        },
+        {
+          "name": "SQL",
+          "type": "Technical",
+          "confidence": 0.95
+        },
+        {
+          "name": "Tableau",
+          "type": "Tool",
+          "confidence": 0.97
+        },
+        {
+          "name": "Statistics",
+          "type": "Domain",
+          "confidence": 0.9
+        },
+        {
+          "name": "Data Visualization",
+          "type": "Domain",
+          "confidence": 0.88
+        },
+        {
+          "name": "Communication",
+          "type": "Soft",
+          "confidence": 0.75
+        }
+      ],
+      "seniority": "mid",
+      "extraction_status": "success"
+    }
+  },
+  {
+    "event_id": "76643daf-01c4-411b-9a34-42d4b6d6f287",
+    "correlation_id": "a55a9d43-25e3-45eb-9979-e1fc3276b4e0",
+    "agent_id": "enrichment",
+    "timestamp": "2026-03-05T02:40:43.124009",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 4,
+      "title": "Data Scientist",
+      "company": "Tableau (Salesforce)",
+      "company_id": "co-salesforce-001",
+      "sector_id": "sec-technology",
+      "role_classification": "Data Science",
+      "seniority": "mid",
+      "quality_score": 0.89,
+      "spam_score": 0.05,
+      "is_spam": false,
+      "enrichment_status": "success"
+    }
+  },
+  {
+    "phase2_skipped": true,
+    "agent_id": "demand_analysis",
+    "correlation_id": "a55a9d43-25e3-45eb-9979-e1fc3276b4e0",
+    "timestamp": "2026-03-05T02:40:43.124365+00:00"
+  },
+  {
+    "event_id": "61600fb3-1a05-40ce-8d27-73aa8934a6e2",
+    "correlation_id": "a55a9d43-25e3-45eb-9979-e1fc3276b4e0",
+    "agent_id": "analytics",
+    "timestamp": "2026-03-05T02:40:43.124365",
+    "schema_version": "1.0",
+    "payload": {
+      "run_id": "batch-run-001",
+      "total_postings": 10,
+      "top_skills": [
+        {
+          "skill": "Python",
+          "count": 10,
+          "type": "Technical"
+        },
+        {
+          "skill": "SQL",
+          "count": 7,
+          "type": "Technical"
+        },
+        {
+          "skill": "Docker",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "AWS",
+          "count": 3,
+          "type": "Technical"
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "REST APIs",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Statistics",
+          "count": 3,
+          "type": "Domain"
+        },
+        {
+          "skill": "System Design",
+          "count": 2,
+          "type": "Domain"
+        },
+        {
+          "skill": "Communication",
+          "count": 3,
+          "type": "Soft"
+        },
+        {
+          "skill": "MLflow",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "dbt",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "PostgreSQL",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Tableau",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Linux",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Excel",
+          "count": 2,
+          "type": "Tool"
+        }
+      ],
+      "seniority_distribution": {
+        "junior": 2,
+        "mid": 4,
+        "senior": 3,
+        "lead": 1
+      },
+      "role_distribution": {
+        "Software Engineering": 3,
+        "Data Science": 2,
+        "Machine Learning": 2,
+        "Data Engineering": 1,
+        "Data Analytics": 1,
+        "DevOps": 1
+      },
+      "locations": {
+        "Seattle, WA": 5,
+        "Redmond, WA": 2,
+        "Bellevue, WA": 1,
+        "Kirkland, WA": 1,
+        "Renton, WA": 1
+      },
+      "sectors": {
+        "Technology": 5,
+        "Aerospace": 1,
+        "Real Estate Tech": 1,
+        "Travel Tech": 1,
+        "Telecommunications": 1,
+        "Logistics Tech": 1
+      },
+      "skill_type_distribution": {
+        "Technical": 42,
+        "Tool": 38,
+        "Domain": 22,
+        "Soft": 12
+      },
+      "avg_quality_score": 0.891,
+      "avg_spam_score": 0.042
+    }
+  },
+  {
+    "event_id": "bd04b9a5-3065-4058-bdfe-acdcf6782180",
+    "correlation_id": "a55a9d43-25e3-45eb-9979-e1fc3276b4e0",
+    "agent_id": "visualization",
+    "timestamp": "2026-03-05T02:40:43.124365",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "78632f6d-6241-4cae-ae3e-6a7b754c217f",
+    "correlation_id": "a55a9d43-25e3-45eb-9979-e1fc3276b4e0",
+    "agent_id": "orchestration",
+    "timestamp": "2026-03-05T02:40:43.124365",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "f51d62b1-6733-4016-8360-f5bd0d890e1d",
+    "correlation_id": "f054cda5-543e-4a0c-92ef-9bfa59daca44",
+    "agent_id": "ingestion",
+    "timestamp": "2026-03-05T02:40:43.125409",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 5,
+      "source": "web_scrape",
+      "url": "https://jobs.boeing.com/job/renton/devops-engineer/5678901",
+      "timestamp": "2026-02-24T10:00:00Z",
+      "title": "DevOps Engineer",
+      "company": "Boeing",
+      "location": "Renton, WA",
+      "raw_text": "Boeing's Digital Aviation Services division is looking for a DevOps Engineer to modernise the CI/CD infrastructure supporting our flight operations software. You will design and maintain deployment pipelines, containerise services using Docker, orchestrate workloads on Kubernetes, and manage cloud infrastructure on AWS. The role requires strong Linux administration skills, proficiency in Python for automation scripting, and experience writing SQL queries to support operational reporting. You will work alongside software engineering teams to reduce deployment friction and improve system observability. Familiarity with infrastructure-as-code tools (Terraform or CDK) and a security-first mindset are highly valued. Active security clearance or eligibility to obtain one is preferred.",
+      "external_id": "https://jobs.boeing.com/job/renton/devops-engineer/5678901",
+      "ingestion_run_id": "c18d269e-d7b7-41a1-adfd-41446aad5c87",
+      "ingestion_timestamp": "2026-03-05T02:40:43.125409+00:00"
+    }
+  },
+  {
+    "event_id": "b48d339a-e15a-4832-8b88-e4763b23e808",
+    "correlation_id": "f054cda5-543e-4a0c-92ef-9bfa59daca44",
+    "agent_id": "normalization",
+    "timestamp": "2026-03-05T02:40:43.125409",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 5,
+      "source": "web_scrape",
+      "url": "https://jobs.boeing.com/job/renton/devops-engineer/5678901",
+      "timestamp": "2026-02-24T10:00:00Z",
+      "title": "DevOps Engineer",
+      "company": "Boeing",
+      "location": "Renton, WA",
+      "raw_text": "Boeing's Digital Aviation Services division is looking for a DevOps Engineer to modernise the CI/CD infrastructure supporting our flight operations software. You will design and maintain deployment pipelines, containerise services using Docker, orchestrate workloads on Kubernetes, and manage cloud infrastructure on AWS. The role requires strong Linux administration skills, proficiency in Python for automation scripting, and experience writing SQL queries to support operational reporting. You will work alongside software engineering teams to reduce deployment friction and improve system observability. Familiarity with infrastructure-as-code tools (Terraform or CDK) and a security-first mindset are highly valued. Active security clearance or eligibility to obtain one is preferred."
+    }
+  },
+  {
+    "event_id": "1d1bba2e-a7f1-4fce-a279-9d6bb8992c67",
+    "correlation_id": "f054cda5-543e-4a0c-92ef-9bfa59daca44",
+    "agent_id": "skills_extraction",
+    "timestamp": "2026-03-05T02:40:43.125409",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 5,
+      "title": "DevOps Engineer",
+      "company": "Boeing",
+      "skills": [
+        {
+          "name": "Docker",
+          "type": "Tool",
+          "confidence": 0.96
+        },
+        {
+          "name": "Kubernetes",
+          "type": "Tool",
+          "confidence": 0.95
+        },
+        {
+          "name": "Python",
+          "type": "Technical",
+          "confidence": 0.92
+        },
+        {
+          "name": "SQL",
+          "type": "Technical",
+          "confidence": 0.85
+        },
+        {
+          "name": "AWS",
+          "type": "Technical",
+          "confidence": 0.94
+        },
+        {
+          "name": "Linux",
+          "type": "Technical",
+          "confidence": 0.93
+        },
+        {
+          "name": "CI/CD",
+          "type": "Domain",
+          "confidence": 0.91
+        }
+      ],
+      "seniority": "mid",
+      "extraction_status": "success"
+    }
+  },
+  {
+    "event_id": "0cf63356-1316-48c8-b764-14763335468d",
+    "correlation_id": "f054cda5-543e-4a0c-92ef-9bfa59daca44",
+    "agent_id": "enrichment",
+    "timestamp": "2026-03-05T02:40:43.126403",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 5,
+      "title": "DevOps Engineer",
+      "company": "Boeing",
+      "company_id": "co-boeing-001",
+      "sector_id": "sec-aerospace",
+      "role_classification": "DevOps",
+      "seniority": "mid",
+      "quality_score": 0.88,
+      "spam_score": 0.04,
+      "is_spam": false,
+      "enrichment_status": "success"
+    }
+  },
+  {
+    "phase2_skipped": true,
+    "agent_id": "demand_analysis",
+    "correlation_id": "f054cda5-543e-4a0c-92ef-9bfa59daca44",
+    "timestamp": "2026-03-05T02:40:43.126403+00:00"
+  },
+  {
+    "event_id": "2848939a-209f-485c-8451-be47a38f71c6",
+    "correlation_id": "f054cda5-543e-4a0c-92ef-9bfa59daca44",
+    "agent_id": "analytics",
+    "timestamp": "2026-03-05T02:40:43.126403",
+    "schema_version": "1.0",
+    "payload": {
+      "run_id": "batch-run-001",
+      "total_postings": 10,
+      "top_skills": [
+        {
+          "skill": "Python",
+          "count": 10,
+          "type": "Technical"
+        },
+        {
+          "skill": "SQL",
+          "count": 7,
+          "type": "Technical"
+        },
+        {
+          "skill": "Docker",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "AWS",
+          "count": 3,
+          "type": "Technical"
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "REST APIs",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Statistics",
+          "count": 3,
+          "type": "Domain"
+        },
+        {
+          "skill": "System Design",
+          "count": 2,
+          "type": "Domain"
+        },
+        {
+          "skill": "Communication",
+          "count": 3,
+          "type": "Soft"
+        },
+        {
+          "skill": "MLflow",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "dbt",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "PostgreSQL",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Tableau",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Linux",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Excel",
+          "count": 2,
+          "type": "Tool"
+        }
+      ],
+      "seniority_distribution": {
+        "junior": 2,
+        "mid": 4,
+        "senior": 3,
+        "lead": 1
+      },
+      "role_distribution": {
+        "Software Engineering": 3,
+        "Data Science": 2,
+        "Machine Learning": 2,
+        "Data Engineering": 1,
+        "Data Analytics": 1,
+        "DevOps": 1
+      },
+      "locations": {
+        "Seattle, WA": 5,
+        "Redmond, WA": 2,
+        "Bellevue, WA": 1,
+        "Kirkland, WA": 1,
+        "Renton, WA": 1
+      },
+      "sectors": {
+        "Technology": 5,
+        "Aerospace": 1,
+        "Real Estate Tech": 1,
+        "Travel Tech": 1,
+        "Telecommunications": 1,
+        "Logistics Tech": 1
+      },
+      "skill_type_distribution": {
+        "Technical": 42,
+        "Tool": 38,
+        "Domain": 22,
+        "Soft": 12
+      },
+      "avg_quality_score": 0.891,
+      "avg_spam_score": 0.042
+    }
+  },
+  {
+    "event_id": "793e3336-0864-4879-94d1-2a704bec8f1a",
+    "correlation_id": "f054cda5-543e-4a0c-92ef-9bfa59daca44",
+    "agent_id": "visualization",
+    "timestamp": "2026-03-05T02:40:43.126403",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "0a27dddb-e678-4132-b417-33a4f215b6be",
+    "correlation_id": "f054cda5-543e-4a0c-92ef-9bfa59daca44",
+    "agent_id": "orchestration",
+    "timestamp": "2026-03-05T02:40:43.127319",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "d284c602-bfd3-4f82-a250-eda5acca7ffc",
+    "correlation_id": "88bc35fc-99f9-46c6-b9a0-f1edafc5a8d5",
+    "agent_id": "ingestion",
+    "timestamp": "2026-03-05T02:40:43.127319",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 6,
+      "source": "web_scrape",
+      "url": "https://www.zillow.com/careers/openings/6789012",
+      "timestamp": "2026-02-24T10:30:00Z",
+      "title": "Senior Software Engineer",
+      "company": "Zillow",
+      "location": "Seattle, WA",
+      "raw_text": "Zillow's Buyer Experience engineering team is seeking a Senior Software Engineer to lead the development of the APIs and backend services that power our home search and mortgage products. You will build scalable Python services using Django and Django REST Framework, design and optimise PostgreSQL schemas and queries, and deploy services on AWS. The role requires deep experience with distributed systems design, REST API design principles, and caching strategies using Redis. You will mentor junior engineers, lead technical design discussions, and contribute to our engineering standards. 6+ years of backend software engineering experience required, with a strong preference for candidates who have built high-traffic consumer-facing systems.",
+      "external_id": "https://www.zillow.com/careers/openings/6789012",
+      "ingestion_run_id": "334b0efc-e127-43ea-803c-effec17f0755",
+      "ingestion_timestamp": "2026-03-05T02:40:43.127319+00:00"
+    }
+  },
+  {
+    "event_id": "5602b9e2-ff82-4df1-9e36-e8e7d8651fbc",
+    "correlation_id": "88bc35fc-99f9-46c6-b9a0-f1edafc5a8d5",
+    "agent_id": "normalization",
+    "timestamp": "2026-03-05T02:40:43.127319",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 6,
+      "source": "web_scrape",
+      "url": "https://www.zillow.com/careers/openings/6789012",
+      "timestamp": "2026-02-24T10:30:00Z",
+      "title": "Senior Software Engineer",
+      "company": "Zillow",
+      "location": "Seattle, WA",
+      "raw_text": "Zillow's Buyer Experience engineering team is seeking a Senior Software Engineer to lead the development of the APIs and backend services that power our home search and mortgage products. You will build scalable Python services using Django and Django REST Framework, design and optimise PostgreSQL schemas and queries, and deploy services on AWS. The role requires deep experience with distributed systems design, REST API design principles, and caching strategies using Redis. You will mentor junior engineers, lead technical design discussions, and contribute to our engineering standards. 6+ years of backend software engineering experience required, with a strong preference for candidates who have built high-traffic consumer-facing systems."
+    }
+  },
+  {
+    "event_id": "75548bfb-f30b-4422-8494-2a1f0aeaf41a",
+    "correlation_id": "88bc35fc-99f9-46c6-b9a0-f1edafc5a8d5",
+    "agent_id": "skills_extraction",
+    "timestamp": "2026-03-05T02:40:43.128959",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 6,
+      "title": "Senior Software Engineer",
+      "company": "Zillow",
+      "skills": [
+        {
+          "name": "Python",
+          "type": "Technical",
+          "confidence": 0.96
+        },
+        {
+          "name": "PostgreSQL",
+          "type": "Tool",
+          "confidence": 0.94
+        },
+        {
+          "name": "Redis",
+          "type": "Tool",
+          "confidence": 0.91
+        },
+        {
+          "name": "AWS",
+          "type": "Technical",
+          "confidence": 0.93
+        },
+        {
+          "name": "Django",
+          "type": "Tool",
+          "confidence": 0.92
+        },
+        {
+          "name": "REST APIs",
+          "type": "Technical",
+          "confidence": 0.9
+        },
+        {
+          "name": "System Design",
+          "type": "Domain",
+          "confidence": 0.86
+        }
+      ],
+      "seniority": "senior",
+      "extraction_status": "success"
+    }
+  },
+  {
+    "event_id": "a080bb16-d886-4125-98cf-e99e8ab1e105",
+    "correlation_id": "88bc35fc-99f9-46c6-b9a0-f1edafc5a8d5",
+    "agent_id": "enrichment",
+    "timestamp": "2026-03-05T02:40:43.128959",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 6,
+      "title": "Senior Software Engineer",
+      "company": "Zillow",
+      "company_id": "co-zillow-001",
+      "sector_id": "sec-real-estate-tech",
+      "role_classification": "Software Engineering",
+      "seniority": "senior",
+      "quality_score": 0.92,
+      "spam_score": 0.03,
+      "is_spam": false,
+      "enrichment_status": "success"
+    }
+  },
+  {
+    "phase2_skipped": true,
+    "agent_id": "demand_analysis",
+    "correlation_id": "88bc35fc-99f9-46c6-b9a0-f1edafc5a8d5",
+    "timestamp": "2026-03-05T02:40:43.129969+00:00"
+  },
+  {
+    "event_id": "d2e6c956-6930-4a92-9905-76ae309002e1",
+    "correlation_id": "88bc35fc-99f9-46c6-b9a0-f1edafc5a8d5",
+    "agent_id": "analytics",
+    "timestamp": "2026-03-05T02:40:43.130366",
+    "schema_version": "1.0",
+    "payload": {
+      "run_id": "batch-run-001",
+      "total_postings": 10,
+      "top_skills": [
+        {
+          "skill": "Python",
+          "count": 10,
+          "type": "Technical"
+        },
+        {
+          "skill": "SQL",
+          "count": 7,
+          "type": "Technical"
+        },
+        {
+          "skill": "Docker",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "AWS",
+          "count": 3,
+          "type": "Technical"
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "REST APIs",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Statistics",
+          "count": 3,
+          "type": "Domain"
+        },
+        {
+          "skill": "System Design",
+          "count": 2,
+          "type": "Domain"
+        },
+        {
+          "skill": "Communication",
+          "count": 3,
+          "type": "Soft"
+        },
+        {
+          "skill": "MLflow",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "dbt",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "PostgreSQL",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Tableau",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Linux",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Excel",
+          "count": 2,
+          "type": "Tool"
+        }
+      ],
+      "seniority_distribution": {
+        "junior": 2,
+        "mid": 4,
+        "senior": 3,
+        "lead": 1
+      },
+      "role_distribution": {
+        "Software Engineering": 3,
+        "Data Science": 2,
+        "Machine Learning": 2,
+        "Data Engineering": 1,
+        "Data Analytics": 1,
+        "DevOps": 1
+      },
+      "locations": {
+        "Seattle, WA": 5,
+        "Redmond, WA": 2,
+        "Bellevue, WA": 1,
+        "Kirkland, WA": 1,
+        "Renton, WA": 1
+      },
+      "sectors": {
+        "Technology": 5,
+        "Aerospace": 1,
+        "Real Estate Tech": 1,
+        "Travel Tech": 1,
+        "Telecommunications": 1,
+        "Logistics Tech": 1
+      },
+      "skill_type_distribution": {
+        "Technical": 42,
+        "Tool": 38,
+        "Domain": 22,
+        "Soft": 12
+      },
+      "avg_quality_score": 0.891,
+      "avg_spam_score": 0.042
+    }
+  },
+  {
+    "event_id": "2b1e36bc-927c-4d85-9abf-c153d5dee52f",
+    "correlation_id": "88bc35fc-99f9-46c6-b9a0-f1edafc5a8d5",
+    "agent_id": "visualization",
+    "timestamp": "2026-03-05T02:40:43.130366",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "cbdef40b-352a-4743-ad1d-1b62b43b4cb0",
+    "correlation_id": "88bc35fc-99f9-46c6-b9a0-f1edafc5a8d5",
+    "agent_id": "orchestration",
+    "timestamp": "2026-03-05T02:40:43.131394",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "dd27b24c-4e67-4b53-a9ee-669d676f722d",
+    "correlation_id": "8cd13dce-95da-4036-ac38-edb8e0a02d3e",
+    "agent_id": "ingestion",
+    "timestamp": "2026-03-05T02:40:43.131724",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 7,
+      "source": "web_scrape",
+      "url": "https://lifeatexpedia.com/jobs/7890123",
+      "timestamp": "2026-02-24T11:00:00Z",
+      "title": "Junior Data Analyst",
+      "company": "Expedia",
+      "location": "Seattle, WA",
+      "raw_text": "Expedia Group's Revenue Analytics team is hiring a Junior Data Analyst to support pricing and demand forecasting across our hotel and flights business. Day-to-day work involves writing SQL queries against our data warehouse, building and maintaining dashboards in Tableau, and preparing Excel-based reporting packages for commercial leadership. You will work closely with senior analysts and business stakeholders to answer ad-hoc data questions and identify trends in booking behaviour. We are looking for a detail-oriented graduate with strong SQL fundamentals, basic Python scripting ability, and clear written communication skills. No prior industry experience required \u2014 curiosity, rigour, and a willingness to ask questions matter more.",
+      "external_id": "https://lifeatexpedia.com/jobs/7890123",
+      "ingestion_run_id": "2f26122c-18f7-40fa-8b3c-fa2da27be98d",
+      "ingestion_timestamp": "2026-03-05T02:40:43.131394+00:00"
+    }
+  },
+  {
+    "event_id": "9be3894c-3a32-4abb-a072-47365c6adef8",
+    "correlation_id": "8cd13dce-95da-4036-ac38-edb8e0a02d3e",
+    "agent_id": "normalization",
+    "timestamp": "2026-03-05T02:40:43.131724",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 7,
+      "source": "web_scrape",
+      "url": "https://lifeatexpedia.com/jobs/7890123",
+      "timestamp": "2026-02-24T11:00:00Z",
+      "title": "Junior Data Analyst",
+      "company": "Expedia",
+      "location": "Seattle, WA",
+      "raw_text": "Expedia Group's Revenue Analytics team is hiring a Junior Data Analyst to support pricing and demand forecasting across our hotel and flights business. Day-to-day work involves writing SQL queries against our data warehouse, building and maintaining dashboards in Tableau, and preparing Excel-based reporting packages for commercial leadership. You will work closely with senior analysts and business stakeholders to answer ad-hoc data questions and identify trends in booking behaviour. We are looking for a detail-oriented graduate with strong SQL fundamentals, basic Python scripting ability, and clear written communication skills. No prior industry experience required \u2014 curiosity, rigour, and a willingness to ask questions matter more."
+    }
+  },
+  {
+    "event_id": "5ee14ad8-a033-4852-9c95-d74df8f8f61c",
+    "correlation_id": "8cd13dce-95da-4036-ac38-edb8e0a02d3e",
+    "agent_id": "skills_extraction",
+    "timestamp": "2026-03-05T02:40:43.132371",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 7,
+      "title": "Junior Data Analyst",
+      "company": "Expedia",
+      "skills": [
+        {
+          "name": "SQL",
+          "type": "Technical",
+          "confidence": 0.97
+        },
+        {
+          "name": "Python",
+          "type": "Technical",
+          "confidence": 0.88
+        },
+        {
+          "name": "Tableau",
+          "type": "Tool",
+          "confidence": 0.93
+        },
+        {
+          "name": "Excel",
+          "type": "Tool",
+          "confidence": 0.91
+        },
+        {
+          "name": "Data Visualization",
+          "type": "Domain",
+          "confidence": 0.83
+        },
+        {
+          "name": "Communication",
+          "type": "Soft",
+          "confidence": 0.76
+        }
+      ],
+      "seniority": "junior",
+      "extraction_status": "success"
+    }
+  },
+  {
+    "event_id": "37f7d788-16e0-4a94-b6fb-db4e2c4f2745",
+    "correlation_id": "8cd13dce-95da-4036-ac38-edb8e0a02d3e",
+    "agent_id": "enrichment",
+    "timestamp": "2026-03-05T02:40:43.132944",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 7,
+      "title": "Junior Data Analyst",
+      "company": "Expedia",
+      "company_id": "co-expedia-001",
+      "sector_id": "sec-travel-tech",
+      "role_classification": "Data Analytics",
+      "seniority": "junior",
+      "quality_score": 0.82,
+      "spam_score": 0.07,
+      "is_spam": false,
+      "enrichment_status": "success"
+    }
+  },
+  {
+    "phase2_skipped": true,
+    "agent_id": "demand_analysis",
+    "correlation_id": "8cd13dce-95da-4036-ac38-edb8e0a02d3e",
+    "timestamp": "2026-03-05T02:40:43.133574+00:00"
+  },
+  {
+    "event_id": "e74b0085-1453-4ae6-af8e-49726f24c63d",
+    "correlation_id": "8cd13dce-95da-4036-ac38-edb8e0a02d3e",
+    "agent_id": "analytics",
+    "timestamp": "2026-03-05T02:40:43.133574",
+    "schema_version": "1.0",
+    "payload": {
+      "run_id": "batch-run-001",
+      "total_postings": 10,
+      "top_skills": [
+        {
+          "skill": "Python",
+          "count": 10,
+          "type": "Technical"
+        },
+        {
+          "skill": "SQL",
+          "count": 7,
+          "type": "Technical"
+        },
+        {
+          "skill": "Docker",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "AWS",
+          "count": 3,
+          "type": "Technical"
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "REST APIs",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Statistics",
+          "count": 3,
+          "type": "Domain"
+        },
+        {
+          "skill": "System Design",
+          "count": 2,
+          "type": "Domain"
+        },
+        {
+          "skill": "Communication",
+          "count": 3,
+          "type": "Soft"
+        },
+        {
+          "skill": "MLflow",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "dbt",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "PostgreSQL",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Tableau",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Linux",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Excel",
+          "count": 2,
+          "type": "Tool"
+        }
+      ],
+      "seniority_distribution": {
+        "junior": 2,
+        "mid": 4,
+        "senior": 3,
+        "lead": 1
+      },
+      "role_distribution": {
+        "Software Engineering": 3,
+        "Data Science": 2,
+        "Machine Learning": 2,
+        "Data Engineering": 1,
+        "Data Analytics": 1,
+        "DevOps": 1
+      },
+      "locations": {
+        "Seattle, WA": 5,
+        "Redmond, WA": 2,
+        "Bellevue, WA": 1,
+        "Kirkland, WA": 1,
+        "Renton, WA": 1
+      },
+      "sectors": {
+        "Technology": 5,
+        "Aerospace": 1,
+        "Real Estate Tech": 1,
+        "Travel Tech": 1,
+        "Telecommunications": 1,
+        "Logistics Tech": 1
+      },
+      "skill_type_distribution": {
+        "Technical": 42,
+        "Tool": 38,
+        "Domain": 22,
+        "Soft": 12
+      },
+      "avg_quality_score": 0.891,
+      "avg_spam_score": 0.042
+    }
+  },
+  {
+    "event_id": "e79b316e-c787-4382-bfdb-edb4ed40446d",
+    "correlation_id": "8cd13dce-95da-4036-ac38-edb8e0a02d3e",
+    "agent_id": "visualization",
+    "timestamp": "2026-03-05T02:40:43.133930",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "c0bc9911-dee7-492c-ad9b-4e329392a7c2",
+    "correlation_id": "8cd13dce-95da-4036-ac38-edb8e0a02d3e",
+    "agent_id": "orchestration",
+    "timestamp": "2026-03-05T02:40:43.133930",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "b1e9a42f-e7d0-4b14-a0d5-8033f7d1f872",
+    "correlation_id": "22daba1f-5b0b-4d0a-9b1b-1981bd201e41",
+    "agent_id": "ingestion",
+    "timestamp": "2026-03-05T02:40:43.133930",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 8,
+      "source": "web_scrape",
+      "url": "https://nvidia.wd5.myworkdayjobs.com/nvidiacareer/jobs/8901234",
+      "timestamp": "2026-02-24T11:30:00Z",
+      "title": "ML Platform Engineer",
+      "company": "NVIDIA",
+      "location": "Redmond, WA",
+      "raw_text": "NVIDIA's ML Systems team is hiring an ML Platform Engineer to build and scale the infrastructure that trains and serves our next-generation AI models. You will develop high-performance Python and C++ tooling for distributed GPU training, optimise CUDA kernels for throughput-critical workloads, and containerise training jobs using Docker for orchestration on Kubernetes clusters. Experiment tracking and model lifecycle management are handled via MLflow \u2014 you will own and extend our internal MLflow deployment. Strong Linux systems knowledge is essential, as is familiarity with NCCL and distributed training frameworks. 4+ years of ML infrastructure or systems engineering experience required.",
+      "external_id": "https://nvidia.wd5.myworkdayjobs.com/nvidiacareer/jobs/8901234",
+      "ingestion_run_id": "bea52805-47b2-411c-9519-9a50fac24e13",
+      "ingestion_timestamp": "2026-03-05T02:40:43.133930+00:00"
+    }
+  },
+  {
+    "event_id": "0feba79d-67d4-45a5-8d7f-82c44b3acd70",
+    "correlation_id": "22daba1f-5b0b-4d0a-9b1b-1981bd201e41",
+    "agent_id": "normalization",
+    "timestamp": "2026-03-05T02:40:43.133930",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 8,
+      "source": "web_scrape",
+      "url": "https://nvidia.wd5.myworkdayjobs.com/nvidiacareer/jobs/8901234",
+      "timestamp": "2026-02-24T11:30:00Z",
+      "title": "ML Platform Engineer",
+      "company": "NVIDIA",
+      "location": "Redmond, WA",
+      "raw_text": "NVIDIA's ML Systems team is hiring an ML Platform Engineer to build and scale the infrastructure that trains and serves our next-generation AI models. You will develop high-performance Python and C++ tooling for distributed GPU training, optimise CUDA kernels for throughput-critical workloads, and containerise training jobs using Docker for orchestration on Kubernetes clusters. Experiment tracking and model lifecycle management are handled via MLflow \u2014 you will own and extend our internal MLflow deployment. Strong Linux systems knowledge is essential, as is familiarity with NCCL and distributed training frameworks. 4+ years of ML infrastructure or systems engineering experience required."
+    }
+  },
+  {
+    "event_id": "7a641b13-dff3-4524-b009-2e08fe6bd246",
+    "correlation_id": "22daba1f-5b0b-4d0a-9b1b-1981bd201e41",
+    "agent_id": "skills_extraction",
+    "timestamp": "2026-03-05T02:40:43.134941",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 8,
+      "title": "ML Platform Engineer",
+      "company": "NVIDIA",
+      "skills": [
+        {
+          "name": "Python",
+          "type": "Technical",
+          "confidence": 0.96
+        },
+        {
+          "name": "C++",
+          "type": "Technical",
+          "confidence": 0.93
+        },
+        {
+          "name": "CUDA",
+          "type": "Technical",
+          "confidence": 0.95
+        },
+        {
+          "name": "Docker",
+          "type": "Tool",
+          "confidence": 0.94
+        },
+        {
+          "name": "Kubernetes",
+          "type": "Tool",
+          "confidence": 0.92
+        },
+        {
+          "name": "MLflow",
+          "type": "Tool",
+          "confidence": 0.91
+        },
+        {
+          "name": "Linux",
+          "type": "Technical",
+          "confidence": 0.9
+        }
+      ],
+      "seniority": "senior",
+      "extraction_status": "success"
+    }
+  },
+  {
+    "event_id": "397a5427-73a5-40cc-b6f5-9aac06c00bbb",
+    "correlation_id": "22daba1f-5b0b-4d0a-9b1b-1981bd201e41",
+    "agent_id": "enrichment",
+    "timestamp": "2026-03-05T02:40:43.134941",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 8,
+      "title": "ML Platform Engineer",
+      "company": "NVIDIA",
+      "company_id": "co-nvidia-001",
+      "sector_id": "sec-technology",
+      "role_classification": "Machine Learning",
+      "seniority": "senior",
+      "quality_score": 0.94,
+      "spam_score": 0.02,
+      "is_spam": false,
+      "enrichment_status": "success"
+    }
+  },
+  {
+    "phase2_skipped": true,
+    "agent_id": "demand_analysis",
+    "correlation_id": "22daba1f-5b0b-4d0a-9b1b-1981bd201e41",
+    "timestamp": "2026-03-05T02:40:43.134941+00:00"
+  },
+  {
+    "event_id": "f6a6886e-b3fb-49a5-930c-3934c9fbb7ba",
+    "correlation_id": "22daba1f-5b0b-4d0a-9b1b-1981bd201e41",
+    "agent_id": "analytics",
+    "timestamp": "2026-03-05T02:40:43.135832",
+    "schema_version": "1.0",
+    "payload": {
+      "run_id": "batch-run-001",
+      "total_postings": 10,
+      "top_skills": [
+        {
+          "skill": "Python",
+          "count": 10,
+          "type": "Technical"
+        },
+        {
+          "skill": "SQL",
+          "count": 7,
+          "type": "Technical"
+        },
+        {
+          "skill": "Docker",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "AWS",
+          "count": 3,
+          "type": "Technical"
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "REST APIs",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Statistics",
+          "count": 3,
+          "type": "Domain"
+        },
+        {
+          "skill": "System Design",
+          "count": 2,
+          "type": "Domain"
+        },
+        {
+          "skill": "Communication",
+          "count": 3,
+          "type": "Soft"
+        },
+        {
+          "skill": "MLflow",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "dbt",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "PostgreSQL",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Tableau",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Linux",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Excel",
+          "count": 2,
+          "type": "Tool"
+        }
+      ],
+      "seniority_distribution": {
+        "junior": 2,
+        "mid": 4,
+        "senior": 3,
+        "lead": 1
+      },
+      "role_distribution": {
+        "Software Engineering": 3,
+        "Data Science": 2,
+        "Machine Learning": 2,
+        "Data Engineering": 1,
+        "Data Analytics": 1,
+        "DevOps": 1
+      },
+      "locations": {
+        "Seattle, WA": 5,
+        "Redmond, WA": 2,
+        "Bellevue, WA": 1,
+        "Kirkland, WA": 1,
+        "Renton, WA": 1
+      },
+      "sectors": {
+        "Technology": 5,
+        "Aerospace": 1,
+        "Real Estate Tech": 1,
+        "Travel Tech": 1,
+        "Telecommunications": 1,
+        "Logistics Tech": 1
+      },
+      "skill_type_distribution": {
+        "Technical": 42,
+        "Tool": 38,
+        "Domain": 22,
+        "Soft": 12
+      },
+      "avg_quality_score": 0.891,
+      "avg_spam_score": 0.042
+    }
+  },
+  {
+    "event_id": "85416a84-a76d-4b2a-a7c1-c9907aaaaedf",
+    "correlation_id": "22daba1f-5b0b-4d0a-9b1b-1981bd201e41",
+    "agent_id": "visualization",
+    "timestamp": "2026-03-05T02:40:43.135832",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "a7f90492-fab3-43c6-ab50-591956ef960b",
+    "correlation_id": "22daba1f-5b0b-4d0a-9b1b-1981bd201e41",
+    "agent_id": "orchestration",
+    "timestamp": "2026-03-05T02:40:43.135832",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "65e1e7e7-39ec-4e24-b4d2-14850b56e82c",
+    "correlation_id": "1d1268a2-78ce-4c24-8aef-e4d108b2e21d",
+    "agent_id": "ingestion",
+    "timestamp": "2026-03-05T02:40:43.135832",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 9,
+      "source": "web_scrape",
+      "url": "https://careers.t-mobile.com/job/bellevue/lead-backend-engineer/9012345",
+      "timestamp": "2026-02-24T12:00:00Z",
+      "title": "Lead Backend Engineer",
+      "company": "T-Mobile",
+      "location": "Bellevue, WA",
+      "raw_text": "T-Mobile's Digital Platform Engineering team is seeking a Lead Backend Engineer to drive the architecture and delivery of the APIs and data services that underpin our customer-facing mobile and web applications. You will write production services in Python and Go, design and optimise PostgreSQL databases at scale, and own the deployment and reliability of services on AWS and Kubernetes. This is a technical leadership role \u2014 you will set engineering direction, conduct design reviews, mentor a team of 4\u20136 engineers, and partner with product management to shape the roadmap. Strong system design skills, a track record of delivering high-availability services, and experience influencing engineering culture are all required. 8+ years of backend engineering experience, including at least 2 in a lead or staff capacity.",
+      "external_id": "https://careers.t-mobile.com/job/bellevue/lead-backend-engineer/9012345",
+      "ingestion_run_id": "b76ef609-814b-4d97-8c53-3be343337103",
+      "ingestion_timestamp": "2026-03-05T02:40:43.135832+00:00"
+    }
+  },
+  {
+    "event_id": "ba1239bf-39f2-4ad1-a7cc-abc2defe9ae7",
+    "correlation_id": "1d1268a2-78ce-4c24-8aef-e4d108b2e21d",
+    "agent_id": "normalization",
+    "timestamp": "2026-03-05T02:40:43.135832",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 9,
+      "source": "web_scrape",
+      "url": "https://careers.t-mobile.com/job/bellevue/lead-backend-engineer/9012345",
+      "timestamp": "2026-02-24T12:00:00Z",
+      "title": "Lead Backend Engineer",
+      "company": "T-Mobile",
+      "location": "Bellevue, WA",
+      "raw_text": "T-Mobile's Digital Platform Engineering team is seeking a Lead Backend Engineer to drive the architecture and delivery of the APIs and data services that underpin our customer-facing mobile and web applications. You will write production services in Python and Go, design and optimise PostgreSQL databases at scale, and own the deployment and reliability of services on AWS and Kubernetes. This is a technical leadership role \u2014 you will set engineering direction, conduct design reviews, mentor a team of 4\u20136 engineers, and partner with product management to shape the roadmap. Strong system design skills, a track record of delivering high-availability services, and experience influencing engineering culture are all required. 8+ years of backend engineering experience, including at least 2 in a lead or staff capacity."
+    }
+  },
+  {
+    "event_id": "3620cff1-aa8c-4a09-bf62-e958ff9b98ed",
+    "correlation_id": "1d1268a2-78ce-4c24-8aef-e4d108b2e21d",
+    "agent_id": "skills_extraction",
+    "timestamp": "2026-03-05T02:40:43.136846",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 9,
+      "title": "Lead Backend Engineer",
+      "company": "T-Mobile",
+      "skills": [
+        {
+          "name": "Python",
+          "type": "Technical",
+          "confidence": 0.95
+        },
+        {
+          "name": "Go",
+          "type": "Technical",
+          "confidence": 0.92
+        },
+        {
+          "name": "PostgreSQL",
+          "type": "Tool",
+          "confidence": 0.93
+        },
+        {
+          "name": "Kubernetes",
+          "type": "Tool",
+          "confidence": 0.94
+        },
+        {
+          "name": "AWS",
+          "type": "Technical",
+          "confidence": 0.93
+        },
+        {
+          "name": "System Design",
+          "type": "Domain",
+          "confidence": 0.89
+        },
+        {
+          "name": "Leadership",
+          "type": "Soft",
+          "confidence": 0.82
+        }
+      ],
+      "seniority": "lead",
+      "extraction_status": "success"
+    }
+  },
+  {
+    "event_id": "c67c1175-8c68-4513-bf59-538d5f402e47",
+    "correlation_id": "1d1268a2-78ce-4c24-8aef-e4d108b2e21d",
+    "agent_id": "enrichment",
+    "timestamp": "2026-03-05T02:40:43.136846",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 9,
+      "title": "Lead Backend Engineer",
+      "company": "T-Mobile",
+      "company_id": "co-tmobile-001",
+      "sector_id": "sec-telecommunications",
+      "role_classification": "Software Engineering",
+      "seniority": "lead",
+      "quality_score": 0.9,
+      "spam_score": 0.03,
+      "is_spam": false,
+      "enrichment_status": "success"
+    }
+  },
+  {
+    "phase2_skipped": true,
+    "agent_id": "demand_analysis",
+    "correlation_id": "1d1268a2-78ce-4c24-8aef-e4d108b2e21d",
+    "timestamp": "2026-03-05T02:40:43.136846+00:00"
+  },
+  {
+    "event_id": "4607ba02-96e6-4948-a64f-6b615768391d",
+    "correlation_id": "1d1268a2-78ce-4c24-8aef-e4d108b2e21d",
+    "agent_id": "analytics",
+    "timestamp": "2026-03-05T02:40:43.137839",
+    "schema_version": "1.0",
+    "payload": {
+      "run_id": "batch-run-001",
+      "total_postings": 10,
+      "top_skills": [
+        {
+          "skill": "Python",
+          "count": 10,
+          "type": "Technical"
+        },
+        {
+          "skill": "SQL",
+          "count": 7,
+          "type": "Technical"
+        },
+        {
+          "skill": "Docker",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "AWS",
+          "count": 3,
+          "type": "Technical"
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "REST APIs",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Statistics",
+          "count": 3,
+          "type": "Domain"
+        },
+        {
+          "skill": "System Design",
+          "count": 2,
+          "type": "Domain"
+        },
+        {
+          "skill": "Communication",
+          "count": 3,
+          "type": "Soft"
+        },
+        {
+          "skill": "MLflow",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "dbt",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "PostgreSQL",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Tableau",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Linux",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Excel",
+          "count": 2,
+          "type": "Tool"
+        }
+      ],
+      "seniority_distribution": {
+        "junior": 2,
+        "mid": 4,
+        "senior": 3,
+        "lead": 1
+      },
+      "role_distribution": {
+        "Software Engineering": 3,
+        "Data Science": 2,
+        "Machine Learning": 2,
+        "Data Engineering": 1,
+        "Data Analytics": 1,
+        "DevOps": 1
+      },
+      "locations": {
+        "Seattle, WA": 5,
+        "Redmond, WA": 2,
+        "Bellevue, WA": 1,
+        "Kirkland, WA": 1,
+        "Renton, WA": 1
+      },
+      "sectors": {
+        "Technology": 5,
+        "Aerospace": 1,
+        "Real Estate Tech": 1,
+        "Travel Tech": 1,
+        "Telecommunications": 1,
+        "Logistics Tech": 1
+      },
+      "skill_type_distribution": {
+        "Technical": 42,
+        "Tool": 38,
+        "Domain": 22,
+        "Soft": 12
+      },
+      "avg_quality_score": 0.891,
+      "avg_spam_score": 0.042
+    }
+  },
+  {
+    "event_id": "eefefc53-76a1-4319-9dda-b144961fc268",
+    "correlation_id": "1d1268a2-78ce-4c24-8aef-e4d108b2e21d",
+    "agent_id": "visualization",
+    "timestamp": "2026-03-05T02:40:43.137839",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "e1275e56-f108-463a-834d-072d7039c45e",
+    "correlation_id": "1d1268a2-78ce-4c24-8aef-e4d108b2e21d",
+    "agent_id": "orchestration",
+    "timestamp": "2026-03-05T02:40:43.137839",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "b06f8019-c1c5-4634-a700-10aba03f6da0",
+    "correlation_id": "71d2f01f-c436-4880-951f-4f8dfe04f63b",
+    "agent_id": "ingestion",
+    "timestamp": "2026-03-05T02:40:43.137839",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 10,
+      "source": "web_scrape",
+      "url": "https://convoy.com/careers/0123456",
+      "timestamp": "2026-02-24T12:30:00Z",
+      "title": "Product Data Scientist",
+      "company": "Convoy",
+      "location": "Seattle, WA",
+      "raw_text": "Convoy's Data Science team is looking for a Product Data Scientist to partner directly with our Product and Operations teams to drive data-informed decisions across our freight marketplace. You will design and analyse A/B tests to evaluate product changes, build statistical models in Python to predict carrier behaviour and shipper demand, and write SQL queries against our dbt-modelled data warehouse. You will be responsible for translating complex analytical findings into clear recommendations for non-technical stakeholders, with presentations delivered regularly to VP-level leadership. Strong applied statistics skills, comfort with experimental design, and excellent written and verbal communication are all required. Experience with Excel for executive reporting is a plus. 2\u20135 years of industry data science or quantitative analytics experience preferred.",
+      "external_id": "https://convoy.com/careers/0123456",
+      "ingestion_run_id": "0ceaf3c0-4aeb-4ba5-bd29-c831ad75912f",
+      "ingestion_timestamp": "2026-03-05T02:40:43.137839+00:00"
+    }
+  },
+  {
+    "event_id": "13ee7c50-7fc5-4600-87d9-30c041718b2a",
+    "correlation_id": "71d2f01f-c436-4880-951f-4f8dfe04f63b",
+    "agent_id": "normalization",
+    "timestamp": "2026-03-05T02:40:43.138849",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 10,
+      "source": "web_scrape",
+      "url": "https://convoy.com/careers/0123456",
+      "timestamp": "2026-02-24T12:30:00Z",
+      "title": "Product Data Scientist",
+      "company": "Convoy",
+      "location": "Seattle, WA",
+      "raw_text": "Convoy's Data Science team is looking for a Product Data Scientist to partner directly with our Product and Operations teams to drive data-informed decisions across our freight marketplace. You will design and analyse A/B tests to evaluate product changes, build statistical models in Python to predict carrier behaviour and shipper demand, and write SQL queries against our dbt-modelled data warehouse. You will be responsible for translating complex analytical findings into clear recommendations for non-technical stakeholders, with presentations delivered regularly to VP-level leadership. Strong applied statistics skills, comfort with experimental design, and excellent written and verbal communication are all required. Experience with Excel for executive reporting is a plus. 2\u20135 years of industry data science or quantitative analytics experience preferred."
+    }
+  },
+  {
+    "event_id": "6a7de138-9598-4ed0-8417-9f5dd520b01f",
+    "correlation_id": "71d2f01f-c436-4880-951f-4f8dfe04f63b",
+    "agent_id": "skills_extraction",
+    "timestamp": "2026-03-05T02:40:43.138849",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 10,
+      "title": "Product Data Scientist",
+      "company": "Convoy",
+      "skills": [
+        {
+          "name": "Python",
+          "type": "Technical",
+          "confidence": 0.96
+        },
+        {
+          "name": "SQL",
+          "type": "Technical",
+          "confidence": 0.95
+        },
+        {
+          "name": "dbt",
+          "type": "Tool",
+          "confidence": 0.91
+        },
+        {
+          "name": "Statistics",
+          "type": "Domain",
+          "confidence": 0.89
+        },
+        {
+          "name": "A/B Testing",
+          "type": "Domain",
+          "confidence": 0.93
+        },
+        {
+          "name": "Communication",
+          "type": "Soft",
+          "confidence": 0.77
+        },
+        {
+          "name": "Excel",
+          "type": "Tool",
+          "confidence": 0.75
+        }
+      ],
+      "seniority": "mid",
+      "extraction_status": "success"
+    }
+  },
+  {
+    "event_id": "54965c68-b691-4794-b955-4982dcf837cd",
+    "correlation_id": "71d2f01f-c436-4880-951f-4f8dfe04f63b",
+    "agent_id": "enrichment",
+    "timestamp": "2026-03-05T02:40:43.138849",
+    "schema_version": "1.0",
+    "payload": {
+      "posting_id": 10,
+      "title": "Product Data Scientist",
+      "company": "Convoy",
+      "company_id": "co-convoy-001",
+      "sector_id": "sec-logistics-tech",
+      "role_classification": "Data Science",
+      "seniority": "mid",
+      "quality_score": 0.87,
+      "spam_score": 0.05,
+      "is_spam": false,
+      "enrichment_status": "success"
+    }
+  },
+  {
+    "phase2_skipped": true,
+    "agent_id": "demand_analysis",
+    "correlation_id": "71d2f01f-c436-4880-951f-4f8dfe04f63b",
+    "timestamp": "2026-03-05T02:40:43.138849+00:00"
+  },
+  {
+    "event_id": "2571fa3b-b0ab-4fe3-b8b3-eb51ba39f0ad",
+    "correlation_id": "71d2f01f-c436-4880-951f-4f8dfe04f63b",
+    "agent_id": "analytics",
+    "timestamp": "2026-03-05T02:40:43.138849",
+    "schema_version": "1.0",
+    "payload": {
+      "run_id": "batch-run-001",
+      "total_postings": 10,
+      "top_skills": [
+        {
+          "skill": "Python",
+          "count": 10,
+          "type": "Technical"
+        },
+        {
+          "skill": "SQL",
+          "count": 7,
+          "type": "Technical"
+        },
+        {
+          "skill": "Docker",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "AWS",
+          "count": 3,
+          "type": "Technical"
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 3,
+          "type": "Tool"
+        },
+        {
+          "skill": "REST APIs",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Statistics",
+          "count": 3,
+          "type": "Domain"
+        },
+        {
+          "skill": "System Design",
+          "count": 2,
+          "type": "Domain"
+        },
+        {
+          "skill": "Communication",
+          "count": 3,
+          "type": "Soft"
+        },
+        {
+          "skill": "MLflow",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "dbt",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "PostgreSQL",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Tableau",
+          "count": 2,
+          "type": "Tool"
+        },
+        {
+          "skill": "Linux",
+          "count": 2,
+          "type": "Technical"
+        },
+        {
+          "skill": "Excel",
+          "count": 2,
+          "type": "Tool"
+        }
+      ],
+      "seniority_distribution": {
+        "junior": 2,
+        "mid": 4,
+        "senior": 3,
+        "lead": 1
+      },
+      "role_distribution": {
+        "Software Engineering": 3,
+        "Data Science": 2,
+        "Machine Learning": 2,
+        "Data Engineering": 1,
+        "Data Analytics": 1,
+        "DevOps": 1
+      },
+      "locations": {
+        "Seattle, WA": 5,
+        "Redmond, WA": 2,
+        "Bellevue, WA": 1,
+        "Kirkland, WA": 1,
+        "Renton, WA": 1
+      },
+      "sectors": {
+        "Technology": 5,
+        "Aerospace": 1,
+        "Real Estate Tech": 1,
+        "Travel Tech": 1,
+        "Telecommunications": 1,
+        "Logistics Tech": 1
+      },
+      "skill_type_distribution": {
+        "Technical": 42,
+        "Tool": 38,
+        "Domain": 22,
+        "Soft": 12
+      },
+      "avg_quality_score": 0.891,
+      "avg_spam_score": 0.042
+    }
+  },
+  {
+    "event_id": "7723f59a-7791-4cb5-bafe-53d336c6a29f",
+    "correlation_id": "71d2f01f-c436-4880-951f-4f8dfe04f63b",
+    "agent_id": "visualization",
+    "timestamp": "2026-03-05T02:40:43.138849",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  },
+  {
+    "event_id": "707a64ef-4b5c-4eaf-9b8d-dae131a365f2",
+    "correlation_id": "71d2f01f-c436-4880-951f-4f8dfe04f63b",
+    "agent_id": "orchestration",
+    "timestamp": "2026-03-05T02:40:43.140352",
+    "schema_version": "1.0",
+    "payload": {
+      "rendered": true,
+      "run_id": "batch-run-001",
+      "posting_id": null
+    }
+  }
+]
