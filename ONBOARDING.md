@@ -304,9 +304,8 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 ## Further Documentation
 
 - [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) — Docker installation (Windows, macOS, Linux)
+- [docs/DOCKER_POSTGRESQL_SETUP.md](docs/DOCKER_POSTGRESQL_SETUP.md) — Detailed PostgreSQL Docker setup
 - [scripts/pg-seed-data/README.md](scripts/pg-seed-data/README.md) — PostgreSQL seed data guide
-- [docs/MIGRATION_MSSQL_TO_POSTGRES.md](docs/MIGRATION_MSSQL_TO_POSTGRES.md) — Admin MSSQL-to-PostgreSQL migration guide (not needed for junior devs)
-- [docs/DOCKER_SQL_SERVER_SETUP.md](docs/DOCKER_SQL_SERVER_SETUP.md) — Detailed SQL Server Docker setup (deprecated)
-- [setup-MSSQL.md](setup-MSSQL.md) — Native MSSQL install (deprecated)
-- [prisma-workflow.md](prisma-workflow.md) — DB schema workflow (Prisma/MSSQL — deprecated)
-- [API-routes.md](API-routes.md) — API reference
+- [docs/setup-MSSQL.md](docs/setup-MSSQL.md) — Native MSSQL install (deprecated — Next.js only)
+- [docs/prisma-workflow.md](docs/prisma-workflow.md) — DB schema workflow (Prisma/MSSQL — deprecated)
+- [docs/API-routes.md](docs/API-routes.md) — API reference

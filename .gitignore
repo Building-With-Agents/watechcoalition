@@ -114,6 +114,12 @@ docs/lesson-framework/
 # Admin-only (keep local copy; do not commit)
 docs/REFRESH_ANONYMIZED_FIXTURES.md
 
+# Deprecated MSSQL docs (kept locally for reference)
+docs/MIGRATION_MSSQL_TO_POSTGRES.md
+docs/MIGRATION_MSSQL_TO_POSTGRES.md.local
+docs/DOCKER_SQL_SERVER_SETUP.md
+docs/DOCKER_SQL_SERVER_SETUP.md.local
+
 
 
 # Large/local database artifacts

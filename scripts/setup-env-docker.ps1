@@ -170,4 +170,4 @@ Write-Host "   Or start individually:" -ForegroundColor Yellow
 Write-Host "   SQL Server: .\scripts\start-sql-server.ps1" -ForegroundColor Yellow
 Write-Host "   PostgreSQL: docker compose --env-file .env.docker up postgres -d" -ForegroundColor Yellow
 Write-Host "2. Import BACPAC (MSSQL): .\scripts\import-bacpac.ps1" -ForegroundColor Yellow
-Write-Host "3. Migrate data to PostgreSQL: see docs/MIGRATION_MSSQL_TO_POSTGRES.md" -ForegroundColor Yellow
+Write-Host "3. Seed PostgreSQL: python scripts/pg-seed-data/seed_pg_database.py" -ForegroundColor Yellow
