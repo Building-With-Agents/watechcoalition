@@ -1,0 +1,89 @@
+{
+  "aborted": false,
+  "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
+  "agents_run": 8,
+  "run_log": [
+    {
+      "agent_id": "ingestion_agent",
+      "event_id": "88852cee-1b4e-4325-a546-25e24e72e3a1",
+      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
+      "timestamp": "2026-03-05T21:52:22.694866",
+      "payload_keys": [
+        "records",
+        "source",
+        "batch_id"
+      ]
+    },
+    {
+      "agent_id": "normalization_agent",
+      "event_id": "9be6a79c-c3b5-4964-8217-1a28107becf0",
+      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
+      "timestamp": "2026-03-05T21:52:22.694866",
+      "payload_keys": [
+        "records",
+        "batch_id"
+      ]
+    },
+    {
+      "agent_id": "skills_extraction_agent",
+      "event_id": "9246f8d3-390a-40b7-b705-428999f1a2b6",
+      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
+      "timestamp": "2026-03-05T21:52:22.695861",
+      "payload_keys": [
+        "records",
+        "batch_id"
+      ]
+    },
+    {
+      "agent_id": "enrichment_agent",
+      "event_id": "063364cd-81d0-44bc-9832-bd2a83749ad9",
+      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
+      "timestamp": "2026-03-05T21:52:22.695861",
+      "payload_keys": [
+        "records",
+        "batch_id"
+      ]
+    },
+    {
+      "agent_id": "analytics_agent",
+      "event_id": "e74163fd-f355-4363-b054-3b9a1906cc4d",
+      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
+      "timestamp": "2026-03-05T21:52:22.696862",
+      "payload_keys": [
+        "analytics",
+        "batch_id"
+      ]
+    },
+    {
+      "agent_id": "visualization_agent",
+      "event_id": "1f5464e7-1f65-4ef6-a050-cfb979dbce55",
+      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
+      "timestamp": "2026-03-05T21:52:22.696862",
+      "payload_keys": [
+        "render_status",
+        "batch_id",
+        "artifacts",
+        "stale"
+      ]
+    },
+    {
+      "agent_id": "orchestration_agent",
+      "event_id": "5ecbba90-6878-4ecb-bd7f-09f73fb4ba29",
+      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
+      "timestamp": "2026-03-05T21:52:22.696862",
+      "payload_keys": [
+        "ack",
+        "inbound_agent_id",
+        "batch_id"
+      ]
+    },
+    {
+      "agent_id": "demand_analysis_agent",
+      "event_id": null,
+      "correlation_id": "f5f2fcff-63d6-4d79-8c86-58de26ae6163",
+      "timestamp": "2026-03-05T21:52:22.696862+00:00",
+      "payload_keys": [],
+      "note": "process() returned None"
+    }
+  ]
+}
