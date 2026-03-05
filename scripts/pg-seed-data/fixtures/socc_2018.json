@@ -1,0 +1,4342 @@
+[
+  {
+    "socc_code": "111011",
+    "title": "Chief Executives",
+    "description": null
+  },
+  {
+    "socc_code": "111021",
+    "title": "General and Operations Managers",
+    "description": null
+  },
+  {
+    "socc_code": "111031",
+    "title": "Legislators",
+    "description": null
+  },
+  {
+    "socc_code": "112011",
+    "title": "Advertising and Promotions Managers",
+    "description": null
+  },
+  {
+    "socc_code": "112021",
+    "title": "Marketing Managers",
+    "description": null
+  },
+  {
+    "socc_code": "112022",
+    "title": "Sales Managers",
+    "description": null
+  },
+  {
+    "socc_code": "112032",
+    "title": "Public Relations Managers",
+    "description": null
+  },
+  {
+    "socc_code": "112033",
+    "title": "Fundraising Managers",
+    "description": null
+  },
+  {
+    "socc_code": "113012",
+    "title": "Administrative Services Managers",
+    "description": null
+  },
+  {
+    "socc_code": "113013",
+    "title": "Facilities Managers",
+    "description": null
+  },
+  {
+    "socc_code": "113021",
+    "title": "Computer and Information Systems Managers",
+    "description": null
+  },
+  {
+    "socc_code": "113031",
+    "title": "Financial Managers",
+    "description": null
+  },
+  {
+    "socc_code": "113051",
+    "title": "Industrial Production Managers",
+    "description": null
+  },
+  {
+    "socc_code": "113061",
+    "title": "Purchasing Managers",
+    "description": null
+  },
+  {
+    "socc_code": "113071",
+    "title": "Transportation, Storage, and Distribution Managers",
+    "description": null
+  },
+  {
+    "socc_code": "113111",
+    "title": "Compensation and Benefits Managers",
+    "description": null
+  },
+  {
+    "socc_code": "113121",
+    "title": "Human Resources Managers",
+    "description": null
+  },
+  {
+    "socc_code": "113131",
+    "title": "Training and Development Managers",
+    "description": null
+  },
+  {
+    "socc_code": "119013",
+    "title": "Farmers, Ranchers, and Other Agricultural Managers",
+    "description": null
+  },
+  {
+    "socc_code": "119021",
+    "title": "Construction Managers",
+    "description": null
+  },
+  {
+    "socc_code": "119031",
+    "title": "Education and Childcare Administrators, Preschool and Daycare",
+    "description": null
+  },
+  {
+    "socc_code": "119032",
+    "title": "Education Administrators, Kindergarten through Secondary",
+    "description": null
+  },
+  {
+    "socc_code": "119033",
+    "title": "Education Administrators, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "119039",
+    "title": "Education Administrators, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "119041",
+    "title": "Architectural and Engineering Managers",
+    "description": null
+  },
+  {
+    "socc_code": "119051",
+    "title": "Food Service Managers",
+    "description": null
+  },
+  {
+    "socc_code": "119071",
+    "title": "Gambling Managers",
+    "description": null
+  },
+  {
+    "socc_code": "119072",
+    "title": "Entertainment and Recreation Managers, Except Gambling",
+    "description": null
+  },
+  {
+    "socc_code": "119081",
+    "title": "Lodging Managers",
+    "description": null
+  },
+  {
+    "socc_code": "119111",
+    "title": "Medical and Health Services Managers",
+    "description": null
+  },
+  {
+    "socc_code": "119121",
+    "title": "Natural Sciences Managers",
+    "description": null
+  },
+  {
+    "socc_code": "119131",
+    "title": "Postmasters and Mail Superintendents",
+    "description": null
+  },
+  {
+    "socc_code": "119141",
+    "title": "Property, Real Estate, and Community Association Managers",
+    "description": null
+  },
+  {
+    "socc_code": "119151",
+    "title": "Social and Community Service Managers",
+    "description": null
+  },
+  {
+    "socc_code": "119161",
+    "title": "Emergency Management Directors",
+    "description": null
+  },
+  {
+    "socc_code": "119171",
+    "title": "Funeral Home Managers",
+    "description": null
+  },
+  {
+    "socc_code": "119179",
+    "title": "Personal Service Managers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "119199",
+    "title": "Managers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "131011",
+    "title": "Agents and Business Managers of Artists, Performers, and Athletes",
+    "description": null
+  },
+  {
+    "socc_code": "131021",
+    "title": "Buyers and Purchasing Agents, Farm Products",
+    "description": null
+  },
+  {
+    "socc_code": "131022",
+    "title": "Wholesale and Retail Buyers, Except Farm Products",
+    "description": null
+  },
+  {
+    "socc_code": "131023",
+    "title": "Purchasing Agents, Except Wholesale, Retail, and Farm Products",
+    "description": null
+  },
+  {
+    "socc_code": "131031",
+    "title": "Claims Adjusters, Examiners, and Investigators",
+    "description": null
+  },
+  {
+    "socc_code": "131032",
+    "title": "Insurance Appraisers, Auto Damage",
+    "description": null
+  },
+  {
+    "socc_code": "131041",
+    "title": "Compliance Officers",
+    "description": null
+  },
+  {
+    "socc_code": "131051",
+    "title": "Cost Estimators",
+    "description": null
+  },
+  {
+    "socc_code": "131071",
+    "title": "Human Resources Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "131074",
+    "title": "Farm Labor Contractors",
+    "description": null
+  },
+  {
+    "socc_code": "131075",
+    "title": "Labor Relations Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "131081",
+    "title": "Logisticians",
+    "description": null
+  },
+  {
+    "socc_code": "131082",
+    "title": "Project Management Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "131111",
+    "title": "Management Analysts",
+    "description": null
+  },
+  {
+    "socc_code": "131121",
+    "title": "Meeting, Convention, and Event Planners",
+    "description": null
+  },
+  {
+    "socc_code": "131131",
+    "title": "Fundraisers",
+    "description": null
+  },
+  {
+    "socc_code": "131141",
+    "title": "Compensation, Benefits, and Job Analysis Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "131151",
+    "title": "Training and Development Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "131161",
+    "title": "Market Research Analysts and Marketing Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "131199",
+    "title": "Business Operations Specialists, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "132011",
+    "title": "Accountants and Auditors",
+    "description": null
+  },
+  {
+    "socc_code": "132022",
+    "title": "Appraisers of Personal and Business Property",
+    "description": null
+  },
+  {
+    "socc_code": "132023",
+    "title": "Appraisers and Assessors of Real Estate",
+    "description": null
+  },
+  {
+    "socc_code": "132031",
+    "title": "Budget Analysts",
+    "description": null
+  },
+  {
+    "socc_code": "132041",
+    "title": "Credit Analysts",
+    "description": null
+  },
+  {
+    "socc_code": "132051",
+    "title": "Financial and Investment Analysts",
+    "description": null
+  },
+  {
+    "socc_code": "132052",
+    "title": "Personal Financial Advisors",
+    "description": null
+  },
+  {
+    "socc_code": "132053",
+    "title": "Insurance Underwriters",
+    "description": null
+  },
+  {
+    "socc_code": "132054",
+    "title": "Financial Risk Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "132061",
+    "title": "Financial Examiners",
+    "description": null
+  },
+  {
+    "socc_code": "132071",
+    "title": "Credit Counselors",
+    "description": null
+  },
+  {
+    "socc_code": "132072",
+    "title": "Loan Officers",
+    "description": null
+  },
+  {
+    "socc_code": "132081",
+    "title": "Tax Examiners and Collectors, and Revenue Agents",
+    "description": null
+  },
+  {
+    "socc_code": "132082",
+    "title": "Tax Preparers",
+    "description": null
+  },
+  {
+    "socc_code": "132099",
+    "title": "Financial Specialists, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "151211",
+    "title": "Computer Systems Analysts",
+    "description": null
+  },
+  {
+    "socc_code": "151212",
+    "title": "Information Security Analysts",
+    "description": null
+  },
+  {
+    "socc_code": "151221",
+    "title": "Computer and Information Research Scientists",
+    "description": null
+  },
+  {
+    "socc_code": "151231",
+    "title": "Computer Network Support Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "151232",
+    "title": "Computer User Support Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "151241",
+    "title": "Computer Network Architects",
+    "description": null
+  },
+  {
+    "socc_code": "151242",
+    "title": "Database Administrators",
+    "description": null
+  },
+  {
+    "socc_code": "151243",
+    "title": "Database Architects",
+    "description": null
+  },
+  {
+    "socc_code": "151244",
+    "title": "Network and Computer Systems Administrators",
+    "description": null
+  },
+  {
+    "socc_code": "151251",
+    "title": "Computer Programmers",
+    "description": null
+  },
+  {
+    "socc_code": "151252",
+    "title": "Software Developers",
+    "description": null
+  },
+  {
+    "socc_code": "151253",
+    "title": "Software Quality Assurance Analysts and Testers",
+    "description": null
+  },
+  {
+    "socc_code": "151254",
+    "title": "Web Developers",
+    "description": null
+  },
+  {
+    "socc_code": "151255",
+    "title": "Web and Digital Interface Designers",
+    "description": null
+  },
+  {
+    "socc_code": "151299",
+    "title": "Computer Occupations, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "152011",
+    "title": "Actuaries",
+    "description": null
+  },
+  {
+    "socc_code": "152021",
+    "title": "Mathematicians",
+    "description": null
+  },
+  {
+    "socc_code": "152031",
+    "title": "Operations Research Analysts",
+    "description": null
+  },
+  {
+    "socc_code": "152041",
+    "title": "Statisticians",
+    "description": null
+  },
+  {
+    "socc_code": "152051",
+    "title": "Data Scientists",
+    "description": null
+  },
+  {
+    "socc_code": "152099",
+    "title": "Mathematical Science Occupations, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "171011",
+    "title": "Architects, Except Landscape and Naval",
+    "description": null
+  },
+  {
+    "socc_code": "171012",
+    "title": "Landscape Architects",
+    "description": null
+  },
+  {
+    "socc_code": "171021",
+    "title": "Cartographers and Photogrammetrists",
+    "description": null
+  },
+  {
+    "socc_code": "171022",
+    "title": "Surveyors",
+    "description": null
+  },
+  {
+    "socc_code": "172011",
+    "title": "Aerospace Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172021",
+    "title": "Agricultural Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172031",
+    "title": "Bioengineers and Biomedical Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172041",
+    "title": "Chemical Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172051",
+    "title": "Civil Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172061",
+    "title": "Computer Hardware Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172071",
+    "title": "Electrical Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172072",
+    "title": "Electronics Engineers, Except Computer",
+    "description": null
+  },
+  {
+    "socc_code": "172081",
+    "title": "Environmental Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172111",
+    "title": "Health and Safety Engineers, Except Mining Safety Engineers and Inspectors",
+    "description": null
+  },
+  {
+    "socc_code": "172112",
+    "title": "Industrial Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172121",
+    "title": "Marine Engineers and Naval Architects",
+    "description": null
+  },
+  {
+    "socc_code": "172131",
+    "title": "Materials Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172141",
+    "title": "Mechanical Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172151",
+    "title": "Mining and Geological Engineers, Including Mining Safety Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172161",
+    "title": "Nuclear Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172171",
+    "title": "Petroleum Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "172199",
+    "title": "Engineers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "173011",
+    "title": "Architectural and Civil Drafters",
+    "description": null
+  },
+  {
+    "socc_code": "173012",
+    "title": "Electrical and Electronics Drafters",
+    "description": null
+  },
+  {
+    "socc_code": "173013",
+    "title": "Mechanical Drafters",
+    "description": null
+  },
+  {
+    "socc_code": "173019",
+    "title": "Drafters, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "173021",
+    "title": "Aerospace Engineering and Operations Technologists and Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "173022",
+    "title": "Civil Engineering Technologists and Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "173023",
+    "title": "Electrical and Electronic Engineering Technologists and Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "173024",
+    "title": "Electro-Mechanical and Mechatronics Technologists and Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "173025",
+    "title": "Environmental Engineering Technologists and Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "173026",
+    "title": "Industrial Engineering Technologists and Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "173027",
+    "title": "Mechanical Engineering Technologists and Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "173028",
+    "title": "Calibration Technologists and Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "173029",
+    "title": "Engineering Technologists and Technicians, Except Drafters, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "173031",
+    "title": "Surveying and Mapping Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "191011",
+    "title": "Animal Scientists",
+    "description": null
+  },
+  {
+    "socc_code": "191012",
+    "title": "Food Scientists and Technologists",
+    "description": null
+  },
+  {
+    "socc_code": "191013",
+    "title": "Soil and Plant Scientists",
+    "description": null
+  },
+  {
+    "socc_code": "191021",
+    "title": "Biochemists and Biophysicists",
+    "description": null
+  },
+  {
+    "socc_code": "191022",
+    "title": "Microbiologists",
+    "description": null
+  },
+  {
+    "socc_code": "191023",
+    "title": "Zoologists and Wildlife Biologists",
+    "description": null
+  },
+  {
+    "socc_code": "191029",
+    "title": "Biological Scientists, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "191031",
+    "title": "Conservation Scientists",
+    "description": null
+  },
+  {
+    "socc_code": "191032",
+    "title": "Foresters",
+    "description": null
+  },
+  {
+    "socc_code": "191041",
+    "title": "Epidemiologists",
+    "description": null
+  },
+  {
+    "socc_code": "191042",
+    "title": "Medical Scientists, Except Epidemiologists",
+    "description": null
+  },
+  {
+    "socc_code": "191099",
+    "title": "Life Scientists, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "192011",
+    "title": "Astronomers",
+    "description": null
+  },
+  {
+    "socc_code": "192012",
+    "title": "Physicists",
+    "description": null
+  },
+  {
+    "socc_code": "192021",
+    "title": "Atmospheric and Space Scientists",
+    "description": null
+  },
+  {
+    "socc_code": "192031",
+    "title": "Chemists",
+    "description": null
+  },
+  {
+    "socc_code": "192032",
+    "title": "Materials Scientists",
+    "description": null
+  },
+  {
+    "socc_code": "192041",
+    "title": "Environmental Scientists and Specialists, Including Health",
+    "description": null
+  },
+  {
+    "socc_code": "192042",
+    "title": "Geoscientists, Except Hydrologists and Geographers",
+    "description": null
+  },
+  {
+    "socc_code": "192043",
+    "title": "Hydrologists",
+    "description": null
+  },
+  {
+    "socc_code": "192099",
+    "title": "Physical Scientists, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "193011",
+    "title": "Economists",
+    "description": null
+  },
+  {
+    "socc_code": "193022",
+    "title": "Survey Researchers",
+    "description": null
+  },
+  {
+    "socc_code": "193032",
+    "title": "Industrial-Organizational Psychologists",
+    "description": null
+  },
+  {
+    "socc_code": "193033",
+    "title": "Clinical and Counseling Psychologists",
+    "description": null
+  },
+  {
+    "socc_code": "193034",
+    "title": "School Psychologists",
+    "description": null
+  },
+  {
+    "socc_code": "193039",
+    "title": "Psychologists, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "193041",
+    "title": "Sociologists",
+    "description": null
+  },
+  {
+    "socc_code": "193051",
+    "title": "Urban and Regional Planners",
+    "description": null
+  },
+  {
+    "socc_code": "193091",
+    "title": "Anthropologists and Archeologists",
+    "description": null
+  },
+  {
+    "socc_code": "193092",
+    "title": "Geographers",
+    "description": null
+  },
+  {
+    "socc_code": "193093",
+    "title": "Historians",
+    "description": null
+  },
+  {
+    "socc_code": "193094",
+    "title": "Political Scientists",
+    "description": null
+  },
+  {
+    "socc_code": "193099",
+    "title": "Social Scientists and Related Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "194012",
+    "title": "Agricultural Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "194013",
+    "title": "Food Science Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "194021",
+    "title": "Biological Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "194031",
+    "title": "Chemical Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "194042",
+    "title": "Environmental Science and Protection Technicians, Including Health",
+    "description": null
+  },
+  {
+    "socc_code": "194043",
+    "title": "Geological Technicians, Except Hydrologic Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "194044",
+    "title": "Hydrologic Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "194051",
+    "title": "Nuclear Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "194061",
+    "title": "Social Science Research Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "194071",
+    "title": "Forest and Conservation Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "194092",
+    "title": "Forensic Science Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "194099",
+    "title": "Life, Physical, and Social Science Technicians, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "195011",
+    "title": "Occupational Health and Safety Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "195012",
+    "title": "Occupational Health and Safety Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "211011",
+    "title": "Substance Abuse and Behavioral Disorder Counselors",
+    "description": null
+  },
+  {
+    "socc_code": "211012",
+    "title": "Educational, Guidance, and Career Counselors and Advisors",
+    "description": null
+  },
+  {
+    "socc_code": "211013",
+    "title": "Marriage and Family Therapists",
+    "description": null
+  },
+  {
+    "socc_code": "211014",
+    "title": "Mental Health Counselors",
+    "description": null
+  },
+  {
+    "socc_code": "211015",
+    "title": "Rehabilitation Counselors",
+    "description": null
+  },
+  {
+    "socc_code": "211019",
+    "title": "Counselors, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "211021",
+    "title": "Child, Family, and School Social Workers",
+    "description": null
+  },
+  {
+    "socc_code": "211022",
+    "title": "Healthcare Social Workers",
+    "description": null
+  },
+  {
+    "socc_code": "211023",
+    "title": "Mental Health and Substance Abuse Social Workers",
+    "description": null
+  },
+  {
+    "socc_code": "211029",
+    "title": "Social Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "211091",
+    "title": "Health Education Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "211092",
+    "title": "Probation Officers and Correctional Treatment Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "211093",
+    "title": "Social and Human Service Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "211094",
+    "title": "Community Health Workers",
+    "description": null
+  },
+  {
+    "socc_code": "211099",
+    "title": "Community and Social Service Specialists, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "212011",
+    "title": "Clergy",
+    "description": null
+  },
+  {
+    "socc_code": "212021",
+    "title": "Directors, Religious Activities and Education",
+    "description": null
+  },
+  {
+    "socc_code": "212099",
+    "title": "Religious Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "231011",
+    "title": "Lawyers",
+    "description": null
+  },
+  {
+    "socc_code": "231012",
+    "title": "Judicial Law Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "231021",
+    "title": "Administrative Law Judges, Adjudicators, and Hearing Officers",
+    "description": null
+  },
+  {
+    "socc_code": "231022",
+    "title": "Arbitrators, Mediators, and Conciliators",
+    "description": null
+  },
+  {
+    "socc_code": "231023",
+    "title": "Judges, Magistrate Judges, and Magistrates",
+    "description": null
+  },
+  {
+    "socc_code": "232011",
+    "title": "Paralegals and Legal Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "232093",
+    "title": "Title Examiners, Abstractors, and Searchers",
+    "description": null
+  },
+  {
+    "socc_code": "232099",
+    "title": "Legal Support Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "251011",
+    "title": "Business Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251021",
+    "title": "Computer Science Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251022",
+    "title": "Mathematical Science Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251031",
+    "title": "Architecture Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251032",
+    "title": "Engineering Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251041",
+    "title": "Agricultural Sciences Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251042",
+    "title": "Biological Science Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251043",
+    "title": "Forestry and Conservation Science Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251051",
+    "title": "Atmospheric, Earth, Marine, and Space Sciences Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251052",
+    "title": "Chemistry Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251053",
+    "title": "Environmental Science Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251054",
+    "title": "Physics Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251061",
+    "title": "Anthropology and Archeology Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251062",
+    "title": "Area, Ethnic, and Cultural Studies Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251063",
+    "title": "Economics Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251064",
+    "title": "Geography Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251065",
+    "title": "Political Science Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251066",
+    "title": "Psychology Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251067",
+    "title": "Sociology Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251069",
+    "title": "Social Sciences Teachers, Postsecondary, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "251071",
+    "title": "Health Specialties Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251072",
+    "title": "Nursing Instructors and Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251081",
+    "title": "Education Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251082",
+    "title": "Library Science Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251111",
+    "title": "Criminal Justice and Law Enforcement Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251112",
+    "title": "Law Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251113",
+    "title": "Social Work Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251121",
+    "title": "Art, Drama, and Music Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251122",
+    "title": "Communications Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251123",
+    "title": "English Language and Literature Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251124",
+    "title": "Foreign Language and Literature Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251125",
+    "title": "History Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251126",
+    "title": "Philosophy and Religion Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251192",
+    "title": "Family and Consumer Sciences Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251193",
+    "title": "Recreation and Fitness Studies Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251194",
+    "title": "Career/Technical Education Teachers, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "251199",
+    "title": "Postsecondary Teachers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "252011",
+    "title": "Preschool Teachers, Except Special Education",
+    "description": null
+  },
+  {
+    "socc_code": "252012",
+    "title": "Kindergarten Teachers, Except Special Education",
+    "description": null
+  },
+  {
+    "socc_code": "252021",
+    "title": "Elementary School Teachers, Except Special Education",
+    "description": null
+  },
+  {
+    "socc_code": "252022",
+    "title": "Middle School Teachers, Except Special and Career/Technical Education",
+    "description": null
+  },
+  {
+    "socc_code": "252023",
+    "title": "Career/Technical Education Teachers, Middle School",
+    "description": null
+  },
+  {
+    "socc_code": "252031",
+    "title": "Secondary School Teachers, Except Special and Career/Technical Education",
+    "description": null
+  },
+  {
+    "socc_code": "252032",
+    "title": "Career/Technical Education Teachers, Secondary School",
+    "description": null
+  },
+  {
+    "socc_code": "252051",
+    "title": "Special Education Teachers, Preschool",
+    "description": null
+  },
+  {
+    "socc_code": "252055",
+    "title": "Special Education Teachers, Kindergarten",
+    "description": null
+  },
+  {
+    "socc_code": "252056",
+    "title": "Special Education Teachers, Elementary School",
+    "description": null
+  },
+  {
+    "socc_code": "252057",
+    "title": "Special Education Teachers, Middle School",
+    "description": null
+  },
+  {
+    "socc_code": "252058",
+    "title": "Special Education Teachers, Secondary School",
+    "description": null
+  },
+  {
+    "socc_code": "252059",
+    "title": "Special Education Teachers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "253011",
+    "title": "Adult Basic Education, Adult Secondary Education, and English as a Second Language Instructors",
+    "description": null
+  },
+  {
+    "socc_code": "253021",
+    "title": "Self-Enrichment Teachers",
+    "description": null
+  },
+  {
+    "socc_code": "253031",
+    "title": "Substitute Teachers, Short-Term",
+    "description": null
+  },
+  {
+    "socc_code": "253041",
+    "title": "Tutors",
+    "description": null
+  },
+  {
+    "socc_code": "253099",
+    "title": "Teachers and Instructors, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "254011",
+    "title": "Archivists",
+    "description": null
+  },
+  {
+    "socc_code": "254012",
+    "title": "Curators",
+    "description": null
+  },
+  {
+    "socc_code": "254013",
+    "title": "Museum Technicians and Conservators",
+    "description": null
+  },
+  {
+    "socc_code": "254022",
+    "title": "Librarians and Media Collections Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "254031",
+    "title": "Library Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "259021",
+    "title": "Farm and Home Management Educators",
+    "description": null
+  },
+  {
+    "socc_code": "259031",
+    "title": "Instructional Coordinators",
+    "description": null
+  },
+  {
+    "socc_code": "259042",
+    "title": "Teaching Assistants, Preschool, Elementary, Middle, and Secondary School, Except Special Education",
+    "description": null
+  },
+  {
+    "socc_code": "259043",
+    "title": "Teaching Assistants, Special Education",
+    "description": null
+  },
+  {
+    "socc_code": "259044",
+    "title": "Teaching Assistants, Postsecondary",
+    "description": null
+  },
+  {
+    "socc_code": "259049",
+    "title": "Teaching Assistants, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "259099",
+    "title": "Educational Instruction and Library Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "271011",
+    "title": "Art Directors",
+    "description": null
+  },
+  {
+    "socc_code": "271012",
+    "title": "Craft Artists",
+    "description": null
+  },
+  {
+    "socc_code": "271013",
+    "title": "Fine Artists, Including Painters, Sculptors, and Illustrators",
+    "description": null
+  },
+  {
+    "socc_code": "271014",
+    "title": "Special Effects Artists and Animators",
+    "description": null
+  },
+  {
+    "socc_code": "271019",
+    "title": "Artists and Related Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "271021",
+    "title": "Commercial and Industrial Designers",
+    "description": null
+  },
+  {
+    "socc_code": "271022",
+    "title": "Fashion Designers",
+    "description": null
+  },
+  {
+    "socc_code": "271023",
+    "title": "Floral Designers",
+    "description": null
+  },
+  {
+    "socc_code": "271024",
+    "title": "Graphic Designers",
+    "description": null
+  },
+  {
+    "socc_code": "271025",
+    "title": "Interior Designers",
+    "description": null
+  },
+  {
+    "socc_code": "271026",
+    "title": "Merchandise Displayers and Window Trimmers",
+    "description": null
+  },
+  {
+    "socc_code": "271027",
+    "title": "Set and Exhibit Designers",
+    "description": null
+  },
+  {
+    "socc_code": "271029",
+    "title": "Designers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "272011",
+    "title": "Actors",
+    "description": null
+  },
+  {
+    "socc_code": "272012",
+    "title": "Producers and Directors",
+    "description": null
+  },
+  {
+    "socc_code": "272021",
+    "title": "Athletes and Sports Competitors",
+    "description": null
+  },
+  {
+    "socc_code": "272022",
+    "title": "Coaches and Scouts",
+    "description": null
+  },
+  {
+    "socc_code": "272023",
+    "title": "Umpires, Referees, and Other Sports Officials",
+    "description": null
+  },
+  {
+    "socc_code": "272031",
+    "title": "Dancers",
+    "description": null
+  },
+  {
+    "socc_code": "272032",
+    "title": "Choreographers",
+    "description": null
+  },
+  {
+    "socc_code": "272041",
+    "title": "Music Directors and Composers",
+    "description": null
+  },
+  {
+    "socc_code": "272042",
+    "title": "Musicians and Singers",
+    "description": null
+  },
+  {
+    "socc_code": "272091",
+    "title": "Disc Jockeys, Except Radio",
+    "description": null
+  },
+  {
+    "socc_code": "272099",
+    "title": "Entertainers and Performers, Sports and Related Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "273011",
+    "title": "Broadcast Announcers and Radio Disc Jockeys",
+    "description": null
+  },
+  {
+    "socc_code": "273023",
+    "title": "News Analysts, Reporters, and Journalists",
+    "description": null
+  },
+  {
+    "socc_code": "273031",
+    "title": "Public Relations Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "273041",
+    "title": "Editors",
+    "description": null
+  },
+  {
+    "socc_code": "273042",
+    "title": "Technical Writers",
+    "description": null
+  },
+  {
+    "socc_code": "273043",
+    "title": "Writers and Authors",
+    "description": null
+  },
+  {
+    "socc_code": "273091",
+    "title": "Interpreters and Translators",
+    "description": null
+  },
+  {
+    "socc_code": "273092",
+    "title": "Court Reporters and Simultaneous Captioners",
+    "description": null
+  },
+  {
+    "socc_code": "273099",
+    "title": "Media and Communication Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "274011",
+    "title": "Audio and Video Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "274012",
+    "title": "Broadcast Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "274014",
+    "title": "Sound Engineering Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "274015",
+    "title": "Lighting Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "274021",
+    "title": "Photographers",
+    "description": null
+  },
+  {
+    "socc_code": "274031",
+    "title": "Camera Operators, Television, Video, and Film",
+    "description": null
+  },
+  {
+    "socc_code": "274032",
+    "title": "Film and Video Editors",
+    "description": null
+  },
+  {
+    "socc_code": "274099",
+    "title": "Media and Communication Equipment Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "291011",
+    "title": "Chiropractors",
+    "description": null
+  },
+  {
+    "socc_code": "291021",
+    "title": "Dentists, General",
+    "description": null
+  },
+  {
+    "socc_code": "291022",
+    "title": "Oral and Maxillofacial Surgeons",
+    "description": null
+  },
+  {
+    "socc_code": "291023",
+    "title": "Orthodontists",
+    "description": null
+  },
+  {
+    "socc_code": "291024",
+    "title": "Prosthodontists",
+    "description": null
+  },
+  {
+    "socc_code": "291029",
+    "title": "Dentists, All Other Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "291031",
+    "title": "Dietitians and Nutritionists",
+    "description": null
+  },
+  {
+    "socc_code": "291041",
+    "title": "Optometrists",
+    "description": null
+  },
+  {
+    "socc_code": "291051",
+    "title": "Pharmacists",
+    "description": null
+  },
+  {
+    "socc_code": "291071",
+    "title": "Physician Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "291081",
+    "title": "Podiatrists",
+    "description": null
+  },
+  {
+    "socc_code": "291122",
+    "title": "Occupational Therapists",
+    "description": null
+  },
+  {
+    "socc_code": "291123",
+    "title": "Physical Therapists",
+    "description": null
+  },
+  {
+    "socc_code": "291124",
+    "title": "Radiation Therapists",
+    "description": null
+  },
+  {
+    "socc_code": "291125",
+    "title": "Recreational Therapists",
+    "description": null
+  },
+  {
+    "socc_code": "291126",
+    "title": "Respiratory Therapists",
+    "description": null
+  },
+  {
+    "socc_code": "291127",
+    "title": "Speech-Language Pathologists",
+    "description": null
+  },
+  {
+    "socc_code": "291128",
+    "title": "Exercise Physiologists",
+    "description": null
+  },
+  {
+    "socc_code": "291129",
+    "title": "Therapists, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "291131",
+    "title": "Veterinarians",
+    "description": null
+  },
+  {
+    "socc_code": "291141",
+    "title": "Registered Nurses",
+    "description": null
+  },
+  {
+    "socc_code": "291151",
+    "title": "Nurse Anesthetists",
+    "description": null
+  },
+  {
+    "socc_code": "291161",
+    "title": "Nurse Midwives",
+    "description": null
+  },
+  {
+    "socc_code": "291171",
+    "title": "Nurse Practitioners",
+    "description": null
+  },
+  {
+    "socc_code": "291181",
+    "title": "Audiologists",
+    "description": null
+  },
+  {
+    "socc_code": "291211",
+    "title": "Anesthesiologists",
+    "description": null
+  },
+  {
+    "socc_code": "291212",
+    "title": "Cardiologists",
+    "description": null
+  },
+  {
+    "socc_code": "291213",
+    "title": "Dermatologists",
+    "description": null
+  },
+  {
+    "socc_code": "291214",
+    "title": "Emergency Medicine Physicians",
+    "description": null
+  },
+  {
+    "socc_code": "291215",
+    "title": "Family Medicine Physicians",
+    "description": null
+  },
+  {
+    "socc_code": "291216",
+    "title": "General Internal Medicine Physicians",
+    "description": null
+  },
+  {
+    "socc_code": "291217",
+    "title": "Neurologists",
+    "description": null
+  },
+  {
+    "socc_code": "291218",
+    "title": "Obstetricians and Gynecologists",
+    "description": null
+  },
+  {
+    "socc_code": "291221",
+    "title": "Pediatricians, General",
+    "description": null
+  },
+  {
+    "socc_code": "291222",
+    "title": "Physicians, Pathologists",
+    "description": null
+  },
+  {
+    "socc_code": "291223",
+    "title": "Psychiatrists",
+    "description": null
+  },
+  {
+    "socc_code": "291224",
+    "title": "Radiologists",
+    "description": null
+  },
+  {
+    "socc_code": "291229",
+    "title": "Physicians, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "291241",
+    "title": "Ophthalmologists, Except Pediatric",
+    "description": null
+  },
+  {
+    "socc_code": "291242",
+    "title": "Orthopedic Surgeons, Except Pediatric",
+    "description": null
+  },
+  {
+    "socc_code": "291243",
+    "title": "Pediatric Surgeons",
+    "description": null
+  },
+  {
+    "socc_code": "291249",
+    "title": "Surgeons, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "291291",
+    "title": "Acupuncturists",
+    "description": null
+  },
+  {
+    "socc_code": "291292",
+    "title": "Dental Hygienists",
+    "description": null
+  },
+  {
+    "socc_code": "291299",
+    "title": "Healthcare Diagnosing or Treating Practitioners, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "292011",
+    "title": "Medical and Clinical Laboratory Technologists",
+    "description": null
+  },
+  {
+    "socc_code": "292012",
+    "title": "Medical and Clinical Laboratory Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "292031",
+    "title": "Cardiovascular Technologists and Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "292032",
+    "title": "Diagnostic Medical Sonographers",
+    "description": null
+  },
+  {
+    "socc_code": "292033",
+    "title": "Nuclear Medicine Technologists",
+    "description": null
+  },
+  {
+    "socc_code": "292034",
+    "title": "Radiologic Technologists and Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "292035",
+    "title": "Magnetic Resonance Imaging Technologists",
+    "description": null
+  },
+  {
+    "socc_code": "292036",
+    "title": "Medical Dosimetrists",
+    "description": null
+  },
+  {
+    "socc_code": "292042",
+    "title": "Emergency Medical Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "292043",
+    "title": "Paramedics",
+    "description": null
+  },
+  {
+    "socc_code": "292051",
+    "title": "Dietetic Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "292052",
+    "title": "Pharmacy Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "292053",
+    "title": "Psychiatric Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "292055",
+    "title": "Surgical Technologists",
+    "description": null
+  },
+  {
+    "socc_code": "292056",
+    "title": "Veterinary Technologists and Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "292057",
+    "title": "Ophthalmic Medical Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "292061",
+    "title": "Licensed Practical and Licensed Vocational Nurses",
+    "description": null
+  },
+  {
+    "socc_code": "292072",
+    "title": "Medical Records Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "292081",
+    "title": "Opticians, Dispensing",
+    "description": null
+  },
+  {
+    "socc_code": "292091",
+    "title": "Orthotists and Prosthetists",
+    "description": null
+  },
+  {
+    "socc_code": "292092",
+    "title": "Hearing Aid Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "292099",
+    "title": "Health Technologists and Technicians, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "299021",
+    "title": "Health Information Technologists and Medical Registrars",
+    "description": null
+  },
+  {
+    "socc_code": "299091",
+    "title": "Athletic Trainers",
+    "description": null
+  },
+  {
+    "socc_code": "299092",
+    "title": "Genetic Counselors",
+    "description": null
+  },
+  {
+    "socc_code": "299093",
+    "title": "Surgical Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "299099",
+    "title": "Healthcare Practitioners and Technical Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "311121",
+    "title": "Home Health Aides",
+    "description": null
+  },
+  {
+    "socc_code": "311122",
+    "title": "Personal Care Aides",
+    "description": null
+  },
+  {
+    "socc_code": "311131",
+    "title": "Nursing Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "311132",
+    "title": "Orderlies",
+    "description": null
+  },
+  {
+    "socc_code": "311133",
+    "title": "Psychiatric Aides",
+    "description": null
+  },
+  {
+    "socc_code": "312011",
+    "title": "Occupational Therapy Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "312012",
+    "title": "Occupational Therapy Aides",
+    "description": null
+  },
+  {
+    "socc_code": "312021",
+    "title": "Physical Therapist Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "312022",
+    "title": "Physical Therapist Aides",
+    "description": null
+  },
+  {
+    "socc_code": "319011",
+    "title": "Massage Therapists",
+    "description": null
+  },
+  {
+    "socc_code": "319091",
+    "title": "Dental Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "319092",
+    "title": "Medical Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "319093",
+    "title": "Medical Equipment Preparers",
+    "description": null
+  },
+  {
+    "socc_code": "319094",
+    "title": "Medical Transcriptionists",
+    "description": null
+  },
+  {
+    "socc_code": "319095",
+    "title": "Pharmacy Aides",
+    "description": null
+  },
+  {
+    "socc_code": "319096",
+    "title": "Veterinary Assistants and Laboratory Animal Caretakers",
+    "description": null
+  },
+  {
+    "socc_code": "319097",
+    "title": "Phlebotomists",
+    "description": null
+  },
+  {
+    "socc_code": "319099",
+    "title": "Healthcare Support Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "331011",
+    "title": "First-Line Supervisors of Correctional Officers",
+    "description": null
+  },
+  {
+    "socc_code": "331012",
+    "title": "First-Line Supervisors of Police and Detectives",
+    "description": null
+  },
+  {
+    "socc_code": "331021",
+    "title": "First-Line Supervisors of Firefighting and Prevention Workers",
+    "description": null
+  },
+  {
+    "socc_code": "331091",
+    "title": "First-Line Supervisors of Security Workers",
+    "description": null
+  },
+  {
+    "socc_code": "331099",
+    "title": "First-Line Supervisors of Protective Service Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "332011",
+    "title": "Firefighters",
+    "description": null
+  },
+  {
+    "socc_code": "332021",
+    "title": "Fire Inspectors and Investigators",
+    "description": null
+  },
+  {
+    "socc_code": "332022",
+    "title": "Forest Fire Inspectors and Prevention Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "333011",
+    "title": "Bailiffs",
+    "description": null
+  },
+  {
+    "socc_code": "333012",
+    "title": "Correctional Officers and Jailers",
+    "description": null
+  },
+  {
+    "socc_code": "333021",
+    "title": "Detectives and Criminal Investigators",
+    "description": null
+  },
+  {
+    "socc_code": "333031",
+    "title": "Fish and Game Wardens",
+    "description": null
+  },
+  {
+    "socc_code": "333041",
+    "title": "Parking Enforcement Workers",
+    "description": null
+  },
+  {
+    "socc_code": "333051",
+    "title": "Police and Sheriff’s Patrol Officers",
+    "description": null
+  },
+  {
+    "socc_code": "333052",
+    "title": "Transit and Railroad Police",
+    "description": null
+  },
+  {
+    "socc_code": "339011",
+    "title": "Animal Control Workers",
+    "description": null
+  },
+  {
+    "socc_code": "339021",
+    "title": "Private Detectives and Investigators",
+    "description": null
+  },
+  {
+    "socc_code": "339031",
+    "title": "Gambling Surveillance Officers and Gambling Investigators",
+    "description": null
+  },
+  {
+    "socc_code": "339032",
+    "title": "Security Guards",
+    "description": null
+  },
+  {
+    "socc_code": "339091",
+    "title": "Crossing Guards and Flaggers",
+    "description": null
+  },
+  {
+    "socc_code": "339092",
+    "title": "Lifeguards, Ski Patrol, and Other Recreational Protective Service Workers",
+    "description": null
+  },
+  {
+    "socc_code": "339093",
+    "title": "Transportation Security Screeners",
+    "description": null
+  },
+  {
+    "socc_code": "339094",
+    "title": "School Bus Monitors",
+    "description": null
+  },
+  {
+    "socc_code": "339099",
+    "title": "Protective Service Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "351011",
+    "title": "Chefs and Head Cooks",
+    "description": null
+  },
+  {
+    "socc_code": "351012",
+    "title": "First-Line Supervisors of Food Preparation and Serving Workers",
+    "description": null
+  },
+  {
+    "socc_code": "352011",
+    "title": "Cooks, Fast Food",
+    "description": null
+  },
+  {
+    "socc_code": "352012",
+    "title": "Cooks, Institution and Cafeteria",
+    "description": null
+  },
+  {
+    "socc_code": "352013",
+    "title": "Cooks, Private Household",
+    "description": null
+  },
+  {
+    "socc_code": "352014",
+    "title": "Cooks, Restaurant",
+    "description": null
+  },
+  {
+    "socc_code": "352015",
+    "title": "Cooks, Short Order",
+    "description": null
+  },
+  {
+    "socc_code": "352019",
+    "title": "Cooks, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "352021",
+    "title": "Food Preparation Workers",
+    "description": null
+  },
+  {
+    "socc_code": "353011",
+    "title": "Bartenders",
+    "description": null
+  },
+  {
+    "socc_code": "353023",
+    "title": "Fast Food and Counter Workers",
+    "description": null
+  },
+  {
+    "socc_code": "353031",
+    "title": "Waiters and Waitresses",
+    "description": null
+  },
+  {
+    "socc_code": "353041",
+    "title": "Food Servers, Nonrestaurant",
+    "description": null
+  },
+  {
+    "socc_code": "359011",
+    "title": "Dining Room and Cafeteria Attendants and Bartender Helpers",
+    "description": null
+  },
+  {
+    "socc_code": "359021",
+    "title": "Dishwashers",
+    "description": null
+  },
+  {
+    "socc_code": "359031",
+    "title": "Hosts and Hostesses, Restaurant, Lounge, and Coffee Shop",
+    "description": null
+  },
+  {
+    "socc_code": "359099",
+    "title": "Food Preparation and Serving Related Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "371011",
+    "title": "First-Line Supervisors of Housekeeping and Janitorial Workers",
+    "description": null
+  },
+  {
+    "socc_code": "371012",
+    "title": "First-Line Supervisors of Landscaping, Lawn Service, and Groundskeeping Workers",
+    "description": null
+  },
+  {
+    "socc_code": "372011",
+    "title": "Janitors and Cleaners, Except Maids and Housekeeping Cleaners",
+    "description": null
+  },
+  {
+    "socc_code": "372012",
+    "title": "Maids and Housekeeping Cleaners",
+    "description": null
+  },
+  {
+    "socc_code": "372019",
+    "title": "Building Cleaning Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "372021",
+    "title": "Pest Control Workers",
+    "description": null
+  },
+  {
+    "socc_code": "373011",
+    "title": "Landscaping and Groundskeeping Workers",
+    "description": null
+  },
+  {
+    "socc_code": "373012",
+    "title": "Pesticide Handlers, Sprayers, and Applicators, Vegetation",
+    "description": null
+  },
+  {
+    "socc_code": "373013",
+    "title": "Tree Trimmers and Pruners",
+    "description": null
+  },
+  {
+    "socc_code": "373019",
+    "title": "Grounds Maintenance Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "391013",
+    "title": "First-Line Supervisors of Gambling Services Workers",
+    "description": null
+  },
+  {
+    "socc_code": "391014",
+    "title": "First-Line Supervisors of Entertainment and Recreation Workers, Except Gambling Services",
+    "description": null
+  },
+  {
+    "socc_code": "391022",
+    "title": "First-Line Supervisors of Personal Service Workers",
+    "description": null
+  },
+  {
+    "socc_code": "392011",
+    "title": "Animal Trainers",
+    "description": null
+  },
+  {
+    "socc_code": "392021",
+    "title": "Animal Caretakers",
+    "description": null
+  },
+  {
+    "socc_code": "393011",
+    "title": "Gambling Dealers",
+    "description": null
+  },
+  {
+    "socc_code": "393012",
+    "title": "Gambling and Sports Book Writers and Runners",
+    "description": null
+  },
+  {
+    "socc_code": "393019",
+    "title": "Gambling Service Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "393021",
+    "title": "Motion Picture Projectionists",
+    "description": null
+  },
+  {
+    "socc_code": "393031",
+    "title": "Ushers, Lobby Attendants, and Ticket Takers",
+    "description": null
+  },
+  {
+    "socc_code": "393091",
+    "title": "Amusement and Recreation Attendants",
+    "description": null
+  },
+  {
+    "socc_code": "393092",
+    "title": "Costume Attendants",
+    "description": null
+  },
+  {
+    "socc_code": "393093",
+    "title": "Locker Room, Coatroom, and Dressing Room Attendants",
+    "description": null
+  },
+  {
+    "socc_code": "393099",
+    "title": "Entertainment Attendants and Related Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "394011",
+    "title": "Embalmers",
+    "description": null
+  },
+  {
+    "socc_code": "394012",
+    "title": "Crematory Operators",
+    "description": null
+  },
+  {
+    "socc_code": "394021",
+    "title": "Funeral Attendants",
+    "description": null
+  },
+  {
+    "socc_code": "394031",
+    "title": "Morticians, Undertakers, and Funeral Arrangers",
+    "description": null
+  },
+  {
+    "socc_code": "395011",
+    "title": "Barbers",
+    "description": null
+  },
+  {
+    "socc_code": "395012",
+    "title": "Hairdressers, Hairstylists, and Cosmetologists",
+    "description": null
+  },
+  {
+    "socc_code": "395091",
+    "title": "Makeup Artists, Theatrical and Performance",
+    "description": null
+  },
+  {
+    "socc_code": "395092",
+    "title": "Manicurists and Pedicurists",
+    "description": null
+  },
+  {
+    "socc_code": "395093",
+    "title": "Shampooers",
+    "description": null
+  },
+  {
+    "socc_code": "395094",
+    "title": "Skincare Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "396011",
+    "title": "Baggage Porters and Bellhops",
+    "description": null
+  },
+  {
+    "socc_code": "396012",
+    "title": "Concierges",
+    "description": null
+  },
+  {
+    "socc_code": "397011",
+    "title": "Tour Guides and Escorts",
+    "description": null
+  },
+  {
+    "socc_code": "397012",
+    "title": "Travel Guides",
+    "description": null
+  },
+  {
+    "socc_code": "399011",
+    "title": "Childcare Workers",
+    "description": null
+  },
+  {
+    "socc_code": "399031",
+    "title": "Exercise Trainers and Group Fitness Instructors",
+    "description": null
+  },
+  {
+    "socc_code": "399032",
+    "title": "Recreation Workers",
+    "description": null
+  },
+  {
+    "socc_code": "399041",
+    "title": "Residential Advisors",
+    "description": null
+  },
+  {
+    "socc_code": "399099",
+    "title": "Personal Care and Service Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "411011",
+    "title": "First-Line Supervisors of Retail Sales Workers",
+    "description": null
+  },
+  {
+    "socc_code": "411012",
+    "title": "First-Line Supervisors of Non-Retail Sales Workers",
+    "description": null
+  },
+  {
+    "socc_code": "412011",
+    "title": "Cashiers",
+    "description": null
+  },
+  {
+    "socc_code": "412012",
+    "title": "Gambling Change Persons and Booth Cashiers",
+    "description": null
+  },
+  {
+    "socc_code": "412021",
+    "title": "Counter and Rental Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "412022",
+    "title": "Parts Salespersons",
+    "description": null
+  },
+  {
+    "socc_code": "412031",
+    "title": "Retail Salespersons",
+    "description": null
+  },
+  {
+    "socc_code": "413011",
+    "title": "Advertising Sales Agents",
+    "description": null
+  },
+  {
+    "socc_code": "413021",
+    "title": "Insurance Sales Agents",
+    "description": null
+  },
+  {
+    "socc_code": "413031",
+    "title": "Securities, Commodities, and Financial Services Sales Agents",
+    "description": null
+  },
+  {
+    "socc_code": "413041",
+    "title": "Travel Agents",
+    "description": null
+  },
+  {
+    "socc_code": "413091",
+    "title": "Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel",
+    "description": null
+  },
+  {
+    "socc_code": "414011",
+    "title": "Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products",
+    "description": null
+  },
+  {
+    "socc_code": "414012",
+    "title": "Sales Representatives, Wholesale and Manufacturing, Except Technical and Scientific Products",
+    "description": null
+  },
+  {
+    "socc_code": "419011",
+    "title": "Demonstrators and Product Promoters",
+    "description": null
+  },
+  {
+    "socc_code": "419012",
+    "title": "Models",
+    "description": null
+  },
+  {
+    "socc_code": "419021",
+    "title": "Real Estate Brokers",
+    "description": null
+  },
+  {
+    "socc_code": "419022",
+    "title": "Real Estate Sales Agents",
+    "description": null
+  },
+  {
+    "socc_code": "419031",
+    "title": "Sales Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "419041",
+    "title": "Telemarketers",
+    "description": null
+  },
+  {
+    "socc_code": "419091",
+    "title": "Door-to-Door Sales Workers, News and Street Vendors, and Related Workers",
+    "description": null
+  },
+  {
+    "socc_code": "419099",
+    "title": "Sales and Related Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "431011",
+    "title": "First-Line Supervisors of Office and Administrative Support Workers",
+    "description": null
+  },
+  {
+    "socc_code": "432011",
+    "title": "Switchboard Operators, Including Answering Service",
+    "description": null
+  },
+  {
+    "socc_code": "432021",
+    "title": "Telephone Operators",
+    "description": null
+  },
+  {
+    "socc_code": "432099",
+    "title": "Communications Equipment Operators, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "433011",
+    "title": "Bill and Account Collectors",
+    "description": null
+  },
+  {
+    "socc_code": "433021",
+    "title": "Billing and Posting Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "433031",
+    "title": "Bookkeeping, Accounting, and Auditing Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "433041",
+    "title": "Gambling Cage Workers",
+    "description": null
+  },
+  {
+    "socc_code": "433051",
+    "title": "Payroll and Timekeeping Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "433061",
+    "title": "Procurement Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "433071",
+    "title": "Tellers",
+    "description": null
+  },
+  {
+    "socc_code": "433099",
+    "title": "Financial Clerks, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "434011",
+    "title": "Brokerage Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "434021",
+    "title": "Correspondence Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "434031",
+    "title": "Court, Municipal, and License Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "434041",
+    "title": "Credit Authorizers, Checkers, and Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "434051",
+    "title": "Customer Service Representatives",
+    "description": null
+  },
+  {
+    "socc_code": "434061",
+    "title": "Eligibility Interviewers, Government Programs",
+    "description": null
+  },
+  {
+    "socc_code": "434071",
+    "title": "File Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "434081",
+    "title": "Hotel, Motel, and Resort Desk Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "434111",
+    "title": "Interviewers, Except Eligibility and Loan",
+    "description": null
+  },
+  {
+    "socc_code": "434121",
+    "title": "Library Assistants, Clerical",
+    "description": null
+  },
+  {
+    "socc_code": "434131",
+    "title": "Loan Interviewers and Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "434141",
+    "title": "New Accounts Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "434151",
+    "title": "Order Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "434161",
+    "title": "Human Resources Assistants, Except Payroll and Timekeeping",
+    "description": null
+  },
+  {
+    "socc_code": "434171",
+    "title": "Receptionists and Information Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "434181",
+    "title": "Reservation and Transportation Ticket Agents and Travel Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "434199",
+    "title": "Information and Record Clerks, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "435011",
+    "title": "Cargo and Freight Agents",
+    "description": null
+  },
+  {
+    "socc_code": "435021",
+    "title": "Couriers and Messengers",
+    "description": null
+  },
+  {
+    "socc_code": "435031",
+    "title": "Public Safety Telecommunicators",
+    "description": null
+  },
+  {
+    "socc_code": "435032",
+    "title": "Dispatchers, Except Police, Fire, and Ambulance",
+    "description": null
+  },
+  {
+    "socc_code": "435041",
+    "title": "Meter Readers, Utilities",
+    "description": null
+  },
+  {
+    "socc_code": "435051",
+    "title": "Postal Service Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "435052",
+    "title": "Postal Service Mail Carriers",
+    "description": null
+  },
+  {
+    "socc_code": "435053",
+    "title": "Postal Service Mail Sorters, Processors, and Processing Machine Operators",
+    "description": null
+  },
+  {
+    "socc_code": "435061",
+    "title": "Production, Planning, and Expediting Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "435071",
+    "title": "Shipping, Receiving, and Inventory Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "435111",
+    "title": "Weighers, Measurers, Checkers, and Samplers, Recordkeeping",
+    "description": null
+  },
+  {
+    "socc_code": "436011",
+    "title": "Executive Secretaries and Executive Administrative Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "436012",
+    "title": "Legal Secretaries and Administrative Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "436013",
+    "title": "Medical Secretaries and Administrative Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "436014",
+    "title": "Secretaries and Administrative Assistants, Except Legal, Medical, and Executive",
+    "description": null
+  },
+  {
+    "socc_code": "439021",
+    "title": "Data Entry Keyers",
+    "description": null
+  },
+  {
+    "socc_code": "439022",
+    "title": "Word Processors and Typists",
+    "description": null
+  },
+  {
+    "socc_code": "439031",
+    "title": "Desktop Publishers",
+    "description": null
+  },
+  {
+    "socc_code": "439041",
+    "title": "Insurance Claims and Policy Processing Clerks",
+    "description": null
+  },
+  {
+    "socc_code": "439051",
+    "title": "Mail Clerks and Mail Machine Operators, Except Postal Service",
+    "description": null
+  },
+  {
+    "socc_code": "439061",
+    "title": "Office Clerks, General",
+    "description": null
+  },
+  {
+    "socc_code": "439071",
+    "title": "Office Machine Operators, Except Computer",
+    "description": null
+  },
+  {
+    "socc_code": "439081",
+    "title": "Proofreaders and Copy Markers",
+    "description": null
+  },
+  {
+    "socc_code": "439111",
+    "title": "Statistical Assistants",
+    "description": null
+  },
+  {
+    "socc_code": "439199",
+    "title": "Office and Administrative Support Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "451011",
+    "title": "First-Line Supervisors of Farming, Fishing, and Forestry Workers",
+    "description": null
+  },
+  {
+    "socc_code": "452011",
+    "title": "Agricultural Inspectors",
+    "description": null
+  },
+  {
+    "socc_code": "452021",
+    "title": "Animal Breeders",
+    "description": null
+  },
+  {
+    "socc_code": "452041",
+    "title": "Graders and Sorters, Agricultural Products",
+    "description": null
+  },
+  {
+    "socc_code": "452091",
+    "title": "Agricultural Equipment Operators",
+    "description": null
+  },
+  {
+    "socc_code": "452092",
+    "title": "Farmworkers and Laborers, Crop, Nursery, and Greenhouse",
+    "description": null
+  },
+  {
+    "socc_code": "452093",
+    "title": "Farmworkers, Farm, Ranch, and Aquacultural Animals",
+    "description": null
+  },
+  {
+    "socc_code": "452099",
+    "title": "Agricultural Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "453031",
+    "title": "Fishing and Hunting Workers",
+    "description": null
+  },
+  {
+    "socc_code": "454011",
+    "title": "Forest and Conservation Workers",
+    "description": null
+  },
+  {
+    "socc_code": "454021",
+    "title": "Fallers",
+    "description": null
+  },
+  {
+    "socc_code": "454022",
+    "title": "Logging Equipment Operators",
+    "description": null
+  },
+  {
+    "socc_code": "454023",
+    "title": "Log Graders and Scalers",
+    "description": null
+  },
+  {
+    "socc_code": "454029",
+    "title": "Logging Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "471011",
+    "title": "First-Line Supervisors of Construction Trades and Extraction Workers",
+    "description": null
+  },
+  {
+    "socc_code": "472011",
+    "title": "Boilermakers",
+    "description": null
+  },
+  {
+    "socc_code": "472021",
+    "title": "Brickmasons and Blockmasons",
+    "description": null
+  },
+  {
+    "socc_code": "472022",
+    "title": "Stonemasons",
+    "description": null
+  },
+  {
+    "socc_code": "472031",
+    "title": "Carpenters",
+    "description": null
+  },
+  {
+    "socc_code": "472041",
+    "title": "Carpet Installers",
+    "description": null
+  },
+  {
+    "socc_code": "472042",
+    "title": "Floor Layers, Except Carpet, Wood, and Hard Tiles",
+    "description": null
+  },
+  {
+    "socc_code": "472043",
+    "title": "Floor Sanders and Finishers",
+    "description": null
+  },
+  {
+    "socc_code": "472044",
+    "title": "Tile and Stone Setters",
+    "description": null
+  },
+  {
+    "socc_code": "472051",
+    "title": "Cement Masons and Concrete Finishers",
+    "description": null
+  },
+  {
+    "socc_code": "472053",
+    "title": "Terrazzo Workers and Finishers",
+    "description": null
+  },
+  {
+    "socc_code": "472061",
+    "title": "Construction Laborers",
+    "description": null
+  },
+  {
+    "socc_code": "472071",
+    "title": "Paving, Surfacing, and Tamping Equipment Operators",
+    "description": null
+  },
+  {
+    "socc_code": "472072",
+    "title": "Pile Driver Operators",
+    "description": null
+  },
+  {
+    "socc_code": "472073",
+    "title": "Operating Engineers and Other Construction Equipment Operators",
+    "description": null
+  },
+  {
+    "socc_code": "472081",
+    "title": "Drywall and Ceiling Tile Installers",
+    "description": null
+  },
+  {
+    "socc_code": "472082",
+    "title": "Tapers",
+    "description": null
+  },
+  {
+    "socc_code": "472111",
+    "title": "Electricians",
+    "description": null
+  },
+  {
+    "socc_code": "472121",
+    "title": "Glaziers",
+    "description": null
+  },
+  {
+    "socc_code": "472131",
+    "title": "Insulation Workers, Floor, Ceiling, and Wall",
+    "description": null
+  },
+  {
+    "socc_code": "472132",
+    "title": "Insulation Workers, Mechanical",
+    "description": null
+  },
+  {
+    "socc_code": "472141",
+    "title": "Painters, Construction and Maintenance",
+    "description": null
+  },
+  {
+    "socc_code": "472142",
+    "title": "Paperhangers",
+    "description": null
+  },
+  {
+    "socc_code": "472151",
+    "title": "Pipelayers",
+    "description": null
+  },
+  {
+    "socc_code": "472152",
+    "title": "Plumbers, Pipefitters, and Steamfitters",
+    "description": null
+  },
+  {
+    "socc_code": "472161",
+    "title": "Plasterers and Stucco Masons",
+    "description": null
+  },
+  {
+    "socc_code": "472171",
+    "title": "Reinforcing Iron and Rebar Workers",
+    "description": null
+  },
+  {
+    "socc_code": "472181",
+    "title": "Roofers",
+    "description": null
+  },
+  {
+    "socc_code": "472211",
+    "title": "Sheet Metal Workers",
+    "description": null
+  },
+  {
+    "socc_code": "472221",
+    "title": "Structural Iron and Steel Workers",
+    "description": null
+  },
+  {
+    "socc_code": "472231",
+    "title": "Solar Photovoltaic Installers",
+    "description": null
+  },
+  {
+    "socc_code": "473011",
+    "title": "Helpers--Brickmasons, Blockmasons, Stonemasons, and Tile and Marble Setters",
+    "description": null
+  },
+  {
+    "socc_code": "473012",
+    "title": "Helpers--Carpenters",
+    "description": null
+  },
+  {
+    "socc_code": "473013",
+    "title": "Helpers--Electricians",
+    "description": null
+  },
+  {
+    "socc_code": "473014",
+    "title": "Helpers--Painters, Paperhangers, Plasterers, and Stucco Masons",
+    "description": null
+  },
+  {
+    "socc_code": "473015",
+    "title": "Helpers--Pipelayers, Plumbers, Pipefitters, and Steamfitters",
+    "description": null
+  },
+  {
+    "socc_code": "473016",
+    "title": "Helpers--Roofers",
+    "description": null
+  },
+  {
+    "socc_code": "473019",
+    "title": "Helpers, Construction Trades, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "474011",
+    "title": "Construction and Building Inspectors",
+    "description": null
+  },
+  {
+    "socc_code": "474021",
+    "title": "Elevator and Escalator Installers and Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "474031",
+    "title": "Fence Erectors",
+    "description": null
+  },
+  {
+    "socc_code": "474041",
+    "title": "Hazardous Materials Removal Workers",
+    "description": null
+  },
+  {
+    "socc_code": "474051",
+    "title": "Highway Maintenance Workers",
+    "description": null
+  },
+  {
+    "socc_code": "474061",
+    "title": "Rail-Track Laying and Maintenance Equipment Operators",
+    "description": null
+  },
+  {
+    "socc_code": "474071",
+    "title": "Septic Tank Servicers and Sewer Pipe Cleaners",
+    "description": null
+  },
+  {
+    "socc_code": "474091",
+    "title": "Segmental Pavers",
+    "description": null
+  },
+  {
+    "socc_code": "474099",
+    "title": "Construction and Related Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "475011",
+    "title": "Derrick Operators, Oil and Gas",
+    "description": null
+  },
+  {
+    "socc_code": "475012",
+    "title": "Rotary Drill Operators, Oil and Gas",
+    "description": null
+  },
+  {
+    "socc_code": "475013",
+    "title": "Service Unit Operators, Oil and Gas",
+    "description": null
+  },
+  {
+    "socc_code": "475022",
+    "title": "Excavating and Loading Machine and Dragline Operators, Surface Mining",
+    "description": null
+  },
+  {
+    "socc_code": "475023",
+    "title": "Earth Drillers, Except Oil and Gas",
+    "description": null
+  },
+  {
+    "socc_code": "475032",
+    "title": "Explosives Workers, Ordnance Handling Experts, and Blasters",
+    "description": null
+  },
+  {
+    "socc_code": "475041",
+    "title": "Continuous Mining Machine Operators",
+    "description": null
+  },
+  {
+    "socc_code": "475043",
+    "title": "Roof Bolters, Mining",
+    "description": null
+  },
+  {
+    "socc_code": "475044",
+    "title": "Loading and Moving Machine Operators, Underground Mining",
+    "description": null
+  },
+  {
+    "socc_code": "475049",
+    "title": "Underground Mining Machine Operators, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "475051",
+    "title": "Rock Splitters, Quarry",
+    "description": null
+  },
+  {
+    "socc_code": "475071",
+    "title": "Roustabouts, Oil and Gas",
+    "description": null
+  },
+  {
+    "socc_code": "475081",
+    "title": "Helpers--Extraction Workers",
+    "description": null
+  },
+  {
+    "socc_code": "475099",
+    "title": "Extraction Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "491011",
+    "title": "First-Line Supervisors of Mechanics, Installers, and Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "492011",
+    "title": "Computer, Automated Teller, and Office Machine Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "492021",
+    "title": "Radio, Cellular, and Tower Equipment Installers and Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "492022",
+    "title": "Telecommunications Equipment Installers and Repairers, Except Line Installers",
+    "description": null
+  },
+  {
+    "socc_code": "492091",
+    "title": "Avionics Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "492092",
+    "title": "Electric Motor, Power Tool, and Related Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "492093",
+    "title": "Electrical and Electronics Installers and Repairers, Transportation Equipment",
+    "description": null
+  },
+  {
+    "socc_code": "492094",
+    "title": "Electrical and Electronics Repairers, Commercial and Industrial Equipment",
+    "description": null
+  },
+  {
+    "socc_code": "492095",
+    "title": "Electrical and Electronics Repairers, Powerhouse, Substation, and Relay",
+    "description": null
+  },
+  {
+    "socc_code": "492096",
+    "title": "Electronic Equipment Installers and Repairers, Motor Vehicles",
+    "description": null
+  },
+  {
+    "socc_code": "492097",
+    "title": "Audiovisual Equipment Installers and Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "492098",
+    "title": "Security and Fire Alarm Systems Installers",
+    "description": null
+  },
+  {
+    "socc_code": "493011",
+    "title": "Aircraft Mechanics and Service Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "493021",
+    "title": "Automotive Body and Related Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "493022",
+    "title": "Automotive Glass Installers and Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "493023",
+    "title": "Automotive Service Technicians and Mechanics",
+    "description": null
+  },
+  {
+    "socc_code": "493031",
+    "title": "Bus and Truck Mechanics and Diesel Engine Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "493041",
+    "title": "Farm Equipment Mechanics and Service Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "493042",
+    "title": "Mobile Heavy Equipment Mechanics, Except Engines",
+    "description": null
+  },
+  {
+    "socc_code": "493043",
+    "title": "Rail Car Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "493051",
+    "title": "Motorboat Mechanics and Service Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "493052",
+    "title": "Motorcycle Mechanics",
+    "description": null
+  },
+  {
+    "socc_code": "493053",
+    "title": "Outdoor Power Equipment and Other Small Engine Mechanics",
+    "description": null
+  },
+  {
+    "socc_code": "493091",
+    "title": "Bicycle Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "493092",
+    "title": "Recreational Vehicle Service Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "493093",
+    "title": "Tire Repairers and Changers",
+    "description": null
+  },
+  {
+    "socc_code": "499011",
+    "title": "Mechanical Door Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "499012",
+    "title": "Control and Valve Installers and Repairers, Except Mechanical Door",
+    "description": null
+  },
+  {
+    "socc_code": "499021",
+    "title": "Heating, Air Conditioning, and Refrigeration Mechanics and Installers",
+    "description": null
+  },
+  {
+    "socc_code": "499031",
+    "title": "Home Appliance Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "499041",
+    "title": "Industrial Machinery Mechanics",
+    "description": null
+  },
+  {
+    "socc_code": "499043",
+    "title": "Maintenance Workers, Machinery",
+    "description": null
+  },
+  {
+    "socc_code": "499044",
+    "title": "Millwrights",
+    "description": null
+  },
+  {
+    "socc_code": "499045",
+    "title": "Refractory Materials Repairers, Except Brickmasons",
+    "description": null
+  },
+  {
+    "socc_code": "499051",
+    "title": "Electrical Power-Line Installers and Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "499052",
+    "title": "Telecommunications Line Installers and Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "499061",
+    "title": "Camera and Photographic Equipment Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "499062",
+    "title": "Medical Equipment Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "499063",
+    "title": "Musical Instrument Repairers and Tuners",
+    "description": null
+  },
+  {
+    "socc_code": "499064",
+    "title": "Watch and Clock Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "499069",
+    "title": "Precision Instrument and Equipment Repairers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "499071",
+    "title": "Maintenance and Repair Workers, General",
+    "description": null
+  },
+  {
+    "socc_code": "499081",
+    "title": "Wind Turbine Service Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "499091",
+    "title": "Coin, Vending, and Amusement Machine Servicers and Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "499092",
+    "title": "Commercial Divers",
+    "description": null
+  },
+  {
+    "socc_code": "499094",
+    "title": "Locksmiths and Safe Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "499095",
+    "title": "Manufactured Building and Mobile Home Installers",
+    "description": null
+  },
+  {
+    "socc_code": "499096",
+    "title": "Riggers",
+    "description": null
+  },
+  {
+    "socc_code": "499097",
+    "title": "Signal and Track Switch Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "499098",
+    "title": "Helpers--Installation, Maintenance, and Repair Workers",
+    "description": null
+  },
+  {
+    "socc_code": "499099",
+    "title": "Installation, Maintenance, and Repair Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "511011",
+    "title": "First-Line Supervisors of Production and Operating Workers",
+    "description": null
+  },
+  {
+    "socc_code": "512011",
+    "title": "Aircraft Structure, Surfaces, Rigging, and Systems Assemblers",
+    "description": null
+  },
+  {
+    "socc_code": "512021",
+    "title": "Coil Winders, Tapers, and Finishers",
+    "description": null
+  },
+  {
+    "socc_code": "512022",
+    "title": "Electrical and Electronic Equipment Assemblers",
+    "description": null
+  },
+  {
+    "socc_code": "512023",
+    "title": "Electromechanical Equipment Assemblers",
+    "description": null
+  },
+  {
+    "socc_code": "512031",
+    "title": "Engine and Other Machine Assemblers",
+    "description": null
+  },
+  {
+    "socc_code": "512041",
+    "title": "Structural Metal Fabricators and Fitters",
+    "description": null
+  },
+  {
+    "socc_code": "512051",
+    "title": "Fiberglass Laminators and Fabricators",
+    "description": null
+  },
+  {
+    "socc_code": "512061",
+    "title": "Timing Device Assemblers and Adjusters",
+    "description": null
+  },
+  {
+    "socc_code": "512092",
+    "title": "Team Assemblers",
+    "description": null
+  },
+  {
+    "socc_code": "512099",
+    "title": "Assemblers and Fabricators, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "513011",
+    "title": "Bakers",
+    "description": null
+  },
+  {
+    "socc_code": "513021",
+    "title": "Butchers and Meat Cutters",
+    "description": null
+  },
+  {
+    "socc_code": "513022",
+    "title": "Meat, Poultry, and Fish Cutters and Trimmers",
+    "description": null
+  },
+  {
+    "socc_code": "513023",
+    "title": "Slaughterers and Meat Packers",
+    "description": null
+  },
+  {
+    "socc_code": "513091",
+    "title": "Food and Tobacco Roasting, Baking, and Drying Machine Operators and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "513092",
+    "title": "Food Batchmakers",
+    "description": null
+  },
+  {
+    "socc_code": "513093",
+    "title": "Food Cooking Machine Operators and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "513099",
+    "title": "Food Processing Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "514021",
+    "title": "Extruding and Drawing Machine Setters, Operators, and Tenders, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514022",
+    "title": "Forging Machine Setters, Operators, and Tenders, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514023",
+    "title": "Rolling Machine Setters, Operators, and Tenders, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514031",
+    "title": "Cutting, Punching, and Press Machine Setters, Operators, and Tenders, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514032",
+    "title": "Drilling and Boring Machine Tool Setters, Operators, and Tenders, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514033",
+    "title": "Grinding, Lapping, Polishing, and Buffing Machine Tool Setters, Operators, and Tenders, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514034",
+    "title": "Lathe and Turning Machine Tool Setters, Operators, and Tenders, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514035",
+    "title": "Milling and Planing Machine Setters, Operators, and Tenders, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514041",
+    "title": "Machinists",
+    "description": null
+  },
+  {
+    "socc_code": "514051",
+    "title": "Metal-Refining Furnace Operators and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "514052",
+    "title": "Pourers and Casters, Metal",
+    "description": null
+  },
+  {
+    "socc_code": "514061",
+    "title": "Model Makers, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514062",
+    "title": "Patternmakers, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514071",
+    "title": "Foundry Mold and Coremakers",
+    "description": null
+  },
+  {
+    "socc_code": "514072",
+    "title": "Molding, Coremaking, and Casting Machine Setters, Operators, and Tenders, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514081",
+    "title": "Multiple Machine Tool Setters, Operators, and Tenders, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514111",
+    "title": "Tool and Die Makers",
+    "description": null
+  },
+  {
+    "socc_code": "514121",
+    "title": "Welders, Cutters, Solderers, and Brazers",
+    "description": null
+  },
+  {
+    "socc_code": "514122",
+    "title": "Welding, Soldering, and Brazing Machine Setters, Operators, and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "514191",
+    "title": "Heat Treating Equipment Setters, Operators, and Tenders, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514192",
+    "title": "Layout Workers, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514193",
+    "title": "Plating Machine Setters, Operators, and Tenders, Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "514194",
+    "title": "Tool Grinders, Filers, and Sharpeners",
+    "description": null
+  },
+  {
+    "socc_code": "514199",
+    "title": "Metal Workers and Plastic Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "515111",
+    "title": "Prepress Technicians and Workers",
+    "description": null
+  },
+  {
+    "socc_code": "515112",
+    "title": "Printing Press Operators",
+    "description": null
+  },
+  {
+    "socc_code": "515113",
+    "title": "Print Binding and Finishing Workers",
+    "description": null
+  },
+  {
+    "socc_code": "516011",
+    "title": "Laundry and Dry-Cleaning Workers",
+    "description": null
+  },
+  {
+    "socc_code": "516021",
+    "title": "Pressers, Textile, Garment, and Related Materials",
+    "description": null
+  },
+  {
+    "socc_code": "516031",
+    "title": "Sewing Machine Operators",
+    "description": null
+  },
+  {
+    "socc_code": "516041",
+    "title": "Shoe and Leather Workers and Repairers",
+    "description": null
+  },
+  {
+    "socc_code": "516042",
+    "title": "Shoe Machine Operators and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "516051",
+    "title": "Sewers, Hand",
+    "description": null
+  },
+  {
+    "socc_code": "516052",
+    "title": "Tailors, Dressmakers, and Custom Sewers",
+    "description": null
+  },
+  {
+    "socc_code": "516061",
+    "title": "Textile Bleaching and Dyeing Machine Operators and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "516062",
+    "title": "Textile Cutting Machine Setters, Operators, and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "516063",
+    "title": "Textile Knitting and Weaving Machine Setters, Operators, and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "516064",
+    "title": "Textile Winding, Twisting, and Drawing Out Machine Setters, Operators, and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "516091",
+    "title": "Extruding and Forming Machine Setters, Operators, and Tenders, Synthetic and Glass Fibers",
+    "description": null
+  },
+  {
+    "socc_code": "516092",
+    "title": "Fabric and Apparel Patternmakers",
+    "description": null
+  },
+  {
+    "socc_code": "516093",
+    "title": "Upholsterers",
+    "description": null
+  },
+  {
+    "socc_code": "516099",
+    "title": "Textile, Apparel, and Furnishings Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "517011",
+    "title": "Cabinetmakers and Bench Carpenters",
+    "description": null
+  },
+  {
+    "socc_code": "517021",
+    "title": "Furniture Finishers",
+    "description": null
+  },
+  {
+    "socc_code": "517031",
+    "title": "Model Makers, Wood",
+    "description": null
+  },
+  {
+    "socc_code": "517032",
+    "title": "Patternmakers, Wood",
+    "description": null
+  },
+  {
+    "socc_code": "517041",
+    "title": "Sawing Machine Setters, Operators, and Tenders, Wood",
+    "description": null
+  },
+  {
+    "socc_code": "517042",
+    "title": "Woodworking Machine Setters, Operators, and Tenders, Except Sawing",
+    "description": null
+  },
+  {
+    "socc_code": "517099",
+    "title": "Woodworkers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "518011",
+    "title": "Nuclear Power Reactor Operators",
+    "description": null
+  },
+  {
+    "socc_code": "518012",
+    "title": "Power Distributors and Dispatchers",
+    "description": null
+  },
+  {
+    "socc_code": "518013",
+    "title": "Power Plant Operators",
+    "description": null
+  },
+  {
+    "socc_code": "518021",
+    "title": "Stationary Engineers and Boiler Operators",
+    "description": null
+  },
+  {
+    "socc_code": "518031",
+    "title": "Water and Wastewater Treatment Plant and System Operators",
+    "description": null
+  },
+  {
+    "socc_code": "518091",
+    "title": "Chemical Plant and System Operators",
+    "description": null
+  },
+  {
+    "socc_code": "518092",
+    "title": "Gas Plant Operators",
+    "description": null
+  },
+  {
+    "socc_code": "518093",
+    "title": "Petroleum Pump System Operators, Refinery Operators, and Gaugers",
+    "description": null
+  },
+  {
+    "socc_code": "518099",
+    "title": "Plant and System Operators, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "519011",
+    "title": "Chemical Equipment Operators and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519012",
+    "title": "Separating, Filtering, Clarifying, Precipitating, and Still Machine Setters, Operators, and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519021",
+    "title": "Crushing, Grinding, and Polishing Machine Setters, Operators, and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519022",
+    "title": "Grinding and Polishing Workers, Hand",
+    "description": null
+  },
+  {
+    "socc_code": "519023",
+    "title": "Mixing and Blending Machine Setters, Operators, and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519031",
+    "title": "Cutters and Trimmers, Hand",
+    "description": null
+  },
+  {
+    "socc_code": "519032",
+    "title": "Cutting and Slicing Machine Setters, Operators, and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519041",
+    "title": "Extruding, Forming, Pressing, and Compacting Machine Setters, Operators, and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519051",
+    "title": "Furnace, Kiln, Oven, Drier, and Kettle Operators and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519061",
+    "title": "Inspectors, Testers, Sorters, Samplers, and Weighers",
+    "description": null
+  },
+  {
+    "socc_code": "519071",
+    "title": "Jewelers and Precious Stone and Metal Workers",
+    "description": null
+  },
+  {
+    "socc_code": "519081",
+    "title": "Dental Laboratory Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "519082",
+    "title": "Medical Appliance Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "519083",
+    "title": "Ophthalmic Laboratory Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "519111",
+    "title": "Packaging and Filling Machine Operators and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519123",
+    "title": "Painting, Coating, and Decorating Workers",
+    "description": null
+  },
+  {
+    "socc_code": "519124",
+    "title": "Coating, Painting, and Spraying Machine Setters, Operators, and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519141",
+    "title": "Semiconductor Processing Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "519151",
+    "title": "Photographic Process Workers and Processing Machine Operators",
+    "description": null
+  },
+  {
+    "socc_code": "519161",
+    "title": "Computer Numerically Controlled Tool Operators",
+    "description": null
+  },
+  {
+    "socc_code": "519162",
+    "title": "Computer Numerically Controlled Tool Programmers",
+    "description": null
+  },
+  {
+    "socc_code": "519191",
+    "title": "Adhesive Bonding Machine Operators and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519192",
+    "title": "Cleaning, Washing, and Metal Pickling Equipment Operators and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519193",
+    "title": "Cooling and Freezing Equipment Operators and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519194",
+    "title": "Etchers and Engravers",
+    "description": null
+  },
+  {
+    "socc_code": "519195",
+    "title": "Molders, Shapers, and Casters, Except Metal and Plastic",
+    "description": null
+  },
+  {
+    "socc_code": "519196",
+    "title": "Paper Goods Machine Setters, Operators, and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "519197",
+    "title": "Tire Builders",
+    "description": null
+  },
+  {
+    "socc_code": "519198",
+    "title": "Helpers--Production Workers",
+    "description": null
+  },
+  {
+    "socc_code": "519199",
+    "title": "Production Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "531041",
+    "title": "Aircraft Cargo Handling Supervisors",
+    "description": null
+  },
+  {
+    "socc_code": "531042",
+    "title": "First-Line Supervisors of Helpers, Laborers, and Material Movers, Hand",
+    "description": null
+  },
+  {
+    "socc_code": "531043",
+    "title": "First-Line Supervisors of Material-Moving Machine and Vehicle Operators",
+    "description": null
+  },
+  {
+    "socc_code": "531044",
+    "title": "First-Line Supervisors of Passenger Attendants",
+    "description": null
+  },
+  {
+    "socc_code": "531049",
+    "title": "First-Line Supervisors of Transportation Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "532011",
+    "title": "Airline Pilots, Copilots, and Flight Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "532012",
+    "title": "Commercial Pilots",
+    "description": null
+  },
+  {
+    "socc_code": "532021",
+    "title": "Air Traffic Controllers",
+    "description": null
+  },
+  {
+    "socc_code": "532022",
+    "title": "Airfield Operations Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "532031",
+    "title": "Flight Attendants",
+    "description": null
+  },
+  {
+    "socc_code": "533011",
+    "title": "Ambulance Drivers and Attendants, Except Emergency Medical Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "533031",
+    "title": "Driver/Sales Workers",
+    "description": null
+  },
+  {
+    "socc_code": "533032",
+    "title": "Heavy and Tractor-Trailer Truck Drivers",
+    "description": null
+  },
+  {
+    "socc_code": "533033",
+    "title": "Light Truck Drivers",
+    "description": null
+  },
+  {
+    "socc_code": "533051",
+    "title": "Bus Drivers, School",
+    "description": null
+  },
+  {
+    "socc_code": "533052",
+    "title": "Bus Drivers, Transit and Intercity",
+    "description": null
+  },
+  {
+    "socc_code": "533053",
+    "title": "Shuttle Drivers and Chauffeurs",
+    "description": null
+  },
+  {
+    "socc_code": "533054",
+    "title": "Taxi Drivers",
+    "description": null
+  },
+  {
+    "socc_code": "533099",
+    "title": "Motor Vehicle Operators, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "534011",
+    "title": "Locomotive Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "534013",
+    "title": "Rail Yard Engineers, Dinkey Operators, and Hostlers",
+    "description": null
+  },
+  {
+    "socc_code": "534022",
+    "title": "Railroad Brake, Signal, and Switch Operators and Locomotive Firers",
+    "description": null
+  },
+  {
+    "socc_code": "534031",
+    "title": "Railroad Conductors and Yardmasters",
+    "description": null
+  },
+  {
+    "socc_code": "534041",
+    "title": "Subway and Streetcar Operators",
+    "description": null
+  },
+  {
+    "socc_code": "534099",
+    "title": "Rail Transportation Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "535011",
+    "title": "Sailors and Marine Oilers",
+    "description": null
+  },
+  {
+    "socc_code": "535021",
+    "title": "Captains, Mates, and Pilots of Water Vessels",
+    "description": null
+  },
+  {
+    "socc_code": "535022",
+    "title": "Motorboat Operators",
+    "description": null
+  },
+  {
+    "socc_code": "535031",
+    "title": "Ship Engineers",
+    "description": null
+  },
+  {
+    "socc_code": "536011",
+    "title": "Bridge and Lock Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "536021",
+    "title": "Parking Attendants",
+    "description": null
+  },
+  {
+    "socc_code": "536031",
+    "title": "Automotive and Watercraft Service Attendants",
+    "description": null
+  },
+  {
+    "socc_code": "536032",
+    "title": "Aircraft Service Attendants",
+    "description": null
+  },
+  {
+    "socc_code": "536041",
+    "title": "Traffic Technicians",
+    "description": null
+  },
+  {
+    "socc_code": "536051",
+    "title": "Transportation Inspectors",
+    "description": null
+  },
+  {
+    "socc_code": "536061",
+    "title": "Passenger Attendants",
+    "description": null
+  },
+  {
+    "socc_code": "536099",
+    "title": "Transportation Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "537011",
+    "title": "Conveyor Operators and Tenders",
+    "description": null
+  },
+  {
+    "socc_code": "537021",
+    "title": "Crane and Tower Operators",
+    "description": null
+  },
+  {
+    "socc_code": "537031",
+    "title": "Dredge Operators",
+    "description": null
+  },
+  {
+    "socc_code": "537041",
+    "title": "Hoist and Winch Operators",
+    "description": null
+  },
+  {
+    "socc_code": "537051",
+    "title": "Industrial Truck and Tractor Operators",
+    "description": null
+  },
+  {
+    "socc_code": "537061",
+    "title": "Cleaners of Vehicles and Equipment",
+    "description": null
+  },
+  {
+    "socc_code": "537062",
+    "title": "Laborers and Freight, Stock, and Material Movers, Hand",
+    "description": null
+  },
+  {
+    "socc_code": "537063",
+    "title": "Machine Feeders and Offbearers",
+    "description": null
+  },
+  {
+    "socc_code": "537064",
+    "title": "Packers and Packagers, Hand",
+    "description": null
+  },
+  {
+    "socc_code": "537065",
+    "title": "Stockers and Order Fillers",
+    "description": null
+  },
+  {
+    "socc_code": "537071",
+    "title": "Gas Compressor and Gas Pumping Station Operators",
+    "description": null
+  },
+  {
+    "socc_code": "537072",
+    "title": "Pump Operators, Except Wellhead Pumpers",
+    "description": null
+  },
+  {
+    "socc_code": "537073",
+    "title": "Wellhead Pumpers",
+    "description": null
+  },
+  {
+    "socc_code": "537081",
+    "title": "Refuse and Recyclable Material Collectors",
+    "description": null
+  },
+  {
+    "socc_code": "537121",
+    "title": "Tank Car, Truck, and Ship Loaders",
+    "description": null
+  },
+  {
+    "socc_code": "537199",
+    "title": "Material Moving Workers, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "551011",
+    "title": "Air Crew Officers",
+    "description": null
+  },
+  {
+    "socc_code": "551012",
+    "title": "Aircraft Launch and Recovery Officers",
+    "description": null
+  },
+  {
+    "socc_code": "551013",
+    "title": "Armored Assault Vehicle Officers",
+    "description": null
+  },
+  {
+    "socc_code": "551014",
+    "title": "Artillery and Missile Officers",
+    "description": null
+  },
+  {
+    "socc_code": "551015",
+    "title": "Command and Control Center Officers",
+    "description": null
+  },
+  {
+    "socc_code": "551016",
+    "title": "Infantry Officers",
+    "description": null
+  },
+  {
+    "socc_code": "551017",
+    "title": "Special Forces Officers",
+    "description": null
+  },
+  {
+    "socc_code": "551019",
+    "title": "Military Officer Special and Tactical Operations Leaders, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "552011",
+    "title": "First-Line Supervisors of Air Crew Members",
+    "description": null
+  },
+  {
+    "socc_code": "552012",
+    "title": "First-Line Supervisors of Weapons Specialists/Crew Members",
+    "description": null
+  },
+  {
+    "socc_code": "552013",
+    "title": "First-Line Supervisors of All Other Tactical Operations Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "553011",
+    "title": "Air Crew Members",
+    "description": null
+  },
+  {
+    "socc_code": "553012",
+    "title": "Aircraft Launch and Recovery Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "553013",
+    "title": "Armored Assault Vehicle Crew Members",
+    "description": null
+  },
+  {
+    "socc_code": "553014",
+    "title": "Artillery and Missile Crew Members",
+    "description": null
+  },
+  {
+    "socc_code": "553015",
+    "title": "Command and Control Center Specialists",
+    "description": null
+  },
+  {
+    "socc_code": "553016",
+    "title": "Infantry",
+    "description": null
+  },
+  {
+    "socc_code": "553018",
+    "title": "Special Forces",
+    "description": null
+  },
+  {
+    "socc_code": "553019",
+    "title": "Military Enlisted Tactical Operations and Air/Weapons Specialists and Crew Members, All Other",
+    "description": null
+  },
+  {
+    "socc_code": "999999",
+    "title": "No Match",
+    "description": null
+  }
+]
