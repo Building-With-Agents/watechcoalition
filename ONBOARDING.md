@@ -179,7 +179,7 @@ If you need the Next.js/Prisma layer, seed MSSQL from the anonymized fixtures in
 ```bash
 npx prisma db push
 npx prisma generate
-npm run db:seed:anonymized
+node prisma/seed-anonymized.mjs --idempotent
 ```
 
 Tip: if `prisma db push` errors and your machine has local SQL Server installed, verify you are connected to Docker SQL first:

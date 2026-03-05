@@ -44,8 +44,8 @@ cd watechcoalition
 - `prettier`: Formats the code using Prettier.
 - `prettier:check`: Checks if the code is formatted according to Prettier.
 - `start`: Starts the application in production mode.
-- `db:seed:anonymized`: Seeds the database with anonymized JSON fixtures from `prisma/mock-data/` (recommended for local dev).
-- `seed`: Seeds the database with synthetic/faker-generated data (does not use `prisma/mock-data/`).
+- `db:seed`: Seeds the PostgreSQL database with anonymized fixtures via `scripts/pg-seed-data/seed_pg_database.py` (recommended for local dev).
+- `seed`: Seeds the MSSQL database with synthetic/faker-generated data via Prisma (deprecated).
 - `lint`: Runs ESLint to check for code issues.
 
 ## Agent Pipeline

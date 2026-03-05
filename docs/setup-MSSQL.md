@@ -106,7 +106,7 @@ Seed from the anonymized JSON fixtures in `prisma/mock-data/` (recommended for l
 To seed the database with anonymized fixtures (recommended):
 
 ```bash
-npm run db:seed:anonymized
+node prisma/seed-anonymized.mjs --idempotent
 ```
 
 Alternative (generates synthetic/faker data; does NOT use `prisma/mock-data/`):
