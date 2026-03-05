@@ -72,7 +72,7 @@ weight it carries and who owns it.
 | 25 | Contract | Next.js / Python layer boundary | Prisma is Next.js-only — never imported or invoked from Python. Python agents access PostgreSQL via SQLAlchemy only |
 | 26 | Contract | Abstraction layer mandate | All swappable tools sit behind ABCs: `SourceAdapter`, `EventBusBase`, `TracerBase`, `AgentBase` |
 | 27 | Contract | Logging library | structlog — JSON format, keyword arguments, no PII in any log line |
-| 28 | Contract | Agent health interface | Every agent exposes `health_check() → bool` — returns True if all dependencies reachable, called by Orchestration Agent before scheduling |
+| 28 | Contract | Agent health interface | Every agent exposes `health_check() → dict` — returns `{"status": "ok"\|"degraded"\|"down", "agent": str, "last_run": str, "metrics": dict}`, called by Orchestration Agent before scheduling |
 | 29 | Contract | Correlation ID propagation | Set once at pipeline entry, propagated unchanged through every downstream event |
 | 30 | Contract | Taxonomy store abstraction | `TaxonomyStoreBase` ABC — concrete implementation switchable via `TAXONOMY_STORE` env var. Phase 1: `PostgreSQLTaxonomyStore`. Phase 2: `LightcastTaxonomyStore` |
 
@@ -380,7 +380,7 @@ are never logged, by any agent.
 | **Type** | Contract |
 | **Options** | No standard interface / `health_check()` on every agent |
 | **Status** | ✅ Resolved — Must resolve before Week 3 |
-| **Decision** | Every agent exposes `health_check() → bool`. Returns `True` if all dependencies reachable, `False` otherwise. The Orchestration Agent calls it before scheduling any run and aborts if any agent returns `False` |
+| **Decision** | Every agent exposes `health_check() → dict`. Returns `{"status": "ok"\|"degraded"\|"down", "agent": str, "last_run": str, "metrics": dict}`. The Orchestration Agent calls it before scheduling any run and aborts if any Phase 1 agent returns `status != "ok"` |
 
 **Rationale:** Without a standard health check, the Orchestration Agent has no
 way to know if a downstream agent is ready before committing resources to a run.

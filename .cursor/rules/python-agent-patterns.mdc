@@ -14,19 +14,19 @@ All Python code in `agents/` must follow these patterns exactly.
 Every inter-agent communication uses this shape. Never invent a different structure.
 
 ```python
-# agents/common/events/base.py
-from dataclasses import dataclass, field
+# agents/common/event_envelope.py
+from pydantic import BaseModel, Field
 from datetime import datetime
-from uuid import uuid4
+from typing import Any
+import uuid
 
-@dataclass
-class AgentEvent:
-    event_id: str = field(default_factory=lambda: str(uuid4()))
-    correlation_id: str = ""       # propagated UNCHANGED from IngestBatch through all downstream events
-    agent_id: str = ""             # e.g. "ingestion_agent"
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+class EventEnvelope(BaseModel):
+    event_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    correlation_id: str            # propagated UNCHANGED from IngestBatch through all downstream events
+    agent_id: str                  # e.g. "ingestion-agent"
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
     schema_version: str = "1.0"    # increment on breaking payload changes
-    payload: dict = field(default_factory=dict)
+    payload: dict[str, Any]
 ```
 
 ## Agent Class Skeleton
@@ -36,7 +36,7 @@ Every agent follows this structure:
 ```python
 import os
 import structlog
-from agents.common.events.base import AgentEvent
+from agents.common.event_envelope import EventEnvelope
 from agents.common.llm_adapter import get_adapter
 
 log = structlog.get_logger()
@@ -49,7 +49,7 @@ class IngestionAgent:
         self.last_run_at = None
         self.last_run_metrics = {}
 
-    def process(self, event: AgentEvent | None = None) -> AgentEvent:
+    def process(self, event: EventEnvelope | None = None) -> EventEnvelope:
         """Main processing method. Consumes an input event, returns an output event."""
         ...
 
@@ -95,9 +95,9 @@ log.error("source_unreachable", source="jsearch", attempt=3, max_retries=5)
 
 ## Database Access — SQLAlchemy Only
 
-Python agents access MSSQL via SQLAlchemy. **Never import or use Prisma from Python.**
+Python agents access PostgreSQL via SQLAlchemy + psycopg2. **Never import or use Prisma from Python.**
 
-Use `PYTHON_DATABASE_URL` (not `DATABASE_URL` — that is Prisma's `sqlserver://` format and is incompatible with SQLAlchemy). `PYTHON_DATABASE_URL` uses `mssql+pyodbc://` format.
+Use `PYTHON_DATABASE_URL` (not `DATABASE_URL` — that is Prisma's format and is incompatible with SQLAlchemy). `PYTHON_DATABASE_URL` uses `postgresql+psycopg2://` format.
 
 ```python
 import os
@@ -107,7 +107,7 @@ from sqlalchemy.orm import Session
 engine = create_engine(os.getenv("PYTHON_DATABASE_URL"))
 
 with Session(engine) as session:
-    result = session.execute(text("SELECT TOP 100 * FROM job_postings WHERE company_id IS NOT NULL"))
+    result = session.execute(text("SELECT * FROM dbo.job_postings WHERE company_id IS NOT NULL LIMIT 100"))
     rows = result.fetchall()
 ```
 
@@ -116,7 +116,7 @@ with Session(engine) as session:
 All credentials from `os.getenv()`. Never hardcode. Key variables:
 
 ```python
-os.getenv("PYTHON_DATABASE_URL")             # SQLAlchemy pyodbc URL: mssql+pyodbc://user:pass@host:port/db?driver=...
+os.getenv("PYTHON_DATABASE_URL")             # SQLAlchemy psycopg2 URL: postgresql+psycopg2://user:pass@host:port/db
 os.getenv("AZURE_OPENAI_API_KEY")            # LLM credentials
 os.getenv("AZURE_OPENAI_ENDPOINT")
 os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
