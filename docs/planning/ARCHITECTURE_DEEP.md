@@ -1,4 +1,5 @@
 # Job Intelligence Engine — Canonical Architecture (Phase 1 / Phase 2)
+
 **Audience:** Implementing engineers, Claude Code
 **Version:** 1.1 | **Source of truth:** `job_intelligence_engine_architecture.docx`
 **Last updated:** 2026-02-18
@@ -212,9 +213,11 @@ class JobRecord(BaseModel):
 ## Agent Specifications
 
 ### 1. Ingestion Agent
+
 **File:** `agents/ingestion/agent.py` | **Emits:** `IngestBatch` | **Writes to:** `raw_ingested_jobs`
 
 **Phase 1 responsibilities:**
+
 - Poll JSearch via `httpx`; scrape via Crawl4AI [SA #12 — reference implementation]
 - Fingerprint: `sha256(source + external_id + title + company + date_posted)`
 - Dedup against `raw_ingested_jobs.raw_payload_hash`; discard silently; increment counter
@@ -222,47 +225,57 @@ class JobRecord(BaseModel):
 - Provenance tags: `source`, `external_id`, `raw_payload_hash`, `ingestion_run_id`, `ingestion_timestamp`
 
 **Error handling:**
+
 - Source unreachable: exponential back-off, max 5 retries → `SourceFailure` to Orchestrator
 - Partial batch: stage successful records; mark failures; do not block downstream
 - Schema violation at intake: quarantine to `data/dead_letter/`
 
-| Metric | Target |
-|--------|--------|
-| Ingest success rate | ≥ 98% per 24h |
-| Duplicate rate forwarded | < 0.5% |
-| Dead-letter volume | < 1%; alert above 2% |
+
+| Metric                   | Target               |
+| ------------------------ | -------------------- |
+| Ingest success rate      | ≥ 98% per 24h        |
+| Duplicate rate forwarded | < 0.5%               |
+| Dead-letter volume       | < 1%; alert above 2% |
+
 
 ---
 
 ### 2. Normalization Agent
+
 **File:** `agents/normalization/agent.py` | **Consumes:** `IngestBatch` | **Emits:** `NormalizationComplete` | **Writes to:** `normalized_jobs`
 
 **Phase 1 responsibilities:**
+
 - Map source fields → `JobRecord` via per-source field mappers
 - Standardize: dates (ISO 8601), salaries (min/max/currency/period), locations, employment types
 - Strip HTML, clean whitespace, sanitize free-text
 - Validate against Pydantic schema; quarantine violations
 
 **Error handling:**
+
 - Violation: quarantine with annotated error path; do not block batch
 - Ambiguous mapping: best-effort; `low_confidence = true`
 - Currency failure: store raw; `currency_normalized = false`
 - Batch failure: `NormalizationFailed` → Orchestrator
 
-| Metric | Target |
-|--------|--------|
-| Schema conformance | ≥ 99% |
-| Field mapping accuracy | ≥ 97% (spot check) |
-| Salary normalization coverage | ≥ 90% |
-| Processing latency | Median < 200ms; p99 < 1s |
-| Quarantine rate | < 1%; alert above 3% |
+
+| Metric                        | Target                   |
+| ----------------------------- | ------------------------ |
+| Schema conformance            | ≥ 99%                    |
+| Field mapping accuracy        | ≥ 97% (spot check)       |
+| Salary normalization coverage | ≥ 90%                    |
+| Processing latency            | Median < 200ms; p99 < 1s |
+| Quarantine rate               | < 1%; alert above 3%     |
+
 
 ---
 
 ### 3. Skills Extraction Agent
+
 **File:** `agents/skills_extraction/agent.py` | **Consumes:** `NormalizationComplete` | **Emits:** `SkillsExtracted`
 
 **Phase 1 responsibilities:**
+
 - LLM inference over `title`, `description`, `requirements`, `responsibilities`
 - Produce `SkillRecord` per skill: `label`, `type`, `confidence`, `field_source`, `required_flag`
 - Taxonomy linking order:
@@ -274,23 +287,28 @@ class JobRecord(BaseModel):
 - Log all LLM calls to `llm_audit_log`
 
 **Error handling:**
+
 - LLM timeout: retry once → `skills = []`, `extraction_status = "failed"`; continue batch
 - Rate limit: back-off and queue; alert Orchestrator if queue > threshold
 
-| Metric | Target |
-|--------|--------|
-| Precision at taxonomy link | ≥ 92% (human eval) |
-| Recall of key skills | ≥ 88% |
-| Taxonomy coverage | ≥ 95% |
-| Avg confidence | ≥ 0.80 |
-| Throughput | ≥ 500 records/min at p50 |
+
+| Metric                     | Target                   |
+| -------------------------- | ------------------------ |
+| Precision at taxonomy link | ≥ 92% (human eval)       |
+| Recall of key skills       | ≥ 88%                    |
+| Taxonomy coverage          | ≥ 95%                    |
+| Avg confidence             | ≥ 0.80                   |
+| Throughput                 | ≥ 500 records/min at p50 |
+
 
 ---
 
 ### 4. Enrichment Agent
+
 **File:** `agents/enrichment/agent.py` | **Consumes:** `SkillsExtracted` | **Emits:** `RecordEnriched` | **Writes to:** `job_postings`
 
 #### Phase 1 — Lite (implement now)
+
 - Classify job role and seniority
 - Quality score [0–1]: completeness, linguistic clarity, AI keyword density, structural coherence
 - Spam detection (IC #8):
@@ -303,6 +321,7 @@ class JobRecord(BaseModel):
 - Map `sector_id` → `industry_sectors`
 
 #### Phase 2 — Full (do not implement in Phase 1)
+
 - Resolve `raw_skill` entries against alternative taxonomy sources
 - Company-level data: industry, size band, funding stage
 - Geographic enrichment: region, metro, remote classification
@@ -310,27 +329,32 @@ class JobRecord(BaseModel):
 - Composite enrichment quality score
 
 **Error handling:**
+
 - Phase 1: classifier unavailable → skip scoring, flag, continue
 - Phase 2: external lookup failure → null field, `enrichment_partial = true`, continue
 
-| Metric | Phase | Target |
-|--------|-------|--------|
-| Classification F1 | 1 | Tracked |
-| Spam precision | 1 | High — minimize false positives |
-| Quality correlation | 1 | Tracked vs human |
-| Company match rate | 2 | ≥ 90% |
-| Geo enrichment rate | 2 | ≥ 95% |
-| SOC/NOC coverage | 2 | ≥ 85% |
-| Raw skill resolution | 2 | ≥ 75% |
-| Enrichment quality avg | 2 | ≥ 0.85 |
+
+| Metric                 | Phase | Target                          |
+| ---------------------- | ----- | ------------------------------- |
+| Classification F1      | 1     | Tracked                         |
+| Spam precision         | 1     | High — minimize false positives |
+| Quality correlation    | 1     | Tracked vs human                |
+| Company match rate     | 2     | ≥ 90%                           |
+| Geo enrichment rate    | 2     | ≥ 95%                           |
+| SOC/NOC coverage       | 2     | ≥ 85%                           |
+| Raw skill resolution   | 2     | ≥ 75%                           |
+| Enrichment quality avg | 2     | ≥ 0.85                          |
+
 
 ---
 
 ### 5. Analytics Agent
+
 **File:** `agents/analytics/agent.py` | **Consumes:** `RecordEnriched` | **Emits:** `AnalyticsRefreshed`
 **Exposes:** `POST /analytics/query` (REST) [SA #18 — reference implementation]
 
 **Phase 1 responsibilities:**
+
 - Aggregates across dimensions: skill, role, industry, region, experience level, company size
 - Salary distributions: median, p25, p75, p95 per dimension intersection
 - Co-occurrence matrices (skills appearing together)
@@ -339,65 +363,77 @@ class JobRecord(BaseModel):
 - Text-to-SQL Q&A with guardrails
 
 **SQL guardrails (always enforced):**
+
 - SELECT only — no INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, EXEC
 - Allowed tables allowlist only
 - 100-row max; 30-second timeout
 - All attempts logged to `llm_audit_log`
 
 **Error handling:**
+
 - Stale data: surface timestamp; recompute if > SLA
 - SQL error: retry once with self-correction → return error with explanation
 - Query timeout: partial result with `is_partial = true`
 - Cardinality explosion: configurable cap; coalesce long-tail into "Other"; emit warning
 - LLM unavailable: template fallback; never block aggregate refresh
 
-| Metric | Target |
-|--------|--------|
-| Aggregate accuracy | ≥ 99.5% vs raw recount |
-| Query p50 latency | < 500ms |
-| Aggregate freshness | Within 15 min of new enriched batch |
+
+| Metric                       | Target                                               |
+| ---------------------------- | ---------------------------------------------------- |
+| Aggregate accuracy           | ≥ 99.5% vs raw recount                               |
+| Query p50 latency            | < 500ms                                              |
+| Aggregate freshness          | Within 15 min of new enriched batch                  |
 | Salary distribution coverage | ≥ 80% of role/region intersections with sufficient N |
+
 
 ---
 
 ### 6. Visualization Agent
+
 **File:** `agents/visualization/agent.py` + `agents/dashboard/streamlit_app.py`
 **Consumes:** `AnalyticsRefreshed`, `DemandSignalsUpdated` (Phase 2)
 **Emits:** `RenderComplete` | **DB:** Read-only SQLAlchemy
 
 **Phase 1 dashboard pages:**
 
-| Page | Features |
-|------|---------|
-| Ingestion Overview | Runs per day, records ingested, dedup rate, error rate, recent runs table |
-| Normalization Quality | Quarantine count by error type, field mapping spot-check, salary coverage |
-| Skill Taxonomy Coverage | % mapped vs unmapped (gauge), skill type distribution, unmapped list |
-| Weekly Insights | LLM or template summary + supporting charts |
-| Ask the Data | Natural language input, generated SQL code block, result table |
-| Operations & Alerts | Active alerts (severity-sorted), alert history, per-agent health |
+
+| Page                    | Features                                                                  |
+| ----------------------- | ------------------------------------------------------------------------- |
+| Ingestion Overview      | Runs per day, records ingested, dedup rate, error rate, recent runs table |
+| Normalization Quality   | Quarantine count by error type, field mapping spot-check, salary coverage |
+| Skill Taxonomy Coverage | % mapped vs unmapped (gauge), skill type distribution, unmapped list      |
+| Weekly Insights         | LLM or template summary + supporting charts                               |
+| Ask the Data            | Natural language input, generated SQL code block, result table            |
+| Operations & Alerts     | Active alerts (severity-sorted), alert history, per-agent health          |
+
 
 **Exports:** PDF summaries, CSV, JSON — all standard in Phase 1, not stretch.
 
 **Cache:** TTL-based. Stale data served with banner + `VisualizationDegraded` alert — never blank page.
 
 **Error handling:**
+
 - Upstream unavailable: stale + banner + alert
 - Render failure: retry once → `RenderFailed` → placeholder
 - Export timeout: stream partial with truncation notice
 
-| Metric | Target |
-|--------|--------|
-| Render success rate | ≥ 99.5% |
-| Freshness | Within 5 min of trigger |
-| Export p95 | < 10s |
-| Cache hit rate | ≥ 70% |
+
+| Metric              | Target                  |
+| ------------------- | ----------------------- |
+| Render success rate | ≥ 99.5%                 |
+| Freshness           | Within 5 min of trigger |
+| Export p95          | < 10s                   |
+| Cache hit rate      | ≥ 70%                   |
+
 
 ---
 
 ### 7. Orchestration Agent
+
 **File:** `agents/orchestration/agent.py` | **Framework:** LangGraph StateGraph [SA #13/#16] + APScheduler [IC]
 
 #### Phase 1 — Basic (implement now)
+
 - Master run schedule; trigger pipeline steps in sequence
 - LangGraph StateGraph for event routing
 - Retry policies with exponential back-off + jitter
@@ -406,36 +442,43 @@ class JobRecord(BaseModel):
 - System-wide health monitoring
 
 **Alerting tiers:**
+
 - **Warning:** logged + metric emitted
 - **Critical:** paged to on-call
 - **Fatal:** circuit broken + human escalation
 
 **Retry policies:**
 
-| Agent | Max retries | Back-off |
-|-------|------------|---------|
-| Ingestion (source unreachable) | 5 | Exponential + jitter |
-| Normalization (batch failure) | 3 | Exponential |
-| Skills Extraction (LLM timeout) | 2 per record | Fixed 2s |
-| Any agent (transient DB error) | 3 | Exponential |
+
+| Agent                           | Max retries  | Back-off             |
+| ------------------------------- | ------------ | -------------------- |
+| Ingestion (source unreachable)  | 5            | Exponential + jitter |
+| Normalization (batch failure)   | 3            | Exponential          |
+| Skills Extraction (LLM timeout) | 2 per record | Fixed 2s             |
+| Any agent (transient DB error)  | 3            | Exponential          |
+
 
 #### Phase 2 — Full (do not implement in Phase 1)
+
 - Circuit-breaking: ≥ 90% precision target (no false positives)
 - Saga pattern: explicit gates at stage transitions
 - Compensating flows: re-queue at last successful checkpoint
 - Admin API for manual overrides, re-runs, config changes
 
-| Metric | Target |
-|--------|--------|
-| Pipeline SLA | ≥ 95% of batches |
-| MTTD | < 60s |
-| MTTR (auto) | < 5 min |
-| Circuit-break precision | ≥ 90% (Phase 2) |
-| Audit log completeness | 100% |
+
+| Metric                  | Target           |
+| ----------------------- | ---------------- |
+| Pipeline SLA            | ≥ 95% of batches |
+| MTTD                    | < 60s            |
+| MTTR (auto)             | < 5 min          |
+| Circuit-break precision | ≥ 90% (Phase 2)  |
+| Audit log completeness  | 100%             |
+
 
 ---
 
 ### 8. Demand Analysis Agent *(Phase 2 only — scaffold directory, do not implement)*
+
 **File:** `agents/demand_analysis/agent.py` | **Consumes:** `RecordEnriched` | **Emits:** `DemandSignalsUpdated`
 
 - Time-series index: skill, role, industry, region
@@ -445,29 +488,33 @@ class JobRecord(BaseModel):
 - 30-day demand forecasts (configurable horizon)
 - `DemandAnomaly` events on detected spikes or cliffs
 
-| Metric | Target |
-|--------|--------|
-| Forecast MAPE (30-day) | < 15% |
-| Trend accuracy | ≥ 85% |
-| Signal freshness | Within 1h of new batch |
-| Anomaly precision | ≥ 80% |
+
+| Metric                 | Target                 |
+| ---------------------- | ---------------------- |
+| Forecast MAPE (30-day) | < 15%                  |
+| Trend accuracy         | ≥ 85%                  |
+| Signal freshness       | Within 1h of new batch |
+| Anomaly precision      | ≥ 80%                  |
+
 
 ---
 
 ## Event Catalog
 
-| Event | Producer | Consumers |
-|-------|----------|-----------|
-| `IngestBatch` | Ingestion | Normalization, Orchestrator |
-| `NormalizationComplete` | Normalization | Skills Extraction, Orchestrator |
-| `SkillsExtracted` | Skills Extraction | Enrichment, Orchestrator |
-| `RecordEnriched` | Enrichment | Analytics, Demand Analysis*, Orchestrator |
-| `DemandSignalsUpdated` | Demand Analysis* | Analytics, Visualization, Orchestrator |
-| `AnalyticsRefreshed` | Analytics | Visualization, Orchestrator |
-| `RenderComplete` | Visualization | Orchestrator |
-| `*Failed` / `*Alert` | Any agent | **Orchestrator only** |
-| `SourceFailure` | Ingestion | Orchestrator |
-| `DemandAnomaly` | Demand Analysis* | Orchestrator |
+
+| Event                   | Producer          | Consumers                                 |
+| ----------------------- | ----------------- | ----------------------------------------- |
+| `IngestBatch`           | Ingestion         | Normalization, Orchestrator               |
+| `NormalizationComplete` | Normalization     | Skills Extraction, Orchestrator           |
+| `SkillsExtracted`       | Skills Extraction | Enrichment, Orchestrator                  |
+| `RecordEnriched`        | Enrichment        | Analytics, Demand Analysis*, Orchestrator |
+| `DemandSignalsUpdated`  | Demand Analysis*  | Analytics, Visualization, Orchestrator    |
+| `AnalyticsRefreshed`    | Analytics         | Visualization, Orchestrator               |
+| `RenderComplete`        | Visualization     | Orchestrator                              |
+| `*Failed` / `*Alert`    | Any agent         | **Orchestrator only**                     |
+| `SourceFailure`         | Ingestion         | Orchestrator                              |
+| `DemandAnomaly`         | Demand Analysis*  | Orchestrator                              |
+
 
 *Phase 2
 
@@ -496,29 +543,33 @@ ALTER TABLE job_postings ADD COLUMN remote_classification NVARCHAR(50);
 
 **Agent-managed tables:**
 
-| Table | Phase | Purpose |
-|-------|-------|---------|
-| `raw_ingested_jobs` | 1 | Ingestion staging |
-| `normalized_jobs` | 1 | Post-normalization records |
-| `job_ingestion_runs` | 1 | Batch tracking |
-| `alerts` | 1 | Active and historical alerts |
-| `orchestration_audit_log` | 1 | All orchestration decisions |
-| `llm_audit_log` | 1 | All LLM calls |
-| `analytics_aggregates` | 1 | Computed aggregates |
-| `demand_signals` | 2 | Trend and forecast outputs |
+
+| Table                     | Phase | Purpose                      |
+| ------------------------- | ----- | ---------------------------- |
+| `raw_ingested_jobs`       | 1     | Ingestion staging            |
+| `normalized_jobs`         | 1     | Post-normalization records   |
+| `job_ingestion_runs`      | 1     | Batch tracking               |
+| `alerts`                  | 1     | Active and historical alerts |
+| `orchestration_audit_log` | 1     | All orchestration decisions  |
+| `llm_audit_log`           | 1     | All LLM calls                |
+| `analytics_aggregates`    | 1     | Computed aggregates          |
+| `demand_signals`          | 2     | Trend and forecast outputs   |
+
 
 ---
 
 ## System-Level Error-Handling
 
-| Strategy | Phase | How It Works |
-|----------|-------|-------------|
-| Dead-letter store | 1 | All retry-exhausted records quarantined with full error context |
-| Exponential back-off | 1 | Back-off + jitter on all retries; max per agent and error class |
-| Graceful degradation | 1 | Analytics/Visualization serve stale with flags; pipeline never halts for non-critical failures |
-| Alerting tiers | 1 | Warning: log + metric. Critical: page. Fatal: circuit break + escalation |
-| Circuit breaker | 2 | Orchestrator opens when error rate > threshold |
-| Compensating sagas | 2 | Mid-pipeline failure rolls back to last successful checkpoint |
+
+| Strategy             | Phase | How It Works                                                                                   |
+| -------------------- | ----- | ---------------------------------------------------------------------------------------------- |
+| Dead-letter store    | 1     | All retry-exhausted records quarantined with full error context                                |
+| Exponential back-off | 1     | Back-off + jitter on all retries; max per agent and error class                                |
+| Graceful degradation | 1     | Analytics/Visualization serve stale with flags; pipeline never halts for non-critical failures |
+| Alerting tiers       | 1     | Warning: log + metric. Critical: page. Fatal: circuit break + escalation                       |
+| Circuit breaker      | 2     | Orchestrator opens when error rate > threshold                                                 |
+| Compensating sagas   | 2     | Mid-pipeline failure rolls back to last successful checkpoint                                  |
+
 
 ---
 
@@ -560,19 +611,21 @@ BATCH_SIZE=100
 
 ## Build Order
 
-| Week(s) | Deliverable |
-|---------|------------|
-| 1–2 | Environment, first scrape, walking skeleton (8 agent stubs, pipeline runner, journey dashboard) |
-| 3 | Ingestion Agent + Normalization Agent |
-| 4 | Skills Extraction Agent + evaluation harness + Enrichment-lite |
-| 5 | Visualization Agent |
-| 6 | Orchestration Agent |
-| 7 | Analytics Agent — aggregates + weekly insights |
-| 8 | Analytics Agent — Ask the Data |
-| 9 | Pipeline hardening (near-dedup, event contract enforcement) |
-| 10 | Testing, security review, load testing |
-| 11 | Documentation |
-| 12 | Capstone demo + `v0.1.0-capstone` |
+
+| Week(s) | Deliverable                                                                                     |
+| ------- | ----------------------------------------------------------------------------------------------- |
+| 1–2     | Environment, first scrape, walking skeleton (8 agent stubs, pipeline runner, journey dashboard) |
+| 3       | Ingestion Agent + Normalization Agent                                                           |
+| 4       | Skills Extraction Agent + evaluation harness + Enrichment-lite                                  |
+| 5       | Visualization Agent                                                                             |
+| 6       | Orchestration Agent                                                                             |
+| 7       | Analytics Agent — aggregates + weekly insights                                                  |
+| 8       | Analytics Agent — Ask the Data                                                                  |
+| 9       | Pipeline hardening (near-dedup, event contract enforcement)                                     |
+| 10      | Testing, security review, load testing                                                          |
+| 11      | Documentation                                                                                   |
+| 12      | Capstone demo + `v0.1.0-capstone`                                                               |
+
 
 ---
 
