@@ -198,18 +198,19 @@ BATCH_SIZE=100
 ### Event envelope (every inter-agent event must use this shape)
 
 ```python
-# agents/common/events/base.py
-from dataclasses import dataclass
+# agents/common/event_envelope.py
+from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Any
+import uuid
 
-@dataclass
-class AgentEvent:
-    event_id: str          # uuid4
+class EventEnvelope(BaseModel):
+    event_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     correlation_id: str    # propagated unchanged from IngestBatch through all downstream events
-    agent_id: str          # e.g. "ingestion_agent"
-    timestamp: datetime
-    schema_version: str    # "1.0" — increment on breaking payload changes
-    payload: dict
+    agent_id: str          # e.g. "ingestion-agent"
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    schema_version: str = "1.0"  # increment on breaking payload changes
+    payload: dict[str, Any]
 ```
 
 ### LLM adapter usage
@@ -456,25 +457,30 @@ See `docs/planning/ARCHITECTURAL_DECISIONS.md` for full classification details a
 
 ## How to Run
 
-```bash
-# Install Python deps
-cd agents && pip install -r requirements.txt
+All commands run from the **repo root** with the venv activated.
 
-# Run Streamlit dashboard
+```bash
+# One-time setup: create venv and install deps
+py -3.11 -m venv agents/.venv               # Windows
+agents\.venv\Scripts\Activate.ps1            # Windows PowerShell
+pip install -r agents/requirements.txt
+
+# Run the walking skeleton pipeline (Week 2+)
+python agents/pipeline_runner.py
+
+# Run the Streamlit dashboard
 streamlit run agents/dashboard/streamlit_app.py
 
-# Run full pipeline (via Orchestration Agent scheduler)
-python -m agents.orchestration.scheduler
+# Run agent tests
+python -m pytest agents/tests/ -v
 
-# Run a single agent manually
-python -m agents.ingestion.agent --source jsearch --limit 50
-python -m agents.ingestion.agent --source crawl4ai --limit 50
+# --- Later weeks (not yet available) ---
+# Run full pipeline via Orchestration Agent scheduler (Week 6)
+# python -m agents.orchestration.scheduler
 
-# Run tests
-cd agents && pytest tests/
-
-# Run integration tests only
-cd agents && pytest tests/test_pipeline_integration.py
+# Run a single agent manually (Week 3+)
+# python -m agents.ingestion.agent --source jsearch --limit 50
+# python -m agents.ingestion.agent --source crawl4ai --limit 50
 ```
 
 ---

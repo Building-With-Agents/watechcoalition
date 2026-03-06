@@ -48,20 +48,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Detect test files
-        id: detect-tests
-        run: |
-          if find tests/ -name 'test_*.py' -o -name '*_test.py' 2>/dev/null | grep -q .; then
-            echo "has_tests=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_tests=false" >> "$GITHUB_OUTPUT"
-            echo "No test files found — skipping lint and pytest"
-          fi
-
       - name: Lint with ruff
-        if: steps.detect-tests.outputs.has_tests == 'true'
         run: ruff check .
 
       - name: Run pytest
-        if: steps.detect-tests.outputs.has_tests == 'true'
         run: pytest tests/ -v
