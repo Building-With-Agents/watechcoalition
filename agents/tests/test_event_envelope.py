@@ -37,6 +37,11 @@ class TestEventEnvelope:
         with pytest.raises(ValidationError):
             EventEnvelope(agent_id="test-agent", payload={})  # type: ignore[call-arg]
 
+    def test_agent_id_required(self) -> None:
+        """Missing agent_id raises a Pydantic ValidationError."""
+        with pytest.raises(ValidationError):
+            EventEnvelope(correlation_id="c-1", payload={})  # type: ignore[call-arg]
+
     def test_defaults(self) -> None:
         """Timestamp is auto-set and schema_version defaults to '1.0'."""
         env = EventEnvelope(
