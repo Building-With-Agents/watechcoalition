@@ -21,17 +21,16 @@ class AgentBase(ABC):
     """Abstract base class for all Job Intelligence Engine agents.
 
     Subclasses MUST implement:
+        agent_id (property) -> str
         health_check() -> dict
         process(event: EventEnvelope) -> EventEnvelope | None
     """
 
-    def __init__(self, agent_id: str) -> None:
-        self._agent_id = agent_id
-
     @property
+    @abstractmethod
     def agent_id(self) -> str:
         """Canonical agent identifier (e.g. 'ingestion-agent')."""
-        return self._agent_id
+        ...
 
     @abstractmethod
     def health_check(self) -> dict:
