@@ -11,5 +11,6 @@ langchain-openai>=0.2
 langsmith>=0.1
 crawl4ai>=0.4
 apscheduler>=3.10
+python-dotenv>=1.0
 pytest>=8.0
 ruff>=0.4

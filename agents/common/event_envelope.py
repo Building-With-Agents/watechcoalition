@@ -47,8 +47,8 @@ class EventEnvelope(BaseModel):
     """
 
     event_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    correlation_id: str
-    agent_id: str
+    correlation_id: str = ""
+    agent_id: str = ""
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     schema_version: str = "1.0"
-    payload: dict[str, Any]
+    payload: dict[str, Any] = Field(default_factory=dict)
