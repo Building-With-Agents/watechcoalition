@@ -80,3 +80,10 @@ Only **finalized** changes are recorded here. Add entries when exercises or revi
 - **Changed** `agents/pipeline_runner.py`: default input when `--input` not provided is `fallback_scrape_sample.json` if present (so `python -m agents.pipeline_runner` runs 10 records). When Demand Analysis returns `None`, runner now appends a synthetic event (same six envelope fields, `payload.phase2_skipped: true`) so the run log has one entry per agent per record (80 entries for 10 records).
 - **Added** `agents/docs/task_2_4_verification.md`: steps to run the pipeline, verify 80 events, six envelope fields, correlation_id consistency, and re-run unique event_ids.
 - **Added** `agents/scripts/verify_pipeline_run.py`: optional script to validate `pipeline_run.json` (event count, envelope fields, correlation_id counts). Run: `python -m agents.scripts.verify_pipeline_run` or with path to JSON.
+
+### Task 2.5 — Three-page journey dashboard
+
+- **Added** Three dashboard pages using `pipeline_run.json`: **Pipeline Run Summary** (run metadata, all-records-through-all-stages, correlation ID table), **Record Journey** (dropdown by correlation_id, timeline of eight stages per record), **Batch Insights** (top skills bar chart, seniority distribution, companies and locations — all derived from event payloads, not hardcoded).
+- **Added** Sidebar page selector: Pipeline Run Summary | Record Journey | Batch Insights | Scraped postings; `_load_pipeline_run()` with `@st.cache_data(ttl=60)`; duration and display helpers.
+- **Verified** Page 2 filters by correlation_id (only that record’s eight stages shown); Page 3 skills and seniority use real data from `skills_extraction_agent` payload.records.
+- **Changed** Batch Insights (Page 3): use first `skills_extraction_agent` / `enrichment_agent` event only. Current stubs emit the full fixture in every event (10 records each), so aggregating all events would 10× duplicate; when Skills Extraction is real (one record per event), dashboard should aggregate all events instead.
