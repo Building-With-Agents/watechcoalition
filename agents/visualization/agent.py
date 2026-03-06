@@ -9,6 +9,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from agents.common.base_agent import BaseAgent
+from agents.common.datetime_utils import datetime_to_iso_utc
 from agents.common.event_envelope import EventEnvelope
 from agents.common.paths import FIXTURES_DIR
 
@@ -28,7 +29,7 @@ class VisualizationAgent(BaseAgent):
         return {
             "status": status,
             "agent": self.agent_id,
-            "last_run": self._last_run_at.isoformat() if self._last_run_at else None,
+            "last_run": datetime_to_iso_utc(self._last_run_at) if self._last_run_at else None,
             "metrics": {"dashboard_path": str(dashboard_app)},
         }
 

@@ -11,6 +11,7 @@ import json
 from datetime import datetime, timezone
 
 from agents.common.base_agent import BaseAgent
+from agents.common.datetime_utils import datetime_to_iso_utc
 from agents.common.event_envelope import EventEnvelope
 from agents.common.paths import FIXTURE_SKILLS_EXTRACTED_PATH
 
@@ -35,7 +36,7 @@ class SkillsExtractionAgent(BaseAgent):
         return {
             "status": status,
             "agent": self.agent_id,
-            "last_run": self._last_run_at.isoformat() if self._last_run_at else None,
+            "last_run": datetime_to_iso_utc(self._last_run_at) if self._last_run_at else None,
             "metrics": {"fixture_path": str(FIXTURE_SKILLS_EXTRACTED_PATH)},
         }
 

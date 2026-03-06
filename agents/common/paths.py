@@ -16,3 +16,7 @@ FALLBACK_SCRAPE_PATH = FIXTURES_DIR / "fallback_scrape_sample.json"
 FIXTURE_SKILLS_EXTRACTED_PATH = FIXTURES_DIR / "fixture_skills_extracted.json"
 FIXTURE_ENRICHED_PATH = FIXTURES_DIR / "fixture_enriched.json"
 FIXTURE_ANALYTICS_REFRESHED_PATH = FIXTURES_DIR / "fixture_analytics_refreshed.json"
+
+# Pipeline runner output (Task 2.3)
+OUTPUT_DIR = _AGENTS_ROOT / "data" / "output"
+PIPELINE_RUN_JSON = OUTPUT_DIR / "pipeline_run.json"

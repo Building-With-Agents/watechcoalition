@@ -10,10 +10,11 @@ import asyncio
 import json
 import os
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 import structlog
+
+from agents.common.datetime_utils import utc_now_iso
 
 # Paths: repo root for .env and for agents package; staging path from common (single source of truth)
 _THIS_FILE = Path(__file__).resolve()
@@ -85,7 +86,7 @@ async def _scrape_urls(urls: list[str]) -> list[dict]:
                 records.append({
                     "source": SOURCE_ID,
                     "url": resolved_url,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": utc_now_iso(),
                     "raw_text": raw_text,
                 })
             except Exception as e:

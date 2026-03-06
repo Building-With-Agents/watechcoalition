@@ -13,6 +13,7 @@ import uuid
 from datetime import datetime, timezone
 
 from agents.common.base_agent import BaseAgent
+from agents.common.datetime_utils import datetime_to_iso_utc
 from agents.common.event_envelope import EventEnvelope
 from agents.common.paths import FALLBACK_SCRAPE_PATH
 
@@ -25,25 +26,30 @@ class IngestionAgent(BaseAgent):
         self._last_run_at: datetime | None = None
 
     def health_check(self) -> dict:
-        """Ok only if fallback scrape fixture exists and is readable."""
-        status = "ok" if FALLBACK_SCRAPE_PATH.exists() and FALLBACK_SCRAPE_PATH.is_file() else "down"
+        """Ok if fallback fixture exists and readable, or stub (accepts runner-provided records)."""
+        status = "ok"
         try:
-            if status == "ok":
+            if FALLBACK_SCRAPE_PATH.exists() and FALLBACK_SCRAPE_PATH.is_file():
                 FALLBACK_SCRAPE_PATH.read_text(encoding="utf-8")
         except OSError:
             status = "down"
         return {
             "status": status,
             "agent": self.agent_id,
-            "last_run": self._last_run_at.isoformat() if self._last_run_at else None,
+            "last_run": datetime_to_iso_utc(self._last_run_at) if self._last_run_at else None,
             "metrics": {"fixture_path": str(FALLBACK_SCRAPE_PATH)},
         }
 
     def process(self, event: EventEnvelope) -> EventEnvelope:
-        """Load fixture and emit IngestBatch. correlation_id from inbound only."""
+        """Emit IngestBatch. Use event.payload['records'] when provided by runner, else load fixture."""
         self._last_run_at = datetime.now(timezone.utc)
-        raw = FALLBACK_SCRAPE_PATH.read_text(encoding="utf-8")
-        records = json.loads(raw)
+        records = event.payload.get("records") if isinstance(event.payload.get("records"), list) else None
+        if records is None:
+            try:
+                raw = FALLBACK_SCRAPE_PATH.read_text(encoding="utf-8")
+                records = json.loads(raw)
+            except (OSError, json.JSONDecodeError):
+                records = []
         if not isinstance(records, list):
             records = []
         run_id = str(uuid.uuid4())
