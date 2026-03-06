@@ -74,3 +74,9 @@ Only **finalized** changes are recorded here. Add entries when exercises or revi
 - **Added** `agents/common/paths.py`: `OUTPUT_DIR`, `PIPELINE_RUN_JSON` (pipeline run log path).
 - **Changed** `agents/ingestion/agent.py`: stub accepts runner-provided `event.payload["records"]` when present; otherwise loads from fallback fixture. Health check remains ok when fixture is missing (stub can run with inline records).
 - **Changed** `agents/pipeline_runner.py`: full Task 2.3 implementation. Accepts `--input` (JSON list of raw postings), `--agents` (e.g. `0:3` for first three agents). Runs health check gate (abort if any agent status not ok/degraded). One `correlation_id` per record, created in runner and propagated through all agents via `create_outbound_event`. Structlog logs every event with `agent_id`, `event_id`, `correlation_id`, `timestamp`. Writes full run log to `agents/data/output/pipeline_run.json` (run_id, started_at, finished_at, input_record_count, events). Extensible via `PIPELINE_AGENTS` list; selectivity via `--agents 0:3`.
+
+### Task 2.4 — Run the pipeline end to end (verification)
+
+- **Changed** `agents/pipeline_runner.py`: default input when `--input` not provided is `fallback_scrape_sample.json` if present (so `python -m agents.pipeline_runner` runs 10 records). When Demand Analysis returns `None`, runner now appends a synthetic event (same six envelope fields, `payload.phase2_skipped: true`) so the run log has one entry per agent per record (80 entries for 10 records).
+- **Added** `agents/docs/task_2_4_verification.md`: steps to run the pipeline, verify 80 events, six envelope fields, correlation_id consistency, and re-run unique event_ids.
+- **Added** `agents/scripts/verify_pipeline_run.py`: optional script to validate `pipeline_run.json` (event count, envelope fields, correlation_id counts). Run: `python -m agents.scripts.verify_pipeline_run` or with path to JSON.

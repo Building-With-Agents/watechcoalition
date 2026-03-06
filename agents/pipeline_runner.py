@@ -35,7 +35,7 @@ import structlog
 
 from agents.common.datetime_utils import datetime_to_iso_utc, utc_now_iso
 from agents.common.event_envelope import EventEnvelope
-from agents.common.paths import OUTPUT_DIR, PIPELINE_RUN_JSON
+from agents.common.paths import FALLBACK_SCRAPE_PATH, OUTPUT_DIR, PIPELINE_RUN_JSON
 from agents.ingestion.agent import IngestionAgent
 from agents.normalization.agent import NormalizationAgent
 from agents.skills_extraction.agent import SkillsExtractionAgent
@@ -119,15 +119,14 @@ def run_pipeline(
         for name, agent in agents:
             out = agent.process(event)
             if out is None:
-                # Demand Analysis (Phase 2) returns None; do not update event
-                log.info(
-                    "event_emitted",
-                    agent_id=agent.agent_id,
-                    event_id=None,
+                # Demand Analysis (Phase 2) returns None; log and append synthetic event so run log has one entry per agent per record
+                synthetic = EventEnvelope(
                     correlation_id=correlation_id,
-                    timestamp=utc_now_iso(),
-                    phase2_skipped=True,
+                    agent_id=agent.agent_id,
+                    payload={"phase2_skipped": True, "message": "Phase 2 not implemented"},
                 )
+                log.info("event_emitted", **_event_to_log_dict(synthetic), phase2_skipped=True)
+                all_events.append(_serialize_event(synthetic))
                 continue
             if out.correlation_id != correlation_id:
                 log.error(
@@ -184,7 +183,7 @@ def main() -> int:
         "--input",
         type=Path,
         default=None,
-        help="JSON file with list of raw postings (or object with 'records' key). Default: one stub record.",
+        help="JSON file with list of raw postings (or object with 'records' key). Default: fallback_scrape_sample.json if present, else one stub.",
     )
     parser.add_argument(
         "--agents",
@@ -208,7 +207,8 @@ def main() -> int:
             print("Invalid --agents; use e.g. 0:3 or 0:5", file=sys.stderr)
             return 1
 
-    raw_postings = load_raw_postings(args.input)
+    input_path = args.input if args.input is not None else (FALLBACK_SCRAPE_PATH if FALLBACK_SCRAPE_PATH.exists() else None)
+    raw_postings = load_raw_postings(input_path)
     log.info("pipeline_start", record_count=len(raw_postings), agents_slice=str(agent_slice))
 
     _health_check_gate()
