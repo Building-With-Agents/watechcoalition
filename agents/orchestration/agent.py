@@ -40,8 +40,9 @@ class OrchestrationAgent(BaseAgent):
             full retry + alerting + audit log system.
     """
 
-    def __init__(self) -> None:
-        super().__init__(agent_id="orchestration-agent")
+    @property
+    def agent_id(self) -> str:
+        return "orchestration-agent"
 
     def health_check(self) -> dict:
         """Always ready — no external dependencies in stub mode."""

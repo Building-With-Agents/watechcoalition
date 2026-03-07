@@ -49,8 +49,11 @@ class AnalyticsAgent(BaseAgent):
     Week 7: replaces this with real aggregate queries and LLM summaries.
     """
 
+    @property
+    def agent_id(self) -> str:
+        return "analytics-agent"
+
     def __init__(self) -> None:
-        super().__init__(agent_id="analytics-agent")
         self._fixture: dict = {}
 
     def health_check(self) -> dict:
