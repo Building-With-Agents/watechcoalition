@@ -17,19 +17,21 @@ import json
 import sys
 from pathlib import Path
 
+import structlog
+
 # Path bootstrap: repo root on sys.path for "from agents.*" imports.
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from agents.common.event_envelope import EventEnvelope
-from agents.exp007.state import TwoAgentPipelineState
-from agents.ingestion.agent import IngestionAgent
-from agents.normalization.agent import NormalizationAgent
+from agents.common.event_envelope import EventEnvelope  # noqa: E402
+from agents.exp007.state import TwoAgentPipelineState  # noqa: E402
+from agents.ingestion.agent import IngestionAgent  # noqa: E402
+from agents.normalization.agent import NormalizationAgent  # noqa: E402
 
 # LangGraph: StateGraph, START, END
 try:
-    from langgraph.graph import END, START, StateGraph
+    from langgraph.graph import END, START, StateGraph  # noqa: E402
 except ImportError as e:
     raise ImportError(
         "LangGraph is required for EXP-007 LangGraph runner. "
@@ -39,6 +41,8 @@ except ImportError as e:
 # Agent instances (stub implementations; same as pipeline_runner.py)
 _INGESTION_AGENT = IngestionAgent()
 _NORMALIZATION_AGENT = NormalizationAgent()
+
+log = structlog.get_logger()
 
 
 def _event_from_state(state: TwoAgentPipelineState) -> EventEnvelope:
@@ -127,7 +131,7 @@ def main() -> None:
     fixtures_dir = Path(__file__).resolve().parent.parent / "data" / "fixtures"
     fallback = fixtures_dir / "fallback_scrape_sample.json"
     if not fallback.exists():
-        print(f"Fixture not found: {fallback}", file=sys.stderr)
+        log.error("fixture_not_found", path=str(fallback))
         sys.exit(1)
 
     postings = json.loads(fallback.read_text(encoding="utf-8"))
@@ -135,11 +139,13 @@ def main() -> None:
     correlation_id = str(posting.get("posting_id", "1"))
 
     state = run_two_agent_langgraph(posting, correlation_id=correlation_id)
-    print("Final event type:", state.get("current_event", {}).get("payload", {}).get("event_type"))
-    print("Correlation ID:", state.get("correlation_id"))
-    print("Status:", state.get("status"))
-    # Pretty-print final event payload for inspection
-    print(json.dumps(state.get("current_event", {}), indent=2, default=str))
+    event_type = state.get("current_event", {}).get("payload", {}).get("event_type")
+    log.info(
+        "langgraph_run_complete",
+        event_type=event_type,
+        correlation_id=state.get("correlation_id"),
+        status=state.get("status"),
+    )
 
 
 if __name__ == "__main__":
