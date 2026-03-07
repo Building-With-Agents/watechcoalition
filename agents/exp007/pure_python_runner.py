@@ -62,6 +62,21 @@ def run_two_agent_pure_python(
     }
 
 
+def run_from_after_ingestion_pure_python(event: EventEnvelope) -> TwoAgentPipelineState:
+    """
+    Resume from the last successful step: run only Normalization (no Ingestion).
+
+    Use after a crash in Normalization: pass the IngestBatch event produced by
+    IngestionAgent; this runs NormalizationAgent only. Ingestion is not invoked.
+    """
+    event = _NORMALIZATION_AGENT.process(event)
+    return {
+        "current_event": event.model_dump(mode="json"),
+        "correlation_id": event.correlation_id,
+        "status": "ok",
+    }
+
+
 def main() -> None:
     """Load one posting from fallback scrape and run through pure Python two-agent pipeline."""
     fixtures_dir = Path(__file__).resolve().parent.parent / "data" / "fixtures"

@@ -129,6 +129,36 @@ def build_three_agent_graph() -> StateGraph:
     return graph.compile()
 
 
+def build_normalization_only_graph() -> StateGraph:
+    """
+    Graph with only normalization (for resume-from-after-ingestion).
+
+    Topology: START → normalization → END. Invoke with state.current_event
+    set to the IngestBatch event; Ingestion is never run.
+    """
+    graph = StateGraph(TwoAgentPipelineState)
+    graph.add_node("normalization", _normalization_node)
+    graph.add_edge(START, "normalization")
+    graph.add_edge("normalization", END)
+    return graph.compile()
+
+
+def run_from_after_ingestion_langgraph(event: EventEnvelope) -> TwoAgentPipelineState:
+    """
+    Resume from the last successful step: run only Normalization (no Ingestion).
+
+    Use after a crash in Normalization: pass the IngestBatch event; this runs
+    the normalization node only. Ingestion is not invoked.
+    """
+    initial_state: TwoAgentPipelineState = {
+        "current_event": event.model_dump(mode="json"),
+        "correlation_id": event.correlation_id,
+        "status": "ok",
+    }
+    app = build_normalization_only_graph()
+    return app.invoke(initial_state)
+
+
 def run_two_agent_langgraph(
     raw_posting: dict,
     correlation_id: str | None = None,
