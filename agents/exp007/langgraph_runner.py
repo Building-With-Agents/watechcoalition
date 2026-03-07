@@ -1,14 +1,16 @@
 """
-EXP-007: Two-agent pipeline (Ingestion → Normalization) in LangGraph.
+EXP-007: Two- or three-agent pipeline in LangGraph.
 
-Uses existing IngestionState/NormalizationState concepts via a single
-TwoAgentPipelineState that carries the current EventEnvelope (as dict)
-through the graph. Each node calls AgentBase.process() on the stub agents.
+Two-agent: Ingestion → Normalization.
+Three-agent: Ingestion → Normalization → Skills Extraction.
+
+Uses TwoAgentPipelineState (same state for 2 or 3 agents) that carries
+the current EventEnvelope (as dict). Each node calls AgentBase.process().
 
 Run from repo root:
     python agents/exp007/langgraph_runner.py
 
-Or import and call run_two_agent_langgraph(raw_posting_dict).
+Or: run_three_agent_langgraph(raw_posting_dict) for full 3-agent run.
 """
 
 from __future__ import annotations
@@ -28,6 +30,7 @@ from agents.common.event_envelope import EventEnvelope  # noqa: E402
 from agents.exp007.state import TwoAgentPipelineState  # noqa: E402
 from agents.ingestion.agent import IngestionAgent  # noqa: E402
 from agents.normalization.agent import NormalizationAgent  # noqa: E402
+from agents.skills_extraction.agent import SkillsExtractionAgent  # noqa: E402
 
 # LangGraph: StateGraph, START, END
 try:
@@ -41,6 +44,7 @@ except ImportError as e:
 # Agent instances (stub implementations; same as pipeline_runner.py)
 _INGESTION_AGENT = IngestionAgent()
 _NORMALIZATION_AGENT = NormalizationAgent()
+_SKILLS_AGENT = SkillsExtractionAgent()
 
 log = structlog.get_logger()
 
@@ -75,6 +79,17 @@ def _normalization_node(state: TwoAgentPipelineState) -> dict:
     }
 
 
+def _skills_extraction_node(state: TwoAgentPipelineState) -> dict:
+    """LangGraph node: run SkillsExtractionAgent.process() and update state."""
+    envelope = _event_from_state(state)
+    out = _SKILLS_AGENT.process(envelope)
+    return {
+        "current_event": out.model_dump(mode="json"),
+        "correlation_id": out.correlation_id,
+        "status": "ok",
+    }
+
+
 def build_two_agent_graph() -> StateGraph:
     """
     Build the Ingestion → Normalization StateGraph.
@@ -90,6 +105,26 @@ def build_two_agent_graph() -> StateGraph:
     graph.add_edge(START, "ingestion")
     graph.add_edge("ingestion", "normalization")
     graph.add_edge("normalization", END)
+
+    return graph.compile()
+
+
+def build_three_agent_graph() -> StateGraph:
+    """
+    Build Ingestion → Normalization → Skills Extraction StateGraph.
+
+    Topology: START → ingestion → normalization → skills_extraction → END.
+    """
+    graph = StateGraph(TwoAgentPipelineState)
+
+    graph.add_node("ingestion", _ingestion_node)
+    graph.add_node("normalization", _normalization_node)
+    graph.add_node("skills_extraction", _skills_extraction_node)
+
+    graph.add_edge(START, "ingestion")
+    graph.add_edge("ingestion", "normalization")
+    graph.add_edge("normalization", "skills_extraction")
+    graph.add_edge("skills_extraction", END)
 
     return graph.compile()
 
@@ -126,8 +161,34 @@ def run_two_agent_langgraph(
     return result
 
 
+def run_three_agent_langgraph(
+    raw_posting: dict,
+    correlation_id: str | None = None,
+) -> TwoAgentPipelineState:
+    """
+    Run one raw posting through the three-agent LangGraph pipeline.
+
+    Ingestion → Normalization → Skills Extraction.
+    """
+    cid = correlation_id or str(raw_posting.get("posting_id", "run-1"))
+    initial = EventEnvelope(
+        correlation_id=cid,
+        agent_id="pipeline-runner",
+        payload=raw_posting,
+    )
+    initial_state: TwoAgentPipelineState = {
+        "current_event": initial.model_dump(mode="json"),
+        "correlation_id": cid,
+        "status": "ok",
+    }
+
+    app = build_three_agent_graph()
+    result = app.invoke(initial_state)
+    return result
+
+
 def main() -> None:
-    """Load one posting from fallback scrape and run through LangGraph pipeline."""
+    """Load one posting from fallback scrape and run through 3-agent LangGraph pipeline."""
     fixtures_dir = Path(__file__).resolve().parent.parent / "data" / "fixtures"
     fallback = fixtures_dir / "fallback_scrape_sample.json"
     if not fallback.exists():
@@ -138,7 +199,7 @@ def main() -> None:
     posting = postings[0]
     correlation_id = str(posting.get("posting_id", "1"))
 
-    state = run_two_agent_langgraph(posting, correlation_id=correlation_id)
+    state = run_three_agent_langgraph(posting, correlation_id=correlation_id)
     event_type = state.get("current_event", {}).get("payload", {}).get("event_type")
     log.info(
         "langgraph_run_complete",
