@@ -18,9 +18,12 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from agents.exp007.langgraph_runner import run_two_agent_langgraph
-from agents.exp007.pure_python_runner import run_two_agent_pure_python
+import structlog  # noqa: E402
 
+from agents.exp007.langgraph_runner import run_two_agent_langgraph  # noqa: E402
+from agents.exp007.pure_python_runner import run_two_agent_pure_python  # noqa: E402
+
+log = structlog.get_logger()
 N = 100
 
 
@@ -50,7 +53,7 @@ def p95(ms: list[float]) -> float:
 def main() -> int:
     postings = load_postings()
     if not postings:
-        print("No fixture postings found.", file=sys.stderr)
+        log.error("benchmark_no_fixtures", note="No fixture postings found.")
         return 1
 
     # Build list of 100 (posting, correlation_id)
@@ -74,11 +77,16 @@ def main() -> int:
         latencies_pp.append((time.perf_counter() - t_start) * 1000)
     total_pp = (time.perf_counter() - t0) * 1000
 
-    print(f"Benchmark: {N} events per candidate")
-    print("  LangGraph:   total={:.0f} ms  p50={:.2f} ms  p95={:.2f} ms".format(
-        total_lg, p50(latencies_lg), p95(latencies_lg)))
-    print("  Pure Python: total={:.0f} ms  p50={:.2f} ms  p95={:.2f} ms".format(
-        total_pp, p50(latencies_pp), p95(latencies_pp)))
+    log.info(
+        "benchmark_complete",
+        n_events=N,
+        langgraph_total_ms=round(total_lg, 0),
+        langgraph_p50_ms=round(p50(latencies_lg), 2),
+        langgraph_p95_ms=round(p95(latencies_lg), 2),
+        pure_python_total_ms=round(total_pp, 0),
+        pure_python_p50_ms=round(p50(latencies_pp), 2),
+        pure_python_p95_ms=round(p95(latencies_pp), 2),
+    )
     return 0
 
 

@@ -20,17 +20,21 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from agents.common.event_envelope import EventEnvelope
-from agents.ingestion.agent import IngestionAgent
-from agents.exp007.langgraph_runner import run_from_after_ingestion_langgraph
-from agents.exp007.pure_python_runner import run_from_after_ingestion_pure_python
+import structlog  # noqa: E402
+
+from agents.common.event_envelope import EventEnvelope  # noqa: E402
+from agents.exp007.langgraph_runner import run_from_after_ingestion_langgraph  # noqa: E402
+from agents.exp007.pure_python_runner import run_from_after_ingestion_pure_python  # noqa: E402
+from agents.ingestion.agent import IngestionAgent  # noqa: E402
+
+log = structlog.get_logger()
 
 
 def main() -> int:
     fixtures_dir = Path(__file__).resolve().parent.parent / "data" / "fixtures"
     fallback = fixtures_dir / "fallback_scrape_sample.json"
     if not fallback.exists():
-        print(f"Fixture not found: {fallback}", file=sys.stderr)
+        log.error("crash_test_fixture_not_found", path=str(fallback))
         return 1
 
     postings = json.loads(fallback.read_text(encoding="utf-8"))
@@ -47,9 +51,10 @@ def main() -> int:
     ingestion_output = ingestion_agent.process(initial)
     event_type_after_ingestion = ingestion_output.payload.get("event_type")
     if event_type_after_ingestion != "IngestBatch":
-        print(
-            f"Expected IngestBatch, got {event_type_after_ingestion}",
-            file=sys.stderr,
+        log.error(
+            "crash_test_unexpected_event",
+            expected="IngestBatch",
+            got=event_type_after_ingestion,
         )
         return 1
 
@@ -62,15 +67,17 @@ def main() -> int:
     out_pp = state_pure.get("current_event", {}).get("payload", {}).get("event_type")
 
     if out_lg != "NormalizationComplete" or out_pp != "NormalizationComplete":
-        print(
-            f"Resume failed: LangGraph={out_lg}, PurePython={out_pp}",
-            file=sys.stderr,
+        log.error(
+            "crash_test_resume_failed",
+            langgraph=out_lg,
+            pure_python=out_pp,
         )
         return 1
 
-    print("Crash test passed: both runners resumed from after Ingestion without re-running it.")
-    print("  LangGraph:  run_from_after_ingestion_langgraph(ingestion_output) -> NormalizationComplete")
-    print("  PurePython: run_from_after_ingestion_pure_python(ingestion_output) -> NormalizationComplete")
+    log.info(
+        "crash_test_passed",
+        note="Both runners resumed from after Ingestion without re-running it.",
+    )
     return 0
 
 
