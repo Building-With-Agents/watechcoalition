@@ -182,8 +182,6 @@ pipeline. AutoGen: conversation-oriented, poor fit for a structured ETL-style
 pipeline. Semantic Kernel: .NET-native. Custom: adds significant build overhead
 with no upside at this scale.
 
-*Validated by EXP-007 (framework spike) — findings in `references/ingestion-agent-design.md`.*
-
 ---
 
 ### #14 — Message Bus Technology
