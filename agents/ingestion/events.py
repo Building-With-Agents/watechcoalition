@@ -31,11 +31,21 @@ def source_failure_payload(
     run_id: str,
     source: str,
     error: str,
+    error_type: str = "source_unreachable",
+    severity: str = "critical",
+    error_reason: str | None = None,
 ) -> dict:
-    """Build a ``SourceFailure`` event payload."""
+    """Build a ``SourceFailure`` event payload.
+
+    Runbook (Exercise 3.4): failure events must include error_type, severity,
+    and error_reason for Orchestration Agent pattern-matching in Week 6.
+    """
     return {
         "event_type": "SourceFailure",
         "run_id": run_id,
         "source": source,
         "error": error,
+        "error_type": error_type,
+        "severity": severity,
+        "error_reason": error_reason if error_reason is not None else error,
     }
