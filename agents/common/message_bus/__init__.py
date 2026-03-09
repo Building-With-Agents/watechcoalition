@@ -19,6 +19,7 @@ from agents.common.message_bus.contracts import (
     validate_handler,
     validate_subscriber_id,
 )
+from agents.common.message_bus.in_process import InProcessEventBus
 
 __all__ = [
     "EVENT_TYPE_KEY",
@@ -26,6 +27,7 @@ __all__ = [
     "ORCHESTRATION_ONLY_CONTROL_EVENTS",
     "ORCHESTRATOR_AGENT_ID",
     "EventBusBase",
+    "InProcessEventBus",
     "EventHandler",
     "MessageBusContractError",
     "InvalidEventTypeError",
