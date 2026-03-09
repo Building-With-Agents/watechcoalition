@@ -2,10 +2,60 @@
 
 from __future__ import annotations
 
+import random
+from collections.abc import Iterable
+
 from agents.common.event_envelope import EventEnvelope
 from agents.common.message_bus import InProcessEventBus
+from agents.ingestion.events import ingest_batch_payload
 from agents.normalization.events import normalization_complete_payload
-from agents.tests.message_bus_stream_fixtures import generate_ingest_batches
+
+try:
+    from agents.common.events.ingest_batch_harness import (  # pragma: no cover
+        generate_synthetic_ingest_batches as _harness_generator,
+    )
+except ImportError:  # pragma: no cover
+    _harness_generator = None
+
+
+def _fixture_synthetic_ingest_batches(
+    *, count: int = 1000, seed: int = 42
+) -> Iterable[EventEnvelope]:
+    """Deterministic fallback stream until the shared harness module is merged."""
+    rng = random.Random(seed)
+
+    for index in range(count):
+        total_fetched = rng.randint(20, 120)
+        dedup_count = rng.randint(0, 10)
+        error_count = rng.randint(0, 5)
+        staged_count = max(total_fetched - dedup_count - error_count, 0)
+        batch_id = f"batch-{index:04d}-{rng.randint(1000, 9999)}"
+        region_id = f"region-{rng.randint(1, 8):02d}"
+        correlation_id = f"corr-{seed}-{index:04d}-{rng.randint(10000, 99999)}"
+
+        yield EventEnvelope(
+            correlation_id=correlation_id,
+            agent_id="ingestion-agent",
+            payload=ingest_batch_payload(
+                batch_id=batch_id,
+                source="synthetic-harness-fixture",
+                region_id=region_id,
+                total_fetched=total_fetched,
+                staged_count=staged_count,
+                dedup_count=dedup_count,
+                error_count=error_count,
+            ),
+        )
+
+
+def _generate_ingest_batches(
+    *, count: int = 1000, seed: int = 42
+) -> Iterable[EventEnvelope]:
+    """Use the shared harness generator when available, otherwise fallback fixture."""
+    if _harness_generator is not None:
+        yield from _harness_generator(count=count, seed=seed)
+        return
+    yield from _fixture_synthetic_ingest_batches(count=count, seed=seed)
 
 
 def test_in_process_publish_subscribe_synchronous_delivery() -> None:
@@ -65,7 +115,7 @@ def test_in_process_tracks_handler_failures_and_continues_delivery() -> None:
 
 def test_harness_equivalent_stream_preserves_correlation_end_to_end() -> None:
     bus = InProcessEventBus()
-    ingest_events = list(generate_ingest_batches(count=1000, seed=42))
+    ingest_events = list(_generate_ingest_batches(count=1000, seed=42))
     normalization_seen_correlation_ids: list[str] = []
     emitted_completions: list[EventEnvelope] = []
 
