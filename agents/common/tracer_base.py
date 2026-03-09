@@ -9,8 +9,8 @@ platform. Swap the tracer without touching agent code.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from contextlib import contextmanager
 from collections.abc import Generator
+from contextlib import contextmanager
 from typing import Any
 
 
