@@ -19,6 +19,10 @@ ignore = [
     "E501",  # line length handled by formatter
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# CLI harness scripts intentionally print to stdout
+"common/events/view_harness.py" = ["T201"]
+
 [tool.ruff.lint.isort]
 known-first-party = ["agents"]
 
