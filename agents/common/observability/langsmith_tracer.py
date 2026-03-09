@@ -6,8 +6,8 @@ EXP-006 candidate: LangChain hosted tracing platform.
 from __future__ import annotations
 
 import time
-from contextlib import contextmanager
 from collections.abc import Generator
+from contextlib import contextmanager
 from typing import Any
 
 from agents.common.tracer_base import TracerBase
