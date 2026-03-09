@@ -11,9 +11,8 @@ from agents.common.event_envelope import EventEnvelope
 class _ConcreteAgent(AgentBase):
     """Minimal concrete subclass for testing the ABC contract."""
 
-    @property
-    def agent_id(self) -> str:
-        return "test-agent"
+    def __init__(self) -> None:
+        super().__init__(agent_id="test-agent")
 
     def health_check(self) -> dict:
         return {"status": "ok", "agent": self.agent_id, "last_run": None, "metrics": {}}
@@ -76,9 +75,8 @@ class TestAgentBase:
         """A subclass missing health_check cannot be instantiated."""
 
         class _NoHealthCheck(AgentBase):
-            @property
-            def agent_id(self) -> str:
-                return "incomplete"
+            def __init__(self) -> None:
+                super().__init__(agent_id="incomplete")
 
             def process(self, event: EventEnvelope) -> EventEnvelope | None:
                 return None
@@ -90,9 +88,8 @@ class TestAgentBase:
         """A subclass missing process cannot be instantiated."""
 
         class _NoProcess(AgentBase):
-            @property
-            def agent_id(self) -> str:
-                return "incomplete"
+            def __init__(self) -> None:
+                super().__init__(agent_id="incomplete")
 
             def health_check(self) -> dict:
                 return {}
