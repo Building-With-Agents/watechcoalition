@@ -8,8 +8,8 @@ Redis, Kafka). Harness only — no bus implementation or throughput/crash tests.
 from __future__ import annotations
 
 import uuid
+from collections.abc import Iterator
 from datetime import datetime, timedelta
-from typing import Iterator
 
 from agents.common.event_envelope import EventEnvelope
 from agents.ingestion.events import ingest_batch_payload

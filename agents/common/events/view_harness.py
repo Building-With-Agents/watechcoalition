@@ -7,6 +7,7 @@ Run from repo root:
   python -m agents.common.events.view_harness --count 1000   # full harness
   python -m agents.common.events.view_harness --count 1 --json   # first event as JSON
 """
+# ruff: noqa: T201
 
 from __future__ import annotations
 
