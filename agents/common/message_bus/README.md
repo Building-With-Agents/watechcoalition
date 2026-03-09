@@ -1,4 +1,4 @@
-# Message Bus Contracts (Week 3 Commit 1)
+# Message Bus Contracts (Week 3 Commit 1-2)
 
 This package defines the transport-agnostic event bus contract used by Week 3
 experiments.
@@ -13,5 +13,7 @@ experiments.
 
 ## Scope
 
-Commit 1 includes abstractions, shared typing, and validation helpers only.
-No transport-specific bus implementation is included in this package yet.
+- Commit 1: transport-agnostic abstractions, shared typing, and validation
+  helpers.
+- Commit 2: baseline `InProcessEventBus` with in-memory subscriptions and
+  minimal counters (`published_events`, `delivered_events`, `handler_failures`).
