@@ -21,7 +21,6 @@ from agents.common.observability.structlog_tracer import StructlogTracer
 from agents.common.tracer_base import TracerBase
 from agents.ingestion.agent_instrumented import InstrumentedIngestionAgent
 
-
 TRACER_KINDS = ["structlog", "langsmith", "langfuse", "otel"]
 
 
