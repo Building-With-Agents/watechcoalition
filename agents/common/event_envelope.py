@@ -13,7 +13,7 @@ and the fixture files for examples.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -49,6 +49,6 @@ class EventEnvelope(BaseModel):
     event_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     correlation_id: str
     agent_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     schema_version: str = "1.0"
     payload: dict[str, Any] = Field(default_factory=dict)
