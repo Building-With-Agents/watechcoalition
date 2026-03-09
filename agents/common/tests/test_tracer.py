@@ -3,7 +3,7 @@ test_tracer.py — EXP-006 observability test suite.
 
 Run with:
     cd agents
-    pytest agents/common/tests/test_tracer.py -v
+    pytest common/tests/test_tracer.py -v
 """
 
 from __future__ import annotations
@@ -88,9 +88,8 @@ def test_correlation_id_propagated(kind: str) -> None:
 def test_error_surfaced_and_reraised(kind: str) -> None:
     tracer = _make_tracer(kind)
     start = time.perf_counter()
-    with pytest.raises(ValueError):
-        with tracer.start_span("error_span", correlation_id=str(uuid.uuid4())):
-            raise ValueError("bad api key")
+    with pytest.raises(ValueError), tracer.start_span("error_span", correlation_id=str(uuid.uuid4())):
+        raise ValueError("bad api key")
     assert time.perf_counter() - start < 30
 
 
