@@ -28,7 +28,7 @@ import re
 import statistics
 import time
 from datetime import datetime
-from typing import Any, Iterable, List, Optional
+from typing import Any
 
 import structlog
 from pydantic import BaseModel, ValidationError
@@ -38,9 +38,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
 from agents.common.base_agent import BaseAgent
+from agents.common.data_store.models import Base, NormalizedJob, RawIngestedJob
 from agents.common.event_envelope import EventEnvelope
-from agents.common.data_store.models import NormalizedJob, RawIngestedJob, Base
-
 
 log = structlog.get_logger()
 
@@ -48,12 +47,12 @@ log = structlog.get_logger()
 class SkillRecord(BaseModel):
     """Pydantic representation of a single skill within a JobRecord."""
 
-    skill_id: Optional[str] = None
+    skill_id: str | None = None
     label: str
     type: str  # Technical | Domain | Soft | Certification | Tool
     confidence: float
     field_source: str  # title | description | requirements | responsibilities
-    required_flag: Optional[bool] = None
+    required_flag: bool | None = None
 
 
 class JobRecord(BaseModel):
@@ -72,32 +71,32 @@ class JobRecord(BaseModel):
     # Core
     title: str
     company: str
-    location: Optional[str] = None
-    salary_raw: Optional[str] = None
-    salary_min: Optional[float] = None
-    salary_max: Optional[float] = None
-    salary_currency: Optional[str] = None
-    salary_period: Optional[str] = None  # annual | hourly | monthly
-    employment_type: Optional[str] = None
-    date_posted: Optional[datetime] = None
-    description: Optional[str] = None
+    location: str | None = None
+    salary_raw: str | None = None
+    salary_min: float | None = None
+    salary_max: float | None = None
+    salary_currency: str | None = None
+    salary_period: str | None = None  # annual | hourly | monthly
+    employment_type: str | None = None
+    date_posted: datetime | None = None
+    description: str | None = None
 
     # Skills Extraction output (populated later in the pipeline)
-    skills: List[SkillRecord] = []
-    extraction_status: Optional[str] = None  # ok | failed | partial
+    skills: list[SkillRecord] = []
+    extraction_status: str | None = None  # ok | failed | partial
 
     # Phase 1 Enrichment output (placeholders for downstream)
-    seniority: Optional[str] = None
-    role_classification: Optional[str] = None
-    sector_id: Optional[int] = None
-    quality_score: Optional[float] = None
-    is_spam: Optional[bool] = None
-    spam_score: Optional[float] = None
-    ai_relevance_score: Optional[float] = None
-    company_id: Optional[int] = None
-    location_id: Optional[int] = None
-    overall_confidence: Optional[float] = None
-    field_confidence: Optional[dict] = None
+    seniority: str | None = None
+    role_classification: str | None = None
+    sector_id: int | None = None
+    quality_score: float | None = None
+    is_spam: bool | None = None
+    spam_score: float | None = None
+    ai_relevance_score: float | None = None
+    company_id: int | None = None
+    location_id: int | None = None
+    overall_confidence: float | None = None
+    field_confidence: dict | None = None
 
 
 def _create_engine() -> Engine:
@@ -449,7 +448,7 @@ def _normalize_whitespace(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def _parse_iso_datetime(value: str | None) -> Optional[datetime]:
+def _parse_iso_datetime(value: str | None) -> datetime | None:
     """
     Parse a date/time string into a timezone-aware datetime when possible.
     """
@@ -465,7 +464,7 @@ def _parse_iso_datetime(value: str | None) -> Optional[datetime]:
         return None
 
 
-def _parse_salary(salary_raw: str) -> tuple[Optional[float], Optional[float], Optional[str], Optional[str]]:
+def _parse_salary(salary_raw: str) -> tuple[float | None, float | None, str | None, str | None]:
     """
     Best-effort salary parser for common textual patterns.
 
@@ -500,7 +499,7 @@ def _parse_salary(salary_raw: str) -> tuple[Optional[float], Optional[float], Op
     return salary_min, salary_max, currency, period
 
 
-def _map_employment_type(raw_text: str) -> Optional[str]:
+def _map_employment_type(raw_text: str) -> str | None:
     """
     Map free-text mentions of employment type to the controlled vocabulary.
     """

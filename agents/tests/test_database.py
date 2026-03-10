@@ -8,10 +8,10 @@ agent-managed tables exist, confirm that the migration is idempotent, and
 ensure that the `job_postings` table has all Phase 1 extension columns.
 """
 
-import os
-from pathlib import Path
-from typing import Iterator, List
 import importlib.util
+import os
+from collections.abc import Iterator
+from pathlib import Path
 
 import pytest
 from sqlalchemy import MetaData, Table, create_engine, inspect, text
@@ -122,7 +122,7 @@ def test_job_postings_has_phase1_columns(engine: Engine) -> None:
     metadata.reflect(bind=engine, only=["job_postings"])
     job_postings: Table = metadata.tables["job_postings"]
 
-    column_names: List[str] = [col.name for col in job_postings.columns]
+    column_names: list[str] = [col.name for col in job_postings.columns]
     expected_columns = [
         "source",
         "external_id",

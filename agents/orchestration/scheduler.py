@@ -17,7 +17,7 @@ Run with:
 """
 
 import secrets
-from typing import Any, Dict
+from typing import Any
 
 import structlog
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -25,7 +25,6 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from agents.common.event_envelope import EventEnvelope
 from agents.ingestion.agent import IngestionAgent, SourceConfig
 from agents.normalization.agent import NormalizationAgent
-
 
 log = structlog.get_logger()
 
@@ -50,7 +49,7 @@ def _uuid4_str() -> str:
     )
 
 
-def _is_failure_event(payload: Dict[str, Any]) -> bool:
+def _is_failure_event(payload: dict[str, Any]) -> bool:
     """
     Determine whether an event payload represents a failure event.
 

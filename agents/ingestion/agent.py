@@ -25,9 +25,9 @@ import json
 import os
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable, List
+from typing import Any
 
 import structlog
 from sqlalchemy import create_engine, select, text
@@ -36,9 +36,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
 from agents.common.base_agent import BaseAgent
+from agents.common.data_store.models import Base, JobIngestionRun, RawIngestedJob
 from agents.common.event_envelope import EventEnvelope
-from agents.common.data_store.models import JobIngestionRun, RawIngestedJob, Base
-
 
 log = structlog.get_logger()
 
@@ -164,7 +163,7 @@ class IngestionAgent(BaseAgent):
         The inbound `EventEnvelope`'s `correlation_id` is propagated unchanged
         to the outbound event.
         """
-        start_time = datetime.now(timezone.utc)
+        start_time = datetime.now(UTC)
         run_id: str | None = None
         session: Session
         record_count = 0
@@ -221,7 +220,7 @@ class IngestionAgent(BaseAgent):
                 run.record_count = record_count
                 run.dedup_count = dedup_count
                 run.error_count = error_count
-                run.completed_at = datetime.now(timezone.utc)
+                run.completed_at = datetime.now(UTC)
                 session.commit()
 
                 self._last_run_at = run.completed_at
@@ -249,7 +248,7 @@ class IngestionAgent(BaseAgent):
                     if run is not None:
                         run.status = "failed"
                         run.error_count = run.error_count + 1
-                        run.completed_at = datetime.now(timezone.utc)
+                        run.completed_at = datetime.now(UTC)
                         session.commit()
 
             log.error(
@@ -274,7 +273,7 @@ class IngestionAgent(BaseAgent):
             return outbound
 
         # Success path: emit IngestBatch event.
-        elapsed_ms = int((datetime.now(timezone.utc) - start_time).total_seconds() * 1000)
+        elapsed_ms = int((datetime.now(UTC) - start_time).total_seconds() * 1000)
         batch_payload = {
             "event_type": "IngestBatch",
             "batch_id": run_id,
@@ -299,7 +298,7 @@ class IngestionAgent(BaseAgent):
         )
         return outbound
 
-    def _load_records_with_retry(self) -> List[dict[str, Any]]:
+    def _load_records_with_retry(self) -> list[dict[str, Any]]:
         """
         Load raw job records from the fixture file with exponential back-off.
 
@@ -443,7 +442,7 @@ class IngestionAgent(BaseAgent):
         The filename includes a UTC timestamp to avoid collisions.
         """
         self._dead_letter_dir.mkdir(parents=True, exist_ok=True)
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
         filename = f"ingestion_dead_{timestamp}.json"
         path = self._dead_letter_dir / filename
 

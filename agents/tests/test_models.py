@@ -8,7 +8,7 @@ tables: raw_ingested_jobs, normalized_jobs, and job_ingestion_runs.
 """
 
 import os
-from typing import Iterator
+from collections.abc import Iterator
 
 import pytest
 from sqlalchemy import create_engine, delete, select, text

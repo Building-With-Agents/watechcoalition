@@ -23,16 +23,15 @@ import os
 import threading
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import structlog
-from sqlalchemy import create_engine, delete, select, text
+from sqlalchemy import create_engine, delete, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from agents.common.data_store.models import Base, RawIngestedJob
-
 
 log = structlog.get_logger()
 
@@ -75,7 +74,7 @@ def benchmark_insert_throughput(num_rows: int = 1000) -> float:
     start = time.perf_counter()
     try:
         with SessionLocal() as session:
-            jobs: List[RawIngestedJob] = []
+            jobs: list[RawIngestedJob] = []
             for i in range(num_rows):
                 jobs.append(
                     RawIngestedJob(
@@ -110,7 +109,7 @@ def benchmark_insert_throughput(num_rows: int = 1000) -> float:
     return rows_per_sec
 
 
-def benchmark_dedup_latency(num_rows: int = 1000) -> Tuple[float, float]:
+def benchmark_dedup_latency(num_rows: int = 1000) -> tuple[float, float]:
     """
     Measure SELECT latency for dedup checks on raw_payload_hash.
 
@@ -121,7 +120,7 @@ def benchmark_dedup_latency(num_rows: int = 1000) -> Tuple[float, float]:
     ingestion_run_id = "exp_002_dedup"
 
     with SessionLocal() as session:
-        jobs: List[RawIngestedJob] = []
+        jobs: list[RawIngestedJob] = []
         for i in range(num_rows):
             jobs.append(
                 RawIngestedJob(
@@ -136,7 +135,7 @@ def benchmark_dedup_latency(num_rows: int = 1000) -> Tuple[float, float]:
         session.bulk_save_objects(jobs)
         session.commit()
 
-    latencies_ms: List[float] = []
+    latencies_ms: list[float] = []
     try:
         with SessionLocal() as session:
             hashes = (
@@ -206,7 +205,7 @@ def benchmark_unicode_roundtrip() -> str:
     ]
 
     with SessionLocal() as session:
-        jobs: List[RawIngestedJob] = []
+        jobs: list[RawIngestedJob] = []
         for idx, s in enumerate(samples):
             jobs.append(
                 RawIngestedJob(
@@ -265,7 +264,7 @@ def _concurrent_worker(
     ingestion_run_id: str,
     per_thread: int,
     thread_id: int,
-    error_flags: List[str],
+    error_flags: list[str],
 ) -> None:
     """
     Worker function for concurrent insert benchmark.
@@ -275,7 +274,7 @@ def _concurrent_worker(
     """
     try:
         with SessionLocal() as session:
-            jobs: List[RawIngestedJob] = []
+            jobs: list[RawIngestedJob] = []
             for i in range(per_thread):
                 jobs.append(
                     RawIngestedJob(
@@ -307,8 +306,8 @@ def benchmark_concurrent_access(num_threads: int = 5, per_thread: int = 100) -> 
     values; otherwise returns "fail". Benchmark rows are cleaned up afterward.
     """
     ingestion_run_id = "exp_002_concurrent"
-    errors: List[str] = []
-    threads: List[threading.Thread] = []
+    errors: list[str] = []
+    threads: list[threading.Thread] = []
 
     for thread_id in range(num_threads):
         t = threading.Thread(
@@ -359,7 +358,7 @@ def main() -> None:
     """
     Run all EXP-002 benchmarks and persist findings to exp_002_findings.json.
     """
-    findings: Dict[str, Any] = {}
+    findings: dict[str, Any] = {}
 
     try:
         insert_rps = benchmark_insert_throughput()
