@@ -35,8 +35,9 @@ class VisualizationAgent(BaseAgent):
     Week 5: replaces this with real Streamlit rendering and exports.
     """
 
-    def __init__(self) -> None:
-        super().__init__(agent_id="visualization-agent")
+    @property
+    def agent_id(self) -> str:
+        return "visualization-agent"
 
     def health_check(self) -> dict:
         """Always ready — no external dependencies in stub mode."""

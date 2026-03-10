@@ -43,8 +43,11 @@ class SkillsExtractionAgent(BaseAgent):
     Week 4: replaces this with real LLM extraction + taxonomy linking.
     """
 
+    @property
+    def agent_id(self) -> str:
+        return "skills-extraction-agent"
+
     def __init__(self) -> None:
-        super().__init__(agent_id="skills-extraction-agent")
         self._fixture: dict[int, dict] = {}
 
     def health_check(self) -> dict:
