@@ -8,7 +8,7 @@ from __future__ import annotations
 import time
 from pathlib import Path
 
-from agents.common.base_agent import BaseAgent
+from agents.common.base_agent import AgentBase
 from agents.common.event_envelope import EventEnvelope
 from agents.common.tracer_base import TracerBase
 
@@ -16,12 +16,15 @@ _FIXTURES_DIR = Path(__file__).parent.parent / "data" / "fixtures"
 _FALLBACK_SCRAPE = _FIXTURES_DIR / "fallback_scrape_sample.json"
 
 
-class InstrumentedIngestionAgent(BaseAgent):
+class InstrumentedIngestionAgent(AgentBase):
     """Ingestion Agent instrumented with a pluggable TracerBase implementation."""
 
     def __init__(self, tracer: TracerBase) -> None:
-        super().__init__(agent_id="ingestion-agent")
         self._tracer = tracer
+
+    @property
+    def agent_id(self) -> str:
+        return "ingestion-agent"
 
     def health_check(self) -> dict:
         if _FALLBACK_SCRAPE.exists():
