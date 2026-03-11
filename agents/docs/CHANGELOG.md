@@ -28,9 +28,38 @@ All notable changes to the agents pipeline are documented here.
 
 ### Remaining for findings doc / ADR-004
 
-- Throughput measurement (events/sec) for in-process, Redis, Kafka.
-- Latency measurement (publish→handler finished; optional publish→ack).
-- Results table comparing transport throughput, latency, crash/replay completeness, and counters.
+- Run the comparison utilities against live Redis / Kafka backends in addition to fake backends.
+- Persist comparison output to a checked-in CSV or ADR artifact if we want historical benchmark snapshots.
+
+## EXP-004 Commit 5 (Codex)
+
+**Unified transport comparison runner + normalized benchmark output.**
+
+### Changes
+
+- **Comparison runner**
+  - `agents/common/message_bus/comparison.py`: adds:
+    - `ComparisonScenario` for shared harness/run configuration
+    - `run_transport_comparison(...)` for one bus instance
+    - `compare_transport_candidates(...)` for multi-bus comparisons
+    - `drain_bus(...)` / `consume_once(...)` helpers that abstract Redis/Kafka drain semantics while treating in-process as no-op
+- **Measurements**
+  - publish throughput (`throughput_publish_events_per_sec`)
+  - end-to-end throughput (`throughput_e2e_events_per_sec`)
+  - publish-to-handler latency percentiles (`latency_p50_ms`, `latency_p95_ms`, `latency_p99_ms`)
+  - crash/replay completeness (`crash_replay_complete`, `replay_completeness_pct`) for replay-capable transports
+- **Normalized result shape**
+  - `TransportComparisonResult` captures throughput, latencies, crash/replay flags, and parity counters (`published_events`, `delivered_events`, `handler_failures`, `queue_depth`, `in_flight`) in one row shape shared by all transports
+- **Output helpers**
+  - `results_to_rows(...)` returns CSV-friendly dicts
+  - `format_results_markdown_table(...)` renders a Markdown table for ADR/findings docs
+- **Exports/docs/tests**
+  - `agents/common/message_bus/__init__.py`: exports comparison helpers and result types
+  - `agents/common/message_bus/README.md`: documents the comparison entry points
+  - `agents/tests/test_transport_comparison.py`: covers in-process, fake Redis Streams, and fake Kafka comparisons plus table output
+  - `agents/common/message_bus/run_comparison.py`: adds a CLI that runs the three-way comparison and renders Markdown / CSV / JSON
+  - `agents/common/message_bus/candidate_factories.py`: adds default in-process, fake Redis, fake Kafka, and optional live Redis/Kafka candidate builders
+  - `agents/tests/test_transport_comparison_cli.py`: covers CLI report rendering
 
 ## EXP-004 scope expansion (Emilio)
 
