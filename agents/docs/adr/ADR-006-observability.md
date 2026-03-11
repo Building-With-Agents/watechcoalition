@@ -21,12 +21,12 @@ Four candidates via a TracerBase ABC:
 
 ## What I Found
 
-| Candidate | Full trace UI | Setup time | Framework-independent |
-|---|---|---|---|
-| structlog | No | 0 min | Yes |
-| LangSmith | Yes | ~10 min | Partial |
-| Langfuse | Yes | ~15 min | Yes |
-| OpenTelemetry | Yes (Jaeger) | ~40 min | Yes |
+| Candidate     | Full trace UI | Setup time | Framework-independent |
+|---------------|---------------|------------|-----------------------|
+| structlog     |       No.     |    0 min.  |         Yes.          |
+| LangSmith     |       Yes     |   ~10 min. |        Partial.       |
+| Langfuse      |       Yes     |   ~15 min  |         Yes           |
+| OpenTelemetry | Yes (Jaeger)  |   ~40 min  |         Yes           |
 
 All four surfaced errors in under 1 second (target: 30s).
 
