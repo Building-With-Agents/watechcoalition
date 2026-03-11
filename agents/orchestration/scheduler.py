@@ -1,173 +1,134 @@
+"""
+APScheduler-based ingestion trigger for EXP-005.
+
+Runs the pipeline (same entrypoint as run_ingestion) on a configurable interval.
+Process stays alive and fires every N minutes. Logs each run start and finish
+for drift measurement and last-run observability.
+
+Run from repo root:
+
+    python -m agents.orchestration.scheduler
+
+Environment variables:
+
+    INGESTION_INTERVAL_MINUTES  Interval in minutes (default: 2). Ignored if
+                                INGESTION_CRON_EXPRESSION is set.
+    INGESTION_CRON_EXPRESSION   Optional cron expression (e.g. "*/2 * * * *"
+                                for every 2 minutes). Overrides interval.
+"""
+
 from __future__ import annotations
 
-"""
-APScheduler-based scheduler for the Job Intelligence Engine walking skeleton.
+import os
+import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
 
-This module wires together the Ingestion and Normalization agents and runs
-them on a fixed 60-second interval. Each cycle:
-    1. Creates a new EventEnvelope with a fresh correlation_id.
-    2. Invokes IngestionAgent.process(event).
-    3. Passes the resulting event directly to NormalizationAgent.process(event).
-    4. Logs correlation_id, record_count, valid_count, and quarantine_count.
-    5. Logs when either agent returns a failure event type.
+# Ensure repo root is on path when run as __main__ from any cwd.
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
-Run with:
+import structlog  # noqa: E402
+from apscheduler.schedulers.background import BackgroundScheduler  # noqa: E402
 
-    PYTHONPATH=. python3 agents/orchestration/scheduler.py
-"""
-
-import secrets
-from typing import Any
-
-import structlog
-from apscheduler.schedulers.blocking import BlockingScheduler
-
-from agents.common.event_envelope import EventEnvelope
-from agents.ingestion.agent import IngestionAgent, SourceConfig
-from agents.normalization.agent import NormalizationAgent
-
+structlog.configure(
+    processors=[
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.add_log_level,
+        structlog.processors.JSONRenderer(),
+    ],
+    wrapper_class=structlog.BoundLogger,
+    context_class=dict,
+    logger_factory=structlog.PrintLoggerFactory(),
+)
 log = structlog.get_logger()
 
 
-def _uuid4_str() -> str:
-    """
-    Generate a UUID4-compatible string without importing the stdlib uuid module.
-
-    This avoids potential interference from misconfigured platform modules
-    while still producing valid v4-style identifiers for correlation_ids.
-    """
-    random_bytes = bytearray(secrets.token_bytes(16))
-    random_bytes[6] = (random_bytes[6] & 0x0F) | 0x40  # version 4
-    random_bytes[8] = (random_bytes[8] & 0x3F) | 0x80  # variant 10xx
-    hexed = random_bytes.hex()
-    return (
-        f"{hexed[0:8]}-"
-        f"{hexed[8:12]}-"
-        f"{hexed[12:16]}-"
-        f"{hexed[16:20]}-"
-        f"{hexed[20:32]}"
-    )
-
-
-def _is_failure_event(payload: dict[str, Any]) -> bool:
-    """
-    Determine whether an event payload represents a failure event.
-
-    Checks for known failure event_type values such as SourceFailure and
-    NormalizationFailed.
-    """
-    event_type = payload.get("event_type")
-    return event_type in {"SourceFailure", "NormalizationFailed"}
-
-
-def _run_cycle(ingestion: IngestionAgent, normalization: NormalizationAgent) -> None:
-    """
-    Execute a single ingestion + normalization cycle.
-
-    Creates an EventEnvelope with a fresh correlation_id, runs the Ingestion
-    agent, then passes the resulting event directly into the Normalization
-    agent. Logs success metrics and any failure events observed.
-    """
-    correlation_id = _uuid4_str()
-
-    log.info("scheduler_cycle_start", correlation_id=correlation_id)
-
-    inbound = EventEnvelope(
-        correlation_id=correlation_id,
-        agent_id="orchestration_scheduler",
-        payload={},
-    )
-
-    ingest_event = ingestion.process(inbound)
-    ingest_payload = ingest_event.payload or {}
-
-    if _is_failure_event(ingest_payload):
-        log.error(
-            "scheduler_ingestion_failure",
-            correlation_id=correlation_id,
-            event_type=ingest_payload.get("event_type"),
-        )
-        # Pass the failure event forward so downstream orchestration can react.
-        current_event = ingest_event
-        valid_count = 0
-        quarantine_count = 0
-    else:
-        batch_id = ingest_payload.get("batch_id")
-        record_count = ingest_payload.get("record_count", 0)
-        dedup_count = ingest_payload.get("dedup_count", 0)
-
-        log.info(
-            "scheduler_ingestion_success",
-            correlation_id=correlation_id,
-            batch_id=batch_id,
-            record_count=record_count,
-            dedup_count=dedup_count,
-        )
-
-        current_event = ingest_event
-
-    norm_event = normalization.process(current_event)
-    norm_payload = norm_event.payload or {}
-
-    if _is_failure_event(norm_payload):
-        log.error(
-            "scheduler_normalization_failure",
-            correlation_id=correlation_id,
-            event_type=norm_payload.get("event_type"),
-        )
-        valid_count = 0
-        quarantine_count = 0
-    else:
-        valid_count = norm_payload.get("valid_count", 0)
-        quarantine_count = norm_payload.get("quarantine_count", 0)
-
+def _scheduled_job() -> None:
+    """Run the pipeline once. Log run start and finish for observability."""
+    run_start = datetime.now(timezone.utc)
     log.info(
-        "scheduler_cycle_complete",
-        correlation_id=correlation_id,
-        ingest_record_count=ingest_payload.get("record_count", 0),
-        ingest_dedup_count=ingest_payload.get("dedup_count", 0),
-        normalization_valid_count=valid_count,
-        normalization_quarantine_count=quarantine_count,
+        "scheduler_run_start",
+        run_start=run_start.isoformat(),
+        event="ingestion_trigger",
     )
+    try:
+        from agents.orchestration.run_ingestion import main as run_ingestion_main  # noqa: E402
+        run_ingestion_main()
+    except SystemExit as e:
+        if e.code != 0:
+            log.warning(
+                "scheduler_run_exit_nonzero",
+                code=e.code,
+                run_start=run_start.isoformat(),
+            )
+    except Exception as exc:
+        log.error(
+            "scheduler_run_error",
+            error=str(exc),
+            run_start=run_start.isoformat(),
+        )
+    run_finish = datetime.now(timezone.utc)
+    log.info(
+        "scheduler_run_finish",
+        run_start=run_start.isoformat(),
+        run_finish=run_finish.isoformat(),
+        event="ingestion_trigger",
+    )
+
+
+def _interval_minutes() -> int:
+    raw = os.environ.get("INGESTION_INTERVAL_MINUTES", "2").strip()
+    try:
+        n = int(raw)
+        return max(1, n)
+    except ValueError:
+        return 2
 
 
 def main() -> None:
-    """
-    Configure and start the APScheduler BlockingScheduler for the pipeline.
+    """Start the scheduler and block the main thread."""
+    cron_expr = os.environ.get("INGESTION_CRON_EXPRESSION", "").strip()
+    interval_min = _interval_minutes()
 
-    Schedules a job that runs every 60 seconds to trigger the ingestion and
-    normalization agents in sequence. Handles graceful shutdown on
-    KeyboardInterrupt.
-    """
-    source_cfg = SourceConfig(
-        name="crawl4ai",
-        type="web_scrape",
-        url="fixture://fallback",
-    )
-    ingestion_agent = IngestionAgent(source=source_cfg)
-    normalization_agent = NormalizationAgent()
+    scheduler = BackgroundScheduler()
 
-    scheduler = BlockingScheduler()
-    scheduler.add_job(
-        _run_cycle,
-        "interval",
-        seconds=60,
-        args=[ingestion_agent, normalization_agent],
-        id="pipeline_cycle",
-        max_instances=1,
-        coalesce=True,
-    )
+    if cron_expr:
+        from apscheduler.triggers.cron import CronTrigger  # noqa: E402
+        scheduler.add_job(
+            _scheduled_job,
+            trigger=CronTrigger.from_crontab(cron_expr),
+            id="ingestion_trigger",
+            name="ingestion_trigger",
+        )
+        log.info(
+            "scheduler_started",
+            trigger="cron",
+            cron_expression=cron_expr,
+        )
+    else:
+        scheduler.add_job(
+            _scheduled_job,
+            trigger="interval",
+            minutes=interval_min,
+            id="ingestion_trigger",
+            name="ingestion_trigger",
+        )
+        log.info(
+            "scheduler_started",
+            trigger="interval",
+            interval_minutes=interval_min,
+        )
 
-    log.info("scheduler_started", interval_seconds=60)
-
+    scheduler.start()
     try:
-        scheduler.start()
-    except KeyboardInterrupt:
-        log.info("scheduler_shutdown_requested")
+        while True:
+            time.sleep(60)
+    except (KeyboardInterrupt, SystemExit):
+        log.info("scheduler_stopping")
         scheduler.shutdown(wait=True)
-        log.info("scheduler_stopped")
-
 
 if __name__ == "__main__":
     main()
-
