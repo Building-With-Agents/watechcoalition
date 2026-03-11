@@ -10,9 +10,9 @@ from __future__ import annotations
 import uuid
 from collections.abc import Iterator
 from datetime import datetime, timedelta
-from typing import Union
 
 from agents.common.event_envelope import EventEnvelope
+from agents.common.events.typed_events import IngestBatchEvent
 from agents.ingestion.events import ingest_batch_payload
 
 # Keys required in an IngestBatch payload (must match ingest_batch_payload()).
@@ -36,15 +36,13 @@ def generate_synthetic_ingest_batches(
     count: int = 1000,
     seed: int = 42,
     typed: bool = False,
-) -> Iterator[Union[EventEnvelope, "IngestBatchEvent"]]:
+) -> Iterator[EventEnvelope | IngestBatchEvent]:
     """
     Yield exactly `count` deterministic IngestBatch events.
 
     Same (count, seed) always produces the same events in the same order.
     When typed=True, yields IngestBatchEvent wrappers; otherwise EventEnvelope.
     """
-    from agents.common.events.typed_events import IngestBatchEvent
-
     base_ts = datetime(2025, 1, 1, 0, 0, 0)
     correlation_id = f"harness-{seed}"
 
