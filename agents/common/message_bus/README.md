@@ -52,3 +52,30 @@ experiments.
     on the first handler failure and keeps that message replayable.
 - kafka-python adapter uses synchronous producer ack (`future.get(timeout=10)`)
   for deterministic experiment counters; production can switch to async/callback.
+
+## Transport comparison utilities
+
+- `comparison.py` adds one shared benchmark runner for transport comparisons.
+- `run_transport_comparison(...)` runs the standard harness scenario against one
+  bus instance and returns a normalized result row with:
+  - publish throughput (`throughput_publish_events_per_sec`)
+  - end-to-end throughput (`throughput_e2e_events_per_sec`)
+  - publish-to-handler latency (`latency_p50_ms`, `latency_p95_ms`, `latency_p99_ms`)
+  - parity counters (`published_events`, `delivered_events`, `handler_failures`,
+    `queue_depth`, `in_flight`)
+  - optional crash/replay completeness (`crash_replay_complete`,
+    `replay_completeness_pct`) when a replay-capable bus factory is provided
+- `compare_transport_candidates(...)` is the multi-bus entry point. Pass a list
+  of `TransportCandidate` factories and it returns one normalized result row per
+  transport/backend.
+- `format_results_markdown_table(...)` and `results_to_rows(...)` convert those
+  result rows into a Markdown table or CSV-friendly dictionaries for ADRs or
+  findings docs.
+- CLI entry point:
+  - `python -m agents.common.message_bus.run_comparison`
+  - useful flags:
+    - `--count 1000 --seed 42`
+    - `--format markdown|csv|json`
+    - `--output agents/docs/exp004_transport_results.md`
+    - `--redis-url redis://...` to swap fake Redis for live Redis
+    - `--kafka-bootstrap-servers localhost:9092` to swap fake Kafka for live Kafka
