@@ -39,8 +39,9 @@ class IngestionAgent(BaseAgent):
     Week 3: replaces this with real API + scraping, dedup, and provenance tags.
     """
 
-    def __init__(self) -> None:
-        super().__init__(agent_id="ingestion-agent")
+    @property
+    def agent_id(self) -> str:
+        return "ingestion-agent"
 
     def health_check(self) -> dict:
         """Return ok status if the fallback scrape file is present and readable."""

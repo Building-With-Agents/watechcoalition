@@ -43,8 +43,11 @@ class EnrichmentAgent(BaseAgent):
              quality scoring, spam detection, and company resolution.
     """
 
+    @property
+    def agent_id(self) -> str:
+        return "enrichment-agent"
+
     def __init__(self) -> None:
-        super().__init__(agent_id="enrichment-agent")
         self._fixture: dict[int, dict] = {}
 
     def health_check(self) -> dict:

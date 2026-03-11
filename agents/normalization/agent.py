@@ -34,8 +34,9 @@ class NormalizationAgent(BaseAgent):
     Week 3: replaces this with real field mapping and schema enforcement.
     """
 
-    def __init__(self) -> None:
-        super().__init__(agent_id="normalization-agent")
+    @property
+    def agent_id(self) -> str:
+        return "normalization-agent"
 
     def health_check(self) -> dict:
         """Always ready — no external dependencies in stub mode."""

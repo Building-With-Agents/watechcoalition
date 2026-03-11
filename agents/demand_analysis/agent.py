@@ -37,8 +37,9 @@ class DemandAnalysisAgent(BaseAgent):
     that consumes RecordEnriched events and emits DemandSignalsUpdated.
     """
 
-    def __init__(self) -> None:
-        super().__init__(agent_id="demand-analysis-agent")
+    @property
+    def agent_id(self) -> str:
+        return "demand-analysis-agent"
 
     def health_check(self) -> dict:
         """
