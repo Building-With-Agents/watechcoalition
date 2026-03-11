@@ -20,6 +20,12 @@ from agents.common.message_bus.contracts import (
     validate_subscriber_id,
 )
 from agents.common.message_bus.in_process import InProcessEventBus
+from agents.common.message_bus.redis_streams import (
+    HandlerExecutionError,
+    RedisDependencyError,
+    RedisStreamsError,
+    RedisStreamsEventBus,
+)
 
 __all__ = [
     "EVENT_TYPE_KEY",
@@ -28,6 +34,10 @@ __all__ = [
     "ORCHESTRATOR_AGENT_ID",
     "EventBusBase",
     "InProcessEventBus",
+    "RedisStreamsEventBus",
+    "RedisStreamsError",
+    "RedisDependencyError",
+    "HandlerExecutionError",
     "EventHandler",
     "MessageBusContractError",
     "InvalidEventTypeError",
