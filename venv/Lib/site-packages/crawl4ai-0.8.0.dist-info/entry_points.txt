@@ -1,0 +1,6 @@
+[console_scripts]
+crawl4ai-doctor = crawl4ai.install:doctor
+crawl4ai-download-models = crawl4ai.model_loader:main
+crawl4ai-migrate = crawl4ai.migrations:main
+crawl4ai-setup = crawl4ai.install:post_install
+crwl = crawl4ai.cli:main
