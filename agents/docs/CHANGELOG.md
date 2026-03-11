@@ -26,6 +26,15 @@ All notable changes to the agents pipeline are documented here.
   - `agents/common/events/tests/test_synthetic_events.py` — shape, `agent_id`, payload keys, determinism for synthetic generators.
   - `agents/common/events/tests/test_correlation_propagation.py` — one test that builds IngestBatch + NormalizationComplete with the same `correlation_id` and asserts they match (synthetic only).
 
+### Demo scripts
+
+- **`agents/common/events/demo_50_events.py`**
+  - Generates 50 success events (IngestBatch only), then 50 mixed events (20 IngestBatch + 15 SourceFailure + 15 NormalizationFailed). Prints sample payloads so you can see `error_type`, `severity`, and `error_reason` on failure events.
+  - **Run:** `python -m agents.common.events.demo_50_events` (from repo root, venv activated).
+- **`agents/common/events/demo_bus_flow.py`**
+  - In-memory bus simulation: Scenario A (happy path, no errors), Scenario B (stream with SourceFailure events interleaved), Scenario C (crash after N events, then recover and replay with same seed).
+  - **Run:** `python -m agents.common.events.demo_bus_flow` (from repo root, venv activated).
+
 ---
 
 ## Test Harness (Emilio)
@@ -178,12 +187,15 @@ This section is a quick reference so you can plug the harness into your event_bu
 
 | Function | Where | What it does | How to use it |
 |----------|--------|--------------|----------------|
-| **`generate_synthetic_ingest_batches(count=1000, seed=42)`** | `agents.common.events.ingest_batch_harness` | Yields `EventEnvelope` instances with IngestBatch payloads. Same `(count, seed)` always gives the same events in the same order. | Iterate and publish each event to your bus, or feed to a consumer. Use `count=1000, seed=42` for the standard replayable run. |
+| **`generate_synthetic_ingest_batches(count=1000, seed=42, typed=False)`** | `agents.common.events.ingest_batch_harness` | Yields `EventEnvelope` or `IngestBatchEvent` (if `typed=True`) with IngestBatch payloads. Same `(count, seed)` always gives the same events in the same order. | Iterate and publish each event to your bus, or feed to a consumer. Use `count=1000, seed=42` for the standard replayable run. |
 | **`assert_valid_ingest_batch_envelope(event)`** | Same module | Validates envelope + IngestBatch payload. Raises `ValueError` with a clear message if invalid (missing key, wrong type, wrong `event_type`). | Call after consuming an event from the bus to ensure structure is still correct; use in tests to fail fast. |
 | **`is_valid_ingest_batch_envelope(event)`** | Same module | Same checks as above; returns `True` or `False` (does not raise). | Use when you want to branch: `if is_valid_ingest_batch_envelope(event): process(event)`. |
+| **`generate_synthetic_normalization_complete(count, seed=42, typed=False)`** | `agents.common.events.synthetic_events` | Yields deterministic NormalizationComplete events. | Use for normalization-stage load or correlation tests. |
+| **`generate_synthetic_source_failures(count, seed=42, typed=False)`** | Same module | Yields deterministic SourceFailure events (with `error_type`, `severity`, `error_reason`). | Use to simulate ingestion failures in bus tests. |
+| **`generate_synthetic_normalization_failed(count, seed=42, typed=False)`** | Same module | Yields deterministic NormalizationFailed events (with `error_type`, `severity`, `error_reason`). | Use to simulate normalization failures in bus tests. |
 
 **Optional constants** (if you need to check payload keys yourself):  
-`INGEST_BATCH_PAYLOAD_KEYS`, `INGEST_BATCH_PAYLOAD_STR_KEYS`, `INGEST_BATCH_PAYLOAD_INT_KEYS`.
+`INGEST_BATCH_PAYLOAD_KEYS`, `INGEST_BATCH_PAYLOAD_STR_KEYS`, `INGEST_BATCH_PAYLOAD_INT_KEYS` (in `ingest_batch_harness`).
 
 ### How to implement in your event_bus tester
 
@@ -217,6 +229,11 @@ This section is a quick reference so you can plug the harness into your event_bu
 | **`python -m agents.common.events.view_harness --count 1000`** | Full 1,000 events; validates all, prints first and last only. Use to confirm the full harness run. |
 | **`python -m agents.common.events.view_harness --count 1 --json`** | Prints the first event as JSON (e.g. for debugging or tooling). |
 | **`python -m agents.common.events.view_harness --count 10 --seed 99`** | 10 events with seed 99 (different stream than 42). |
+| **`python -m agents.common.events.demo_50_events`** | Generates 50 success events, then 50 mixed (success + SourceFailure + NormalizationFailed). Shows `error_type`, `severity`, `error_reason` on failure payloads. |
+| **`python -m agents.common.events.demo_bus_flow`** | Runs in-memory bus demo: happy path, stream with errors, crash-and-recover. Example of how to use the bus with success/failure events. |
 | **`cd agents && pytest common/events/tests/test_harness_events.py -v`** | Runs the 16 harness-structure tests (envelope, payload, count, determinism, uniqueness, validation). No bus required. |
+| **`cd agents && pytest common/events/tests/test_synthetic_events.py -v`** | Runs synthetic generator tests (NormalizationComplete, SourceFailure, NormalizationFailed). |
+| **`cd agents && pytest common/events/tests/test_correlation_propagation.py -v`** | Runs correlation_id propagation test (IngestBatch → NormalizationComplete). |
+| **`cd agents && pytest common/events/tests/ -v`** | Runs all event tests (harness + synthetic + correlation).
 
 **Note:** Run Python commands from the **repo root** (`watechcoalition`) so `agents` is importable, or set `PYTHONPATH` to the repo root.
