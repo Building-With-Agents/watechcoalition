@@ -20,13 +20,13 @@ from agents.common.event_envelope import EventEnvelope
 class AgentBase(ABC):
     """Abstract base class for all Job Intelligence Engine agents.
 
-    Subclasses MUST implement:
-        __init__(agent_id: str) via super().__init__(...)
+<<<<<<< HEAD
+    Subclasses MUST call super().__init__(agent_id="...") and implement:
         health_check() -> dict
         process(event: EventEnvelope) -> EventEnvelope | None
     """
 
-    def __init__(self, agent_id: str) -> None:
+    def __init__(self, *, agent_id: str) -> None:
         normalized_agent_id = agent_id.strip()
         if not normalized_agent_id:
             raise ValueError("agent_id must be non-empty")

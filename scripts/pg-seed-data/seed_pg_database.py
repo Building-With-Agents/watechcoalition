@@ -446,9 +446,9 @@ def seed_database() -> None:
     else:
         print("All row counts verified")
 
-    print(f"\nNext steps:")
-    print(f"  1. Activate venv:  agents\\.venv\\Scripts\\Activate.ps1")
-    print(f"  2. Run pipeline:   python agents/pipeline_runner.py")
+    print("\nNext steps:")
+    print("  1. Activate venv:  agents\\.venv\\Scripts\\Activate.ps1")
+    print("  2. Run pipeline:   python agents/pipeline_runner.py")
     print("=" * 60)
 
 

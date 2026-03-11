@@ -19,7 +19,6 @@ Usage (from project root, with venv activated):
 
 import json
 import os
-import sys
 
 import pyodbc
 import psycopg2
