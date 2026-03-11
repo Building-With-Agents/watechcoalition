@@ -1,0 +1,223 @@
+{
+  "event_id": "efd14b42-7759-4502-9012-c87f587a4049",
+  "correlation_id": "run-ingestion-cli",
+  "agent_id": "ingestion-agent",
+  "timestamp": "2026-03-11T04:49:42.615548",
+  "schema_version": "1.0",
+  "payload": {
+    "event_type": "IngestBatch",
+    "batch_id": "batch-run-inge",
+    "source": "jsearch",
+    "region_id": "el-paso",
+    "total_fetched": 2,
+    "staged_count": 2,
+    "dedup_count": 0,
+    "error_count": 0,
+    "records": [
+      {
+        "external_id": "O9yYWNO0aSEx55K0AAAAAA==",
+        "source": "jsearch",
+        "region_id": "el-paso",
+        "raw_payload_hash": "681c3b6917704e2c1bb5da1a7b29607ecf3fb992b2b87159b8fc3ff645df2eed",
+        "title": "Rehabilitation Engineer/Data Scientist/Health AI-Focused Engineer",
+        "company": "The University of Texas at El Paso",
+        "description": "POSITION DESCRIPTION:\n\nThe University of Texas at El Paso (UTEP) College of Health Sciences invites nominations and applications for a full-time tenured/tenure-track Assistant, Associate, or Full Professor in the Department of Physical Therapy & Movement Science to develop and enhance the Rehabilitation Engineering path.\nThis is a 9-month appointment with potential for summer teaching. The department welcomes applications from candidates in all areas of rehabilitation engineering and associated fields. The successful candidate will be responsible to bridge different disciplines to enhance the research productivity of the department.\n\nWe are interested in a dynamic person who can connect across existing strengths and expertise at UTEP.\n\nPriority will be given to the originality and promise of the candidate's vision for a Rehabilitation Engineering field within the larger umbrella of UTEP's vision and mission of providing access to excellent higher education.\n\nThe successful candidate will be strongly supported to build a premier Rehabilitation Engineering research program with world-class faculty and facilities, and collaborations across UTEP.\n\nWithin the department, the candidate will be required to maintain a strong synergy with other departments such as the Department of Metallurgical, Materials and Biomedical Engineering, within the College of Engineering, and the Department of Occupational Therapy, within the College of Health Sciences.\n\nJob responsibilities include teaching, scholarly activity (e.g., grant writing, manuscript publications, and conference presentations), and service to the program, college, university, community, and profession.\nThe anticipated appointment date is Fall 2026.\n\nThe ideal candidate will excel at having a highly productive research agenda, thrive in a bi-national setting, embrace the opportunities to work with underserved groups, and flourish in an independent work environment.\n\nThis position represents an excellent opportunity for an outstanding individual to build on an established and nationally recognized program and shape the direction of new initiatives.\nMultiple scholarly/research opportunities are available in the community and clinical settings on both sides of the U.S.-Mexico border. Teaching excellence and current scholarship/research will determine appointment at the Assistant or Associate level.\n\nTHE PROGRAM:\nThe Reagents' Research Excellence Program is largest state-funded research program in UTEP history.\n\nThis new program provides funding for the University to hire senior, fully tenured research faculty who are prominent in their fields.\n\nThese new tenured faculty are expected to build externally funded research portfolios over 2-5 years to enhance research at UTEP.\nThe Department of Physical Therapy and Movement Sciences was awarded one of these positions to enhance its research footprint.\n\nTHE DEPARTMENT:\nThe Department of Physical Therapy & Movement Science ) has been recently created and currently includes two academic units: Doctor of Physical Therapy and post-professional Residency in Orthopedic Physical Therapy.\n\nIn addition, departmental faculty members actively participate in the Interdisciplinary Health Sciences PhD Program by teaching and mentoring PhD students.\n\nThe Department has a close relationship with the Bachelors in Rehabilitation Sciences, with 450+ undergraduate students, and the Department of Occupational Therapy, with which they share the newly renovated space of the Rehabilitation Sciences Complex.\nIts faculty members are widely recognized for their scholarship/research and teaching on rehabilitation sciences in a Hispanic border context.\n\nTHE COLLEGE:\n\nThe College of Health Sciences prepares the next generation of health and human service professionals to improve quality of life and address health disparities in their communities.\nThe College offers five undergraduate degrees in Clinical Lab Science, Health Promotion, Rehabilitation Sciences, Social Work, and Kinesiology.\n\nThere are four master's degrees in the college:\nSpeech-Language Pathology, Public Health, Social Work, and Kinesiology.\n\nThere are currently three doctoral programs in the College:\nDoctor of Physical Therapy, Occupational Therapy Doctorate, and a PhD in Interdisciplinary Health Sciences.\n\nHigh impact educational experiences enable students to develop leadership, problem-solving, and critical thinking skills, as well as a strong sense of social responsibility through community and global engagement opportunities.\nFaculty and students engage in teaching, research, and service incorporating Boyer's Model of the scholarship of discovery, integration, application/engagement, and teaching and learning, all related to the applied health sciences ). The College's facilities and programs are designed to promote interprofessional teaching, learning, research and community & global engagement initiatives. The College enjoys a strong and collaborative relationship with a range of local, national and global community partners.\n\nGraduate and undergraduate students participate actively with faculty clinical and research mentors in conducting a variety of projects relevant to addressing health disparities and improving quality of life in the Paso del Norte region and beyond.\n\nTHE UNIVERSITY AND EL PASO:\n\nThe University of Texas at El Paso is a Carnegie R1 and Community Engaged research university at the heart of the U.S.-Mexico border region that is increasing access to excellent higher education.\n\nUTEP enrolls more than 26,000 students, and more than half of undergraduates are the first generation in their families to attend college.\n\nThe city's border location makes it an ideal venue for academic programs and research studies on topics of national interest such as bilingual education/language acquisition, border environment and immigration, environmental sustainability and infrastructure, health disparities, and international trade and commerce.\n\nThe Paso del Norte region's center for intellectual capital, UTEP is one of the major economic engines in the region, adding more than $1.4 billion to the local economy annually.\n\nEl Paso's active arts and culture community features the state's longest-running symphony orchestra, a nationally recognized chamber music festival, art galleries, museums, and a full schedule of seasonal events and festivals.\n\nUTEP adds to the arts and entertainment scene with an award-winning dinner theater, music and dance productions, contemporary and student art galleries, and a natural history museum.\n\nFor sports fans, the UTEP Miners offer exciting Division I college athletics at several campus venues including Sun Bowl Stadium, the Don Haskins Center, Kidd Field, University Field, and the Helen of Troy Softball Complex.\n\nSouthwest University Park, located a mile away in lively downtown El Paso, is home to the El Paso Chihuahuas, the Triple-A affiliate of the San Diego Padres, and the El Paso Locomotive, a professional soccer team founded in 2019.\n\nREQUIRED QUALIFICATIONS:\n\nCandidates are required to have: (1) an academic doctorate (preferably PhD) in any field associated with rehabilitation engineering; (2) a demonstrated record of scholarly/research activity and potential for securing external funding; (3) demonstrated experience with or potential for graduate teaching excellence; (4) experience in or potential for service to the program, college, university, community, and profession; and (5) ability to work effectively with faculty, staff, and students from diverse ethnic, cultural, and socioeconomic backgrounds.\n\nPreferred qualifications include:\n(1) currently licensed as a physical therapist in the United States; (2) demonstrated record of securing external funding; (3) post-doctoral research training; (4) demonstrated record of substantively involving undergraduate and/or graduate students in scholarship/research.\nSALARY/\n\nBENEFITS:\nThe initial salary is negotiable and based on qualifications and experience. The position comes with research start-up package and excellent fringe benefits.\n\nAPPLICATION PROCEDURE:\nReview of applications will begin immediately, and applications will be accepted until the position is filled.\n\nCandidates must submit the following:\n(1) cover letter addressing how candidate meets each required qualification, and any applicable preferred qualifications; (2) curriculum vitae; (3) abbreviated research plan (2 pages or less); (4) brief teaching philosophy (2 pages or less); (5) copies of up to three first-authored or co-authored peer-reviewed publications relevant to current scholarly/research agenda; and (6) complete contact information for at least three references. Applicants will be notified before references are contacted.\n\nFor more information about the position, contact:\n\nDr. Alvaro N Gurovich, Search Committee Chair\nChair Department of Rehabilitation Sciences",
+        "city": "El Paso",
+        "state": "Texas",
+        "country": "US",
+        "is_remote": false,
+        "date_posted": "2026-02-20T00:00:00",
+        "date_ingested": "2026-03-11T04:49:42.463084",
+        "salary_raw": null,
+        "salary_min": null,
+        "salary_max": null,
+        "salary_currency": null,
+        "salary_period": null,
+        "employment_type": "Full-time",
+        "experience_level": null,
+        "job_url": "https://us.bebee.com/job/6cf5c1b83d80b3f812d4eb1a97c904f6?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+        "source_url": "https://jsearch.p.rapidapi.com/search",
+        "raw_payload": {
+          "job_id": "O9yYWNO0aSEx55K0AAAAAA==",
+          "job_title": "Rehabilitation Engineer/Data Scientist/Health AI-Focused Engineer",
+          "employer_name": "The University of Texas at El Paso",
+          "employer_logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIuptHYW0QTuzYjyDg23NeLex0xiPIczp9V1PM&s=0",
+          "employer_website": null,
+          "job_publisher": "BeBee",
+          "job_employment_type": "Full-time",
+          "job_employment_types": [
+            "FULLTIME"
+          ],
+          "job_apply_link": "https://us.bebee.com/job/6cf5c1b83d80b3f812d4eb1a97c904f6?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+          "job_apply_is_direct": false,
+          "apply_options": [
+            {
+              "publisher": "BeBee",
+              "apply_link": "https://us.bebee.com/job/6cf5c1b83d80b3f812d4eb1a97c904f6?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "apply_link": "https://us.bebee.com/job/6cf5c1b83d80b3f812d4eb1a97c904f6",
+              "is_direct": null,
+              "publisher": "BeBee"
+            }
+          ],
+          "job_description": "POSITION DESCRIPTION:\n\nThe University of Texas at El Paso (UTEP) College of Health Sciences invites nominations and applications for a full-time tenured/tenure-track Assistant, Associate, or Full Professor in the Department of Physical Therapy & Movement Science to develop and enhance the Rehabilitation Engineering path.\nThis is a 9-month appointment with potential for summer teaching. The department welcomes applications from candidates in all areas of rehabilitation engineering and associated fields. The successful candidate will be responsible to bridge different disciplines to enhance the research productivity of the department.\n\nWe are interested in a dynamic person who can connect across existing strengths and expertise at UTEP.\n\nPriority will be given to the originality and promise of the candidate's vision for a Rehabilitation Engineering field within the larger umbrella of UTEP's vision and mission of providing access to excellent higher education.\n\nThe successful candidate will be strongly supported to build a premier Rehabilitation Engineering research program with world-class faculty and facilities, and collaborations across UTEP.\n\nWithin the department, the candidate will be required to maintain a strong synergy with other departments such as the Department of Metallurgical, Materials and Biomedical Engineering, within the College of Engineering, and the Department of Occupational Therapy, within the College of Health Sciences.\n\nJob responsibilities include teaching, scholarly activity (e.g., grant writing, manuscript publications, and conference presentations), and service to the program, college, university, community, and profession.\nThe anticipated appointment date is Fall 2026.\n\nThe ideal candidate will excel at having a highly productive research agenda, thrive in a bi-national setting, embrace the opportunities to work with underserved groups, and flourish in an independent work environment.\n\nThis position represents an excellent opportunity for an outstanding individual to build on an established and nationally recognized program and shape the direction of new initiatives.\nMultiple scholarly/research opportunities are available in the community and clinical settings on both sides of the U.S.-Mexico border. Teaching excellence and current scholarship/research will determine appointment at the Assistant or Associate level.\n\nTHE PROGRAM:\nThe Reagents' Research Excellence Program is largest state-funded research program in UTEP history.\n\nThis new program provides funding for the University to hire senior, fully tenured research faculty who are prominent in their fields.\n\nThese new tenured faculty are expected to build externally funded research portfolios over 2-5 years to enhance research at UTEP.\nThe Department of Physical Therapy and Movement Sciences was awarded one of these positions to enhance its research footprint.\n\nTHE DEPARTMENT:\nThe Department of Physical Therapy & Movement Science ) has been recently created and currently includes two academic units: Doctor of Physical Therapy and post-professional Residency in Orthopedic Physical Therapy.\n\nIn addition, departmental faculty members actively participate in the Interdisciplinary Health Sciences PhD Program by teaching and mentoring PhD students.\n\nThe Department has a close relationship with the Bachelors in Rehabilitation Sciences, with 450+ undergraduate students, and the Department of Occupational Therapy, with which they share the newly renovated space of the Rehabilitation Sciences Complex.\nIts faculty members are widely recognized for their scholarship/research and teaching on rehabilitation sciences in a Hispanic border context.\n\nTHE COLLEGE:\n\nThe College of Health Sciences prepares the next generation of health and human service professionals to improve quality of life and address health disparities in their communities.\nThe College offers five undergraduate degrees in Clinical Lab Science, Health Promotion, Rehabilitation Sciences, Social Work, and Kinesiology.\n\nThere are four master's degrees in the college:\nSpeech-Language Pathology, Public Health, Social Work, and Kinesiology.\n\nThere are currently three doctoral programs in the College:\nDoctor of Physical Therapy, Occupational Therapy Doctorate, and a PhD in Interdisciplinary Health Sciences.\n\nHigh impact educational experiences enable students to develop leadership, problem-solving, and critical thinking skills, as well as a strong sense of social responsibility through community and global engagement opportunities.\nFaculty and students engage in teaching, research, and service incorporating Boyer's Model of the scholarship of discovery, integration, application/engagement, and teaching and learning, all related to the applied health sciences ). The College's facilities and programs are designed to promote interprofessional teaching, learning, research and community & global engagement initiatives. The College enjoys a strong and collaborative relationship with a range of local, national and global community partners.\n\nGraduate and undergraduate students participate actively with faculty clinical and research mentors in conducting a variety of projects relevant to addressing health disparities and improving quality of life in the Paso del Norte region and beyond.\n\nTHE UNIVERSITY AND EL PASO:\n\nThe University of Texas at El Paso is a Carnegie R1 and Community Engaged research university at the heart of the U.S.-Mexico border region that is increasing access to excellent higher education.\n\nUTEP enrolls more than 26,000 students, and more than half of undergraduates are the first generation in their families to attend college.\n\nThe city's border location makes it an ideal venue for academic programs and research studies on topics of national interest such as bilingual education/language acquisition, border environment and immigration, environmental sustainability and infrastructure, health disparities, and international trade and commerce.\n\nThe Paso del Norte region's center for intellectual capital, UTEP is one of the major economic engines in the region, adding more than $1.4 billion to the local economy annually.\n\nEl Paso's active arts and culture community features the state's longest-running symphony orchestra, a nationally recognized chamber music festival, art galleries, museums, and a full schedule of seasonal events and festivals.\n\nUTEP adds to the arts and entertainment scene with an award-winning dinner theater, music and dance productions, contemporary and student art galleries, and a natural history museum.\n\nFor sports fans, the UTEP Miners offer exciting Division I college athletics at several campus venues including Sun Bowl Stadium, the Don Haskins Center, Kidd Field, University Field, and the Helen of Troy Softball Complex.\n\nSouthwest University Park, located a mile away in lively downtown El Paso, is home to the El Paso Chihuahuas, the Triple-A affiliate of the San Diego Padres, and the El Paso Locomotive, a professional soccer team founded in 2019.\n\nREQUIRED QUALIFICATIONS:\n\nCandidates are required to have: (1) an academic doctorate (preferably PhD) in any field associated with rehabilitation engineering; (2) a demonstrated record of scholarly/research activity and potential for securing external funding; (3) demonstrated experience with or potential for graduate teaching excellence; (4) experience in or potential for service to the program, college, university, community, and profession; and (5) ability to work effectively with faculty, staff, and students from diverse ethnic, cultural, and socioeconomic backgrounds.\n\nPreferred qualifications include:\n(1) currently licensed as a physical therapist in the United States; (2) demonstrated record of securing external funding; (3) post-doctoral research training; (4) demonstrated record of substantively involving undergraduate and/or graduate students in scholarship/research.\nSALARY/\n\nBENEFITS:\nThe initial salary is negotiable and based on qualifications and experience. The position comes with research start-up package and excellent fringe benefits.\n\nAPPLICATION PROCEDURE:\nReview of applications will begin immediately, and applications will be accepted until the position is filled.\n\nCandidates must submit the following:\n(1) cover letter addressing how candidate meets each required qualification, and any applicable preferred qualifications; (2) curriculum vitae; (3) abbreviated research plan (2 pages or less); (4) brief teaching philosophy (2 pages or less); (5) copies of up to three first-authored or co-authored peer-reviewed publications relevant to current scholarly/research agenda; and (6) complete contact information for at least three references. Applicants will be notified before references are contacted.\n\nFor more information about the position, contact:\n\nDr. Alvaro N Gurovich, Search Committee Chair\nChair Department of Rehabilitation Sciences",
+          "job_is_remote": false,
+          "job_posted_at": "19 days ago",
+          "job_posted_at_timestamp": 1771545600,
+          "job_posted_at_datetime_utc": "2026-02-20T00:00:00.000Z",
+          "job_location": "El Paso, TX",
+          "job_city": "El Paso",
+          "job_state": "Texas",
+          "job_country": "US",
+          "job_latitude": 31.761877799999997,
+          "job_longitude": -106.48502169999999,
+          "job_benefits": null,
+          "job_google_link": "https://www.google.com/search?q=jobs&gl=us&hl=en&udm=8#vhid=vt%3D20/docid%3DO9yYWNO0aSEx55K0AAAAAA%3D%3D&vssid=jobs-detail-viewer",
+          "job_salary": null,
+          "job_min_salary": null,
+          "job_max_salary": null,
+          "job_salary_period": null,
+          "job_highlights": {
+            "Qualifications": [
+              "Speech-Language Pathology, Public Health, Social Work, and Kinesiology",
+              "Doctor of Physical Therapy, Occupational Therapy Doctorate, and a PhD in Interdisciplinary Health Sciences",
+              "High impact educational experiences enable students to develop leadership, problem-solving, and critical thinking skills, as well as a strong sense of social responsibility through community and global engagement opportunities",
+              "Candidates are required to have: (1) an academic doctorate (preferably PhD) in any field associated with rehabilitation engineering; (2) a demonstrated record of scholarly/research activity and potential for securing external funding; (3) demonstrated experience with or potential for graduate teaching excellence; (4) experience in or potential for service to the program, college, university, community, and profession; and (5) ability to work effectively with faculty, staff, and students from diverse ethnic, cultural, and socioeconomic backgrounds",
+              "(1) currently licensed as a physical therapist in the United States; (2) demonstrated record of securing external funding; (3) post-doctoral research training; (4) demonstrated record of substantively involving undergraduate and/or graduate students in scholarship/research"
+            ],
+            "Benefits": [
+              "The initial salary is negotiable and based on qualifications and experience"
+            ],
+            "Responsibilities": [
+              "The successful candidate will be strongly supported to build a premier Rehabilitation Engineering research program with world-class faculty and facilities, and collaborations across UTEP",
+              "Within the department, the candidate will be required to maintain a strong synergy with other departments such as the Department of Metallurgical, Materials and Biomedical Engineering, within the College of Engineering, and the Department of Occupational Therapy, within the College of Health Sciences",
+              "Job responsibilities include teaching, scholarly activity (e.g., grant writing, manuscript publications, and conference presentations), and service to the program, college, university, community, and profession",
+              "Teaching excellence and current scholarship/research will determine appointment at the Assistant or Associate level",
+              "Faculty and students engage in teaching, research, and service incorporating Boyer's Model of the scholarship of discovery, integration, application/engagement, and teaching and learning, all related to the applied health sciences )"
+            ]
+          },
+          "job_onet_soc": "15111100",
+          "job_onet_job_zone": "5"
+        }
+      },
+      {
+        "external_id": "n9dRkSYSSxr1tyUyAAAAAA==",
+        "source": "jsearch",
+        "region_id": "el-paso",
+        "raw_payload_hash": "40414af4a6b52fdf65917349137c87a08b88d87a993a3c18b63a21430a34ee59",
+        "title": "Staff Software Engineer .NET + Data - Remote - USA",
+        "company": "FullStack Labs",
+        "description": "About FullStack\n\nFullStack is one of the fastest-growing software consultancy companies in the Americas. We deliver transformational digital solutions to top global companies and Silicon Valley startups. As an employee-first company, we focus on hiring the most talented software designers and developers by creating a positive, respectful, and supportive work environment where they can achieve their greatest potential.\n\nWe're most proud of:\n\u2022 Offering life-changing career opportunities to talented software professionals across the Americas.\n\u2022 Building highly-skilled software development teams for hundreds of the world's greatest companies.\n\u2022 Having delivered hundreds of successful custom software solutions, which have positively impacted the lives and careers of millions of users.\n\u2022 Our 4.2-star rating on GlassDoor.\n\u2022 Our client Net Promoter Score of 68, twice the industry average.\nThe Position\n\nWe're looking to hire a Staff Software Engineer (.NET + Data) to join our team. You'll work with our incredible clients in one of two ways:\n\u2022 Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily.\n\u2022 Design & Build: You will work on a FullStack product team to build and deliver a product to our clients.\nWhat We Are Looking For\n\u2022 8+ years of professional software engineering experience.\n\u2022 3+ years of experience in technical leadership, influencing architecture and engineering direction.\n\u2022 Advanced English is required.\n\u2022 Successful completion of a four-year college degree is required.\n\u2022 Expert-level proficiency in C#/.NET and TypeScript, with a deep understanding of the full software lifecycle.\n\u2022 Hands-on experience with TypeScript/JavaScript.\n\u2022 Proven experience mentoring senior engineers and raising the technical bar across a team.\n\u2022 Extensive experience designing and scaling event-driven architectures using Kafka or Kinesis and NoSQL/SQL databases.\n\u2022 Experience architecting and managing workloads in Kubernetes at scale (including Helm and Service Mesh).\n\u2022 Hands-on expertise in AWS, Kubernetes, and Terraform (Infrastructure as Code), with a focus on GitOps and automated delivery.\n\u2022 Strong understanding of microservices architecture and event-driven systems.\n\u2022 Experience implementing secure authentication and authorization using OAuth/OIDC.\n\u2022 Experience designing and maintaining APIs and service-to-service integrations.\n\u2022 Experience implementing comprehensive observability (Datadog/Prometheus) and testing strategies (TDD, Performance Testing) to ensure 24/7 system reliability.\n\u2022 Ability to work through new and difficult issues and contribute to libraries as needed.\n\u2022 Ability to create and maintain continuous integration and delivery of applications.\n\u2022 Forensic attention to detail.\n\u2022 A positive mindset and a can-do attitude.\n\u2022 Experience working on Agile/Scrum teams.\n\u2022 Meaningful experience working on large, complex systems.\n\u2022 Ability to take extreme ownership over your work. Every day is a challenge to ensure you are performing to the expectations you and your team have agreed upon.\n\u2022 Ability to identify with the goals of FullStack's clients and dedicate yourself to delivering on the commitments you and your team make to them.\n\u2022 Ability to consistently work 40 hours per week.\nWhat We Offer\n\u2022 Competitive Salary.\n\u2022 Paid Time Off (vacation, sick leave, maternity and paternity leave, holidays).\n\u2022 100% remote work.\n\u2022 The ability to work with leading startups and Fortune 500 companies.\n\u2022 Health, dental, and vision insurance.\n\u2022 401(k) w/ 4% match.\n\u2022 Ample opportunity for career advancement.\n\u2022 Continuing education opportunities.\n\nFullStack is proud to be an equal opportunity workplace. We are committed to equal employment opportunity regardless of race, color, ancestry, religion, sex, national origin, sexual orientation, age, citizenship, marital status, disability, gender identity, or Veteran status.\n\nLearn more about our Applicants Privacy Notice .",
+        "city": "El Paso",
+        "state": "Texas",
+        "country": "US",
+        "is_remote": false,
+        "date_posted": "2026-03-06T00:00:00",
+        "date_ingested": "2026-03-11T04:49:42.463129",
+        "salary_raw": null,
+        "salary_min": null,
+        "salary_max": null,
+        "salary_currency": null,
+        "salary_period": null,
+        "employment_type": "Full-time",
+        "experience_level": null,
+        "job_url": "https://www.jobilize.com/amp/job/us-tx-el-paso-staff-software-engineer-net-data-remote-usa-fullstack?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+        "source_url": "https://jsearch.p.rapidapi.com/search",
+        "raw_payload": {
+          "job_id": "n9dRkSYSSxr1tyUyAAAAAA==",
+          "job_title": "Staff Software Engineer .NET + Data - Remote - USA",
+          "employer_name": "FullStack Labs",
+          "employer_logo": null,
+          "employer_website": "https://www.fullstack.com",
+          "job_publisher": "Jobilize",
+          "job_employment_type": "Full-time",
+          "job_employment_types": [
+            "FULLTIME"
+          ],
+          "job_apply_link": "https://www.jobilize.com/amp/job/us-tx-el-paso-staff-software-engineer-net-data-remote-usa-fullstack?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+          "job_apply_is_direct": false,
+          "apply_options": [
+            {
+              "publisher": "Jobilize",
+              "apply_link": "https://www.jobilize.com/amp/job/us-tx-el-paso-staff-software-engineer-net-data-remote-usa-fullstack?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "apply_link": "https://www.jobilize.com/amp/job/us-tx-el-paso-staff-software-engineer-net-data-remote-usa-fullstack",
+              "is_direct": null,
+              "publisher": "Jobilize"
+            }
+          ],
+          "job_description": "About FullStack\n\nFullStack is one of the fastest-growing software consultancy companies in the Americas. We deliver transformational digital solutions to top global companies and Silicon Valley startups. As an employee-first company, we focus on hiring the most talented software designers and developers by creating a positive, respectful, and supportive work environment where they can achieve their greatest potential.\n\nWe're most proud of:\n\u2022 Offering life-changing career opportunities to talented software professionals across the Americas.\n\u2022 Building highly-skilled software development teams for hundreds of the world's greatest companies.\n\u2022 Having delivered hundreds of successful custom software solutions, which have positively impacted the lives and careers of millions of users.\n\u2022 Our 4.2-star rating on GlassDoor.\n\u2022 Our client Net Promoter Score of 68, twice the industry average.\nThe Position\n\nWe're looking to hire a Staff Software Engineer (.NET + Data) to join our team. You'll work with our incredible clients in one of two ways:\n\u2022 Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily.\n\u2022 Design & Build: You will work on a FullStack product team to build and deliver a product to our clients.\nWhat We Are Looking For\n\u2022 8+ years of professional software engineering experience.\n\u2022 3+ years of experience in technical leadership, influencing architecture and engineering direction.\n\u2022 Advanced English is required.\n\u2022 Successful completion of a four-year college degree is required.\n\u2022 Expert-level proficiency in C#/.NET and TypeScript, with a deep understanding of the full software lifecycle.\n\u2022 Hands-on experience with TypeScript/JavaScript.\n\u2022 Proven experience mentoring senior engineers and raising the technical bar across a team.\n\u2022 Extensive experience designing and scaling event-driven architectures using Kafka or Kinesis and NoSQL/SQL databases.\n\u2022 Experience architecting and managing workloads in Kubernetes at scale (including Helm and Service Mesh).\n\u2022 Hands-on expertise in AWS, Kubernetes, and Terraform (Infrastructure as Code), with a focus on GitOps and automated delivery.\n\u2022 Strong understanding of microservices architecture and event-driven systems.\n\u2022 Experience implementing secure authentication and authorization using OAuth/OIDC.\n\u2022 Experience designing and maintaining APIs and service-to-service integrations.\n\u2022 Experience implementing comprehensive observability (Datadog/Prometheus) and testing strategies (TDD, Performance Testing) to ensure 24/7 system reliability.\n\u2022 Ability to work through new and difficult issues and contribute to libraries as needed.\n\u2022 Ability to create and maintain continuous integration and delivery of applications.\n\u2022 Forensic attention to detail.\n\u2022 A positive mindset and a can-do attitude.\n\u2022 Experience working on Agile/Scrum teams.\n\u2022 Meaningful experience working on large, complex systems.\n\u2022 Ability to take extreme ownership over your work. Every day is a challenge to ensure you are performing to the expectations you and your team have agreed upon.\n\u2022 Ability to identify with the goals of FullStack's clients and dedicate yourself to delivering on the commitments you and your team make to them.\n\u2022 Ability to consistently work 40 hours per week.\nWhat We Offer\n\u2022 Competitive Salary.\n\u2022 Paid Time Off (vacation, sick leave, maternity and paternity leave, holidays).\n\u2022 100% remote work.\n\u2022 The ability to work with leading startups and Fortune 500 companies.\n\u2022 Health, dental, and vision insurance.\n\u2022 401(k) w/ 4% match.\n\u2022 Ample opportunity for career advancement.\n\u2022 Continuing education opportunities.\n\nFullStack is proud to be an equal opportunity workplace. We are committed to equal employment opportunity regardless of race, color, ancestry, religion, sex, national origin, sexual orientation, age, citizenship, marital status, disability, gender identity, or Veteran status.\n\nLearn more about our Applicants Privacy Notice .",
+          "job_is_remote": false,
+          "job_posted_at": "5 days ago",
+          "job_posted_at_timestamp": 1772755200,
+          "job_posted_at_datetime_utc": "2026-03-06T00:00:00.000Z",
+          "job_location": "El Paso, TX",
+          "job_city": "El Paso",
+          "job_state": "Texas",
+          "job_country": "US",
+          "job_latitude": 31.761877799999997,
+          "job_longitude": -106.48502169999999,
+          "job_benefits": [
+            "paid_time_off",
+            "dental_coverage",
+            "health_insurance"
+          ],
+          "job_google_link": "https://www.google.com/search?q=jobs&gl=us&hl=en&udm=8#vhid=vt%3D20/docid%3Dn9dRkSYSSxr1tyUyAAAAAA%3D%3D&vssid=jobs-detail-viewer",
+          "job_salary": null,
+          "job_min_salary": null,
+          "job_max_salary": null,
+          "job_salary_period": null,
+          "job_highlights": {
+            "Qualifications": [
+              "8+ years of professional software engineering experience",
+              "3+ years of experience in technical leadership, influencing architecture and engineering direction",
+              "Advanced English is required",
+              "Successful completion of a four-year college degree is required",
+              "Expert-level proficiency in C#/.NET and TypeScript, with a deep understanding of the full software lifecycle",
+              "Hands-on experience with TypeScript/JavaScript",
+              "Proven experience mentoring senior engineers and raising the technical bar across a team",
+              "Extensive experience designing and scaling event-driven architectures using Kafka or Kinesis and NoSQL/SQL databases",
+              "Experience architecting and managing workloads in Kubernetes at scale (including Helm and Service Mesh)",
+              "Hands-on expertise in AWS, Kubernetes, and Terraform (Infrastructure as Code), with a focus on GitOps and automated delivery",
+              "Strong understanding of microservices architecture and event-driven systems",
+              "Experience implementing secure authentication and authorization using OAuth/OIDC",
+              "Experience designing and maintaining APIs and service-to-service integrations",
+              "Experience implementing comprehensive observability (Datadog/Prometheus) and testing strategies (TDD, Performance Testing) to ensure 24/7 system reliability",
+              "Ability to work through new and difficult issues and contribute to libraries as needed",
+              "Ability to create and maintain continuous integration and delivery of applications",
+              "Forensic attention to detail",
+              "A positive mindset and a can-do attitude",
+              "Experience working on Agile/Scrum teams",
+              "Meaningful experience working on large, complex systems",
+              "Ability to take extreme ownership over your work",
+              "Every day is a challenge to ensure you are performing to the expectations you and your team have agreed upon",
+              "Ability to identify with the goals of FullStack's clients and dedicate yourself to delivering on the commitments you and your team make to them",
+              "Ability to consistently work 40 hours per week"
+            ],
+            "Benefits": [
+              "Offering life-changing career opportunities to talented software professionals across the Americas",
+              "Competitive Salary",
+              "Paid Time Off (vacation, sick leave, maternity and paternity leave, holidays)",
+              "100% remote work",
+              "The ability to work with leading startups and Fortune 500 companies",
+              "Health, dental, and vision insurance",
+              "401(k) w/ 4% match",
+              "Ample opportunity for career advancement",
+              "Continuing education opportunities"
+            ],
+            "Responsibilities": [
+              "Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily",
+              "Design & Build: You will work on a FullStack product team to build and deliver a product to our clients"
+            ]
+          },
+          "job_onet_soc": "15113200",
+          "job_onet_job_zone": "4"
+        }
+      }
+    ]
+  }
+}
