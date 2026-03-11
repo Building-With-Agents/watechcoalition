@@ -22,6 +22,11 @@ experiments.
   serialization/deserialization, and transport counters
   (`published_events`, `delivered_events`, `handler_failures`,
   `queue_depth`, `in_flight`).
+- Commit 4: `KafkaEventBus` candidate with Kafka publish/consume
+  (`send`, `poll`, per-message `commit`), envelope
+  serialization/deserialization, and transport counters
+  (`published_events`, `delivered_events`, `handler_failures`,
+  `queue_depth`, `in_flight`).
 
 ## Commit 3 Redis usage
 
@@ -32,3 +37,18 @@ experiments.
   - `replay_pending=True` reprocesses unacked entries first.
   - `stop_on_handler_error=True` raises `HandlerExecutionError` and leaves the
     failed entry pending for replay.
+
+## Commit 4 Kafka usage
+
+- Install dependency if using live brokers: `pip install kafka-python`
+  (or install from `agents/requirements.txt`).
+- `publish(event)` sends serialized `EventEnvelope` JSON to a topic.
+- `subscribe(event_type, handler, subscriber_id=...)` registers one handler.
+- `consume_available(...)` polls and dispatches handlers:
+  - successful messages are committed per message.
+  - failed messages are not committed and are seeked for replay.
+  - released-for-replay messages are removed from `in_flight` immediately.
+  - `stop_on_handler_error=True` raises `KafkaHandlerExecutionError`
+    on the first handler failure and keeps that message replayable.
+- kafka-python adapter uses synchronous producer ack (`future.get(timeout=10)`)
+  for deterministic experiment counters; production can switch to async/callback.

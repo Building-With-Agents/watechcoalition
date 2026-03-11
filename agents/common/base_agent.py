@@ -20,7 +20,6 @@ from agents.common.event_envelope import EventEnvelope
 class AgentBase(ABC):
     """Abstract base class for all Job Intelligence Engine agents.
 
-<<<<<<< HEAD
     Subclasses MUST call super().__init__(agent_id="...") and implement:
         health_check() -> dict
         process(event: EventEnvelope) -> EventEnvelope | None
