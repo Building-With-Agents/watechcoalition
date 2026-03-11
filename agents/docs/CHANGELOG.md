@@ -4,6 +4,34 @@ All notable changes to the agents pipeline are documented here.
 
 ---
 
+## EXP-004 Commit 4 (Bryan)
+
+**Kafka event bus candidate + transport parity tests.**
+
+### Changes
+
+- **Kafka candidate**
+  - `agents/common/message_bus/kafka.py`: adds `KafkaEventBus` with:
+    - transport-agnostic routing via `EventEnvelope` + `payload["event_type"]`
+    - parity counters (`published_events`, `delivered_events`, `handler_failures`, `queue_depth`, `in_flight`)
+    - per-message commit on success and seek-on-failure replay behavior
+    - optional `from_bootstrap_servers(...)` constructor (requires `kafka-python`)
+- **Exports/docs**
+  - `agents/common/message_bus/__init__.py`: exports Kafka bus/errors.
+  - `agents/common/message_bus/README.md`: adds Commit 4 Kafka usage and semantics.
+  - `agents/requirements.txt`: adds `kafka-python>=2.0`.
+- **Tests**
+  - `agents/tests/test_kafka_event_bus.py`:
+    - envelope serialization round-trip
+    - harness-equivalent 1,000-event IngestBatch → NormalizationComplete parity
+    - crash at index 500 + replay (`replay_count=501`, `replay_completeness=100%`, same event_id set)
+
+### Remaining for findings doc / ADR-004
+
+- Throughput measurement (events/sec) for in-process, Redis, Kafka.
+- Latency measurement (publish→handler finished; optional publish→ack).
+- Results table comparing transport throughput, latency, crash/replay completeness, and counters.
+
 ## EXP-004 scope expansion (Emilio)
 
 **Failure payloads, synthetic generators, typed events, and correlation propagation.**
