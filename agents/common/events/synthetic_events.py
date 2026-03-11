@@ -10,9 +10,13 @@ from __future__ import annotations
 import uuid
 from collections.abc import Iterator
 from datetime import datetime, timedelta
-from typing import Union
 
 from agents.common.event_envelope import EventEnvelope
+from agents.common.events.typed_events import (
+    NormalizationCompleteEvent,
+    NormalizationFailedEvent,
+    SourceFailureEvent,
+)
 from agents.ingestion.events import source_failure_payload
 from agents.normalization.events import (
     normalization_complete_payload,
@@ -26,15 +30,13 @@ def generate_synthetic_normalization_complete(
     count: int = 100,
     seed: int = 42,
     typed: bool = False,
-) -> Iterator[Union[EventEnvelope, "NormalizationCompleteEvent"]]:
+) -> Iterator[EventEnvelope | NormalizationCompleteEvent]:
     """
     Yield deterministic NormalizationComplete events.
 
     Same (count, seed) always produces the same events in the same order.
     When typed=True, yields NormalizationCompleteEvent wrappers; otherwise EventEnvelope.
     """
-    from agents.common.events.typed_events import NormalizationCompleteEvent
-
     correlation_id = f"harness-norm-{seed}"
     for i in range(count):
         event_id = str(
@@ -73,15 +75,13 @@ def generate_synthetic_source_failures(
     count: int = 10,
     seed: int = 42,
     typed: bool = False,
-) -> Iterator[Union[EventEnvelope, "SourceFailureEvent"]]:
+) -> Iterator[EventEnvelope | SourceFailureEvent]:
     """
     Yield deterministic SourceFailure events.
 
     Same (count, seed) always produces the same events in the same order.
     When typed=True, yields SourceFailureEvent wrappers; otherwise EventEnvelope.
     """
-    from agents.common.events.typed_events import SourceFailureEvent
-
     correlation_id = f"harness-fail-{seed}"
     sources = ("jsearch", "crawl4ai", "harness")
     for i in range(count):
@@ -120,15 +120,13 @@ def generate_synthetic_normalization_failed(
     count: int = 10,
     seed: int = 42,
     typed: bool = False,
-) -> Iterator[Union[EventEnvelope, "NormalizationFailedEvent"]]:
+) -> Iterator[EventEnvelope | NormalizationFailedEvent]:
     """
     Yield deterministic NormalizationFailed events.
 
     Same (count, seed) always produces the same events in the same order.
     When typed=True, yields NormalizationFailedEvent wrappers; otherwise EventEnvelope.
     """
-    from agents.common.events.typed_events import NormalizationFailedEvent
-
     correlation_id = f"harness-normfail-{seed}"
     for i in range(count):
         event_id = str(
