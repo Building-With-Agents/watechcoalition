@@ -10,6 +10,7 @@ from __future__ import annotations
 import uuid
 from collections.abc import Iterator
 from datetime import datetime, timedelta
+from typing import Union
 
 from agents.common.event_envelope import EventEnvelope
 from agents.ingestion.events import ingest_batch_payload
@@ -34,12 +35,16 @@ INGEST_BATCH_PAYLOAD_INT_KEYS = frozenset({"total_fetched", "staged_count", "ded
 def generate_synthetic_ingest_batches(
     count: int = 1000,
     seed: int = 42,
-) -> Iterator[EventEnvelope]:
+    typed: bool = False,
+) -> Iterator[Union[EventEnvelope, "IngestBatchEvent"]]:
     """
     Yield exactly `count` deterministic IngestBatch events.
 
     Same (count, seed) always produces the same events in the same order.
+    When typed=True, yields IngestBatchEvent wrappers; otherwise EventEnvelope.
     """
+    from agents.common.events.typed_events import IngestBatchEvent
+
     base_ts = datetime(2025, 1, 1, 0, 0, 0)
     correlation_id = f"harness-{seed}"
 
@@ -62,7 +67,7 @@ def generate_synthetic_ingest_batches(
             dedup_count=dedup_count,
             error_count=error_count,
         )
-        yield EventEnvelope(
+        envelope = EventEnvelope(
             event_id=event_id,
             correlation_id=correlation_id,
             agent_id="ingestion_agent",
@@ -70,6 +75,10 @@ def generate_synthetic_ingest_batches(
             schema_version="1.0",
             payload=payload,
         )
+        if typed:
+            yield IngestBatchEvent(envelope=envelope)
+        else:
+            yield envelope
 
 
 def is_valid_ingest_batch_envelope(event: EventEnvelope) -> bool:

@@ -4,6 +4,30 @@ All notable changes to the agents pipeline are documented here.
 
 ---
 
+## EXP-004 scope expansion (Emilio)
+
+**Failure payloads, synthetic generators, typed events, and correlation propagation.**
+
+### Changes
+
+- **Failure payloads**
+  - `agents/ingestion/events.py`: `source_failure_payload` extended with `error_type`, `severity` (default `"critical"`), and `error_reason`.
+  - `agents/normalization/events.py`: `normalization_failed_payload` extended with the same three fields (`error_type`, `severity`, `error_reason`).
+- **Synthetic generators** (`agents/common/events/synthetic_events.py`)
+  - `generate_synthetic_normalization_complete(count, seed, typed=False)` — deterministic NormalizationComplete events.
+  - `generate_synthetic_source_failures(count, seed, typed=False)` — deterministic SourceFailure events.
+  - `generate_synthetic_normalization_failed(count, seed, typed=False)` — deterministic NormalizationFailed events.
+  - All accept optional `typed=True` to yield typed event wrappers.
+- **Typed events** (`agents/common/events/typed_events.py`)
+  - `IngestBatchEvent`, `NormalizationCompleteEvent`, `SourceFailureEvent`, `NormalizationFailedEvent` — wrappers around `EventEnvelope` that validate `payload["event_type"]`.
+- **Harness**
+  - `ingest_batch_harness.py`: `generate_synthetic_ingest_batches(..., typed=False)`; when `typed=True`, yields `IngestBatchEvent` instances.
+- **Tests**
+  - `agents/common/events/tests/test_synthetic_events.py` — shape, `agent_id`, payload keys, determinism for synthetic generators.
+  - `agents/common/events/tests/test_correlation_propagation.py` — one test that builds IngestBatch + NormalizationComplete with the same `correlation_id` and asserts they match (synthetic only).
+
+---
+
 ## Test Harness (Emilio)
 
 **EXP-004 Event Bus — synthetic IngestBatch generator and harness structure tests.**

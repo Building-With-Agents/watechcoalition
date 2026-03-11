@@ -26,10 +26,16 @@ def normalization_failed_payload(
     *,
     batch_id: str,
     error: str,
+    error_type: str,
+    severity: str = "critical",
+    error_reason: str,
 ) -> dict:
     """Build a ``NormalizationFailed`` event payload."""
     return {
         "event_type": "NormalizationFailed",
         "batch_id": batch_id,
         "error": error,
+        "error_type": error_type,
+        "severity": severity,
+        "error_reason": error_reason,
     }

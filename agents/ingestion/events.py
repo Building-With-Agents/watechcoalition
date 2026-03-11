@@ -31,6 +31,9 @@ def source_failure_payload(
     run_id: str,
     source: str,
     error: str,
+    error_type: str,
+    severity: str = "critical",
+    error_reason: str,
 ) -> dict:
     """Build a ``SourceFailure`` event payload."""
     return {
@@ -38,4 +41,7 @@ def source_failure_payload(
         "run_id": run_id,
         "source": source,
         "error": error,
+        "error_type": error_type,
+        "severity": severity,
+        "error_reason": error_reason,
     }
