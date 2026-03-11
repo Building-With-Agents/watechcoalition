@@ -134,6 +134,7 @@ incident-report_*.md
 
 # Python agent pipeline artifacts
 **/.venv/
+venv/
 **/__pycache__/
 **/*.pyc
 **/.python_packages/
