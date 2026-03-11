@@ -20,6 +20,12 @@ from agents.common.message_bus.contracts import (
     validate_subscriber_id,
 )
 from agents.common.message_bus.in_process import InProcessEventBus
+from agents.common.message_bus.kafka import (
+    KafkaDependencyError,
+    KafkaEventBus,
+    KafkaEventBusError,
+    KafkaHandlerExecutionError,
+)
 from agents.common.message_bus.redis_streams import (
     HandlerExecutionError,
     RedisDependencyError,
@@ -34,6 +40,10 @@ __all__ = [
     "ORCHESTRATOR_AGENT_ID",
     "EventBusBase",
     "InProcessEventBus",
+    "KafkaEventBus",
+    "KafkaEventBusError",
+    "KafkaDependencyError",
+    "KafkaHandlerExecutionError",
     "RedisStreamsEventBus",
     "RedisStreamsError",
     "RedisDependencyError",
