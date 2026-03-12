@@ -29,6 +29,7 @@ class ComparisonScenario:
     latency_sample_size: int | None = None
     include_crash_replay: bool = True
     crash_at: int = 500
+    producer_crash_at: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,6 +91,12 @@ class TransportComparisonResult:
     in_flight: int | None
     drain_iterations: int
     correctness_passed: bool
+    max_in_flight: int | None
+    replay_count: int | None
+    correlation_id_propagation_passed: bool
+    producer_crash_delivered: int | None
+    producer_crash_events_lost: int | None
+    events_lost_consumer_crash: int | None
 
 
 def run_transport_comparison(
@@ -181,11 +188,29 @@ def run_transport_comparison(
 
     replay_complete: bool | None = None
     replay_completeness_pct: float | None = None
+    replay_count: int | None = None
     replay_factory = replay_bus_factory
+    events_lost_consumer_crash: int | None = None
     if resolved.include_crash_replay and replay_factory is not None and has_consumer(bus):
-        replay_complete, replay_completeness_pct = measure_crash_replay(
+        replay_complete, replay_completeness_pct, replay_count = measure_crash_replay(
             replay_factory,
             scenario=resolved,
+        )
+        if replay_count is not None:
+            recovered = (resolved.crash_at - 1) + replay_count
+            events_lost_consumer_crash = max(0, resolved.event_count - recovered)
+
+    producer_crash_delivered: int | None = None
+    producer_crash_events_lost: int | None = None
+    if (
+        resolved.producer_crash_at is not None
+        and replay_bus_factory is not None
+    ):
+        producer_crash_delivered, producer_crash_events_lost = (
+            _measure_producer_crash_delivered_lost(
+                replay_bus_factory,
+                scenario=resolved,
+            )
         )
 
     producer_crash = (
@@ -206,6 +231,17 @@ def run_transport_comparison(
         and counters["handler_failures"] == 0
         and counters["queue_depth"] in {None, 0}
         and counters["in_flight"] in {None, 0}
+    )
+
+    queue_depth_result = (
+        counters.get("max_queue_depth_seen")
+        if counters.get("max_queue_depth_seen") is not None
+        else counters["queue_depth"]
+    )
+    max_in_flight_result = (
+        counters.get("max_in_flight_seen")
+        if counters.get("max_in_flight_seen") is not None
+        else counters.get("in_flight")
     )
 
     return TransportComparisonResult(
@@ -242,10 +278,16 @@ def run_transport_comparison(
         published_events=counters["published_events"],
         delivered_events=counters["delivered_events"],
         handler_failures=counters["handler_failures"],
-        queue_depth=counters["queue_depth"],
+        queue_depth=queue_depth_result,
         in_flight=counters["in_flight"],
         drain_iterations=drain_stats.iterations,
         correctness_passed=correctness_passed,
+        max_in_flight=max_in_flight_result,
+        replay_count=replay_count,
+        correlation_id_propagation_passed=correctness_passed,
+        producer_crash_delivered=producer_crash_delivered,
+        producer_crash_events_lost=producer_crash_events_lost,
+        events_lost_consumer_crash=events_lost_consumer_crash,
     )
 
 
@@ -305,8 +347,13 @@ def measure_crash_replay(
     bus_factory: Callable[[], EventBusBase],
     *,
     scenario: ComparisonScenario | None = None,
-) -> tuple[bool, float]:
-    """Run the crash-at-N then replay scenario on a fresh transport instance."""
+) -> tuple[bool, float, int]:
+    """Run the crash-at-N then replay scenario on a fresh transport instance.
+
+    Returns:
+        (replay_complete, replay_completeness_pct, replay_count)
+        where replay_count is the number of events processed after the crash.
+    """
     resolved = scenario or ComparisonScenario()
     _validate_scenario(resolved)
 
@@ -374,7 +421,54 @@ def measure_crash_replay(
         and len(combined_ids) == len(published_ids)
         and set(combined_ids) == set(published_ids)
     )
-    return replay_complete, replay_completeness_pct
+    replay_count = len(replay_processed_ids)
+    return replay_complete, replay_completeness_pct, replay_count
+
+
+def _measure_producer_crash_delivered_lost(
+    bus_factory: Callable[[], EventBusBase],
+    *,
+    scenario: ComparisonScenario | None = None,
+) -> tuple[int, int]:
+    """Publish first producer_crash_at events then drain; return (delivered, events_lost)."""
+    resolved = scenario or ComparisonScenario()
+    _validate_scenario(resolved)
+    n = resolved.producer_crash_at
+    if n is None or n <= 0:
+        raise ValueError("producer_crash_at must be set and > 0")
+
+    bus = bus_factory()
+    harness_events = list(
+        generate_synthetic_ingest_batches(
+            count=resolved.event_count,
+            seed=resolved.seed,
+        )
+    )
+    to_publish = harness_events[:n]
+    delivered_ids: list[str] = []
+
+    def _count_handler(event: EventEnvelope) -> None:
+        delivered_ids.append(event.event_id)
+
+    bus.subscribe(
+        "IngestBatch",
+        _count_handler,
+        subscriber_id="normalization-agent",
+    )
+
+    for event in to_publish:
+        bus.publish(event)
+
+    if has_consumer(bus):
+        drain_bus(
+            bus,
+            batch_size=resolved.drain_batch_size,
+            iteration_limit=resolved.drain_iteration_limit,
+        )
+
+    delivered = len(delivered_ids)
+    events_lost = n - delivered
+    return delivered, events_lost
 
 
 def measure_producer_crash(
@@ -479,13 +573,20 @@ def snapshot_counters(bus: EventBusBase) -> dict[str, int | None]:
     """Return normalized transport counters across all bus variants."""
     raw_counters = getattr(bus, "counters", {})
     counters = raw_counters if isinstance(raw_counters, dict) else {}
-    return {
+    out: dict[str, int | None] = {
         "published_events": int(counters.get("published_events", 0)),
         "delivered_events": int(counters.get("delivered_events", 0)),
         "handler_failures": int(counters.get("handler_failures", 0)),
         "queue_depth": _maybe_int(counters.get("queue_depth")),
         "in_flight": _maybe_int(counters.get("in_flight")),
     }
+    max_qd = _maybe_int(counters.get("max_queue_depth_seen"))
+    max_if = _maybe_int(counters.get("max_in_flight_seen"))
+    if max_qd is not None:
+        out["max_queue_depth_seen"] = max_qd
+    if max_if is not None:
+        out["max_in_flight_seen"] = max_if
+    return out
 
 
 def results_to_rows(
@@ -515,6 +616,12 @@ def results_to_rows(
             "queue_depth": result.queue_depth,
             "in_flight": result.in_flight,
             "correctness_passed": result.correctness_passed,
+            "max_in_flight": result.max_in_flight,
+            "replay_count": result.replay_count,
+            "correlation_id_propagation_passed": result.correlation_id_propagation_passed,
+            "producer_crash_delivered": result.producer_crash_delivered,
+            "producer_crash_events_lost": result.producer_crash_events_lost,
+            "events_lost_consumer_crash": result.events_lost_consumer_crash,
         }
         for result in results
     ]
@@ -546,6 +653,12 @@ def format_results_markdown_table(
         "queue_depth",
         "in_flight",
         "correctness_passed",
+        "max_in_flight",
+        "replay_count",
+        "correlation_id_propagation_passed",
+        "producer_crash_delivered",
+        "producer_crash_events_lost",
+        "events_lost_consumer_crash",
     ]
     lines = [
         "| " + " | ".join(headers) + " |",
@@ -605,6 +718,13 @@ def _validate_scenario(scenario: ComparisonScenario) -> None:
         raise ValueError("latency_sample_size must be > 0 when provided")
     if scenario.crash_at <= 0:
         raise ValueError("crash_at must be > 0")
+    if scenario.include_crash_replay and scenario.crash_at > scenario.event_count:
+        raise ValueError("crash_at must be <= event_count when replay is enabled")
+    if scenario.producer_crash_at is not None:
+        if scenario.producer_crash_at <= 0:
+            raise ValueError("producer_crash_at must be > 0 when provided")
+        if scenario.producer_crash_at > scenario.event_count:
+            raise ValueError("producer_crash_at must be <= event_count")
 
 
 def _validate_drain_args(batch_size: int, iteration_limit: int) -> None:
