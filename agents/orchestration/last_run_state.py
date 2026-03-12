@@ -12,11 +12,13 @@ scheduler.py sets apscheduler.
 
 Per-scheduler section includes: last_run_start, last_run_finish, last_run_duration_seconds
 (time between start and finish for the last run), recent_durations_seconds (last N run
-durations), and average_duration_seconds (average of recent_durations_seconds).
+durations), average_duration_seconds (average of recent_durations_seconds), and
+last_5_runs (for drift: expected_fire_at, actual_fire_at, drift_seconds per run).
 
 Read from command line:
 
     python -m agents.orchestration.last_run_state
+    python -m agents.orchestration.last_run_state --drift-table [apscheduler|task_scheduler]
 """
 
 from __future__ import annotations
@@ -24,7 +26,7 @@ from __future__ import annotations
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Repo root / agents dir for default path when run as __main__ or imported.
@@ -37,6 +39,8 @@ _DEFAULT_SCHEDULER_TYPE = "apscheduler"
 
 # Keep this many recent run durations for the running average.
 _MAX_RECENT_DURATIONS = 20
+# Keep this many runs for 5-cycle drift (expected vs actual fire time).
+_MAX_DRIFT_RUNS = 5
 
 
 def _state_path() -> Path:
@@ -51,6 +55,25 @@ def _scheduler_type() -> str:
     """Return current scheduler type from SCHEDULER_TYPE env (apscheduler | task_scheduler)."""
     raw = os.environ.get("SCHEDULER_TYPE", "").strip().lower()
     return raw if raw in _SCHEDULER_TYPES else _DEFAULT_SCHEDULER_TYPE
+
+
+def _interval_minutes() -> int:
+    """Return INGESTION_INTERVAL_MINUTES from env (default 2) for drift expected-time calculation."""
+    raw = os.environ.get("INGESTION_INTERVAL_MINUTES", "2").strip()
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return 2
+
+
+def _parse_iso(s: str | None) -> datetime | None:
+    """Parse ISO timestamp; return None if missing or invalid."""
+    if not s:
+        return None
+    try:
+        return datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except (ValueError, TypeError):
+        return None
 
 
 def _backfill_duration(section: dict) -> None:
@@ -102,26 +125,38 @@ def _load_data(path: Path) -> dict:
 
 
 def write_last_run_start() -> datetime:
-    """Record that a run has started for the current scheduler type. Returns the start time for passing to write_last_run_finish."""
+    """Record that a run has started for the current scheduler type. Returns the start time for passing to write_last_run_finish.
+
+    Also appends to last_5_runs for drift tracking: expected_fire_at (from interval), actual_fire_at (now), drift_seconds.
+    First run: expected = actual. Run N+1: expected = previous expected + INGESTION_INTERVAL_MINUTES.
+    """
     path = _state_path()
     data = _load_data(path)
     key = _scheduler_type()
     data[key] = dict(data.get(key, {}))
+    section = data[key]
     now = datetime.now(timezone.utc)
-    data[key]["last_run_start"] = now.isoformat()
+    section["last_run_start"] = now.isoformat()
+
+    # Drift: expected vs actual fire time (last 5 runs for EXP-005).
+    last_5: list[dict] = list(section.get("last_5_runs", []))
+    interval_min = _interval_minutes()
+    last_expected = _parse_iso(last_5[-1]["expected_fire_at"]) if last_5 else None
+    if last_expected is None:
+        expected = now  # First run: expected = actual.
+    else:
+        expected = last_expected + timedelta(minutes=interval_min)
+    drift_sec = round((now - expected).total_seconds(), 3)
+    last_5.append({
+        "expected_fire_at": expected.isoformat(),
+        "actual_fire_at": now.isoformat(),
+        "drift_seconds": drift_sec,
+    })
+    section["last_5_runs"] = last_5[-_MAX_DRIFT_RUNS:]
+
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2), encoding="utf-8")
     return now
-
-
-def _parse_iso(s: str | None) -> datetime | None:
-    """Parse ISO timestamp; return None if missing or invalid."""
-    if not s:
-        return None
-    try:
-        return datetime.fromisoformat(s.replace("Z", "+00:00"))
-    except (ValueError, TypeError):
-        return None
 
 
 def write_last_run_finish(started_at: datetime | None = None) -> None:
@@ -172,8 +207,39 @@ def read_last_run(scheduler_type: str | None = None) -> dict:
     return data
 
 
+def format_drift_table(scheduler_type: str | None = None) -> str:
+    """Format last_5_runs as a Markdown table: Cycle | Expected | Actual | Drift (s).
+
+    If scheduler_type is None, returns a table for each scheduler (apscheduler, then task_scheduler).
+    """
+    data = read_last_run()
+    keys = [scheduler_type] if scheduler_type and scheduler_type in _SCHEDULER_TYPES else list(_SCHEDULER_TYPES)
+    lines: list[str] = []
+    for key in keys:
+        section = data.get(key, {})
+        runs: list[dict] = section.get("last_5_runs", [])
+        if not runs:
+            lines.append(f"**{key}**: no drift data yet (run 5 cycles to populate).\n")
+            continue
+        lines.append(f"**{key}** (last {len(runs)} runs)\n")
+        lines.append("| Cycle | Expected | Actual | Drift (s) |")
+        lines.append("|-------|----------|--------|-----------|")
+        for i, r in enumerate(runs, 1):
+            exp = r.get("expected_fire_at", "")
+            act = r.get("actual_fire_at", "")
+            drift = r.get("drift_seconds", "")
+            lines.append(f"| {i} | {exp} | {act} | {drift} |")
+        lines.append("")
+    return "\n".join(lines).strip()
+
+
 if __name__ == "__main__":
     if str(_AGENTS_DIR.parent) not in sys.path:
         sys.path.insert(0, str(_AGENTS_DIR.parent))
-    out = read_last_run()
-    print(json.dumps(out, indent=2))
+    argv = sys.argv[1:]
+    if argv and argv[0] == "--drift-table":
+        sched = argv[1] if len(argv) > 1 and argv[1] in _SCHEDULER_TYPES else None
+        print(format_drift_table(sched))
+    else:
+        out = read_last_run()
+        print(json.dumps(out, indent=2))
