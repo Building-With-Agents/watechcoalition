@@ -5,10 +5,12 @@ Writes a small JSON file on each pipeline run so we can query "last run start"
 and "last run finish" without a database. Path is agents/data/scheduler_last_run.json
 by default, or SCHEDULER_STATE_PATH (env) for an absolute path.
 
-State is stored per scheduler type so APScheduler and Task Scheduler do not
-overwrite each other. Set SCHEDULER_TYPE=apscheduler or SCHEDULER_TYPE=task_scheduler
-before running; default is apscheduler. The batch script sets task_scheduler;
-scheduler.py sets apscheduler.
+In normal operation only the apscheduler section is written (scheduler.py sets
+SCHEDULER_TYPE=apscheduler before invoking run_ingestion). The task_scheduler
+key is legacy: it may still appear in the file for backward compatibility when
+reading existing scheduler_last_run.json; it is not written by the current code.
+The JSON shape and _SCHEDULER_TYPES keep both keys so old state files still load;
+the drift table and read API may still show both sections if present.
 
 Per-scheduler section includes: last_run_start, last_run_finish, last_run_duration_seconds
 (time between start and finish for the last run), recent_durations_seconds (last N run
@@ -30,8 +32,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Repo root / agents dir for default path when run as __main__ or imported.
+# Resolve so the same file is used regardless of cwd (e.g. when Task Scheduler runs the batch).
 _AGENTS_DIR = Path(__file__).resolve().parent.parent
-_DEFAULT_PATH = _AGENTS_DIR / "data" / "scheduler_last_run.json"
+_DEFAULT_PATH = (_AGENTS_DIR / "data" / "scheduler_last_run.json").resolve()
 
 # Allowed values for SCHEDULER_TYPE; default when unset.
 _SCHEDULER_TYPES = ("apscheduler", "task_scheduler")
@@ -46,7 +49,7 @@ _MAX_DRIFT_RUNS = 5
 def _state_path() -> Path:
     p = os.environ.get("SCHEDULER_STATE_PATH", "").strip()
     if p:
-        return Path(p)
+        return Path(p).resolve()
     _DEFAULT_PATH.parent.mkdir(parents=True, exist_ok=True)
     return _DEFAULT_PATH
 

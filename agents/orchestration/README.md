@@ -4,7 +4,7 @@ To run scheduler tests: from repo root, `pytest agents/tests/ agents/orchestrati
 
 ## Single pipeline run (ingestion trigger)
 
-Runs the full pipeline once and exits. Same entrypoint used by APScheduler and Task Scheduler.
+Runs the full pipeline once and exits. Same entrypoint used by APScheduler.
 
 From repo root (watechcoalition):
 
@@ -41,11 +41,11 @@ Schedule is configurable without code changes: set the env var before starting t
 
 ## Last run observability
 
-Each pipeline run writes `last_run_start` and `last_run_finish` (ISO timestamps) to a JSON file. **APScheduler and Task Scheduler write to separate keys** so you can compare both without one overwriting the other.
+Each pipeline run (when invoked by APScheduler) writes `last_run_start` and `last_run_finish` (ISO timestamps) to a JSON file.
 
 Default path: `agents/data/scheduler_last_run.json`. Override with `SCHEDULER_STATE_PATH` (absolute path).
 
-File shape (each section also gets `last_run_duration_seconds`, `average_duration_seconds`, and **last_5_runs** for 5-cycle drift after runs):
+File shape (the `apscheduler` section is updated on each run; `task_scheduler` may appear in the file for backward compatibility but is not written in normal operation):
 
 ```json
 {
@@ -59,18 +59,15 @@ File shape (each section also gets `last_run_duration_seconds`, `average_duratio
       { "expected_fire_at": "...", "actual_fire_at": "...", "drift_seconds": 0.0 },
       ...
     ]
-  },
-  "task_scheduler": { ... }
+  }
 }
 ```
 
-To read both schedulers' last run (from repo root):
+To read last run state (from repo root):
 
 ```bash
 python -m agents.orchestration.last_run_state
 ```
-
-Output is the full JSON above so you can compare drift and timing for each.
 
 ### 5-cycle drift table (for EXP-005 findings)
 
@@ -80,50 +77,6 @@ To print a markdown table (Cycle | Expected | Actual | Drift (s)) for pasting in
 python -m agents.orchestration.last_run_state --drift-table
 ```
 
-Use `--drift-table apscheduler` or `--drift-table task_scheduler` to show one scheduler only. Run at least 5 cycles (scheduler or manual runs) so `last_5_runs` is full and the table has 5 rows.
+Use `--drift-table apscheduler` to show only APScheduler. Run at least 5 cycles so `last_5_runs` is full and the table has 5 rows.
 
 For the one-page findings (What I Tested, What I Found, Recommendation, Data/Evidence), see `docs/EXP-005-findings.md`.
-
-## Windows Task Scheduler (same trigger, external process)
-
-A batch script runs the same ingestion entrypoint as APScheduler so you can compare in-process vs OS scheduler (EXP-005).
-
-**Script:** `agents/orchestration/run_ingestion_task.bat`
-
-- Sets working directory to the watechcoalition repo root (two levels up from the script).
-- Uses `venv\Scripts\python.exe` if present, otherwise `python` from PATH.
-- Runs exactly one pipeline run: `python -m agents.orchestration.run_ingestion`.
-
-You can run it manually from a shell (from any directory) or schedule it with Task Scheduler.
-
-### Create a task that runs every 2 minutes (schtasks)
-
-Open Command Prompt or PowerShell **as Administrator**. Replace `C:\path\to\watechcoalition` with your actual repo path.
-
-```cmd
-schtasks /create /tn "WATechIngestionTrigger" /tr "C:\path\to\watechcoalition\agents\orchestration\run_ingestion_task.bat" /sc minute /mo 2 /ru "%USERNAME%"
-```
-
-- `/tn` task name (change if you like).
-- `/tr` full path to the batch file.
-- `/sc minute /mo 2` run every 2 minutes.
-- `/ru "%USERNAME%"` run as the current user (so Python and venv are the same as your dev environment). Use `SYSTEM` or another user if you prefer.
-
-The task starts at creation time and then runs every 2 minutes. To run the task once immediately for testing:
-
-```cmd
-schtasks /run /tn "WATechIngestionTrigger"
-```
-
-### Create or edit the task (Task Scheduler GUI)
-
-1. Open **Task Scheduler** (taskschd.msc).
-2. **Create Task** (or **Create Basic Task**): set name e.g. `WATechIngestionTrigger`.
-3. **Triggers:** New → “Begin the task”: **On a schedule** → **Daily** (or **One time** then set repeat). Check **Repeat task every** → choose **2 minutes** for a 2-minute interval. Set duration **Indefinitely** (or as needed).
-4. **Actions:** New → **Start a program** → Program: full path to `run_ingestion_task.bat` (e.g. `C:\Users\You\Desktop\wAIfinder\watechcoalition\agents\orchestration\run_ingestion_task.bat`). “Start in” can be left empty (the script changes to repo root).
-5. **Conditions / Settings:** Uncheck “Start the task only if the computer is on AC power” if you want it to run on battery.
-
-### Change the interval (no code deploy)
-
-- **schtasks:** Delete and recreate with a different `/mo` value (e.g. `/mo 5` for every 5 minutes), or use **Task Scheduler GUI** to edit.
-- **GUI:** Task Scheduler → double-click the task → **Triggers** tab → **Edit** → change “Repeat task every” to the desired minutes (e.g. 5) → OK. No code change or redeploy required.

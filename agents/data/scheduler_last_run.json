@@ -1,86 +1,83 @@
 {
   "apscheduler": {
-    "last_run_start": "2026-03-12T14:22:37.443762+00:00",
+    "last_run_start": "2026-03-12T22:34:31.684268+00:00",
     "last_5_runs": [
       {
-        "expected_fire_at": "2026-03-12T14:14:37.519914+00:00",
-        "actual_fire_at": "2026-03-12T14:14:37.450005+00:00",
-        "drift_seconds": -0.07
+        "expected_fire_at": "2026-03-12T21:24:25.196409+00:00",
+        "actual_fire_at": "2026-03-12T21:24:25.089114+00:00",
+        "drift_seconds": -0.107
       },
       {
-        "expected_fire_at": "2026-03-12T14:16:37.519914+00:00",
-        "actual_fire_at": "2026-03-12T14:16:37.438777+00:00",
-        "drift_seconds": -0.081
+        "expected_fire_at": "2026-03-12T21:26:25.196409+00:00",
+        "actual_fire_at": "2026-03-12T21:26:25.088491+00:00",
+        "drift_seconds": -0.108
       },
       {
-        "expected_fire_at": "2026-03-12T14:18:37.519914+00:00",
-        "actual_fire_at": "2026-03-12T14:18:37.445834+00:00",
-        "drift_seconds": -0.074
+        "expected_fire_at": "2026-03-12T21:28:25.196409+00:00",
+        "actual_fire_at": "2026-03-12T21:28:25.089961+00:00",
+        "drift_seconds": -0.106
       },
       {
-        "expected_fire_at": "2026-03-12T14:20:37.519914+00:00",
-        "actual_fire_at": "2026-03-12T14:20:37.444451+00:00",
-        "drift_seconds": -0.075
+        "expected_fire_at": "2026-03-12T21:30:25.196409+00:00",
+        "actual_fire_at": "2026-03-12T21:30:25.089661+00:00",
+        "drift_seconds": -0.107
       },
       {
-        "expected_fire_at": "2026-03-12T14:22:37.519914+00:00",
-        "actual_fire_at": "2026-03-12T14:22:37.443762+00:00",
-        "drift_seconds": -0.076
+        "expected_fire_at": "2026-03-12T21:32:25.196409+00:00",
+        "actual_fire_at": "2026-03-12T22:34:31.684268+00:00",
+        "drift_seconds": 3726.488
       }
     ],
-    "last_run_finish": "2026-03-12T14:22:37.473654+00:00",
-    "last_run_duration_seconds": 0.03,
+    "last_run_finish": "2026-03-12T22:34:31.709261+00:00",
+    "last_run_duration_seconds": 0.025,
     "recent_durations_seconds": [
-      0.025,
       0.024,
-      0.025,
       0.021,
+      0.029,
+      0.023,
       0.022,
-      0.027,
-      0.03
+      0.025
     ],
-    "average_duration_seconds": 0.025
+    "average_duration_seconds": 0.024
   },
   "task_scheduler": {
-    "last_run_start": "2026-03-12T14:22:01.980984+00:00",
+    "last_run_start": "2026-03-12T21:30:02.756577+00:00",
     "last_5_runs": [
       {
-        "expected_fire_at": "2026-03-12T14:14:01.928451+00:00",
-        "actual_fire_at": "2026-03-12T14:14:01.979856+00:00",
-        "drift_seconds": 0.051
+        "expected_fire_at": "2026-03-12T21:22:02.633773+00:00",
+        "actual_fire_at": "2026-03-12T21:22:02.633773+00:00",
+        "drift_seconds": 0.0
       },
       {
-        "expected_fire_at": "2026-03-12T14:16:01.928451+00:00",
-        "actual_fire_at": "2026-03-12T14:16:02.002428+00:00",
-        "drift_seconds": 0.074
+        "expected_fire_at": "2026-03-12T21:24:02.633773+00:00",
+        "actual_fire_at": "2026-03-12T21:24:02.591257+00:00",
+        "drift_seconds": -0.043
       },
       {
-        "expected_fire_at": "2026-03-12T14:18:01.928451+00:00",
-        "actual_fire_at": "2026-03-12T14:18:02.016675+00:00",
-        "drift_seconds": 0.088
+        "expected_fire_at": "2026-03-12T21:26:02.633773+00:00",
+        "actual_fire_at": "2026-03-12T21:26:02.574730+00:00",
+        "drift_seconds": -0.059
       },
       {
-        "expected_fire_at": "2026-03-12T14:20:01.928451+00:00",
-        "actual_fire_at": "2026-03-12T14:20:02.081788+00:00",
-        "drift_seconds": 0.153
+        "expected_fire_at": "2026-03-12T21:28:02.633773+00:00",
+        "actual_fire_at": "2026-03-12T21:28:02.589991+00:00",
+        "drift_seconds": -0.044
       },
       {
-        "expected_fire_at": "2026-03-12T14:22:01.928451+00:00",
-        "actual_fire_at": "2026-03-12T14:22:01.980984+00:00",
-        "drift_seconds": 0.053
+        "expected_fire_at": "2026-03-12T21:30:02.633773+00:00",
+        "actual_fire_at": "2026-03-12T21:30:02.756577+00:00",
+        "drift_seconds": 0.123
       }
     ],
-    "last_run_finish": "2026-03-12T14:22:02.002457+00:00",
-    "last_run_duration_seconds": 0.021,
+    "last_run_finish": "2026-03-12T21:30:02.780637+00:00",
+    "last_run_duration_seconds": 0.024,
     "recent_durations_seconds": [
-      0.026,
-      0.029,
-      0.022,
+      0.023,
+      0.023,
       0.024,
-      0.026,
-      0.026,
-      0.021
+      0.019,
+      0.024
     ],
-    "average_duration_seconds": 0.025
+    "average_duration_seconds": 0.023
   }
 }

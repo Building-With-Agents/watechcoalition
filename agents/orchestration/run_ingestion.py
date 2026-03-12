@@ -2,8 +2,8 @@
 Ingestion trigger — single pipeline run for EXP-005 (scheduling).
 
 Runs the full pipeline once (same logic as pipeline_runner.main) and exits.
-This module is the single entrypoint that both APScheduler and Task Scheduler
-will invoke. Run from repo root:
+Invoked by APScheduler (scheduler.py sets SCHEDULER_TYPE=apscheduler before calling).
+Run from repo root:
 
     python -m agents.orchestration.run_ingestion
 
