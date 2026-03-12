@@ -30,6 +30,7 @@ def test_cli_main_renders_markdown_report_to_stdout_buffer() -> None:
     assert "in_process" in rendered
     assert "redis_streams" in rendered
     assert "kafka" in rendered
+    assert "Producer crash at `10`" in rendered
 
 
 def test_render_report_csv_outputs_header_and_values() -> None:
@@ -48,6 +49,12 @@ def test_render_report_csv_outputs_header_and_values() -> None:
                 latency_sample_count=10,
                 crash_replay_complete=None,
                 replay_completeness_pct=None,
+                producer_crash_published_before_crash=10,
+                producer_crash_delivered_before_crash=10,
+                producer_crash_loss_count=0,
+                producer_resume_recovered_count=0,
+                producer_resume_final_loss_count=0,
+                producer_resume_complete=True,
                 published_events=20,
                 delivered_events=20,
                 handler_failures=0,

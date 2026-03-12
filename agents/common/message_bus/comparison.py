@@ -50,6 +50,18 @@ class DrainStats:
 
 
 @dataclass(frozen=True, slots=True)
+class ProducerCrashResult:
+    """Normalized producer-crash measurement for one transport."""
+
+    published_before_crash: int
+    delivered_before_crash: int
+    loss_count: int
+    recovered_count: int
+    final_loss_count: int
+    recovery_complete: bool
+
+
+@dataclass(frozen=True, slots=True)
 class TransportComparisonResult:
     """Normalized result row for one transport run."""
 
@@ -65,6 +77,12 @@ class TransportComparisonResult:
     latency_sample_count: int
     crash_replay_complete: bool | None
     replay_completeness_pct: float | None
+    producer_crash_published_before_crash: int | None
+    producer_crash_delivered_before_crash: int | None
+    producer_crash_loss_count: int | None
+    producer_resume_recovered_count: int | None
+    producer_resume_final_loss_count: int | None
+    producer_resume_complete: bool | None
     published_events: int
     delivered_events: int
     handler_failures: int
@@ -81,6 +99,7 @@ def run_transport_comparison(
     backend: str = "custom",
     scenario: ComparisonScenario | None = None,
     replay_bus_factory: Callable[[], EventBusBase] | None = None,
+    producer_crash_bus_factory: Callable[[], EventBusBase] | None = None,
     clock: Callable[[], float] = time.perf_counter,
 ) -> TransportComparisonResult:
     """Run the shared harness scenario against one bus instance."""
@@ -169,6 +188,15 @@ def run_transport_comparison(
             scenario=resolved,
         )
 
+    producer_crash = (
+        measure_producer_crash(
+            producer_crash_bus_factory,
+            scenario=resolved,
+        )
+        if producer_crash_bus_factory is not None
+        else None
+    )
+
     expected_total_events = resolved.event_count * 2
     correctness_passed = (
         len(normalization_seen) == resolved.event_count
@@ -193,6 +221,24 @@ def run_transport_comparison(
         latency_sample_count=len(latency_ms),
         crash_replay_complete=replay_complete,
         replay_completeness_pct=replay_completeness_pct,
+        producer_crash_published_before_crash=(
+            producer_crash.published_before_crash if producer_crash is not None else None
+        ),
+        producer_crash_delivered_before_crash=(
+            producer_crash.delivered_before_crash if producer_crash is not None else None
+        ),
+        producer_crash_loss_count=(
+            producer_crash.loss_count if producer_crash is not None else None
+        ),
+        producer_resume_recovered_count=(
+            producer_crash.recovered_count if producer_crash is not None else None
+        ),
+        producer_resume_final_loss_count=(
+            producer_crash.final_loss_count if producer_crash is not None else None
+        ),
+        producer_resume_complete=(
+            producer_crash.recovery_complete if producer_crash is not None else None
+        ),
         published_events=counters["published_events"],
         delivered_events=counters["delivered_events"],
         handler_failures=counters["handler_failures"],
@@ -218,6 +264,7 @@ def compare_transport_candidates(
             backend=candidate.backend,
             scenario=resolved,
             replay_bus_factory=candidate.replay_factory or candidate.factory,
+            producer_crash_bus_factory=candidate.factory,
             clock=clock,
         )
         for candidate in candidates
@@ -278,6 +325,7 @@ def measure_crash_replay(
     replay_processed_ids: list[str] = []
     replay_mode = False
     seen = 0
+    crash_at = _effective_crash_at(resolved)
 
     def _crash_once_handler(event: EventEnvelope) -> None:
         nonlocal replay_mode, seen
@@ -286,8 +334,8 @@ def measure_crash_replay(
             return
 
         seen += 1
-        if seen == resolved.crash_at:
-            raise RuntimeError(f"simulated crash at event index {resolved.crash_at}")
+        if seen == crash_at:
+            raise RuntimeError(f"simulated crash at event index {crash_at}")
         first_run_processed_ids.append(event.event_id)
 
     bus.subscribe(
@@ -329,6 +377,94 @@ def measure_crash_replay(
     return replay_complete, replay_completeness_pct
 
 
+def measure_producer_crash(
+    bus_factory: Callable[[], EventBusBase],
+    *,
+    scenario: ComparisonScenario | None = None,
+) -> ProducerCrashResult:
+    """Publish until crash_at, stop, then resume publishing and measure loss."""
+    resolved = scenario or ComparisonScenario()
+    _validate_scenario(resolved)
+    crash_at = _effective_crash_at(resolved)
+
+    bus = bus_factory()
+    harness_events = list(
+        generate_synthetic_ingest_batches(
+            count=resolved.event_count,
+            seed=resolved.seed,
+        )
+    )
+    first_batch = harness_events[:crash_at]
+    resume_batch = harness_events[crash_at:]
+    delivered_before_resume: list[str] = []
+    delivered_after_resume: list[str] = []
+    capture_before_resume = True
+
+    def _normalization_handler(event: EventEnvelope) -> None:
+        delivered_after_resume.append(event.event_id)
+        if capture_before_resume:
+            delivered_before_resume.append(event.event_id)
+
+        completion = EventEnvelope(
+            correlation_id=event.correlation_id,
+            agent_id="normalization-agent",
+            payload=normalization_complete_payload(
+                batch_id=str(event.payload.get("batch_id", "")),
+                region_id=str(event.payload.get("region_id", "")),
+                normalized_count=int(event.payload.get("staged_count", 0)),
+                quarantined_count=int(event.payload.get("error_count", 0)),
+                normalization_status="success",
+            ),
+        )
+        bus.publish(completion)
+
+    bus.subscribe(
+        "IngestBatch",
+        _normalization_handler,
+        subscriber_id="normalization-agent",
+    )
+    bus.subscribe(
+        "NormalizationComplete",
+        lambda _: None,
+        subscriber_id="analytics-agent",
+    )
+
+    for event in first_batch:
+        bus.publish(event)
+
+    drain_bus(
+        bus,
+        batch_size=resolved.drain_batch_size,
+        iteration_limit=resolved.drain_iteration_limit,
+    )
+
+    delivered_before_crash = len(set(delivered_before_resume))
+    loss_count = max(resolved.event_count - delivered_before_crash, 0)
+
+    capture_before_resume = False
+    for event in resume_batch:
+        bus.publish(event)
+
+    drain_bus(
+        bus,
+        batch_size=resolved.drain_batch_size,
+        iteration_limit=resolved.drain_iteration_limit,
+    )
+
+    final_delivered_count = len(set(delivered_after_resume))
+    recovered_count = max(final_delivered_count - delivered_before_crash, 0)
+    final_loss_count = max(resolved.event_count - final_delivered_count, 0)
+
+    return ProducerCrashResult(
+        published_before_crash=len(first_batch),
+        delivered_before_crash=delivered_before_crash,
+        loss_count=loss_count,
+        recovered_count=recovered_count,
+        final_loss_count=final_loss_count,
+        recovery_complete=final_loss_count == 0,
+    )
+
+
 def consume_once(bus: EventBusBase, *, max_events: int = 1) -> int:
     """Consume one iteration with handler failures surfaced to the caller."""
     consume = getattr(bus, "consume_available", None)
@@ -367,6 +503,12 @@ def results_to_rows(
             "latency_p99_ms": result.latency_p99_ms,
             "crash_replay_complete": result.crash_replay_complete,
             "replay_completeness_pct": result.replay_completeness_pct,
+            "producer_crash_published_before_crash": result.producer_crash_published_before_crash,
+            "producer_crash_delivered_before_crash": result.producer_crash_delivered_before_crash,
+            "producer_crash_loss_count": result.producer_crash_loss_count,
+            "producer_resume_recovered_count": result.producer_resume_recovered_count,
+            "producer_resume_final_loss_count": result.producer_resume_final_loss_count,
+            "producer_resume_complete": result.producer_resume_complete,
             "published_events": result.published_events,
             "delivered_events": result.delivered_events,
             "handler_failures": result.handler_failures,
@@ -392,6 +534,12 @@ def format_results_markdown_table(
         "latency_p99_ms",
         "crash_replay_complete",
         "replay_completeness_pct",
+        "producer_crash_published_before_crash",
+        "producer_crash_delivered_before_crash",
+        "producer_crash_loss_count",
+        "producer_resume_recovered_count",
+        "producer_resume_final_loss_count",
+        "producer_resume_complete",
         "published_events",
         "delivered_events",
         "handler_failures",
@@ -457,8 +605,6 @@ def _validate_scenario(scenario: ComparisonScenario) -> None:
         raise ValueError("latency_sample_size must be > 0 when provided")
     if scenario.crash_at <= 0:
         raise ValueError("crash_at must be > 0")
-    if scenario.include_crash_replay and scenario.crash_at > scenario.event_count:
-        raise ValueError("crash_at must be <= event_count when replay is enabled")
 
 
 def _validate_drain_args(batch_size: int, iteration_limit: int) -> None:
@@ -484,9 +630,14 @@ def _format_cell(value: object) -> str:
     return str(value)
 
 
+def _effective_crash_at(scenario: ComparisonScenario) -> int:
+    return min(scenario.crash_at, scenario.event_count)
+
+
 __all__ = [
     "ComparisonScenario",
     "DrainStats",
+    "ProducerCrashResult",
     "TransportCandidate",
     "TransportComparisonResult",
     "compare_transport_candidates",
@@ -495,6 +646,7 @@ __all__ = [
     "format_results_markdown_table",
     "has_consumer",
     "measure_crash_replay",
+    "measure_producer_crash",
     "percentile",
     "results_to_rows",
     "run_transport_comparison",

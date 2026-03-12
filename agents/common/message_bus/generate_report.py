@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from agents.common.message_bus.candidate_factories import build_transport_candidates
 from agents.common.message_bus.comparison import (
@@ -84,6 +85,26 @@ def build_html_report(
         r["replay_completeness_pct"] if r["replay_completeness_pct"] is not None else None
         for r in rows
     ]
+    producer_loss = [
+        r["producer_crash_loss_count"] if r["producer_crash_loss_count"] is not None else 0
+        for r in rows
+    ]
+    producer_recovered = [
+        (
+            r["producer_resume_recovered_count"]
+            if r["producer_resume_recovered_count"] is not None
+            else 0
+        )
+        for r in rows
+    ]
+    producer_final_loss = [
+        (
+            r["producer_resume_final_loss_count"]
+            if r["producer_resume_final_loss_count"] is not None
+            else 0
+        )
+        for r in rows
+    ]
     correctness = [r["correctness_passed"] for r in rows]
 
     data_js = json.dumps({
@@ -94,12 +115,16 @@ def build_html_report(
         "latency_p95": latency_p95,
         "latency_p99": latency_p99,
         "replay_pct": replay_pct,
+        "producer_loss": producer_loss,
+        "producer_recovered": producer_recovered,
+        "producer_final_loss": producer_final_loss,
         "correctness": correctness,
         "rows": rows,
         "scenario": {
             "name": scenario.name,
             "event_count": scenario.event_count,
             "seed": scenario.seed,
+            "crash_at": scenario.crash_at,
             "replay_enabled": scenario.include_crash_replay,
         },
     })
@@ -231,7 +256,7 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
 <body>
   <div class="container">
     <h1>EXP-004 Transport Comparison</h1>
-    <p class="subtitle">Event bus candidate benchmark — publish throughput, end-to-end throughput, latency (p50/p95/p99), and crash/replay completeness.</p>
+    <p class="subtitle">Event bus candidate benchmark — publish throughput, latency, consumer replay, and producer-crash recovery.</p>
 
     <div class="meta" id="meta"></div>
 
@@ -260,6 +285,14 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
     </section>
 
     <section>
+      <h2>Producer crash at event <span id="producerCrashIndex"></span></h2>
+      <div class="chart-wrap">
+        <canvas id="chartProducerCrash"></canvas>
+      </div>
+      <p class="subtitle" style="margin-top: 0.5rem;">Loss is measured immediately after the producer stops publishing. Recovery is measured after resuming the remaining deterministic events.</p>
+    </section>
+
+    <section>
       <h2>Full results</h2>
       <div style="overflow-x: auto;">
         <table id="tableResults"></table>
@@ -284,8 +317,10 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
       '<span>Scenario</span> <strong>' + s.name + '</strong>',
       '<span>Events</span> <strong>' + s.event_count + '</strong>',
       '<span>Seed</span> <strong>' + s.seed + '</strong>',
+      '<span>Crash at</span> <strong>' + s.crash_at + '</strong>',
       '<span>Replay</span> <strong>' + (s.replay_enabled ? 'enabled' : 'disabled') + '</strong>'
     ].join('');
+    document.getElementById('producerCrashIndex').textContent = s.crash_at;
 
     const fontFamily = "'JetBrains Mono', monospace";
     const gridColor = 'rgba(45, 58, 79, 0.8)';
@@ -356,6 +391,27 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
       }
     });
 
+    new Chart(document.getElementById('chartProducerCrash'), {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [
+          { label: 'Lost after crash', data: data.producer_loss, backgroundColor: 'rgba(210, 153, 34, 0.7)', borderColor: '#d29922', borderWidth: 1 },
+          { label: 'Recovered after resume', data: data.producer_recovered, backgroundColor: 'rgba(63, 185, 80, 0.7)', borderColor: '#3fb950', borderWidth: 1 },
+          { label: 'Final loss after resume', data: data.producer_final_loss, backgroundColor: 'rgba(188, 140, 255, 0.7)', borderColor: '#bc8cff', borderWidth: 1 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: labelColor } } },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: labelColor, font: { family: fontFamily, size: 11 } } },
+          y: { grid: { color: gridColor }, ticks: { color: labelColor, font: { family: fontFamily } } }
+        }
+      }
+    });
+
     // Table
     const rows = data.rows;
     if (rows.length) {
@@ -385,9 +441,7 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
-    crash_at = args.crash_at
-    if not args.skip_replay and crash_at > args.count:
-        crash_at = max(1, args.count // 2)
+    crash_at = min(max(args.crash_at, 1), args.count)
 
     results, scenario = run_comparison(
         event_count=args.count,
@@ -405,7 +459,7 @@ def main() -> int:
         out = repo / out
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
-    print(f"Report written to {out}")
+    sys.stdout.write(f"Report written to {out}\n")
     return 0
 
 

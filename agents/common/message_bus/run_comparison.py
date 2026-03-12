@@ -117,6 +117,7 @@ def main(argv: Sequence[str] | None = None, *, out: TextIO | None = None) -> int
     parser = build_parser()
     args = parser.parse_args(argv)
     output = out or io.StringIO()
+    crash_at = min(max(args.crash_at, 1), args.count)
 
     scenario = ComparisonScenario(
         event_count=args.count,
@@ -125,7 +126,7 @@ def main(argv: Sequence[str] | None = None, *, out: TextIO | None = None) -> int
         drain_iteration_limit=args.drain_iteration_limit,
         latency_sample_size=args.latency_sample_size,
         include_crash_replay=not args.skip_replay,
-        crash_at=args.crash_at,
+        crash_at=crash_at,
     )
     kafka_bootstrap_servers = _parse_bootstrap_servers(args.kafka_bootstrap_servers)
     candidates = build_transport_candidates(
@@ -187,6 +188,31 @@ def _render_markdown_summary(
     ]
     lowest_p95 = min(latency_candidates, key=lambda result: result.latency_p95_ms or 0)
     replay_label = "enabled" if scenario.include_crash_replay else "disabled"
+    producer_crash_lines = [
+        result
+        for result in results
+        if result.producer_crash_loss_count is not None
+        and result.producer_resume_recovered_count is not None
+        and result.producer_resume_complete is not None
+    ]
+    producer_summary = None
+    if producer_crash_lines:
+        max_loss = max(
+            result.producer_crash_loss_count or 0 for result in producer_crash_lines
+        )
+        min_recovered = min(
+            result.producer_resume_recovered_count or 0
+            for result in producer_crash_lines
+        )
+        all_recovered = all(
+            result.producer_resume_complete is True
+            for result in producer_crash_lines
+        )
+        producer_summary = (
+            f"Producer crash at `{scenario.crash_at}`: immediate loss `{max_loss}` "
+            f"events; resumed recovery `{min_recovered}` events; "
+            f"complete after resume: `{all_recovered}`"
+        )
 
     lines = [
         "# EXP-004 Transport Comparison",
@@ -208,6 +234,8 @@ def _render_markdown_summary(
             f"at `{(lowest_p95.latency_p95_ms or 0):.2f}` ms"
         ),
     ]
+    if producer_summary is not None:
+        lines.append(producer_summary)
 
     return "\n".join(lines)
 

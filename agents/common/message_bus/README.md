@@ -35,10 +35,11 @@ The comparison harness runs a fixed scenario (synthetic `IngestBatch` → handle
 - **Latency:** p50, p95, p99 (ms)  
 - **Parity:** `published_events`, `delivered_events`, `handler_failures`, `queue_depth`, `in_flight`  
 - **Replay (optional):** crash mid-run then drain; reports `crash_replay_complete` and `replay_completeness_pct`
+- **Producer crash recovery:** stop publishing at `crash_at`, measure immediate loss, resume the remaining deterministic events, and report recovered/final-loss counts
 
 **Programmatic use**
 
-- `run_transport_comparison(bus, transport=..., backend=..., scenario=..., replay_bus_factory=...)` → one `TransportComparisonResult`
+- `run_transport_comparison(bus, transport=..., backend=..., scenario=..., replay_bus_factory=..., producer_crash_bus_factory=...)` → one `TransportComparisonResult`
 - `compare_transport_candidates(candidates, scenario=...)` → list of results (one per transport/backend)
 - `format_results_markdown_table(results)` and `results_to_rows(results)` for Markdown table or CSV/JSON-friendly dicts
 
