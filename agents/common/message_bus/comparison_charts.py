@@ -7,8 +7,12 @@ import os
 from pathlib import Path
 
 import matplotlib
+import matplotlib.pyplot as plt
+import structlog
+
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+
+log = structlog.get_logger()
 
 
 def _default_csv_path() -> Path:
@@ -217,11 +221,9 @@ def main() -> int:
     csv_path = _default_csv_path()
     paths = generate_charts(csv_path)
     if not paths:
-        print("No CSV found at", csv_path, "or CSV is empty. Run run_comparison_and_report first.")
+        log.warning("no_csv_or_empty", csv_path=str(csv_path), hint="Run run_comparison_and_report first.")
         return 1
-    print("Charts saved:")
-    for p in paths:
-        print(" ", p)
+    log.info("charts_saved", paths=[str(p) for p in paths])
     return 0
 
 
