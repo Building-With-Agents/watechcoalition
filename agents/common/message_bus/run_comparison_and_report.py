@@ -1,10 +1,12 @@
-"""Run EXP-004 transport comparison (1000, seed 42), write CSV, then print five-metric summary."""
+"""Run EXP-004 transport comparison (1000, seed 42), write CSV, then log five-metric summary."""
 
 from __future__ import annotations
 
 import csv
 import os
 from pathlib import Path
+
+import structlog
 
 from agents.common.message_bus.candidate_factories import build_transport_candidates
 from agents.common.message_bus.comparison import (
@@ -13,6 +15,8 @@ from agents.common.message_bus.comparison import (
     results_to_rows,
 )
 from agents.common.message_bus.comparison_charts import generate_charts
+
+log = structlog.get_logger()
 
 
 def _default_csv_path() -> Path:
@@ -48,50 +52,42 @@ def _format_val(value: object) -> str:
     return str(value)
 
 
-def _print_report(rows: list[dict[str, str]]) -> None:
+def _log_report(rows: list[dict[str, str]]) -> None:
     if not rows:
-        print("No results to report.")
+        log.info("exp004_report", message="No results to report.")
         return
 
-    print("\n" + "=" * 60)
-    print("EXP-004 Comparison Summary (from CSV)")
-    print("=" * 60)
-
-    print("\n--- Throughput (events consumed per second) ---")
+    log.info("exp004_report", section="header", message="EXP-004 Comparison Summary (from CSV)")
     for row in rows:
         transport = row.get("transport", "?")
         backend = row.get("backend", "?")
         e2e = row.get("throughput_e2e_events_per_sec", "")
-        print(f"  {transport} / {backend}: {_format_val(e2e)} events/sec")
+        log.info("exp004_throughput", transport=transport, backend=backend, events_per_sec=_format_val(e2e))
 
-    print("\n--- Latency (publish to consumed) ---")
-    print("  Latency = publish to consumed (handler finished).")
+    log.info("exp004_report", section="latency", message="Latency = publish to consumed (handler finished).")
     for row in rows:
         transport = row.get("transport", "?")
         backend = row.get("backend", "?")
         p50 = row.get("latency_p50_ms", "")
         p95 = row.get("latency_p95_ms", "")
         p99 = row.get("latency_p99_ms", "")
-        print(f"  {transport} / {backend}: p50={_format_val(p50)} ms, p95={_format_val(p95)} ms, p99={_format_val(p99)} ms")
+        log.info("exp004_latency", transport=transport, backend=backend, p50_ms=_format_val(p50), p95_ms=_format_val(p95), p99_ms=_format_val(p99))
 
-    print("\n--- Max in-flight ---")
-    print("  Peak events sent but not yet acknowledged (or N/A).")
+    log.info("exp004_report", section="max_in_flight", message="Peak events sent but not yet acknowledged (or N/A).")
     for row in rows:
         transport = row.get("transport", "?")
         backend = row.get("backend", "?")
         max_if = row.get("max_in_flight", row.get("in_flight", ""))
-        print(f"  {transport} / {backend}: {_format_val(max_if)}")
+        log.info("exp004_max_in_flight", transport=transport, backend=backend, max_in_flight=_format_val(max_if))
 
-    print("\n--- Replay ---")
     for row in rows:
         transport = row.get("transport", "?")
         backend = row.get("backend", "?")
         replay_count = row.get("replay_count", "")
         replay_pct = row.get("replay_completeness_pct", "")
         complete = row.get("crash_replay_complete", "")
-        print(f"  {transport} / {backend}: replay_count={_format_val(replay_count)}, replay_completeness_pct={_format_val(replay_pct)}, crash_replay_complete={_format_val(complete)}")
+        log.info("exp004_replay", transport=transport, backend=backend, replay_count=_format_val(replay_count), replay_completeness_pct=_format_val(replay_pct), crash_replay_complete=_format_val(complete))
 
-    print("\n--- Correlation ID propagation ---")
     corr_key = "correlation_id_propagation_passed"
     if rows and corr_key not in rows[0]:
         corr_key = "correctness_passed"
@@ -99,26 +95,24 @@ def _print_report(rows: list[dict[str, str]]) -> None:
         transport = row.get("transport", "?")
         backend = row.get("backend", "?")
         passed = row.get(corr_key, "")
-        print(f"  {transport} / {backend}: {_format_val(passed)}")
+        log.info("exp004_correlation_id", transport=transport, backend=backend, passed=_format_val(passed))
 
     if rows and "producer_crash_delivered" in rows[0]:
-        print("\n--- Producer crash (at 500) ---")
         for row in rows:
             transport = row.get("transport", "?")
             backend = row.get("backend", "?")
             delivered = row.get("producer_crash_delivered", "")
             lost = row.get("producer_crash_events_lost", "")
-            print(f"  {transport} / {backend}: delivered={_format_val(delivered)}, events_lost={_format_val(lost)}")
+            log.info("exp004_producer_crash", transport=transport, backend=backend, delivered=_format_val(delivered), events_lost=_format_val(lost))
 
     if rows and "events_lost_consumer_crash" in rows[0]:
-        print("\n--- Consumer crash event loss ---")
         for row in rows:
             transport = row.get("transport", "?")
             backend = row.get("backend", "?")
             lost = row.get("events_lost_consumer_crash", "")
-            print(f"  {transport} / {backend}: events_lost={_format_val(lost)}")
+            log.info("exp004_consumer_crash_loss", transport=transport, backend=backend, events_lost=_format_val(lost))
 
-    print("\n" + "=" * 60)
+    log.info("exp004_report", section="footer", message="End of EXP-004 Comparison Summary")
 
 
 def main() -> int:
@@ -135,16 +129,14 @@ def main() -> int:
 
     csv_path = _default_csv_path()
     _write_csv(csv_path, rows)
-    print(f"Wrote CSV to {csv_path}")
+    log.info("exp004_csv_written", csv_path=str(csv_path))
 
     chart_paths = generate_charts(csv_path)
     if chart_paths:
-        print("Charts saved:")
-        for p in chart_paths:
-            print(f"  {p}")
+        log.info("exp004_charts_saved", paths=[str(p) for p in chart_paths])
 
     read_back = _read_csv(csv_path)
-    _print_report(read_back)
+    _log_report(read_back)
 
     return 0
 
