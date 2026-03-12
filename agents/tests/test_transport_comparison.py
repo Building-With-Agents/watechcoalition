@@ -10,11 +10,13 @@ from agents.common.message_bus import (
     FakeRedisStreamsClient,
     InProcessEventBus,
     KafkaEventBus,
+    ProducerCrashResult,
     RedisStreamsEventBus,
     TransportCandidate,
     build_transport_candidates,
     compare_transport_candidates,
     format_results_markdown_table,
+    measure_producer_crash,
     results_to_rows,
     run_transport_comparison,
 )
@@ -38,6 +40,7 @@ def test_run_transport_comparison_in_process_returns_normalized_metrics() -> Non
             event_count=50,
             include_crash_replay=False,
         ),
+        producer_crash_bus_factory=InProcessEventBus,
     )
 
     assert result.transport == "in_process"
@@ -50,6 +53,12 @@ def test_run_transport_comparison_in_process_returns_normalized_metrics() -> Non
     assert result.in_flight is None
     assert result.crash_replay_complete is None
     assert result.replay_completeness_pct is None
+    assert result.producer_crash_published_before_crash == 50
+    assert result.producer_crash_delivered_before_crash == 50
+    assert result.producer_crash_loss_count == 0
+    assert result.producer_resume_recovered_count == 0
+    assert result.producer_resume_final_loss_count == 0
+    assert result.producer_resume_complete is True
     assert result.latency_sample_count == 50
     assert result.latency_p50_ms is not None
     assert result.latency_p95_ms is not None
@@ -95,12 +104,27 @@ def test_compare_transport_candidates_builds_rows_for_all_buses() -> None:
 
     by_transport = {result.transport: result for result in results}
     assert by_transport["in_process"].crash_replay_complete is None
+    assert by_transport["in_process"].producer_crash_published_before_crash == 10
+    assert by_transport["in_process"].producer_crash_loss_count == 15
+    assert by_transport["in_process"].producer_resume_recovered_count == 15
+    assert by_transport["in_process"].producer_resume_final_loss_count == 0
+    assert by_transport["in_process"].producer_resume_complete is True
     assert by_transport["redis_streams"].crash_replay_complete is True
     assert by_transport["redis_streams"].replay_completeness_pct == 100.0
+    assert by_transport["redis_streams"].producer_crash_delivered_before_crash == 10
+    assert by_transport["redis_streams"].producer_crash_loss_count == 15
+    assert by_transport["redis_streams"].producer_resume_recovered_count == 15
+    assert by_transport["redis_streams"].producer_resume_final_loss_count == 0
+    assert by_transport["redis_streams"].producer_resume_complete is True
     assert by_transport["redis_streams"].queue_depth == 0
     assert by_transport["redis_streams"].in_flight == 0
     assert by_transport["kafka"].crash_replay_complete is True
     assert by_transport["kafka"].replay_completeness_pct == 100.0
+    assert by_transport["kafka"].producer_crash_delivered_before_crash == 10
+    assert by_transport["kafka"].producer_crash_loss_count == 15
+    assert by_transport["kafka"].producer_resume_recovered_count == 15
+    assert by_transport["kafka"].producer_resume_final_loss_count == 0
+    assert by_transport["kafka"].producer_resume_complete is True
     assert by_transport["kafka"].queue_depth == 0
     assert by_transport["kafka"].in_flight == 0
 
@@ -109,9 +133,11 @@ def test_compare_transport_candidates_builds_rows_for_all_buses() -> None:
     assert all(row["published_events"] == 50 for row in rows)
     assert all(row["delivered_events"] == 50 for row in rows)
     assert all(row["handler_failures"] == 0 for row in rows)
+    assert all(row["producer_resume_final_loss_count"] == 0 for row in rows)
 
     table = format_results_markdown_table(results)
     assert "throughput_publish_events_per_sec" in table
+    assert "producer_crash_loss_count" in table
     assert "redis_streams" in table
     assert "fake_kafka" in table
 
@@ -129,3 +155,23 @@ def test_build_transport_candidates_defaults_to_three_way_fake_comparison() -> N
         "fake_redis",
         "fake_kafka",
     ]
+
+
+def test_measure_producer_crash_reports_loss_then_full_recovery() -> None:
+    result = measure_producer_crash(
+        InProcessEventBus,
+        scenario=ComparisonScenario(
+            event_count=1000,
+            crash_at=500,
+            include_crash_replay=False,
+        ),
+    )
+
+    assert result == ProducerCrashResult(
+        published_before_crash=500,
+        delivered_before_crash=500,
+        loss_count=500,
+        recovered_count=500,
+        final_loss_count=0,
+        recovery_complete=True,
+    )
