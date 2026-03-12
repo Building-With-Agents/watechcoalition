@@ -14,4 +14,5 @@ if exist "venv\Scripts\python.exe" (
     set PYTHON=python
 )
 
+set SCHEDULER_TYPE=task_scheduler
 "%PYTHON%" -m agents.orchestration.run_ingestion

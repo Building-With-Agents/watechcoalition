@@ -1,4 +1,32 @@
 {
-  "last_run_start": "2026-03-11T03:03:07.709989+00:00",
-  "last_run_finish": "2026-03-11T03:03:07.724989+00:00"
+  "apscheduler": {
+    "last_run_start": "2026-03-12T13:50:47.267640+00:00",
+    "last_run_finish": "2026-03-12T13:50:47.289740+00:00",
+    "last_run_duration_seconds": 0.022,
+    "recent_durations_seconds": [
+      0.024,
+      0.022,
+      0.02,
+      0.022
+    ],
+    "average_duration_seconds": 0.022
+  },
+  "task_scheduler": {
+    "last_run_start": "2026-03-12T13:47:01.982394+00:00",
+    "last_run_finish": "2026-03-12T13:47:02.004962+00:00",
+    "last_run_duration_seconds": 0.023,
+    "recent_durations_seconds": [
+      0.024,
+      0.02,
+      0.018,
+      0.025,
+      0.022,
+      0.018,
+      0.018,
+      0.024,
+      0.023,
+      0.023
+    ],
+    "average_duration_seconds": 0.021
+  }
 }

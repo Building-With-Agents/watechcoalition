@@ -52,9 +52,9 @@ def _scheduled_job() -> None:
     log.info(
         "scheduler_run_start",
         run_start=run_start.isoformat(),
-        event="ingestion_trigger",
     )
     try:
+        os.environ["SCHEDULER_TYPE"] = "apscheduler"
         from agents.orchestration.run_ingestion import main as run_ingestion_main  # noqa: E402
         run_ingestion_main()
     except SystemExit as e:
@@ -75,7 +75,6 @@ def _scheduled_job() -> None:
         "scheduler_run_finish",
         run_start=run_start.isoformat(),
         run_finish=run_finish.isoformat(),
-        event="ingestion_trigger",
     )
 
 
