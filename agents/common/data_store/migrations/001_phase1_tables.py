@@ -31,7 +31,6 @@ import structlog
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 
-
 log = structlog.get_logger()
 
 
