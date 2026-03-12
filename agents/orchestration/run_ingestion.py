@@ -32,11 +32,11 @@ from agents.pipeline_runner import main as pipeline_main  # noqa: E402
 def main() -> None:
     """Run the pipeline once (ingestion through orchestration) and exit."""
     _ = os.environ.get("INGESTION_INTERVAL_MINUTES")  # for scheduler use later
-    write_last_run_start()
+    started_at = write_last_run_start()
     try:
         pipeline_main()
     finally:
-        write_last_run_finish()
+        write_last_run_finish(started_at=started_at)
 
 
 if __name__ == "__main__":

@@ -41,17 +41,32 @@ Schedule is configurable without code changes: set the env var before starting t
 
 ## Last run observability
 
-Each pipeline run (from the scheduler or from Task Scheduler) writes `last_run_start` and `last_run_finish` (ISO timestamps) to a JSON file so you can query when the ingestion trigger last ran.
+Each pipeline run writes `last_run_start` and `last_run_finish` (ISO timestamps) to a JSON file. **APScheduler and Task Scheduler write to separate keys** so you can compare both without one overwriting the other.
 
 Default path: `agents/data/scheduler_last_run.json`. Override with `SCHEDULER_STATE_PATH` (absolute path).
 
-To read the last run timestamps from the command line (from repo root):
+File shape (each section also gets `last_run_duration_seconds` and `average_duration_seconds` after runs):
+
+```json
+{
+  "apscheduler": {
+    "last_run_start": "...",
+    "last_run_finish": "...",
+    "last_run_duration_seconds": 0.02,
+    "recent_durations_seconds": [0.02, 0.019, ...],
+    "average_duration_seconds": 0.019
+  },
+  "task_scheduler": { ... }
+}
+```
+
+To read both schedulers' last run (from repo root):
 
 ```bash
 python -m agents.orchestration.last_run_state
 ```
 
-Output is JSON, e.g. `{"last_run_start": "2026-03-11T12:00:00+00:00", "last_run_finish": "..."}`.
+Output is the full JSON above so you can compare drift and timing for each.
 
 ## Windows Task Scheduler (same trigger, external process)
 
