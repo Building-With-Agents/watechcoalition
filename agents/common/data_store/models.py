@@ -1,164 +1,190 @@
+"""SQLAlchemy ORM models for agent-managed tables.
+
+All tables live in the ``dbo`` schema to match pgloader-migrated tables.
+These tables are created by agents (via migrations.py), NOT by Prisma.
+"""
+
 from __future__ import annotations
 
-"""
-SQLAlchemy ORM models for agent-managed tables in the Job Intelligence Engine.
-
-This module defines the canonical Phase 1 tables:
-    - raw_ingested_jobs
-    - normalized_jobs
-    - job_ingestion_runs
-
-These tables live alongside the existing Prisma-managed schema and are owned
-exclusively by the Python agents. They are designed for PostgreSQL via
-SQLAlchemy (psycopg2) and should be created via the migration scripts in
-`agents/common/data_store/migrations/`.
-"""
-
-import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import (
-    Column,
+    Boolean,
     DateTime,
     Float,
     Index,
     Integer,
     String,
     Text,
-    func,
+    UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    """Shared declarative base for all agent models."""
+
+    pass
+
+
+# ---------------------------------------------------------------------------
+# Ingestion tables
+# ---------------------------------------------------------------------------
 
 
 class RawIngestedJob(Base):
-    """
-    ORM model for the `raw_ingested_jobs` ingestion staging table.
-
-    Each row represents a single raw job posting as ingested from an external
-    source (JSearch API or web scraping) before normalization. Deduplication is
-    performed against `raw_payload_hash`, which is enforced as a unique index.
-    """
+    """Staging table for raw job postings before normalization."""
 
     __tablename__ = "raw_ingested_jobs"
-
-    id: uuid.UUID = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
-    source: str = Column(Text, nullable=False)
-    external_id: str = Column(Text, nullable=False)
-    raw_payload_hash: str = Column(Text, nullable=False, unique=True)
-    ingestion_run_id: str = Column(Text, nullable=False)
-    raw_text: str = Column(Text, nullable=False)
-    raw_metadata_json: dict = Column(JSONB, nullable=False)
-    created_at: datetime = Column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-    )
-    error_reason: str | None = Column(Text, nullable=True)
-
     __table_args__ = (
-        Index(
-            "ux_raw_ingested_jobs_raw_payload_hash",
-            "raw_payload_hash",
-            unique=True,
-        ),
+        UniqueConstraint("raw_payload_hash", name="uq_raw_ingested_jobs_hash"),
+        Index("ix_raw_ingested_jobs_run_id", "ingestion_run_id"),
+        Index("ix_raw_ingested_jobs_source_eid", "source", "external_id"),
+        Index("ix_raw_ingested_jobs_status", "processing_status"),
+        {"schema": "dbo"},
     )
 
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    ingestion_run_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    region_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    source: Mapped[str] = mapped_column(String(50), nullable=False)
+    external_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    raw_payload_hash: Mapped[str] = mapped_column(String(64), nullable=False)
 
-class NormalizedJob(Base):
-    """
-    ORM model for the `normalized_jobs` table.
+    # Core fields
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    company: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    Records in this table represent source-agnostic JobRecord instances after
-    schema validation and normalization. Quarantined records are retained with
-    a `validation_status` of \"quarantined\" and an accompanying
-    `quarantine_reason`.
-    """
+    # Structured location (replaces single ``location`` column)
+    city: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    state: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    country: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    is_remote: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
-    __tablename__ = "normalized_jobs"
+    # URLs
+    job_url: Mapped[str | None] = mapped_column(String(2083), nullable=True)
+    source_url: Mapped[str | None] = mapped_column(String(2083), nullable=True)
 
-    id: uuid.UUID = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
-    external_id: str = Column(Text, nullable=False)
-    source: str = Column(Text, nullable=False)
-    ingestion_run_id: str = Column(Text, nullable=False)
-    raw_payload_hash: str = Column(Text, nullable=False)
+    # Date & classification
+    date_posted: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    employment_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    experience_level: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
-    title: str = Column(Text, nullable=False)
-    company: str = Column(Text, nullable=False)
-    location: str | None = Column(Text, nullable=True)
+    # Salary (raw extraction)
+    salary_raw: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    salary_min: Mapped[float | None] = mapped_column(Float, nullable=True)
+    salary_max: Mapped[float | None] = mapped_column(Float, nullable=True)
+    salary_currency: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    salary_period: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
-    salary_min: float | None = Column(Float, nullable=True)
-    salary_max: float | None = Column(Float, nullable=True)
-    salary_currency: str | None = Column(Text, nullable=True)
-    salary_period: str | None = Column(Text, nullable=True)
+    # Raw payload
+    raw_payload: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
-    employment_type: str | None = Column(Text, nullable=True)
-    date_posted: datetime | None = Column(DateTime(timezone=True), nullable=True)
-
-    description: str | None = Column(Text, nullable=True)
-
-    validation_status: str = Column(String(length=32), nullable=False)
-    quarantine_reason: str | None = Column(Text, nullable=True)
-
-    created_at: datetime = Column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-    )
+    # Processing state
+    processing_status: Mapped[str] = mapped_column(String(50), default="pending")
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ingestion_timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
 
 class JobIngestionRun(Base):
-    """
-    ORM model for the `job_ingestion_runs` table.
-
-    Each row tracks a single ingestion batch run, including counts for ingested
-    records, deduplicated records, and errors, along with status transitions
-    and timestamps.
-    """
+    """Tracks each ingestion batch run for auditing and observability."""
 
     __tablename__ = "job_ingestion_runs"
-
-    id: uuid.UUID = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
-    source: str = Column(Text, nullable=False)
-    status: str = Column(String(length=32), nullable=False)
-
-    record_count: int = Column(
-        Integer,
-        nullable=False,
-        server_default="0",
-    )
-    dedup_count: int = Column(
-        Integer,
-        nullable=False,
-        server_default="0",
-    )
-    error_count: int = Column(
-        Integer,
-        nullable=False,
-        server_default="0",
+    __table_args__ = (
+        Index("ix_job_ingestion_runs_status", "status"),
+        {"schema": "dbo"},
     )
 
-    started_at: datetime = Column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-    )
-    completed_at: datetime | None = Column(
-        DateTime(timezone=True),
-        nullable=True,
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    run_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    region_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    source: Mapped[str] = mapped_column(String(50), nullable=False)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(50), default="running")
+    total_fetched: Mapped[int] = mapped_column(Integer, default=0)
+    staged_count: Mapped[int] = mapped_column(Integer, default=0)
+    dedup_count: Mapped[int] = mapped_column(Integer, default=0)
+    error_count: Mapped[int] = mapped_column(Integer, default=0)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+# ---------------------------------------------------------------------------
+# Normalization tables
+# ---------------------------------------------------------------------------
+
+
+class NormalizedJob(Base):
+    """Post-normalization canonical job records."""
+
+    __tablename__ = "normalized_jobs"
+    __table_args__ = (
+        Index("ix_normalized_jobs_run_id", "ingestion_run_id"),
+        Index("ix_normalized_jobs_source_eid", "source", "external_id"),
+        {"schema": "dbo"},
     )
 
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    raw_job_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    ingestion_run_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    region_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    source: Mapped[str] = mapped_column(String(50), nullable=False)
+    external_id: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    # Core fields
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    company: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Structured location (replaces location / normalized_location)
+    city: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    state_province: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    country: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    work_arrangement: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    is_remote: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+
+    # URL
+    job_url: Mapped[str | None] = mapped_column(String(2083), nullable=True)
+
+    # Classification
+    employment_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    experience_level: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    occupation_code: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    mapper_used: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+    # Date
+    date_posted: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Salary
+    salary_raw: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    salary_min: Mapped[float | None] = mapped_column(Float, nullable=True)
+    salary_max: Mapped[float | None] = mapped_column(Float, nullable=True)
+    salary_currency: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    salary_period: Mapped[str | None] = mapped_column(String(20), nullable=True)
+
+    # Quality
+    normalization_status: Mapped[str] = mapped_column(String(50), default="success")
+    normalization_errors: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+
+
+class NormalizationQuarantine(Base):
+    """Records that failed normalization validation."""
+
+    __tablename__ = "normalization_quarantine"
+    __table_args__ = (
+        Index("ix_norm_quarantine_run_id", "ingestion_run_id"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    raw_job_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    ingestion_run_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    source: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    external_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    error_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    error_detail: Mapped[str | None] = mapped_column(Text, nullable=True)
+    quarantined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))

@@ -148,6 +148,3 @@ agents/data/rendered/*
 agents/data/dead_letter/*
 agents/data/output/*
 !agents/data/**/.gitkeep
-agents/venv/
-venv/
-.venv/
