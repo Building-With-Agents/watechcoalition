@@ -246,7 +246,7 @@ def benchmark_unicode_roundtrip() -> str:
     if len(rows) != len(samples):
         status = "fail"
     else:
-        for row, expected in zip(rows, samples):
+        for row, expected in zip(rows, samples, strict=False):
             meta = row.raw_metadata_json or {}
             if (
                 meta.get("title") != expected["title"]
