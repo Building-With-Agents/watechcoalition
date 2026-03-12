@@ -19,6 +19,9 @@ from agents.common.types.region_config import RegionConfig
 JSEARCH_BASE_URL = "https://jsearch.p.rapidapi.com/search"
 JSEARCH_HOST = "jsearch.p.rapidapi.com"
 
+# Sites to request from JSearch (one request per site, results merged)
+JSEARCH_SITES = ["linkedin", "indeed", "glassdoor"]
+
 
 def _fingerprint(source: str, external_id: str, title: str, company: str, date_posted: str) -> str:
     """SHA-256 fingerprint for dedup: source + external_id + title + company + date_posted."""
@@ -152,26 +155,36 @@ class JSearchAdapter(SourceAdapter):
             num_pages = 1
 
         all_records: list[RawJobRecord] = []
+        seen_hashes: set[str] = set()
         async with httpx.AsyncClient(timeout=30.0) as client:
-            for page in range(1, num_pages + 1):
-                response = await client.get(
-                    JSEARCH_BASE_URL,
-                    params={"query": query, "page": str(page), "num_pages": "1"},
-                    headers={
-                        "X-RapidAPI-Key": api_key,
-                        "X-RapidAPI-Host": JSEARCH_HOST,
-                    },
-                )
-                response.raise_for_status()
-                data = response.json()
-                jobs = data.get("data") if isinstance(data, dict) else []
-                if not jobs:
-                    break
-                for job in jobs:
-                    if isinstance(job, dict):
-                        all_records.append(_job_to_raw_record(job, region.region_id))
-                if len(jobs) < 10:
-                    break
+            for site in JSEARCH_SITES:
+                for page in range(1, num_pages + 1):
+                    response = await client.get(
+                        JSEARCH_BASE_URL,
+                        params={
+                            "query": query,
+                            "page": str(page),
+                            "num_pages": "1",
+                            "site": site,
+                        },
+                        headers={
+                            "X-RapidAPI-Key": api_key,
+                            "X-RapidAPI-Host": JSEARCH_HOST,
+                        },
+                    )
+                    response.raise_for_status()
+                    data = response.json()
+                    jobs = data.get("data") if isinstance(data, dict) else []
+                    if not jobs:
+                        break
+                    for job in jobs:
+                        if isinstance(job, dict):
+                            rec = _job_to_raw_record(job, region.region_id)
+                            if rec.raw_payload_hash and rec.raw_payload_hash not in seen_hashes:
+                                seen_hashes.add(rec.raw_payload_hash)
+                                all_records.append(rec)
+                    if len(jobs) < 10:
+                        break
 
         return all_records
 

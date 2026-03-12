@@ -63,11 +63,11 @@ DEFAULT_REGION = {
     "region_id": "el-paso",
     "display_name": "El Paso / Borderplex",
     "query_location": "El Paso, TX",
-    "radius_miles": 50,
+    "radius_miles": 1000,
     "states": ["TX"],
     "countries": ["US"],
     "sources": ["jsearch"],
-    "role_categories": ["Technology", "Healthcare"],
+    "role_categories": [], #["Technology", "Healthcare"],
     "keywords": ["software", "engineer", "data"],
 }
 
