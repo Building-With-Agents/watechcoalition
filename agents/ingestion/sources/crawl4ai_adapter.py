@@ -169,6 +169,10 @@ class Crawl4AIAdapter(SourceAdapter):
         except Exception as e:
             raise Crawl4AIAdapterError(f"Crawl4AI init/fetch failed: {e}") from e
 
+        has_html = getattr(result, "html", None) is not None
+        has_cleaned = getattr(result, "cleaned_html", None) is not None
+        print(f"[DEBUG fetch] crawl success={result.success}, has_html={has_html}, has_cleaned_html={has_cleaned}")
+
         if not result.success:
             msg = getattr(result, "error_message", str(result)) or "unknown"
             raise Crawl4AIAdapterError(f"Target unreachable: {msg}")
@@ -177,13 +181,32 @@ class Crawl4AIAdapter(SourceAdapter):
         if html is None:
             raise Crawl4AIAdapterError("Crawl result missing html and cleaned_html")
         html = str(html) if html else ""
+        print(f"[DEBUG fetch] html length={len(html)}")
+
         if len(html) < _MIN_HTML_LEN:
             raise Crawl4AIAdapterError(f"Page content too small ({len(html)} chars)")
 
+        job_match_count = len(list(_JOB_LINK_RE.finditer(html)))
+        no_openings_m = _NO_OPENINGS_RE.search(html)
+        no_openings_matched = no_openings_m is not None
         cards = self._extract_job_cards(html, EL_PASO_PORTAL_BASE)
+        print(f"[DEBUG fetch] _JOB_LINK_RE matches={job_match_count}, _NO_OPENINGS_RE match={no_openings_matched}, raw_cards={len(cards)}")
+
+        def _debug_save_html() -> None:
+            try:
+                with open("debug_elpaso_page.html", "w", encoding="utf-8") as f:
+                    f.write(html)
+                print("[DEBUG fetch] saved HTML to debug_elpaso_page.html")
+            except OSError as e:
+                print(f"[DEBUG fetch] could not save HTML: {e}")
+
         if not cards and len(html) >= _MIN_HTML_LEN:
-            if _NO_OPENINGS_RE.search(html):
+            if no_openings_matched:
+                print("[DEBUG fetch] returning [] (no-openings signal matched)")
+                _debug_save_html()
                 return []
+            print("[DEBUG fetch] raising parser-breakage (zero cards, no no-openings signal)")
+            _debug_save_html()
             raise Crawl4AIAdapterError(
                 "Large page with zero job links; possible parser breakage"
             )
