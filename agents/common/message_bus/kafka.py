@@ -103,6 +103,8 @@ class KafkaEventBus(EventBusBase):
         self._handler_failures = 0
         self._committed_message_ids: set[str] = set()
         self._in_flight_message_ids: set[str] = set()
+        self._max_queue_depth_seen: int = 0
+        self._max_in_flight_seen: int = 0
 
     @classmethod
     def from_bootstrap_servers(
@@ -158,18 +160,32 @@ class KafkaEventBus(EventBusBase):
             return EventEnvelope.model_validate_json(raw.decode("utf-8"))
         return EventEnvelope.model_validate_json(raw)
 
+    def _update_peak_counters(self) -> None:
+        """Update peak queue_depth and in_flight from current state."""
+        current_qd = max(
+            self._published_events - len(self._committed_message_ids),
+            0,
+        )
+        current_if = len(self._in_flight_message_ids)
+        self._max_queue_depth_seen = max(self._max_queue_depth_seen, current_qd)
+        self._max_in_flight_seen = max(self._max_in_flight_seen, current_if)
+
     @property
     def counters(self) -> dict[str, int]:
         """Snapshot counters used by Week 3 transport comparisons."""
+        qd = max(
+            self._published_events - len(self._committed_message_ids),
+            0,
+        )
+        if_ = len(self._in_flight_message_ids)
         return {
             "published_events": self._published_events,
             "delivered_events": self._delivered_events,
             "handler_failures": self._handler_failures,
-            "queue_depth": max(
-                self._published_events - len(self._committed_message_ids),
-                0,
-            ),
-            "in_flight": len(self._in_flight_message_ids),
+            "queue_depth": qd,
+            "in_flight": if_,
+            "max_queue_depth_seen": self._max_queue_depth_seen,
+            "max_in_flight_seen": self._max_in_flight_seen,
         }
 
     def publish(self, event: EventEnvelope) -> None:
@@ -179,6 +195,7 @@ class KafkaEventBus(EventBusBase):
         key = event.correlation_id.encode("utf-8") if event.correlation_id else None
         self._producer.send(self._topic, payload, key=key)
         self._published_events += 1
+        self._update_peak_counters()
 
     def subscribe(
         self,
@@ -219,6 +236,7 @@ class KafkaEventBus(EventBusBase):
 
             message_id = _message_id(record)
             self._in_flight_message_ids.add(message_id)
+            self._update_peak_counters()
             total_processed += 1
 
             try:
@@ -299,6 +317,7 @@ class KafkaEventBus(EventBusBase):
         self._consumer.commit(record)
         self._committed_message_ids.add(message_id)
         self._in_flight_message_ids.discard(message_id)
+        self._update_peak_counters()
 
 
 class _KafkaPythonProducerAdapter:

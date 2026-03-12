@@ -190,7 +190,11 @@ def test_redis_streams_harness_equivalent_stream_preserves_correlation() -> None
         "handler_failures": 0,
         "queue_depth": 0,
         "in_flight": 0,
+        "max_queue_depth_seen": bus.counters["max_queue_depth_seen"],
+        "max_in_flight_seen": bus.counters["max_in_flight_seen"],
     }
+    assert bus.counters["max_queue_depth_seen"] >= 0
+    assert bus.counters["max_in_flight_seen"] >= 0
 
 
 def test_redis_streams_crash_and_replay_preserves_event_id_set() -> None:
@@ -256,10 +260,12 @@ def test_redis_streams_crash_and_replay_preserves_event_id_set() -> None:
     assert replay_completeness == 100.0
     assert len(combined_ids) == len(published_event_ids)
     assert set(combined_ids) == set(published_event_ids)
-    assert bus.counters == {
-        "published_events": 1000,
-        "delivered_events": 1000,
-        "handler_failures": 1,
-        "queue_depth": 0,
-        "in_flight": 0,
-    }
+    assert bus.counters["published_events"] == 1000
+    assert bus.counters["delivered_events"] == 1000
+    assert bus.counters["handler_failures"] == 1
+    assert bus.counters["queue_depth"] == 0
+    assert bus.counters["in_flight"] == 0
+    assert bus.counters.get("max_queue_depth_seen") is not None
+    assert bus.counters["max_queue_depth_seen"] >= 0
+    assert bus.counters.get("max_in_flight_seen") is not None
+    assert bus.counters["max_in_flight_seen"] >= 0

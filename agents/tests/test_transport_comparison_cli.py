@@ -62,6 +62,12 @@ def test_render_report_csv_outputs_header_and_values() -> None:
                 in_flight=None,
                 drain_iterations=0,
                 correctness_passed=True,
+                max_in_flight=None,
+                replay_count=None,
+                correlation_id_propagation_passed=True,
+                producer_crash_delivered=None,
+                producer_crash_events_lost=None,
+                events_lost_consumer_crash=None,
             )
         ],
         scenario=ComparisonScenario(event_count=10, include_crash_replay=False),
