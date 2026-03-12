@@ -67,6 +67,8 @@ def truncate_agent_tables(engine: Engine) -> Iterator[None]:
     yield
 
 
+
+@pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_database_connection(engine: Engine) -> None:
     """
     Verify that the PostgreSQL database is reachable and SELECT 1 succeeds.
@@ -77,6 +79,8 @@ def test_database_connection(engine: Engine) -> None:
     assert value == 1
 
 
+
+@pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_all_tables_exist(engine: Engine) -> None:
     """
     Confirm that all Phase 1 tables exist: raw_ingested_jobs, normalized_jobs,
@@ -97,6 +101,8 @@ def test_all_tables_exist(engine: Engine) -> None:
     assert not missing, f"Missing expected tables: {missing}"
 
 
+
+@pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_migration_is_idempotent(engine: Engine) -> None:
     """
     Ensure that running the Phase 1 migration multiple times does not raise
@@ -112,6 +118,8 @@ def test_migration_is_idempotent(engine: Engine) -> None:
     assert "job_ingestion_runs" in inspector.get_table_names()
 
 
+
+@pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_job_postings_has_phase1_columns(engine: Engine) -> None:
     """
     Verify that the job_postings table has all nine Phase 1 extension columns.

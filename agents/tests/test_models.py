@@ -64,6 +64,8 @@ def session(engine: Engine) -> Iterator[Session]:
         yield session
 
 
+
+@pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_insert_raw_ingested_job(session: Session) -> None:
     """
     Insert a RawIngestedJob row and read it back, verifying that core fields
@@ -98,6 +100,8 @@ def test_insert_raw_ingested_job(session: Session) -> None:
     session.commit()
 
 
+
+@pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_insert_normalized_job(session: Session) -> None:
     """
     Insert a NormalizedJob row and read it back, verifying the validation_status
@@ -140,6 +144,8 @@ def test_insert_normalized_job(session: Session) -> None:
     session.commit()
 
 
+
+@pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_insert_job_ingestion_run(session: Session) -> None:
     """
     Insert a JobIngestionRun row and update its status from 'running' to
@@ -171,6 +177,8 @@ def test_insert_job_ingestion_run(session: Session) -> None:
     session.commit()
 
 
+
+@pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_raw_payload_hash_unique(session: Session) -> None:
     """
     Verify that raw_payload_hash is enforced as unique in raw_ingested_jobs by
@@ -209,6 +217,8 @@ def test_raw_payload_hash_unique(session: Session) -> None:
     session.commit()
 
 
+
+@pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_unicode_fields(session: Session) -> None:
     """
     Insert a RawIngestedJob with Unicode content in raw_metadata_json and read
