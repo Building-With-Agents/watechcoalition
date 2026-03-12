@@ -17,8 +17,6 @@ select = [
 ]
 ignore = [
     "E501",  # line length handled by formatter
-    "E402",  # module imports not at top (caused by __future__ annotations pattern)
-    "N806",  # variable in function should be lowercase
 ]
 
 [tool.ruff.lint.per-file-ignores]
