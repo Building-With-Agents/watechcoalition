@@ -45,7 +45,7 @@ Each pipeline run writes `last_run_start` and `last_run_finish` (ISO timestamps)
 
 Default path: `agents/data/scheduler_last_run.json`. Override with `SCHEDULER_STATE_PATH` (absolute path).
 
-File shape (each section also gets `last_run_duration_seconds` and `average_duration_seconds` after runs):
+File shape (each section also gets `last_run_duration_seconds`, `average_duration_seconds`, and **last_5_runs** for 5-cycle drift after runs):
 
 ```json
 {
@@ -54,7 +54,11 @@ File shape (each section also gets `last_run_duration_seconds` and `average_dura
     "last_run_finish": "...",
     "last_run_duration_seconds": 0.02,
     "recent_durations_seconds": [0.02, 0.019, ...],
-    "average_duration_seconds": 0.019
+    "average_duration_seconds": 0.019,
+    "last_5_runs": [
+      { "expected_fire_at": "...", "actual_fire_at": "...", "drift_seconds": 0.0 },
+      ...
+    ]
   },
   "task_scheduler": { ... }
 }
@@ -67,6 +71,18 @@ python -m agents.orchestration.last_run_state
 ```
 
 Output is the full JSON above so you can compare drift and timing for each.
+
+### 5-cycle drift table (for EXP-005 findings)
+
+To print a markdown table (Cycle | Expected | Actual | Drift (s)) for pasting into `docs/EXP-005-findings.md`:
+
+```bash
+python -m agents.orchestration.last_run_state --drift-table
+```
+
+Use `--drift-table apscheduler` or `--drift-table task_scheduler` to show one scheduler only. Run at least 5 cycles (scheduler or manual runs) so `last_5_runs` is full and the table has 5 rows.
+
+For the one-page findings (What I Tested, What I Found, Recommendation, Data/Evidence), see `docs/EXP-005-findings.md`.
 
 ## Windows Task Scheduler (same trigger, external process)
 
