@@ -16,3 +16,4 @@ apscheduler>=3.10
 python-dotenv>=1.0
 pytest>=8.0
 ruff>=0.4
+matplotlib>=3.8

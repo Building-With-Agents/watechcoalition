@@ -104,6 +104,8 @@ class RedisStreamsEventBus(EventBusBase):
         self._known_stream_ids: set[str] = set()
         self._acked_stream_ids: set[str] = set()
         self._in_flight_stream_ids: set[str] = set()
+        self._max_queue_depth_seen: int = 0
+        self._max_in_flight_seen: int = 0
 
         self._ensure_consumer_group()
 
@@ -150,15 +152,26 @@ class RedisStreamsEventBus(EventBusBase):
             return EventEnvelope.model_validate_json(raw.decode("utf-8"))
         return EventEnvelope.model_validate_json(raw)
 
+    def _update_peak_counters(self) -> None:
+        """Update peak queue_depth and in_flight from current state."""
+        current_qd = max(len(self._known_stream_ids) - len(self._acked_stream_ids), 0)
+        current_if = len(self._in_flight_stream_ids)
+        self._max_queue_depth_seen = max(self._max_queue_depth_seen, current_qd)
+        self._max_in_flight_seen = max(self._max_in_flight_seen, current_if)
+
     @property
     def counters(self) -> dict[str, int]:
         """Snapshot counters used by Week 3 transport comparisons."""
+        qd = max(len(self._known_stream_ids) - len(self._acked_stream_ids), 0)
+        if_ = len(self._in_flight_stream_ids)
         return {
             "published_events": self._published_events,
             "delivered_events": self._delivered_events,
             "handler_failures": self._handler_failures,
-            "queue_depth": max(len(self._known_stream_ids) - len(self._acked_stream_ids), 0),
-            "in_flight": len(self._in_flight_stream_ids),
+            "queue_depth": qd,
+            "in_flight": if_,
+            "max_queue_depth_seen": self._max_queue_depth_seen,
+            "max_in_flight_seen": self._max_in_flight_seen,
         }
 
     def publish(self, event: EventEnvelope) -> None:
@@ -168,6 +181,7 @@ class RedisStreamsEventBus(EventBusBase):
         stream_id = _to_text(self._client.xadd(self._stream_name, {_EVENT_FIELD: payload}))
         self._known_stream_ids.add(stream_id)
         self._published_events += 1
+        self._update_peak_counters()
 
     def subscribe(
         self,
@@ -214,6 +228,7 @@ class RedisStreamsEventBus(EventBusBase):
 
             for stream_id, fields in entries:
                 self._in_flight_stream_ids.add(stream_id)
+                self._update_peak_counters()
                 total_processed += 1
                 remaining -= 1
 
@@ -335,6 +350,7 @@ class RedisStreamsEventBus(EventBusBase):
         self._client.xack(self._stream_name, self._group_name, stream_id)
         self._acked_stream_ids.add(stream_id)
         self._in_flight_stream_ids.discard(stream_id)
+        self._update_peak_counters()
 
 
 def _to_text(value: object) -> str:

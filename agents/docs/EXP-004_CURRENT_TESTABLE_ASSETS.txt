@@ -1,0 +1,30 @@
+EXP-004 Event Bus — Current Testable Assets
+=============================================
+
+What we tested
+--------------
+• Three transports: in_process (in-memory), Redis Streams (fake_redis), Kafka (fake_kafka).
+• Scenario: ingest_batch_to_normalization_complete, 1000 input events, seed 42.
+• Metrics: publish and end-to-end throughput, latency (p50/p95/p99), correctness (published/delivered/handler_failures, queue_depth and in_flight after drain).
+• Consumer crash at event 500: replay and event loss.
+• Producer crash at 500: events delivered vs lost.
+• Observability: peak queue depth and peak max in-flight during the run (for Redis/Kafka).
+
+What we found
+-------------
+• In-process: Highest throughput (~171k publish events/sec, ~171k e2e), sub-ms latency (p50 ~0.005 ms). No queue_depth/in_flight (N/A). Producer crash: 500 delivered, 0 lost. No consumer-crash replay (N/A).
+• Redis Streams / Kafka: Lower e2e throughput (~31–33k events/sec) due to drain loop and fake backends. Latency ~12–18 ms (p50–p99). Both pass correctness (2000 published, 2000 delivered, 0 handler failures, queue empty after drain). Peak queue depth during run: 1001. Peak max in-flight: 1. Consumer crash: 501 events replayed, 100% completeness, 0 events lost. Producer crash: 500 delivered, 0 lost. Correlation ID propagation passed for all.
+
+Recommendation
+--------------
+Use Redis or Kafka for the ingestion → normalization handoff when scaling out (replay, no producer/consumer crash loss, observability). Use in-process for single-process or local dev only (no persistence, no replay).
+
+Tradeoffs
+---------
+In-process: best latency and throughput, no operational visibility (no queue_depth/max_in_flight), no crash replay. Redis/Kafka: replay and crash resilience, peak queue_depth and max_in_flight visible; lower e2e throughput and higher latency in the current fake-backend setup.
+
+Data/evidence
+-------------
+• CSV: agents/data/output/exp004_comparison.csv (transport, backend, throughput, latency, queue_depth, in_flight after drain, max_in_flight peak, replay, producer_crash_*, events_lost_consumer_crash, etc.).
+• Charts (peak only for queue_depth/in_flight): same directory — exp004_throughput.png, exp004_latency.png, exp004_observability.png (queue depth + in flight peak), exp004_replay.png (replay count + replay completeness %), exp004_correlation_id.png. For Redis/Kafka, queue_depth and max_in_flight in charts are peak during the run; after-drain values remain in the CSV.
+• Tests: pytest agents/tests/test_transport_comparison.py agents/tests/test_redis_streams_event_bus.py agents/tests/test_kafka_event_bus.py -v — all pass.

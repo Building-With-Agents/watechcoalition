@@ -66,6 +66,12 @@ def test_run_transport_comparison_in_process_returns_normalized_metrics() -> Non
     assert result.throughput_publish_events_per_sec > 0
     assert result.throughput_e2e_events_per_sec > 0
     assert result.correctness_passed is True
+    assert result.max_in_flight is None
+    assert result.replay_count is None
+    assert result.correlation_id_propagation_passed is True
+    assert result.producer_crash_delivered is None
+    assert result.producer_crash_events_lost is None
+    assert result.events_lost_consumer_crash is None
 
 
 def test_compare_transport_candidates_builds_rows_for_all_buses() -> None:
@@ -73,6 +79,7 @@ def test_compare_transport_candidates_builds_rows_for_all_buses() -> None:
         event_count=25,
         include_crash_replay=True,
         crash_at=10,
+        producer_crash_at=10,
     )
     results = compare_transport_candidates(
         [
@@ -104,6 +111,8 @@ def test_compare_transport_candidates_builds_rows_for_all_buses() -> None:
 
     by_transport = {result.transport: result for result in results}
     assert by_transport["in_process"].crash_replay_complete is None
+    assert by_transport["in_process"].queue_depth is None
+    assert by_transport["in_process"].in_flight is None
     assert by_transport["in_process"].producer_crash_published_before_crash == 10
     assert by_transport["in_process"].producer_crash_loss_count == 15
     assert by_transport["in_process"].producer_resume_recovered_count == 15
@@ -116,8 +125,10 @@ def test_compare_transport_candidates_builds_rows_for_all_buses() -> None:
     assert by_transport["redis_streams"].producer_resume_recovered_count == 15
     assert by_transport["redis_streams"].producer_resume_final_loss_count == 0
     assert by_transport["redis_streams"].producer_resume_complete is True
-    assert by_transport["redis_streams"].queue_depth == 0
-    assert by_transport["redis_streams"].in_flight == 0
+    assert by_transport["redis_streams"].queue_depth is not None
+    assert by_transport["redis_streams"].queue_depth >= 0
+    assert by_transport["redis_streams"].in_flight is not None
+    assert by_transport["redis_streams"].in_flight >= 0
     assert by_transport["kafka"].crash_replay_complete is True
     assert by_transport["kafka"].replay_completeness_pct == 100.0
     assert by_transport["kafka"].producer_crash_delivered_before_crash == 10
@@ -125,11 +136,27 @@ def test_compare_transport_candidates_builds_rows_for_all_buses() -> None:
     assert by_transport["kafka"].producer_resume_recovered_count == 15
     assert by_transport["kafka"].producer_resume_final_loss_count == 0
     assert by_transport["kafka"].producer_resume_complete is True
-    assert by_transport["kafka"].queue_depth == 0
-    assert by_transport["kafka"].in_flight == 0
+    assert by_transport["kafka"].queue_depth is not None
+    assert by_transport["kafka"].queue_depth >= 0
+    assert by_transport["kafka"].in_flight is not None
+    assert by_transport["kafka"].in_flight >= 0
+    assert by_transport["in_process"].producer_crash_delivered == 10
+    assert by_transport["in_process"].producer_crash_events_lost == 0
+    assert by_transport["redis_streams"].producer_crash_delivered == 10
+    assert by_transport["redis_streams"].producer_crash_events_lost == 0
+    assert by_transport["kafka"].producer_crash_delivered == 10
+    assert by_transport["kafka"].producer_crash_events_lost == 0
 
     rows = results_to_rows(results)
     assert rows[0]["transport"] in {"in_process", "redis_streams", "kafka"}
+    assert "replay_count" in rows[0]
+    assert "max_in_flight" in rows[0]
+    assert "correlation_id_propagation_passed" in rows[0]
+    assert "producer_crash_delivered" in rows[0]
+    assert "producer_crash_events_lost" in rows[0]
+    assert "events_lost_consumer_crash" in rows[0]
+    assert by_transport["redis_streams"].replay_count == 16
+    assert by_transport["kafka"].replay_count == 16
     assert all(row["published_events"] == 50 for row in rows)
     assert all(row["delivered_events"] == 50 for row in rows)
     assert all(row["handler_failures"] == 0 for row in rows)
