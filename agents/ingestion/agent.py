@@ -70,7 +70,6 @@ class IngestionAgent(BaseAgent):
         where source-field normalisation, dedup fingerprinting, and
         provenance tagging happen.
         """
-        raw = event.payload
         start_time = datetime.now(UTC)
         run_id: str | None = None
         record_count = 0

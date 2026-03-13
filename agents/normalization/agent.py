@@ -22,8 +22,20 @@ Week 3 replaces this stub with:
 
 from __future__ import annotations
 
+import statistics
+import time
+from datetime import UTC, datetime
+
+import structlog
+from pydantic import ValidationError
+from sqlalchemy.exc import SQLAlchemyError
+
 from agents.common.base_agent import BaseAgent
+from agents.common.data_store import get_session_factory
 from agents.common.event_envelope import EventEnvelope
+
+log = structlog.get_logger()
+SessionLocal = get_session_factory()
 
 
 class NormalizationAgent(BaseAgent):
@@ -49,7 +61,6 @@ class NormalizationAgent(BaseAgent):
         Stub adds normalized_location and employment_type fields.
         In Week 3, this is where field mapping and validation run.
         """
-        p = event.payload
         batch_id = event.payload.get("batch_id")
         if not batch_id:
             log.error("normalization_missing_batch_id", payload_keys=list(event.payload.keys()))
@@ -140,7 +151,7 @@ class NormalizationAgent(BaseAgent):
             median_ms = 0.0
             p99_ms = 0.0
 
-        self._last_run_at = datetime.utcnow()
+        self._last_run_at = datetime.now(UTC)
         self._last_run_metrics = {
             "batch_id": batch_id,
             "valid_count": valid_count,
