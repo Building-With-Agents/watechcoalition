@@ -64,6 +64,8 @@ class IngestionAgent(BaseAgent):
             agent_id=self.agent_id,
             payload={
                 "event_type": "IngestBatch",
+                "batch_id": event.correlation_id,
+                "total_fetched": 1,
                 "posting_id": raw.get("posting_id"),
                 "source": raw.get("source", "web_scrape"),
                 "url": raw.get("url"),

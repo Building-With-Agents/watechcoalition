@@ -56,6 +56,8 @@ class NormalizationAgent(BaseAgent):
             agent_id=self.agent_id,
             payload={
                 "event_type": "NormalizationComplete",
+                "batch_id": event.correlation_id,
+                "record_count": 1,
                 "posting_id": p.get("posting_id"),
                 "title": p.get("title"),
                 "company": p.get("company"),
