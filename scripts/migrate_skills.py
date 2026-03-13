@@ -13,6 +13,7 @@ import os
 import json
 import pyodbc
 import psycopg2
+from psycopg2.extras import execute_values
 
 # ── Connection strings ────────────────────────────────────────────────
 # MSSQL: read from the Prisma-style DATABASE_URL or build from .env.docker vars
