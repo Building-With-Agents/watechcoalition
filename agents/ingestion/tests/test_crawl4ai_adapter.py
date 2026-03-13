@@ -10,9 +10,9 @@ import pytest
 from agents.common.types.raw_job_record import RawJobRecord
 from agents.common.types.region_config import RegionConfig
 from agents.ingestion.sources.crawl4ai_adapter import (
+    EL_PASO_PORTAL_BASE,
     Crawl4AIAdapter,
     Crawl4AIAdapterError,
-    EL_PASO_PORTAL_BASE,
 )
 
 
