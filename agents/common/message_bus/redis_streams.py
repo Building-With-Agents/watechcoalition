@@ -265,12 +265,14 @@ class RedisStreamsEventBus(EventBusBase):
         count: int,
         block_ms: int,
     ) -> list[tuple[str, dict[str, str]]]:
+        kwargs: dict[str, int] = {"count": count}
+        if block_ms > 0:
+            kwargs["block"] = block_ms
         raw_response = self._client.xreadgroup(
             self._group_name,
             self._consumer_name,
             {self._stream_name: offset},
-            count=count,
-            block=block_ms,
+            **kwargs,
         )
         entries: list[tuple[str, dict[str, str]]] = []
 
