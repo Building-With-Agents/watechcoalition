@@ -35,6 +35,7 @@ _MIN_HTML_LEN = 500
 # supported; region_id from RegionConfig is passed through for output metadata only.
 EL_PASO_PORTAL_BASE = "https://www.governmentjobs.com"
 EL_PASO_CAREERS_URL = "https://www.governmentjobs.com/careers/elpaso"
+TEST_URL = "https://bebee.com/us/jobs"
 
 # GovernmentJobs "no openings" signal (e.g. "0 jobs found", "no jobs available").
 _NO_OPENINGS_RE = re.compile(
@@ -72,7 +73,7 @@ class Crawl4AIAdapter(SourceAdapter):
 
     def __init__(self, target_urls: list[str] | None = None) -> None:
         # Allow override for testing; default uses fixed El Paso portal.
-        self._target_urls = target_urls or [EL_PASO_CAREERS_URL]
+        self._target_urls = target_urls or [TEST_URL]
 
     @property
     def source_name(self) -> str:
@@ -80,7 +81,7 @@ class Crawl4AIAdapter(SourceAdapter):
 
     def _build_search_url(self, region: RegionConfig) -> str:
         """Return the crawl target URL. Single target: El Paso portal."""
-        return self._target_urls[0] if self._target_urls else EL_PASO_CAREERS_URL
+        return self._target_urls[0] if self._target_urls else TEST_URL
 
     def _extract_job_cards(self, html: str, base_url: str) -> list[dict]:
         """Extract job links from HTML. Returns list of {external_id, title, job_url}."""
