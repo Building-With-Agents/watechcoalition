@@ -16,7 +16,7 @@ def _ingestion_output_event() -> EventEnvelope:
         agent_id="pipeline-runner",
         payload={
             "posting_id": 1,
-            "source": "web_scrape",
+            "source": "crawl4ai",
             "title": "Senior Data Engineer",
             "company": "Microsoft",
             "location": "Redmond, WA",
