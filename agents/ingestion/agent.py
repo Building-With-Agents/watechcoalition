@@ -20,10 +20,23 @@ Week 3 replaces this stub with:
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 
+import structlog
+
 from agents.common.base_agent import BaseAgent
+from agents.common.data_store import get_session_factory
+from agents.common.data_store.models import JobIngestionRun
 from agents.common.event_envelope import EventEnvelope
+
+log = structlog.get_logger()
+SessionLocal = get_session_factory()
+
+
+class SourceFailureError(Exception):
+    """Raised when the ingestion source is unreachable after retries."""
+    pass
 
 # The fallback scrape file lives alongside the other fixtures.
 # health_check() verifies it exists before the pipeline runs.
@@ -57,25 +70,137 @@ class IngestionAgent(BaseAgent):
         where source-field normalisation, dedup fingerprinting, and
         provenance tagging happen.
         """
-        raw = event.payload
+        start_time = datetime.now(UTC)
+        run_id: str | None = None
+        record_count = 0
+        dedup_count = 0
+        error_count = 0
 
-        return EventEnvelope(
+        try:
+            with SessionLocal() as session:
+                # 1. Create job_ingestion_runs record (status: running)
+                run = JobIngestionRun(
+                    source=self.source.name,
+                    status="running",
+                )
+                session.add(run)
+                session.flush()  # populate PK
+                run_id = str(run.id)
+
+                log.info(
+                    "ingestion_run_started",
+                    agent=self.agent_id,
+                    run_id=run_id,
+                    source=self.source.name,
+                )
+
+                # 2. Load fixture records with retry handling for source failures.
+                records = self._load_records_with_retry()
+
+                # 3. Process each record: dedup + insert.
+                for raw_record in records:
+                    try:
+                        processed = self._process_single_record(
+                            session=session,
+                            run=run,
+                            raw_record=raw_record,
+                        )
+                    except Exception as exc:  # schema violation or unexpected error
+                        error_count += 1
+                        self._write_dead_letter(raw_record, reason=str(exc))
+                        log.error(
+                            "ingestion_record_error",
+                            agent=self.agent_id,
+                            run_id=run_id,
+                            error=str(exc),
+                        )
+                        continue
+
+                    if processed == "dedup":
+                        dedup_count += 1
+                    elif processed == "ingested":
+                        record_count += 1
+
+                # 4. Update run record to complete with final counts.
+                run.status = "complete"
+                run.record_count = record_count
+                run.dedup_count = dedup_count
+                run.error_count = error_count
+                run.completed_at = datetime.now(UTC)
+                session.commit()
+
+                self._last_run_at = run.completed_at
+                self._last_run_metrics = {
+                    "record_count": record_count,
+                    "dedup_count": dedup_count,
+                    "error_count": error_count,
+                }
+
+                log.info(
+                    "ingestion_run_complete",
+                    agent=self.agent_id,
+                    run_id=run_id,
+                    record_count=record_count,
+                    dedup_count=dedup_count,
+                    error_count=error_count,
+                )
+
+        except SourceFailureError as exc:
+            # Source failures are handled by emitting a SourceFailure event and
+            # marking the run as failed when possible.
+            if run_id is not None:
+                with SessionLocal() as session:
+                    run = session.get(JobIngestionRun, run_id)
+                    if run is not None:
+                        run.status = "failed"
+                        run.error_count = run.error_count + 1
+                        run.completed_at = datetime.now(UTC)
+                        session.commit()
+
+            log.error(
+                "ingestion_source_failure",
+                agent=self.agent_id,
+                run_id=run_id,
+                source=self.source.name,
+                error=str(exc),
+            )
+
+            payload = {
+                "event_type": "SourceFailure",
+                "source": self.source.name,
+                "run_id": run_id,
+                "error": "source_unavailable",
+            }
+            outbound = EventEnvelope(
+                correlation_id=event.correlation_id,
+                agent_id=self.agent_id,
+                payload=payload,
+            )
+            return outbound
+
+        # Success path: emit IngestBatch event.
+        elapsed_ms = int((datetime.now(UTC) - start_time).total_seconds() * 1000)
+        total_fetched = record_count + dedup_count + error_count
+        batch_payload = {
+            "event_type": "IngestBatch",
+            "batch_id": run_id,
+            "total_fetched": total_fetched,
+            "record_count": record_count,
+            "dedup_count": dedup_count,
+            "source": self.source.name,
+            "correlation_id": event.correlation_id,
+            "elapsed_ms": elapsed_ms,
+        }
+        outbound = EventEnvelope(
             correlation_id=event.correlation_id,
             agent_id=self.agent_id,
-            payload={
-                "event_type": "IngestBatch",
-                "posting_id": raw.get("posting_id"),
-                "source": raw.get("source", "web_scrape"),
-                "url": raw.get("url"),
-                "title": raw.get("title"),
-                "company": raw.get("company"),
-                "location": raw.get("location"),
-                "timestamp": raw.get("timestamp"),
-                "raw_text": raw.get("raw_text"),
-                # Provenance tags — stubs for Week 2; real values set in Week 3
-                "ingestion_run_id": event.correlation_id,
-                "ingestion_timestamp": event.timestamp.isoformat(),
-                "raw_payload_hash": "stub-hash",   # Week 3: sha256(source+id+title+company+date)
-                "external_id": str(raw.get("posting_id")),
-            },
+            payload=batch_payload,
         )
+        log.info(
+            "ingestion_emit_ingest_batch",
+            agent=self.agent_id,
+            run_id=run_id,
+            record_count=record_count,
+            dedup_count=dedup_count,
+        )
+        return outbound
