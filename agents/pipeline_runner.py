@@ -46,7 +46,7 @@ import contextlib
 import json
 import sys
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -202,7 +202,7 @@ def process_record(
                 "agent_id": agent.agent_id,
                 "event_id": str(uuid.uuid4()),
                 "correlation_id": correlation_id,
-                "timestamp": datetime.now(UTC).isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "schema_version": "1.0",
                 "payload": {
                     "event_type": "Phase2Skipped",
@@ -284,7 +284,7 @@ def main() -> None:
     3. Process each posting through all eight agents in sequence.
     4. Write pipeline_run.json.
     """
-    run_start = datetime.now(UTC)
+    run_start = datetime.now(timezone.utc)
     run_id = str(uuid.uuid4())[:8]
 
     log.info(
@@ -347,7 +347,7 @@ def main() -> None:
         encoding="utf-8",
     )
 
-    run_end = datetime.now(UTC)
+    run_end = datetime.now(timezone.utc)
     duration_s = round((run_end - run_start).total_seconds(), 3)
     expected_entries = len(postings) * len(PIPELINE)
 
