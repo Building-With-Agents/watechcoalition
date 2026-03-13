@@ -50,23 +50,125 @@ class NormalizationAgent(BaseAgent):
         In Week 3, this is where field mapping and validation run.
         """
         p = event.payload
+        batch_id = event.payload.get("batch_id")
+        if not batch_id:
+            log.error("normalization_missing_batch_id", payload_keys=list(event.payload.keys()))
+            return self._emit_failed(
+                inbound=event,
+                error_type="missing_batch_id",
+                error_reason="IngestBatch event missing batch_id",
+            )
+        latencies_ms: list[float] = []
+        valid_count = 0
+        quarantine_count = 0
 
-        return EventEnvelope(
+        try:
+            with SessionLocal() as session:
+                raw_records = self._load_raw_records(session, batch_id)
+                if not raw_records:
+                    log.warning("normalization_no_raw_records", batch_id=batch_id)
+
+                for raw_job in raw_records:
+                    start = time.perf_counter()
+                    try:
+                        job_record = self._map_and_validate(raw_job)
+                        self._write_normalized(session, job_record, raw_job, validation_status="valid")
+                        valid_count += 1
+                    except ValidationError as exc:
+                        quarantine_count += 1
+                        self._write_normalized(
+                            session,
+                            None,
+                            raw_job,
+                            validation_status="quarantined",
+                            quarantine_reason=str(exc),
+                        )
+                        log.warning(
+                            "normalization_record_quarantined",
+                            batch_id=batch_id,
+                        )
+                    except Exception as exc:
+                        quarantine_count += 1
+                        self._write_normalized(
+                            session,
+                            None,
+                            raw_job,
+                            validation_status="quarantined",
+                            quarantine_reason=str(exc),
+                        )
+                        log.error(
+                            "normalization_record_error",
+                            batch_id=batch_id,
+                            error=str(exc),
+                        )
+                    finally:
+                        elapsed_ms = (time.perf_counter() - start) * 1000.0
+                        latencies_ms.append(elapsed_ms)
+
+                session.commit()
+
+        except SQLAlchemyError as exc:
+            log.error(
+                "normalization_batch_db_failure",
+                batch_id=batch_id,
+                error=str(exc),
+            )
+            return self._emit_failed(
+                inbound=event,
+                error_type="database_error",
+                error_reason=str(exc),
+            )
+        except Exception as exc:
+            log.error(
+                "normalization_batch_unexpected_failure",
+                batch_id=batch_id,
+                error=str(exc),
+            )
+            return self._emit_failed(
+                inbound=event,
+                error_type="unknown_error",
+                error_reason=str(exc),
+            )
+
+        # Compute median and p99 latency metrics.
+        if latencies_ms:
+            latencies_sorted = sorted(latencies_ms)
+            median_ms = statistics.median(latencies_sorted)
+            p99_index = max(int(len(latencies_sorted) * 0.99) - 1, 0)
+            p99_ms = latencies_sorted[p99_index]
+        else:
+            median_ms = 0.0
+            p99_ms = 0.0
+
+        self._last_run_at = datetime.utcnow()
+        self._last_run_metrics = {
+            "batch_id": batch_id,
+            "valid_count": valid_count,
+            "quarantine_count": quarantine_count,
+            "latency_median_ms": median_ms,
+            "latency_p99_ms": p99_ms,
+        }
+
+        log.info(
+            "normalization_latency_metrics",
+            batch_id=batch_id,
+            median_ms=median_ms,
+            p99_ms=p99_ms,
+            target_median_ms=200.0,
+            target_p99_ms=1000.0,
+        )
+
+        payload = {
+            "event_type": "NormalizationComplete",
+            "batch_id": batch_id,
+            "record_count": valid_count,
+            "valid_count": valid_count,
+            "quarantine_count": quarantine_count,
+            "correlation_id": event.correlation_id,
+        }
+        outbound = EventEnvelope(
             correlation_id=event.correlation_id,
             agent_id=self.agent_id,
-            payload={
-                "event_type": "NormalizationComplete",
-                "posting_id": p.get("posting_id"),
-                "title": p.get("title"),
-                "company": p.get("company"),
-                "location": p.get("location"),
-                "normalized_location": p.get("location"),   # stub: identity transform
-                "employment_type": "full_time",             # stub: default
-                "date_posted": p.get("timestamp"),
-                "raw_text": p.get("raw_text"),
-                "source": p.get("source"),
-                "url": p.get("url"),
-                "normalization_status": "success",
-                # Week 3 adds: salary_min, salary_max, salary_currency, salary_period
-            },
+            payload=payload,
         )
+        return outbound

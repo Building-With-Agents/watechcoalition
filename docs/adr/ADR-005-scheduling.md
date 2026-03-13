@@ -1,8 +1,8 @@
-# EXP-005 Findings: Scheduling mechanism for daily ingestion run
+# ADR-005: Scheduling mechanism for daily ingestion run
 
 **Owner:** Juan  
 **Date:** 2026-03-12  
-**Output:** One-page findings → ADR-005
+**Status:** Accepted
 
 The project uses **APScheduler only** for the ingestion run. Task Scheduler is no longer supported or recommended.
 
@@ -63,4 +63,52 @@ The project uses **APScheduler only** for the ingestion run. Task Scheduler is n
 
 ---
 
-*This document feeds ADR-005 and the ingestion-agent-design result cell.*
+## How to run (runbook)
+
+Run everything from **watechcoalition** repo root. Use the project venv (e.g. `.\venv\Scripts\python.exe` or activate venv first).
+
+### Run APScheduler (2-min interval, 5 cycles)
+
+1. From repo root:
+   ```bash
+   python -m agents.orchestration.scheduler
+   ```
+   Or with venv Python:
+   ```bash
+   .\venv\Scripts\python.exe -m agents.orchestration.scheduler
+   ```
+2. Leave it running **at least 10 minutes** (5 fires × 2 min). First fire at start, then +2, +4, +6, +8 min.
+3. In the console you'll see JSON lines: `scheduler_run_start` and `scheduler_run_finish` for each fire. Note the timestamps (or use `agents/data/scheduler_last_run.json`).
+4. Stop with **Ctrl+C**.
+
+### Run pipeline once (no scheduler)
+
+```bash
+python -m agents.orchestration.run_ingestion
+```
+
+### Query last run state / drift table
+
+```bash
+python -m agents.orchestration.last_run_state
+python -m agents.orchestration.last_run_state --drift-table
+```
+
+### Tests
+
+```bash
+pytest agents/tests/ agents/orchestration/tests/ -v
+```
+
+### Quick command reference
+
+| Goal | Command |
+|------|--------|
+| Run APScheduler (2-min, keep running) | `python -m agents.orchestration.scheduler` |
+| Run pipeline once (no scheduler) | `python -m agents.orchestration.run_ingestion` |
+| Query last run start/finish | `python -m agents.orchestration.last_run_state` |
+| Run all tests | `pytest agents/tests/ agents/orchestration/tests/ -v` |
+
+---
+
+*This document feeds the ingestion-agent-design result cell.*

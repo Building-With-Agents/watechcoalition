@@ -22,7 +22,7 @@ from __future__ import annotations
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Ensure repo root is on path when run as __main__ from any cwd.
@@ -48,7 +48,7 @@ log = structlog.get_logger()
 
 def _scheduled_job() -> None:
     """Run the pipeline once. Log run start and finish for observability."""
-    run_start = datetime.now(datetime.UTC)
+    run_start = datetime.now(timezone.utc)
     log.info(
         "scheduler_run_start",
         run_start=run_start.isoformat(),
@@ -70,7 +70,7 @@ def _scheduled_job() -> None:
             error=str(exc),
             run_start=run_start.isoformat(),
         )
-    run_finish = datetime.now(datetime.UTC)
+    run_finish = datetime.now(timezone.utc)
     log.info(
         "scheduler_run_finish",
         run_start=run_start.isoformat(),

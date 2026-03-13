@@ -71,7 +71,7 @@ python -m agents.orchestration.last_run_state
 
 ### 5-cycle drift table (for EXP-005 findings)
 
-To print a markdown table (Cycle | Expected | Actual | Drift (s)) for pasting into `docs/EXP-005-findings.md`:
+To print a markdown table (Cycle | Expected | Actual | Drift (s)) for pasting into `docs/adr/ADR-005-scheduling.md`:
 
 ```bash
 python -m agents.orchestration.last_run_state --drift-table
@@ -79,4 +79,4 @@ python -m agents.orchestration.last_run_state --drift-table
 
 Use `--drift-table apscheduler` to show only APScheduler. Run at least 5 cycles so `last_5_runs` is full and the table has 5 rows.
 
-For the one-page findings (What I Tested, What I Found, Recommendation, Data/Evidence), see `docs/EXP-005-findings.md`.
+For the one-page findings (What I Tested, What I Found, Recommendation, Data/Evidence), see `docs/adr/ADR-005-scheduling.md`.
