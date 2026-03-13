@@ -138,7 +138,7 @@ Sources (JSearch API via httpx / Web scraping via Crawl4AI)
 
 | Layer | Technology | Decision |
 |-------|-----------|---------|
-| Agent runtime | Python 3.11+ | — |
+| Agent runtime | Python 3.11 (pinned) | — |
 | Multi-agent framework | LangGraph StateGraph | SA #13 |
 | LLM adapter | LangChain + Azure OpenAI (provider-agnostic) | SA #11 |
 | LLM provider default | Azure OpenAI; switchable via `LLM_PROVIDER` env var | SA #11 |

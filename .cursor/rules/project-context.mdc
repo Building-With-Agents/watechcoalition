@@ -10,7 +10,7 @@ alwaysApply: true
 Dual-stack repository:
 
 - **Root (`/`)** — Next.js / TypeScript / Prisma web application. **Read-only from the agent pipeline perspective.**
-- **`agents/`** — Python 3.11+ eight-agent pipeline that ingests, normalizes, enriches, and analyzes external job postings. **This is the active development focus.**
+- **`agents/`** — Python 3.11 (pinned) eight-agent pipeline that ingests, normalizes, enriches, and analyzes external job postings. **This is the active development focus.**
 
 ## Canonical Documentation
 
@@ -45,7 +45,7 @@ Unless explicitly instructed, never modify files outside `agents/`:
 
 | Layer | Technology |
 |-------|-----------|
-| Runtime | Python 3.11+ |
+| Runtime | Python 3.11 (pinned) |
 | Multi-agent framework | LangGraph (StateGraph) |
 | LLM adapter | LangChain + Azure OpenAI (provider-agnostic via `LLM_PROVIDER` env var) |
 | Tracing | LangSmith |
