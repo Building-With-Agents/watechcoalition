@@ -91,7 +91,7 @@ def _job_to_raw_record(job: dict, region_id: str) -> RawJobRecord:
             salary_max = None
     salary_currency = job.get("job_salary_currency") or job.get("salary_currency")
     salary_period = job.get("job_salary_period") or job.get("salary_period")
-    salary_raw = job.get("job_salary_display") or job.get("salary_display")
+    salary_raw = job.get("job_salary") or job.get("job_salary_display")
 
     employment_type = job.get("job_employment_type") or job.get("employment_type")
     experience_level = job.get("job_required_experience", {}).get("required_experience_level") if isinstance(job.get("job_required_experience"), dict) else job.get("experience_level")
