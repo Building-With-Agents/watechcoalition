@@ -11,8 +11,9 @@ from agents.common.event_envelope import EventEnvelope
 class _ConcreteAgent(AgentBase):
     """Minimal concrete subclass for testing the ABC contract."""
 
-    def __init__(self) -> None:
-        super().__init__(agent_id="test-agent")
+    @property
+    def agent_id(self) -> str:
+        return "test-agent"
 
     def health_check(self) -> dict:
         return {"status": "ok", "agent": self.agent_id, "last_run": None, "metrics": {}}
@@ -26,12 +27,12 @@ class _ConcreteAgent(AgentBase):
 
 
 class TestAgentBase:
-    """Verify the abstract interface and constructor-based agent_id."""
+    """Verify the abstract interface and property-based agent_id."""
 
     def test_cannot_instantiate_directly(self) -> None:
         """AgentBase is abstract — direct instantiation raises TypeError."""
         with pytest.raises(TypeError):
-            AgentBase(agent_id="base")  # type: ignore[abstract]
+            AgentBase()  # type: ignore[abstract]
 
     def test_backward_compat_alias(self) -> None:
         """BaseAgent is an alias for AgentBase."""
@@ -75,8 +76,9 @@ class TestAgentBase:
         """A subclass missing health_check cannot be instantiated."""
 
         class _NoHealthCheck(AgentBase):
-            def __init__(self) -> None:
-                super().__init__(agent_id="incomplete")
+            @property
+            def agent_id(self) -> str:
+                return "incomplete"
 
             def process(self, event: EventEnvelope) -> EventEnvelope | None:
                 return None
@@ -88,8 +90,9 @@ class TestAgentBase:
         """A subclass missing process cannot be instantiated."""
 
         class _NoProcess(AgentBase):
-            def __init__(self) -> None:
-                super().__init__(agent_id="incomplete")
+            @property
+            def agent_id(self) -> str:
+                return "incomplete"
 
             def health_check(self) -> dict:
                 return {}
