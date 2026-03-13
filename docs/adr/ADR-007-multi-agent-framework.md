@@ -1,7 +1,7 @@
 # ADR-007: Multi-Agent Framework for Pipeline Orchestration
 
-**Status:** In Review  
-**Date:** 2026-03-07  
+**Status:** Adopted  
+**Date:** 2026-03-12  
 **Deciders:** Fabian (EXP-007 owner)  
 **References:** EXP-007 plan and findings (`docs/planning/EXP-007-plan-and-findings-template.md` §10), ARCHITECTURAL_DECISIONS #13, #16, #17
 
