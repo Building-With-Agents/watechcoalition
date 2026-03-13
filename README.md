@@ -8,7 +8,7 @@ For a visual overview of the platform architecture (current and planned), see [d
 
 - Node.js >= 18.17.0
 
-- Python >= 3.11 (for the agent pipeline)
+- Python 3.11 (pinned — for the agent pipeline)
 - npm
 - Docker (for local PostgreSQL)
 
