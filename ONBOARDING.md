@@ -5,7 +5,7 @@ This guide walks through setting up the watechcoalition platform after cloning t
 ## Prerequisites
 
 - **Node.js** 18.17 or later ([nodejs.org](https://nodejs.org/) or use [nvm](https://github.com/nvm-sh/nvm))
-- **Python** 3.11 or later — [python.org/downloads](https://www.python.org/downloads/); on Windows, enable **"Add python.exe to PATH"** during install
+- **Python 3.11** (pinned — do not use 3.12+) — [python.org/downloads](https://www.python.org/downloads/); on Windows, enable **"Add python.exe to PATH"** during install
 - **Docker** (for local PostgreSQL) — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md)
 - **Git**
 
@@ -89,7 +89,7 @@ See [docs/DOCKER_POSTGRESQL_SETUP.md](docs/DOCKER_POSTGRESQL_SETUP.md) for detai
 
 ### 4.1 Install Python 3.11 (if not already installed)
 
-1. Download from [python.org/downloads](https://www.python.org/downloads/) (Python 3.11 or later).
+1. Download from [python.org/downloads](https://www.python.org/downloads/) (**Python 3.11 specifically** — do not use 3.12+; a dependency requires 3.11).
 2. Run the installer. **On Windows**, check **"Add python.exe to PATH"**.
 3. Verify:
 
