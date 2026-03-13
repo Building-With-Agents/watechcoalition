@@ -10,36 +10,40 @@ from __future__ import annotations
 import os
 from unittest.mock import MagicMock, patch
 
-
 class TestTriggerReliability:
     """The job callable invokes the ingestion entrypoint when it runs."""
 
-    @patch("agents.orchestration.scheduler.log")
-    @patch("agents.orchestration.run_ingestion.main")
-    def test_scheduled_job_invokes_run_ingestion_once(
-        self,
-        mock_run_ingestion: MagicMock,
-        _mock_log: MagicMock,
-    ) -> None:
+    def test_scheduled_job_invokes_run_ingestion_once(self) -> None:
         """When the scheduler fires the job, it calls run_ingestion.main exactly once."""
-        from agents.orchestration.scheduler import _scheduled_job
+        # Patch DB first so importing run_ingestion (via patch target) does not require PYTHON_DATABASE_URL.
+        mock_factory = MagicMock()
+        mock_factory.return_value = MagicMock()  # SessionLocal() -> session context manager
+        with patch("agents.common.data_store.database.get_engine", return_value=MagicMock()), patch(
+            "agents.common.data_store.database.get_session_factory", return_value=mock_factory
+        ):
+            with patch("agents.orchestration.scheduler.log"), patch(
+                "agents.orchestration.run_ingestion.main"
+            ) as mock_run_ingestion:
+                from agents.orchestration.scheduler import _scheduled_job
 
-        _scheduled_job()
-        mock_run_ingestion.assert_called_once()
+                _scheduled_job()
+                mock_run_ingestion.assert_called_once()
 
-    @patch("agents.orchestration.scheduler.log")
-    @patch("agents.orchestration.run_ingestion.main")
-    def test_scheduled_job_invokes_entrypoint_even_if_import_late(
-        self,
-        mock_run_ingestion: MagicMock,
-        _mock_log: MagicMock,
-    ) -> None:
+    def test_scheduled_job_invokes_entrypoint_even_if_import_late(self) -> None:
         """Job callable uses the same entrypoint as APScheduler/Task Scheduler (run_ingestion.main)."""
-        from agents.orchestration.scheduler import _scheduled_job
+        mock_factory = MagicMock()
+        mock_factory.return_value = MagicMock()
+        with patch("agents.common.data_store.database.get_engine", return_value=MagicMock()), patch(
+            "agents.common.data_store.database.get_session_factory", return_value=mock_factory
+        ):
+            with patch("agents.orchestration.scheduler.log"), patch(
+                "agents.orchestration.run_ingestion.main"
+            ) as mock_run_ingestion:
+                from agents.orchestration.scheduler import _scheduled_job
 
-        _scheduled_job()
-        mock_run_ingestion.assert_called_once()
-        mock_run_ingestion.assert_called_with()
+                _scheduled_job()
+                mock_run_ingestion.assert_called_once()
+                mock_run_ingestion.assert_called_with()
 
 
 class TestScheduleFromEnvironment:

@@ -5,12 +5,10 @@ Writes a small JSON file on each pipeline run so we can query "last run start"
 and "last run finish" without a database. Path is agents/data/scheduler_last_run.json
 by default, or SCHEDULER_STATE_PATH (env) for an absolute path.
 
-In normal operation only the apscheduler section is written (scheduler.py sets
-SCHEDULER_TYPE=apscheduler before invoking run_ingestion). The task_scheduler
-key is legacy: it may still appear in the file for backward compatibility when
-reading existing scheduler_last_run.json; it is not written by the current code.
-The JSON shape and _SCHEDULER_TYPES keep both keys so old state files still load;
-the drift table and read API may still show both sections if present.
+State is stored per scheduler type so APScheduler and Task Scheduler do not
+overwrite each other. Set SCHEDULER_TYPE=apscheduler or SCHEDULER_TYPE=task_scheduler
+before running; default is apscheduler. The batch script sets task_scheduler;
+scheduler.py sets apscheduler.
 
 Per-scheduler section includes: last_run_start, last_run_finish, last_run_duration_seconds
 (time between start and finish for the last run), recent_durations_seconds (last N run
@@ -28,13 +26,12 @@ from __future__ import annotations
 import json
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Repo root / agents dir for default path when run as __main__ or imported.
-# Resolve so the same file is used regardless of cwd (e.g. when Task Scheduler runs the batch).
 _AGENTS_DIR = Path(__file__).resolve().parent.parent
-_DEFAULT_PATH = (_AGENTS_DIR / "data" / "scheduler_last_run.json").resolve()
+_DEFAULT_PATH = _AGENTS_DIR / "data" / "scheduler_last_run.json"
 
 # Allowed values for SCHEDULER_TYPE; default when unset.
 _SCHEDULER_TYPES = ("apscheduler", "task_scheduler")
@@ -49,7 +46,7 @@ _MAX_DRIFT_RUNS = 5
 def _state_path() -> Path:
     p = os.environ.get("SCHEDULER_STATE_PATH", "").strip()
     if p:
-        return Path(p).resolve()
+        return Path(p)
     _DEFAULT_PATH.parent.mkdir(parents=True, exist_ok=True)
     return _DEFAULT_PATH
 
@@ -138,14 +135,17 @@ def write_last_run_start() -> datetime:
     key = _scheduler_type()
     data[key] = dict(data.get(key, {}))
     section = data[key]
-    now = datetime.now(datetime.UTC)
+    now = datetime.now(timezone.utc)
     section["last_run_start"] = now.isoformat()
 
     # Drift: expected vs actual fire time (last 5 runs for EXP-005).
     last_5: list[dict] = list(section.get("last_5_runs", []))
     interval_min = _interval_minutes()
     last_expected = _parse_iso(last_5[-1]["expected_fire_at"]) if last_5 else None
-    expected = now if last_expected is None else last_expected + timedelta(minutes=interval_min)
+    if last_expected is None:
+        expected = now  # First run: expected = actual.
+    else:
+        expected = last_expected + timedelta(minutes=interval_min)
     drift_sec = round((now - expected).total_seconds(), 3)
     last_5.append({
         "expected_fire_at": expected.isoformat(),
@@ -170,7 +170,7 @@ def write_last_run_finish(started_at: datetime | None = None) -> None:
     key = _scheduler_type()
     data[key] = dict(data.get(key, {}))
     section = data[key]
-    finish = datetime.now(datetime.UTC)
+    finish = datetime.now(timezone.utc)
     section["last_run_finish"] = finish.isoformat()
 
     # Duration of this run (seconds): prefer passed-in start time so we don't rely on file state
@@ -239,7 +239,7 @@ if __name__ == "__main__":
     argv = sys.argv[1:]
     if argv and argv[0] == "--drift-table":
         sched = argv[1] if len(argv) > 1 and argv[1] in _SCHEDULER_TYPES else None
-        print(format_drift_table(sched))  # noqa: T201
+        print(format_drift_table(sched))
     else:
         out = read_last_run()
-        print(json.dumps(out, indent=2))  # noqa: T201
+        print(json.dumps(out, indent=2))
