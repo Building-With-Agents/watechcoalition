@@ -8,7 +8,6 @@ import pytest
 
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types.raw_job_record import RawJobRecord
-from agents.common.types.region_config import RegionConfig
 from agents.ingestion.agent import IngestionAgent
 from agents.ingestion.events import ingest_batch_payload
 

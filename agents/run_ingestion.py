@@ -24,6 +24,12 @@ import os
 import sys
 from pathlib import Path
 
+import structlog
+
+from agents.common.event_envelope import EventEnvelope
+from agents.ingestion.agent import IngestionAgent
+from agents.ingestion.sources.jsearch_adapter import JSEARCH_BASE_URL
+
 # Repo root on path for "from agents.*"
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
@@ -32,15 +38,10 @@ if str(_REPO_ROOT) not in sys.path:
 # Load .env if available
 try:
     from dotenv import load_dotenv
+
     load_dotenv(_REPO_ROOT / ".env")
 except ImportError:
     pass
-
-import structlog
-
-from agents.common.event_envelope import EventEnvelope
-from agents.ingestion.agent import IngestionAgent
-from agents.ingestion.sources.jsearch_adapter import JSEARCH_BASE_URL
 
 # Output file for ingestion agent result (agents/ingestion_agent_output.json)
 _INGESTION_OUTPUT_FILE = Path(__file__).resolve().parent / "ingestion_agent_output.json"

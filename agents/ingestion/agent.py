@@ -21,8 +21,8 @@ import structlog
 
 from agents.common.base_agent import BaseAgent
 from agents.common.event_envelope import EventEnvelope
-from agents.common.types.region_config import RegionConfig
 from agents.common.types.raw_job_record import RawJobRecord
+from agents.common.types.region_config import RegionConfig
 from agents.ingestion.events import ingest_batch_payload, source_failure_payload
 from agents.ingestion.sources.jsearch_adapter import JSearchAdapter
 
