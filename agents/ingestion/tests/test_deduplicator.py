@@ -3,7 +3,7 @@ EXP-003: Deduplication experiment tests.
 
 Evaluates:
 - Pure exact hash: platform-level only, cannot detect cross-source duplicates
-- Hybrid: exact + logical (title+company+date_posted) for cross-source detection
+- Hybrid: exact + logical (title+company only) for cross-source detection
 - Database enforcement: simulated UNIQUE constraint rejects duplicates (INSERT ON CONFLICT DO NOTHING)
 """
 
@@ -36,19 +36,19 @@ def generate_pure_hash(job_record: dict) -> str:
 
 
 def generate_logical_hash(job_record: dict) -> str:
-    """Logical hash for cross-source detection: sha256(normalized_title + normalized_company + date_posted).
+    """Logical hash for cross-source detection: sha256(normalized_title + normalized_company).
 
-    Normalization: lowercase, strip whitespace. Used to detect same job across sources.
+    Uses only title and company (no date_posted) to avoid date granularity and scraping
+    inconsistencies; reposts or multi-source listings with different timestamps are
+    correctly identified as duplicates. Normalization: lowercase, strip whitespace.
     """
     title = job_record.get("title")
     company = job_record.get("company")
-    date_posted = job_record.get("date_posted")
     title = "" if title is None else str(title)
     company = "" if company is None else str(company)
-    date_posted = "" if date_posted is None else str(date_posted)
     normalized_title = title.lower().strip()
     normalized_company = company.lower().strip()
-    payload = f"{normalized_title}{normalized_company}{date_posted}"
+    payload = f"{normalized_title}{normalized_company}"
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -94,11 +94,15 @@ def test_generate_pure_hash_deterministic():
 
 
 def test_generate_logical_hash_normalization():
-    """Logical hash normalizes title/company (lowercase, strip) and ignores source/external_id."""
+    """Logical hash normalizes title/company (lowercase, strip), ignores source/external_id and date_posted."""
     job1 = {"source": "JSearch", "external_id": "a", "title": " Engineer ", "company": "ACME", "date_posted": "2026-01-01"}
     job2 = {"source": "costco.com", "external_id": "b", "title": "engineer", "company": "acme", "date_posted": "2026-01-01"}
     assert generate_logical_hash(job1) == generate_logical_hash(job2)
     assert generate_pure_hash(job1) != generate_pure_hash(job2)
+    # Same title and company but different dates must produce the same hybrid (logical) hash.
+    job3 = {"source": "JSearch", "external_id": "c", "title": "Engineer", "company": "Acme", "date_posted": "2 days ago"}
+    job4 = {"source": "scraper", "external_id": "d", "title": "engineer", "company": "acme", "date_posted": "2026-03-10T00:00:00Z"}
+    assert generate_logical_hash(job3) == generate_logical_hash(job4)
 
 
 def _load_ground_truth() -> list[dict]:
@@ -141,7 +145,7 @@ def test_hybrid_strategy():
             exact_seen.add(exact_hash)
             logical_seen.add(logical_hash)
     # Expected: 5 cross-source duplicates (Costco, SAIC, Allied Universal, TravelCenters, Rockforce).
-    # Actual count depends on dataset: injected records must match JSearch base on title+company+date_posted.
+    # Logical hash uses title+company only (no date_posted) so reposts / different timestamps still dedupe.
     assert duplicate_count >= 5, f"hybrid strategy should detect cross-source duplicates; got {duplicate_count}"
 
 
@@ -153,13 +157,11 @@ def test_database_enforcement_layer():
     for job in jobs:
         title = job.get("title")
         company = job.get("company")
-        date_posted = job.get("date_posted")
         title = "" if title is None else str(title).strip().lower()
         company = "" if company is None else str(company).strip().lower()
-        date_posted = "" if date_posted is None else str(date_posted).strip().lower()
-        payload = f"{title}{company}{date_posted}"
+        payload = f"{title}{company}"
         payload_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
         if not table_sim.insert_on_conflict_do_nothing(payload_hash):
             dedup_counter += 1
-    # 5 = injected cross-source duplicates; dataset may have additional same-logical-identity rows (e.g. within JSearch)
+    # 5 = injected cross-source duplicates; hash uses title+company only (no date_posted).
     assert dedup_counter >= 5, f"simulated DB enforcement should reject at least 5 duplicates; got {dedup_counter}"
