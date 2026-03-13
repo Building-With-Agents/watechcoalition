@@ -10,7 +10,7 @@ For a visual overview of the platform architecture (current and planned), see [d
 
 - Python >= 3.11 (for the agent pipeline)
 - npm
-- Docker (for local PostgreSQL)
+- Docker (for local PostgreSQL and Redis)
 
 ## Getting Started
 
@@ -33,6 +33,7 @@ cd watechcoalition
 - [Install Docker](docs/INSTALL_DOCKER.md)
 - [Branching Strategy](docs/branch-strategy.md)
 - [PostgreSQL Docker Setup](docs/DOCKER_POSTGRESQL_SETUP.md)
+- [Redis Setup](#redis-message-bus) — Redis Streams for inter-agent events
 - [Changing the DB schema](docs/prisma-workflow.md)
 - [API Routes](docs/API-routes.md)
 - [CSS Utilities & Styling Guide](docs/styling-guide.md)
@@ -84,6 +85,7 @@ python -m pytest agents/tests/ -v
 - **LangChain**: LLM adapter layer. [LangChain Documentation](https://python.langchain.com/)
 - **SQLAlchemy**: Python database access (PostgreSQL via psycopg2). [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
 - **Streamlit**: Read-only analytics dashboards. [Streamlit Documentation](https://docs.streamlit.io/)
+- **Redis Streams**: Inter-agent event bus (`XADD`/`XREADGROUP`/`XACK`). [Redis Streams Documentation](https://redis.io/docs/data-types/streams/)
 - **LangSmith**: Agent tracing and evaluation. [LangSmith Documentation](https://docs.smith.langchain.com/)
 
 ## License
