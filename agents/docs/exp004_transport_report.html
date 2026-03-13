@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EXP-004 Transport Comparison Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3a4f;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --chart1: #58a6ff;
+      --chart2: #3fb950;
+      --chart3: #bc8cff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .meta span { color: var(--muted); }
+    .meta strong { color: var(--text); font-family: 'JetBrains Mono', monospace; }
+    section {
+      margin-bottom: 2.5rem;
+    }
+    section h2 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 0 0 1rem;
+      color: var(--text);
+    }
+    .chart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      height: 320px;
+    }
+    .chart-wrap.wide { height: 360px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 0.6rem 0.9rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.75rem;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(88, 166, 255, 0.06); }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .badge.ok { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+    .badge.na { background: rgba(139, 148, 158, 0.2); color: var(--muted); }
+    .conclusion {
+      padding: 1.25rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+    }
+    .conclusion h2 { margin-top: 0; }
+    .conclusion p { margin: 0.5rem 0 0; color: var(--muted); font-size: 0.95rem; }
+    .conclusion p:first-of-type { margin-top: 0; color: var(--text); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>EXP-004 Transport Comparison</h1>
+    <p class="subtitle">Event bus candidate benchmark — publish throughput, latency, consumer replay, and producer-crash recovery.</p>
+
+    <div class="meta" id="meta"></div>
+
+    <section>
+      <h2>Throughput (events/sec)</h2>
+      <div class="chart-wrap wide">
+        <canvas id="chartThroughput"></canvas>
+      </div>
+      <p class="subtitle" style="margin-top: 0.5rem;">Publish: rate at which events are published. End-to-end: rate including handler execution and drain.</p>
+    </section>
+
+    <section>
+      <h2>Publish-to-handler latency (ms)</h2>
+      <div class="chart-wrap">
+        <canvas id="chartLatency"></canvas>
+      </div>
+      <p class="subtitle" style="margin-top: 0.5rem;">p50, p95, p99 — in-process is sync so latency is near zero; Redis/Kafka include serialization and drain.</p>
+    </section>
+
+    <section>
+      <h2>Correctness &amp; replay</h2>
+      <div class="chart-wrap">
+        <canvas id="chartReplay"></canvas>
+      </div>
+      <p class="subtitle" style="margin-top: 0.5rem;">Replay completeness % (after simulated crash). In-process has no replay (N/A).</p>
+    </section>
+
+    <section>
+      <h2>Producer crash at event <span id="producerCrashIndex"></span></h2>
+      <div class="chart-wrap">
+        <canvas id="chartProducerCrash"></canvas>
+      </div>
+      <p class="subtitle" style="margin-top: 0.5rem;">Loss is measured immediately after the producer stops publishing. Recovery is measured after resuming the remaining deterministic events.</p>
+    </section>
+
+    <section>
+      <h2>Full results</h2>
+      <div style="overflow-x: auto;">
+        <table id="tableResults"></table>
+      </div>
+    </section>
+
+    <section>
+      <div class="conclusion">
+        <h2>Conclusion</h2>
+        <p><strong>Phase 1:</strong> Use <strong>in-process</strong> event bus — highest throughput, lowest latency, no extra infrastructure. Matches architecture (in-process pub/sub for Phase 1).</p>
+        <p><strong>Phase 2:</strong> Re-run this report with live Redis or Kafka (e.g. <code>--redis-url</code> / <code>--kafka-bootstrap-servers</code>) when durability, replay, or multi-process consumption is required.</p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const data = {"labels": ["in_process (in_memory)", "redis_streams (fake_redis)", "kafka (fake_kafka)"], "throughput_publish": [128496.71686144664, 123768.50344390645, 111745.57773468671], "throughput_e2e": [128412.56379740825, 32025.005127995224, 31968.18526539548], "latency_p50": [0.005000001692678779, 12.968850001925603, 13.787300002150005], "latency_p95": [0.006105002466938454, 17.485344997840002, 18.226620001587435], "latency_p99": [0.014903004339430478, 17.997319004134624, 18.578084002874675], "replay_pct": [null, 100.0, 100.0], "producer_loss": [500, 500, 500], "producer_recovered": [500, 500, 500], "producer_final_loss": [0, 0, 0], "correctness": [true, true, true], "rows": [{"transport": "in_process", "backend": "in_memory", "throughput_publish_events_per_sec": 128496.71686144664, "throughput_e2e_events_per_sec": 128412.56379740825, "latency_p50_ms": 0.005000001692678779, "latency_p95_ms": 0.006105002466938454, "latency_p99_ms": 0.014903004339430478, "crash_replay_complete": null, "replay_completeness_pct": null, "producer_crash_published_before_crash": 500, "producer_crash_delivered_before_crash": 500, "producer_crash_loss_count": 500, "producer_resume_recovered_count": 500, "producer_resume_final_loss_count": 0, "producer_resume_complete": true, "published_events": 2000, "delivered_events": 2000, "handler_failures": 0, "queue_depth": null, "in_flight": null, "correctness_passed": true, "max_in_flight": null, "replay_count": null, "correlation_id_propagation_passed": true, "producer_crash_delivered": null, "producer_crash_events_lost": null, "events_lost_consumer_crash": null}, {"transport": "redis_streams", "backend": "fake_redis", "throughput_publish_events_per_sec": 123768.50344390645, "throughput_e2e_events_per_sec": 32025.005127995224, "latency_p50_ms": 12.968850001925603, "latency_p95_ms": 17.485344997840002, "latency_p99_ms": 17.997319004134624, "crash_replay_complete": true, "replay_completeness_pct": 100.0, "producer_crash_published_before_crash": 500, "producer_crash_delivered_before_crash": 500, "producer_crash_loss_count": 500, "producer_resume_recovered_count": 500, "producer_resume_final_loss_count": 0, "producer_resume_complete": true, "published_events": 2000, "delivered_events": 2000, "handler_failures": 0, "queue_depth": 1001, "in_flight": 0, "correctness_passed": true, "max_in_flight": 1, "replay_count": 501, "correlation_id_propagation_passed": true, "producer_crash_delivered": null, "producer_crash_events_lost": null, "events_lost_consumer_crash": 0}, {"transport": "kafka", "backend": "fake_kafka", "throughput_publish_events_per_sec": 111745.57773468671, "throughput_e2e_events_per_sec": 31968.18526539548, "latency_p50_ms": 13.787300002150005, "latency_p95_ms": 18.226620001587435, "latency_p99_ms": 18.578084002874675, "crash_replay_complete": true, "replay_completeness_pct": 100.0, "producer_crash_published_before_crash": 500, "producer_crash_delivered_before_crash": 500, "producer_crash_loss_count": 500, "producer_resume_recovered_count": 500, "producer_resume_final_loss_count": 0, "producer_resume_complete": true, "published_events": 2000, "delivered_events": 2000, "handler_failures": 0, "queue_depth": 1001, "in_flight": 0, "correctness_passed": true, "max_in_flight": 1, "replay_count": 501, "correlation_id_propagation_passed": true, "producer_crash_delivered": null, "producer_crash_events_lost": null, "events_lost_consumer_crash": 0}], "scenario": {"name": "ingest_batch_to_normalization_complete", "event_count": 1000, "seed": 42, "crash_at": 500, "replay_enabled": true}};
+
+    // Meta
+    const s = data.scenario;
+    document.getElementById('meta').innerHTML = [
+      '<span>Scenario</span> <strong>' + s.name + '</strong>',
+      '<span>Events</span> <strong>' + s.event_count + '</strong>',
+      '<span>Seed</span> <strong>' + s.seed + '</strong>',
+      '<span>Crash at</span> <strong>' + s.crash_at + '</strong>',
+      '<span>Replay</span> <strong>' + (s.replay_enabled ? 'enabled' : 'disabled') + '</strong>'
+    ].join('');
+    document.getElementById('producerCrashIndex').textContent = s.crash_at;
+
+    const fontFamily = "'JetBrains Mono', monospace";
+    const gridColor = 'rgba(45, 58, 79, 0.8)';
+    const labelColor = '#8b949e';
+
+    // Throughput (grouped bar)
+    new Chart(document.getElementById('chartThroughput'), {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [
+          { label: 'Publish throughput (events/s)', data: data.throughput_publish, backgroundColor: 'rgba(88, 166, 255, 0.7)', borderColor: '#58a6ff', borderWidth: 1 },
+          { label: 'End-to-end throughput (events/s)', data: data.throughput_e2e, backgroundColor: 'rgba(63, 185, 80, 0.7)', borderColor: '#3fb950', borderWidth: 1 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: labelColor } } },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: labelColor, font: { family: fontFamily, size: 11 } } },
+          y: { grid: { color: gridColor }, ticks: { color: labelColor, font: { family: fontFamily } } }
+        }
+      }
+    });
+
+    // Latency (grouped bar)
+    new Chart(document.getElementById('chartLatency'), {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [
+          { label: 'p50 (ms)', data: data.latency_p50, backgroundColor: 'rgba(88, 166, 255, 0.6)', borderColor: '#58a6ff', borderWidth: 1 },
+          { label: 'p95 (ms)', data: data.latency_p95, backgroundColor: 'rgba(63, 185, 80, 0.6)', borderColor: '#3fb950', borderWidth: 1 },
+          { label: 'p99 (ms)', data: data.latency_p99, backgroundColor: 'rgba(188, 140, 255, 0.6)', borderColor: '#bc8cff', borderWidth: 1 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: labelColor } } },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: labelColor, font: { family: fontFamily, size: 11 } } },
+          y: { grid: { color: gridColor }, ticks: { color: labelColor, font: { family: fontFamily } } }
+        }
+      }
+    });
+
+    // Replay completeness (%); correctness as secondary
+    const replayData = data.replay_pct.map(function (v) { return v != null ? v : 0; });
+    new Chart(document.getElementById('chartReplay'), {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [
+          { label: 'Replay completeness (%)', data: replayData, backgroundColor: 'rgba(188, 140, 255, 0.7)', borderColor: '#bc8cff', borderWidth: 1 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: { legend: { labels: { color: labelColor } } },
+        scales: {
+          x: { min: 0, max: 100, grid: { color: gridColor }, ticks: { color: labelColor, font: { family: fontFamily } } },
+          y: { grid: { color: gridColor }, ticks: { color: labelColor, font: { family: fontFamily, size: 11 } } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('chartProducerCrash'), {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [
+          { label: 'Lost after crash', data: data.producer_loss, backgroundColor: 'rgba(210, 153, 34, 0.7)', borderColor: '#d29922', borderWidth: 1 },
+          { label: 'Recovered after resume', data: data.producer_recovered, backgroundColor: 'rgba(63, 185, 80, 0.7)', borderColor: '#3fb950', borderWidth: 1 },
+          { label: 'Final loss after resume', data: data.producer_final_loss, backgroundColor: 'rgba(188, 140, 255, 0.7)', borderColor: '#bc8cff', borderWidth: 1 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: labelColor } } },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: labelColor, font: { family: fontFamily, size: 11 } } },
+          y: { grid: { color: gridColor }, ticks: { color: labelColor, font: { family: fontFamily } } }
+        }
+      }
+    });
+
+    // Table
+    const rows = data.rows;
+    if (rows.length) {
+      const keys = Object.keys(rows[0]);
+      let thead = '<thead><tr>' + keys.map(function (k) { return '<th>' + k + '</th>'; }).join('') + '</tr></thead>';
+      let tbody = '<tbody>';
+      rows.forEach(function (r) {
+        tbody += '<tr>';
+        keys.forEach(function (k) {
+          let v = r[k];
+          if (v === null || v === undefined) v = 'N/A';
+          else if (typeof v === 'number' && (v * 100) % 1 !== 0) v = v.toFixed(2);
+          else if (typeof v === 'boolean') v = v ? 'true' : 'false';
+          tbody += '<td class="mono">' + v + '</td>';
+        });
+        tbody += '</tr>';
+      });
+      tbody += '</tbody>';
+      document.getElementById('tableResults').innerHTML = thead + tbody;
+    }
+  </script>
+</body>
+</html>

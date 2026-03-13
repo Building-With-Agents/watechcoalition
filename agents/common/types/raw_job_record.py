@@ -6,7 +6,7 @@ Consumed by the deduplicator and stored in raw_ingested_jobs.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field
 
@@ -33,7 +33,7 @@ class RawJobRecord(BaseModel):
 
     # Dates
     date_posted: datetime | None = None
-    date_ingested: datetime = Field(default_factory=datetime.utcnow)
+    date_ingested: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     # Salary
     salary_raw: str | None = None
