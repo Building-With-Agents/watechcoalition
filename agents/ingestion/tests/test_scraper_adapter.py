@@ -4,7 +4,20 @@ from __future__ import annotations
 
 import asyncio
 
+from agents.common.types.region_config import RegionConfig
 from agents.ingestion.sources.scraper_adapter import ScraperAdapter
+
+_TEST_REGION = RegionConfig(
+    region_id="test-region",
+    display_name="Test",
+    query_location="Test City",
+    radius_miles=50,
+    states=["TX"],
+    countries=["US"],
+    sources=["crawl4ai"],
+    role_categories=["Software Engineering"],
+    keywords=["software engineer"],
+)
 
 
 class TestScraperAdapter:
@@ -14,25 +27,24 @@ class TestScraperAdapter:
         """When no SCRAPING_TARGETS set, loads from fixture file."""
         adapter = ScraperAdapter()
         adapter._targets = []
-        records = asyncio.run(adapter.fetch(limit=5))
+        records = asyncio.run(adapter.fetch(region=_TEST_REGION))
         assert len(records) > 0
-        assert len(records) <= 5
 
     def test_fixture_field_mapping(self) -> None:
-        """Fixture records are mapped to canonical field names."""
+        """Fixture records are mapped to RawJobRecord with canonical fields."""
         adapter = ScraperAdapter()
         adapter._targets = []
-        records = asyncio.run(adapter.fetch(limit=1))
-        assert len(records) == 1
+        records = asyncio.run(adapter.fetch(region=_TEST_REGION))
+        assert len(records) >= 1
         r = records[0]
-        assert "external_id" in r
-        assert r["source"] == "crawl4ai"
-        assert "title" in r
-        assert "company" in r
-        assert "raw_text" in r
+        assert r.external_id
+        assert r.source == "crawl4ai"
+        assert r.title
+        assert r.company
 
     def test_health_check_fixture_mode(self) -> None:
-        """Health check returns True in fixture fallback mode."""
+        """Health check returns reachable: True in fixture fallback mode."""
         adapter = ScraperAdapter()
         adapter._targets = []
-        assert asyncio.run(adapter.health_check()) is True
+        result = asyncio.run(adapter.health_check())
+        assert result["reachable"] is True

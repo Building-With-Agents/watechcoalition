@@ -24,8 +24,8 @@ class TestIngestionAgentIntegration:
     def test_health_check_with_db(self) -> None:
         agent = IngestionAgent()
         result = agent.health_check()
-        assert result["status"] in ("ok", "degraded")
-        assert result["metrics"]["db_connected"] is True
+        assert result["status"] in ("ok", "healthy", "degraded")
+        assert result["db_reachable"] is True
 
     def test_full_cycle_fixture_fallback(self) -> None:
         """Full ingestion cycle using fixture data."""
@@ -37,7 +37,7 @@ class TestIngestionAgentIntegration:
         )
         result = agent.process(trigger)
         assert result.payload["event_type"] == "IngestBatch"
-        assert result.payload["records_staged"] >= 0
+        assert result.payload["staged_count"] >= 0
         assert result.correlation_id == "integration-test-1"
 
     def test_ingest_batch_event_shape(self) -> None:
@@ -53,7 +53,6 @@ class TestIngestionAgentIntegration:
         assert "batch_id" in p
         assert "source" in p
         assert "total_fetched" in p
-        assert "duplicates_skipped" in p
-        assert "records_staged" in p
-        assert "dead_letter_count" in p
-        assert "staged_record_ids" in p
+        assert "staged_count" in p
+        assert "dedup_count" in p
+        assert "error_count" in p

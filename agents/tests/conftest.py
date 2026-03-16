@@ -8,9 +8,22 @@ All fixtures use correlation_id="test-1" for traceability.
 
 from __future__ import annotations
 
-import pytest  # noqa: F401
+from pathlib import Path
 
-from agents.common.event_envelope import EventEnvelope
+from dotenv import find_dotenv, load_dotenv
+
+# Load .env before test modules are collected so that @pytest.mark.skipif
+# decorators that check os.getenv("PYTHON_DATABASE_URL") see the real value.
+# Try repo root first, then walk upward from CWD (handles worktrees).
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_dotenv_path = _REPO_ROOT / ".env"
+if not _dotenv_path.exists():
+    _dotenv_path = find_dotenv(usecwd=True) or ""
+load_dotenv(_dotenv_path)
+
+import pytest  # noqa: F401, E402
+
+from agents.common.event_envelope import EventEnvelope  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Raw posting (input to pipeline runner / Ingestion Agent)

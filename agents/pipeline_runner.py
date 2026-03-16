@@ -257,13 +257,13 @@ def main() -> None:
     # Batch trigger with region_config (backward-compat: old keys also accepted)
     trigger_payload = {
         "region_config": {
-            "region_id": "wa-default",
-            "display_name": "Washington State",
-            "query_location": "Washington state",
+            "region_id": "borderplex-default",
+            "display_name": "Borderplex Region",
+            "query_location": "El Paso Texas",
             "radius_miles": 50,
-            "states": ["WA"],
+            "states": ["TX", "NM"],
             "countries": ["US"],
-            "sources": ["crawl4ai"],
+            "sources": ["jsearch", "crawl4ai"],
             "role_categories": ["Software Engineering"],
             "keywords": ["software engineer"],
         },
