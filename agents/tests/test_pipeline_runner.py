@@ -6,6 +6,7 @@ Covers agents/pipeline_runner.py (Week 2 walking skeleton). Does not recreate te
 
 from __future__ import annotations
 
+import os
 from unittest.mock import MagicMock
 
 import pytest
@@ -61,12 +62,16 @@ class TestAgentBaseCompatibility:
 class TestHealthCheckGating:
     """Phase 1 agent failure aborts; Phase 2 failure is warning only."""
 
+    @pytest.mark.skipif(
+        not os.getenv("JSEARCH_API_KEY"),
+        reason="Requires JSEARCH_API_KEY — IngestionAgent health_check verifies JSearch reachability",
+    )
     def test_run_health_checks_returns_true_when_all_phase1_healthy(self) -> None:
         """With default PIPELINE and fixtures present, all Phase 1 agents pass."""
         result = run_health_checks(PIPELINE)
         assert result is True, (
             "All Phase 1 agents must pass health_check(); "
-            "ensure agents/data/fixtures/fallback_scrape_sample.json exists"
+            "ensure agents/data/fixtures/fallback_scrape_sample.json exists and JSEARCH_API_KEY is set"
         )
 
     def test_run_health_checks_returns_false_when_phase1_agent_unhealthy(self) -> None:
