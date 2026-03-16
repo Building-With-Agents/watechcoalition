@@ -164,57 +164,59 @@ class SpanRecord(BaseModel):
     """Source text span for provenance tracking."""
     text: str
     field_source: str             # title | description | requirements | responsibilities
-    char_start: int
-    char_end: int
+    start_char: int
+    end_char: int
 
 class SkillRecord(BaseModel):
     skill_id: Optional[str]
     label: str
     type: str                     # Technical | Domain | Soft | Certification | Tool
     confidence: float
-    field_source: str             # title | description | requirements | responsibilities
     required_flag: Optional[bool]
     esco_uri: Optional[str]       # ESCO digital skills cluster URI
     is_genai_extension: bool = False  # True if from GenAI Extension Layer
-    source_span: Optional[SpanRecord]
+    source_span: SpanRecord       # required — links extraction back to source text
 
 class ToolRecord(BaseModel):
     tool_id: Optional[str]
-    label: str
+    tool_name: str
     category: str                 # language | framework | platform | database | devops | ai_tool | other
     confidence: float
-    field_source: str
-    source_span: Optional[SpanRecord]
+    source_span: SpanRecord
+    is_genai_tool: bool           # True if tool is AI/GenAI-specific
 
 class TaskRecord(BaseModel):
     task_id: Optional[str]
-    description: str
+    task_description: str
+    category: str                 # e.g., development | operations | management | analysis
+    frequency: str                # e.g., daily | weekly | ad-hoc
     complexity: Optional[str]     # routine | analytical | creative | strategic
     confidence: float
-    field_source: str
     source_span: Optional[SpanRecord]
 
 class ResponsibilityRecord(BaseModel):
     responsibility_id: Optional[str]
-    description: str
+    responsibility_description: str
     scope: Optional[str]          # individual | team | department | organization
+    level: str                    # e.g., owns | contributes | supports
     confidence: float
-    field_source: str
     source_span: Optional[SpanRecord]
 
 class ContextSignal(BaseModel):
     signal_type: str              # remote_policy | team_size | reporting_structure | growth_stage | ai_usage
     value: str
     confidence: float
-    field_source: str
+    source_span: Optional[SpanRecord]
 
 class ExtractionMetadata(BaseModel):
     extraction_version: str
-    extraction_model: str         # Model used (e.g., "claude-sonnet-4-5", "claude-haiku-4-5")
-    extraction_tokens_used: int
-    extraction_cost_usd: float
-    pass1_pattern_matches: int    # Hybrid Pass 1: pattern matching hits
-    pass2_llm_calls: int          # Hybrid Pass 2: LLM inference calls
+    model_used: str               # Model used (e.g., "gpt-4o", "gpt-4o-mini")
+    model_tier: str               # sonnet | haiku
+    tokens_used: int
+    cost_usd: float
+    extraction_duration_ms: int
+    pass1_tool_count: int         # Hybrid Pass 1: pattern matching hits
+    pass2_llm_dimensions: list[str]  # Hybrid Pass 2: dimensions processed by LLM
     extraction_warnings: List[str] = []
 ```
 
@@ -222,18 +224,18 @@ class ExtractionMetadata(BaseModel):
 
 10 predefined GenAI skills injected atop ESCO taxonomy when detected in job postings:
 
-| GenAI Skill | ESCO Mapping |
+| GenAI Skill | ESCO Parent Cluster |
 |---|---|
-| Prompt Engineering | Digital skills cluster — extension |
-| RAG (Retrieval-Augmented Generation) | Digital skills cluster — extension |
-| LLM Fine-tuning | Digital skills cluster — extension |
-| AI Governance | Digital skills cluster — extension |
-| Agentic Systems Design | Digital skills cluster — extension |
-| AI Output Validation | Digital skills cluster — extension |
-| AI Tool Integration | Digital skills cluster — extension |
-| Foundation Model Selection | Digital skills cluster — extension |
-| Vector Database Management | Digital skills cluster — extension |
-| AI Safety and Alignment | Digital skills cluster — extension |
+| Prompt Engineering | Digital content creation |
+| RAG (Retrieval-Augmented Generation) | Information retrieval |
+| LLM Fine-tuning | Machine learning |
+| AI Governance | Digital ethics |
+| Agentic Systems Design | Software architecture |
+| AI Output Validation | Quality assurance |
+| AI Tool Integration | Systems integration |
+| Foundation Model Selection | Technology evaluation |
+| Vector Database Management | Database management |
+| AI Safety and Alignment | Digital ethics |
 
 ### Enrichment Schemas
 
@@ -421,22 +423,23 @@ class JobRecord(BaseModel):
 | *Trajectory* | *Phase 2 — Analytics Agent computes from aggregated data* | — | `TrajectoryRecord` |
 
 **Model tier routing:**
-- Sonnet-class (e.g., claude-sonnet-4-5): Skills, Responsibilities — requires nuanced understanding
-- Haiku-class (e.g., claude-haiku-4-5): Tasks — simpler extraction, cost-optimized
+- Sonnet-class (e.g., gpt-4o): Skills, Responsibilities — requires nuanced understanding
+- Haiku-class (e.g., gpt-4o-mini): Tasks — simpler extraction, cost-optimized
 
 **Taxonomy resolution:**
-- Primary source: ESCO digital skills cluster
+- Primary source: ESCO digital skills cluster (maps to internal `skills` table)
 - Resolution order:
-  1. Exact name match → ESCO skills store
-  2. Normalized name match → ESCO skills store
-  3. Embedding cosine similarity ≥ 0.92 → ESCO skills store
-  4. O*NET occupation code match
-  5. GenAI Extension Layer match (10 predefined GenAI skills)
+  1. Exact match → GenAI Extension Layer (10 predefined GenAI skills)
+  2. Exact name match → ESCO digital skills cluster
+  3. Normalized name match → ESCO digital skills cluster
+  4. Embedding cosine similarity ≥ 0.92 → ESCO digital skills cluster
+  5. O*NET occupation code match
   6. Emit as `raw_skill` (null taxonomy ID) — flagged for review
 
 **GenAI Extension Layer:**
-- 10 predefined GenAI skills injected atop ESCO taxonomy (see GenAI Extension Layer table above)
+- 10 predefined GenAI skills checked first (step 1) before ESCO lookup
 - `is_genai_extension = True` on SkillRecord when matched
+- `esco_uri` maps to parent ESCO cluster (not null) — see GenAI Extension Layer table above
 
 **Cost tracking (required):**
 - Per-record: `extraction_tokens_used`, `extraction_cost_usd` stored in `extracted_intelligence` table
