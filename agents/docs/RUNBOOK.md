@@ -106,11 +106,44 @@ print('Migrations complete')
 
 **Verify tables exist:**
 
-```sql
--- Run via psql, pgAdmin, DBeaver, or Azure Data Studio
-SELECT table_name FROM information_schema.tables
-WHERE table_schema = 'dbo'
-ORDER BY table_name;
+**Option A — Local Docker** (no extra tools needed):
+
+```bash
+docker exec postgres-server psql -U postgres -d talent_finder -c "
+  SELECT table_name FROM information_schema.tables
+  WHERE table_schema = 'dbo'
+  ORDER BY table_name;
+"
+```
+
+**Option B — Azure** (requires admin credentials):
+
+```bash
+# Using psql with Azure connection string
+psql "postgresql://<ADMIN_USER>:<ADMIN_PASSWORD>@<SERVER_NAME>.postgres.database.azure.com:5432/talent_finder?sslmode=require" -c "
+  SELECT table_name FROM information_schema.tables
+  WHERE table_schema = 'dbo'
+  ORDER BY table_name;
+"
+```
+
+> **Note:** Azure CLI (`az postgres flexible-server execute`) is admin-only.
+> Non-admin devs should use **psql**, **pgAdmin**, **DBeaver**, or **Azure Data Studio**
+> with the connection string from `.env` (`PYTHON_DATABASE_URL`).
+
+**Option C — Python** (works against whichever DB `.env` points to):
+
+```bash
+python -c "
+from agents.common.data_store.database import get_engine
+from sqlalchemy import text
+with get_engine().connect() as conn:
+    rows = conn.execute(text(\"\"\"
+        SELECT table_name FROM information_schema.tables
+        WHERE table_schema = 'dbo' ORDER BY table_name
+    \"\"\")).fetchall()
+    for r in rows: print(r[0])
+"
 ```
 
 Expected tables:
@@ -131,18 +164,38 @@ python -m agents.ingestion.agent --source all --limit 5 --migrate
 
 **Verify in the database:**
 
-```sql
--- Check raw ingested jobs
-SELECT source, external_id, title, company, processing_status
-FROM dbo.raw_ingested_jobs
-ORDER BY created_at DESC
-LIMIT 10;
+**Docker:**
 
--- Check ingestion run tracking
-SELECT run_id, source, status, total_fetched, staged_count, dedup_count
-FROM dbo.job_ingestion_runs
-ORDER BY started_at DESC
-LIMIT 3;
+```bash
+docker exec postgres-server psql -U postgres -d talent_finder -c "
+  SELECT source, external_id, title, company, processing_status
+  FROM dbo.raw_ingested_jobs ORDER BY created_at DESC LIMIT 10;
+"
+docker exec postgres-server psql -U postgres -d talent_finder -c "
+  SELECT run_id, source, status, total_fetched, staged_count, dedup_count
+  FROM dbo.job_ingestion_runs ORDER BY started_at DESC LIMIT 3;
+"
+```
+
+**Azure (psql with connection string):**
+
+```bash
+psql "postgresql://<ADMIN_USER>:<ADMIN_PASSWORD>@<SERVER_NAME>.postgres.database.azure.com:5432/talent_finder?sslmode=require" -c "
+  SELECT source, external_id, title, company, processing_status
+  FROM dbo.raw_ingested_jobs ORDER BY created_at DESC LIMIT 10;
+"
+```
+
+**Python (works against whichever DB `.env` points to):**
+
+```bash
+python -c "
+from agents.common.data_store.database import get_engine
+from sqlalchemy import text
+with get_engine().connect() as conn:
+    rows = conn.execute(text('SELECT source, external_id, title, company, processing_status FROM dbo.raw_ingested_jobs ORDER BY created_at DESC LIMIT 10')).fetchall()
+    for r in rows: print(r)
+"
 ```
 
 **Expected:** `status = 'completed'`, `staged_count > 0`, `processing_status = 'pending'` on raw rows.
@@ -158,6 +211,12 @@ python agents/pipeline_runner.py
 ```
 
 **Verify normalization:**
+
+> **How to run these queries:** Use the method matching your environment:
+> - **Docker:** `docker exec postgres-server psql -U postgres -d talent_finder -c "<query>"`
+> - **Azure:** `psql "<PYTHON_DATABASE_URL from .env>" -c "<query>"`
+> - **Python:** See the Python snippet in Section 5 above.
+> - **GUI tools:** pgAdmin, DBeaver, or Azure Data Studio with your connection string.
 
 ```sql
 -- Check normalized jobs
@@ -289,6 +348,9 @@ psql "host=pg-jobintel-cfa-dev.postgres.database.azure.com port=5432 dbname=tale
 
 ### Useful queries
 
+> Run these via Docker (`docker exec postgres-server psql -U postgres -d talent_finder -c "..."`),
+> Azure (`psql` with connection string), or a GUI tool. See Section 5 for details.
+
 ```sql
 -- Row counts for all agent tables
 SELECT 'raw_ingested_jobs' AS tbl, COUNT(*) FROM dbo.raw_ingested_jobs
@@ -342,6 +404,8 @@ docker compose down
 ```
 
 ### Truncate agent tables (keep schema)
+
+> Run via Docker psql or Azure psql — see Section 5 for connection details.
 
 ```sql
 TRUNCATE dbo.normalization_quarantine CASCADE;
