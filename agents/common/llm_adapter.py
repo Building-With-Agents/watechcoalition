@@ -18,6 +18,8 @@ from __future__ import annotations
 import hashlib
 import os
 import time
+import uuid
+from contextlib import nullcontext
 from typing import Any
 
 import structlog
@@ -25,11 +27,15 @@ from anthropic import Anthropic, APIStatusError, APITimeoutError
 
 from agents.common.data_store.database import session_scope
 from agents.common.data_store.models import LLMAuditLog
+from agents.common.observability.langfuse_tracer import LangfuseTracer
 
 log = structlog.get_logger()
 
 # Optional bus for emitting SkillsExtractionAlert; set via register_alert_bus()
 _alert_bus: Any = None
+
+# Optional Langfuse tracer; set via register_tracer() so every LLM call can be traced
+_tracer: LangfuseTracer | None = None
 
 # ---------------------------------------------------------------------------
 # Pricing (per token) — configurable via env vars
@@ -146,11 +152,15 @@ def complete(
     model: str | None = None,
     system: str | None = None,
     max_tokens: int = 1000,
+    correlation_id: str | None = None,
 ) -> dict[str, Any]:
     """Make an LLM call, log it via log_extraction_event(), and return the result.
 
     Retries once on timeout; on second timeout or other API error returns
     via handle_extraction_failure() with extraction_failed=True.
+
+    If a tracer is registered via register_tracer(), the call is wrapped in a
+    Langfuse span; correlation_id is passed through when provided, else a new uuid.
 
     Returns a dict with:
         - content: str
@@ -166,6 +176,14 @@ def complete(
     model_tier = MODEL_TIER_MAP.get(model, "sonnet")
     client = Anthropic()
 
+    correlation_id = correlation_id or str(uuid.uuid4())
+    span_metadata = {"agent_name": agent_name, "model": model, "model_tier": model_tier}
+    span_ctx = (
+        _tracer.start_span("llm_call", correlation_id=correlation_id, metadata=span_metadata)
+        if _tracer
+        else nullcontext()
+    )
+
     messages = [{"role": "user", "content": prompt}]
     kwargs: dict[str, Any] = {"model": model, "max_tokens": max_tokens, "messages": messages}
     if system:
@@ -173,117 +191,142 @@ def complete(
 
     backoff_cycles = 0
 
-    # --- Retry loop for rate limits ---
-    while True:
-        # --- Single attempt with one timeout retry ---
-        for attempt in range(2):
-            start = time.monotonic()
-            try:
-                response = client.messages.create(**kwargs)
-                latency_ms = int((time.monotonic() - start) * 1000)
+    with span_ctx:
+        # --- Retry loop for rate limits ---
+        while True:
+            # --- Single attempt with one timeout retry ---
+            for attempt in range(2):
+                start = time.monotonic()
+                try:
+                    response = client.messages.create(**kwargs)
+                    latency_ms = int((time.monotonic() - start) * 1000)
 
-                input_tokens = response.usage.input_tokens
-                output_tokens = response.usage.output_tokens
-                cost_usd = compute_extraction_cost(input_tokens, output_tokens, model_tier)
-                content = response.content[0].text
+                    input_tokens = response.usage.input_tokens
+                    output_tokens = response.usage.output_tokens
+                    cost_usd = compute_extraction_cost(input_tokens, output_tokens, model_tier)
+                    content = response.content[0].text
 
-                log_extraction_event(
-                    agent_name=agent_name,
-                    prompt=prompt,
-                    model=model,
-                    provider=provider,
-                    latency_ms=latency_ms,
-                    input_tokens=input_tokens,
-                    output_tokens=output_tokens,
-                    cost_usd=cost_usd,
-                    success=True,
-                )
+                    log_extraction_event(
+                        agent_name=agent_name,
+                        prompt=prompt,
+                        model=model,
+                        provider=provider,
+                        latency_ms=latency_ms,
+                        input_tokens=input_tokens,
+                        output_tokens=output_tokens,
+                        cost_usd=cost_usd,
+                        success=True,
+                    )
 
-                log.info(
-                    "llm_call_success",
-                    agent=agent_name,
-                    model=model,
-                    input_tokens=input_tokens,
-                    output_tokens=output_tokens,
-                    cost_usd=round(cost_usd, 6),
-                    latency_ms=latency_ms,
-                )
+                    log.info(
+                        "llm_call_success",
+                        agent=agent_name,
+                        model=model,
+                        input_tokens=input_tokens,
+                        output_tokens=output_tokens,
+                        cost_usd=round(cost_usd, 6),
+                        latency_ms=latency_ms,
+                    )
 
-                return {
-                    "content": content,
-                    "input_tokens": input_tokens,
-                    "output_tokens": output_tokens,
-                    "cost_usd": cost_usd,
-                    "model_tier": model_tier,
-                    "success": True,
-                    "extraction_failed": False,
-                }
+                    if _tracer:
+                        try:
+                            _tracer.record_latency("llm_call", seconds=latency_ms / 1000.0)
+                            _tracer.log_event(
+                                "llm_success",
+                                {
+                                    "input_tokens": input_tokens,
+                                    "output_tokens": output_tokens,
+                                    "cost_usd": round(cost_usd, 6),
+                                },
+                            )
+                        except Exception:
+                            pass
 
-            except APITimeoutError as exc:
-                latency_ms = int((time.monotonic() - start) * 1000)
-                log.warning("llm_timeout", agent=agent_name, attempt=attempt + 1)
-                if attempt == 0:
-                    continue  # retry once
-                # Both attempts timed out — log and return extraction_failed
-                log_extraction_event(
-                    agent_name=agent_name,
-                    prompt=prompt,
-                    model=model,
-                    provider=provider,
-                    latency_ms=latency_ms,
-                    input_tokens=0,
-                    output_tokens=0,
-                    cost_usd=0.0,
-                    success=False,
-                    error_reason=f"timeout: {exc}",
-                )
-                return handle_extraction_failure(
-                    agent_name=agent_name,
-                    model_tier=model_tier,
-                    error_reason=f"timeout: {exc}",
-                    latency_ms=latency_ms,
-                )
+                    return {
+                        "content": content,
+                        "input_tokens": input_tokens,
+                        "output_tokens": output_tokens,
+                        "cost_usd": cost_usd,
+                        "model_tier": model_tier,
+                        "success": True,
+                        "extraction_failed": False,
+                    }
 
-            except APIStatusError as exc:
-                latency_ms = int((time.monotonic() - start) * 1000)
-                if exc.status_code == 429:
-                    # Rate limit — break out of attempt loop, handle below
-                    break
-                # Any other API error — log and return extraction_failed
-                log_extraction_event(
-                    agent_name=agent_name,
-                    prompt=prompt,
-                    model=model,
-                    provider=provider,
-                    latency_ms=latency_ms,
-                    input_tokens=0,
-                    output_tokens=0,
-                    cost_usd=0.0,
-                    success=False,
-                    error_reason=f"{exc.status_code}: {exc.message}",
-                )
-                return handle_extraction_failure(
-                    agent_name=agent_name,
-                    model_tier=model_tier,
-                    error_reason=f"{exc.status_code}: {exc.message}",
-                    latency_ms=latency_ms,
-                )
+                except APITimeoutError as exc:
+                    latency_ms = int((time.monotonic() - start) * 1000)
+                    log.warning("llm_timeout", agent=agent_name, attempt=attempt + 1)
+                    if attempt == 0:
+                        continue  # retry once
+                    # Both attempts timed out — log and return extraction_failed
+                    log_extraction_event(
+                        agent_name=agent_name,
+                        prompt=prompt,
+                        model=model,
+                        provider=provider,
+                        latency_ms=latency_ms,
+                        input_tokens=0,
+                        output_tokens=0,
+                        cost_usd=0.0,
+                        success=False,
+                        error_reason=f"timeout: {exc}",
+                    )
+                    if _tracer:
+                        try:
+                            _tracer.record_error(exc, context={"agent_name": agent_name, "model": model})
+                        except Exception:
+                            pass
+                    return handle_extraction_failure(
+                        agent_name=agent_name,
+                        model_tier=model_tier,
+                        error_reason=f"timeout: {exc}",
+                        latency_ms=latency_ms,
+                    )
+
+                except APIStatusError as exc:
+                    latency_ms = int((time.monotonic() - start) * 1000)
+                    if exc.status_code == 429:
+                        # Rate limit — break out of attempt loop, handle below
+                        break
+                    # Any other API error — log and return extraction_failed
+                    log_extraction_event(
+                        agent_name=agent_name,
+                        prompt=prompt,
+                        model=model,
+                        provider=provider,
+                        latency_ms=latency_ms,
+                        input_tokens=0,
+                        output_tokens=0,
+                        cost_usd=0.0,
+                        success=False,
+                        error_reason=f"{exc.status_code}: {exc.message}",
+                    )
+                    if _tracer:
+                        try:
+                            _tracer.record_error(exc, context={"agent_name": agent_name, "model": model})
+                        except Exception:
+                            pass
+                    return handle_extraction_failure(
+                        agent_name=agent_name,
+                        model_tier=model_tier,
+                        error_reason=f"{exc.status_code}: {exc.message}",
+                        latency_ms=latency_ms,
+                    )
+                else:
+                    break  # success — exit attempt loop
+
             else:
-                break  # success — exit attempt loop
+                # Only reached if attempt loop ended without a 429 break
+                continue
 
-        else:
-            # Only reached if attempt loop ended without a 429 break
-            continue
+            # --- Rate limit back-off ---
+            backoff_cycles += 1
+            wait = _BACKOFF_SEQUENCE[min(backoff_cycles - 1, len(_BACKOFF_SEQUENCE) - 1)]
+            log.warning("llm_rate_limit_backoff", agent=agent_name, cycle=backoff_cycles, wait_s=wait)
 
-        # --- Rate limit back-off ---
-        backoff_cycles += 1
-        wait = _BACKOFF_SEQUENCE[min(backoff_cycles - 1, len(_BACKOFF_SEQUENCE) - 1)]
-        log.warning("llm_rate_limit_backoff", agent=agent_name, cycle=backoff_cycles, wait_s=wait)
+            if backoff_cycles >= _ALERT_AFTER_CYCLES:
+                _emit_skills_extraction_alert(agent_name, backoff_cycles)
 
-        if backoff_cycles >= _ALERT_AFTER_CYCLES:
-            _emit_skills_extraction_alert(agent_name, backoff_cycles)
-
-        time.sleep(wait)
+            time.sleep(wait)
 
 
 # ---------------------------------------------------------------------------
@@ -299,6 +342,16 @@ def register_alert_bus(bus: Any) -> None:
     """
     global _alert_bus
     _alert_bus = bus
+
+
+def register_tracer(tracer: LangfuseTracer | None) -> None:
+    """Register a Langfuse tracer so every LLM call is automatically traced.
+
+    Call once from the pipeline or orchestration layer. If not set, no
+    tracing is performed; tracing is optional and must never break the pipeline.
+    """
+    global _tracer
+    _tracer = tracer
 
 
 def _emit_skills_extraction_alert(agent_name: str, backoff_cycles: int) -> None:
