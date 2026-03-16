@@ -325,7 +325,7 @@ for Agent in [IngestionAgent, NormalizationAgent]:
 ```
 
 **Expected keys in each response:**
-- `status` — `"healthy"` or `"degraded"`
+- `status` — `"ok"`, `"degraded"`, or `"down"`
 - `agent` — agent ID string
 - `last_run` — `null` (no runs tracked yet)
 - `metrics` — `{}`
