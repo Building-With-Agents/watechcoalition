@@ -202,3 +202,41 @@ class NormalizationQuarantine(Base):
     quarantined_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+
+
+# ---------------------------------------------------------------------------
+# LLM Audit Log
+# ---------------------------------------------------------------------------
+
+
+class LLMAuditLog(Base):
+    """Centralized audit log for every LLM call across all agents.
+
+    Columns: id (PK; checklist: log_id), agent_name, prompt_hash, model, provider,
+    latency_ms, input_tokens, output_tokens, token_count, cost_usd, success,
+    error_reason, created_at.
+    """
+
+    __tablename__ = "llm_audit_log"
+    __table_args__ = (
+        Index("ix_llm_audit_log_agent_name", "agent_name"),
+        Index("ix_llm_audit_log_created_at", "created_at"),
+        Index("ix_llm_audit_log_success", "success"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    agent_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    prompt_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    model: Mapped[str] = mapped_column(String(100), nullable=False)
+    provider: Mapped[str] = mapped_column(String(50), nullable=False)
+    latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    input_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    output_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    token_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    success: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    error_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
