@@ -349,7 +349,9 @@ class NormalizationAgent(AgentBase):
         return "normalization-agent"
 
     def health_check(self) -> dict:
-        """Check DB connectivity."""
+        """Check DB connectivity and mapper availability."""
+        from agents.normalization.mappers import MAPPER_REGISTRY
+
         db_ok = check_db_connection()
         return {
             "status": "healthy" if db_ok else "degraded",
@@ -357,6 +359,7 @@ class NormalizationAgent(AgentBase):
             "last_run": None,
             "metrics": {},
             "db_reachable": db_ok,
+            "mappers_registered": list(MAPPER_REGISTRY.keys()),
         }
 
     def process(self, event: EventEnvelope) -> EventEnvelope:

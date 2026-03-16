@@ -84,8 +84,9 @@ class RawIngestedJob(Base):
     # Processing state
     processing_status: Mapped[str] = mapped_column(String(50), default="pending")
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
-    ingestion_timestamp: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    date_ingested: Mapped[datetime] = mapped_column(
+        "ingestion_timestamp",
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
