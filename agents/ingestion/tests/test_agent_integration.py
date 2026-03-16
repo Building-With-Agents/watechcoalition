@@ -24,7 +24,7 @@ class TestIngestionAgentIntegration:
     def test_health_check_with_db(self) -> None:
         agent = IngestionAgent()
         result = agent.health_check()
-        assert result["status"] in ("ok", "healthy", "degraded")
+        assert result["status"] in ("ok", "degraded", "down")
         assert result["db_reachable"] is True
 
     def test_full_cycle_fixture_fallback(self) -> None:

@@ -123,7 +123,7 @@ def run_health_checks(pipeline: list[tuple[Any, bool]]) -> bool:
         result = agent.health_check()
         status = result.get("status", "down")
 
-        if status in ("ok", "healthy", "degraded"):
+        if status in ("ok", "degraded"):
             log.info(
                 "health_check_passed",
                 agent_id=agent.agent_id,

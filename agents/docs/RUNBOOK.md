@@ -278,7 +278,14 @@ python -m pytest agents/normalization/tests/ -v --tb=short
 python -m pytest agents/tests/test_pipeline_runner.py -v --tb=short
 ```
 
-**Expected:** 83+ passed, ~11 skipped (DB-dependent tests skip when `PYTHON_DATABASE_URL` is unset).
+**Expected:** 94 passed, 0 skipped.
+
+| Suite | Expected |
+|-------|----------|
+| Full run (`agents/tests/`) | 94 passed |
+| Ingestion (`agents/ingestion/tests/`) | 38 passed |
+| Normalization (`agents/normalization/tests/`) | 38 passed |
+| Pipeline runner (`test_pipeline_runner.py`) | 7 passed |
 
 ### Ruff lint
 
@@ -318,7 +325,7 @@ for Agent in [IngestionAgent, NormalizationAgent]:
 ```
 
 **Expected keys in each response:**
-- `status` — `"healthy"` or `"degraded"`
+- `status` — `"ok"`, `"degraded"`, or `"down"`
 - `agent` — agent ID string
 - `last_run` — `null` (no runs tracked yet)
 - `metrics` — `{}`
