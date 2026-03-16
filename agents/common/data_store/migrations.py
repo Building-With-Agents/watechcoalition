@@ -37,6 +37,10 @@ def run_migrations(engine: Engine) -> None:
     """Create agent tables and add Phase 1 columns. Safe to run multiple times."""
     log.info("migrations_start")
 
+    # 0. Ensure the dbo schema exists (required by ORM models)
+    with engine.begin() as conn:
+        conn.execute(text("CREATE SCHEMA IF NOT EXISTS dbo"))
+
     # 1. Create agent-managed tables via SQLAlchemy metadata
     Base.metadata.create_all(engine)
     log.info("migrations_tables_created")
