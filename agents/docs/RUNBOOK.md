@@ -278,18 +278,14 @@ python -m pytest agents/normalization/tests/ -v --tb=short
 python -m pytest agents/tests/test_pipeline_runner.py -v --tb=short
 ```
 
-**Expected (full run):** 94 passed, 0 skipped.
+**Expected:** 94 passed, 0 skipped.
 
 | Suite | Expected |
 |-------|----------|
 | Full run (`agents/tests/`) | 94 passed |
 | Ingestion (`agents/ingestion/tests/`) | 38 passed |
-| Normalization (`agents/normalization/tests/`) | 35 passed, 3 skipped |
+| Normalization (`agents/normalization/tests/`) | 38 passed |
 | Pipeline runner (`test_pipeline_runner.py`) | 7 passed |
-
-> **Note:** The 3 normalization skips are DB integration tests that skip when run per-module
-> (the root conftest that loads `.env` is only picked up by the full run).
-> This is expected behavior.
 
 ### Ruff lint
 
