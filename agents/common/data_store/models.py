@@ -264,7 +264,7 @@ class ExtractedIntelligence(Base):
 class LLMAuditLog(Base):
     """Centralized audit log for every LLM call across all agents.
 
-    Columns: id (PK), agent_name, prompt_hash, model, provider,
+    Columns: id (PK; checklist: log_id), agent_name, prompt_hash, model, provider,
     latency_ms, input_tokens, output_tokens, token_count, cost_usd, success,
     error_reason, created_at.
     """
