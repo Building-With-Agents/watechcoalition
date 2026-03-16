@@ -19,8 +19,10 @@ import {
   TimeUntilCompletion,
 } from "@/app/lib/admin/careerPrep";
 
-interface JsEducationPageBlankHighestLevelDTO
-  extends Omit<JsEducationPageDTO, "highestLevelOfStudy"> {
+interface JsEducationPageBlankHighestLevelDTO extends Omit<
+  JsEducationPageDTO,
+  "highestLevelOfStudy"
+> {
   highestLevelOfStudy: HighestCompletedEducationLevel | "";
 }
 
