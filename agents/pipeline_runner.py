@@ -112,9 +112,9 @@ PIPELINE: list[tuple[Any, bool]] = [
     (SkillsExtractionAgent(),   False),
     (EnrichmentAgent(),         False),
     (AnalyticsAgent(),          False),
-    (VisualizationAgent("visualization-agent"),      False),
-    (OrchestrationAgent("orchestration-agent"),      False),
-    (DemandAnalysisAgent("demand-analysis-agent"),     True),   # Phase 2 — expected to return None
+    (VisualizationAgent(),      False),
+    (OrchestrationAgent(),      False),
+    (DemandAnalysisAgent(),     True),   # Phase 2 — expected to return None
 ]
 
 
