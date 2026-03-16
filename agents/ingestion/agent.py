@@ -335,11 +335,11 @@ class IngestionAgent(AgentBase):
         fixture_ok = (Path(__file__).parent.parent / "data" / "fixtures" / "fallback_scrape_sample.json").exists()
 
         if db_ok and fixture_ok:
-            status = "healthy"
+            status = "ok"
         elif db_ok or fixture_ok:
             status = "degraded"
         else:
-            status = "unhealthy"
+            status = "down"
 
         return {
             "status": status,
@@ -435,6 +435,9 @@ def _quarantine_to_file(run_id: str, record: dict, error: str) -> None:
 def _cli() -> None:
     """CLI for running the Ingestion Agent standalone."""
     import argparse
+
+    from dotenv import load_dotenv
+    load_dotenv()
 
     parser = argparse.ArgumentParser(description="Run the Ingestion Agent")
     parser.add_argument("--source", choices=["jsearch", "crawl4ai", "all"], default="all")

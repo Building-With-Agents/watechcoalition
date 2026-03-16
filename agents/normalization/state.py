@@ -19,3 +19,4 @@ class NormalizationState(TypedDict, total=False):
     status: str
     errors: list[str]
     normalization_complete_event: dict
+    _pending_records: list[dict]
