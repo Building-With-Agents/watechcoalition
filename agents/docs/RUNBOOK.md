@@ -278,9 +278,18 @@ python -m pytest agents/normalization/tests/ -v --tb=short
 python -m pytest agents/tests/test_pipeline_runner.py -v --tb=short
 ```
 
-**Expected:** 94 passed, 0 skipped (with `PYTHON_DATABASE_URL` set and DB reachable).
+**Expected (full run):** 94 passed, 0 skipped.
 
-> Without DB: ~83 passed, ~11 skipped — DB-dependent integration tests skip automatically.
+| Suite | Expected |
+|-------|----------|
+| Full run (`agents/tests/`) | 94 passed |
+| Ingestion (`agents/ingestion/tests/`) | 38 passed |
+| Normalization (`agents/normalization/tests/`) | 35 passed, 3 skipped |
+| Pipeline runner (`test_pipeline_runner.py`) | 7 passed |
+
+> **Note:** The 3 normalization skips are DB integration tests that skip when run per-module
+> (the root conftest that loads `.env` is only picked up by the full run).
+> This is expected behavior.
 
 ### Ruff lint
 
