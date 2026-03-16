@@ -1,3 +1,4 @@
+# ruff: noqa: T201
 """Quick database verification utility.
 
 Usage (from repo root, venv activated):
@@ -23,8 +24,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from agents.common.data_store.database import get_engine  # noqa: E402
 from sqlalchemy import text  # noqa: E402
+
+from agents.common.data_store.database import get_engine  # noqa: E402
 
 
 def _run_query(sql: str) -> None:
