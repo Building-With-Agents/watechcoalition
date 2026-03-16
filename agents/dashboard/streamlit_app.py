@@ -20,9 +20,15 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
+
+# Ensure repo root is on sys.path so `agents.*` imports work regardless of cwd
+_REPO_ROOT = str(Path(__file__).resolve().parent.parent.parent)
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
 
 import pandas as pd
 import streamlit as st
@@ -32,7 +38,8 @@ from dotenv import load_dotenv
 # Environment & paths
 # ---------------------------------------------------------------------------
 
-load_dotenv()
+# Explicitly point at repo-root .env so it loads regardless of cwd
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
 _HERE = Path(__file__).parent.parent   # agents/
 _RUN_LOG_PATH = _HERE / "data" / "output" / "pipeline_run.json"
@@ -54,15 +61,15 @@ _AGENT_ORDER_INDEX = {a: i for i, a in enumerate(_AGENT_ORDER)}
 # Database helpers
 # ---------------------------------------------------------------------------
 
-def _db_available() -> bool:
-    """Check if PostgreSQL is reachable."""
+def _db_status() -> str:
+    """Return database status: 'connected', 'unreachable', or 'not_configured'."""
     if not os.getenv("PYTHON_DATABASE_URL"):
-        return False
+        return "not_configured"
     try:
         from agents.common.data_store import check_db_connection
-        return check_db_connection()
+        return "connected" if check_db_connection() else "unreachable"
     except Exception:
-        return False
+        return "unreachable"
 
 
 @st.cache_data(ttl=60)
@@ -806,9 +813,16 @@ def main() -> None:
     st.sidebar.title("JIE Dashboard")
 
     # Detect data source — shown directly under title
-    use_db = _db_available()
+    db_status = _db_status()
+    use_db = db_status == "connected"
     if use_db:
         st.sidebar.success("Connected to PostgreSQL")
+    elif db_status == "unreachable":
+        st.sidebar.error("PostgreSQL unreachable — using fixture data (JSON)")
+        st.sidebar.caption(
+            "`PYTHON_DATABASE_URL` is set but the database could not be reached. "
+            "Check that the server is running and credentials are correct."
+        )
     else:
         st.sidebar.warning("Using fixture data (JSON)")
         st.sidebar.caption(
