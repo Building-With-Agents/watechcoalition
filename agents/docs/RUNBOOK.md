@@ -276,16 +276,20 @@ python -m pytest agents/normalization/tests/ -v --tb=short
 
 # Pipeline runner tests
 python -m pytest agents/tests/test_pipeline_runner.py -v --tb=short
+
+# Streamlit dashboard tests
+python -m pytest agents/tests/test_streamlit_app.py -v --tb=short
 ```
 
-**Expected:** 94 passed, 0 skipped.
+**Expected:** 114 passed, 0 skipped.
 
 | Suite | Expected |
 |-------|----------|
-| Full run (`agents/tests/`) | 94 passed |
+| Full run (`agents/tests/`) | 114 passed |
 | Ingestion (`agents/ingestion/tests/`) | 38 passed |
 | Normalization (`agents/normalization/tests/`) | 38 passed |
 | Pipeline runner (`test_pipeline_runner.py`) | 7 passed |
+| Streamlit dashboard (`test_streamlit_app.py`) | 20 passed |
 
 ### Ruff lint
 
@@ -303,9 +307,16 @@ python -m ruff check agents/
 streamlit run agents/dashboard/streamlit_app.py
 ```
 
-Opens in browser at `http://localhost:8501`. Check pages:
-- Ingestion Overview
-- Pipeline Journey
+Opens in browser at `http://localhost:8501`.
+
+**Data source:** The dashboard auto-detects whether PostgreSQL is available via `PYTHON_DATABASE_URL`.
+- **Connected:** Sidebar shows "Connected to PostgreSQL" — pages query live DB tables.
+- **Fallback:** Sidebar shows "Using fixture data (JSON)" — pages read from `agents/data/output/pipeline_run.json`.
+
+**Check pages:**
+- Pipeline Run Summary — ingestion runs, record counts, stage completion
+- Record Journey — trace a single job through ingestion → normalization
+- Batch Insights — aggregate charts: locations, sources, employment types, salary distributions
 
 ---
 
