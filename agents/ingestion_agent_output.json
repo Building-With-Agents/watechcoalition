@@ -1,0 +1,1163 @@
+{
+  "event_id": "6e5f0f21-fe27-4aac-b197-83b15b7d6c2d",
+  "correlation_id": "run-ingestion-cli",
+  "agent_id": "ingestion-agent",
+  "timestamp": "2026-03-12T19:19:46.966177",
+  "schema_version": "1.0",
+  "payload": {
+    "event_type": "IngestBatch",
+    "batch_id": "batch-run-inge",
+    "source": "jsearch",
+    "region_id": "el-paso",
+    "total_fetched": 10,
+    "staged_count": 10,
+    "dedup_count": 0,
+    "error_count": 0,
+    "records": [
+      {
+        "external_id": "QGV7ErBlahFTbBNMAAAAAA==",
+        "source": "jsearch",
+        "region_id": "el-paso",
+        "raw_payload_hash": "0af50f933b94506e45981f97e50bed9ffbbd32aea043fe898169c6220cfb1df6",
+        "title": "Senior Databricks Engineer - Remote - USA",
+        "company": "FullStack Labs",
+        "description": "About FullStack\n\nFullStack is one of the fastest-growing software consultancy companies in the Americas. We deliver transformational digital solutions to top global companies and Silicon Valley startups. As an employee-first company, we focus on hiring the most talented software designers and developers by creating a positive, respectful, and supportive work environment where they can achieve their greatest potential.\n\nWe're most proud of:\n\u2022 Offering life-changing career opportunities to talented software professionals across the Americas.\n\u2022 Building highly-skilled software development teams for hundreds of the world's greatest companies.\n\u2022 Having delivered hundreds of successful custom software solutions, which have positively impacted the lives and careers of millions of users.\n\u2022 Our 4.2-star rating on GlassDoor.\n\u2022 Our client Net Promoter Score of 68, twice the industry average.\n\nThe Position\n\nWe're looking to hire a Senior Databricks Engineer to join our team. You'll work with our incredible clients in one of two ways:\n\u2022 Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily.\n\u2022 Design & Build: You will work on a FullStack product team to build and deliver a product to our clients.\n\nWhat We Are Looking For\n\u2022 5+ years of professional data engineering experience.\n\u2022 Advanced English is required.\n\u2022 Successful completion of a four-year college degree is required.\n\u2022 Strong experience designing and building production-grade data pipelines on Databricks.\n\u2022 Deep hands-on expertise with Apache Spark (Spark SQL and PySpark).\n\u2022 Advanced knowledge of Delta Lake, including ACID transactions and data versioning.\n\u2022 Expert-level SQL and Python, with a focus on scalable data transformations.\n\u2022 Proven experience implementing multi-hop architectures.\n\u2022 Strong understanding of software engineering principles applied to data systems.\n\u2022 Experience building data services, APIs, or microservices for data consumption.\n\u2022 Demonstrated ability to implement monitoring, observability, and error handling.\n\u2022 Experience optimizing data workloads for performance and cost efficiency.\n\u2022 Familiarity with data quality frameworks and automated validation.\n\u2022 Ability to debug and resolve issues in distributed systems.\n\u2022 Experience working in regulated environments with strict security requirements.\n\u2022 Ability to work through new and difficult issues and contribute to libraries as needed.\n\u2022 Ability to create and maintain continuous integration and delivery of applications.\n\u2022 Forensic attention to detail.\n\u2022 A positive mindset and a can-do attitude.\n\u2022 Experience working on Agile / Scrum teams.\n\u2022 Meaningful experience working on large, complex systems.\n\u2022 Ability to take extreme ownership over your work. Every day is a challenge to ensure you are performing to the expectations you and your team have agreed upon.\n\u2022 Ability to identify with the goals of FullStack's clients, and dedicate yourself to delivering on the commitments you and your team make to them.\n\u2022 Ability to consistently work 40 hours per week.\n\nWhat We Offer\n\u2022 Competitive Salary.\n\u2022 Paid Time Off (vacation, sick leave, maternity and paternity leave, holidays).\n\u2022 100% remote work.\n\u2022 The ability to work with leading startups and Fortune 500 companies.\n\u2022 Health, dental, and vision insurance.\n\u2022 401(k) w/ 4% match.\n\u2022 Ample opportunity for career advancement.\n\u2022 Continuing education opportunities.\n\nFullStack is proud to be an equal opportunity workplace. We are committed to equal employment opportunity regardless of race, color, ancestry, religion, sex, national origin, sexual orientation, age, citizenship, marital status, disability, gender identity, or Veteran status.\n\nLearn more about our Applicants Privacy Notice .",
+        "city": "El Paso",
+        "state": "Texas",
+        "country": "US",
+        "is_remote": false,
+        "date_posted": "2026-03-10T00:00:00",
+        "date_ingested": "2026-03-12T19:19:36.300034",
+        "salary_raw": null,
+        "salary_min": null,
+        "salary_max": null,
+        "salary_currency": null,
+        "salary_period": null,
+        "employment_type": "Full-time",
+        "experience_level": null,
+        "job_url": "https://www.ziprecruiter.com/c/FullStack-Labs/Job/Senior-Databricks-Engineer-Remote-USA/-in-El-Paso,TX?jid=7f1e1362b3a3f140&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+        "source_url": "https://jsearch.p.rapidapi.com/search",
+        "raw_payload": {
+          "job_id": "QGV7ErBlahFTbBNMAAAAAA==",
+          "job_title": "Senior Databricks Engineer - Remote - USA",
+          "employer_name": "FullStack Labs",
+          "employer_logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIOfi4dNIYQs3Eh0UG83DLAMuwZRLUuiyhpD8B&s=0",
+          "employer_website": "https://www.fullstack.com",
+          "job_publisher": "ZipRecruiter",
+          "job_employment_type": "Full-time",
+          "job_employment_types": [
+            "FULLTIME"
+          ],
+          "job_apply_link": "https://www.ziprecruiter.com/c/FullStack-Labs/Job/Senior-Databricks-Engineer-Remote-USA/-in-El-Paso,TX?jid=7f1e1362b3a3f140&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+          "job_apply_is_direct": true,
+          "apply_options": [
+            {
+              "publisher": "ZipRecruiter",
+              "apply_link": "https://www.ziprecruiter.com/c/FullStack-Labs/Job/Senior-Databricks-Engineer-Remote-USA/-in-El-Paso,TX?jid=7f1e1362b3a3f140&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": true
+            },
+            {
+              "apply_link": "https://www.ziprecruiter.com/c/FullStack-Labs/Job/Senior-Databricks-Engineer-Remote-USA/-in-El-Paso,TX?jid=7f1e1362b3a3f140",
+              "is_direct": null,
+              "publisher": "ZipRecruiter"
+            }
+          ],
+          "job_description": "About FullStack\n\nFullStack is one of the fastest-growing software consultancy companies in the Americas. We deliver transformational digital solutions to top global companies and Silicon Valley startups. As an employee-first company, we focus on hiring the most talented software designers and developers by creating a positive, respectful, and supportive work environment where they can achieve their greatest potential.\n\nWe're most proud of:\n\u2022 Offering life-changing career opportunities to talented software professionals across the Americas.\n\u2022 Building highly-skilled software development teams for hundreds of the world's greatest companies.\n\u2022 Having delivered hundreds of successful custom software solutions, which have positively impacted the lives and careers of millions of users.\n\u2022 Our 4.2-star rating on GlassDoor.\n\u2022 Our client Net Promoter Score of 68, twice the industry average.\n\nThe Position\n\nWe're looking to hire a Senior Databricks Engineer to join our team. You'll work with our incredible clients in one of two ways:\n\u2022 Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily.\n\u2022 Design & Build: You will work on a FullStack product team to build and deliver a product to our clients.\n\nWhat We Are Looking For\n\u2022 5+ years of professional data engineering experience.\n\u2022 Advanced English is required.\n\u2022 Successful completion of a four-year college degree is required.\n\u2022 Strong experience designing and building production-grade data pipelines on Databricks.\n\u2022 Deep hands-on expertise with Apache Spark (Spark SQL and PySpark).\n\u2022 Advanced knowledge of Delta Lake, including ACID transactions and data versioning.\n\u2022 Expert-level SQL and Python, with a focus on scalable data transformations.\n\u2022 Proven experience implementing multi-hop architectures.\n\u2022 Strong understanding of software engineering principles applied to data systems.\n\u2022 Experience building data services, APIs, or microservices for data consumption.\n\u2022 Demonstrated ability to implement monitoring, observability, and error handling.\n\u2022 Experience optimizing data workloads for performance and cost efficiency.\n\u2022 Familiarity with data quality frameworks and automated validation.\n\u2022 Ability to debug and resolve issues in distributed systems.\n\u2022 Experience working in regulated environments with strict security requirements.\n\u2022 Ability to work through new and difficult issues and contribute to libraries as needed.\n\u2022 Ability to create and maintain continuous integration and delivery of applications.\n\u2022 Forensic attention to detail.\n\u2022 A positive mindset and a can-do attitude.\n\u2022 Experience working on Agile / Scrum teams.\n\u2022 Meaningful experience working on large, complex systems.\n\u2022 Ability to take extreme ownership over your work. Every day is a challenge to ensure you are performing to the expectations you and your team have agreed upon.\n\u2022 Ability to identify with the goals of FullStack's clients, and dedicate yourself to delivering on the commitments you and your team make to them.\n\u2022 Ability to consistently work 40 hours per week.\n\nWhat We Offer\n\u2022 Competitive Salary.\n\u2022 Paid Time Off (vacation, sick leave, maternity and paternity leave, holidays).\n\u2022 100% remote work.\n\u2022 The ability to work with leading startups and Fortune 500 companies.\n\u2022 Health, dental, and vision insurance.\n\u2022 401(k) w/ 4% match.\n\u2022 Ample opportunity for career advancement.\n\u2022 Continuing education opportunities.\n\nFullStack is proud to be an equal opportunity workplace. We are committed to equal employment opportunity regardless of race, color, ancestry, religion, sex, national origin, sexual orientation, age, citizenship, marital status, disability, gender identity, or Veteran status.\n\nLearn more about our Applicants Privacy Notice .",
+          "job_is_remote": false,
+          "job_posted_at": "2 days ago",
+          "job_posted_at_timestamp": 1773100800,
+          "job_posted_at_datetime_utc": "2026-03-10T00:00:00.000Z",
+          "job_location": "El Paso, TX",
+          "job_city": "El Paso",
+          "job_state": "Texas",
+          "job_country": "US",
+          "job_latitude": 31.761877799999997,
+          "job_longitude": -106.48502169999999,
+          "job_benefits": [
+            "paid_time_off",
+            "dental_coverage",
+            "health_insurance"
+          ],
+          "job_google_link": "https://www.google.com/search?q=jobs&gl=us&hl=en&udm=8#vhid=vt%3D20/docid%3DQGV7ErBlahFTbBNMAAAAAA%3D%3D&vssid=jobs-detail-viewer",
+          "job_salary": null,
+          "job_min_salary": null,
+          "job_max_salary": null,
+          "job_salary_period": null,
+          "job_highlights": {
+            "Qualifications": [
+              "5+ years of professional data engineering experience",
+              "Advanced English is required",
+              "Successful completion of a four-year college degree is required",
+              "Strong experience designing and building production-grade data pipelines on Databricks",
+              "Deep hands-on expertise with Apache Spark (Spark SQL and PySpark)",
+              "Advanced knowledge of Delta Lake, including ACID transactions and data versioning",
+              "Expert-level SQL and Python, with a focus on scalable data transformations",
+              "Proven experience implementing multi-hop architectures",
+              "Strong understanding of software engineering principles applied to data systems",
+              "Experience building data services, APIs, or microservices for data consumption",
+              "Demonstrated ability to implement monitoring, observability, and error handling",
+              "Experience optimizing data workloads for performance and cost efficiency",
+              "Familiarity with data quality frameworks and automated validation",
+              "Ability to debug and resolve issues in distributed systems",
+              "Experience working in regulated environments with strict security requirements",
+              "Ability to work through new and difficult issues and contribute to libraries as needed",
+              "Ability to create and maintain continuous integration and delivery of applications",
+              "Forensic attention to detail",
+              "A positive mindset and a can-do attitude",
+              "Experience working on Agile / Scrum teams",
+              "Meaningful experience working on large, complex systems",
+              "Ability to take extreme ownership over your work",
+              "Every day is a challenge to ensure you are performing to the expectations you and your team have agreed upon",
+              "Ability to identify with the goals of FullStack's clients, and dedicate yourself to delivering on the commitments you and your team make to them",
+              "Ability to consistently work 40 hours per week"
+            ],
+            "Benefits": [
+              "Offering life-changing career opportunities to talented software professionals across the Americas",
+              "Competitive Salary",
+              "Paid Time Off (vacation, sick leave, maternity and paternity leave, holidays)",
+              "100% remote work",
+              "The ability to work with leading startups and Fortune 500 companies",
+              "Health, dental, and vision insurance",
+              "401(k) w/ 4% match",
+              "Ample opportunity for career advancement",
+              "Continuing education opportunities"
+            ],
+            "Responsibilities": [
+              "Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily",
+              "Design & Build: You will work on a FullStack product team to build and deliver a product to our clients"
+            ]
+          },
+          "job_onet_soc": "15113200",
+          "job_onet_job_zone": "4"
+        }
+      },
+      {
+        "external_id": "CUs7YaJ1QwA_hASiAAAAAA==",
+        "source": "jsearch",
+        "region_id": "el-paso",
+        "raw_payload_hash": "7b31f7427e6ec8cf3aa3d39d3968c2f61fa3260e3ff6c05f5dc60dce7adc76a1",
+        "title": "Staff Data Engineer (Databricks) - Remote - USA",
+        "company": "FullStack Labs",
+        "description": "About FullStack\n\nFullStack is one of the fastest-growing software consultancy companies in the Americas. We deliver transformational digital solutions to top global companies and Silicon Valley startups. As an employee-first company, we focus on hiring the most talented software designers and developers by creating a positive, respectful, and supportive work environment where they can achieve their greatest potential.\n\nWe're most proud of:\n\u2022 Offering life-changing career opportunities to talented software professionals across the Americas.\n\u2022 Building highly-skilled software development teams for hundreds of the world's greatest companies.\n\u2022 Having delivered hundreds of successful custom software solutions, which have positively impacted the lives and careers of millions of users.\n\u2022 Our 4.2-star rating on GlassDoor.\n\u2022 Our client Net Promoter Score of 68, twice the industry average.\n\nThe Position\n\nWe're looking to hire a Staff Data Engineer to join our team. You'll work with our incredible clients in one of two ways:\n\u2022 Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily.\n\u2022 Design & Build: You will work on a FullStack product team to build and deliver a product to our clients.\n\nWhat We Are Looking For\n\u2022 5+ years of professional experience in data engineering.\n\u2022 Advanced English is required.\n\u2022 Successful completion of a four-year college degree is required.\n\u2022 Solid background working within Databricks environments as the primary platform for scalable data services and enterprise-grade pipeline development.\n\u2022 Demonstrated expertise designing and implementing complex ETL/ELT pipelines in distributed data ecosystems.\n\u2022 Proven experience developing data ingestion microservices and RESTful APIs/SDKs to enable scalable and secure data integration.\n\u2022 Strong engineering rigor, including CI/CD integration, Test-Driven Development (TDD), and version control best practices within data platforms.\n\u2022 Experience debugging, optimizing, and scaling distributed data processing systems in high-volume environments.\n\u2022 Demonstrated ability to drive technical leadership as a Staff or Lead engineer, promoting adoption of robust software design patterns and architectural standards.\n\u2022 Experience building and maintaining real-time or streaming data pipelines within low-latency architectures is preferred.\n\u2022 Strong familiarity with observability frameworks, including automated data quality validation, monitoring, and logging practices.\n\u2022 Experience working with data governance tools such as data catalogs, discovery platforms, and security scanning solutions.\n\u2022 Proven experience handling sensitive healthcare data at scale, ensuring strict adherence to HIPAA regulations and PHI security standards.\n\u2022 Experience operating within regulated, compliance-driven enterprise environments is required.\n\u2022 Ability to work through new and difficult issues and contribute to libraries as needed.\n\u2022 Ability to create and maintain continuous integration and delivery of applications.\n\u2022 Forensic attention to detail.\n\u2022 A positive mindset and a can-do attitude.\n\u2022 Experience working on Agile / Scrum teams.\n\u2022 Meaningful experience working on large, complex systems.\n\u2022 Ability to take extreme ownership over your work. Every day is a challenge to ensure you are performing to the expectations you and your team have agreed upon.\n\u2022 Ability to identify with the goals of FullStack's clients, and dedicate yourself to delivering on the commitments you and your team make to them.\n\u2022 Ability to consistently work 40 hours per week.\n\nWhat We Offer\n\u2022 Competitive Salary.\n\u2022 Paid Time Off (vacation, sick leave, maternity and paternity leave, holidays).\n\u2022 100% remote work.\n\u2022 The ability to work with leading startups and Fortune 500 companies.\n\u2022 Health, dental, and vision insurance.\n\u2022 401(k) w/ 4% match.\n\u2022 Ample opportunity for career advancement.\n\u2022 Continuing education opportunities.\n\nFullStack is proud to be an equal opportunity workplace. We are committed to equal employment opportunity regardless of race, color, ancestry, religion, sex, national origin, sexual orientation, age, citizenship, marital status, disability, gender identity, or Veteran status.\n\nLearn more about our Applicants Privacy Notice .",
+        "city": "El Paso",
+        "state": "Texas",
+        "country": "US",
+        "is_remote": false,
+        "date_posted": "2026-03-05T00:00:00",
+        "date_ingested": "2026-03-12T19:19:36.300103",
+        "salary_raw": null,
+        "salary_min": null,
+        "salary_max": null,
+        "salary_currency": null,
+        "salary_period": null,
+        "employment_type": "Full-time",
+        "experience_level": null,
+        "job_url": "https://www.ziprecruiter.com/c/FullStack-Labs/Job/Staff-Data-Engineer-(Databricks)-Remote-USA/-in-El-Paso,TX?jid=d61500796b114579&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+        "source_url": "https://jsearch.p.rapidapi.com/search",
+        "raw_payload": {
+          "job_id": "CUs7YaJ1QwA_hASiAAAAAA==",
+          "job_title": "Staff Data Engineer (Databricks) - Remote - USA",
+          "employer_name": "FullStack Labs",
+          "employer_logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIOfi4dNIYQs3Eh0UG83DLAMuwZRLUuiyhpD8B&s=0",
+          "employer_website": "https://www.fullstack.com",
+          "job_publisher": "ZipRecruiter",
+          "job_employment_type": "Full-time",
+          "job_employment_types": [
+            "FULLTIME"
+          ],
+          "job_apply_link": "https://www.ziprecruiter.com/c/FullStack-Labs/Job/Staff-Data-Engineer-(Databricks)-Remote-USA/-in-El-Paso,TX?jid=d61500796b114579&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+          "job_apply_is_direct": true,
+          "apply_options": [
+            {
+              "publisher": "ZipRecruiter",
+              "apply_link": "https://www.ziprecruiter.com/c/FullStack-Labs/Job/Staff-Data-Engineer-(Databricks)-Remote-USA/-in-El-Paso,TX?jid=d61500796b114579&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": true
+            },
+            {
+              "publisher": "Lensa",
+              "apply_link": "https://lensa.com/job-v1/fullstack-labs/el-paso-tx/data-engineer/5fbe360ffa6e4bb8aeb8846dda321ec3?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "apply_link": "https://www.ziprecruiter.com/c/FullStack-Labs/Job/Staff-Data-Engineer-(Databricks)-Remote-USA/-in-El-Paso,TX?jid=d61500796b114579",
+              "is_direct": null,
+              "publisher": "ZipRecruiter"
+            }
+          ],
+          "job_description": "About FullStack\n\nFullStack is one of the fastest-growing software consultancy companies in the Americas. We deliver transformational digital solutions to top global companies and Silicon Valley startups. As an employee-first company, we focus on hiring the most talented software designers and developers by creating a positive, respectful, and supportive work environment where they can achieve their greatest potential.\n\nWe're most proud of:\n\u2022 Offering life-changing career opportunities to talented software professionals across the Americas.\n\u2022 Building highly-skilled software development teams for hundreds of the world's greatest companies.\n\u2022 Having delivered hundreds of successful custom software solutions, which have positively impacted the lives and careers of millions of users.\n\u2022 Our 4.2-star rating on GlassDoor.\n\u2022 Our client Net Promoter Score of 68, twice the industry average.\n\nThe Position\n\nWe're looking to hire a Staff Data Engineer to join our team. You'll work with our incredible clients in one of two ways:\n\u2022 Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily.\n\u2022 Design & Build: You will work on a FullStack product team to build and deliver a product to our clients.\n\nWhat We Are Looking For\n\u2022 5+ years of professional experience in data engineering.\n\u2022 Advanced English is required.\n\u2022 Successful completion of a four-year college degree is required.\n\u2022 Solid background working within Databricks environments as the primary platform for scalable data services and enterprise-grade pipeline development.\n\u2022 Demonstrated expertise designing and implementing complex ETL/ELT pipelines in distributed data ecosystems.\n\u2022 Proven experience developing data ingestion microservices and RESTful APIs/SDKs to enable scalable and secure data integration.\n\u2022 Strong engineering rigor, including CI/CD integration, Test-Driven Development (TDD), and version control best practices within data platforms.\n\u2022 Experience debugging, optimizing, and scaling distributed data processing systems in high-volume environments.\n\u2022 Demonstrated ability to drive technical leadership as a Staff or Lead engineer, promoting adoption of robust software design patterns and architectural standards.\n\u2022 Experience building and maintaining real-time or streaming data pipelines within low-latency architectures is preferred.\n\u2022 Strong familiarity with observability frameworks, including automated data quality validation, monitoring, and logging practices.\n\u2022 Experience working with data governance tools such as data catalogs, discovery platforms, and security scanning solutions.\n\u2022 Proven experience handling sensitive healthcare data at scale, ensuring strict adherence to HIPAA regulations and PHI security standards.\n\u2022 Experience operating within regulated, compliance-driven enterprise environments is required.\n\u2022 Ability to work through new and difficult issues and contribute to libraries as needed.\n\u2022 Ability to create and maintain continuous integration and delivery of applications.\n\u2022 Forensic attention to detail.\n\u2022 A positive mindset and a can-do attitude.\n\u2022 Experience working on Agile / Scrum teams.\n\u2022 Meaningful experience working on large, complex systems.\n\u2022 Ability to take extreme ownership over your work. Every day is a challenge to ensure you are performing to the expectations you and your team have agreed upon.\n\u2022 Ability to identify with the goals of FullStack's clients, and dedicate yourself to delivering on the commitments you and your team make to them.\n\u2022 Ability to consistently work 40 hours per week.\n\nWhat We Offer\n\u2022 Competitive Salary.\n\u2022 Paid Time Off (vacation, sick leave, maternity and paternity leave, holidays).\n\u2022 100% remote work.\n\u2022 The ability to work with leading startups and Fortune 500 companies.\n\u2022 Health, dental, and vision insurance.\n\u2022 401(k) w/ 4% match.\n\u2022 Ample opportunity for career advancement.\n\u2022 Continuing education opportunities.\n\nFullStack is proud to be an equal opportunity workplace. We are committed to equal employment opportunity regardless of race, color, ancestry, religion, sex, national origin, sexual orientation, age, citizenship, marital status, disability, gender identity, or Veteran status.\n\nLearn more about our Applicants Privacy Notice .",
+          "job_is_remote": false,
+          "job_posted_at": "7 days ago",
+          "job_posted_at_timestamp": 1772668800,
+          "job_posted_at_datetime_utc": "2026-03-05T00:00:00.000Z",
+          "job_location": "El Paso, TX",
+          "job_city": "El Paso",
+          "job_state": "Texas",
+          "job_country": "US",
+          "job_latitude": 31.761877799999997,
+          "job_longitude": -106.48502169999999,
+          "job_benefits": [
+            "health_insurance",
+            "dental_coverage",
+            "paid_time_off"
+          ],
+          "job_google_link": "https://www.google.com/search?q=jobs&gl=us&hl=en&udm=8#vhid=vt%3D20/docid%3DCUs7YaJ1QwA_hASiAAAAAA%3D%3D&vssid=jobs-detail-viewer",
+          "job_salary": null,
+          "job_min_salary": null,
+          "job_max_salary": null,
+          "job_salary_period": null,
+          "job_highlights": {
+            "Qualifications": [
+              "5+ years of professional experience in data engineering",
+              "Advanced English is required",
+              "Successful completion of a four-year college degree is required",
+              "Solid background working within Databricks environments as the primary platform for scalable data services and enterprise-grade pipeline development",
+              "Demonstrated expertise designing and implementing complex ETL/ELT pipelines in distributed data ecosystems",
+              "Proven experience developing data ingestion microservices and RESTful APIs/SDKs to enable scalable and secure data integration",
+              "Strong engineering rigor, including CI/CD integration, Test-Driven Development (TDD), and version control best practices within data platforms",
+              "Experience debugging, optimizing, and scaling distributed data processing systems in high-volume environments",
+              "Demonstrated ability to drive technical leadership as a Staff or Lead engineer, promoting adoption of robust software design patterns and architectural standards",
+              "Strong familiarity with observability frameworks, including automated data quality validation, monitoring, and logging practices",
+              "Experience working with data governance tools such as data catalogs, discovery platforms, and security scanning solutions",
+              "Proven experience handling sensitive healthcare data at scale, ensuring strict adherence to HIPAA regulations and PHI security standards",
+              "Experience operating within regulated, compliance-driven enterprise environments is required",
+              "Ability to work through new and difficult issues and contribute to libraries as needed",
+              "Ability to create and maintain continuous integration and delivery of applications",
+              "Forensic attention to detail",
+              "A positive mindset and a can-do attitude",
+              "Experience working on Agile / Scrum teams",
+              "Meaningful experience working on large, complex systems",
+              "Ability to take extreme ownership over your work",
+              "Every day is a challenge to ensure you are performing to the expectations you and your team have agreed upon",
+              "Ability to identify with the goals of FullStack's clients, and dedicate yourself to delivering on the commitments you and your team make to them",
+              "Ability to consistently work 40 hours per week"
+            ],
+            "Benefits": [
+              "Offering life-changing career opportunities to talented software professionals across the Americas",
+              "Competitive Salary",
+              "Paid Time Off (vacation, sick leave, maternity and paternity leave, holidays)",
+              "100% remote work",
+              "The ability to work with leading startups and Fortune 500 companies",
+              "Health, dental, and vision insurance",
+              "401(k) w/ 4% match",
+              "Ample opportunity for career advancement",
+              "Continuing education opportunities"
+            ],
+            "Responsibilities": [
+              "Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily",
+              "Design & Build: You will work on a FullStack product team to build and deliver a product to our clients"
+            ]
+          },
+          "job_onet_soc": "15113200",
+          "job_onet_job_zone": "4"
+        }
+      },
+      {
+        "external_id": "no6izhOwdi_27HrbAAAAAA==",
+        "source": "jsearch",
+        "region_id": "el-paso",
+        "raw_payload_hash": "f50535a896250fcc9aa5b97d70ae732a47dc423d8c7ebe3b87fbf0dc44c37483",
+        "title": "Software Developer II",
+        "company": "City of El Paso",
+        "description": "MOS Code: None\n\nEducation and Experience: Bachelor's degree or higher in Computer Information Systems, Computer Science, Data Processing or related field and two (2) years of data processing and complex programming experience using C#.NET and SQL or an Associate's Degree in Computer Information Systems, Computer Science, Data Processing or related field and four (4) years of data processing and complex programming experience using C#.NET and SQL.\n\nLicenses and Certificates: NoneUnder direction, develop and/or modify of software or specialized utility programs and maintain large scale applications and documentation.\nAnalyze, design and develop software applications. Involves: Meet with users and analyze needs and software requirements. Modify existing software to correct errors, allow it to adapt to new hardware, or to improve its performance. Develop software system testing and validation procedures, programming and documentation. Analyze user needs and software requirements to determine feasibility of design within time and cost constraints. Using scientific analysis and mathematical models predict and measure outcome and consequences of design. Store, retrieve and manipulate data for analysis of system capabilities and requirements. Assist with the design and development of software applications on all platforms using C#.NET. Obtain and evaluate information on factors such as reporting formats required, costs, and security needs to determine hardware configuration. Assist with determining system performance standards. Work with a team software developers to deliver products in a timely manner. Train users on new or modified equipment.\n\nPerform related duties as assigned. Involves: Substitute, if assigned, for immediate supervisor or coworkers during temporary absences by performing delegated duties sufficient to maintain continuity of normal operations. Assist supervisor with training new staff in established programming standards and procedures.\n\nFor a complete job specification, click here.\n\nNote: This is an unclassified contract position.\nNote: Applicants are encouraged to apply immediately. This position will close when a preset number of qualified applications have been received.\n\nPlease note: Applicants with foreign diplomas, transcripts, and degrees must have all documents translated and evaluated by an agency of the National Association of Credential Evaluation Services (NACES) prior to submitting them to the Human Resources Department. Please visit www.naces.org/members for more information.\n\nA r\u00e9sum\u00e9 and/or other documents will not be accepted in lieu of a completed application. Comments such as \u201cSee r\u00e9sum\u00e9\u201d are not acceptable and will result in the application being considered incomplete.\n\nTo qualify for this position, the required education, experience, knowledge, and skills must be clearly stated on your application\u2019s employment history. We do not use any information on your resume to review if you meet the minimum qualifications for this position.\n\nFailure to fully detail all experience and job duties in the application, or copying/pasting directly from the job specification, or responses referring to your r\u00e9sum\u00e9 will eliminate you from consideration for the position.",
+        "city": "El Paso",
+        "state": "Texas",
+        "country": "US",
+        "is_remote": false,
+        "date_posted": "2026-02-24T00:00:00",
+        "date_ingested": "2026-03-12T19:19:36.300142",
+        "salary_raw": null,
+        "salary_min": 65472.58,
+        "salary_max": 98208.86,
+        "salary_currency": null,
+        "salary_period": "YEAR",
+        "employment_type": "Contractor",
+        "experience_level": null,
+        "job_url": "https://www.governmentjobs.com/careers/elpaso/jobs/5249556/software-developer-ii?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+        "source_url": "https://jsearch.p.rapidapi.com/search",
+        "raw_payload": {
+          "job_id": "no6izhOwdi_27HrbAAAAAA==",
+          "job_title": "Software Developer II",
+          "employer_name": "City of El Paso",
+          "employer_logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiRzV-t3kz-xb-ja5c3iOj4Nh0HU-tthgEv9QT&s=0",
+          "employer_website": null,
+          "job_publisher": "GovernmentJobs.com",
+          "job_employment_type": "Contractor",
+          "job_employment_types": [
+            "CONTRACTOR"
+          ],
+          "job_apply_link": "https://www.governmentjobs.com/careers/elpaso/jobs/5249556/software-developer-ii?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+          "job_apply_is_direct": true,
+          "apply_options": [
+            {
+              "publisher": "GovernmentJobs.com",
+              "apply_link": "https://www.governmentjobs.com/careers/elpaso/jobs/5249556/software-developer-ii?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": true
+            },
+            {
+              "publisher": "LinkedIn",
+              "apply_link": "https://www.linkedin.com/jobs/view/software-developer-ii-at-city-of-el-paso-4378356127?refId=DnoNACiapSv81ryD7uOO3A%3D%3D&trackingId=v2qB4kgKkqiW6HKgorGI3Q%3D%3D&position=12&pageNum=0&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Jooble",
+              "apply_link": "https://jooble.org/jdp/-5781776290969255339?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "BeBee",
+              "apply_link": "https://us.bebee.com/job/e8510f1e92cde3db90d4b9314fc965d2?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Jobs And Careers",
+              "apply_link": "https://www.career.com/job/city-of-el-paso/software-developer-ii/j202308312347186640360?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Jobs.cu-Fc.com",
+              "apply_link": "https://jobs.cu-fc.com/jobs/software-developer-ii-el-paso-texas/2640514204-2/?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "apply_link": "https://www.governmentjobs.com/careers/elpaso/jobs/5249556/software-developer-ii",
+              "is_direct": null,
+              "publisher": "GovernmentJobs.com"
+            }
+          ],
+          "job_description": "MOS Code: None\n\nEducation and Experience: Bachelor's degree or higher in Computer Information Systems, Computer Science, Data Processing or related field and two (2) years of data processing and complex programming experience using C#.NET and SQL or an Associate's Degree in Computer Information Systems, Computer Science, Data Processing or related field and four (4) years of data processing and complex programming experience using C#.NET and SQL.\n\nLicenses and Certificates: NoneUnder direction, develop and/or modify of software or specialized utility programs and maintain large scale applications and documentation.\nAnalyze, design and develop software applications. Involves: Meet with users and analyze needs and software requirements. Modify existing software to correct errors, allow it to adapt to new hardware, or to improve its performance. Develop software system testing and validation procedures, programming and documentation. Analyze user needs and software requirements to determine feasibility of design within time and cost constraints. Using scientific analysis and mathematical models predict and measure outcome and consequences of design. Store, retrieve and manipulate data for analysis of system capabilities and requirements. Assist with the design and development of software applications on all platforms using C#.NET. Obtain and evaluate information on factors such as reporting formats required, costs, and security needs to determine hardware configuration. Assist with determining system performance standards. Work with a team software developers to deliver products in a timely manner. Train users on new or modified equipment.\n\nPerform related duties as assigned. Involves: Substitute, if assigned, for immediate supervisor or coworkers during temporary absences by performing delegated duties sufficient to maintain continuity of normal operations. Assist supervisor with training new staff in established programming standards and procedures.\n\nFor a complete job specification, click here.\n\nNote: This is an unclassified contract position.\nNote: Applicants are encouraged to apply immediately. This position will close when a preset number of qualified applications have been received.\n\nPlease note: Applicants with foreign diplomas, transcripts, and degrees must have all documents translated and evaluated by an agency of the National Association of Credential Evaluation Services (NACES) prior to submitting them to the Human Resources Department. Please visit www.naces.org/members for more information.\n\nA r\u00e9sum\u00e9 and/or other documents will not be accepted in lieu of a completed application. Comments such as \u201cSee r\u00e9sum\u00e9\u201d are not acceptable and will result in the application being considered incomplete.\n\nTo qualify for this position, the required education, experience, knowledge, and skills must be clearly stated on your application\u2019s employment history. We do not use any information on your resume to review if you meet the minimum qualifications for this position.\n\nFailure to fully detail all experience and job duties in the application, or copying/pasting directly from the job specification, or responses referring to your r\u00e9sum\u00e9 will eliminate you from consideration for the position.",
+          "job_is_remote": false,
+          "job_posted_at": "16 days ago",
+          "job_posted_at_timestamp": 1771891200,
+          "job_posted_at_datetime_utc": "2026-02-24T00:00:00.000Z",
+          "job_location": "El Paso, TX",
+          "job_city": "El Paso",
+          "job_state": "Texas",
+          "job_country": "US",
+          "job_latitude": 31.761877799999997,
+          "job_longitude": -106.48502169999999,
+          "job_benefits": null,
+          "job_google_link": "https://www.google.com/search?q=jobs&gl=us&hl=en&udm=8#vhid=vt%3D20/docid%3Dno6izhOwdi_27HrbAAAAAA%3D%3D&vssid=jobs-detail-viewer",
+          "job_min_salary": 65472.58,
+          "job_max_salary": 98208.86,
+          "job_salary_period": "YEAR",
+          "job_highlights": {
+            "Qualifications": [
+              "Education and Experience: Bachelor's degree or higher in Computer Information Systems, Computer Science, Data Processing or related field and two (2) years of data processing and complex programming experience using C#.NET and SQL or an Associate's Degree in Computer Information Systems, Computer Science, Data Processing or related field and four (4) years of data processing and complex programming experience using C#.NET and SQL",
+              "Licenses and Certificates: NoneUnder direction, develop and/or modify of software or specialized utility programs and maintain large scale applications and documentation",
+              "Please note: Applicants with foreign diplomas, transcripts, and degrees must have all documents translated and evaluated by an agency of the National Association of Credential Evaluation Services (NACES) prior to submitting them to the Human Resources Department",
+              "To qualify for this position, the required education, experience, knowledge, and skills must be clearly stated on your application\u2019s employment history"
+            ],
+            "Responsibilities": [
+              "Analyze, design and develop software applications",
+              "Involves: Meet with users and analyze needs and software requirements",
+              "Modify existing software to correct errors, allow it to adapt to new hardware, or to improve its performance",
+              "Develop software system testing and validation procedures, programming and documentation",
+              "Analyze user needs and software requirements to determine feasibility of design within time and cost constraints",
+              "Using scientific analysis and mathematical models predict and measure outcome and consequences of design",
+              "Store, retrieve and manipulate data for analysis of system capabilities and requirements",
+              "Assist with the design and development of software applications on all platforms using C#.NET",
+              "Obtain and evaluate information on factors such as reporting formats required, costs, and security needs to determine hardware configuration",
+              "Assist with determining system performance standards",
+              "Work with a team software developers to deliver products in a timely manner",
+              "Train users on new or modified equipment",
+              "Perform related duties as assigned",
+              "Involves: Substitute, if assigned, for immediate supervisor or coworkers during temporary absences by performing delegated duties sufficient to maintain continuity of normal operations",
+              "Assist supervisor with training new staff in established programming standards and procedures"
+            ]
+          },
+          "job_onet_soc": "15113200",
+          "job_onet_job_zone": "4"
+        }
+      },
+      {
+        "external_id": "-EcP-ksGMRAIbGiVAAAAAA==",
+        "source": "jsearch",
+        "region_id": "el-paso",
+        "raw_payload_hash": "42f72a936d750b5a75ded9c4035d3504d52aebcbf20fe26f7d7f7e9ebb147bd5",
+        "title": "Director of Data Platform Engineering (26-27)",
+        "company": "IDEA Public Schools",
+        "description": "Job Description:\n\nDescription Director of Data Platform Engineering This is a vacancy for the 26-27 school year with a target start date of July 1, 2026 Mission: The Director of Data Platform Engineering leads the team responsible for building, operating, and optimizing IDEA's data infrastructure. This leader ensures the data platform is reliable, scalable, secure, and performant\u2014enabling Analytics Engineering, Data Science, Business Intelligence, and Research teams to deliver insights that improve student outcomes across IDEA Public Schools. Reporting to the Managing Director of Data Platform & Engineering, this role translates architectural vision into operational reality through disciplined engineering execution, automation-first practices, and a relentless focus on platform reliability. This leader manages the platform engineering team through IDEA's critical transition from legacy ETL systems to a modern Snowflake-based data lakehouse, balancing the urgency of modernization with the stability requirements of production operations. This role is central to achieving IDEA's goal of reducing data source onboarding from years to days through automated ingestion, robust orchestration, and comprehensive DataOps practices. Supervisory Responsibilities: Directly manages Data Platform Engineers - Build and maintain cloud data infrastructure, Snowflake environments, and ingestion pipelines Location: This is a full-time position based in Texas, with preference given to candidates who live in Austin, El Paso, Houston, Permian Basin (Midland/Odessa), Rio Grande Valley, San Antonio, and Tarrant County (Fort Worth), or who are willing to relocate. Travel Expectations: 10% travel for team collaboration, critical implementations, and leadership meetings. May include occasional visits to IDEA campuses and headquarters. What You\u2019ll Do \u2013 Accountabilities Essential Duties: \u00b7 Build, mentor, and grow a high-performing platform engineering team of 4 direct reports with diverse skill sets (infrastructure, automation, legacy systems) \u00b7 Lead day-to-day build out and operation of IDEA's Snowflake-based data platform ensuring production-grade reliability, security, and performance \u00b7 Oversee Snowflake environment management including warehouse sizing, resource monitors, cost optimization, role-based access control, and performance tuning \u00b7 Ensure platform infrastructure meets defined SLAs for data freshness, pipeline reliability, and system availability \u00b7 Implement monitoring, alerting, and incident response processes that surface issues early and drive durable fixes \u00b7 Partner with IT Security and Data Governance to ensure platform meets enterprise standards for access controls, audit trails, and compliance \u00b7 Oversee implementation and operation of automated ELT pipelines from 20-30+ source systems (PowerSchool, assessment platforms, SIS systems, financial systems) into Snowflake Additional Duties and Responsibilities: \u00b7 Ensure ingestion pipelines meet standards for reliability, data freshness, schema evolution handling, and error recovery \u00b7 Lead evaluation and operational management of ingestion tools (Fivetran, Airbyte) ensuring consistent implementation patterns \u00b7 Partner with Analytics Engineering to ensure Bronze layer (raw data landing) supports downstream transformation needs without creating coupling \u00b7 Drive \"onboarding in days not years\" goal through templated ingestion patterns, automated connector setup, and self-service enablement \u00b7 Monitor data pipeline health through observability dashboards and proactive alerting \u00b7 Partner with DataOps Engineer to embed CI/CD, automated testing, and deployment automation across all platform work \u00b7 Ensure infrastructure-as-code practices (Terraform) for all Snowflake resources, reducing manual configuration and enabling reproducibility \u00b7 Implement deployment standards including version control (Git), code review, automated testing, and rollback procedures \u00b7 Drive platform reliability through SLO/SLA definition, error budgets, and post-incident reviews that prevent recurrence \u00b7 Establish observability practices ensuring visibility into pipeline performance, data quality, costs, and system health \u00b7 Balance reliability work (automation, monitoring, technical debt) with delivery commitments (new data sources, platform features) \u00b7 Serve as primary technical partner to Manager of Analytics Engineering, ensuring platform capabilities support dbt development, testing, and data product delivery \u00b7 Work closely with Data Platform Architect to implement architectural standards faithfully while surfacing execution challenges and operational realities that should inform future design \u00b7 Collaborate with Director of Data Governance to ensure platform enforces data quality rules, access policies, and metadata standards \u00b7 Partner with Director of Business Intelligence and MD of Data Science & Analytics to understand platform requirements for dashboards and advanced analytics \u00b7 Interface with IT infrastructure team on networking, security, gateway management, and on-prem and/or cloud service integration \u00b7 Provide light oversight to Data Warehouse Manager maintaining production stability of legacy SSIS/SQL Server systems during 18-month modernization period \u00b7 Establish clear boundaries preventing legacy work from consuming modern team capacity \u00b7 Set aggressive migration timelines with executive alignment \u00b7 Triage legacy incidents, prioritizing only business-critical issues while deferring optimization and enhancements \u00b7 Protect modern team focus: legacy maintenance is separate from modern platform development \u00b7 Develop quarterly platform engineering roadmap balancing new capabilities, reliability improvements, and technical debt reduction \u00b7 Translate business requirements into platform capabilities, data source priorities, and infrastructure investments \u00b7 Provide input to Data Platform Architect on architectural decisions based on operational experience and execution constraints \u00b7 Participate in tool evaluations (ingestion, orchestration, observability) with hands-on proof-of-concept work \u00b7 Provide clear, timely communication about platform health, incidents, risks, and planned improvements to MD, peer managers, and stakeholder \u00b7 Translate technical platform issues into operational and business impact for non-technical audience \u00b7 Run regular platform demos showcasing new capabilities, performance improvements, and reliability wins \u00b7 Establish trust through transparency about what's working, what's not, and what's being done to improve \u00b7 Support operational management of Snowflake, Fivetran/Airbyte, and orchestration platforms \u00b7 Ensure tools are implemented using consistent patterns with clear ownership and documentation \u00b7 Identify sources of operational friction, manual toil, and platform fragility through metrics and team feedback Knowledge and Skills \u2013 CompetenciesMake Strategic Decisions: This team member fosters an inclusive decision-making environment by encouraging diverse perspectives, managing disagreements constructively, and creating space for all voices to be heard. They clearly communicate final decisions, providing context and anticipated impact\u2014even when choices are difficult or unpopular. Manage Work and Teams: This team member builds and maintains systems to track progress toward team goals, ensuring clarity through defined roles and responsibilities. They implement structured processes that support smooth team operations and strategically allocate time and resources to drive goal achievement. Grow Self and Others: This team member uses data to assess development needs and designs learning opportunities that align with team goals and individual career growth. They model a growth mindset by being open about their own development and ensure that both personal and team-led learning initiatives are impactful and well-aligned with organizational priorities. Build a Culture of Trust: This team member fosters a team culture where individuals genuinely care for one another both personally and professionally. They lead with transparency, encourage open communication, including healthy conflict\u2014and promote reliability and consistency, while regularly seeking and responding to team feedback to enhance the collective experience. Communicate Deliberately: This team member leads inclusive discussions that surface obstacles and drive actionable solutions, ensuring all voices are heard. They communicate key information clearly across multiple channels and establish feedback loops that promote open dialogue, collaboration, and continuous improvement. Additional Skills: Cloud Data Platform Expertise: \u00b7 Deep hands-on experience with Snowflake including warehouse management, resource monitors, clustering, caching, performance optimization, and cost management \u00b7 Strong understanding of cloud data architectures (data lakes, data warehouses, lakehouse patterns) \u00b7 Familiarity with Iceberg/Delta table formats and modern lakehouse capabilities \u00b7 Experience with cloud providers (AWS, Azure, GCP) including IAM, networking, storage, and service integration \u00b7 Knowledge of data security concepts (encryption, role-based access control, PII handling, audit trails) Data Engineering & Ingestion: \u00b7 Proficiency with modern ELT tools (Fivetran, Airbyte, Stitch) and understanding of when to use pre-built connectors vs. custom solutions \u00b7 Advanced SQL skills for troubleshooting pipelines, validating data, and performance optimization \u00b7 Working knowledge of Python for automation, scripting, and data manipulation \u00b7 Experience with orchestration platforms (Dagster, Prefect, Airflow) for workflow management \u00b7 Understanding of data modeling concepts (star schema, wide tables, slowly changing dimensions) to support Analytics Engineering DataOps & Platform Reliability: \u00b7 Strong familiarity with CI/CD concepts, Git workflows, and code review practices \u00b7 Experience with infrastructure-as-code (Terraform, CloudFormation) for reproducible infrastructure \u00b7 Understanding of observability principles (metrics, logging, tracing) and tools (Datadog, Monte Carlo, Elementary) \u00b7 Knowledge of incident management, post-mortems, and SRE practices (SLOs, error budgets, on-call) \u00b7 Ability to balance feature delivery with reliability, technical debt, and automation work Leadership & Soft Skills: \u00b7 Proven ability to build and lead technical teams through periods of significant change and modernization \u00b7 Strong prioritization and time management skills managing competing urgent demands \u00b7 Excellent facilitation skills for technical design discussions, incident response, and retrospectives \u00b7 Change management experience helping teams adopt new tools, practices, and ways of working Required experience: \u00b7 Education: Bachelor's degree in Computer Science, Engineering, Information Systems, or related field, OR equivalent practical experience \u00b7 Experience: Minimum 7 years in data engineering, platform engineering, data infrastructure, or related technical roles \u00b7 Leadership experience: At least 3 years in technical leadership or people management role leading data/platform engineering teams \u00b7 Cloud platform experience: Demonstrated hands-on experience building and operating cloud data platforms (Snowflake, Databricks, Redshift, or similar) in production environments \u00b7 Modernization experience: Proven track record migrating from legacy ETL systems to modern cloud-native ELT platforms \u00b7 Team development: Experience hiring, mentoring, and developing data engineers from junior to senior levels Preferred Education and Experience: \u00b7 Advanced degree: Master's degree in Computer Science, Data Engineering, or related technical field \u00b7 Snowflake expertise: SnowPro Core or Advanced certification, or deep hands-on Snowflake experience \u00b7 Multi-domain environments: Experience building platforms supporting multiple business units, states, or regions with federated operations \u00b7 Education sector: Experience with K-12 education data systems (student information systems, assessment platforms, education data standards) \u00b7 DataOps/SRE background: Formal training or deep experience in site reliability engineering, platform reliability, or DataOps practices \u00b7 Open source contributions: Active participation in data engineering communities, conference presentations, or technical blog posts demonstrating thought leadership Physical Requirements: \u00b7 Prolonged periods working on a computer and in virtual meetings \u00b7 Ability to travel domestically via car and air travel \u00b7 Flexibility for occasional evening/weekend work during critical deployments or incident response What We Offer: Compensation & Benefits: Salaries for people entering this role typically fall between $119,000 and $142,800, commensurate with relevant experience and qualifications and in alignment with internal equity. This role is also eligible for performance pay based on organizational performance and goal attainment. Additionally, we offer medical, dental, and vision plans, disability, life insurance, parenting benefits, flexible spending account options, generous vacation time, referral bonuses, professional development, and a 403(b) plan. You can find more information about our benefits at https://ideapublicschools.org/careers/benefits/. * IDEA may offer a relocation stipend to defray the cost of moving for this role, if applicable. Application process: Submit your application online through Jobvite. Please note that applications will be reviewed on an ongoing basis until the position is filled. Applicants are encouraged to apply as early as possible. Learn more about IDEA At IDEA the Staff Experience Team uses our Core Values to promote human connection and a culture of integrity, respect, and belonging for all Team and Family members. Learn more about our Commitment to Core Values here: https://ideapublicschools.org/our-story/#core-values",
+        "city": "El Paso",
+        "state": "Texas",
+        "country": "US",
+        "is_remote": false,
+        "date_posted": "2026-03-02T00:00:00",
+        "date_ingested": "2026-03-12T19:19:36.300172",
+        "salary_raw": null,
+        "salary_min": null,
+        "salary_max": null,
+        "salary_currency": null,
+        "salary_period": null,
+        "employment_type": "Full-time",
+        "experience_level": null,
+        "job_url": "https://www.ziprecruiter.com/c/IDEA-Public-Schools/Job/Director-of-Data-Platform-Engineering-(26-27)/-in-El-Paso,TX?jid=eed4294389c06d92&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+        "source_url": "https://jsearch.p.rapidapi.com/search",
+        "raw_payload": {
+          "job_id": "-EcP-ksGMRAIbGiVAAAAAA==",
+          "job_title": "Director of Data Platform Engineering (26-27)",
+          "employer_name": "IDEA Public Schools",
+          "employer_logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6OHN9e48z8XvSKdLnRb1tlMd6vqMdvy2vXe77&s=0",
+          "employer_website": "https://ideapublicschools.org",
+          "job_publisher": "ZipRecruiter",
+          "job_employment_type": "Full-time",
+          "job_employment_types": [
+            "FULLTIME"
+          ],
+          "job_apply_link": "https://www.ziprecruiter.com/c/IDEA-Public-Schools/Job/Director-of-Data-Platform-Engineering-(26-27)/-in-El-Paso,TX?jid=eed4294389c06d92&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+          "job_apply_is_direct": true,
+          "apply_options": [
+            {
+              "publisher": "ZipRecruiter",
+              "apply_link": "https://www.ziprecruiter.com/c/IDEA-Public-Schools/Job/Director-of-Data-Platform-Engineering-(26-27)/-in-El-Paso,TX?jid=eed4294389c06d92&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": true
+            },
+            {
+              "publisher": "Teal",
+              "apply_link": "https://www.tealhq.com/job/director-of-data-platform-engineering_7ea1a0a465779bcc061c01ffde00de5b62d34?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Glassdoor",
+              "apply_link": "https://www.glassdoor.com/job-listing/director-of-data-platform-engineering-26-27-idea-public-schools-JV_IC1140105_KO0,43_KE44,63.htm?jl=1010052494423&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Indeed",
+              "apply_link": "https://www.indeed.com/viewjob?jk=4d5c8bfb9208f434&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Ladders",
+              "apply_link": "https://www.theladders.com/job/director-of-data-platform-engineering-26-27-idea-public-schools-el-paso-tx_85971847?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Monster",
+              "apply_link": "https://www.monster.com/job-openings/director-of-data-platform-engineering-26-27-el-paso-tx--7a5fed78-d17b-409e-b60e-d4cbe47004a2?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Jobright",
+              "apply_link": "https://jobright.ai/jobs/info/69a5ff42b600907a962bd630?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Lensa",
+              "apply_link": "https://lensa.com/job-v1/idea-public-schools/el-paso-tx/director-of-data/236c7bdf11f8721fc3338f33caa58c1b?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "apply_link": "https://www.ziprecruiter.com/c/IDEA-Public-Schools/Job/Director-of-Data-Platform-Engineering-(26-27)/-in-El-Paso,TX?jid=eed4294389c06d92",
+              "is_direct": null,
+              "publisher": "ZipRecruiter"
+            }
+          ],
+          "job_description": "Job Description:\n\nDescription Director of Data Platform Engineering This is a vacancy for the 26-27 school year with a target start date of July 1, 2026 Mission: The Director of Data Platform Engineering leads the team responsible for building, operating, and optimizing IDEA's data infrastructure. This leader ensures the data platform is reliable, scalable, secure, and performant\u2014enabling Analytics Engineering, Data Science, Business Intelligence, and Research teams to deliver insights that improve student outcomes across IDEA Public Schools. Reporting to the Managing Director of Data Platform & Engineering, this role translates architectural vision into operational reality through disciplined engineering execution, automation-first practices, and a relentless focus on platform reliability. This leader manages the platform engineering team through IDEA's critical transition from legacy ETL systems to a modern Snowflake-based data lakehouse, balancing the urgency of modernization with the stability requirements of production operations. This role is central to achieving IDEA's goal of reducing data source onboarding from years to days through automated ingestion, robust orchestration, and comprehensive DataOps practices. Supervisory Responsibilities: Directly manages Data Platform Engineers - Build and maintain cloud data infrastructure, Snowflake environments, and ingestion pipelines Location: This is a full-time position based in Texas, with preference given to candidates who live in Austin, El Paso, Houston, Permian Basin (Midland/Odessa), Rio Grande Valley, San Antonio, and Tarrant County (Fort Worth), or who are willing to relocate. Travel Expectations: 10% travel for team collaboration, critical implementations, and leadership meetings. May include occasional visits to IDEA campuses and headquarters. What You\u2019ll Do \u2013 Accountabilities Essential Duties: \u00b7 Build, mentor, and grow a high-performing platform engineering team of 4 direct reports with diverse skill sets (infrastructure, automation, legacy systems) \u00b7 Lead day-to-day build out and operation of IDEA's Snowflake-based data platform ensuring production-grade reliability, security, and performance \u00b7 Oversee Snowflake environment management including warehouse sizing, resource monitors, cost optimization, role-based access control, and performance tuning \u00b7 Ensure platform infrastructure meets defined SLAs for data freshness, pipeline reliability, and system availability \u00b7 Implement monitoring, alerting, and incident response processes that surface issues early and drive durable fixes \u00b7 Partner with IT Security and Data Governance to ensure platform meets enterprise standards for access controls, audit trails, and compliance \u00b7 Oversee implementation and operation of automated ELT pipelines from 20-30+ source systems (PowerSchool, assessment platforms, SIS systems, financial systems) into Snowflake Additional Duties and Responsibilities: \u00b7 Ensure ingestion pipelines meet standards for reliability, data freshness, schema evolution handling, and error recovery \u00b7 Lead evaluation and operational management of ingestion tools (Fivetran, Airbyte) ensuring consistent implementation patterns \u00b7 Partner with Analytics Engineering to ensure Bronze layer (raw data landing) supports downstream transformation needs without creating coupling \u00b7 Drive \"onboarding in days not years\" goal through templated ingestion patterns, automated connector setup, and self-service enablement \u00b7 Monitor data pipeline health through observability dashboards and proactive alerting \u00b7 Partner with DataOps Engineer to embed CI/CD, automated testing, and deployment automation across all platform work \u00b7 Ensure infrastructure-as-code practices (Terraform) for all Snowflake resources, reducing manual configuration and enabling reproducibility \u00b7 Implement deployment standards including version control (Git), code review, automated testing, and rollback procedures \u00b7 Drive platform reliability through SLO/SLA definition, error budgets, and post-incident reviews that prevent recurrence \u00b7 Establish observability practices ensuring visibility into pipeline performance, data quality, costs, and system health \u00b7 Balance reliability work (automation, monitoring, technical debt) with delivery commitments (new data sources, platform features) \u00b7 Serve as primary technical partner to Manager of Analytics Engineering, ensuring platform capabilities support dbt development, testing, and data product delivery \u00b7 Work closely with Data Platform Architect to implement architectural standards faithfully while surfacing execution challenges and operational realities that should inform future design \u00b7 Collaborate with Director of Data Governance to ensure platform enforces data quality rules, access policies, and metadata standards \u00b7 Partner with Director of Business Intelligence and MD of Data Science & Analytics to understand platform requirements for dashboards and advanced analytics \u00b7 Interface with IT infrastructure team on networking, security, gateway management, and on-prem and/or cloud service integration \u00b7 Provide light oversight to Data Warehouse Manager maintaining production stability of legacy SSIS/SQL Server systems during 18-month modernization period \u00b7 Establish clear boundaries preventing legacy work from consuming modern team capacity \u00b7 Set aggressive migration timelines with executive alignment \u00b7 Triage legacy incidents, prioritizing only business-critical issues while deferring optimization and enhancements \u00b7 Protect modern team focus: legacy maintenance is separate from modern platform development \u00b7 Develop quarterly platform engineering roadmap balancing new capabilities, reliability improvements, and technical debt reduction \u00b7 Translate business requirements into platform capabilities, data source priorities, and infrastructure investments \u00b7 Provide input to Data Platform Architect on architectural decisions based on operational experience and execution constraints \u00b7 Participate in tool evaluations (ingestion, orchestration, observability) with hands-on proof-of-concept work \u00b7 Provide clear, timely communication about platform health, incidents, risks, and planned improvements to MD, peer managers, and stakeholder \u00b7 Translate technical platform issues into operational and business impact for non-technical audience \u00b7 Run regular platform demos showcasing new capabilities, performance improvements, and reliability wins \u00b7 Establish trust through transparency about what's working, what's not, and what's being done to improve \u00b7 Support operational management of Snowflake, Fivetran/Airbyte, and orchestration platforms \u00b7 Ensure tools are implemented using consistent patterns with clear ownership and documentation \u00b7 Identify sources of operational friction, manual toil, and platform fragility through metrics and team feedback Knowledge and Skills \u2013 CompetenciesMake Strategic Decisions: This team member fosters an inclusive decision-making environment by encouraging diverse perspectives, managing disagreements constructively, and creating space for all voices to be heard. They clearly communicate final decisions, providing context and anticipated impact\u2014even when choices are difficult or unpopular. Manage Work and Teams: This team member builds and maintains systems to track progress toward team goals, ensuring clarity through defined roles and responsibilities. They implement structured processes that support smooth team operations and strategically allocate time and resources to drive goal achievement. Grow Self and Others: This team member uses data to assess development needs and designs learning opportunities that align with team goals and individual career growth. They model a growth mindset by being open about their own development and ensure that both personal and team-led learning initiatives are impactful and well-aligned with organizational priorities. Build a Culture of Trust: This team member fosters a team culture where individuals genuinely care for one another both personally and professionally. They lead with transparency, encourage open communication, including healthy conflict\u2014and promote reliability and consistency, while regularly seeking and responding to team feedback to enhance the collective experience. Communicate Deliberately: This team member leads inclusive discussions that surface obstacles and drive actionable solutions, ensuring all voices are heard. They communicate key information clearly across multiple channels and establish feedback loops that promote open dialogue, collaboration, and continuous improvement. Additional Skills: Cloud Data Platform Expertise: \u00b7 Deep hands-on experience with Snowflake including warehouse management, resource monitors, clustering, caching, performance optimization, and cost management \u00b7 Strong understanding of cloud data architectures (data lakes, data warehouses, lakehouse patterns) \u00b7 Familiarity with Iceberg/Delta table formats and modern lakehouse capabilities \u00b7 Experience with cloud providers (AWS, Azure, GCP) including IAM, networking, storage, and service integration \u00b7 Knowledge of data security concepts (encryption, role-based access control, PII handling, audit trails) Data Engineering & Ingestion: \u00b7 Proficiency with modern ELT tools (Fivetran, Airbyte, Stitch) and understanding of when to use pre-built connectors vs. custom solutions \u00b7 Advanced SQL skills for troubleshooting pipelines, validating data, and performance optimization \u00b7 Working knowledge of Python for automation, scripting, and data manipulation \u00b7 Experience with orchestration platforms (Dagster, Prefect, Airflow) for workflow management \u00b7 Understanding of data modeling concepts (star schema, wide tables, slowly changing dimensions) to support Analytics Engineering DataOps & Platform Reliability: \u00b7 Strong familiarity with CI/CD concepts, Git workflows, and code review practices \u00b7 Experience with infrastructure-as-code (Terraform, CloudFormation) for reproducible infrastructure \u00b7 Understanding of observability principles (metrics, logging, tracing) and tools (Datadog, Monte Carlo, Elementary) \u00b7 Knowledge of incident management, post-mortems, and SRE practices (SLOs, error budgets, on-call) \u00b7 Ability to balance feature delivery with reliability, technical debt, and automation work Leadership & Soft Skills: \u00b7 Proven ability to build and lead technical teams through periods of significant change and modernization \u00b7 Strong prioritization and time management skills managing competing urgent demands \u00b7 Excellent facilitation skills for technical design discussions, incident response, and retrospectives \u00b7 Change management experience helping teams adopt new tools, practices, and ways of working Required experience: \u00b7 Education: Bachelor's degree in Computer Science, Engineering, Information Systems, or related field, OR equivalent practical experience \u00b7 Experience: Minimum 7 years in data engineering, platform engineering, data infrastructure, or related technical roles \u00b7 Leadership experience: At least 3 years in technical leadership or people management role leading data/platform engineering teams \u00b7 Cloud platform experience: Demonstrated hands-on experience building and operating cloud data platforms (Snowflake, Databricks, Redshift, or similar) in production environments \u00b7 Modernization experience: Proven track record migrating from legacy ETL systems to modern cloud-native ELT platforms \u00b7 Team development: Experience hiring, mentoring, and developing data engineers from junior to senior levels Preferred Education and Experience: \u00b7 Advanced degree: Master's degree in Computer Science, Data Engineering, or related technical field \u00b7 Snowflake expertise: SnowPro Core or Advanced certification, or deep hands-on Snowflake experience \u00b7 Multi-domain environments: Experience building platforms supporting multiple business units, states, or regions with federated operations \u00b7 Education sector: Experience with K-12 education data systems (student information systems, assessment platforms, education data standards) \u00b7 DataOps/SRE background: Formal training or deep experience in site reliability engineering, platform reliability, or DataOps practices \u00b7 Open source contributions: Active participation in data engineering communities, conference presentations, or technical blog posts demonstrating thought leadership Physical Requirements: \u00b7 Prolonged periods working on a computer and in virtual meetings \u00b7 Ability to travel domestically via car and air travel \u00b7 Flexibility for occasional evening/weekend work during critical deployments or incident response What We Offer: Compensation & Benefits: Salaries for people entering this role typically fall between $119,000 and $142,800, commensurate with relevant experience and qualifications and in alignment with internal equity. This role is also eligible for performance pay based on organizational performance and goal attainment. Additionally, we offer medical, dental, and vision plans, disability, life insurance, parenting benefits, flexible spending account options, generous vacation time, referral bonuses, professional development, and a 403(b) plan. You can find more information about our benefits at https://ideapublicschools.org/careers/benefits/. * IDEA may offer a relocation stipend to defray the cost of moving for this role, if applicable. Application process: Submit your application online through Jobvite. Please note that applications will be reviewed on an ongoing basis until the position is filled. Applicants are encouraged to apply as early as possible. Learn more about IDEA At IDEA the Staff Experience Team uses our Core Values to promote human connection and a culture of integrity, respect, and belonging for all Team and Family members. Learn more about our Commitment to Core Values here: https://ideapublicschools.org/our-story/#core-values",
+          "job_is_remote": false,
+          "job_posted_at": "10 days ago",
+          "job_posted_at_timestamp": 1772409600,
+          "job_posted_at_datetime_utc": "2026-03-02T00:00:00.000Z",
+          "job_location": "El Paso, TX",
+          "job_city": "El Paso",
+          "job_state": "Texas",
+          "job_country": "US",
+          "job_latitude": 31.761877799999997,
+          "job_longitude": -106.48502169999999,
+          "job_benefits": [
+            "health_insurance",
+            "dental_coverage",
+            "paid_time_off"
+          ],
+          "job_google_link": "https://www.google.com/search?q=jobs&gl=us&hl=en&udm=8#vhid=vt%3D20/docid%3D-EcP-ksGMRAIbGiVAAAAAA%3D%3D&vssid=jobs-detail-viewer",
+          "job_salary": null,
+          "job_min_salary": null,
+          "job_max_salary": null,
+          "job_salary_period": null,
+          "job_highlights": {},
+          "job_onet_soc": "15113200",
+          "job_onet_job_zone": "4"
+        }
+      },
+      {
+        "external_id": "-V2C22jn8sK104plAAAAAA==",
+        "source": "jsearch",
+        "region_id": "el-paso",
+        "raw_payload_hash": "52f350e45193ee304b4bcf6acddcc3ee56ec629b3deae079afc02df1be1e47a9",
+        "title": "DATA ENGINEER-ASSOC-STAFF",
+        "company": "Electric Company",
+        "description": "COMPANY OVERVIEW:\n\nEl Paso Electric (EPE) is a regional energy provider that is engaged in generation, transmission, and distribution service to power approximately 460,000 customers in a 10,000-square mile area of the Rio Grande Valley in west Texas and southern New Mexico. We invite you to visit epelectric.com to learn more about EPE and our strategic initiatives. Join our EPE Team, and TOGETHER, we will transform the energy landscape.\n\nDATE POSTED: 06/30/25 CLOSING DATE: 07/07/25\n\nGRADE LEVEL: 52-53\n\nDEPARTMENT: Transmission Sub & Relay\n\nSTARTING SALARY: $68,700 - $106,000 Salary is commensurate with experience.\n\nJOB FAMILY SUMMARY PURPOSE:\n\nUnder the general supervision of the Supervisor of Asset Mgmt. and Compliance, is responsible for providing both technical and functional support for information systems used in these departments. The Data Engineer will be responsible for or involved with identifying, designing, building, integrating, and maintaining operational data from several sources. This position will ultimately be responsible for the engineering, administration, configuration and maintenance of software, hardware and related equipment associated with Substation and Transmission Assets and work on continually improving the quality and integrity of data used for maintenance and replacement of these assets.\n\nEDUCATION:\n\u2022 Bachelor's or Master's degree in Computer Science, Engineering, Mathematics, Statistics or a related field.\n\u2022 Knowledge of Electric Utility business preferred.\n\nEXPERIENCE:\n\u2022 0-3 years or more experience required.\n\nMINIMUM KNOWLEDGE, SKILLS & ABILITIES:\n\u2022 Experience in a position as System Administrator or similar role, with highly technical as well as functional business skills related to the development, operation, and maintenance of various relational databases, with knowledge of MAS 8/MAXIMO and its operation preferred.\n\u2022 Experience with process improvement, evaluating client needs and data management sharing practices preferred.\n\u2022 Experience with database management preferred.\n\u2022 Knowledge of power system operations preferred.\n\u2022 Knowledge of Compliance principles preferred.\n\u2022 Ability to utilize complex PC software to monitor, maintain and troubleshoot of complex department software and issues.\n\u2022 Ability to analyze and interpret data and prepare reports and presentations from data obtained.\n\u2022 Ability to manage multiple activities and changing priorities.\n\u2022 Ability to provide guidance on strategic database architecture and deployment, as well as to lead application migration projects, including optimizing technical reliability and improving database performance.\n\u2022 Business background with ability to interface with IT technical resources preferred.\n\u2022 Understanding of technical design specifications; defines test conditions and assists in the development of test plans and execution.\n\u2022 Proficient in the use of several software applications, including spreadsheets, databases, word processing, scheduling and presentation packages. Experience in EPE standard packages preferred (Currently Microsoft Applications).\n\u2022 Analytical and troubleshooting skills.\n\u2022 Ability to start and finish projects with minimal supervision.\n\u2022 Ability to effectively manage several tasks at the same time.\n\u2022 Strong verbal and written communication skills to share insights and recommendations to audiences of varying levels of technical sophistication.\n\u2022 Ability to maintain effective working relationships with officers, managers, fellow employees, and the general public.\n\u2022 Ability to maintain a strong sense of propriety concerning confidential matters.\n\nESSENTIAL JOB FUNCTIONS:\n\u2022 Administration, maintenance, and configuration of the selected operating system.\n\u2022 Oversee the regularly scheduled patching and upgrading of the selected operating system and user acceptance testing regarding MAXIMO software, hardware and equipment upgrades.\n\u2022 Troubleshoot and provide resolution to issues within the MAXIMO system to maintain adequate system operation.\n\u2022 Review proper compatibility of new software, hardware, and systems, including replacement equipment to ensure continued integrity of department software.\n\u2022 Establish, recommend, coordinate, and review technical specifications required for effective system functionality, to include hardware and software.\n\u2022 Monitor department systems to ensure uptime and performance availability target levels are met.\n\u2022 Proactively anticipate the need for system enhancements and provide guidance in optimizing technical reliability to improve the system database performance.\n\u2022 Perform VEE (Validation, Estimation, and Editing) on data sets and provide technical support to the Asset Analyst and other stakeholders.\n\u2022 May be called upon to perform data submission activities to internal departments and external entities as required.\n\u2022 Maintain a high standard of IT and cyber security best practices to ensure a secure operating system, to include installation of cyber security updates, review of system access lists, and other activities as required.\n\u2022 Evaluate gaps in existing data platforms and aid the implementation of modern data platforms.\n\u2022 Identify, design, and implement internal process improvements: automating manual processes, optimizing data delivery.\n\u2022 Ensure the effective collection, organization and distribution of data, from a variety of data sources.\n\u2022 Retrieve, synthesize, and present critical data in a format that is immediately useful to answering specific questions regarding auditing controls.\n\u2022 Troubleshoot data quality issues - Identifying root cause, system & documentation, and communication of resolution.\n\u2022 Acts as a liaison between Information Technology, outside consultants, internal and external auditors, and departments on asset databases and software.\n\u2022 Valid driver's license and be in compliance with the Company's Driving Program policy.\n\u2022 Complies with all applicable Company policies, procedures and code of ethics as well as all applicable governmental laws and regulations to include employment, safety and environmental standards and regulations.\n\u2022 Perform other related tasks that are not included but are within the context of the duties defined.\n\nIf interested in applying for this position, you must apply on-line by 5:00 PM, July 7, 2025. (Please scroll back up to the \"Apply Now\" button)\n\nEqual Opportunity Employer/Protected Veterans/Individuals with Disabilities\n\nThis employer is required to notify all applicants of their rights pursuant to federal employment laws.\nFor further information, please review the Know Your Rights notice from the Department of Labor.",
+        "city": "El Paso",
+        "state": "Texas",
+        "country": "US",
+        "is_remote": false,
+        "date_posted": null,
+        "date_ingested": "2026-03-12T19:19:36.300204",
+        "salary_raw": null,
+        "salary_min": 68700.0,
+        "salary_max": 106000.0,
+        "salary_currency": null,
+        "salary_period": "YEAR",
+        "employment_type": "Full-time",
+        "experience_level": null,
+        "job_url": "https://www.theladders.com/job/data-engineer-assoc-staff-electric-el-paso-tx_82179144?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+        "source_url": "https://jsearch.p.rapidapi.com/search",
+        "raw_payload": {
+          "job_id": "-V2C22jn8sK104plAAAAAA==",
+          "job_title": "DATA ENGINEER-ASSOC-STAFF",
+          "employer_name": "Electric Company",
+          "employer_logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyP3X23LsBjHKwL_xpBgkjh_dz7jzngP0w-Izk&s=0",
+          "employer_website": null,
+          "job_publisher": "Ladders",
+          "job_employment_type": "Full-time",
+          "job_employment_types": [
+            "FULLTIME"
+          ],
+          "job_apply_link": "https://www.theladders.com/job/data-engineer-assoc-staff-electric-el-paso-tx_82179144?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+          "job_apply_is_direct": false,
+          "apply_options": [
+            {
+              "publisher": "Ladders",
+              "apply_link": "https://www.theladders.com/job/data-engineer-assoc-staff-electric-el-paso-tx_82179144?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "apply_link": "https://www.theladders.com/job/data-engineer-assoc-staff-electric-el-paso-tx_82179144",
+              "is_direct": null,
+              "publisher": "Ladders"
+            }
+          ],
+          "job_description": "COMPANY OVERVIEW:\n\nEl Paso Electric (EPE) is a regional energy provider that is engaged in generation, transmission, and distribution service to power approximately 460,000 customers in a 10,000-square mile area of the Rio Grande Valley in west Texas and southern New Mexico. We invite you to visit epelectric.com to learn more about EPE and our strategic initiatives. Join our EPE Team, and TOGETHER, we will transform the energy landscape.\n\nDATE POSTED: 06/30/25 CLOSING DATE: 07/07/25\n\nGRADE LEVEL: 52-53\n\nDEPARTMENT: Transmission Sub & Relay\n\nSTARTING SALARY: $68,700 - $106,000 Salary is commensurate with experience.\n\nJOB FAMILY SUMMARY PURPOSE:\n\nUnder the general supervision of the Supervisor of Asset Mgmt. and Compliance, is responsible for providing both technical and functional support for information systems used in these departments. The Data Engineer will be responsible for or involved with identifying, designing, building, integrating, and maintaining operational data from several sources. This position will ultimately be responsible for the engineering, administration, configuration and maintenance of software, hardware and related equipment associated with Substation and Transmission Assets and work on continually improving the quality and integrity of data used for maintenance and replacement of these assets.\n\nEDUCATION:\n\u2022 Bachelor's or Master's degree in Computer Science, Engineering, Mathematics, Statistics or a related field.\n\u2022 Knowledge of Electric Utility business preferred.\n\nEXPERIENCE:\n\u2022 0-3 years or more experience required.\n\nMINIMUM KNOWLEDGE, SKILLS & ABILITIES:\n\u2022 Experience in a position as System Administrator or similar role, with highly technical as well as functional business skills related to the development, operation, and maintenance of various relational databases, with knowledge of MAS 8/MAXIMO and its operation preferred.\n\u2022 Experience with process improvement, evaluating client needs and data management sharing practices preferred.\n\u2022 Experience with database management preferred.\n\u2022 Knowledge of power system operations preferred.\n\u2022 Knowledge of Compliance principles preferred.\n\u2022 Ability to utilize complex PC software to monitor, maintain and troubleshoot of complex department software and issues.\n\u2022 Ability to analyze and interpret data and prepare reports and presentations from data obtained.\n\u2022 Ability to manage multiple activities and changing priorities.\n\u2022 Ability to provide guidance on strategic database architecture and deployment, as well as to lead application migration projects, including optimizing technical reliability and improving database performance.\n\u2022 Business background with ability to interface with IT technical resources preferred.\n\u2022 Understanding of technical design specifications; defines test conditions and assists in the development of test plans and execution.\n\u2022 Proficient in the use of several software applications, including spreadsheets, databases, word processing, scheduling and presentation packages. Experience in EPE standard packages preferred (Currently Microsoft Applications).\n\u2022 Analytical and troubleshooting skills.\n\u2022 Ability to start and finish projects with minimal supervision.\n\u2022 Ability to effectively manage several tasks at the same time.\n\u2022 Strong verbal and written communication skills to share insights and recommendations to audiences of varying levels of technical sophistication.\n\u2022 Ability to maintain effective working relationships with officers, managers, fellow employees, and the general public.\n\u2022 Ability to maintain a strong sense of propriety concerning confidential matters.\n\nESSENTIAL JOB FUNCTIONS:\n\u2022 Administration, maintenance, and configuration of the selected operating system.\n\u2022 Oversee the regularly scheduled patching and upgrading of the selected operating system and user acceptance testing regarding MAXIMO software, hardware and equipment upgrades.\n\u2022 Troubleshoot and provide resolution to issues within the MAXIMO system to maintain adequate system operation.\n\u2022 Review proper compatibility of new software, hardware, and systems, including replacement equipment to ensure continued integrity of department software.\n\u2022 Establish, recommend, coordinate, and review technical specifications required for effective system functionality, to include hardware and software.\n\u2022 Monitor department systems to ensure uptime and performance availability target levels are met.\n\u2022 Proactively anticipate the need for system enhancements and provide guidance in optimizing technical reliability to improve the system database performance.\n\u2022 Perform VEE (Validation, Estimation, and Editing) on data sets and provide technical support to the Asset Analyst and other stakeholders.\n\u2022 May be called upon to perform data submission activities to internal departments and external entities as required.\n\u2022 Maintain a high standard of IT and cyber security best practices to ensure a secure operating system, to include installation of cyber security updates, review of system access lists, and other activities as required.\n\u2022 Evaluate gaps in existing data platforms and aid the implementation of modern data platforms.\n\u2022 Identify, design, and implement internal process improvements: automating manual processes, optimizing data delivery.\n\u2022 Ensure the effective collection, organization and distribution of data, from a variety of data sources.\n\u2022 Retrieve, synthesize, and present critical data in a format that is immediately useful to answering specific questions regarding auditing controls.\n\u2022 Troubleshoot data quality issues - Identifying root cause, system & documentation, and communication of resolution.\n\u2022 Acts as a liaison between Information Technology, outside consultants, internal and external auditors, and departments on asset databases and software.\n\u2022 Valid driver's license and be in compliance with the Company's Driving Program policy.\n\u2022 Complies with all applicable Company policies, procedures and code of ethics as well as all applicable governmental laws and regulations to include employment, safety and environmental standards and regulations.\n\u2022 Perform other related tasks that are not included but are within the context of the duties defined.\n\nIf interested in applying for this position, you must apply on-line by 5:00 PM, July 7, 2025. (Please scroll back up to the \"Apply Now\" button)\n\nEqual Opportunity Employer/Protected Veterans/Individuals with Disabilities\n\nThis employer is required to notify all applicants of their rights pursuant to federal employment laws.\nFor further information, please review the Know Your Rights notice from the Department of Labor.",
+          "job_is_remote": false,
+          "job_posted_at": null,
+          "job_posted_at_timestamp": null,
+          "job_posted_at_datetime_utc": null,
+          "job_location": "El Paso, TX",
+          "job_city": "El Paso",
+          "job_state": "Texas",
+          "job_country": "US",
+          "job_latitude": 31.761877799999997,
+          "job_longitude": -106.48502169999999,
+          "job_benefits": null,
+          "job_google_link": "https://www.google.com/search?q=jobs&gl=us&hl=en&udm=8#vhid=vt%3D20/docid%3D-V2C22jn8sK104plAAAAAA%3D%3D&vssid=jobs-detail-viewer",
+          "job_min_salary": 68700,
+          "job_max_salary": 106000,
+          "job_salary_period": "YEAR",
+          "job_highlights": {
+            "Qualifications": [
+              "Bachelor's or Master's degree in Computer Science, Engineering, Mathematics, Statistics or a related field",
+              "0-3 years or more experience required",
+              "Ability to utilize complex PC software to monitor, maintain and troubleshoot of complex department software and issues",
+              "Ability to analyze and interpret data and prepare reports and presentations from data obtained",
+              "Ability to manage multiple activities and changing priorities",
+              "Ability to provide guidance on strategic database architecture and deployment, as well as to lead application migration projects, including optimizing technical reliability and improving database performance",
+              "Understanding of technical design specifications; defines test conditions and assists in the development of test plans and execution",
+              "Proficient in the use of several software applications, including spreadsheets, databases, word processing, scheduling and presentation packages",
+              "Valid driver's license and be in compliance with the Company's Driving Program policy"
+            ],
+            "Benefits": [
+              "STARTING SALARY: $68,700 - $106,000 Salary is commensurate with experience"
+            ],
+            "Responsibilities": [
+              "Under the general supervision of the Supervisor of Asset Mgmt",
+              "and Compliance, is responsible for providing both technical and functional support for information systems used in these departments",
+              "The Data Engineer will be responsible for or involved with identifying, designing, building, integrating, and maintaining operational data from several sources",
+              "This position will ultimately be responsible for the engineering, administration, configuration and maintenance of software, hardware and related equipment associated with Substation and Transmission Assets and work on continually improving the quality and integrity of data used for maintenance and replacement of these assets",
+              "Administration, maintenance, and configuration of the selected operating system",
+              "Oversee the regularly scheduled patching and upgrading of the selected operating system and user acceptance testing regarding MAXIMO software, hardware and equipment upgrades",
+              "Troubleshoot and provide resolution to issues within the MAXIMO system to maintain adequate system operation",
+              "Review proper compatibility of new software, hardware, and systems, including replacement equipment to ensure continued integrity of department software",
+              "Establish, recommend, coordinate, and review technical specifications required for effective system functionality, to include hardware and software",
+              "Monitor department systems to ensure uptime and performance availability target levels are met",
+              "Proactively anticipate the need for system enhancements and provide guidance in optimizing technical reliability to improve the system database performance",
+              "Perform VEE (Validation, Estimation, and Editing) on data sets and provide technical support to the Asset Analyst and other stakeholders",
+              "May be called upon to perform data submission activities to internal departments and external entities as required",
+              "Maintain a high standard of IT and cyber security best practices to ensure a secure operating system, to include installation of cyber security updates, review of system access lists, and other activities as required",
+              "Evaluate gaps in existing data platforms and aid the implementation of modern data platforms",
+              "Identify, design, and implement internal process improvements: automating manual processes, optimizing data delivery",
+              "Ensure the effective collection, organization and distribution of data, from a variety of data sources",
+              "Retrieve, synthesize, and present critical data in a format that is immediately useful to answering specific questions regarding auditing controls",
+              "Troubleshoot data quality issues - Identifying root cause, system & documentation, and communication of resolution",
+              "Acts as a liaison between Information Technology, outside consultants, internal and external auditors, and departments on asset databases and software",
+              "Complies with all applicable Company policies, procedures and code of ethics as well as all applicable governmental laws and regulations to include employment, safety and environmental standards and regulations",
+              "Perform other related tasks that are not included but are within the context of the duties defined"
+            ]
+          },
+          "job_onet_soc": "15113200",
+          "job_onet_job_zone": "4"
+        }
+      },
+      {
+        "external_id": "TwLZSkjOGNJ3VheTAAAAAA==",
+        "source": "jsearch",
+        "region_id": "el-paso",
+        "raw_payload_hash": "973d5310b4420625a8072d7dd7619124218bd9f5c966c8bfdce99edfd9d7fb7b",
+        "title": "Mgr Software Development- REMOTE",
+        "company": "AnswerNet",
+        "description": "Job Type: Full Time\nHours: Days\nSalary: $80-$120 K Yearly\n\nAbout AnswerNet\nAnswerNet is the brand name for the AnswerNet family of companies, including AnswerNet, Inc., New AnswerNet Inc., Cerida Investment Corp., TPV.com, and Ansercomm, to name a few. Together with our affiliates, AnswerNet operates more than 20 contact centers within the continental United States and Canada. We provide a vast range of services to optimize telephone answering services, appointment setting and confirmation, customer support, third-party verification, sales, lead qualification, market research, and a host of other contact management solutions. In all, AnswerNet has more than 10,000 satisfied clients, and we process over 125 million interactions per year.\n\nSummary of Position:\n\nReporting to the Director of Software and Data, the Manager of Software Development will be responsible for overseeing the successful development, implementation, and maintenance of our software applications and data infrastructure. This role requires a strong blend of technical expertise, proven leadership skills, and a deep understanding of Agile methodologies. The successful candidate will lead a team of talented software engineers and data professionals, ensuring the delivery of high-quality, impactful solutions that align with our strategic objectives.\n\nKey Responsibilities:\n\nTeam Leadership & Development: Lead, mentor, and inspire a high-performing team of software engineers and data professionals. This includes maintaining and enforcing standards, conducting performance reviews, fostering career development (including your own), and promoting a collaborative and innovative team culture.\nAgile Leadership: Serve as an expert in Agile methodologies (Scrum, Kanban), actively coaching and mentoring teams to optimize processes, improve efficiency, and foster a continuous delivery mindset.\nProduct Ownership Support: Leverage proven Product Owner experience to guide the definition of product vision, manage and prioritize backlogs, articulate user stories, and ensure close collaboration with stakeholders to maximize value delivery.\nThis includes being on-call 24/7 for emergencies when needed\nStakeholder Communication: Exhibit exceptional communication skills to effectively collaborate with technical teams, Product Owners, business stakeholders, and senior management, translating complex technical concepts into clear, actionable insights.\nProblem-Solving & Innovation: Proactively identify and resolve complex technical and process-related challenges, demonstrating a commitment to continuous improvement, research, and the adoption of innovative solutions.\nTechnical Decision Making: Apply strong technical acumen to make informed decisions and provide expert guidance in areas such as:\nTechnical Review, Assessment, and Adjustment: Lead and perform technical reviews of architecture, code, and data models; conduct technical assessments of new tools, frameworks, and proposed solutions; and recommend and implement adjustments to ensure performance, scalability, and adherence to engineering standards.\nChange Advisory Board (CAB) Processes: Actively participate in CAB discussions, evaluate the technical impact of proposed changes, and ensure seamless implementation.\nRelease Management: Oversee the entire software and data release lifecycle, ensuring quality assurance, system stability, and timely deployments.\nRisk Assessment: Proactively identify, analyze, and mitigate technical risks across all software development and data operations.\nProject and Resource Management: Plan and oversee software and data projects, including resource allocation, timeline management, and ensuring projects are delivered on time and within scope.\n\nRequired skills and technologies:\n\nProven experience with cloud platforms (e.g., AWS, Azure, GCP).\nFamiliarity with various programming languages relevant to software development (e.g., Python, Java, C#, JavaScript, PHP).\nExperience with relational and/or NoSQL database technologies (e.g., PostgreSQL, SQL Server, MongoDB, Cassandra).\nProficiency with version control systems (e.g., Git).\nUnderstanding of CI/CD pipelines and DevOps principles.\nStrong analytical and problem-solving abilities with attention to detail.\nExcellent communication skills, both written and verbal.\nAbility to work effectively with stakeholders at all levels.\n3+ years of related management experience.",
+        "city": "El Paso",
+        "state": "Texas",
+        "country": "US",
+        "is_remote": true,
+        "date_posted": null,
+        "date_ingested": "2026-03-12T19:19:36.300234",
+        "salary_raw": null,
+        "salary_min": 80.0,
+        "salary_max": 120.0,
+        "salary_currency": null,
+        "salary_period": "HOUR",
+        "employment_type": "Full-time",
+        "experience_level": null,
+        "job_url": "https://www.indeed.com/viewjob?jk=a1f1a0cd3111d2a5&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+        "source_url": "https://jsearch.p.rapidapi.com/search",
+        "raw_payload": {
+          "job_id": "TwLZSkjOGNJ3VheTAAAAAA==",
+          "job_title": "Mgr Software Development- REMOTE",
+          "employer_name": "AnswerNet",
+          "employer_logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQplYyRvI0ab7-CC1DQZItdwX2y9azXIKQBd0gK&s=0",
+          "employer_website": "https://answernet.com",
+          "job_publisher": "Indeed",
+          "job_employment_type": "Full-time",
+          "job_employment_types": [
+            "FULLTIME"
+          ],
+          "job_apply_link": "https://www.indeed.com/viewjob?jk=a1f1a0cd3111d2a5&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+          "job_apply_is_direct": true,
+          "apply_options": [
+            {
+              "publisher": "Indeed",
+              "apply_link": "https://www.indeed.com/viewjob?jk=a1f1a0cd3111d2a5&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": true
+            },
+            {
+              "publisher": "ZipRecruiter",
+              "apply_link": "https://www.ziprecruiter.com/c/AnswerNet/Job/Mgr-Software-Development-REMOTE/-in-Remote,US?jid=625cb2f95686c3c5&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": true
+            },
+            {
+              "publisher": "Glassdoor",
+              "apply_link": "https://www.glassdoor.com/job-listing/mgr-software-development-remote-answernet-JV_IC1140105_KO0,31_KE32,41.htm?jl=1009948152299&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": true
+            },
+            {
+              "publisher": "Hiring Cafe",
+              "apply_link": "https://hiring.cafe/viewjob/mj357vjgqpp2rzip?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Jobs Trabajo.org",
+              "apply_link": "https://us.trabajo.org/job-2611-e3f373932290c7d4ed6b29def08a678e?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "apply_link": "https://www.indeed.com/viewjob?jk=a1f1a0cd3111d2a5",
+              "is_direct": null,
+              "publisher": "Indeed"
+            }
+          ],
+          "job_description": "Job Type: Full Time\nHours: Days\nSalary: $80-$120 K Yearly\n\nAbout AnswerNet\nAnswerNet is the brand name for the AnswerNet family of companies, including AnswerNet, Inc., New AnswerNet Inc., Cerida Investment Corp., TPV.com, and Ansercomm, to name a few. Together with our affiliates, AnswerNet operates more than 20 contact centers within the continental United States and Canada. We provide a vast range of services to optimize telephone answering services, appointment setting and confirmation, customer support, third-party verification, sales, lead qualification, market research, and a host of other contact management solutions. In all, AnswerNet has more than 10,000 satisfied clients, and we process over 125 million interactions per year.\n\nSummary of Position:\n\nReporting to the Director of Software and Data, the Manager of Software Development will be responsible for overseeing the successful development, implementation, and maintenance of our software applications and data infrastructure. This role requires a strong blend of technical expertise, proven leadership skills, and a deep understanding of Agile methodologies. The successful candidate will lead a team of talented software engineers and data professionals, ensuring the delivery of high-quality, impactful solutions that align with our strategic objectives.\n\nKey Responsibilities:\n\nTeam Leadership & Development: Lead, mentor, and inspire a high-performing team of software engineers and data professionals. This includes maintaining and enforcing standards, conducting performance reviews, fostering career development (including your own), and promoting a collaborative and innovative team culture.\nAgile Leadership: Serve as an expert in Agile methodologies (Scrum, Kanban), actively coaching and mentoring teams to optimize processes, improve efficiency, and foster a continuous delivery mindset.\nProduct Ownership Support: Leverage proven Product Owner experience to guide the definition of product vision, manage and prioritize backlogs, articulate user stories, and ensure close collaboration with stakeholders to maximize value delivery.\nThis includes being on-call 24/7 for emergencies when needed\nStakeholder Communication: Exhibit exceptional communication skills to effectively collaborate with technical teams, Product Owners, business stakeholders, and senior management, translating complex technical concepts into clear, actionable insights.\nProblem-Solving & Innovation: Proactively identify and resolve complex technical and process-related challenges, demonstrating a commitment to continuous improvement, research, and the adoption of innovative solutions.\nTechnical Decision Making: Apply strong technical acumen to make informed decisions and provide expert guidance in areas such as:\nTechnical Review, Assessment, and Adjustment: Lead and perform technical reviews of architecture, code, and data models; conduct technical assessments of new tools, frameworks, and proposed solutions; and recommend and implement adjustments to ensure performance, scalability, and adherence to engineering standards.\nChange Advisory Board (CAB) Processes: Actively participate in CAB discussions, evaluate the technical impact of proposed changes, and ensure seamless implementation.\nRelease Management: Oversee the entire software and data release lifecycle, ensuring quality assurance, system stability, and timely deployments.\nRisk Assessment: Proactively identify, analyze, and mitigate technical risks across all software development and data operations.\nProject and Resource Management: Plan and oversee software and data projects, including resource allocation, timeline management, and ensuring projects are delivered on time and within scope.\n\nRequired skills and technologies:\n\nProven experience with cloud platforms (e.g., AWS, Azure, GCP).\nFamiliarity with various programming languages relevant to software development (e.g., Python, Java, C#, JavaScript, PHP).\nExperience with relational and/or NoSQL database technologies (e.g., PostgreSQL, SQL Server, MongoDB, Cassandra).\nProficiency with version control systems (e.g., Git).\nUnderstanding of CI/CD pipelines and DevOps principles.\nStrong analytical and problem-solving abilities with attention to detail.\nExcellent communication skills, both written and verbal.\nAbility to work effectively with stakeholders at all levels.\n3+ years of related management experience.",
+          "job_is_remote": true,
+          "job_posted_at": null,
+          "job_posted_at_timestamp": null,
+          "job_posted_at_datetime_utc": null,
+          "job_location": "El Paso, TX",
+          "job_city": "El Paso",
+          "job_state": "Texas",
+          "job_country": "US",
+          "job_latitude": 31.761877799999997,
+          "job_longitude": -106.48502169999999,
+          "job_benefits": null,
+          "job_google_link": "https://www.google.com/search?q=jobs&gl=us&hl=en&udm=8#vhid=vt%3D20/docid%3DTwLZSkjOGNJ3VheTAAAAAA%3D%3D&vssid=jobs-detail-viewer",
+          "job_min_salary": 80,
+          "job_max_salary": 120,
+          "job_salary_period": "HOUR",
+          "job_highlights": {
+            "Qualifications": [
+              "This role requires a strong blend of technical expertise, proven leadership skills, and a deep understanding of Agile methodologies",
+              "Proven experience with cloud platforms (e.g., AWS, Azure, GCP)",
+              "Familiarity with various programming languages relevant to software development (e.g., Python, Java, C#, JavaScript, PHP)",
+              "Experience with relational and/or NoSQL database technologies (e.g., PostgreSQL, SQL Server, MongoDB, Cassandra)",
+              "Proficiency with version control systems (e.g., Git)",
+              "Understanding of CI/CD pipelines and DevOps principles",
+              "Strong analytical and problem-solving abilities with attention to detail",
+              "Excellent communication skills, both written and verbal",
+              "Ability to work effectively with stakeholders at all levels",
+              "3+ years of related management experience"
+            ],
+            "Benefits": [
+              "Salary: $80-$120 K Yearly"
+            ],
+            "Responsibilities": [
+              "Reporting to the Director of Software and Data, the Manager of Software Development will be responsible for overseeing the successful development, implementation, and maintenance of our software applications and data infrastructure",
+              "The successful candidate will lead a team of talented software engineers and data professionals, ensuring the delivery of high-quality, impactful solutions that align with our strategic objectives",
+              "Team Leadership & Development: Lead, mentor, and inspire a high-performing team of software engineers and data professionals",
+              "This includes maintaining and enforcing standards, conducting performance reviews, fostering career development (including your own), and promoting a collaborative and innovative team culture",
+              "Agile Leadership: Serve as an expert in Agile methodologies (Scrum, Kanban), actively coaching and mentoring teams to optimize processes, improve efficiency, and foster a continuous delivery mindset",
+              "Product Ownership Support: Leverage proven Product Owner experience to guide the definition of product vision, manage and prioritize backlogs, articulate user stories, and ensure close collaboration with stakeholders to maximize value delivery",
+              "This includes being on-call 24/7 for emergencies when needed",
+              "Stakeholder Communication: Exhibit exceptional communication skills to effectively collaborate with technical teams, Product Owners, business stakeholders, and senior management, translating complex technical concepts into clear, actionable insights",
+              "Problem-Solving & Innovation: Proactively identify and resolve complex technical and process-related challenges, demonstrating a commitment to continuous improvement, research, and the adoption of innovative solutions",
+              "Technical Decision Making: Apply strong technical acumen to make informed decisions and provide expert guidance in areas such as:",
+              "Technical Review, Assessment, and Adjustment: Lead and perform technical reviews of architecture, code, and data models; conduct technical assessments of new tools, frameworks, and proposed solutions; and recommend and implement adjustments to ensure performance, scalability, and adherence to engineering standards",
+              "Change Advisory Board (CAB) Processes: Actively participate in CAB discussions, evaluate the technical impact of proposed changes, and ensure seamless implementation",
+              "Release Management: Oversee the entire software and data release lifecycle, ensuring quality assurance, system stability, and timely deployments",
+              "Risk Assessment: Proactively identify, analyze, and mitigate technical risks across all software development and data operations",
+              "Project and Resource Management: Plan and oversee software and data projects, including resource allocation, timeline management, and ensuring projects are delivered on time and within scope"
+            ]
+          },
+          "job_onet_soc": "15113200",
+          "job_onet_job_zone": "4"
+        }
+      },
+      {
+        "external_id": "7CBzrvFHkUQvA4sdAAAAAA==",
+        "source": "jsearch",
+        "region_id": "el-paso",
+        "raw_payload_hash": "70de5261aea7b933f10daa83a0c776aed7744b9274b5b16b9fc4deb777566c67",
+        "title": "Data Engineer",
+        "company": "JANUS Research Group",
+        "description": "Data Engineer\n\nLocation: Fort Bliss, TX (routine CONUS travel; OCONUS as mission dictates) or Remote (preference for Ft. Eustis, VA or Austin, TX)\nClearance: Active Secret\n\nAbout the Role\n\nJoin JANUS as a Data Engineer supporting Army modernization. You will design and operate secure, scalable data pipelines that integrate operational, simulation, and enterprise data into analysis-ready formats. Your work will enable real-time dashboards, predictive analytics, and decision support products used across Army event cycles and campaign planning.\n\nKey Responsibilities\n\u2022 Build & Operate Pipelines: Design, implement, and optimize ETL/ELT pipelines using SQL, Python, and Azure services (Data & Storage, Databricks, Purview).\n\u2022 Integrate Data Sources: Ingest and standardize diverse Army datasets into relational databases with clear lineage, metadata, and quality controls.\n\u2022 Support Army Operations: Enable near-real-time data products that inform analytics, dashboards, and assessments supporting Army staff and decision-makers.\n\u2022 Cloud Engineering: Leverage Azure PaaS solutions to design scalable, secure data integration strategies aligned with AIMD\u2019s enterprise architecture.\n\u2022 Governance & Security: Apply OPSEC, IA, and PII safeguards across workflows; ensure compliance with Army data governance practices.\n\u2022 Collaboration: Work with software development teams, stakeholders, and analysts to ensure data solutions meet mission requirements and PRS-driven timelines.\n\nQualifications\n\u2022 Education: Bachelor\u2019s degree in Computer Science, Information Systems, Engineering, Math, or related field. Equivalent experience may substitute.\n\u2022 Clearance: Active Secret clearance required.\n\u2022 Experience:\n\u2022 3\u20135+ years in data engineering, ETL, or data wrangling.\n\u2022 Hands-on SQL and scripting/ETL (Python or similar).\n\u2022 Experience with Azure cloud services (Data & Storage, Analytics, Databricks, Purview) preferred.\n\u2022 Familiarity with DoD/Army datasets, event-driven deliverables, or mission data environments a plus.\n\u2022 Skills:\n\u2022 Strong problem-solving and analytical skills, including data modeling and blending.\n\u2022 Effective communicator, able to document work clearly and engage with Army stakeholders.\n\u2022 Motivated team player, comfortable in fast-paced, multi-stakeholder environments.\n\nBenefits:\n\n401(k), Paid Time Off (PTO), Paid Holidays, Medical and Dental Plans, Life and Disability insurance, Education Assistance (and more).\n\nJANUS strives to provide opportunities for career growth through training and development. We also offer an attractive comprehensive benefit package to include health and welfare plans and financial products. As part of a total rewards program, employees can benefit from our referral bonus program, and other various employee awards. JANUS Research Group takes pride in our benefit package and rewards program which has earned us the certification of a Great Place to Work\u2122\n\nJANUS Research Group provides reasonable accommodation so that qualified applicants with a disability may participate in the selection process. Please advise us of any accommodations you request to express interest in a position by e-mailing: Alisha Pollard, Director of Human Resources at alisha.pollard@janusresearch.com or calling (706) 364-9100. Please state your request for assistance in your message. Only reasonable accommodation requests related to applying for a specific position within JANUS Research Group will be reviewed at the e-mail address and phone number supplied. Thank you for considering a career with JANUS Research Group.\n\nJANUS Research Group participates in the Electronic Employment Verification Program. Please click the E-Verify link below for more information.\n\nE-Verify\n\nJANUS Research Group is an equal opportunity/ affirmative action employer. It is company policy to provide equal opportunity in all areas of employment practice without regard to race, color, religion, sex, sexual orientation, national origin, age, marital status, veteran status, citizenship, or disability.\n\nThis contractor and subcontractor shall abide by the requirements of 41 CFR 60-1.4(a), 60-300.5(a) and 60-741.5(a). These regulations prohibit discrimination against qualified individuals based on their status as protected veterans or individuals with disabilities and prohibit discrimination against all individuals based on their race, color, religion, sex, or national origin. Moreover, these regulations require that covered prime contractors and subcontractors take affirmative action to employ and advance in employment qualified individuals without regard to race, color, religion, sex, national origin, protected veteran status or disability.",
+        "city": "El Paso",
+        "state": "Texas",
+        "country": "US",
+        "is_remote": false,
+        "date_posted": null,
+        "date_ingested": "2026-03-12T19:19:36.300259",
+        "salary_raw": null,
+        "salary_min": null,
+        "salary_max": null,
+        "salary_currency": null,
+        "salary_period": null,
+        "employment_type": "Full-time",
+        "experience_level": null,
+        "job_url": "https://www.ziprecruiter.com/c/JANUS-Research-Group/Job/Data-Engineer/-in-El-Paso,TX?jid=e343512745c0b44a&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+        "source_url": "https://jsearch.p.rapidapi.com/search",
+        "raw_payload": {
+          "job_id": "7CBzrvFHkUQvA4sdAAAAAA==",
+          "job_title": "Data Engineer",
+          "employer_name": "JANUS Research Group",
+          "employer_logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRY5csImGUzaMRmfvGe9OV8o0EPxa6ulgEf4ywB&s=0",
+          "employer_website": "https://www.janusresearch.com",
+          "job_publisher": "ZipRecruiter",
+          "job_employment_type": "Full-time",
+          "job_employment_types": [
+            "FULLTIME"
+          ],
+          "job_apply_link": "https://www.ziprecruiter.com/c/JANUS-Research-Group/Job/Data-Engineer/-in-El-Paso,TX?jid=e343512745c0b44a&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+          "job_apply_is_direct": true,
+          "apply_options": [
+            {
+              "publisher": "ZipRecruiter",
+              "apply_link": "https://www.ziprecruiter.com/c/JANUS-Research-Group/Job/Data-Engineer/-in-El-Paso,TX?jid=e343512745c0b44a&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": true
+            },
+            {
+              "publisher": "WayUp",
+              "apply_link": "https://www.wayup.com/i-j-Data-Engineer-Precise-Systems-504203936500790/?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Jooble",
+              "apply_link": "https://jooble.org/jdp/-4343267033051767869?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Talents By Vaia",
+              "apply_link": "https://talents.vaia.com/companies/united-it/data-engineer-34765337/?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Lensa",
+              "apply_link": "https://lensa.com/job-v1/janus-research-group/el-paso-tx/data-engineer/6df38d332c06e4336d8e129cdddace51?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Ctapp.forum",
+              "apply_link": "https://ctapp.forum/publications/B4pvyI9i?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "JobLeads",
+              "apply_link": "https://www.jobleads.com/us/job/data-engineer--el-paso--e640153ea62dadb3de946b460f23899d1?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Socialesquechuastilb.com",
+              "apply_link": "https://socialesquechuastilb.com/widgets/O5wTQPH7?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "apply_link": "https://www.ziprecruiter.com/c/JANUS-Research-Group/Job/Data-Engineer/-in-El-Paso,TX?jid=e343512745c0b44a",
+              "is_direct": null,
+              "publisher": "ZipRecruiter"
+            }
+          ],
+          "job_description": "Data Engineer\n\nLocation: Fort Bliss, TX (routine CONUS travel; OCONUS as mission dictates) or Remote (preference for Ft. Eustis, VA or Austin, TX)\nClearance: Active Secret\n\nAbout the Role\n\nJoin JANUS as a Data Engineer supporting Army modernization. You will design and operate secure, scalable data pipelines that integrate operational, simulation, and enterprise data into analysis-ready formats. Your work will enable real-time dashboards, predictive analytics, and decision support products used across Army event cycles and campaign planning.\n\nKey Responsibilities\n\u2022 Build & Operate Pipelines: Design, implement, and optimize ETL/ELT pipelines using SQL, Python, and Azure services (Data & Storage, Databricks, Purview).\n\u2022 Integrate Data Sources: Ingest and standardize diverse Army datasets into relational databases with clear lineage, metadata, and quality controls.\n\u2022 Support Army Operations: Enable near-real-time data products that inform analytics, dashboards, and assessments supporting Army staff and decision-makers.\n\u2022 Cloud Engineering: Leverage Azure PaaS solutions to design scalable, secure data integration strategies aligned with AIMD\u2019s enterprise architecture.\n\u2022 Governance & Security: Apply OPSEC, IA, and PII safeguards across workflows; ensure compliance with Army data governance practices.\n\u2022 Collaboration: Work with software development teams, stakeholders, and analysts to ensure data solutions meet mission requirements and PRS-driven timelines.\n\nQualifications\n\u2022 Education: Bachelor\u2019s degree in Computer Science, Information Systems, Engineering, Math, or related field. Equivalent experience may substitute.\n\u2022 Clearance: Active Secret clearance required.\n\u2022 Experience:\n\u2022 3\u20135+ years in data engineering, ETL, or data wrangling.\n\u2022 Hands-on SQL and scripting/ETL (Python or similar).\n\u2022 Experience with Azure cloud services (Data & Storage, Analytics, Databricks, Purview) preferred.\n\u2022 Familiarity with DoD/Army datasets, event-driven deliverables, or mission data environments a plus.\n\u2022 Skills:\n\u2022 Strong problem-solving and analytical skills, including data modeling and blending.\n\u2022 Effective communicator, able to document work clearly and engage with Army stakeholders.\n\u2022 Motivated team player, comfortable in fast-paced, multi-stakeholder environments.\n\nBenefits:\n\n401(k), Paid Time Off (PTO), Paid Holidays, Medical and Dental Plans, Life and Disability insurance, Education Assistance (and more).\n\nJANUS strives to provide opportunities for career growth through training and development. We also offer an attractive comprehensive benefit package to include health and welfare plans and financial products. As part of a total rewards program, employees can benefit from our referral bonus program, and other various employee awards. JANUS Research Group takes pride in our benefit package and rewards program which has earned us the certification of a Great Place to Work\u2122\n\nJANUS Research Group provides reasonable accommodation so that qualified applicants with a disability may participate in the selection process. Please advise us of any accommodations you request to express interest in a position by e-mailing: Alisha Pollard, Director of Human Resources at alisha.pollard@janusresearch.com or calling (706) 364-9100. Please state your request for assistance in your message. Only reasonable accommodation requests related to applying for a specific position within JANUS Research Group will be reviewed at the e-mail address and phone number supplied. Thank you for considering a career with JANUS Research Group.\n\nJANUS Research Group participates in the Electronic Employment Verification Program. Please click the E-Verify link below for more information.\n\nE-Verify\n\nJANUS Research Group is an equal opportunity/ affirmative action employer. It is company policy to provide equal opportunity in all areas of employment practice without regard to race, color, religion, sex, sexual orientation, national origin, age, marital status, veteran status, citizenship, or disability.\n\nThis contractor and subcontractor shall abide by the requirements of 41 CFR 60-1.4(a), 60-300.5(a) and 60-741.5(a). These regulations prohibit discrimination against qualified individuals based on their status as protected veterans or individuals with disabilities and prohibit discrimination against all individuals based on their race, color, religion, sex, or national origin. Moreover, these regulations require that covered prime contractors and subcontractors take affirmative action to employ and advance in employment qualified individuals without regard to race, color, religion, sex, national origin, protected veteran status or disability.",
+          "job_is_remote": false,
+          "job_posted_at": null,
+          "job_posted_at_timestamp": null,
+          "job_posted_at_datetime_utc": null,
+          "job_location": "El Paso, TX",
+          "job_city": "El Paso",
+          "job_state": "Texas",
+          "job_country": "US",
+          "job_latitude": 31.761877799999997,
+          "job_longitude": -106.48502169999999,
+          "job_benefits": [
+            "health_insurance",
+            "dental_coverage",
+            "paid_time_off"
+          ],
+          "job_google_link": "https://www.google.com/search?q=jobs&gl=us&hl=en&udm=8#vhid=vt%3D20/docid%3D7CBzrvFHkUQvA4sdAAAAAA%3D%3D&vssid=jobs-detail-viewer",
+          "job_salary": null,
+          "job_min_salary": null,
+          "job_max_salary": null,
+          "job_salary_period": null,
+          "job_highlights": {
+            "Qualifications": [
+              "Education: Bachelor\u2019s degree in Computer Science, Information Systems, Engineering, Math, or related field",
+              "Clearance: Active Secret clearance required",
+              "3\u20135+ years in data engineering, ETL, or data wrangling",
+              "Hands-on SQL and scripting/ETL (Python or similar)",
+              "Strong problem-solving and analytical skills, including data modeling and blending",
+              "Effective communicator, able to document work clearly and engage with Army stakeholders",
+              "Motivated team player, comfortable in fast-paced, multi-stakeholder environments"
+            ],
+            "Benefits": [
+              "401(k), Paid Time Off (PTO), Paid Holidays, Medical and Dental Plans, Life and Disability insurance, Education Assistance (and more)",
+              "JANUS strives to provide opportunities for career growth through training and development",
+              "We also offer an attractive comprehensive benefit package to include health and welfare plans and financial products",
+              "As part of a total rewards program, employees can benefit from our referral bonus program, and other various employee awards"
+            ],
+            "Responsibilities": [
+              "You will design and operate secure, scalable data pipelines that integrate operational, simulation, and enterprise data into analysis-ready formats",
+              "Your work will enable real-time dashboards, predictive analytics, and decision support products used across Army event cycles and campaign planning",
+              "Build & Operate Pipelines: Design, implement, and optimize ETL/ELT pipelines using SQL, Python, and Azure services (Data & Storage, Databricks, Purview)",
+              "Integrate Data Sources: Ingest and standardize diverse Army datasets into relational databases with clear lineage, metadata, and quality controls",
+              "Support Army Operations: Enable near-real-time data products that inform analytics, dashboards, and assessments supporting Army staff and decision-makers",
+              "Cloud Engineering: Leverage Azure PaaS solutions to design scalable, secure data integration strategies aligned with AIMD\u2019s enterprise architecture",
+              "Governance & Security: Apply OPSEC, IA, and PII safeguards across workflows; ensure compliance with Army data governance practices",
+              "Collaboration: Work with software development teams, stakeholders, and analysts to ensure data solutions meet mission requirements and PRS-driven timelines"
+            ]
+          },
+          "job_onet_soc": "15113200",
+          "job_onet_job_zone": "4"
+        }
+      },
+      {
+        "external_id": "rYhkHLp7hLBWh4qEAAAAAA==",
+        "source": "jsearch",
+        "region_id": "el-paso",
+        "raw_payload_hash": "7b2592ded93b7db4b14d8b1921f3a3f29c59626f26d206bb624eb5628116bb2f",
+        "title": "Software Engineer, Data Platform",
+        "company": "Virtual Vocations Inc",
+        "description": "A company is looking for a Software Engineer, Data Platform.\nKey Responsibilities\n\nDesign, build, and maintain backend services, APIs, and infrastructure components\nContribute to data pipelines and processes for data extraction, processing, and transformation\nDrive engineering projects from start to finish with a high level of ownership and autonomy\n\nRequired Qualifications\n\n8+ years of software engineering experience with an emphasis on Data Engineering\nStrong backend development skills, including building and supporting REST/gRPC APIs and services\nExperience with complex SQL queries and database/lakehouse technologies\nFamiliarity with cloud platforms like AWS, GCP, or Azure\nA bias for action and eagerness to learn and grow",
+        "city": "El Paso",
+        "state": "Texas",
+        "country": "US",
+        "is_remote": false,
+        "date_posted": "2026-03-04T00:00:00",
+        "date_ingested": "2026-03-12T19:19:36.300310",
+        "salary_raw": null,
+        "salary_min": null,
+        "salary_max": null,
+        "salary_currency": null,
+        "salary_period": null,
+        "employment_type": "Full-time",
+        "experience_level": null,
+        "job_url": "https://www.jobilize.com/job/us-tx-el-paso-software-engineer-data-platform-virtual-vocations-hiring?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+        "source_url": "https://jsearch.p.rapidapi.com/search",
+        "raw_payload": {
+          "job_id": "rYhkHLp7hLBWh4qEAAAAAA==",
+          "job_title": "Software Engineer, Data Platform",
+          "employer_name": "Virtual Vocations Inc",
+          "employer_logo": null,
+          "employer_website": "https://www.virtualvocations.com",
+          "job_publisher": "Jobilize",
+          "job_employment_type": "Full-time",
+          "job_employment_types": [
+            "FULLTIME"
+          ],
+          "job_apply_link": "https://www.jobilize.com/job/us-tx-el-paso-software-engineer-data-platform-virtual-vocations-hiring?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+          "job_apply_is_direct": false,
+          "apply_options": [
+            {
+              "publisher": "Jobilize",
+              "apply_link": "https://www.jobilize.com/job/us-tx-el-paso-software-engineer-data-platform-virtual-vocations-hiring?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "apply_link": "https://www.jobilize.com/job/us-tx-el-paso-software-engineer-data-platform-virtual-vocations-hiring",
+              "is_direct": null,
+              "publisher": "Jobilize"
+            }
+          ],
+          "job_description": "A company is looking for a Software Engineer, Data Platform.\nKey Responsibilities\n\nDesign, build, and maintain backend services, APIs, and infrastructure components\nContribute to data pipelines and processes for data extraction, processing, and transformation\nDrive engineering projects from start to finish with a high level of ownership and autonomy\n\nRequired Qualifications\n\n8+ years of software engineering experience with an emphasis on Data Engineering\nStrong backend development skills, including building and supporting REST/gRPC APIs and services\nExperience with complex SQL queries and database/lakehouse technologies\nFamiliarity with cloud platforms like AWS, GCP, or Azure\nA bias for action and eagerness to learn and grow",
+          "job_is_remote": false,
+          "job_posted_at": "8 days ago",
+          "job_posted_at_timestamp": 1772582400,
+          "job_posted_at_datetime_utc": "2026-03-04T00:00:00.000Z",
+          "job_location": "El Paso, TX",
+          "job_city": "El Paso",
+          "job_state": "Texas",
+          "job_country": "US",
+          "job_latitude": 31.761877799999997,
+          "job_longitude": -106.48502169999999,
+          "job_benefits": null,
+          "job_google_link": "https://www.google.com/search?q=jobs&gl=us&hl=en&udm=8#vhid=vt%3D20/docid%3DrYhkHLp7hLBWh4qEAAAAAA%3D%3D&vssid=jobs-detail-viewer",
+          "job_salary": null,
+          "job_min_salary": null,
+          "job_max_salary": null,
+          "job_salary_period": null,
+          "job_highlights": {
+            "Qualifications": [
+              "8+ years of software engineering experience with an emphasis on Data Engineering",
+              "Strong backend development skills, including building and supporting REST/gRPC APIs and services",
+              "Experience with complex SQL queries and database/lakehouse technologies",
+              "Familiarity with cloud platforms like AWS, GCP, or Azure",
+              "A bias for action and eagerness to learn and grow"
+            ],
+            "Responsibilities": [
+              "Design, build, and maintain backend services, APIs, and infrastructure components",
+              "Contribute to data pipelines and processes for data extraction, processing, and transformation",
+              "Drive engineering projects from start to finish with a high level of ownership and autonomy"
+            ]
+          },
+          "job_onet_soc": "15113200",
+          "job_onet_job_zone": "4"
+        }
+      },
+      {
+        "external_id": "W4PujreM1JqqLYk9AAAAAA==",
+        "source": "jsearch",
+        "region_id": "el-paso",
+        "raw_payload_hash": "b46b2caaffe51ce903e0363cca0585a95ed2ce3a079805d80dfe1bfd5cfe9fd7",
+        "title": "Senior Data Engineer Op AI",
+        "company": "Precise Systems",
+        "description": "Diagnose, treat, and manage many disorders in children who have been diagnosed with a childhood cancer or blood disorders. Diagnose, treat, and manage pediatric and adolescent patients with cancer or blood disorders, including leukemia, lymphoma, embryonic tumors and genetic blood disorders such as sickle-cell anemia or hemophilia.\n\nRequired Skills\n\u2022 Effective assessment, evaluation and resolution skills.\n\u2022 Effective oral and written communication skills.\n\u2022 Ability to remain flexible and positive in stressful situations.\n\u2022 Ability to read and comprehend English at a level necessary to follow written and oral instructions and safety precautions.\n\u2022 Bilingual preferred (English/Spanish).\n\nRequired Experience\n\nWork Experience:\n\u2022 Minimum of 3 years related experience and/or training.\n\nLicense/Registration/Certification\n\u2022 Current Board Certification or Board Eligibility in the specialty of planned clinical activity.\n\u2022 Current license to practice medicine in the state of Texas.\n\u2022 Current specialty specific cardiopulmonary resuscitation by the American Heart Association or American Red Cross.\n\nEducation and Training\n\u2022 Completion of a four-year M.D. degree program and medical residency.\n\u2022 Completion of a ACGME approved (or equivalent) post-graduate training in Hematology/Oncology followed by successful completion of an accredited fellowship program in Pediatric Hematology/Oncology.\n\nQualifications:\n\u2022 Effective assessment, evaluation and resolution skills.\n\u2022 Effective oral and written communication skills.\n\u2022 Ability to remain flexible and positive in stressful situations.\n\u2022 Ability to read and comprehend English at a level necessary to follow written and oral instructions and safety precautions.\n\u2022 Bilingual preferred (English/Spanish).",
+        "city": "El Paso",
+        "state": "Texas",
+        "country": "US",
+        "is_remote": false,
+        "date_posted": null,
+        "date_ingested": "2026-03-12T19:19:36.300343",
+        "salary_raw": null,
+        "salary_min": null,
+        "salary_max": null,
+        "salary_currency": null,
+        "salary_period": null,
+        "employment_type": "Full-time",
+        "experience_level": null,
+        "job_url": "https://www.wayup.com/i-Hospital-and-Health-Care-j-Pediatric-Hematologist-Oncologist-El-Paso-Childrens-Hospital-380924924874143/?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+        "source_url": "https://jsearch.p.rapidapi.com/search",
+        "raw_payload": {
+          "job_id": "W4PujreM1JqqLYk9AAAAAA==",
+          "job_title": "Senior Data Engineer Op AI",
+          "employer_name": "Precise Systems",
+          "employer_logo": null,
+          "employer_website": "https://goprecise.com",
+          "job_publisher": "WayUp",
+          "job_employment_type": "Full-time",
+          "job_employment_types": [
+            "FULLTIME"
+          ],
+          "job_apply_link": "https://www.wayup.com/i-Hospital-and-Health-Care-j-Pediatric-Hematologist-Oncologist-El-Paso-Childrens-Hospital-380924924874143/?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+          "job_apply_is_direct": false,
+          "apply_options": [
+            {
+              "publisher": "WayUp",
+              "apply_link": "https://www.wayup.com/i-Hospital-and-Health-Care-j-Pediatric-Hematologist-Oncologist-El-Paso-Childrens-Hospital-380924924874143/?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Jobrapido",
+              "apply_link": "https://us.jobrapido.com/jobpreview/4505476968312995840?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Learn4Good",
+              "apply_link": "https://www.learn4good.com/jobs/el-paso/texas/doctor_of_medicine/4854058898/e/?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Jobilize",
+              "apply_link": "https://www.jobilize.com/job/us-tx-el-paso-senior-data-engineer-op-ai-precise-systems-md-hiring?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "apply_link": "https://www.wayup.com/i-Hospital-and-Health-Care-j-Pediatric-Hematologist-Oncologist-El-Paso-Childrens-Hospital-380924924874143/",
+              "is_direct": null,
+              "publisher": "WayUp"
+            }
+          ],
+          "job_description": "Diagnose, treat, and manage many disorders in children who have been diagnosed with a childhood cancer or blood disorders. Diagnose, treat, and manage pediatric and adolescent patients with cancer or blood disorders, including leukemia, lymphoma, embryonic tumors and genetic blood disorders such as sickle-cell anemia or hemophilia.\n\nRequired Skills\n\u2022 Effective assessment, evaluation and resolution skills.\n\u2022 Effective oral and written communication skills.\n\u2022 Ability to remain flexible and positive in stressful situations.\n\u2022 Ability to read and comprehend English at a level necessary to follow written and oral instructions and safety precautions.\n\u2022 Bilingual preferred (English/Spanish).\n\nRequired Experience\n\nWork Experience:\n\u2022 Minimum of 3 years related experience and/or training.\n\nLicense/Registration/Certification\n\u2022 Current Board Certification or Board Eligibility in the specialty of planned clinical activity.\n\u2022 Current license to practice medicine in the state of Texas.\n\u2022 Current specialty specific cardiopulmonary resuscitation by the American Heart Association or American Red Cross.\n\nEducation and Training\n\u2022 Completion of a four-year M.D. degree program and medical residency.\n\u2022 Completion of a ACGME approved (or equivalent) post-graduate training in Hematology/Oncology followed by successful completion of an accredited fellowship program in Pediatric Hematology/Oncology.\n\nQualifications:\n\u2022 Effective assessment, evaluation and resolution skills.\n\u2022 Effective oral and written communication skills.\n\u2022 Ability to remain flexible and positive in stressful situations.\n\u2022 Ability to read and comprehend English at a level necessary to follow written and oral instructions and safety precautions.\n\u2022 Bilingual preferred (English/Spanish).",
+          "job_is_remote": false,
+          "job_posted_at": null,
+          "job_posted_at_timestamp": null,
+          "job_posted_at_datetime_utc": null,
+          "job_location": "El Paso, TX",
+          "job_city": "El Paso",
+          "job_state": "Texas",
+          "job_country": "US",
+          "job_latitude": 31.761877799999997,
+          "job_longitude": -106.48502169999999,
+          "job_benefits": null,
+          "job_google_link": "https://www.google.com/search?q=jobs&gl=us&hl=en&udm=8#vhid=vt%3D20/docid%3DW4PujreM1JqqLYk9AAAAAA%3D%3D&vssid=jobs-detail-viewer",
+          "job_salary": null,
+          "job_min_salary": null,
+          "job_max_salary": null,
+          "job_salary_period": null,
+          "job_highlights": {
+            "Qualifications": [
+              "Effective assessment, evaluation and resolution skills",
+              "Effective oral and written communication skills",
+              "Ability to remain flexible and positive in stressful situations",
+              "Ability to read and comprehend English at a level necessary to follow written and oral instructions and safety precautions",
+              "Required Experience",
+              "Minimum of 3 years related experience and/or training",
+              "Current Board Certification or Board Eligibility in the specialty of planned clinical activity",
+              "Current license to practice medicine in the state of Texas",
+              "Current specialty specific cardiopulmonary resuscitation by the American Heart Association or American Red Cross",
+              "Completion of a four-year M.D. degree program and medical residency",
+              "Completion of a ACGME approved (or equivalent) post-graduate training in Hematology/Oncology followed by successful completion of an accredited fellowship program in Pediatric Hematology/Oncology",
+              "Effective assessment, evaluation and resolution skills",
+              "Effective oral and written communication skills",
+              "Ability to remain flexible and positive in stressful situations",
+              "Ability to read and comprehend English at a level necessary to follow written and oral instructions and safety precautions"
+            ],
+            "Responsibilities": [
+              "Diagnose, treat, and manage many disorders in children who have been diagnosed with a childhood cancer or blood disorders",
+              "Diagnose, treat, and manage pediatric and adolescent patients with cancer or blood disorders, including leukemia, lymphoma, embryonic tumors and genetic blood disorders such as sickle-cell anemia or hemophilia"
+            ]
+          },
+          "job_onet_soc": "15113200",
+          "job_onet_job_zone": "4"
+        }
+      },
+      {
+        "external_id": "FHfjDqlFRj-5utA9AAAAAA==",
+        "source": "jsearch",
+        "region_id": "el-paso",
+        "raw_payload_hash": "be097159e9accb2249f26b674a412f1f5ee8fab4a09d15f8f9d26fd7e8ebb56f",
+        "title": "Staff Data Engineer",
+        "company": "FullStack",
+        "description": "About FullStack\nFullStack is one of the fastest-growing software consultancy companies in the Americas. We deliver transformational digital solutions to top global companies and Silicon Valley startups. As an employee-first company, we focus on hiring the most talented software designers and developers by creating a positive, respectful, and supportive work environment where they can achieve their greatest potential.\n\nWe're Most Proud Of\n\u2022 Offering life-changing career opportunities to talented software professionals across the Americas.\n\u2022 Building highly-skilled software development teams for hundreds of the world's greatest companies.\n\u2022 Having delivered hundreds of successful custom software solutions, which have positively impacted the lives and careers of millions of users.\n\u2022 Our 4.2-star rating on GlassDoor.\n\u2022 Our client Net Promoter Score of 68, twice the industry average.\n\nThe Position\nWe're Looking To Hire a Staff Data Engineer To Join Our Team. You'll Work With Our Incredible Clients In One Of Two Ways\n\u2022 Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily.\n\u2022 Design & Build: You will work on a FullStack product team to build and deliver a product to our clients.\n\nWhat We're Looking For\n\u2022 5+ years of professional experience in data engineering.\n\u2022 Advanced English is required.\n\u2022 Successful completion of a four-year college degree is required.\n\u2022 Solid background working within Databricks environments as the primary platform for scalable data services and enterprise-grade pipeline development.\n\u2022 Demonstrated expertise designing and implementing complex ETL/ELT pipelines in distributed data ecosystems.\n\u2022 Proven experience developing data ingestion microservices and RESTful APIs/SDKs to enable scalable and secure data integration.\n\u2022 Strong engineering rigor, including CI/CD integration, Test-Driven Development (TDD), and version control best practices within data platforms.\n\u2022 Experience debugging, optimizing, and scaling distributed data processing systems in high-volume environments.\n\u2022 Demonstrated ability to drive technical leadership as a Staff or Lead engineer, promoting adoption of robust software design patterns and architectural standards.\n\u2022 Experience building and maintaining real-time or streaming data pipelines within low-latency architectures is preferred.\n\u2022 Strong familiarity with observability frameworks, including automated data quality validation, monitoring, and logging practices.\n\u2022 Experience working with data governance tools such as data catalogs, discovery platforms, and security scanning solutions.\n\u2022 Proven experience handling sensitive healthcare data at scale, ensuring strict adherence to HIPAA regulations and PHI security standards.\n\u2022 Experience operating within regulated, compliance-driven enterprise environments is required.\n\u2022 Ability to work through new and difficult issues and contribute to libraries as needed.\n\u2022 Ability to create and maintain continuous integration and delivery of applications.\n\u2022 Forensic attention to detail.\n\u2022 A positive mindset and a can-do attitude.\n\u2022 Experience working on Agile / Scrum teams.\n\u2022 Meaningful experience working on large, complex systems.\n\u2022 Ability to take extreme ownership over your work. Every day is a challenge to ensure you are performing to the expectations you and your team have agreed upon.\n\u2022 Ability to identify with the goals of FullStack's clients, and dedicate yourself to delivering on the commitments you and your team make to them.\n\u2022 Ability to consistently work 40 hours per week.\n\nWhat We Offer\n\u2022 Competitive Salary.\n\u2022 Paid Time Off (vacation, sick leave, maternity and paternity leave, holidays).\n\u2022 100% remote work.\n\u2022 The ability to work with leading startups and Fortune 500 companies.\n\u2022 Health, dental, and vision insurance.\n\u2022 401(k) w/ 4% match.\n\u2022 Ample opportunity for career advancement.\n\u2022 Continuing education opportunities.\n\nFullStack is proud to be an equal opportunity workplace. We are committed to equal employment opportunity regardless of race, color, ancestry, religion, sex, national origin, sexual orientation, age, citizenship, marital status, disability, gender identity, or Veteran status.\n\nLearn more about our Applicants Privacy Notice.",
+        "city": "El Paso",
+        "state": "Texas",
+        "country": "US",
+        "is_remote": false,
+        "date_posted": "2026-03-04T00:00:00",
+        "date_ingested": "2026-03-12T19:19:36.300385",
+        "salary_raw": null,
+        "salary_min": 190000.0,
+        "salary_max": 300000.0,
+        "salary_currency": null,
+        "salary_period": "YEAR",
+        "employment_type": "Full-time",
+        "experience_level": null,
+        "job_url": "https://us.bebee.com/job/b3230c94ae1a2c3d44e689683d2131cf?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+        "source_url": "https://jsearch.p.rapidapi.com/search",
+        "raw_payload": {
+          "job_id": "FHfjDqlFRj-5utA9AAAAAA==",
+          "job_title": "Staff Data Engineer",
+          "employer_name": "FullStack",
+          "employer_logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeQNHhVbnJoJ16j86lldG908W34juQu4kRyOD-&s=0",
+          "employer_website": "https://www.fullstack.com",
+          "job_publisher": "BeBee",
+          "job_employment_type": "Full-time",
+          "job_employment_types": [
+            "FULLTIME"
+          ],
+          "job_apply_link": "https://us.bebee.com/job/b3230c94ae1a2c3d44e689683d2131cf?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+          "job_apply_is_direct": false,
+          "apply_options": [
+            {
+              "publisher": "BeBee",
+              "apply_link": "https://us.bebee.com/job/b3230c94ae1a2c3d44e689683d2131cf?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Talent.com",
+              "apply_link": "https://www.talent.com/view?id=535899312299903111&utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "publisher": "Jobilize",
+              "apply_link": "https://www.jobilize.com/amp/job/us-tx-el-paso-staff-data-engineer-virtual-vocations-hiring-now-job?utm_campaign=google_jobs_apply&utm_source=google_jobs_apply&utm_medium=organic",
+              "is_direct": false
+            },
+            {
+              "apply_link": "https://us.bebee.com/job/b3230c94ae1a2c3d44e689683d2131cf",
+              "is_direct": null,
+              "publisher": "BeBee"
+            }
+          ],
+          "job_description": "About FullStack\nFullStack is one of the fastest-growing software consultancy companies in the Americas. We deliver transformational digital solutions to top global companies and Silicon Valley startups. As an employee-first company, we focus on hiring the most talented software designers and developers by creating a positive, respectful, and supportive work environment where they can achieve their greatest potential.\n\nWe're Most Proud Of\n\u2022 Offering life-changing career opportunities to talented software professionals across the Americas.\n\u2022 Building highly-skilled software development teams for hundreds of the world's greatest companies.\n\u2022 Having delivered hundreds of successful custom software solutions, which have positively impacted the lives and careers of millions of users.\n\u2022 Our 4.2-star rating on GlassDoor.\n\u2022 Our client Net Promoter Score of 68, twice the industry average.\n\nThe Position\nWe're Looking To Hire a Staff Data Engineer To Join Our Team. You'll Work With Our Incredible Clients In One Of Two Ways\n\u2022 Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily.\n\u2022 Design & Build: You will work on a FullStack product team to build and deliver a product to our clients.\n\nWhat We're Looking For\n\u2022 5+ years of professional experience in data engineering.\n\u2022 Advanced English is required.\n\u2022 Successful completion of a four-year college degree is required.\n\u2022 Solid background working within Databricks environments as the primary platform for scalable data services and enterprise-grade pipeline development.\n\u2022 Demonstrated expertise designing and implementing complex ETL/ELT pipelines in distributed data ecosystems.\n\u2022 Proven experience developing data ingestion microservices and RESTful APIs/SDKs to enable scalable and secure data integration.\n\u2022 Strong engineering rigor, including CI/CD integration, Test-Driven Development (TDD), and version control best practices within data platforms.\n\u2022 Experience debugging, optimizing, and scaling distributed data processing systems in high-volume environments.\n\u2022 Demonstrated ability to drive technical leadership as a Staff or Lead engineer, promoting adoption of robust software design patterns and architectural standards.\n\u2022 Experience building and maintaining real-time or streaming data pipelines within low-latency architectures is preferred.\n\u2022 Strong familiarity with observability frameworks, including automated data quality validation, monitoring, and logging practices.\n\u2022 Experience working with data governance tools such as data catalogs, discovery platforms, and security scanning solutions.\n\u2022 Proven experience handling sensitive healthcare data at scale, ensuring strict adherence to HIPAA regulations and PHI security standards.\n\u2022 Experience operating within regulated, compliance-driven enterprise environments is required.\n\u2022 Ability to work through new and difficult issues and contribute to libraries as needed.\n\u2022 Ability to create and maintain continuous integration and delivery of applications.\n\u2022 Forensic attention to detail.\n\u2022 A positive mindset and a can-do attitude.\n\u2022 Experience working on Agile / Scrum teams.\n\u2022 Meaningful experience working on large, complex systems.\n\u2022 Ability to take extreme ownership over your work. Every day is a challenge to ensure you are performing to the expectations you and your team have agreed upon.\n\u2022 Ability to identify with the goals of FullStack's clients, and dedicate yourself to delivering on the commitments you and your team make to them.\n\u2022 Ability to consistently work 40 hours per week.\n\nWhat We Offer\n\u2022 Competitive Salary.\n\u2022 Paid Time Off (vacation, sick leave, maternity and paternity leave, holidays).\n\u2022 100% remote work.\n\u2022 The ability to work with leading startups and Fortune 500 companies.\n\u2022 Health, dental, and vision insurance.\n\u2022 401(k) w/ 4% match.\n\u2022 Ample opportunity for career advancement.\n\u2022 Continuing education opportunities.\n\nFullStack is proud to be an equal opportunity workplace. We are committed to equal employment opportunity regardless of race, color, ancestry, religion, sex, national origin, sexual orientation, age, citizenship, marital status, disability, gender identity, or Veteran status.\n\nLearn more about our Applicants Privacy Notice.",
+          "job_is_remote": false,
+          "job_posted_at": "8 days ago",
+          "job_posted_at_timestamp": 1772582400,
+          "job_posted_at_datetime_utc": "2026-03-04T00:00:00.000Z",
+          "job_location": "El Paso, TX",
+          "job_city": "El Paso",
+          "job_state": "Texas",
+          "job_country": "US",
+          "job_latitude": 31.761877799999997,
+          "job_longitude": -106.48502169999999,
+          "job_benefits": [
+            "health_insurance",
+            "paid_time_off",
+            "dental_coverage"
+          ],
+          "job_google_link": "https://www.google.com/search?q=jobs&gl=us&hl=en&udm=8#vhid=vt%3D20/docid%3DFHfjDqlFRj-5utA9AAAAAA%3D%3D&vssid=jobs-detail-viewer",
+          "job_min_salary": 190000,
+          "job_max_salary": 300000,
+          "job_salary_period": "YEAR",
+          "job_highlights": {
+            "Qualifications": [
+              "5+ years of professional experience in data engineering",
+              "Advanced English is required",
+              "Successful completion of a four-year college degree is required",
+              "Solid background working within Databricks environments as the primary platform for scalable data services and enterprise-grade pipeline development",
+              "Demonstrated expertise designing and implementing complex ETL/ELT pipelines in distributed data ecosystems",
+              "Proven experience developing data ingestion microservices and RESTful APIs/SDKs to enable scalable and secure data integration",
+              "Strong engineering rigor, including CI/CD integration, Test-Driven Development (TDD), and version control best practices within data platforms",
+              "Experience debugging, optimizing, and scaling distributed data processing systems in high-volume environments",
+              "Demonstrated ability to drive technical leadership as a Staff or Lead engineer, promoting adoption of robust software design patterns and architectural standards",
+              "Strong familiarity with observability frameworks, including automated data quality validation, monitoring, and logging practices",
+              "Experience working with data governance tools such as data catalogs, discovery platforms, and security scanning solutions",
+              "Proven experience handling sensitive healthcare data at scale, ensuring strict adherence to HIPAA regulations and PHI security standards",
+              "Experience operating within regulated, compliance-driven enterprise environments is required",
+              "Ability to work through new and difficult issues and contribute to libraries as needed",
+              "Ability to create and maintain continuous integration and delivery of applications",
+              "Forensic attention to detail",
+              "A positive mindset and a can-do attitude",
+              "Experience working on Agile / Scrum teams",
+              "Meaningful experience working on large, complex systems",
+              "Ability to take extreme ownership over your work",
+              "Every day is a challenge to ensure you are performing to the expectations you and your team have agreed upon",
+              "Ability to identify with the goals of FullStack's clients, and dedicate yourself to delivering on the commitments you and your team make to them",
+              "Ability to consistently work 40 hours per week"
+            ],
+            "Benefits": [
+              "Offering life-changing career opportunities to talented software professionals across the Americas",
+              "Competitive Salary",
+              "Paid Time Off (vacation, sick leave, maternity and paternity leave, holidays)",
+              "100% remote work",
+              "The ability to work with leading startups and Fortune 500 companies",
+              "Health, dental, and vision insurance",
+              "401(k) w/ 4% match",
+              "Ample opportunity for career advancement",
+              "Continuing education opportunities"
+            ],
+            "Responsibilities": [
+              "You'll Work With Our Incredible Clients In One Of Two Ways",
+              "Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily",
+              "Design & Build: You will work on a FullStack product team to build and deliver a product to our clients"
+            ]
+          },
+          "job_onet_soc": "15113200",
+          "job_onet_job_zone": "4"
+        }
+      }
+    ]
+  }
+}
