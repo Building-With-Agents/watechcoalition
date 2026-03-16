@@ -22,8 +22,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+"agents/ingestion/tests/fetch_ground_truth.py" = ["T20"]
 "ingestion/tests/fetch_ground_truth.py" = ["T20"]
 # CLI harness scripts intentionally print to stdout
+"agents/common/events/view_harness.py" = ["T201"]
 "common/events/view_harness.py" = ["T201"]
 
 [tool.ruff.lint.isort]
