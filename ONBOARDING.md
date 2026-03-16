@@ -33,6 +33,7 @@ Edit `.env` and set at minimum:
 |----------|-------------|
 | `AUTH_SECRET` | Generate with `openssl rand -base64 32` |
 | `PYTHON_DATABASE_URL` | PostgreSQL connection string (see step 5) |
+| `REDIS_URL` | Redis connection string — default: `redis://localhost:6379/0` |
 | `AZURE_OPENAI_ENDPOINT` | Azure OpenAI resource URL |
 | `AZURE_OPENAI_API_KEY` | Azure OpenAI API key |
 | `AZURE_OPENAI_API_VERSION` | e.g. `2025-01-01-preview` |
@@ -64,6 +65,7 @@ Edit `.env.docker` and set the PostgreSQL variables:
 | `POSTGRES_PASSWORD` | — | Strong password |
 | `POSTGRES_DB` | `talent_finder` | Database name |
 | `POSTGRES_PORT` | `5432` | Host port mapping |
+| `REDIS_PORT` | `6379` | Redis host port mapping |
 
 > **MSSQL variables** (`MSSQL_SA_PASSWORD`, `MSSQL_DATABASE`, `MSSQL_PORT`) are only needed if you run the legacy Next.js app — see [section 8](#8-optional-mssql--nextjs-setup).
 
@@ -84,6 +86,28 @@ docker ps --filter "name=postgres-server"
 You should see `(healthy)` in the STATUS column. The pgvector extension is automatically enabled on first container creation (via `scripts/postgres-init/01-enable-pgvector.sql`).
 
 See [docs/DOCKER_POSTGRESQL_SETUP.md](docs/DOCKER_POSTGRESQL_SETUP.md) for detailed setup, troubleshooting, and connection info.
+
+## 3.1 Start Redis (Docker)
+
+Redis Streams is the inter-agent message bus for the Job Intelligence Engine pipeline. Agents publish and consume typed events via `XADD`/`XREADGROUP`/`XACK`.
+
+```bash
+docker compose --env-file .env.docker up redis -d
+```
+
+Verify the container is healthy:
+
+```bash
+docker ps --filter "name=redis-server"
+```
+
+Test connectivity:
+
+```bash
+docker exec redis-server redis-cli ping
+```
+
+You should see `PONG`. Redis is configured with AOF persistence — data survives container restarts.
 
 ## 4. Python Environment Setup
 
@@ -287,6 +311,8 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 | `PYTHON_DATABASE_URL` connection fails | Ensure PostgreSQL container is running (`docker ps --filter "name=postgres-server"`), port matches `.env.docker`, password is correct |
 | `ERROR: Set PYTHON_DATABASE_URL` | Add `PYTHON_DATABASE_URL=postgresql+psycopg2://postgres:YourPassword@localhost:5432/talent_finder` to `.env` |
 | Port 5432 already in use | Change `POSTGRES_PORT` in `.env.docker` (e.g. to `15432`) and update `PYTHON_DATABASE_URL` |
+| Redis container won't start | Check Docker is running: `docker ps`. Check logs: `docker logs redis-server` |
+| Redis `PONG` test fails | Ensure Redis container is running and healthy: `docker ps --filter "name=redis-server"` |
 | `pip` not recognized / Python not found | Install Python 3.11, enable "Add python.exe to PATH", then use a venv (section 4). On Windows, use `py -3.11 -m venv .venv` and activate before running `pip` |
 | `SQLAlchemy OperationalError` | `DATABASE_URL` uses Prisma's `sqlserver://` format. Set `PYTHON_DATABASE_URL` using `postgresql+psycopg2://` format (see step 5) |
 | Docker not found | Install Docker — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) |
