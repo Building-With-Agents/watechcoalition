@@ -7,9 +7,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from agents.common.types.raw_job_record import RawJobRecord
-from agents.common.types.region_config import RegionConfig
-from agents.ingestion.sources.crawl4ai_adapter import (
+crawl4ai = pytest.importorskip("crawl4ai", reason="crawl4ai not installed")
+
+from agents.common.types.raw_job_record import RawJobRecord  # noqa: E402
+from agents.common.types.region_config import RegionConfig  # noqa: E402
+from agents.ingestion.sources.crawl4ai_adapter import (  # noqa: E402
     EL_PASO_PORTAL_BASE,
     Crawl4AIAdapter,
     Crawl4AIAdapterError,

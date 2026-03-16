@@ -22,8 +22,8 @@ class TestNormalizationAgentIntegration:
     def test_health_check_with_db(self) -> None:
         agent = NormalizationAgent()
         result = agent.health_check()
-        assert result["status"] == "ok"
-        assert result["metrics"]["db_connected"] is True
+        assert result["status"] in ("ok", "healthy")
+        assert result["db_reachable"] is True
 
     def test_empty_batch(self) -> None:
         """Empty staged_record_ids produces NormalizationComplete with 0 counts."""

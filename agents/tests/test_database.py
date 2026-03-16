@@ -8,34 +8,20 @@ agent-managed tables exist, confirm that the migration is idempotent, and
 ensure that the `job_postings` table has all Phase 1 extension columns.
 """
 
-import importlib.util
 import os
 from collections.abc import Iterator
-from pathlib import Path
 
 import pytest
 from sqlalchemy import MetaData, Table, create_engine, inspect, text
 from sqlalchemy.engine import Engine
 
-
-def _load_run_migration():
-    """
-    Dynamically load the Phase 1 migration module from its file path.
-
-    The migration file is named `001_phase1_tables.py`, which is not a valid
-    Python identifier for direct imports, so we load it via importlib.
-    """
-    root = Path(__file__).resolve().parents[1]
-    path = root / "common" / "data_store" / "migrations" / "001_phase1_tables.py"
-    spec = importlib.util.spec_from_file_location("phase1_migration", path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError("Could not load migration module spec")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)  # type: ignore[assignment]
-    return module.run_migration
+from agents.common.data_store.database import get_engine as _get_engine
+from agents.common.data_store.migrations import run_migrations
 
 
-run_migration = _load_run_migration()
+def run_migration() -> None:
+    """Run the canonical dbo-schema migrations."""
+    run_migrations(_get_engine())
 
 
 @pytest.fixture(scope="session")
@@ -60,7 +46,7 @@ def truncate_agent_tables(engine: Engine) -> Iterator[None]:
     with engine.begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE TABLE raw_ingested_jobs, normalized_jobs, job_ingestion_runs "
+                "TRUNCATE TABLE dbo.raw_ingested_jobs, dbo.normalized_jobs, dbo.job_ingestion_runs "
                 "RESTART IDENTITY CASCADE;"
             )
         )
@@ -90,12 +76,11 @@ def test_all_tables_exist(engine: Engine) -> None:
     run_migration()
 
     inspector = inspect(engine)
-    tables = set(inspector.get_table_names())
+    tables = set(inspector.get_table_names(schema="dbo"))
     expected = {
         "raw_ingested_jobs",
         "normalized_jobs",
         "job_ingestion_runs",
-        "job_postings",
     }
     missing = expected - tables
     assert not missing, f"Missing expected tables: {missing}"
@@ -113,9 +98,9 @@ def test_migration_is_idempotent(engine: Engine) -> None:
     run_migration()
 
     inspector = inspect(engine)
-    assert "raw_ingested_jobs" in inspector.get_table_names()
-    assert "normalized_jobs" in inspector.get_table_names()
-    assert "job_ingestion_runs" in inspector.get_table_names()
+    assert "raw_ingested_jobs" in inspector.get_table_names(schema="dbo")
+    assert "normalized_jobs" in inspector.get_table_names(schema="dbo")
+    assert "job_ingestion_runs" in inspector.get_table_names(schema="dbo")
 
 
 
@@ -126,9 +111,9 @@ def test_job_postings_has_phase1_columns(engine: Engine) -> None:
     """
     run_migration()
 
-    metadata = MetaData()
-    metadata.reflect(bind=engine, only=["job_postings"])
-    job_postings: Table = metadata.tables["job_postings"]
+    metadata = MetaData(schema="dbo")
+    metadata.reflect(bind=engine, only=["job_postings"], schema="dbo")
+    job_postings: Table = metadata.tables["dbo.job_postings"]
 
     column_names: list[str] = [col.name for col in job_postings.columns]
     expected_columns = [

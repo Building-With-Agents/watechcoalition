@@ -97,6 +97,7 @@ Run migrations to create agent-managed tables:
 ```bash
 # From repo root, venv activated
 python -c "
+from dotenv import load_dotenv; load_dotenv()
 from agents.common.data_store.database import get_engine
 from agents.common.data_store.migrations import run_migrations
 run_migrations(get_engine())
@@ -135,6 +136,7 @@ psql "postgresql://<ADMIN_USER>:<ADMIN_PASSWORD>@<SERVER_NAME>.postgres.database
 
 ```bash
 python -c "
+from dotenv import load_dotenv; load_dotenv()
 from agents.common.data_store.database import get_engine
 from sqlalchemy import text
 with get_engine().connect() as conn:
@@ -190,6 +192,7 @@ psql "postgresql://<ADMIN_USER>:<ADMIN_PASSWORD>@<SERVER_NAME>.postgres.database
 
 ```bash
 python -c "
+from dotenv import load_dotenv; load_dotenv()
 from agents.common.data_store.database import get_engine
 from sqlalchemy import text
 with get_engine().connect() as conn:

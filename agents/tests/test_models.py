@@ -8,6 +8,7 @@ tables: raw_ingested_jobs, normalized_jobs, and job_ingestion_runs.
 """
 
 import os
+import uuid
 from collections.abc import Iterator
 
 import pytest
@@ -33,6 +34,8 @@ def engine() -> Engine:
     if not database_url:
         raise RuntimeError("PYTHON_DATABASE_URL is not set")
     engine = create_engine(database_url, future=True)
+    with engine.begin() as conn:
+        conn.execute(text("CREATE SCHEMA IF NOT EXISTS dbo"))
     Base.metadata.create_all(engine)
     return engine
 
@@ -47,7 +50,7 @@ def truncate_agent_tables(engine: Engine) -> Iterator[None]:
     with engine.begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE TABLE raw_ingested_jobs, normalized_jobs, job_ingestion_runs "
+                "TRUNCATE TABLE dbo.raw_ingested_jobs, dbo.normalized_jobs, dbo.job_ingestion_runs "
                 "RESTART IDENTITY CASCADE;"
             )
         )
@@ -77,8 +80,10 @@ def test_insert_raw_ingested_job(session: Session) -> None:
         external_id="ext-1",
         raw_payload_hash="hash-1",
         ingestion_run_id=ingestion_run_id,
-        raw_text="test raw text",
-        raw_metadata_json={"foo": "bar"},
+        title="Test Job Title",
+        company="Test Company",
+        description="test raw text",
+        raw_payload={"foo": "bar"},
     )
     session.add(job)
     session.commit()
@@ -92,7 +97,7 @@ def test_insert_raw_ingested_job(session: Session) -> None:
     )
     assert fetched.source == "test_source"
     assert fetched.external_id == "ext-1"
-    assert fetched.raw_metadata_json["foo"] == "bar"
+    assert fetched.raw_payload["foo"] == "bar"
 
     session.execute(
         delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id)
@@ -104,7 +109,7 @@ def test_insert_raw_ingested_job(session: Session) -> None:
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_insert_normalized_job(session: Session) -> None:
     """
-    Insert a NormalizedJob row and read it back, verifying the validation_status
+    Insert a NormalizedJob row and read it back, verifying the normalization_status
     field is persisted correctly.
     """
     ingestion_run_id = "test_models_normalized"
@@ -112,10 +117,8 @@ def test_insert_normalized_job(session: Session) -> None:
         external_id="ext-2",
         source="test_source",
         ingestion_run_id=ingestion_run_id,
-        raw_payload_hash="hash-2",
         title="Title",
         company="Company",
-        location=None,
         salary_min=None,
         salary_max=None,
         salary_currency=None,
@@ -123,20 +126,19 @@ def test_insert_normalized_job(session: Session) -> None:
         employment_type=None,
         date_posted=None,
         description=None,
-        validation_status="valid",
-        quarantine_reason=None,
+        normalization_status="success",
     )
     session.add(job)
     session.commit()
 
     fetched = (
         session.execute(
-            select(NormalizedJob).where(NormalizedJob.raw_payload_hash == "hash-2")
+            select(NormalizedJob).where(NormalizedJob.external_id == "ext-2")
         )
         .scalars()
         .one()
     )
-    assert fetched.validation_status == "valid"
+    assert fetched.normalization_status == "success"
 
     session.execute(
         delete(NormalizedJob).where(NormalizedJob.ingestion_run_id == ingestion_run_id)
@@ -149,31 +151,33 @@ def test_insert_normalized_job(session: Session) -> None:
 def test_insert_job_ingestion_run(session: Session) -> None:
     """
     Insert a JobIngestionRun row and update its status from 'running' to
-    'complete', verifying that the update persists.
+    'completed', verifying that the update persists.
     """
     run = JobIngestionRun(
+        run_id=f"test-run-{uuid.uuid4().hex[:8]}",
         source="test_source",
         status="running",
-        record_count=0,
+        total_fetched=0,
+        staged_count=0,
         dedup_count=0,
         error_count=0,
     )
     session.add(run)
     session.commit()
 
-    run_id = run.id
-    fetched = session.get(JobIngestionRun, run_id)
+    run_pk = run.id
+    fetched = session.get(JobIngestionRun, run_pk)
     assert fetched is not None
     assert fetched.status == "running"
 
-    fetched.status = "complete"
+    fetched.status = "completed"
     session.commit()
 
-    updated = session.get(JobIngestionRun, run_id)
+    updated = session.get(JobIngestionRun, run_pk)
     assert updated is not None
-    assert updated.status == "complete"
+    assert updated.status == "completed"
 
-    session.execute(delete(JobIngestionRun).where(JobIngestionRun.id == run_id))
+    session.execute(delete(JobIngestionRun).where(JobIngestionRun.id == run_pk))
     session.commit()
 
 
@@ -191,8 +195,10 @@ def test_raw_payload_hash_unique(session: Session) -> None:
         external_id="ext-a",
         raw_payload_hash="dup-hash",
         ingestion_run_id=ingestion_run_id,
-        raw_text="text1",
-        raw_metadata_json={},
+        title="Job A",
+        company="Company A",
+        description="text1",
+        raw_payload={},
     )
     session.add(job1)
     session.commit()
@@ -202,8 +208,10 @@ def test_raw_payload_hash_unique(session: Session) -> None:
         external_id="ext-b",
         raw_payload_hash="dup-hash",
         ingestion_run_id=ingestion_run_id,
-        raw_text="text2",
-        raw_metadata_json={},
+        title="Job B",
+        company="Company B",
+        description="text2",
+        raw_payload={},
     )
     session.add(job2)
 
@@ -221,7 +229,7 @@ def test_raw_payload_hash_unique(session: Session) -> None:
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_unicode_fields(session: Session) -> None:
     """
-    Insert a RawIngestedJob with Unicode content in raw_metadata_json and read
+    Insert a RawIngestedJob with Unicode content in raw_payload and read
     it back, verifying that the Unicode fields round-trip without corruption.
     """
     ingestion_run_id = "test_models_unicode"
@@ -235,8 +243,10 @@ def test_unicode_fields(session: Session) -> None:
         external_id="ext-unicode",
         raw_payload_hash="hash-unicode",
         ingestion_run_id=ingestion_run_id,
-        raw_text="unicode test",
-        raw_metadata_json=meta,
+        title="Unicode Test",
+        company="Unicode Co",
+        description="unicode test",
+        raw_payload=meta,
     )
     session.add(job)
     session.commit()
@@ -248,10 +258,9 @@ def test_unicode_fields(session: Session) -> None:
         .scalars()
         .one()
     )
-    assert fetched.raw_metadata_json == meta
+    assert fetched.raw_payload == meta
 
     session.execute(
         delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id)
     )
     session.commit()
-
