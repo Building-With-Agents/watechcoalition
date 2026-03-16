@@ -278,7 +278,16 @@ python -m pytest agents/normalization/tests/ -v --tb=short
 python -m pytest agents/tests/test_pipeline_runner.py -v --tb=short
 ```
 
-**Expected:** 83+ passed, ~11 skipped (DB-dependent tests skip when `PYTHON_DATABASE_URL` is unset).
+**Expected (with DB):** 94 passed, 0 skipped.
+
+**Expected (without DB):** 83 passed, 11 skipped (DB-dependent integration tests skip when `PYTHON_DATABASE_URL` is unset).
+
+| Suite | With DB | Without DB |
+|-------|---------|------------|
+| Full run (`agents/tests/`) | 94 passed | 83 passed, 11 skipped |
+| Ingestion (`agents/ingestion/tests/`) | 16 passed, 4 skipped | 16 passed, 4 skipped |
+| Normalization (`agents/normalization/tests/`) | 35 passed, 3 skipped | 35 passed, 3 skipped |
+| Pipeline runner (`test_pipeline_runner.py`) | 7 passed | 7 passed |
 
 ### Ruff lint
 
