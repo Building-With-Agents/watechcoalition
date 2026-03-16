@@ -314,13 +314,14 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 - Standardizes: dates (ISO 8601), salaries (min/max/currency/period), locations, employment types
 - Quarantines schema violations — never passes bad records downstream
 
-### Skills Extraction Agent
+### Skills Extraction Agent *(Work Intelligence Agent)*
 - Taxonomy linking order (strict):
-  1. Exact name match → `skills` table
-  2. Normalized name match → `skills` table
-  3. Embedding cosine similarity ≥ 0.92 → `skills` table
-  4. O\*NET occupation code match
-  5. Emit as `raw_skill` (null taxonomy_id) — Enrichment resolves in Phase 2
+  1. Exact match → GenAI Extension Layer (10 predefined GenAI skills; `is_genai_extension = True`, `esco_uri` maps to parent ESCO cluster)
+  2. Exact name match → ESCO digital skills cluster (maps to `skills` table)
+  3. Normalized name match → ESCO digital skills cluster (maps to `skills` table)
+  4. Embedding cosine similarity ≥ 0.92 → ESCO digital skills cluster
+  5. O\*NET occupation code match
+  6. Emit as `raw_skill` (null taxonomy_id) — Enrichment resolves in Phase 2
 - Log every LLM call to `llm_audit_log`
 
 ### Enrichment Agent (Phase 1 lite)
