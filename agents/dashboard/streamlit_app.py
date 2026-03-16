@@ -1,50 +1,42 @@
 """
-Journey Dashboard — Week 2 Walking Skeleton.
+Journey Dashboard — Database-connected Streamlit dashboard.
 
-Three-page Streamlit dashboard for observing a pipeline run.
+Three-page Streamlit dashboard for observing pipeline data.
 
 Pages
 -----
-1. Pipeline Run Summary   — did all records complete all stages?
-                            when did the run happen?
-                            one row per record showing stage completion.
+1. Pipeline Run Summary   — ingestion runs, record counts, stage completion.
+2. Record Journey         — select one record and trace it through stages.
+3. Batch Insights         — aggregate charts: locations, employment types,
+                            experience levels, salary distributions, sources.
 
-2. Record Journey         — select one record by correlation ID.
-                            see the full timeline: agent -> event -> timestamp -> payload.
-                            correlation ID shown at the top, consistent throughout.
-
-3. Batch Insights         — aggregate charts from fixture analytics data:
-                            top skills, seniority distribution, role distribution,
-                            locations, skill type distribution, quality/spam scores.
-
-Data source: agents/data/output/pipeline_run.json
-             Run `python agents/pipeline_runner.py` to generate it.
+Data source: PostgreSQL (via SQLAlchemy) with JSON file fallback.
 
 Usage:
     streamlit run agents/dashboard/streamlit_app.py
-
-Design note (Week 2): Page 3 uses fixture data from the Analytics Agent.
-In Week 7 when the Analytics Agent is real, Page 3 will reflect actual
-extracted and aggregated data automatically — no dashboard code changes needed.
 """
 
 from __future__ import annotations
 
 import json
+import os
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+from dotenv import load_dotenv
 
 # ---------------------------------------------------------------------------
-# Paths
+# Environment & paths
 # ---------------------------------------------------------------------------
+
+load_dotenv()
 
 _HERE = Path(__file__).parent.parent   # agents/
 _RUN_LOG_PATH = _HERE / "data" / "output" / "pipeline_run.json"
 
-# The canonical agent order — used for sorting the journey timeline.
 _AGENT_ORDER = [
     "ingestion-agent",
     "normalization-agent",
@@ -55,24 +47,133 @@ _AGENT_ORDER = [
     "orchestration-agent",
     "demand-analysis-agent",
 ]
-
 _AGENT_ORDER_INDEX = {a: i for i, a in enumerate(_AGENT_ORDER)}
 
 
 # ---------------------------------------------------------------------------
-# Data loading
+# Database helpers
+# ---------------------------------------------------------------------------
+
+def _db_available() -> bool:
+    """Check if PostgreSQL is reachable."""
+    if not os.getenv("PYTHON_DATABASE_URL"):
+        return False
+    try:
+        from agents.common.data_store import check_db_connection
+        return check_db_connection()
+    except Exception:
+        return False
+
+
+@st.cache_data(ttl=60)
+def _load_ingestion_runs() -> pd.DataFrame:
+    """Load ingestion run history from DB."""
+    from agents.common.data_store import get_engine
+    query = """
+        SELECT run_id, region_id, source, started_at, completed_at,
+               status, total_fetched, staged_count, dedup_count, error_count,
+               error_message
+        FROM dbo.job_ingestion_runs
+        ORDER BY started_at DESC
+        LIMIT 50
+    """
+    return pd.read_sql(query, get_engine())
+
+
+@st.cache_data(ttl=60)
+def _load_raw_jobs(run_id: str | None = None) -> pd.DataFrame:
+    """Load raw ingested jobs, optionally filtered by run_id."""
+    from agents.common.data_store import get_engine
+    if run_id:
+        query = """
+            SELECT id, ingestion_run_id, region_id, source, external_id,
+                   title, company, city, state, country, is_remote,
+                   date_posted, employment_type, experience_level,
+                   salary_min, salary_max, salary_currency, salary_period,
+                   processing_status, error_message, ingestion_timestamp
+            FROM dbo.raw_ingested_jobs
+            WHERE ingestion_run_id = %(run_id)s
+            ORDER BY id
+        """
+        return pd.read_sql(query, get_engine(), params={"run_id": run_id})
+    query = """
+        SELECT id, ingestion_run_id, region_id, source, external_id,
+               title, company, city, state, country, is_remote,
+               date_posted, employment_type, experience_level,
+               salary_min, salary_max, salary_currency, salary_period,
+               processing_status, error_message, ingestion_timestamp
+        FROM dbo.raw_ingested_jobs
+        ORDER BY id DESC
+        LIMIT 500
+    """
+    return pd.read_sql(query, get_engine())
+
+
+@st.cache_data(ttl=60)
+def _load_normalized_jobs(run_id: str | None = None) -> pd.DataFrame:
+    """Load normalized jobs, optionally filtered by run_id."""
+    from agents.common.data_store import get_engine
+    if run_id:
+        query = """
+            SELECT id, raw_job_id, ingestion_run_id, region_id, source, external_id,
+                   title, company, city, state_province, country,
+                   work_arrangement, is_remote, employment_type, experience_level,
+                   date_posted, salary_min, salary_max, salary_currency, salary_period,
+                   normalization_status, created_at
+            FROM dbo.normalized_jobs
+            WHERE ingestion_run_id = %(run_id)s
+            ORDER BY id
+        """
+        return pd.read_sql(query, get_engine(), params={"run_id": run_id})
+    query = """
+        SELECT id, raw_job_id, ingestion_run_id, region_id, source, external_id,
+               title, company, city, state_province, country,
+               work_arrangement, is_remote, employment_type, experience_level,
+               date_posted, salary_min, salary_max, salary_currency, salary_period,
+               normalization_status, created_at
+        FROM dbo.normalized_jobs
+        ORDER BY id DESC
+        LIMIT 500
+    """
+    return pd.read_sql(query, get_engine())
+
+
+@st.cache_data(ttl=60)
+def _load_quarantined(run_id: str | None = None) -> pd.DataFrame:
+    """Load quarantined records."""
+    from agents.common.data_store import get_engine
+    if run_id:
+        query = """
+            SELECT id, raw_job_id, ingestion_run_id, source, external_id,
+                   error_type, error_detail, quarantined_at
+            FROM dbo.normalization_quarantine
+            WHERE ingestion_run_id = %(run_id)s
+            ORDER BY quarantined_at DESC
+        """
+        return pd.read_sql(query, get_engine(), params={"run_id": run_id})
+    query = """
+        SELECT id, raw_job_id, ingestion_run_id, source, external_id,
+               error_type, error_detail, quarantined_at
+        FROM dbo.normalization_quarantine
+        ORDER BY quarantined_at DESC
+        LIMIT 100
+    """
+    return pd.read_sql(query, get_engine())
+
+
+# ---------------------------------------------------------------------------
+# JSON fallback helpers (Week 2 walking skeleton compatibility)
 # ---------------------------------------------------------------------------
 
 @st.cache_data
-def load_run_log() -> list[dict]:
-    """Load pipeline_run.json.  Returns an empty list if not found."""
+def _load_run_log() -> list[dict]:
+    """Load pipeline_run.json. Returns empty list if not found."""
     if not _RUN_LOG_PATH.exists():
         return []
     return json.loads(_RUN_LOG_PATH.read_text(encoding="utf-8"))
 
 
-def build_record_map(entries: list[dict]) -> dict[str, list[dict]]:
-    """Group log entries by correlation_id -> preserves insertion order."""
+def _build_record_map(entries: list[dict]) -> dict[str, list[dict]]:
     record_map: dict[str, list[dict]] = defaultdict(list)
     for entry in entries:
         cid = entry.get("correlation_id", "unknown")
@@ -80,17 +181,362 @@ def build_record_map(entries: list[dict]) -> dict[str, list[dict]]:
     return dict(record_map)
 
 
-def sort_key(cid: str) -> int:
-    """Sort correlation IDs numerically when they are digit strings."""
+def _sort_key(cid: str) -> int:
     return int(cid) if cid.isdigit() else 0
 
 
 # ---------------------------------------------------------------------------
-# Page 1 — Pipeline Run Summary
+# Page 1 — Pipeline Run Summary (DB)
 # ---------------------------------------------------------------------------
 
-def page_run_summary(entries: list[dict]) -> None:
+def _page_run_summary_db() -> None:
     st.title("Pipeline Run Summary")
+
+    runs_df = _load_ingestion_runs()
+    if runs_df.empty:
+        st.warning("No ingestion runs found in the database yet.")
+        return
+
+    # -- Run selector
+    run_options = []
+    for _, row in runs_df.iterrows():
+        started = row["started_at"]
+        if isinstance(started, datetime):
+            started = started.strftime("%Y-%m-%d %H:%M")
+        run_options.append(f"{row['run_id']}  |  {row['source']}  |  {started}  |  {row['status']}")
+
+    selected_idx = st.selectbox("Select an ingestion run", range(len(run_options)),
+                                format_func=lambda i: run_options[i])
+    selected_run_id = runs_df.iloc[selected_idx]["run_id"]
+    run_row = runs_df.iloc[selected_idx]
+
+    st.markdown("---")
+
+    # -- Headline metrics
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Total Fetched", int(run_row["total_fetched"]))
+    col2.metric("Staged", int(run_row["staged_count"]))
+    col3.metric("Deduplicated", int(run_row["dedup_count"]))
+    col4.metric("Errors", int(run_row["error_count"]))
+
+    status = run_row["status"]
+    if status == "success":
+        st.success(f"Run `{selected_run_id}` completed successfully.")
+    elif status == "running":
+        st.info(f"Run `{selected_run_id}` is still running.")
+    else:
+        st.error(f"Run `{selected_run_id}` status: {status}")
+        if run_row.get("error_message"):
+            st.code(run_row["error_message"])
+
+    st.markdown("---")
+
+    # -- Stage completion: raw -> normalized
+    raw_df = _load_raw_jobs(selected_run_id)
+    norm_df = _load_normalized_jobs(selected_run_id)
+    quarantine_df = _load_quarantined(selected_run_id)
+
+    col_a, col_b, col_c = st.columns(3)
+    col_a.metric("Raw Ingested", len(raw_df))
+    col_b.metric("Normalized", len(norm_df))
+    col_c.metric("Quarantined", len(quarantine_df))
+
+    st.markdown("---")
+
+    # -- Completion table: one row per raw job showing stage progress
+    st.subheader("Record Completion")
+    st.caption("Each row is one ingested record. Columns show pipeline stage status.")
+
+    if raw_df.empty:
+        st.info("No records in this run.")
+        return
+
+    # Build normalized lookup by raw_job_id
+    norm_raw_ids = set(norm_df["raw_job_id"].dropna().astype(int)) if not norm_df.empty else set()
+    quarantine_raw_ids = set(quarantine_df["raw_job_id"].dropna().astype(int)) if not quarantine_df.empty else set()
+
+    rows = []
+    for _, raw in raw_df.iterrows():
+        raw_id = int(raw["id"])
+        ingested = raw["processing_status"] == "success"
+        normalized = raw_id in norm_raw_ids
+        quarantined = raw_id in quarantine_raw_ids
+
+        rows.append({
+            "ID": raw_id,
+            "Title": raw["title"],
+            "Company": raw["company"],
+            "Source": raw["source"],
+            "Ingestion": "Pass" if ingested else "Fail",
+            "Normalization": "Quarantined" if quarantined else ("Pass" if normalized else "Pending"),
+        })
+
+    result_df = pd.DataFrame(rows)
+    st.dataframe(result_df, use_container_width=True, hide_index=True)
+
+    ingested_pass = sum(1 for r in rows if r["Ingestion"] == "Pass")
+    norm_pass = sum(1 for r in rows if r["Normalization"] == "Pass")
+    total = len(rows)
+    st.info(f"Ingestion: {ingested_pass}/{total} passed  |  Normalization: {norm_pass}/{total} passed")
+
+
+# ---------------------------------------------------------------------------
+# Page 2 — Record Journey (DB)
+# ---------------------------------------------------------------------------
+
+def _page_record_journey_db() -> None:
+    st.title("Record Journey")
+
+    raw_df = _load_raw_jobs()
+    if raw_df.empty:
+        st.warning("No ingested records in the database yet.")
+        return
+
+    # -- Record selector
+    options = []
+    for _, row in raw_df.head(100).iterrows():
+        options.append(f"[{row['id']}]  {row['title']}  @  {row['company']}")
+
+    selected_idx = st.selectbox("Select a record to trace", range(len(options)),
+                                format_func=lambda i: options[i])
+    selected_raw = raw_df.iloc[selected_idx]
+    raw_id = int(selected_raw["id"])
+
+    st.markdown("---")
+    st.subheader(f"Record ID: `{raw_id}`  —  {selected_raw['title']}")
+    st.caption(f"Source: {selected_raw['source']}  |  External ID: {selected_raw['external_id']}")
+
+    # -- Stage 1: Ingestion
+    st.markdown("#### Stage 1: Ingestion")
+    with st.expander("Ingestion details", expanded=True):
+        col1, col2 = st.columns(2)
+        col1.markdown(f"**Run ID:** `{selected_raw['ingestion_run_id']}`")
+        col2.markdown(f"**Status:** `{selected_raw['processing_status']}`")
+
+        ingestion_fields = {
+            "Title": selected_raw["title"],
+            "Company": selected_raw["company"],
+            "Location": ", ".join(filter(None, [
+                selected_raw.get("city"),
+                selected_raw.get("state"),
+                selected_raw.get("country"),
+            ])) or "—",
+            "Remote": selected_raw.get("is_remote"),
+            "Date Posted": selected_raw.get("date_posted"),
+            "Employment Type": selected_raw.get("employment_type"),
+            "Experience Level": selected_raw.get("experience_level"),
+            "Ingested At": selected_raw.get("ingestion_timestamp"),
+        }
+        st.json({k: str(v) if v is not None else "—" for k, v in ingestion_fields.items()})
+
+        if selected_raw.get("salary_min") or selected_raw.get("salary_max"):
+            st.markdown(
+                f"**Salary:** {selected_raw.get('salary_min', '?')} – "
+                f"{selected_raw.get('salary_max', '?')} "
+                f"{selected_raw.get('salary_currency', '')} / "
+                f"{selected_raw.get('salary_period', '')}"
+            )
+
+        if selected_raw.get("error_message"):
+            st.error(f"Error: {selected_raw['error_message']}")
+
+    # -- Stage 2: Normalization
+    st.markdown("#### Stage 2: Normalization")
+    norm_df = _load_normalized_jobs()
+    norm_match = norm_df[norm_df["raw_job_id"] == raw_id] if not norm_df.empty else pd.DataFrame()
+
+    if not norm_match.empty:
+        norm_row = norm_match.iloc[0]
+        with st.expander("Normalization details", expanded=True):
+            col1, col2 = st.columns(2)
+            col1.markdown(f"**Status:** `{norm_row['normalization_status']}`")
+            col2.markdown(f"**Normalized ID:** `{norm_row['id']}`")
+
+            norm_fields = {
+                "Title": norm_row["title"],
+                "Company": norm_row["company"],
+                "Location": ", ".join(filter(None, [
+                    norm_row.get("city"),
+                    norm_row.get("state_province"),
+                    norm_row.get("country"),
+                ])) or "—",
+                "Work Arrangement": norm_row.get("work_arrangement") or "—",
+                "Remote": norm_row.get("is_remote"),
+                "Employment Type": norm_row.get("employment_type") or "—",
+                "Experience Level": norm_row.get("experience_level") or "—",
+                "Date Posted": str(norm_row.get("date_posted")) if norm_row.get("date_posted") else "—",
+            }
+            st.json({k: str(v) if v is not None else "—" for k, v in norm_fields.items()})
+
+            if norm_row.get("salary_min") or norm_row.get("salary_max"):
+                st.markdown(
+                    f"**Salary:** {norm_row.get('salary_min', '?')} – "
+                    f"{norm_row.get('salary_max', '?')} "
+                    f"{norm_row.get('salary_currency', '')} / "
+                    f"{norm_row.get('salary_period', '')}"
+                )
+    else:
+        # Check quarantine
+        quarantine_df = _load_quarantined()
+        q_match = quarantine_df[quarantine_df["raw_job_id"] == raw_id] if not quarantine_df.empty else pd.DataFrame()
+        if not q_match.empty:
+            q_row = q_match.iloc[0]
+            with st.expander("Normalization — QUARANTINED", expanded=True):
+                st.error(f"**Error type:** {q_row['error_type']}")
+                st.code(q_row.get("error_detail", "No detail"))
+        else:
+            st.info("Not yet normalized — pending or in progress.")
+
+    # -- Stages 3-7: Not yet in DB (future weeks)
+    st.markdown("---")
+    st.caption(
+        "Stages 3–7 (Skills Extraction, Enrichment, Analytics, Visualization, Orchestration) "
+        "will appear here as those agents write to the database in upcoming weeks."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Page 3 — Batch Insights (DB)
+# ---------------------------------------------------------------------------
+
+def _page_batch_insights_db() -> None:
+    st.title("Batch Insights")
+    st.caption("Aggregate view across ingested and normalized job records from the database.")
+
+    norm_df = _load_normalized_jobs()
+    raw_df = _load_raw_jobs()
+
+    if norm_df.empty and raw_df.empty:
+        st.warning("No records found in the database yet.")
+        return
+
+    # Use normalized if available, otherwise raw
+    df = norm_df if not norm_df.empty else raw_df
+    source_label = "normalized" if not norm_df.empty else "raw ingested"
+
+    st.info(f"Showing aggregates from **{len(df)}** {source_label} records.")
+    st.markdown("---")
+
+    # -- Source distribution
+    st.subheader("Source Distribution")
+    if "source" in df.columns:
+        source_counts = df["source"].value_counts()
+        st.bar_chart(source_counts)
+
+    st.markdown("---")
+
+    # -- Locations
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("Top Locations (State)")
+        state_col = "state_province" if "state_province" in df.columns else "state"
+        if state_col in df.columns:
+            state_counts = df[state_col].dropna().value_counts().head(15)
+            if not state_counts.empty:
+                st.bar_chart(state_counts)
+            else:
+                st.info("No location data.")
+        else:
+            st.info("No state column found.")
+
+    with col2:
+        st.subheader("Top Cities")
+        if "city" in df.columns:
+            city_counts = df["city"].dropna().value_counts().head(15)
+            if not city_counts.empty:
+                st.bar_chart(city_counts)
+            else:
+                st.info("No city data.")
+
+    st.markdown("---")
+
+    # -- Remote distribution
+    st.subheader("Remote vs On-site")
+    if "is_remote" in df.columns:
+        remote_counts = df["is_remote"].map({True: "Remote", False: "On-site", None: "Unknown"})
+        remote_counts = remote_counts.fillna("Unknown").value_counts()
+        st.bar_chart(remote_counts)
+
+    st.markdown("---")
+
+    # -- Employment type + Experience level (side by side)
+    col3, col4 = st.columns(2)
+
+    with col3:
+        st.subheader("Employment Type")
+        if "employment_type" in df.columns:
+            et_counts = df["employment_type"].dropna().value_counts()
+            if not et_counts.empty:
+                st.bar_chart(et_counts)
+            else:
+                st.info("No employment type data.")
+
+    with col4:
+        st.subheader("Experience Level")
+        if "experience_level" in df.columns:
+            el_counts = df["experience_level"].dropna().value_counts()
+            if not el_counts.empty:
+                st.bar_chart(el_counts)
+            else:
+                st.info("No experience level data.")
+
+    st.markdown("---")
+
+    # -- Salary distribution
+    st.subheader("Salary Distribution")
+    salary_df = df[["salary_min", "salary_max"]].dropna(how="all")
+    if not salary_df.empty:
+        col_s1, col_s2, col_s3 = st.columns(3)
+        valid_min = salary_df["salary_min"].dropna()
+        valid_max = salary_df["salary_max"].dropna()
+        if not valid_min.empty:
+            col_s1.metric("Median Min Salary", f"${valid_min.median():,.0f}")
+        if not valid_max.empty:
+            col_s2.metric("Median Max Salary", f"${valid_max.median():,.0f}")
+        col_s3.metric("Records with Salary", len(salary_df))
+
+        # Histogram of salary_min
+        if not valid_min.empty:
+            st.markdown("**Minimum Salary Distribution**")
+            st.bar_chart(valid_min.value_counts(bins=10).sort_index())
+    else:
+        st.info("No salary data available.")
+
+    st.markdown("---")
+
+    # -- Processing status (raw jobs)
+    if not raw_df.empty and "processing_status" in raw_df.columns:
+        st.subheader("Processing Status (Raw Jobs)")
+        status_counts = raw_df["processing_status"].value_counts()
+        st.bar_chart(status_counts)
+
+    st.markdown("---")
+
+    # -- Recent records table
+    st.subheader("Recent Records")
+    display_cols = ["title", "company", "source"]
+    if "city" in df.columns:
+        display_cols.append("city")
+    state_col = "state_province" if "state_province" in df.columns else "state"
+    if state_col in df.columns:
+        display_cols.append(state_col)
+    if "employment_type" in df.columns:
+        display_cols.append("employment_type")
+    if "experience_level" in df.columns:
+        display_cols.append("experience_level")
+
+    available_cols = [c for c in display_cols if c in df.columns]
+    st.dataframe(df[available_cols].head(50), use_container_width=True, hide_index=True)
+
+
+# ---------------------------------------------------------------------------
+# JSON fallback pages (Week 2 walking skeleton)
+# ---------------------------------------------------------------------------
+
+def _page_run_summary_json(entries: list[dict]) -> None:
+    st.title("Pipeline Run Summary")
+    st.warning("Database unavailable — showing data from JSON file.")
 
     if not entries:
         st.error(
@@ -100,19 +546,15 @@ def page_run_summary(entries: list[dict]) -> None:
         )
         return
 
-    record_map = build_record_map(entries)
+    record_map = _build_record_map(entries)
     phase1_agents = [a for a in _AGENT_ORDER if a != "demand-analysis-agent"]
 
-    # -- Headline metrics
     timestamps = [e["timestamp"] for e in entries if "timestamp" in e]
     run_start = min(timestamps) if timestamps else "—"
-    run_end   = max(timestamps) if timestamps else "—"
+    run_end = max(timestamps) if timestamps else "—"
 
-    # Compute duration from earliest to latest timestamp.
     duration_str = "—"
     if run_start != "—" and run_end != "—":
-        from datetime import datetime
-
         t0 = datetime.fromisoformat(run_start).replace(tzinfo=None)
         t1 = datetime.fromisoformat(run_end).replace(tzinfo=None)
         delta = t1 - t0
@@ -133,7 +575,6 @@ def page_run_summary(entries: list[dict]) -> None:
     col4.metric("Duration", duration_str)
     st.markdown("---")
 
-    # -- Completion table
     st.subheader("Completion Table")
     st.caption(
         "One row per job record.  Each column is one pipeline stage.  "
@@ -141,11 +582,10 @@ def page_run_summary(entries: list[dict]) -> None:
     )
 
     rows = []
-    for cid in sorted(record_map.keys(), key=sort_key):
+    for cid in sorted(record_map.keys(), key=_sort_key):
         record_entries = record_map[cid]
         completed_agents = {e["agent_id"] for e in record_entries}
 
-        # Pull a human-readable label from the first entry that has title/company.
         title, company = "—", "—"
         for e in record_entries:
             p = e.get("payload", {})
@@ -156,12 +596,7 @@ def page_run_summary(entries: list[dict]) -> None:
             if title != "—" and company != "—":
                 break
 
-        row: dict = {
-            "Correlation ID": cid,
-            "Title": title,
-            "Company": company,
-        }
-
+        row: dict = {"Correlation ID": cid, "Title": title, "Company": company}
         for agent in phase1_agents:
             short = agent.replace("-agent", "").replace("-", " ").title()
             row[short] = "Pass" if agent in completed_agents else "Fail"
@@ -175,21 +610,15 @@ def page_run_summary(entries: list[dict]) -> None:
 
     complete_count = sum(1 for r in rows if r["All Stages"] == "Pass")
     total_count = len(rows)
-
     if complete_count == total_count:
         st.success(f"All {total_count} records completed all seven Phase 1 stages.")
     else:
-        st.warning(
-            f"{complete_count} / {total_count} records completed all Phase 1 stages."
-        )
+        st.warning(f"{complete_count} / {total_count} records completed all Phase 1 stages.")
 
 
-# ---------------------------------------------------------------------------
-# Page 2 — Record Journey
-# ---------------------------------------------------------------------------
-
-def page_record_journey(entries: list[dict]) -> None:
+def _page_record_journey_json(entries: list[dict]) -> None:
     st.title("Record Journey")
+    st.warning("Database unavailable — showing data from JSON file.")
 
     if not entries:
         st.error(
@@ -199,49 +628,38 @@ def page_record_journey(entries: list[dict]) -> None:
         )
         return
 
-    record_map = build_record_map(entries)
+    record_map = _build_record_map(entries)
 
-    # -- Record selector
     def label(cid: str) -> str:
         for e in record_map.get(cid, []):
             p = e.get("payload", {})
-            t = p.get("title")
-            c = p.get("company")
+            t, c = p.get("title"), p.get("company")
             if t and c:
                 return f"[{cid}]  {t}  @  {c}"
         return f"Record {cid}"
 
-    sorted_cids = sorted(record_map.keys(), key=sort_key)
-    labels      = [label(cid) for cid in sorted_cids]
+    sorted_cids = sorted(record_map.keys(), key=_sort_key)
+    labels = [label(cid) for cid in sorted_cids]
     label_to_cid = dict(zip(labels, sorted_cids, strict=True))
 
     selected_label = st.selectbox("Select a record to trace", labels)
-    selected_cid   = label_to_cid[selected_label]
+    selected_cid = label_to_cid[selected_label]
 
     st.markdown("---")
-
-    # -- Header
     st.subheader(f"Correlation ID: `{selected_cid}`")
-    st.caption(
-        "This ID is set once when the record enters the pipeline and carried "
-        "unchanged through all eight stages.  It is how you find a specific "
-        "record in any log, at any stage, at any time."
-    )
 
-    # -- Timeline
     record_entries = sorted(
         record_map[selected_cid],
         key=lambda e: _AGENT_ORDER_INDEX.get(e.get("agent_id", ""), 99),
     )
 
     st.markdown("#### Stage-by-stage timeline")
-
     for entry in record_entries:
-        agent_id   = entry.get("agent_id", "—")
-        payload    = entry.get("payload", {})
+        agent_id = entry.get("agent_id", "—")
+        payload = entry.get("payload", {})
         event_type = payload.get("event_type", agent_id)
-        timestamp  = entry.get("timestamp", "—")
-        is_phase2  = event_type == "Phase2Skipped"
+        timestamp = entry.get("timestamp", "—")
+        is_phase2 = event_type == "Phase2Skipped"
 
         status_str = "SKIPPED" if is_phase2 else "OK"
         label_str = f"{status_str}  **{agent_id}**  ->  `{event_type}`  |  {timestamp}"
@@ -250,14 +668,12 @@ def page_record_journey(entries: list[dict]) -> None:
             col_a, col_b = st.columns(2)
             col_a.markdown(f"**Event ID**  \n`{entry.get('event_id', '—')}`")
             col_b.markdown(f"**Schema Version**  \n`{entry.get('schema_version', '—')}`")
-
             st.markdown(f"**Correlation ID:** `{entry.get('correlation_id', '—')}`")
 
             if is_phase2:
                 st.info("Phase 2 stub — this agent is not yet implemented.")
                 continue
 
-            # Payload summary — show the most useful fields prominently.
             summary_fields = [
                 "event_type", "posting_id", "title", "company",
                 "seniority", "role_classification",
@@ -271,39 +687,20 @@ def page_record_journey(entries: list[dict]) -> None:
                 st.markdown("**Payload summary**")
                 st.json(summary)
 
-            # Skills table (if present).
             skills = payload.get("skills")
             if skills:
                 st.markdown("**Skills extracted**")
-                st.dataframe(
-                    pd.DataFrame(skills),
-                    use_container_width=True,
-                    hide_index=True,
-                )
+                st.dataframe(pd.DataFrame(skills), use_container_width=True, hide_index=True)
 
-            # Top skills in analytics payload.
             top_skills = payload.get("top_skills")
             if top_skills:
                 st.markdown("**Batch top skills** (from fixture analytics)")
-                st.dataframe(
-                    pd.DataFrame(top_skills),
-                    use_container_width=True,
-                    hide_index=True,
-                )
+                st.dataframe(pd.DataFrame(top_skills), use_container_width=True, hide_index=True)
 
 
-# ---------------------------------------------------------------------------
-# Page 3 — Batch Insights
-# ---------------------------------------------------------------------------
-
-def page_batch_insights(entries: list[dict]) -> None:
+def _page_batch_insights_json(entries: list[dict]) -> None:
     st.title("Batch Insights")
-    st.caption(
-        "Aggregate view across all 10 job postings.  "
-        "In Week 2, charts are drawn from the Analytics Agent fixture data.  "
-        "In Week 7, they will reflect real extracted and aggregated data — "
-        "no dashboard changes needed."
-    )
+    st.warning("Database unavailable — showing data from JSON file.")
 
     if not entries:
         st.error(
@@ -313,7 +710,6 @@ def page_batch_insights(entries: list[dict]) -> None:
         )
         return
 
-    # Pull analytics payload from the first analytics-agent entry.
     analytics_entries = [e for e in entries if e.get("agent_id") == "analytics-agent"]
     if not analytics_entries:
         st.warning("No Analytics Agent entries found in the run log.")
@@ -321,22 +717,14 @@ def page_batch_insights(entries: list[dict]) -> None:
 
     p = analytics_entries[0].get("payload", {})
 
-    # -- Top Skills bar chart
     st.subheader("Top Skills")
     top_skills = p.get("top_skills", [])
     if top_skills:
-        df_skills = (
-            pd.DataFrame(top_skills)
-            .sort_values("count", ascending=False)
-            .set_index("skill")
-        )
+        df_skills = pd.DataFrame(top_skills).sort_values("count", ascending=False).set_index("skill")
         st.bar_chart(df_skills["count"])
-    else:
-        st.info("No top_skills data in analytics payload.")
 
     st.markdown("---")
 
-    # -- Seniority distribution
     st.subheader("Seniority Distribution")
     seniority = p.get("seniority_distribution", {})
     if seniority:
@@ -346,27 +734,20 @@ def page_batch_insights(entries: list[dict]) -> None:
             .dropna()
         )
         st.bar_chart(df_sen["count"])
-    else:
-        st.info("No seniority_distribution data.")
 
     st.markdown("---")
 
-    # -- Role distribution  +  Locations  (side by side)
     col1, col2 = st.columns(2)
-
     with col1:
         st.subheader("Role Distribution")
         roles = p.get("role_distribution", {})
         if roles:
             df_roles = (
                 pd.DataFrame.from_dict(roles, orient="index", columns=["count"])
-                .reset_index()
-                .rename(columns={"index": "role"})
+                .reset_index().rename(columns={"index": "role"})
                 .sort_values("count", ascending=False)
             )
             st.dataframe(df_roles, use_container_width=True, hide_index=True)
-        else:
-            st.info("No role_distribution data.")
 
     with col2:
         st.subheader("Locations")
@@ -374,81 +755,37 @@ def page_batch_insights(entries: list[dict]) -> None:
         if locations:
             df_loc = (
                 pd.DataFrame.from_dict(locations, orient="index", columns=["postings"])
-                .reset_index()
-                .rename(columns={"index": "location"})
+                .reset_index().rename(columns={"index": "location"})
                 .sort_values("postings", ascending=False)
             )
             st.dataframe(df_loc, use_container_width=True, hide_index=True)
-        else:
-            st.info("No locations data.")
 
     st.markdown("---")
 
-    # -- Sectors
-    st.subheader("Sectors")
-    sectors = p.get("sectors", {})
-    if sectors:
-        df_sec = (
-            pd.DataFrame.from_dict(sectors, orient="index", columns=["count"])
-            .reset_index()
-            .rename(columns={"index": "sector"})
-            .sort_values("count", ascending=False)
-        )
-        st.dataframe(df_sec, use_container_width=True, hide_index=True)
-
-    st.markdown("---")
-
-    # -- Skill type distribution
-    st.subheader("Skill Type Distribution")
-    skill_types = p.get("skill_type_distribution", {})
-    if skill_types:
-        df_types = (
-            pd.DataFrame.from_dict(skill_types, orient="index", columns=["count"])
-            .reset_index()
-            .rename(columns={"index": "type"})
-        )
-        st.bar_chart(df_types.set_index("type")["count"])
-    else:
-        st.info("No skill_type_distribution data.")
-
-    st.markdown("---")
-
-    # -- Quality & spam scores
     st.subheader("Quality & Spam Scores")
     col3, col4 = st.columns(2)
-
     avg_quality = p.get("avg_quality_score")
-    avg_spam    = p.get("avg_spam_score")
-
+    avg_spam = p.get("avg_spam_score")
     if avg_quality is not None:
-        col3.metric(
-            "Average Quality Score",
-            f"{avg_quality:.3f}",
-            help="1.0 = perfect completeness, clarity, and coherence",
-        )
+        col3.metric("Average Quality Score", f"{avg_quality:.3f}")
     if avg_spam is not None:
-        col4.metric(
-            "Average Spam Score",
-            f"{avg_spam:.3f}",
-            help="< 0.70 -> proceed  |  0.70-0.90 -> flag  |  > 0.90 -> reject",
-        )
+        col4.metric("Average Spam Score", f"{avg_spam:.3f}")
 
-    # Per-record quality breakdown from enrichment entries.
-    st.markdown("#### Per-record quality breakdown")
     enrichment_entries = [e for e in entries if e.get("agent_id") == "enrichment-agent"]
     if enrichment_entries:
+        st.markdown("#### Per-record quality breakdown")
         quality_rows = []
         for e in enrichment_entries:
             ep = e.get("payload", {})
             quality_rows.append({
-                "Posting ID":  ep.get("posting_id"),
-                "Title":       ep.get("title"),
-                "Company":     ep.get("company"),
-                "Role":        ep.get("role_classification"),
-                "Seniority":   ep.get("seniority"),
-                "Quality":     ep.get("quality_score"),
-                "Spam":        ep.get("spam_score"),
-                "Is Spam":     ep.get("is_spam"),
+                "Posting ID": ep.get("posting_id"),
+                "Title": ep.get("title"),
+                "Company": ep.get("company"),
+                "Role": ep.get("role_classification"),
+                "Seniority": ep.get("seniority"),
+                "Quality": ep.get("quality_score"),
+                "Spam": ep.get("spam_score"),
+                "Is Spam": ep.get("is_spam"),
             })
         df_quality = pd.DataFrame(quality_rows).sort_values("Posting ID")
         st.dataframe(df_quality, use_container_width=True, hide_index=True)
@@ -460,14 +797,24 @@ def page_batch_insights(entries: list[dict]) -> None:
 
 def main() -> None:
     st.set_page_config(
-        page_title="JIE Journey Dashboard — Week 2",
+        page_title="JIE Dashboard",
         page_icon="*",
         layout="wide",
         initial_sidebar_state="expanded",
     )
 
     st.sidebar.title("JIE Dashboard")
-    st.sidebar.caption("Week 2 — Walking Skeleton")
+
+    # Detect data source — shown directly under title
+    use_db = _db_available()
+    if use_db:
+        st.sidebar.success("Connected to PostgreSQL")
+    else:
+        st.sidebar.warning("Using fixture data (JSON)")
+        st.sidebar.caption(
+            "Set `PYTHON_DATABASE_URL` in `.env` to connect to PostgreSQL."
+        )
+
     st.sidebar.markdown("---")
 
     page = st.sidebar.radio(
@@ -479,22 +826,21 @@ def main() -> None:
         ],
     )
 
-    st.sidebar.markdown("---")
-    st.sidebar.caption(
-        f"Data source:  \n`{_RUN_LOG_PATH.name}`"
-    )
-
-    if not _RUN_LOG_PATH.exists():
-        st.sidebar.error("Run log not found.  Run the pipeline first.")
-
-    entries = load_run_log()
-
-    if page == "Pipeline Run Summary":
-        page_run_summary(entries)
-    elif page == "Record Journey":
-        page_record_journey(entries)
-    elif page == "Batch Insights":
-        page_batch_insights(entries)
+    if use_db:
+        if page == "Pipeline Run Summary":
+            _page_run_summary_db()
+        elif page == "Record Journey":
+            _page_record_journey_db()
+        elif page == "Batch Insights":
+            _page_batch_insights_db()
+    else:
+        entries = _load_run_log()
+        if page == "Pipeline Run Summary":
+            _page_run_summary_json(entries)
+        elif page == "Record Journey":
+            _page_record_journey_json(entries)
+        elif page == "Batch Insights":
+            _page_batch_insights_json(entries)
 
 
 if __name__ == "__main__":
