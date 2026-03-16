@@ -138,7 +138,7 @@ def write_last_run_start() -> datetime:
     key = _scheduler_type()
     data[key] = dict(data.get(key, {}))
     section = data[key]
-    now = datetime.now(datetime.UTC)
+    now = datetime.now(datetime.timezone.utc)
     section["last_run_start"] = now.isoformat()
 
     # Drift: expected vs actual fire time (last 5 runs for EXP-005).
@@ -170,7 +170,7 @@ def write_last_run_finish(started_at: datetime | None = None) -> None:
     key = _scheduler_type()
     data[key] = dict(data.get(key, {}))
     section = data[key]
-    finish = datetime.now(datetime.UTC)
+    finish = datetime.now(datetime.timezone.utc)
     section["last_run_finish"] = finish.isoformat()
 
     # Duration of this run (seconds): prefer passed-in start time so we don't rely on file state
