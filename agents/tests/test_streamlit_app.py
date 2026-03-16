@@ -6,11 +6,6 @@ import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
-from agents.common.event_envelope import EventEnvelope
-
-
 # ---------------------------------------------------------------------------
 # Helpers: build sample JSON entries matching pipeline_run.json shape
 # ---------------------------------------------------------------------------
@@ -199,7 +194,7 @@ class TestJsonFallbackLogic:
 
     def test_completion_table_marks_all_pass_when_all_agents_present(self) -> None:
         """Simulate the completion table logic from page_run_summary_json."""
-        from agents.dashboard.streamlit_app import _build_record_map, _AGENT_ORDER
+        from agents.dashboard.streamlit_app import _AGENT_ORDER, _build_record_map
 
         entries = _full_pipeline_entries("1")
         record_map = _build_record_map(entries)
@@ -212,7 +207,7 @@ class TestJsonFallbackLogic:
 
     def test_completion_table_marks_fail_when_agent_missing(self) -> None:
         """Missing an agent should not count as all-complete."""
-        from agents.dashboard.streamlit_app import _build_record_map, _AGENT_ORDER
+        from agents.dashboard.streamlit_app import _AGENT_ORDER, _build_record_map
 
         entries = _full_pipeline_entries("1")
         # Remove the analytics-agent entry
