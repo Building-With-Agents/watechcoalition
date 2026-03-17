@@ -73,7 +73,12 @@ class SkillsExtractionAgent(BaseAgent):
                 pass
 
         db_reachable = check_db_connection()
-        status = "ok" if (fixture_ok and db_reachable) else "degraded"
+        if not fixture_ok:
+            status = "down"
+        elif db_reachable:
+            status = "ok"
+        else:
+            status = "degraded"
 
         return {
             "status": status,
