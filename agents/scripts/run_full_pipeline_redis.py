@@ -40,8 +40,8 @@ from agents.analytics.agent import AnalyticsAgent
 from agents.common.event_envelope import EventEnvelope
 from agents.common.message_bus.redis_streams import (
     RedisDependencyError,
-    RedisStreamsEventBus,
     RedisStreamsError,
+    RedisStreamsEventBus,
 )
 from agents.enrichment.agent import EnrichmentAgent
 from agents.ingestion.agent import IngestionAgent
@@ -107,7 +107,7 @@ def _run(
     buses: list[RedisStreamsEventBus] = []
     bus_by_name: dict[str, RedisStreamsEventBus] = {}
 
-    for stage_name, _agent, _sub_event, next_stage in STAGES:
+    for stage_name, _agent, _sub_event, _next_stage in STAGES:
         stream_name = f"{STREAM_PREFIX}:{stage_name}"
         group_name = f"{STREAM_PREFIX}:{stage_name}-group"
         bus = RedisStreamsEventBus.from_url(
