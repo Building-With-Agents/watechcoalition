@@ -18,7 +18,6 @@ Decision #32 (Model tier routing), Decision #33 (Token cost budget).
 
 from __future__ import annotations
 
-from decimal import Decimal
 from typing import Any
 
 

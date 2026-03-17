@@ -13,8 +13,6 @@ Week 5: used by remaining extractors (tasks, responsibilities, context).
 
 from __future__ import annotations
 
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 
@@ -30,48 +28,48 @@ class SpanRecord(BaseModel):
 class SkillRecord(BaseModel):
     """A single extracted skill with taxonomy linking metadata."""
 
-    skill_id: Optional[str] = None
+    skill_id: str | None = None
     label: str
     type: str  # Technical | Domain | Soft | Certification | Tool
     confidence: float = Field(ge=0.0, le=1.0)
     field_source: str  # title | description | requirements | responsibilities
-    required_flag: Optional[bool] = None
-    esco_uri: Optional[str] = None  # ESCO digital skills cluster URI
+    required_flag: bool | None = None
+    esco_uri: str | None = None  # ESCO digital skills cluster URI
     is_genai_extension: bool = False  # True if from GenAI Extension Layer
-    source_span: Optional[SpanRecord] = None
+    source_span: SpanRecord | None = None
 
 
 class ToolRecord(BaseModel):
     """A single extracted tool (programming language, framework, platform, etc.)."""
 
-    tool_id: Optional[str] = None
+    tool_id: str | None = None
     label: str
     category: str  # language | framework | platform | database | devops | ai_tool | other
     confidence: float = Field(ge=0.0, le=1.0)
     field_source: str
-    source_span: Optional[SpanRecord] = None
+    source_span: SpanRecord | None = None
 
 
 class TaskRecord(BaseModel):
     """A single extracted job task or duty."""
 
-    task_id: Optional[str] = None
+    task_id: str | None = None
     description: str
-    complexity: Optional[str] = None  # routine | analytical | creative | strategic
+    complexity: str | None = None  # routine | analytical | creative | strategic
     confidence: float = Field(ge=0.0, le=1.0)
     field_source: str
-    source_span: Optional[SpanRecord] = None
+    source_span: SpanRecord | None = None
 
 
 class ResponsibilityRecord(BaseModel):
     """A single extracted responsibility with scope classification."""
 
-    responsibility_id: Optional[str] = None
+    responsibility_id: str | None = None
     description: str
-    scope: Optional[str] = None  # individual | team | department | organization
+    scope: str | None = None  # individual | team | department | organization
     confidence: float = Field(ge=0.0, le=1.0)
     field_source: str
-    source_span: Optional[SpanRecord] = None
+    source_span: SpanRecord | None = None
 
 
 class ContextSignal(BaseModel):
@@ -87,8 +85,8 @@ class TaxonomyResult(BaseModel):
     """Result of resolving a skill label against the taxonomy store."""
 
     original_label: str
-    esco_uri: Optional[str] = None
-    esco_label: Optional[str] = None
+    esco_uri: str | None = None
+    esco_label: str | None = None
     is_genai_extension: bool = False
     resolution_step: int = 6  # 1-6, which step resolved this skill
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
