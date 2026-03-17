@@ -119,6 +119,12 @@ def fetch_sources(state: IngestionState) -> IngestionState:
             ))
             log.warning("source_fetch_failed", source=source_name, error=str(exc))
 
+    # Cap total fetched records to limit (default 50) when set on state
+    cap = state.get("limit")
+    if isinstance(cap, int) and cap > 0 and len(all_records) > cap:
+        original_count = len(all_records)
+        all_records = all_records[:cap]
+        log.info("ingestion_capped", limit=cap, total_before_cap=original_count, capped_to=len(all_records))
     return {
         "fetched_records": all_records,
         "source_results": source_results,
@@ -371,10 +377,17 @@ class IngestionAgent(AgentBase):
                 "role_categories": [],
                 "keywords": [payload.get("query", "software engineer")],
             }
+        # Cap number of jobs: from region_config, top-level payload, or default 50
+        limit = 50
+        if isinstance(region_config, dict) and isinstance(region_config.get("limit"), int):
+            limit = region_config["limit"]
+        elif isinstance(payload.get("limit"), int):
+            limit = payload["limit"]
 
         initial_state: IngestionState = {
             "run_id": run_id,
             "region_config": region_config,
+            "limit": limit,
             "correlation_id": event.correlation_id,
             "batch_id": run_id,
         }

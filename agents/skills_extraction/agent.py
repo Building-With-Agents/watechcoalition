@@ -14,6 +14,7 @@ The agent supports three input modes, in order:
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -308,6 +309,14 @@ class SkillsExtractionAgent(BaseAgent):
         work_items = self._work_item_loader.load(event)
         if not work_items:
             return self._legacy_fixture_response(event)
+
+        # Cap work items per run for faster pipeline runs (default 10; set SKILLS_EXTRACTION_MAX_JOBS to override)
+        try:
+            max_jobs = int(os.environ.get("SKILLS_EXTRACTION_MAX_JOBS", "10"))
+        except (TypeError, ValueError):
+            max_jobs = 10
+        if max_jobs > 0 and len(work_items) > max_jobs:
+            work_items = work_items[:max_jobs]
 
         results = [self._extract_work_item(item) for item in work_items]
         self._extraction_store.save(results)
