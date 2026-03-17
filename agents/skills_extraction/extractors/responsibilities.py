@@ -14,25 +14,19 @@ Reference: ARCHITECTURE_DEEP.md § 6-Dimension Extraction Model.
 
 from __future__ import annotations
 
-from agents.common.types import JobRecord, ResponsibilityRecord
+from typing import List
+
+from agents.common.types import JobRecord
+from agents.common.types.extraction_types import ResponsibilityRecord
 
 
-def extract_responsibilities(job_record: JobRecord) -> list[ResponsibilityRecord]:
-    """Extract responsibilities from a normalized job record.
+def extract_responsibilities(job_record: JobRecord) -> List[ResponsibilityRecord]:
+    """Extract broader areas of ownership and responsibility from a normalized job posting.
 
-    Week 4 (Fatima + Nestor): Implement stub returning empty ResponsibilityRecord[]
-    that passes schema validation and integrates with the pipeline runner.
-
-    Week 5: Replace with Sonnet-class LLM extraction.
-
-    Parameters
-    ----------
-    job_record : JobRecord
-        A normalized job posting from the normalization pipeline.
-
-    Returns
-    -------
-    list[ResponsibilityRecord]
-        Extracted responsibilities with scope and source spans.
+    This dimension identifies high-level responsibilities (e.g. "Own the data
+    platform roadmap", "Lead cross-functional initiatives") rather than
+    discrete tasks. Week 5 implementation: LLM extraction using a Sonnet-class
+    model. The current stub returns an empty list to be schema-valid and
+    pipeline-safe for Week 4 integration.
     """
-    raise NotImplementedError("Week 4: implement stub returning empty list with schema validation")
+    return []
