@@ -15,7 +15,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
+
+import structlog
 
 
 def main() -> None:
@@ -39,8 +42,9 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    log = structlog.get_logger()
     if not args.fixture.exists():
-        print(f"Fixture not found: {args.fixture}", flush=True)
+        log.error("fixture_not_found", path=str(args.fixture))
         return
 
     with args.fixture.open(encoding="utf-8") as f:
@@ -57,7 +61,7 @@ def main() -> None:
             break
 
     for pid in ids[: args.limit]:
-        print(pid)
+        sys.stdout.write(f"{pid}\n")
 
 
 if __name__ == "__main__":

@@ -13,6 +13,7 @@ from agents.skills_extraction.extractors.taxonomy import (
     resolve_taxonomy_batch,
 )
 
+
 # Dummy embedding to simulate Azure OpenAI (text-embedding-3-small is 1536-dim)
 def _mock_embed_texts_azure(texts: list[str]) -> list[list[float]] | None:
     if not texts:

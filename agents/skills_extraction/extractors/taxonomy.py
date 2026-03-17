@@ -86,7 +86,7 @@ def _build_parent_label_to_uri(records: list[dict[str, Any]]) -> dict[str, str]:
     for rec in records:
         labels = rec.get("broader_concept_labels") or []
         uris = rec.get("broader_concept_uris") or []
-        for label, uri in zip(labels, uris):
+        for label, uri in zip(labels, uris, strict=True):
             if label and uri:
                 key = _normalize_label(label)
                 if key not in out:
