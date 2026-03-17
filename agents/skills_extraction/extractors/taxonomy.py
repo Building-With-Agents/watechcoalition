@@ -21,6 +21,7 @@ Reference: ARCHITECTURE_DEEP.md § 6-Step Taxonomy Resolution.
 
 from __future__ import annotations
 
+import csv
 import json
 import os
 import re
@@ -43,6 +44,7 @@ log = structlog.get_logger()
 _TAXONOMY_DIR = Path(__file__).parent.parent / "taxonomy"
 _DEFAULT_ESCO_JSON = _TAXONOMY_DIR / "esco_digital_skills.json"
 _DEFAULT_GENAI_EXTENSION_JSON = _TAXONOMY_DIR / "genai_extension.json"
+_DEFAULT_ONET_SKILLS_PATH = _TAXONOMY_DIR / "onet_skills.txt"
 
 # Alias map: ARCHITECTURE_DEEP parent cluster name (normalized) → ESCO broader_concept label as it appears in data
 _PARENT_LABEL_ALIASES: dict[str, str] = {
@@ -105,6 +107,59 @@ def _load_genai_extension(json_path: Path | None = None) -> dict[str, str]:
         return {}
     with path.open(encoding="utf-8") as f:
         return json.load(f)
+
+
+# ---------------------------------------------------------------------------
+# O*NET store loading (Step 5)
+# ---------------------------------------------------------------------------
+
+_onet_normalized_to_pair: dict[str, tuple[str, str]] | None = None
+
+
+def _load_onet_store(path: Path | None = None) -> dict[str, tuple[str, str]]:
+    """Load O*NET Skills tab-delimited file; return normalized_name -> (element_id, element_name).
+
+    File format: O*NET 25.0 Text Skills (13 columns). Uses Element ID and Element Name.
+    First occurrence wins for duplicates. If file is missing or empty, returns {}.
+    """
+    p = path or _DEFAULT_ONET_SKILLS_PATH
+    if not p.exists():
+        return {}
+    out: dict[str, tuple[str, str]] = {}
+    try:
+        with p.open(encoding="utf-8", newline="") as f:
+            reader = csv.reader(f, delimiter="\t")
+            header = next(reader, None)
+            if not header:
+                return {}
+            col_names = [h.strip() for h in header]
+            try:
+                idx_id = col_names.index("Element ID")
+                idx_name = col_names.index("Element Name")
+            except ValueError:
+                return {}
+            for row in reader:
+                if len(row) <= max(idx_id, idx_name):
+                    continue
+                element_id = (row[idx_id] or "").strip()
+                element_name = (row[idx_name] or "").strip()
+                if not element_id or not element_name:
+                    continue
+                key = _normalize_label(element_name)
+                if key not in out:
+                    out[key] = (element_id, element_name)
+    except Exception as exc:
+        log.warning("onet_load_failed", path=str(p), error=str(exc))
+        return {}
+    return out
+
+
+def _get_onet_store() -> dict[str, tuple[str, str]]:
+    """Return lazy-loaded O*NET normalized_name -> (element_id, element_name)."""
+    global _onet_normalized_to_pair
+    if _onet_normalized_to_pair is None:
+        _onet_normalized_to_pair = _load_onet_store()
+    return _onet_normalized_to_pair
 
 
 # Lazy-loaded singleton store state
@@ -360,13 +415,32 @@ def _resolve_step4_embedding_impl(label: str) -> TaxonomyResult | None:
 
 
 # ---------------------------------------------------------------------------
-# Step 5: O*NET (stub — fall through to step 6)
+# Step 5: O*NET skill match (normalized name lookup)
 # ---------------------------------------------------------------------------
 
 
-def _resolve_step5_onet(_label: str) -> TaxonomyResult | None:
-    """O*NET occupation code match. Week 4: stub only."""
-    return None
+def _resolve_step5_onet(label: str) -> TaxonomyResult | None:
+    """O*NET skill match: normalized name lookup in O*NET Skills store.
+
+    Returns TaxonomyResult with esco_uri='urn:onet:skill:{Element ID}' and
+    esco_label=Element Name. If file is missing or no match, returns None.
+    """
+    store = _get_onet_store()
+    if not store:
+        return None
+    norm = _normalize_label(label)
+    pair = store.get(norm)
+    if pair is None:
+        return None
+    element_id, element_name = pair
+    return TaxonomyResult(
+        original_label=label,
+        esco_uri="urn:onet:skill:" + element_id,
+        esco_label=element_name,
+        is_genai_extension=False,
+        resolution_step=5,
+        confidence=1.0,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -516,6 +590,13 @@ def resolve_taxonomy_batch(labels: list[str]) -> list[TaxonomyResult]:
                             resolution_step=4,
                             confidence=round(best_score, 4),
                         )
+
+    # Phase 2.5: Step 5 (O*NET) for any still unresolved
+    for lab in pending_step4:
+        if lab not in resolved_map:
+            r5 = _resolve_step5_onet(lab)
+            if r5 is not None:
+                resolved_map[lab] = r5
 
     # Phase 3: Step 6 for anything still unresolved
     for lab in pending_step4:

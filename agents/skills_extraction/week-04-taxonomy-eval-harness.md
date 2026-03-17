@@ -99,8 +99,8 @@ Angel's completed work:
 - **GenAI Extension Layer:** `agents/skills_extraction/taxonomy/genai_extension.json` — 10 skills → ESCO parent cluster label. Step 1 resolves by normalized exact match; parent label → URI is resolved from the ESCO store's `broader_concept_labels`/`broader_concept_uris`.
 - **ESCO store:** Loaded from `agents/skills_extraction/taxonomy/esco_digital_skills.json` (in-memory). Steps 2 (exact) and 3 (normalized) use `preferred_label`, `alt_labels`, `hidden_labels` and their normalized variants.
 - **Step 4 (embedding):** Azure OpenAI Embeddings API (text-embedding-3-small). No local model — HTTP calls via `AZURE_OPENAI_EMBEDDING_*` env vars. ESCO texts are sent in chunks of 100 to respect API payload limits; cache is built once and reused. Threshold via `SKILL_TAXONOMY_SIMILARITY_THRESHOLD` (default `0.92`). If the API is unavailable, step 4 is skipped and labels fall through to step 5/6; cosine similarity is computed with NumPy on the returned vectors.
-- **Step 5 (O*NET):** Stub only in Week 4; falls through to step 6.
-- **Batch:** `resolve_taxonomy_batch(labels)` deduplicates by exact label, runs Steps 1–3 for all unique labels, then sends **one batched** embedding request (chunked by 100) for labels that need Step 4; similarity is computed in one NumPy matrix multiply. Results are returned in the same order as input. No N+1 API calls.
+- **Step 5 (O*NET):** O*NET skill match: load from `taxonomy/onet_skills.txt` (tab-delimited, O*NET 25.0 Skills). Normalized name lookup; returns `urn:onet:skill:{Element ID}` and Element Name. File optional: if missing, step 5 is skipped.
+- **Batch:** `resolve_taxonomy_batch(labels)` deduplicates by exact label, runs Steps 1–3 for all unique labels, then **one batched** embedding request (chunked by 100) for labels that need Step 4, then Step 5 (O*NET) for any still unresolved, then Step 6. Results are returned in the same order as input. No N+1 API calls.
 - **Resolution stats:** `resolution_stats(results)` returns `{1: n1, 2: n2, ...}` (counts per step). Taxonomy coverage = (steps 1–5 total) / len(results); target ≥ 95%.
 
 ### Commands (resolver)
@@ -125,6 +125,7 @@ print('Step', r.resolution_step, 'uri', r.esco_uri, 'genai', r.is_genai_extensio
 
 # Resolve a batch and print resolution stats
 # NOTE: Make sure your Azure API keys are in your .env file before running this, 
+# If env vars do not load look for the test command below, under step 5
 # as unresolved skills will trigger live network calls to Step 4!
 python -c "
 from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch, resolution_stats
@@ -148,11 +149,38 @@ print('Taxonomy coverage:', round(coverage, 1), '%')
 
 If any of these are missing or the API request fails, step 4 is skipped and labels fall through to step 5/6 (no local model or PyTorch).
 
+**O*NET data (Step 5):** Download the [O*NET 25.0 Skills](https://www.onetcenter.org/dl_files/database/db_25_0_text/Skills.txt) tab-delimited file and save it as `agents/skills_extraction/taxonomy/onet_skills.txt`. If the file is missing, step 5 is skipped (no-op). No env vars required.
+
 Optional env for step 4 threshold:
 
 ```bash
 export SKILL_TAXONOMY_SIMILARITY_THRESHOLD=0.92
 ```
+
+### Two levels of testing
+
+- **pytest (logic test):** `pytest agents/tests/test_taxonomy_resolver.py -v` mocks the embedding API via monkeypatch. Use this in CI or when you don’t have Azure keys — it checks that the resolver logic and fallbacks are correct without live calls.
+- **CLI with `.env` (integration test):** The script below loads `.env` and calls the real Azure Embeddings API. It confirms endpoint, key, and connectivity. If the API returns 429 or fails, the resolver falls back to Step 5 (O*NET) or Step 6 (raw_skill) instead of crashing; seeing step counts like `{1: 0, 2: 2, 3: 0, 4: 0, 5: 1, 6: 3}` even when Step 4 fails is expected and shows defensive behavior.
+
+### API integration test script (for Angel)
+
+Run from **repo root** with venv activated and `.env` containing the `AZURE_OPENAI_EMBEDDING_*` variables. This hits the real Azure API; if you get 429 or timeouts, the resolver still completes and falls back to O*NET/raw_skill.
+
+```bash
+python -c "
+from dotenv import load_dotenv
+load_dotenv()
+
+from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch, resolution_stats
+labels = ['Python', 'ABAP', 'Prompt Engineering', 'machine learning', 'Reading Comprehension', 'Unknown Skill XYZ']
+results = resolve_taxonomy_batch(labels)
+print(resolution_stats(results))
+"
+```
+
+Expected: a dict like `{1: 0, 2: 2, 3: 0, 4: 0, 5: 1, 6: 3}` (exact counts depend on API success). If you see `embedding_api_failed` or `embedding_init_failed` in the logs, Step 4 was skipped and the rest of the pipeline still ran.
+
+**Handoff note (for Gary / Angel):** If you hit 429 during ESCO cache init, the batch still completes via Step 5/6 fallback. For a full production run, consider raising TPM/RPM on the Azure embedding deployment. The O*NET file is in `agents/skills_extraction/taxonomy/onet_skills.txt` and is ready for Step 5 refinements.
 
 ---
 
@@ -184,7 +212,7 @@ Output: one `posting_id` per line. Use `--fixture` to point at another JSON arra
 - [x] ESCO store loader (JSON, in-memory)
 - [x] Step 2 (exact) and step 3 (normalized) in `resolve_taxonomy()`
 - [x] Step 4 (embedding similarity, threshold from env)
-- [x] Step 5 (O*NET) stub
+- [x] Step 5 (O*NET) — load from onet_skills.txt, normalized name lookup
 - [x] `resolve_taxonomy_batch()` with dedupe and same-order results
 - [x] `resolution_stats()` for per-step counts and coverage
 - [x] Posting selection script (optional)
@@ -194,13 +222,10 @@ Output: one `posting_id` per line. Use `--fixture` to point at another JSON arra
 
 ## Next steps for Angel
 
-1. **Step 5 — O\*NET occupation code match**  
-   Implement the fallback to the [U.S. Department of Labor O\*NET taxonomy](https://www.onetcenter.org/). Right now step 5 is a stub (always falls through to step 6). Adding O\*NET will improve coverage for occupation-related skills that don't match ESCO or the embedding step.
+**20–30 hand-verified job postings**  
+Create a small ground-truth set so the eval harness has something concrete to measure against:
+- Use the posting-selection script (or any 20–30 real postings that span roles and skills).
+- For each posting, hand-verify which extracted skills map to which ESCO (or O\*NET) codes/labels.
+- Store these as the "expected" outcomes; the harness can then compute precision/recall and step-wise accuracy against this set.
 
-2. **20–30 hand-verified job postings (we can split)**  
-   Create a small ground-truth set so the eval harness has something concrete to measure against:
-   - Use the posting-selection script (or any 20–30 real postings that span roles and skills).
-   - For each posting, hand-verify which extracted skills map to which ESCO (or O\*NET) codes/labels.
-   - Store these as the "expected" outcomes; the harness can then compute precision/recall and step-wise accuracy against this set.
-
-Once step 5 is in place and the ground-truth set exists, we can run the full eval (coverage + precision/recall) off a single, well-defined dataset.
+Once the ground-truth set exists, we can run the full eval (coverage + precision/recall) off a single, well-defined dataset.
