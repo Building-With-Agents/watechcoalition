@@ -32,6 +32,11 @@ _PHASE1_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB",
 ]
 
+_NORMALIZED_JOBS_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS requirements TEXT",
+    "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS responsibilities TEXT",
+]
+
 
 def run_migrations(engine: Engine) -> None:
     """Create agent tables and add Phase 1 columns. Safe to run multiple times."""
@@ -54,6 +59,16 @@ def run_migrations(engine: Engine) -> None:
                 # Column may already exist or table may not exist yet — log and continue
                 log.warning(
                     "migration_alter_skipped",
+                    statement=stmt,
+                    error=str(exc),
+                )
+
+        for stmt in _NORMALIZED_JOBS_ALTER_STATEMENTS:
+            try:
+                conn.execute(text(stmt))
+            except Exception as exc:
+                log.warning(
+                    "migration_normalized_jobs_alter_skipped",
                     statement=stmt,
                     error=str(exc),
                 )
