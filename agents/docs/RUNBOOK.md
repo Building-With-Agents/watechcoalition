@@ -88,6 +88,10 @@ cp .env.example .env
 - `LANGSMITH_API_KEY` + `LANGCHAIN_TRACING_V2=true` — enables LangSmith tracing
 - `REDIS_URL` — only needed if testing Redis Streams event bus
 
+**Week 4 — Pass 2 skills extraction (Sonnet-class LLM):**
+- `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_API_VERSION`, `AZURE_OPENAI_DEPLOYMENT_NAME` — used for skills extraction.
+- `EXTRACTION_DEPLOYMENT_SKILLS` or `EXTRACTION_MODEL_SKILLS` — optional override for the deployment/model used only for Pass 2 skills (defaults to `AZURE_OPENAI_DEPLOYMENT_NAME` if unset).
+
 ---
 
 ## 5. Database Migration & Seeding

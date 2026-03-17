@@ -55,6 +55,9 @@ class SkillRecord(BaseModel):
     esco_uri: str | None = None  # ESCO digital skills cluster URI
     is_genai_extension: bool = False  # True if from GenAI Extension Layer
     source_span: SpanRecord
+    # Debug: set when source_span end_char was auto-corrected to match len(text)
+    span_auto_corrected: bool = False
+    original_end_char: int | None = None  # end_char before correction (when span_auto_corrected)
 
 
 class ToolRecord(BaseModel):

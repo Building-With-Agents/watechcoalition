@@ -24,7 +24,7 @@ from agents.common.data_store import check_db_connection, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types import JobRecord, ToolRecord
-from agents.skills_extraction.extractors import extract_tools
+from agents.skills_extraction.extractors import extract_skills, extract_tools
 
 _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
@@ -54,6 +54,9 @@ class ExtractionResult:
     tools: list[ToolRecord]
     seniority: str | None
     extraction_status: str
+    extraction_tokens_used: int = 0
+    extraction_cost_usd: float = 0.0
+    alert_skills_extraction: bool = False
 
 
 class WorkItemLoader(Protocol):
@@ -236,8 +239,8 @@ class SQLAlchemyExtractionStore:
 
                 row.extraction_version = EXTRACTION_VERSION
                 row.extraction_model = EXTRACTION_MODEL
-                row.extraction_tokens_used = 0
-                row.extraction_cost_usd = 0.0
+                row.extraction_tokens_used = getattr(result, "extraction_tokens_used", 0) or 0
+                row.extraction_cost_usd = getattr(result, "extraction_cost_usd", 0.0) or 0.0
                 row.skills = result.skills
                 row.tools = [tool.model_dump() for tool in result.tools]
                 row.tasks = []
@@ -308,6 +311,8 @@ class SkillsExtractionAgent(BaseAgent):
 
         results = [self._extract_work_item(item) for item in work_items]
         self._extraction_store.save(results)
+        # When payload["skills_extraction_alert"] is True, caller/orchestrator should
+        # publish SkillsExtractionAlert so the Orchestration Agent can react.
 
         return EventEnvelope(
             correlation_id=event.correlation_id,
@@ -316,12 +321,33 @@ class SkillsExtractionAgent(BaseAgent):
         )
 
     def _extract_work_item(self, item: ExtractionWorkItem) -> ExtractionResult:
-        """Run Pass 1 extraction and merge the current fixture-backed skills view."""
+        """Run Pass 1 (tools) then Pass 2 (skills) when normalized text is available."""
+        tools = extract_tools(item.job_record)
+        job = item.job_record
+        has_normalized_text = bool(
+            (job.description or "").strip()
+            or (job.requirements or "").strip()
+            or (job.responsibilities or "").strip()
+        )
+        if has_normalized_text:
+            skills_list, meta = extract_skills(job, pass1_tools=tools)
+            skills_payload = [s.model_dump() for s in skills_list]
+            status = "success" if not meta.get("extraction_failed") else "failed"
+            return ExtractionResult(
+                work_item=item,
+                skills=skills_payload,
+                tools=tools,
+                seniority=None,
+                extraction_status=status,
+                extraction_tokens_used=meta.get("tokens_used", 0) or 0,
+                extraction_cost_usd=meta.get("cost_usd", 0.0) or 0.0,
+                alert_skills_extraction=meta.get("alert_skills_extraction", False),
+            )
         fixture_payload = self._fixture.get(item.posting_id, {}) if item.posting_id is not None else {}
         return ExtractionResult(
             work_item=item,
             skills=fixture_payload.get("skills", []),
-            tools=extract_tools(item.job_record),
+            tools=tools,
             seniority=fixture_payload.get("seniority"),
             extraction_status=fixture_payload.get("extraction_status", "success"),
         )
@@ -334,22 +360,38 @@ class SkillsExtractionAgent(BaseAgent):
         """Build a batch-aligned SkillsExtracted payload with single-record compatibility."""
         summaries = [_result_summary(result) for result in results]
         job_ids = [summary["job_id"] for summary in summaries if summary["job_id"] is not None]
+        total_skills = sum(len(result.skills) for result in results)
+        skills_with_taxonomy = sum(
+            1
+            for result in results
+            for s in result.skills
+            if isinstance(s, dict) and (s.get("esco_uri") or s.get("is_genai_extension"))
+        )
+        taxonomy_coverage = (skills_with_taxonomy / total_skills) if total_skills else 0.0
+        total_cost = sum(getattr(result, "extraction_cost_usd", 0.0) or 0.0 for result in results)
+        any_llm_called = any(
+            (getattr(r, "extraction_tokens_used", 0) or 0) > 0 for r in results
+        )
+        any_alert = any(
+            getattr(r, "alert_skills_extraction", False) for r in results
+        )
         payload: dict[str, Any] = {
             "event_type": "SkillsExtracted",
             "batch_id": event.payload.get("batch_id"),
             "job_ids": job_ids,
-            "skills_count": sum(len(result.skills) for result in results),
+            "skills_count": total_skills,
             "tools_count": sum(len(result.tools) for result in results),
             "tasks_count": 0,
             "responsibilities_count": 0,
             "context_count": 0,
-            "taxonomy_coverage": 0.0,
-            "extraction_cost_usd": 0.0,
+            "taxonomy_coverage": round(taxonomy_coverage, 4),
+            "extraction_cost_usd": round(total_cost, 6),
             "failed_count": sum(1 for result in results if result.extraction_status != "success"),
             "records": summaries,
-            "llm_provider": "stub",
-            "llm_model": "stub",
-            "llm_call_logged": False,
+            "llm_provider": "azure-openai" if any_llm_called else "stub",
+            "llm_model": "sonnet" if any_llm_called else "stub",
+            "llm_call_logged": any_llm_called,
+            "skills_extraction_alert": any_alert,
         }
 
         if len(results) == 1:
