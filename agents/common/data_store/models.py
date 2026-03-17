@@ -292,3 +292,50 @@ class LLMAuditLog(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+
+
+# ---------------------------------------------------------------------------
+# Skills Extraction tables
+# ---------------------------------------------------------------------------
+
+
+class ExtractedIntelligence(Base):
+    """Per-posting extraction output from the Skills Extraction Agent.
+
+    Stores skills, tools, tasks, responsibilities, and context extracted
+    from a normalized job posting, along with cost and validation metadata.
+    Mirrors the extracted_intelligence DDL in ARCHITECTURE_DEEP.md.
+    """
+
+    __tablename__ = "extracted_intelligence"
+    __table_args__ = (
+        Index("ix_extracted_intelligence_normalized_job_id", "normalized_job_id"),
+        Index("ix_extracted_intelligence_extracted_at", "extracted_at"),
+        Index("ix_extracted_intelligence_failed", "extraction_failed"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    normalized_job_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    extraction_version: Mapped[str] = mapped_column(String(50), nullable=False)
+    extracted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    extraction_model: Mapped[str] = mapped_column(String(100), nullable=False)
+    extraction_tokens_used: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    extraction_cost_usd: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+
+    # Extracted dimensions (JSONB lists)
+    skills: Mapped[list | None] = mapped_column(JSONB, nullable=True, default=list)
+    tools: Mapped[list | None] = mapped_column(JSONB, nullable=True, default=list)
+    tasks: Mapped[list | None] = mapped_column(JSONB, nullable=True, default=list)
+    responsibilities: Mapped[list | None] = mapped_column(JSONB, nullable=True, default=list)
+    context: Mapped[list | None] = mapped_column(JSONB, nullable=True, default=list)
+
+    # Quality
+    overall_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    extraction_warnings: Mapped[list | None] = mapped_column(JSONB, nullable=True, default=list)
+    extraction_failed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    # Full ExtractionMetadata blob for audit/debugging
+    extraction_metadata: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
