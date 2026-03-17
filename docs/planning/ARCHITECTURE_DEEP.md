@@ -206,7 +206,7 @@ class ContextSignal(BaseModel):
     signal_type: str              # remote_policy | team_size | reporting_structure | growth_stage | ai_usage
     value: str
     confidence: float
-    source_span: Optional[SpanRecord]
+    source_span: SpanRecord
 
 class ExtractionMetadata(BaseModel):
     extraction_version: str
