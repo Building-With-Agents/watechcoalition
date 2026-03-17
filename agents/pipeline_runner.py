@@ -64,6 +64,7 @@ from agents.ingestion.agent import IngestionAgent  # noqa: E402
 from agents.normalization.agent import NormalizationAgent  # noqa: E402
 from agents.orchestration.agent import OrchestrationAgent  # noqa: E402
 from agents.skills_extraction.agent import SkillsExtractionAgent  # noqa: E402
+from agents.skills_extraction.extractors.context import extract_context  # noqa: E402
 from agents.visualization.agent import VisualizationAgent  # noqa: E402
 
 # ---------------------------------------------------------------------------
@@ -220,6 +221,15 @@ def run_pipeline(
             correlation_id=outbound.correlation_id,
             event_type=outbound.payload.get("event_type"),
         )
+
+        # Week 4 stub: context extraction after normalization (Pass 1 only; real impl Week 5)
+        if outbound.agent_id == "normalization-agent":
+            context_signals = extract_context(outbound.payload)
+            log.info(
+                "context_extraction_result",
+                count=len(context_signals),
+                correlation_id=outbound.correlation_id,
+            )
 
         run_entries.append({
             "agent_id": outbound.agent_id,
