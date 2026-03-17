@@ -202,3 +202,73 @@ class NormalizationQuarantine(Base):
     quarantined_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+
+
+# ---------------------------------------------------------------------------
+# Extraction tables (Week 4)
+# ---------------------------------------------------------------------------
+
+
+class ExtractedIntelligence(Base):
+    """Extraction results for the 6-dimension model (skills, tools, tasks,
+    responsibilities, context) plus cost and quality metadata.
+
+    Source of truth: ARCHITECTURE_DEEP.md § extracted_intelligence table.
+    """
+
+    __tablename__ = "extracted_intelligence"
+    __table_args__ = (
+        Index("ix_extracted_intelligence_norm_id", "normalized_job_id"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    normalized_job_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    extraction_version: Mapped[str] = mapped_column(Text, nullable=False)
+    extracted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    extraction_model: Mapped[str] = mapped_column(Text, nullable=False)
+    extraction_tokens_used: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    extraction_cost_usd: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+
+    # 6-dimension JSONB columns
+    skills: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
+    tools: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
+    tasks: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
+    responsibilities: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
+    context: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
+
+    # Quality metadata
+    overall_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    extraction_warnings: Mapped[dict | None] = mapped_column(JSON, nullable=True, default=list)
+    extraction_failed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class LlmAuditLog(Base):
+    """Centralized audit log for all LLM calls across agents.
+
+    Every LLM call must be logged here via agents/common/llm_adapter.py.
+    Source of truth: ARCHITECTURE_DEEP.md § llm_audit_log table.
+    """
+
+    __tablename__ = "llm_audit_log"
+    __table_args__ = (
+        Index("ix_llm_audit_log_agent", "agent_name"),
+        Index("ix_llm_audit_log_created", "created_at"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    agent_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    prompt_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    model: Mapped[str] = mapped_column(String(100), nullable=False)
+    provider: Mapped[str] = mapped_column(String(50), nullable=False)
+    latency_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    token_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    cost_usd: Mapped[float] = mapped_column(Float, nullable=False)
+    success: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    error_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
