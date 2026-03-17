@@ -6,6 +6,7 @@ Usage (from repo root with venv activated):
 Requires: AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, and one of
   AZURE_OPENAI_DEPLOYMENT_NAME, EXTRACTION_DEPLOYMENT_SKILLS, EXTRACTION_MODEL_SKILLS.
 """
+# ruff: noqa: T201  # CLI script; print to stdout is intentional
 
 from __future__ import annotations
 

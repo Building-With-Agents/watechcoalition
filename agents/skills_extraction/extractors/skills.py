@@ -173,10 +173,9 @@ def extract_skills(
             break
         except Exception as e:
             err_str = str(e).lower()
-            if "timeout" in err_str or isinstance(e, TimeoutError):
-                if timeout_attempt == 0:
-                    time.sleep(0.5)
-                    continue
+            if ("timeout" in err_str or isinstance(e, TimeoutError)) and timeout_attempt == 0:
+                time.sleep(0.5)
+                continue
             metadata["error_reason"] = str(e)
             return [], metadata
 

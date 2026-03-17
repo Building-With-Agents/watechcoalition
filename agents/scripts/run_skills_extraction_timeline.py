@@ -162,9 +162,7 @@ def _source_span_cell_with_debug(span: dict | None, span_auto_corrected: bool = 
     cell = _source_span_cell(span)
     if span_auto_corrected and original_end_char is not None and span and isinstance(span, dict):
         corrected_end = span.get("end_char", "")
-        cell += ' <span class="debug-note" title="LLM returned invalid end_char; corrected to match text length">[span corrected: end_char {} → {}]</span>'.format(
-            original_end_char, corrected_end
-        )
+        cell += f' <span class="debug-note" title="LLM returned invalid end_char; corrected to match text length">[span corrected: end_char {original_end_char} → {corrected_end}]</span>'
     return cell
 
 
@@ -182,10 +180,7 @@ def _render_skills_table(skills_full: list[dict]) -> str:
         span = s.get("source_span") if isinstance(s.get("source_span"), dict) else {}
         esco = s.get("esco_uri") or ""
         genai = "Yes" if s.get("is_genai_extension") else ""
-        if esco or genai:
-            tax = f"{html.escape(str(esco))}" + (" (GenAI)" if genai else "")
-        else:
-            tax = "—"
+        tax = f"{html.escape(str(esco))}" + (" (GenAI)" if genai else "") if esco or genai else "—"
         span_cell = _source_span_cell_with_debug(
             span,
             span_auto_corrected=s.get("span_auto_corrected", False),
@@ -479,8 +474,8 @@ def main() -> int:
         "skills_full": skills_full,
     }
     build_timeline_html(steps, args.out, run_context=run_context)
-    print(f"Timeline written to {args.out}")
-    print(f"Open in browser: file://{args.out.resolve()}")
+    print(f"Timeline written to {args.out}")  # noqa: T201
+    print(f"Open in browser: file://{args.out.resolve()}")  # noqa: T201
     return 0
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from agents.common.types import JobRecord, SkillRecord, SpanRecord, ToolRecord
+from agents.common.types import JobRecord, SpanRecord, ToolRecord
 from agents.skills_extraction.extractors.skills import extract_skills
 
 
