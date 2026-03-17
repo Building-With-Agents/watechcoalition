@@ -20,12 +20,17 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
+import structlog
+
 from agents.common.base_agent import BaseAgent
 from agents.common.data_store import check_db_connection, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types import JobRecord, ToolRecord
 from agents.skills_extraction.extractors import extract_skills, extract_tools
+from agents.skills_extraction.validator import validate_extraction_result
+
+log = structlog.get_logger()
 
 _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
@@ -248,7 +253,10 @@ class SQLAlchemyExtractionStore:
                 row.responsibilities = []
                 row.context = []
                 row.overall_confidence = _average_tool_confidence(result.tools)
-                row.extraction_warnings = []
+                warnings = validate_extraction_result(
+                    result.skills, [tool.model_dump() for tool in result.tools]
+                )
+                row.extraction_warnings = warnings
                 row.extraction_failed = result.extraction_status != "success"
 
 
