@@ -22,6 +22,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
+import structlog
+
 from agents.common.base_agent import BaseAgent
 
 # Proactive inter-request delay to avoid Azure OpenAI 429 rate limits.
@@ -39,6 +41,8 @@ from agents.skills_extraction.extractors.skills import (
 from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
 from agents.skills_extraction.prompts import SKILLS_PROMPT_VERSION
 from agents.skills_extraction.validator import validate_extraction_result
+
+log = structlog.get_logger()
 
 _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
