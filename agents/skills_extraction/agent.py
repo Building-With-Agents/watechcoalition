@@ -287,12 +287,22 @@ class SkillsExtractionAgent(BaseAgent):
         fixture_ok = self._load_fixture()
         db_ok = check_db_connection()
 
+<<<<<<< HEAD
         if fixture_ok and db_ok:
             status = "ok"
         elif fixture_ok or db_ok:
             status = "degraded"
         else:
             status = "down"
+=======
+        db_reachable = check_db_connection()
+        if not fixture_ok:
+            status = "down"
+        elif db_reachable:
+            status = "ok"
+        else:
+            status = "degraded"
+>>>>>>> 8bf5cda4 (Week 4: health_check down/degraded, cost_log.md, prompt_iteration_log.md)
 
         return {
             "status": status,
