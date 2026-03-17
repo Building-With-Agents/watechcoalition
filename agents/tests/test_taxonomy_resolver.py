@@ -90,6 +90,20 @@ class TestResolveTaxonomy:
         assert r.esco_label is not None
         assert r.is_genai_extension is False
 
+    def test_step5_onet_match(self, monkeypatch) -> None:
+        """Label that does not match steps 1–4 resolves at step 5 via O*NET (monkeypatched store)."""
+        monkeypatch.setattr(
+            "agents.skills_extraction.extractors.taxonomy._get_onet_store",
+            lambda: {"reading comprehension": ("2.A.1.a", "Reading Comprehension")},
+        )
+        r = resolve_taxonomy("Reading Comprehension")
+        assert r.resolution_step == 5
+        assert r.esco_uri is not None
+        assert r.esco_uri.startswith("urn:onet:skill:")
+        assert r.esco_label is not None
+        assert r.is_genai_extension is False
+        assert r.confidence == 1.0
+
     def test_step6_unknown_skill(self) -> None:
         """Unknown label falls through to step 6."""
         r = resolve_taxonomy("Some Unknown Skill XYZ 123")
@@ -126,6 +140,30 @@ class TestResolveTaxonomyBatch:
         results = resolve_taxonomy_batch(labels)
         assert results[0].esco_uri == results[1].esco_uri
         assert results[0].resolution_step == results[1].resolution_step
+
+    def test_step5_in_batch(self, monkeypatch) -> None:
+        """Batch resolves a label at step 5 when O*NET store is patched and step 4 is skipped."""
+        monkeypatch.setattr(
+            "agents.skills_extraction.extractors.taxonomy._esco_embedding_meta",
+            None,
+        )
+        monkeypatch.setattr(
+            "agents.skills_extraction.extractors.taxonomy._esco_normalized_matrix",
+            None,
+        )
+        monkeypatch.setattr(
+            "agents.skills_extraction.extractors.taxonomy._get_onet_store",
+            lambda: {"reading comprehension": ("2.A.1.a", "Reading Comprehension")},
+        )
+        labels = ["ABAP", "Reading Comprehension", "Unknown XYZ"]
+        results = resolve_taxonomy_batch(labels)
+        assert len(results) == 3
+        assert results[0].resolution_step == 2  # ABAP -> ESCO
+        assert results[1].resolution_step == 5
+        assert results[1].esco_uri is not None and results[1].esco_uri.startswith("urn:onet:skill:")
+        assert results[2].resolution_step == 6
+        stats = resolution_stats(results)
+        assert stats.get(5, 0) == 1
 
 
 class TestResolutionStats:
