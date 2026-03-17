@@ -437,7 +437,7 @@ def _cli() -> None:
     import argparse
 
     from dotenv import load_dotenv
-    load_dotenv()
+    load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
     parser = argparse.ArgumentParser(description="Run the Ingestion Agent")
     parser.add_argument("--source", choices=["jsearch", "crawl4ai", "all"], default="all")
