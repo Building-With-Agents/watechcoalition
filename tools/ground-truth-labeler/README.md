@@ -35,6 +35,10 @@ This is the same key used by the ingestion agent. If unset, use the Manual Entry
 
 Exported JSON matches the `SkillRecord` and `ToolRecord` shapes from `extraction_types.py` (PR #64 schema). Each record can be loaded directly with Pydantic for validation.
 
+## Labeling Examples
+
+See [ground-truth-examples.md](ground-truth-examples.md) for 5 hand-labeled examples showing the expected format, schema conventions, and labeler notes. Use these as a reference when labeling new records.
+
 ## Target Dataset
 
 20-30 labeled postings covering:
