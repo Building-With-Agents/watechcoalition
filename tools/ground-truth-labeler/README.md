@@ -6,8 +6,11 @@ A lightweight Streamlit app for hand-labeling job postings with `SkillRecord` an
 
 ```bash
 cd tools/ground-truth-labeler
+python -m venv venv
+venv\Scripts\activate      # Windows
+# source venv/bin/activate # macOS/Linux
 pip install -r requirements.txt
-streamlit run app.py
+python -m streamlit run app.py
 ```
 
 ## Environment
