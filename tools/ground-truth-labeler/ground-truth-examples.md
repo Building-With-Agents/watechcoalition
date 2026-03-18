@@ -1083,6 +1083,6 @@ Each team member should label 2–3 postings to collectively reach the 20–30 r
 2. **Use the ground truth labeling tool** (`tools/ground-truth-labeler`) to search JSearch and label postings.
 3. **Label 2–3 postings each** to reach the 20–30 target collectively.
 4. **Maintain the ratios:** ~30–40% GenAI roles, at least 5–8 traditional, ambiguous items throughout.
-5. **Save to:** `agents/eval/extraction_ground_truth.json`
+5. **Drop your `ground_truth_labeled.json` file in the dedicated Discord channel** — the file is gitignored to avoid merge conflicts. We'll combine all submissions into `agents/eval/extraction_ground_truth.json`.
 6. **Replace placeholder ESCO URIs** once `esco_digital_skills.json` is populated and the taxonomy store is loaded.
 7. **Add `labeler_note`** on every ambiguous call — the eval harness ignores this field but reviewers need it.
