@@ -153,6 +153,15 @@ def render_selectable_job_text(job: dict, bridge_key: str = "span_bridge") -> No
                 end_char: endChar
             }});
 
+            // Save scroll positions of both columns before triggering rerun
+            var hBlock = sectionEl.closest('[data-testid="stHorizontalBlock"]');
+            if (hBlock) {{
+                var cols = hBlock.querySelectorAll(':scope > [data-testid="stColumn"]');
+                cols.forEach(function(col, i) {{
+                    sessionStorage.setItem('gt_col_scroll_' + i, col.scrollTop);
+                }});
+            }}
+
             // Find the hidden Streamlit text_input, set value, press Enter to trigger rerun
             var input = parentDoc.querySelector('input[aria-label="span_data"]');
             if (input) {{
@@ -166,6 +175,33 @@ def render_selectable_job_text(job: dict, bridge_key: str = "span_bridge") -> No
                 input.dispatchEvent(new KeyboardEvent('keypress', {{ key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }}));
             }}
         }});
+
+        // Persistent scroll restorer: watches for .gt-section to appear after rerun
+        if (!parentDoc._gtScrollObserver) {{
+            parentDoc._gtScrollObserver = new MutationObserver(function() {{
+                var s0 = sessionStorage.getItem('gt_col_scroll_0');
+                var s1 = sessionStorage.getItem('gt_col_scroll_1');
+                if (!s0 && !s1) return;
+
+                var section = parentDoc.querySelector('.gt-section');
+                if (!section) return;
+
+                var hBlock = section.closest('[data-testid="stHorizontalBlock"]');
+                if (!hBlock) return;
+
+                var cols = hBlock.querySelectorAll(':scope > [data-testid="stColumn"]');
+                if (cols.length < 2) return;
+
+                // Wait a tick for layout to settle
+                setTimeout(function() {{
+                    if (s0) cols[0].scrollTop = parseInt(s0, 10);
+                    if (s1) cols[1].scrollTop = parseInt(s1, 10);
+                    sessionStorage.removeItem('gt_col_scroll_0');
+                    sessionStorage.removeItem('gt_col_scroll_1');
+                }}, 100);
+            }});
+            parentDoc._gtScrollObserver.observe(parentDoc.body, {{ childList: true, subtree: true }});
+        }}
     }})();
     </script>
     """, height=0, width=0)

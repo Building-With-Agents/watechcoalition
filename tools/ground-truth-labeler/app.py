@@ -179,6 +179,26 @@ def reset_labels() -> None:
 
 st.set_page_config(page_title="Ground Truth Labeler", page_icon="🏷️", layout="wide")
 
+# CSS: independent scrolling for left (form) and right (job text) columns
+st.markdown("""
+<style>
+/* The horizontal block containing the labeling columns:
+   kill flex-grow so height constraint is respected */
+[data-testid="stHorizontalBlock"]:has(.gt-section) {
+    height: calc(100vh - 260px) !important;
+    flex: 0 0 calc(100vh - 260px) !important;
+    overflow: hidden !important;
+    align-items: stretch !important;
+    flex-wrap: nowrap !important;
+}
+/* Both columns: independent scroll */
+[data-testid="stHorizontalBlock"]:has(.gt-section) > [data-testid="stColumn"] {
+    overflow-y: auto !important;
+    height: 100% !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # --- Sidebar: dataset status + labeled items for current job ---
 dataset = load_dataset()
 with st.sidebar:
