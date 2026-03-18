@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   sqlserver:
@@ -33,7 +33,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/postgres-init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-talent_finder}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-talent_finder}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10

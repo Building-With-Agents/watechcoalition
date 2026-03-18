@@ -19,6 +19,54 @@ from agents.common.data_store.models import Base
 
 log = structlog.get_logger()
 
+_EXTRACTED_INTELLIGENCE_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.extracted_intelligence (
+    id SERIAL PRIMARY KEY,
+    normalized_job_id INTEGER,
+    extraction_version TEXT NOT NULL,
+    extracted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    extraction_model TEXT NOT NULL,
+    extraction_tokens_used INTEGER NOT NULL DEFAULT 0,
+    extraction_cost_usd DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    skills JSONB NOT NULL DEFAULT '[]',
+    tools JSONB NOT NULL DEFAULT '[]',
+    tasks JSONB NOT NULL DEFAULT '[]',
+    responsibilities JSONB NOT NULL DEFAULT '[]',
+    context JSONB NOT NULL DEFAULT '[]',
+    overall_confidence DOUBLE PRECISION,
+    extraction_warnings JSONB DEFAULT '[]',
+    extraction_failed BOOLEAN NOT NULL DEFAULT FALSE,
+    extraction_metadata JSONB
+);
+CREATE INDEX IF NOT EXISTS ix_extracted_intelligence_normalized_job_id
+    ON dbo.extracted_intelligence (normalized_job_id);
+CREATE INDEX IF NOT EXISTS ix_extracted_intelligence_extracted_at
+    ON dbo.extracted_intelligence (extracted_at);
+CREATE INDEX IF NOT EXISTS ix_extracted_intelligence_failed
+    ON dbo.extracted_intelligence (extraction_failed);
+"""
+
+_LLM_AUDIT_LOG_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.llm_audit_log (
+    id SERIAL PRIMARY KEY,
+    agent_name VARCHAR(100) NOT NULL,
+    prompt_hash VARCHAR(64) NOT NULL,
+    model VARCHAR(100) NOT NULL,
+    provider VARCHAR(50) NOT NULL,
+    latency_ms INTEGER,
+    input_tokens INTEGER,
+    output_tokens INTEGER,
+    token_count INTEGER,
+    cost_usd DOUBLE PRECISION,
+    success BOOLEAN NOT NULL,
+    error_reason TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_llm_audit_log_agent_name ON dbo.llm_audit_log (agent_name);
+CREATE INDEX IF NOT EXISTS ix_llm_audit_log_created_at ON dbo.llm_audit_log (created_at);
+CREATE INDEX IF NOT EXISTS ix_llm_audit_log_success ON dbo.llm_audit_log (success);
+"""
+
 # Phase 1 columns to add to dbo.job_postings (idempotent via IF NOT EXISTS)
 _PHASE1_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS source TEXT",
@@ -45,7 +93,17 @@ def run_migrations(engine: Engine) -> None:
     Base.metadata.create_all(engine)
     log.info("migrations_tables_created")
 
-    # 2. Add Phase 1 columns to existing job_postings table
+    # 2. Create extracted_intelligence table
+    with engine.begin() as conn:
+        conn.execute(text(_EXTRACTED_INTELLIGENCE_DDL))
+    log.info("migrations_extracted_intelligence_created")
+
+    # 3. Create llm_audit_log table
+    with engine.begin() as conn:
+        conn.execute(text(_LLM_AUDIT_LOG_DDL))
+    log.info("migrations_llm_audit_log_created")
+
+    # 4. Add Phase 1 columns to existing job_postings table
     with engine.begin() as conn:
         for stmt in _PHASE1_ALTER_STATEMENTS:
             try:

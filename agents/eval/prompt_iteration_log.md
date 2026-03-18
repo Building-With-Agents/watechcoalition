@@ -1,0 +1,48 @@
+# Exercise 4.5 — Prompt iteration and integration verification
+
+This document records verification steps and findings after Pair C (and other pairs) perform prompt iteration and integration.
+
+---
+
+## Checklist
+
+- [ ] **llm_audit_log coverage:** Verify `llm_audit_log` contains entries for all LLM calls from all pairs (Bryan/Emilio, Angel/Fabian, Juan/Enrique, etc.).
+- [ ] **Cost accuracy:** Verify cost data is accurate after Pair C's prompt iteration changes (compare `cost_usd` and `token_count` before/after).
+- [ ] **Cost-per-record impact:** Check whether prompt revisions changed cost per record (more/fewer tokens).
+- [ ] **Cost projections:** Update cost projections in `cost_model_week4.md` if per-record cost changed significantly.
+- [ ] **End-to-end:** Verify `extracted_intelligence` has correct `extraction_tokens_used`, `extraction_cost_usd`, and `extraction_metadata` populated.
+
+---
+
+## Findings
+
+### llm_audit_log coverage
+
+| Agent / pair     | LLM calls go through adapter? | Notes |
+|------------------|-------------------------------|--------|
+| Skills extraction| _Verify_                      | _TBD_  |
+| _Pair C_         | _Verify_                      | _TBD_  |
+| _Other_          | _Verify_                      | _TBD_  |
+
+### Cost before / after prompt iteration
+
+| When   | Avg tokens per record | Avg cost per record | Notes |
+|--------|------------------------|---------------------|--------|
+| Before | _TBD_                  | _TBD_               | _Baseline_ |
+| After  | _TBD_                  | _TBD_               | _Post Pair C changes_ |
+
+### extracted_intelligence columns
+
+| Check                          | Result | Notes |
+|--------------------------------|--------|--------|
+| `extraction_tokens_used` set   | _TBD_  | _Sample query_ |
+| `extraction_cost_usd` set      | _TBD_  | _Sample query_ |
+| `extraction_metadata` populated | _TBD_  | _JSON shape_ |
+
+---
+
+## Changelog
+
+| Date     | Who / what |
+|----------|------------|
+| _Week 4_ | Template created; fill after prompt iteration and integration runs. |

@@ -17,9 +17,10 @@ class TestSkillsExtractionAgent:
         assert agent.agent_id == "skills-extraction-agent"
 
     def test_health_check_ok(self) -> None:
-        """Returns 'ok' when the fixture file exists and is valid JSON."""
+        """Returns 'ok' when the fixture file exists, is valid JSON, and DB is reachable."""
         agent = SkillsExtractionAgent()
-        result = agent.health_check()
+        with patch("agents.skills_extraction.agent.check_db_connection", return_value=True):
+            result = agent.health_check()
         assert result["status"] == "ok"
 
     def test_health_check_down_missing_file(self) -> None:
