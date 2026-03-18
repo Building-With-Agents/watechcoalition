@@ -377,7 +377,7 @@ elif st.session_state.phase == "label":
         # =================================================================
 
         if st.session_state.label_step == "review":
-            col1, col2 = st.columns(2)
+            col1, col2, _ = st.columns([1, 1, 8])
             with col1:
                 if st.button("⏭️ Skip this job"):
                     st.session_state.job_index += 1
@@ -388,7 +388,7 @@ elif st.session_state.phase == "label":
                     set_label_step("review")
                     st.rerun()
             with col2:
-                if st.button("Label Skills →"):
+                if st.button("Label Job Post →"):
                     reset_labels()
                     set_label_step("skills")
                     st.rerun()
@@ -401,7 +401,7 @@ elif st.session_state.phase == "label":
 
         elif st.session_state.label_step == "skills":
             # Tab-like navigation
-            nav1, nav2, nav3, nav4 = st.columns(4)
+            nav1, nav2, nav3, nav4, _ = st.columns([1, 1, 1, 1, 6])
             with nav1:
                 if st.button("← Review", key="nav_review_from_skills"):
                     set_label_step("review")
@@ -567,7 +567,7 @@ elif st.session_state.phase == "label":
 
         elif st.session_state.label_step == "tools":
             # Tab-like navigation
-            nav1, nav2, nav3, nav4 = st.columns(4)
+            nav1, nav2, nav3, nav4, _ = st.columns([1, 1, 1, 1, 6])
             with nav1:
                 if st.button("← Review", key="nav_review_from_tools"):
                     set_label_step("review")

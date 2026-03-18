@@ -117,10 +117,13 @@ def render_selectable_job_text(job: dict, bridge_key: str = "span_bridge") -> No
     <script>
     (function() {{
         var parentDoc = window.parent.document;
-        if (parentDoc._gtSelListener) return;
-        parentDoc._gtSelListener = true;
 
-        parentDoc.addEventListener("mouseup", function() {{
+        // Remove previous listener if any, then install fresh
+        if (parentDoc._gtSelHandler) {{
+            parentDoc.removeEventListener("mouseup", parentDoc._gtSelHandler);
+        }}
+
+        parentDoc._gtSelHandler = function() {{
             var sel = parentDoc.getSelection();
             if (!sel || sel.isCollapsed || !sel.toString().trim()) return;
 
@@ -179,7 +182,8 @@ def render_selectable_job_text(job: dict, bridge_key: str = "span_bridge") -> No
                 }}
             }}
             setSpanInput(data, 5);
-        }});
+        }};
+        parentDoc.addEventListener("mouseup", parentDoc._gtSelHandler);
 
         // Persistent scroll restorer: watches for .gt-section to appear after rerun
         if (!parentDoc._gtScrollObserver) {{
