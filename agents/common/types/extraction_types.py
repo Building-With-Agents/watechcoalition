@@ -21,8 +21,8 @@ class SpanRecord(BaseModel):
 
     text: str
     field_source: str  # title | description | requirements | responsibilities
-    char_start: int
-    char_end: int
+    start_char: int
+    end_char: int
 
 
 class SkillRecord(BaseModel):
