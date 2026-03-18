@@ -13,25 +13,19 @@ Reference: ARCHITECTURE_DEEP.md § 6-Dimension Extraction Model.
 
 from __future__ import annotations
 
-from agents.common.types import JobRecord, TaskRecord
+from typing import List
+
+from agents.common.types import JobRecord
+from agents.common.types.extraction_types import TaskRecord
 
 
-def extract_tasks(job_record: JobRecord) -> list[TaskRecord]:
-    """Extract tasks from a normalized job record.
+def extract_tasks(job_record: JobRecord) -> List[TaskRecord]:
+    """Extract specific, actionable tasks from a normalized job posting.
 
-    Week 4 (Fatima + Nestor): Implement stub returning empty TaskRecord[]
-    that passes schema validation and integrates with the pipeline runner.
-
-    Week 5: Replace with Haiku-class LLM extraction.
-
-    Parameters
-    ----------
-    job_record : JobRecord
-        A normalized job posting from the normalization pipeline.
-
-    Returns
-    -------
-    list[TaskRecord]
-        Extracted tasks with complexity and source spans.
+    This dimension identifies discrete duties and tasks (e.g. "Maintain CI/CD
+    pipelines", "Review code for security issues") from the job text. Week 5
+    implementation: LLM extraction using a Haiku-class model. The current
+    stub returns an empty list to be schema-valid and pipeline-safe for
+    Week 4 integration.
     """
-    raise NotImplementedError("Week 4: implement stub returning empty list with schema validation")
+    return []
