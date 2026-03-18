@@ -400,6 +400,23 @@ elif st.session_state.phase == "label":
         # =================================================================
 
         elif st.session_state.label_step == "skills":
+            # Tab-like navigation
+            nav1, nav2, nav3, nav4 = st.columns(4)
+            with nav1:
+                if st.button("← Review", key="nav_review_from_skills"):
+                    set_label_step("review")
+                    st.rerun()
+            with nav2:
+                st.button("🎯 Skills", key="nav_skills_active", disabled=True)
+            with nav3:
+                if st.button("🔧 Tools", key="nav_tools_from_skills"):
+                    set_label_step("tools")
+                    st.rerun()
+            with nav4:
+                if st.button("💾 Save →", key="nav_save_from_skills"):
+                    set_label_step("save")
+                    st.rerun()
+
             left, right = st.columns([1, 1])
 
             with right:
@@ -544,22 +561,28 @@ elif st.session_state.phase == "label":
                                 st.session_state.pop("editing_skill_index", None)
                                 st.rerun()
 
-                st.divider()
-                bc1, bc2 = st.columns(2)
-                with bc1:
-                    if st.button("← Back to Review"):
-                        set_label_step("review")
-                        st.rerun()
-                with bc2:
-                    if st.button("Label Tools →"):
-                        set_label_step("tools")
-                        st.rerun()
-
         # =================================================================
         # LABEL STEP: Tools — left pane form, right pane job text
         # =================================================================
 
         elif st.session_state.label_step == "tools":
+            # Tab-like navigation
+            nav1, nav2, nav3, nav4 = st.columns(4)
+            with nav1:
+                if st.button("← Review", key="nav_review_from_tools"):
+                    set_label_step("review")
+                    st.rerun()
+            with nav2:
+                if st.button("🎯 Skills", key="nav_skills_from_tools"):
+                    set_label_step("skills")
+                    st.rerun()
+            with nav3:
+                st.button("🔧 Tools", key="nav_tools_active", disabled=True)
+            with nav4:
+                if st.button("💾 Save →", key="nav_save_from_tools"):
+                    set_label_step("save")
+                    st.rerun()
+
             left, right = st.columns([1, 1])
 
             with right:
@@ -697,17 +720,6 @@ elif st.session_state.phase == "label":
                                 st.session_state.tools.pop(i)
                                 st.session_state.pop("editing_tool_index", None)
                                 st.rerun()
-
-                st.divider()
-                bc1, bc2 = st.columns(2)
-                with bc1:
-                    if st.button("← Back to Skills"):
-                        set_label_step("skills")
-                        st.rerun()
-                with bc2:
-                    if st.button("Review & Save →"):
-                        set_label_step("save")
-                        st.rerun()
 
         # =================================================================
         # LABEL STEP: Save

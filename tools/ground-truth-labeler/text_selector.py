@@ -163,17 +163,22 @@ def render_selectable_job_text(job: dict, bridge_key: str = "span_bridge") -> No
             }}
 
             // Find the hidden Streamlit text_input, set value, press Enter to trigger rerun
-            var input = parentDoc.querySelector('input[aria-label="span_data"]');
-            if (input) {{
-                input.focus();
-                var nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-                    window.parent.HTMLInputElement.prototype, 'value'
-                ).set;
-                nativeInputValueSetter.call(input, data);
-                input.dispatchEvent(new Event('input', {{ bubbles: true }}));
-                input.dispatchEvent(new KeyboardEvent('keydown', {{ key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }}));
-                input.dispatchEvent(new KeyboardEvent('keypress', {{ key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }}));
+            function setSpanInput(data, retries) {{
+                var input = parentDoc.querySelector('input[aria-label="span_data"]');
+                if (input) {{
+                    input.focus();
+                    var nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+                        window.parent.HTMLInputElement.prototype, 'value'
+                    ).set;
+                    nativeInputValueSetter.call(input, data);
+                    input.dispatchEvent(new Event('input', {{ bubbles: true }}));
+                    input.dispatchEvent(new KeyboardEvent('keydown', {{ key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }}));
+                    input.dispatchEvent(new KeyboardEvent('keypress', {{ key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }}));
+                }} else if (retries > 0) {{
+                    setTimeout(function() {{ setSpanInput(data, retries - 1); }}, 200);
+                }}
             }}
+            setSpanInput(data, 5);
         }});
 
         // Persistent scroll restorer: watches for .gt-section to appear after rerun
