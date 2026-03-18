@@ -357,9 +357,6 @@ elif st.session_state.phase == "label":
         # =================================================================
 
         if st.session_state.label_step == "review":
-            render_job_text(job)
-
-            st.divider()
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("⏭️ Skip this job"):
@@ -375,6 +372,8 @@ elif st.session_state.phase == "label":
                     reset_labels()
                     set_label_step("skills")
                     st.rerun()
+            st.divider()
+            render_job_text(job)
 
         # =================================================================
         # LABEL STEP: Skills — left pane form, right pane job text
