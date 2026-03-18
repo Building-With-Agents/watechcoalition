@@ -1,6 +1,6 @@
 # Ground Truth Labeling Examples — Week 4 Eval Harness
 
-> **Purpose:** 5 hand-labeled examples for Angel + Fabian (Pair A) to use as a template when building the full 20–30 record dataset at `agents/eval/extraction_ground_truth.json`.
+> **Purpose:** 5 hand-labeled examples for the team to use as a template when building the full 20–30 record dataset at `agents/eval/extraction_ground_truth.json`. Each pair should label 2–3 postings using the ground truth labeling tool.
 >
 > **Format decision:** JSON file, not Postgres. The eval harness loads ground truth from a fixture file and compares it against extraction output. The `extracted_intelligence` table stores agent output — ground truth stays in a separate JSON file so it's version-controlled and human-reviewable.
 
@@ -1032,7 +1032,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
 
 ## Labeling Decisions Log
 
-These decisions should be consistent across all 20–30 records. Angel + Fabian (Pair A) should follow these when labeling the remaining 15–25 postings.
+These decisions should be consistent across all 20–30 records. All pairs should follow these when labeling their assigned postings.
 
 | Item | Decision | Rationale |
 |------|----------|-----------|
@@ -1050,7 +1050,7 @@ These decisions should be consistent across all 20–30 records. Angel + Fabian 
 
 ## Sourcing Real Postings via JSearch
 
-These 5 examples use synthetic job descriptions. For the remaining 15–25 records, Angel + Fabian (Pair A) should pull **real postings** from the JSearch API to ensure the ground truth reflects actual employer language, not what we think a listing looks like.
+These 5 examples use synthetic job descriptions. For the remaining 15–25 records, each pair should pull **real postings** using the ground truth labeling tool (JSearch integration) to ensure the ground truth reflects actual employer language, not what we think a listing looks like.
 
 **Recommended queries** (El Paso / Borderplex region):
 
@@ -1075,11 +1075,13 @@ This produces ground truth that the eval harness can compare against the agent's
 
 ---
 
-## Next Steps for Angel + Fabian (Pair A)
+## Next Steps for All Pairs
+
+Each pair should label 2–3 postings to collectively reach the 20–30 record target.
 
 1. **Use these 5 records as your template** — match this exact JSON structure.
-2. **Pull real postings from JSearch** using the queries above.
-3. **Label 15–25 more postings** by hand to reach the 20–30 target.
+2. **Use the ground truth labeling tool** (`tools/ground-truth-labeler`) to search JSearch and label postings.
+3. **Label 2–3 postings per pair** to reach the 20–30 target collectively.
 4. **Maintain the ratios:** ~30–40% GenAI roles, at least 5–8 traditional, ambiguous items throughout.
 5. **Save to:** `agents/eval/extraction_ground_truth.json`
 6. **Replace placeholder ESCO URIs** once `esco_digital_skills.json` is populated and the taxonomy store is loaded.
