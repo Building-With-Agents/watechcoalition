@@ -43,7 +43,7 @@ class ToolRecord(BaseModel):
     """A single extracted tool (programming language, framework, platform, etc.)."""
 
     tool_id: str | None = None
-    label: str
+    tool_name: str
     category: str  # language | framework | platform | database | devops | ai_tool | other
     confidence: float = Field(ge=0.0, le=1.0)
     field_source: str
