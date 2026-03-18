@@ -27,6 +27,8 @@ class JobRecord(BaseModel):
     title: str
     company: str
     description: str | None = None
+    requirements: str | None = None
+    responsibilities: str | None = None
     job_url: str | None = None
 
     # Location (structured)

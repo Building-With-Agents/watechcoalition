@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Full pipeline Redis — Run report</title>
+  <style>
+    body { font-family: system-ui; max-width: 960px; margin: 1rem auto; padding: 1rem; background: #0f172a; color: #e2e8f0; }
+    h1 { color: #38bdf8; }
+    h2 { color: #94a3b8; margin-top: 1.5rem; }
+    .ok { color: #4ade80; }
+    .error { background: #7f1d1d; color: #fecaca; }
+    .err { font-size: 0.85rem; white-space: pre-wrap; margin: 0.25rem 0; }
+    .tb { font-size: 0.75rem; opacity: 0.9; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid #334155; }
+    th { color: #94a3b8; }
+    .e2e { margin: 1rem 0; font-size: 1.1rem; }
+    .timeline { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; margin: 1rem 0; }
+    .step { padding: 0.35rem 0.6rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .step.ok { background: #14532d; color: #4ade80; }
+    .step.error { background: #7f1d1d; color: #fecaca; }
+    .step.skipped { background: #334155; color: #94a3b8; }
+    .arrow { color: #64748b; }
+    .step-ms { font-size: 0.9rem; opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <h1>Full pipeline Redis — Run report</h1>
+  <p>Correlation ID: <code>redis-pipe-0b19b058</code></p>
+  <p class="e2e">End-to-end latency: <strong>342099.25 ms</strong> | Overall: <strong class="ok">Success</strong></p>
+  
+
+  <h2>Timeline (locate the failing stage)</h2>
+  <div class="timeline" role="list">
+<div class="step ok"><span class="step-name">ingestion</span><span class="step-ms">82499.91 ms</span><span class="step-status">OK</span></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="step ok"><span class="step-name">normalization</span><span class="step-ms">975.25 ms</span><span class="step-status">OK</span></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="step ok"><span class="step-name">skills</span><span class="step-ms">258372.0 ms</span><span class="step-status">OK</span></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="step ok"><span class="step-name">enrichment</span><span class="step-ms">0.69 ms</span><span class="step-status">OK</span></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="step ok"><span class="step-name">analytics</span><span class="step-ms">0.4 ms</span><span class="step-status">OK</span></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="step ok"><span class="step-name">visualization</span><span class="step-ms">0.04 ms</span><span class="step-status">OK</span></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="step ok"><span class="step-name">orchestration</span><span class="step-ms">0.04 ms</span><span class="step-status">OK</span></div>
+  </div>
+
+  <h2>Per-stage details</h2>
+  <table>
+    <thead><tr><th>Stage</th><th>Event in → out</th><th>Latency</th><th>Status</th><th>Error</th></tr></thead>
+    <tbody>
+
+    <tr class="">
+      <td>ingestion</td>
+      <td>PipelineTrigger → IngestBatch</td>
+      <td>82499.91 ms</td>
+      <td>OK</td>
+      <td></td>
+    </tr>
+    <tr class="">
+      <td>normalization</td>
+      <td>IngestBatch → NormalizationComplete</td>
+      <td>975.25 ms</td>
+      <td>OK</td>
+      <td></td>
+    </tr>
+    <tr class="">
+      <td>skills</td>
+      <td>NormalizationComplete → SkillsExtracted</td>
+      <td>258372.0 ms</td>
+      <td>OK</td>
+      <td></td>
+    </tr>
+    <tr class="">
+      <td>enrichment</td>
+      <td>SkillsExtracted → RecordEnriched</td>
+      <td>0.69 ms</td>
+      <td>OK</td>
+      <td></td>
+    </tr>
+    <tr class="">
+      <td>analytics</td>
+      <td>RecordEnriched → AnalyticsRefreshed</td>
+      <td>0.4 ms</td>
+      <td>OK</td>
+      <td></td>
+    </tr>
+    <tr class="">
+      <td>visualization</td>
+      <td>AnalyticsRefreshed → RenderComplete</td>
+      <td>0.04 ms</td>
+      <td>OK</td>
+      <td></td>
+    </tr>
+    <tr class="">
+      <td>orchestration</td>
+      <td>RenderComplete → OrchestrationAck</td>
+      <td>0.04 ms</td>
+      <td>OK</td>
+      <td></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <h2>Redis stream counters (queue depth / lag)</h2>
+  <table>
+    <thead><tr><th>Stream</th><th>Published</th><th>Delivered</th><th>In flight</th><th>Max in flight</th></tr></thead>
+    <tbody>
+    <tr><td><code>pipeline:ingestion</code></td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+    <tr><td><code>pipeline:normalization</code></td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+    <tr><td><code>pipeline:skills</code></td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+    <tr><td><code>pipeline:enrichment</code></td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+    <tr><td><code>pipeline:analytics</code></td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+    <tr><td><code>pipeline:visualization</code></td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+    <tr><td><code>pipeline:orchestration</code></td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

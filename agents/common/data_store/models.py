@@ -12,6 +12,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     Float,
+    ForeignKey,
     Index,
     Integer,
     String,
@@ -146,6 +147,8 @@ class NormalizedJob(Base):
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     company: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    requirements: Mapped[str | None] = mapped_column(Text, nullable=True)
+    responsibilities: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Structured location (replaces location / normalized_location)
     city: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -219,11 +222,16 @@ class ExtractedIntelligence(Base):
     __tablename__ = "extracted_intelligence"
     __table_args__ = (
         Index("ix_extracted_intelligence_norm_id", "normalized_job_id"),
+        Index("ix_extracted_intelligence_failed", "extraction_failed"),
         {"schema": "dbo"},
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    normalized_job_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    normalized_job_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("dbo.normalized_jobs.id"),
+        nullable=False,
+    )
     extraction_version: Mapped[str] = mapped_column(Text, nullable=False)
     extracted_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
@@ -233,15 +241,15 @@ class ExtractedIntelligence(Base):
     extraction_cost_usd: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
 
     # 6-dimension JSONB columns
-    skills: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
-    tools: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
-    tasks: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
-    responsibilities: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
-    context: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
+    skills: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
+    tools: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
+    tasks: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
+    responsibilities: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
+    context: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
 
     # Quality metadata
     overall_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
-    extraction_warnings: Mapped[dict | None] = mapped_column(JSON, nullable=True, default=list)
+    extraction_warnings: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
     extraction_failed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     # Full ExtractionMetadata blob for audit/debugging (from guardrails branch)

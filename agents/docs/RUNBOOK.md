@@ -93,6 +93,10 @@ cp .env.example .env
 - `LANGSMITH_API_KEY` + `LANGCHAIN_TRACING_V2=true` — enables LangSmith tracing
 - `REDIS_URL` — only needed if testing Redis Streams event bus
 
+**Week 4 — Pass 2 skills extraction (Sonnet-class LLM):**
+- `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_API_VERSION`, `AZURE_OPENAI_DEPLOYMENT_NAME` — used for skills extraction.
+- `EXTRACTION_DEPLOYMENT_SKILLS` or `EXTRACTION_MODEL_SKILLS` — optional override for the deployment/model used only for Pass 2 skills (defaults to `AZURE_OPENAI_DEPLOYMENT_NAME` if unset).
+
 ---
 
 ## 5. Database Migration & Seeding
@@ -413,25 +417,104 @@ FROM dbo.raw_ingested_jobs;
 
 ---
 
-## 13. Troubleshooting
+## 13. Full pipeline with Redis Streams
 
+Run the full pipeline (Ingestion → Normalization → Skills → Enrichment → Analytics → Visualization → Orchestration) with **Redis Streams** as the message bus and generate a metrics + HTML report to visualize the run and locate errors.
 
-| Error                                                             | Cause                           | Fix                                                               |
-| ----------------------------------------------------------------- | ------------------------------- | ----------------------------------------------------------------- |
-| `FATAL: password authentication failed`                           | Wrong credentials in `.env`     | Check `PYTHON_DATABASE_URL` — verify user/password                |
-| `could not connect to server: Connection refused`                 | DB not running                  | Start Docker (`docker compose up -d`) or verify Azure firewall    |
-| `UndefinedTable: relation "dbo.raw_ingested_jobs" does not exist` | Migrations not run              | Run migration script from Section 5                               |
-| `schema "dbo" does not exist`                                     | Old migration code              | Pull latest — `migrations.py` now auto-creates `dbo` schema       |
-| `SSL connection is required` (Azure)                              | Missing `sslmode=require`       | Add `?sslmode=require` to `PYTHON_DATABASE_URL`                   |
-| `ModuleNotFoundError: No module named 'agents'`                   | Wrong working directory or venv | Run from repo root with venv activated                            |
-| `Port 5432 already in use`                                        | Another PostgreSQL instance     | Stop it or change Docker port mapping                             |
-| `JSEARCH_API_KEY not set` (tests skip)                            | Missing API key                 | Set `JSEARCH_API_KEY` in `.env`; some tests skip without it       |
-| `datetime.UTC` / `UP017` ruff error                               | Python 3.12+ alias used         | Codebase uses `timezone.utc`; `UP017` is globally ignored in ruff |
+### Start Redis
 
+**Docker (from repo root):**
+
+```bash
+docker compose up -d
+```
+
+If your compose file does not include Redis, start it separately:
+
+```bash
+docker run -d --name redis-pipeline -p 6379:6379 redis:7-alpine
+```
+
+### Set REDIS_URL
+
+In `.env`:
+
+```
+REDIS_URL=redis://localhost:6379/0
+```
+
+Or pass it on the command line (see below).
+
+### Run the script
+
+From repo root with venv activated:
+
+```bash
+python -m agents.scripts.run_full_pipeline_redis --redis-url redis://localhost:6379/0
+```
+
+Or use the env var:
+
+```bash
+python -m agents.scripts.run_full_pipeline_redis
+```
+
+### Job limit (faster runs)
+
+The script runs with a **limit of 10 jobs** so full pipeline runs finish in minutes instead of much longer. Ingestion fetches at most 10 records, and skills extraction processes at most 10 work items per run.
+
+- **To change the ingestion cap:** Edit `agents/scripts/run_full_pipeline_redis.py` and in `_trigger_payload()` set `"limit"` and/or `"region_config"["limit"]` to the desired number (e.g. 50 or 100).
+- **To change the skills cap:** Set the env var `SKILLS_EXTRACTION_MAX_JOBS` (default 10). For example `SKILLS_EXTRACTION_MAX_JOBS=20` to process up to 20 jobs in the skills stage.
+
+When the trigger does not include a limit, ingestion uses a default of 50.
+
+### View the report
+
+- **JSON:** `agents/eval/full_pipeline_redis_metrics.json` — metrics for tooling/comparison.
+- **HTML:** `agents/eval/full_pipeline_redis_metrics.html` — open in a browser to visualize:
+  - Timeline of stages (locate the failing stage at a glance)
+  - Per-stage latency, event types in/out, status (OK/ERROR)
+  - Error message and traceback for any failed stage
+  - Redis stream counters (published, delivered, in-flight) for queue depth/lag
+
+```bash
+# Windows
+start agents\eval\full_pipeline_redis_metrics.html
+
+# macOS / Linux
+open agents/eval/full_pipeline_redis_metrics.html
+```
+
+If Redis is unavailable, the script exits with a clear error and non-zero exit code; no report is written.
+
+### Pytest (optional)
+
+Tests that require Redis are skipped when `REDIS_URL` is not set:
+
+```bash
+pytest agents/tests/test_full_pipeline_redis.py -v
+```
 
 ---
 
-## 14. Cleanup
+## 14. Troubleshooting
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `FATAL: password authentication failed` | Wrong credentials in `.env` | Check `PYTHON_DATABASE_URL` — verify user/password |
+| `could not connect to server: Connection refused` | DB not running | Start Docker (`docker compose up -d`) or verify Azure firewall |
+| `UndefinedTable: relation "dbo.raw_ingested_jobs" does not exist` | Migrations not run | Run migration script from Section 5 |
+| `schema "dbo" does not exist` | Old migration code | Pull latest — `migrations.py` now auto-creates `dbo` schema |
+| `SSL connection is required` (Azure) | Missing `sslmode=require` | Add `?sslmode=require` to `PYTHON_DATABASE_URL` |
+| `ModuleNotFoundError: No module named 'agents'` | Wrong working directory or venv | Run from repo root with venv activated |
+| `Port 5432 already in use` | Another PostgreSQL instance | Stop it or change Docker port mapping |
+| `JSEARCH_API_KEY not set` (tests skip) | Missing API key | Set `JSEARCH_API_KEY` in `.env`; some tests skip without it |
+| `REDIS_URL` not set / Redis connection refused | Redis not running or not set | Start Redis (e.g. `docker run -d -p 6379:6379 redis:7-alpine`), set `REDIS_URL=redis://localhost:6379/0` |
+| `datetime.UTC` / `UP017` ruff error | Python 3.12+ alias used | Codebase uses `timezone.utc`; `UP017` is globally ignored in ruff |
+
+---
+
+## 15. Cleanup
 
 ### Stop services
 

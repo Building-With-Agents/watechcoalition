@@ -1,20 +1,29 @@
-# Exercise 4.5 — Prompt iteration and integration verification
+# Prompt iteration log — Skills extraction (Exercise 4.5)
 
-This document records verification steps and findings after Pair C (and other pairs) perform prompt iteration and integration.
+Document prompt changes and before/after metrics when iterating on the skills extraction prompt.
+
+## Version history
+
+| Version | Date | Change | Before metrics | After metrics |
+|---------|------|--------|----------------|----------------|
+| v1 | (initial) | Initial prompt in `agents/skills_extraction/prompts/skills_extraction_v1.py` | — | — |
+
+## How to add an entry
+
+1. Update the prompt in `agents/skills_extraction/prompts/skills_extraction_*.py` (or create a new versioned file).
+2. Run the eval harness (Pair A) and record precision/recall per skill type.
+3. Add a row to the table above with version, date, short description of the change, and before/after metrics.
+4. Commit the prompt file and this log together.
 
 ---
 
-## Checklist
+## Integration verification checklist
 
 - [ ] **llm_audit_log coverage:** Verify `llm_audit_log` contains entries for all LLM calls from all pairs (Bryan/Emilio, Angel/Fabian, Juan/Enrique, etc.).
 - [ ] **Cost accuracy:** Verify cost data is accurate after Pair C's prompt iteration changes (compare `cost_usd` and `token_count` before/after).
 - [ ] **Cost-per-record impact:** Check whether prompt revisions changed cost per record (more/fewer tokens).
 - [ ] **Cost projections:** Update cost projections in `cost_model_week4.md` if per-record cost changed significantly.
 - [ ] **End-to-end:** Verify `extracted_intelligence` has correct `extraction_tokens_used`, `extraction_cost_usd`, and `extraction_metadata` populated.
-
----
-
-## Findings
 
 ### llm_audit_log coverage
 
