@@ -215,7 +215,7 @@ with st.sidebar:
             st.markdown(f"**Skills ({len(st.session_state.skills)})**")
             for skill in st.session_state.skills:
                 badge = " 🤖" if skill.is_genai_extension else ""
-                st.markdown(f"- {skill.label}{badge} *({skill.type})*")
+                st.markdown(f"- {skill.skill_name}{badge} *({skill.type})*")
         if st.session_state.tools:
             st.markdown(f"**Tools ({len(st.session_state.tools)})**")
             for tool in st.session_state.tools:
@@ -439,7 +439,7 @@ elif st.session_state.phase == "label":
                 editing_skill = st.session_state.skills[editing_idx] if editing_idx is not None else None
 
                 if editing_skill:
-                    st.markdown(f"#### ✏️ Edit Skill: {editing_skill.label}")
+                    st.markdown(f"#### ✏️ Edit Skill: {editing_skill.skill_name}")
                 else:
                     st.markdown("#### 🎯 Add Skill")
 
@@ -473,14 +473,14 @@ elif st.session_state.phase == "label":
                     span_end = None
                     st.warning("No span selected — drag text in the right pane to set source_span.")
 
-                # Determine default label from span selection or editing
-                default_label = editing_skill.label if editing_skill else ""
+                # Determine default skill_name from editing
+                default_name = editing_skill.skill_name if editing_skill else ""
 
                 with st.form("skill_form", clear_on_submit=True):
                     s_label = st.text_input(
-                        "Skill label",
-                        value=default_label,
-                        help="e.g. Python, Prompt Engineering. Drag text on the right to auto-fill.",
+                        "Skill name",
+                        value=default_name,
+                        help="e.g. Python, Prompt Engineering. The human-judged skill label.",
                     )
                     c1, c2 = st.columns(2)
                     with c1:
@@ -495,7 +495,7 @@ elif st.session_state.phase == "label":
                     s_esco = st.text_input("ESCO URI (optional)", value=editing_skill.esco_uri or "" if editing_skill else "")
                     s_note = st.text_input(
                         "Labeler note (optional)",
-                        value=st.session_state.labeler_notes.get(editing_skill.label, "") if editing_skill else "",
+                        value=st.session_state.labeler_notes.get(editing_skill.skill_name, "") if editing_skill else "",
                     )
                     s_confidence = st.slider("Confidence", 0.0, 1.0, editing_skill.confidence if editing_skill else 1.0, 0.05)
 
@@ -503,13 +503,13 @@ elif st.session_state.phase == "label":
                     submitted = st.form_submit_button(btn_label)
                     if submitted:
                         if not s_label.strip():
-                            st.error("Skill label is required.")
+                            st.error("Skill name is required.")
                         elif span_field is None:
                             st.error("Source span is required — drag to select text in the right pane first.")
                         else:
-                            label = s_label.strip()
+                            skill_name = s_label.strip()
                             skill = SkillRecord(
-                                label=label,
+                                skill_name=skill_name,
                                 type=s_type,
                                 confidence=s_confidence,
                                 required_flag=s_required,
@@ -528,7 +528,7 @@ elif st.session_state.phase == "label":
                             else:
                                 st.session_state.skills.append(skill)
                             if s_note.strip():
-                                st.session_state.labeler_notes[label] = s_note.strip()
+                                st.session_state.labeler_notes[skill_name] = s_note.strip()
                             # Clear span selection after use
                             st.session_state.pop("span_selection", None)
                             st.rerun()
@@ -548,7 +548,7 @@ elif st.session_state.phase == "label":
                             badge = " 🤖" if skill.is_genai_extension else ""
                             sp = skill.source_span
                             st.markdown(
-                                f"- **{skill.label}**{badge} — {skill.type} "
+                                f"- **{skill.skill_name}**{badge} — {skill.type} "
                                 f"(`{sp.field_source}` [{sp.start_char}:{sp.end_char}])"
                             )
                         with sc2:

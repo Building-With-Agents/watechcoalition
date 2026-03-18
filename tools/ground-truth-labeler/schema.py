@@ -59,7 +59,7 @@ class SkillRecord(BaseModel):
     """A single extracted skill with taxonomy linking metadata."""
 
     skill_id: str | None = None
-    label: str
+    skill_name: str
     type: SkillType
     confidence: float = Field(ge=0.0, le=1.0)
     required_flag: bool | None = None

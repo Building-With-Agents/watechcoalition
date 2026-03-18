@@ -40,7 +40,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
     "responsibilities": "Design and implement scalable data pipelines using Python and Apache Spark. Optimize SQL queries and database performance. Collaborate with data scientists and analysts to deliver clean datasets. Maintain documentation for data architecture decisions. Mentor junior engineers on best practices.",
     "skills": [
       {
-        "label": "Python",
+        "skill_name": "Python",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -55,7 +55,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Ambiguous — could be Tool. Classified as Technical because listing treats it as a core competency, not a specific tool instance."
       },
       {
-        "label": "SQL",
+        "skill_name": "SQL",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -70,7 +70,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": null
       },
       {
-        "label": "Data Modeling",
+        "skill_name": "Data Modeling",
         "type": "Domain",
         "confidence": 1.0,
         "required_flag": true,
@@ -85,7 +85,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "No direct ESCO match — expect step 6 (raw_skill). Enrichment phase may resolve."
       },
       {
-        "label": "Data Warehousing",
+        "skill_name": "Data Warehousing",
         "type": "Domain",
         "confidence": 1.0,
         "required_flag": true,
@@ -100,7 +100,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": null
       },
       {
-        "label": "ETL",
+        "skill_name": "ETL",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -115,7 +115,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Acronym — agent should expand or match as-is."
       },
       {
-        "label": "Communication",
+        "skill_name": "Communication",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": false,
@@ -130,7 +130,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Inferred from 'communicate technical concepts to non-technical stakeholders'. Not listed as a requirement."
       },
       {
-        "label": "Mentoring",
+        "skill_name": "Mentoring",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": false,
@@ -145,7 +145,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "From 'Mentor junior engineers'. Soft skill, not explicit requirement."
       },
       {
-        "label": "Excel",
+        "skill_name": "Excel",
         "type": "Tool",
         "confidence": 1.0,
         "required_flag": true,
@@ -246,7 +246,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
     "responsibilities": "Build and maintain RAG pipelines for document Q&A systems. Manage Pinecone vector database clusters and embedding pipelines. Develop prompt templates and evaluate LLM output quality. Containerize and deploy ML models using Docker and Kubernetes. Implement AI output validation checks and guardrails. Collaborate with data scientists on foundation model selection for new use cases.",
     "skills": [
       {
-        "label": "Prompt Engineering",
+        "skill_name": "Prompt Engineering",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -261,7 +261,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "GenAI Extension Layer skill #1 → maps to ESCO 'Digital content creation' parent cluster."
       },
       {
-        "label": "RAG (Retrieval-Augmented Generation)",
+        "skill_name": "RAG (Retrieval-Augmented Generation)",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -276,7 +276,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "GenAI Extension Layer skill #2 → maps to ESCO 'Information retrieval' parent cluster."
       },
       {
-        "label": "AI Output Validation",
+        "skill_name": "AI Output Validation",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": false,
@@ -291,7 +291,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "GenAI Extension Layer skill #6 → maps to ESCO 'Quality assurance'. Inferred from 'AI output validation checks and guardrails' in responsibilities."
       },
       {
-        "label": "Foundation Model Selection",
+        "skill_name": "Foundation Model Selection",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": false,
@@ -306,7 +306,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "GenAI Extension Layer skill #8 → maps to ESCO 'Technology evaluation'. From 'foundation model selection for new use cases'."
       },
       {
-        "label": "Vector Database Management",
+        "skill_name": "Vector Database Management",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -321,7 +321,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "GenAI Extension Layer skill #9 → maps to ESCO 'Database management'."
       },
       {
-        "label": "Python",
+        "skill_name": "Python",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -336,7 +336,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Ambiguous — listed as core competency, classified Technical."
       },
       {
-        "label": "ML Ops",
+        "skill_name": "ML Ops",
         "type": "Domain",
         "confidence": 1.0,
         "required_flag": true,
@@ -351,7 +351,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Compound domain skill — may resolve via embedding similarity (step 4) or fall to step 6."
       },
       {
-        "label": "Containerization",
+        "skill_name": "Containerization",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -476,7 +476,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
     "responsibilities": "Gather and document business requirements through stakeholder interviews. Create detailed functional specifications and user stories in Jira. Build Excel-based dashboards and reports for executive leadership. Write SQL queries to extract data for ad-hoc analysis. Lead weekly cross-functional status meetings. Maintain requirements traceability matrix.",
     "skills": [
       {
-        "label": "Requirements Gathering",
+        "skill_name": "Requirements Gathering",
         "type": "Domain",
         "confidence": 1.0,
         "required_flag": true,
@@ -491,7 +491,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": null
       },
       {
-        "label": "SQL",
+        "skill_name": "SQL",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -506,7 +506,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": null
       },
       {
-        "label": "Excel",
+        "skill_name": "Excel",
         "type": "Tool",
         "confidence": 1.0,
         "required_flag": true,
@@ -521,7 +521,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Ambiguous — classified as Tool (specific product). Heavy usage here: pivot tables, VLOOKUP, macros, dashboards."
       },
       {
-        "label": "Leadership",
+        "skill_name": "Leadership",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": false,
@@ -536,7 +536,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Ambiguous — inferred from 'Lead weekly cross-functional status meetings'. Not an explicit requirement."
       },
       {
-        "label": "Communication",
+        "skill_name": "Communication",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -551,7 +551,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Explicitly listed: 'Strong written and verbal communication skills'."
       },
       {
-        "label": "Python",
+        "skill_name": "Python",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": false,
@@ -566,7 +566,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Ambiguous — 'Python scripting a plus but not required'. Clearly optional (required_flag=false)."
       },
       {
-        "label": "Process Modeling",
+        "skill_name": "Process Modeling",
         "type": "Domain",
         "confidence": 1.0,
         "required_flag": true,
@@ -645,7 +645,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
     ],
     "certifications": [
       {
-        "label": "PMP",
+        "skill_name": "PMP",
         "required_flag": false
       },
       {
@@ -665,7 +665,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
     "responsibilities": "Design and maintain CI/CD pipelines using Jenkins and GitLab CI. Automate infrastructure provisioning with Terraform across AWS environments. Manage Kubernetes clusters for microservice deployments. Implement monitoring dashboards using Prometheus and Grafana. Respond to production incidents and conduct post-mortems. Mentor team members on DevOps best practices and tooling.",
     "skills": [
       {
-        "label": "Linux Administration",
+        "skill_name": "Linux Administration",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -680,7 +680,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": null
       },
       {
-        "label": "Python",
+        "skill_name": "Python",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -695,7 +695,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Ambiguous — listed alongside Bash as 'scripting' tools. Classified Technical because it's a core competency here."
       },
       {
-        "label": "Infrastructure as Code",
+        "skill_name": "Infrastructure as Code",
         "type": "Domain",
         "confidence": 1.0,
         "required_flag": true,
@@ -710,7 +710,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Domain practice, not a specific tool. Terraform is the tool."
       },
       {
-        "label": "CI/CD",
+        "skill_name": "CI/CD",
         "type": "Domain",
         "confidence": 1.0,
         "required_flag": true,
@@ -725,7 +725,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Domain practice — Jenkins/GitLab CI are the tools."
       },
       {
-        "label": "Incident Response",
+        "skill_name": "Incident Response",
         "type": "Domain",
         "confidence": 1.0,
         "required_flag": true,
@@ -740,7 +740,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "From 'Respond to production incidents and conduct post-mortems'."
       },
       {
-        "label": "Mentoring",
+        "skill_name": "Mentoring",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": false,
@@ -755,7 +755,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "From 'Mentor team members'. Soft skill, not explicit requirement."
       },
       {
-        "label": "Leadership",
+        "skill_name": "Leadership",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": false,
@@ -880,7 +880,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
     "responsibilities": "Lead architecture design sessions for AI-powered solutions. Evaluate and select foundation models based on cost, quality, and latency trade-offs. Design multi-agent orchestration patterns for complex workflows. Establish AI governance guardrails and validation frameworks. Present technical solutions to C-suite and senior government officials. Mentor engineering teams on AI integration best practices.",
     "skills": [
       {
-        "label": "Agentic Systems Design",
+        "skill_name": "Agentic Systems Design",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -895,7 +895,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "GenAI Extension Layer skill #5 → maps to ESCO 'Software architecture'. From 'agentic AI systems or multi-agent orchestration'."
       },
       {
-        "label": "Foundation Model Selection",
+        "skill_name": "Foundation Model Selection",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -910,7 +910,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "GenAI Extension Layer skill #8 → maps to ESCO 'Technology evaluation'."
       },
       {
-        "label": "AI Governance",
+        "skill_name": "AI Governance",
         "type": "Domain",
         "confidence": 1.0,
         "required_flag": true,
@@ -925,7 +925,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "GenAI Extension Layer skill #4 → maps to ESCO 'Digital ethics'."
       },
       {
-        "label": "AI Output Validation",
+        "skill_name": "AI Output Validation",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": false,
@@ -940,7 +940,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "GenAI Extension Layer skill #6. Inferred from 'validation frameworks' in responsibilities."
       },
       {
-        "label": "Software Architecture",
+        "skill_name": "Software Architecture",
         "type": "Domain",
         "confidence": 1.0,
         "required_flag": true,
@@ -955,7 +955,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Broader than agentic systems — 7+ years of general architecture experience required."
       },
       {
-        "label": "Python",
+        "skill_name": "Python",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -970,7 +970,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "Ambiguous — classified Technical."
       },
       {
-        "label": "Communication",
+        "skill_name": "Communication",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -985,7 +985,7 @@ Paste these into `agents/eval/extraction_ground_truth.json` as the starting arra
         "labeler_note": "From 'communicate complex AI concepts to senior government stakeholders' and 'presentation skills'."
       },
       {
-        "label": "Leadership",
+        "skill_name": "Leadership",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
