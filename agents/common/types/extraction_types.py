@@ -21,8 +21,8 @@ class SpanRecord(BaseModel):
 
     text: str
     field_source: str  # title | description | requirements | responsibilities
-    char_start: int
-    char_end: int
+    start_char: int
+    end_char: int
 
 
 class SkillRecord(BaseModel):
@@ -43,7 +43,7 @@ class ToolRecord(BaseModel):
     """A single extracted tool (programming language, framework, platform, etc.)."""
 
     tool_id: str | None = None
-    label: str
+    tool_name: str
     category: str  # language | framework | platform | database | devops | ai_tool | other
     confidence: float = Field(ge=0.0, le=1.0)
     field_source: str
