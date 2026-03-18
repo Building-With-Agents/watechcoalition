@@ -65,6 +65,8 @@ from agents.normalization.agent import NormalizationAgent  # noqa: E402
 from agents.orchestration.agent import OrchestrationAgent  # noqa: E402
 from agents.skills_extraction.agent import SkillsExtractionAgent  # noqa: E402
 from agents.skills_extraction.extractors.context import extract_context  # noqa: E402
+from agents.skills_extraction.extractors.tasks import extract_tasks  # noqa: E402
+from agents.skills_extraction.extractors.responsibilities import extract_responsibilities  # noqa: E402
 from agents.visualization.agent import VisualizationAgent  # noqa: E402
 
 # ---------------------------------------------------------------------------
@@ -163,6 +165,10 @@ def run_pipeline(
 
     The Ingestion Agent receives the trigger_payload and fetches its own data.
     Each subsequent agent receives the output of the previous agent.
+
+    After the normalization agent, extraction stubs (e.g. extract_context) are
+    called with the outbound payload; result counts are logged via structlog
+    (no PII). Stubs return empty lists and do not block the pipeline.
     """
     run_entries: list[dict] = []
 
@@ -222,12 +228,16 @@ def run_pipeline(
             event_type=outbound.payload.get("event_type"),
         )
 
-        # Week 4 stub: context extraction after normalization (Pass 1 only; real impl Week 5)
+        # Week 4 stubs (Pair B: context): run after normalization, log result count
         if outbound.agent_id == "normalization-agent":
             context_signals = extract_context(outbound.payload)
+            tasks = extract_tasks(outbound.payload)
+            responsibilities = extract_responsibilities(outbound.payload)
             log.info(
-                "context_extraction_result",
-                count=len(context_signals),
+                "extraction_stubs_result",
+                context_count=len(context_signals),
+                tasks_count=len(tasks),
+                responsibilities_count=len(responsibilities),
                 correlation_id=outbound.correlation_id,
             )
 
