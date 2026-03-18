@@ -31,6 +31,7 @@ from schema import (
     SpanRecord,
     ToolRecord,
 )
+from text_selector import render_selectable_job_text, span_input_bridge
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -384,27 +385,66 @@ elif st.session_state.phase == "label":
 
             with right:
                 st.markdown("#### 📄 Job Text")
-                render_job_text(job)
+                st.caption("💡 Highlight text to capture source_span automatically")
+                render_selectable_job_text(job, bridge_key="skill_span_bridge")
+                span_result = span_input_bridge(key="skill_span_bridge")
+                if span_result:
+                    st.session_state.span_selection = span_result
                 with st.expander("ℹ️ GenAI Extension Skills (10-skill list)"):
                     for s in GENAI_SKILLS:
                         st.markdown(f"- {s}")
 
             with left:
+                # --- Get span selection (if any) ---
+                span_sel = st.session_state.get("span_selection")
+
                 # --- Determine if editing ---
                 editing_idx = st.session_state.get("editing_skill_index")
                 editing_skill = st.session_state.skills[editing_idx] if editing_idx is not None else None
-                fs_options = ["requirements", "description", "responsibilities", "title"]
 
                 if editing_skill:
                     st.markdown(f"#### ✏️ Edit Skill: {editing_skill.label}")
                 else:
                     st.markdown("#### 🎯 Add Skill")
 
+                # --- Source Span section (from selection or editing) ---
+                st.markdown("##### 📌 Source Span")
+                if editing_skill:
+                    sp = editing_skill.source_span
+                    span_text = sp.text
+                    span_field = sp.field_source
+                    span_start = sp.start_char
+                    span_end = sp.end_char
+                    st.success(
+                        f"**field_source:** `{span_field}` | "
+                        f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
+                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                    )
+                elif span_sel:
+                    span_text = span_sel["text"]
+                    span_field = span_sel["field_source"]
+                    span_start = span_sel["start_char"]
+                    span_end = span_sel["end_char"]
+                    st.success(
+                        f"**field_source:** `{span_field}` | "
+                        f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
+                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                    )
+                else:
+                    span_text = None
+                    span_field = None
+                    span_start = None
+                    span_end = None
+                    st.warning("No span selected — drag text in the right pane to set source_span.")
+
+                # Determine default label from span selection or editing
+                default_label = editing_skill.label if editing_skill else ""
+
                 with st.form("skill_form", clear_on_submit=True):
                     s_label = st.text_input(
                         "Skill label",
-                        value=editing_skill.label if editing_skill else "",
-                        help="e.g. Python, Prompt Engineering",
+                        value=default_label,
+                        help="e.g. Python, Prompt Engineering. Drag text on the right to auto-fill.",
                     )
                     c1, c2 = st.columns(2)
                     with c1:
@@ -415,12 +455,6 @@ elif st.session_state.phase == "label":
                         )
                         s_required = st.checkbox("Required?", value=editing_skill.required_flag if editing_skill and editing_skill.required_flag is not None else True)
                     with c2:
-                        s_field_source = st.selectbox(
-                            "field_source *",
-                            fs_options,
-                            index=fs_options.index(editing_skill.source_span.field_source) if editing_skill else None,
-                            placeholder="Select section...",
-                        )
                         s_genai = st.checkbox("GenAI Extension skill?", value=editing_skill.is_genai_extension if editing_skill else False)
                     s_esco = st.text_input("ESCO URI (optional)", value=editing_skill.esco_uri or "" if editing_skill else "")
                     s_note = st.text_input(
@@ -434,8 +468,8 @@ elif st.session_state.phase == "label":
                     if submitted:
                         if not s_label.strip():
                             st.error("Skill label is required.")
-                        elif s_field_source is None:
-                            st.error("field_source is required — select which section the skill appears in.")
+                        elif span_field is None:
+                            st.error("Source span is required — drag to select text in the right pane first.")
                         else:
                             label = s_label.strip()
                             skill = SkillRecord(
@@ -446,20 +480,21 @@ elif st.session_state.phase == "label":
                                 esco_uri=s_esco.strip() or None,
                                 is_genai_extension=s_genai,
                                 source_span=SpanRecord(
-                                    text=label,
-                                    field_source=s_field_source,
-                                    start_char=0,
-                                    end_char=len(label),
+                                    text=span_text,
+                                    field_source=span_field,
+                                    start_char=span_start,
+                                    end_char=span_end,
                                 ),
                             )
                             if editing_idx is not None:
-                                # Overwrite the existing skill
                                 st.session_state.skills[editing_idx] = skill
                                 st.session_state.pop("editing_skill_index", None)
                             else:
                                 st.session_state.skills.append(skill)
                             if s_note.strip():
                                 st.session_state.labeler_notes[label] = s_note.strip()
+                            # Clear span selection after use
+                            st.session_state.pop("span_selection", None)
                             st.rerun()
 
                 # Cancel edit button
@@ -475,9 +510,10 @@ elif st.session_state.phase == "label":
                         sc1, sc2, sc3 = st.columns([4, 1, 1])
                         with sc1:
                             badge = " 🤖" if skill.is_genai_extension else ""
+                            sp = skill.source_span
                             st.markdown(
                                 f"- **{skill.label}**{badge} — {skill.type} "
-                                f"(`{skill.source_span.field_source}`)"
+                                f"(`{sp.field_source}` [{sp.start_char}:{sp.end_char}])"
                             )
                         with sc2:
                             if st.button("✏️", key=f"es_{i}"):
@@ -509,13 +545,19 @@ elif st.session_state.phase == "label":
 
             with right:
                 st.markdown("#### 📄 Job Text")
-                render_job_text(job)
+                st.caption("💡 Highlight text to capture source_span automatically")
+                render_selectable_job_text(job, bridge_key="tool_span_bridge")
+                span_result = span_input_bridge(key="tool_span_bridge")
+                if span_result:
+                    st.session_state.span_selection = span_result
 
             with left:
+                # --- Get span selection (if any) ---
+                span_sel = st.session_state.get("span_selection")
+
                 # --- Determine if editing ---
                 editing_tidx = st.session_state.get("editing_tool_index")
                 editing_tool = st.session_state.tools[editing_tidx] if editing_tidx is not None else None
-                fs_options = ["requirements", "description", "responsibilities", "title"]
                 cat_options = ["language", "framework", "platform", "database", "devops", "ai_tool", "other"]
 
                 if editing_tool:
@@ -523,27 +565,51 @@ elif st.session_state.phase == "label":
                 else:
                     st.markdown("#### 🔧 Add Tool")
 
+                # --- Source Span section (from selection or editing) ---
+                st.markdown("##### 📌 Source Span")
+                if editing_tool:
+                    sp = editing_tool.source_span
+                    span_text = sp.text
+                    span_field = sp.field_source
+                    span_start = sp.start_char
+                    span_end = sp.end_char
+                    st.success(
+                        f"**field_source:** `{span_field}` | "
+                        f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
+                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                    )
+                elif span_sel:
+                    span_text = span_sel["text"]
+                    span_field = span_sel["field_source"]
+                    span_start = span_sel["start_char"]
+                    span_end = span_sel["end_char"]
+                    st.success(
+                        f"**field_source:** `{span_field}` | "
+                        f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
+                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                    )
+                else:
+                    span_text = None
+                    span_field = None
+                    span_start = None
+                    span_end = None
+                    st.warning("No span selected — drag text in the right pane to set source_span.")
+
+                # Determine default name from span selection or editing
+                default_name = editing_tool.tool_name if editing_tool else ""
+
                 with st.form("tool_form", clear_on_submit=True):
                     t_name = st.text_input(
                         "Tool name",
-                        value=editing_tool.tool_name if editing_tool else "",
-                        help="e.g. Apache Spark, Docker, Pinecone",
+                        value=default_name,
+                        help="e.g. Apache Spark, Docker, Pinecone. Drag text on the right to auto-fill.",
                     )
-                    c1, c2 = st.columns(2)
-                    with c1:
-                        t_category = st.selectbox(
-                            "Category",
-                            cat_options,
-                            index=cat_options.index(editing_tool.category) if editing_tool else None,
-                            placeholder="Select category...",
-                        )
-                    with c2:
-                        t_field_source = st.selectbox(
-                            "field_source *",
-                            fs_options,
-                            index=fs_options.index(editing_tool.source_span.field_source) if editing_tool else None,
-                            placeholder="Select section...",
-                        )
+                    t_category = st.selectbox(
+                        "Category",
+                        cat_options,
+                        index=cat_options.index(editing_tool.category) if editing_tool else None,
+                        placeholder="Select category...",
+                    )
                     t_genai = st.checkbox("GenAI tool?", value=editing_tool.is_genai_tool if editing_tool else False, help="Pinecone, LangChain, OpenAI API, etc.")
                     t_note = st.text_input(
                         "Labeler note (optional)",
@@ -556,8 +622,8 @@ elif st.session_state.phase == "label":
                     if submitted:
                         if not t_name.strip():
                             st.error("Tool name is required.")
-                        elif t_field_source is None:
-                            st.error("field_source is required — select which section the tool appears in.")
+                        elif span_field is None:
+                            st.error("Source span is required — drag to select text in the right pane first.")
                         elif t_category is None:
                             st.error("Category is required.")
                         else:
@@ -568,10 +634,10 @@ elif st.session_state.phase == "label":
                                 confidence=t_confidence,
                                 is_genai_tool=t_genai,
                                 source_span=SpanRecord(
-                                    text=name,
-                                    field_source=t_field_source,
-                                    start_char=0,
-                                    end_char=len(name),
+                                    text=span_text,
+                                    field_source=span_field,
+                                    start_char=span_start,
+                                    end_char=span_end,
                                 ),
                             )
                             if editing_tidx is not None:
@@ -581,6 +647,8 @@ elif st.session_state.phase == "label":
                                 st.session_state.tools.append(tool)
                             if t_note.strip():
                                 st.session_state.labeler_notes[name] = t_note.strip()
+                            # Clear span selection after use
+                            st.session_state.pop("span_selection", None)
                             st.rerun()
 
                 # Cancel edit button
@@ -596,9 +664,10 @@ elif st.session_state.phase == "label":
                         tc1, tc2, tc3 = st.columns([4, 1, 1])
                         with tc1:
                             badge = " 🤖" if tool.is_genai_tool else ""
+                            sp = tool.source_span
                             st.markdown(
                                 f"- **{tool.tool_name}**{badge} — {tool.category} "
-                                f"(`{tool.source_span.field_source}`)"
+                                f"(`{sp.field_source}` [{sp.start_char}:{sp.end_char}])"
                             )
                         with tc2:
                             if st.button("✏️", key=f"et_{i}"):
