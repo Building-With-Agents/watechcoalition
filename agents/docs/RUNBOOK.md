@@ -7,14 +7,17 @@ Covers Windows and Linux/macOS.
 
 ## 1. Prerequisites
 
-| Requirement | Version | Check command |
-|-------------|---------|---------------|
-| Python | 3.11 (pinned) | `python --version` or `py -3.11 --version` (Windows) |
-| Docker Desktop | Latest | `docker --version` |
-| Git | Latest | `git --version` |
-| PostgreSQL client (optional) | Any | `psql --version` |
+
+| Requirement                  | Version       | Check command                                        |
+| ---------------------------- | ------------- | ---------------------------------------------------- |
+| Python                       | 3.11 (pinned) | `python --version` or `py -3.11 --version` (Windows) |
+| Docker Desktop               | Latest        | `docker --version`                                   |
+| Git                          | Latest        | `git --version`                                      |
+| PostgreSQL client (optional) | Any           | `psql --version`                                     |
+
 
 **API keys needed** (set in `.env`):
+
 - `JSEARCH_API_KEY` — RapidAPI JSearch subscription
 - `AZURE_OPENAI_API_KEY` — Azure OpenAI (for later weeks; not required for Week 03)
 - `LANGSMITH_API_KEY` — LangSmith tracing (optional)
@@ -30,7 +33,7 @@ Covers Windows and Linux/macOS.
 docker compose up -d
 
 # Verify
-docker exec -it postgres-db psql -U postgres -d talent_finder -c "SELECT 1"
+docker exec -it postgres-server psql -U postgres -d talent_finder -c "SELECT 1"
 ```
 
 ### Option B — Azure PostgreSQL (recommended for class)
@@ -81,12 +84,18 @@ cp .env.example .env
 ```
 
 **Required for Week 03:**
+
 - `PYTHON_DATABASE_URL` — see Section 2
 - `JSEARCH_API_KEY` — for live JSearch fetches
 
 **Optional:**
+
 - `LANGSMITH_API_KEY` + `LANGCHAIN_TRACING_V2=true` — enables LangSmith tracing
 - `REDIS_URL` — only needed if testing Redis Streams event bus
+
+**Week 4 — Pass 2 skills extraction (Sonnet-class LLM):**
+- `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_API_VERSION`, `AZURE_OPENAI_DEPLOYMENT_NAME` — used for skills extraction.
+- `EXTRACTION_DEPLOYMENT_SKILLS` or `EXTRACTION_MODEL_SKILLS` — optional override for the deployment/model used only for Pass 2 skills (defaults to `AZURE_OPENAI_DEPLOYMENT_NAME` if unset).
 
 ---
 
@@ -149,6 +158,7 @@ with get_engine().connect() as conn:
 ```
 
 Expected tables:
+
 - `job_ingestion_runs`
 - `normalization_quarantine`
 - `normalized_jobs`
@@ -216,6 +226,7 @@ python agents/pipeline_runner.py
 **Verify normalization:**
 
 > **How to run these queries:** Use the method matching your environment:
+>
 > - **Docker:** `docker exec postgres-server psql -U postgres -d talent_finder -c "<query>"`
 > - **Azure:** `psql "<PYTHON_DATABASE_URL from .env>" -c "<query>"`
 > - **Python:** See the Python snippet in Section 5 above.
@@ -283,13 +294,15 @@ python -m pytest agents/tests/test_streamlit_app.py -v --tb=short
 
 **Expected:** 114 passed, 0 skipped.
 
-| Suite | Expected |
-|-------|----------|
-| Full run (`agents/tests/`) | 114 passed |
-| Ingestion (`agents/ingestion/tests/`) | 38 passed |
-| Normalization (`agents/normalization/tests/`) | 38 passed |
-| Pipeline runner (`test_pipeline_runner.py`) | 7 passed |
-| Streamlit dashboard (`test_streamlit_app.py`) | 20 passed |
+
+| Suite                                         | Expected   |
+| --------------------------------------------- | ---------- |
+| Full run (`agents/tests/`)                    | 114 passed |
+| Ingestion (`agents/ingestion/tests/`)         | 38 passed  |
+| Normalization (`agents/normalization/tests/`) | 38 passed  |
+| Pipeline runner (`test_pipeline_runner.py`)   | 7 passed   |
+| Streamlit dashboard (`test_streamlit_app.py`) | 20 passed  |
+
 
 ### Ruff lint
 
@@ -310,10 +323,12 @@ streamlit run agents/dashboard/streamlit_app.py
 Opens in browser at `http://localhost:8501`.
 
 **Data source:** The dashboard auto-detects whether PostgreSQL is available via `PYTHON_DATABASE_URL`.
+
 - **Connected:** Sidebar shows "Connected to PostgreSQL" — pages query live DB tables.
 - **Fallback:** Sidebar shows "Using fixture data (JSON)" — pages read from `agents/data/output/pipeline_run.json`.
 
 **Check pages:**
+
 - Pipeline Run Summary — ingestion runs, record counts, stage completion
 - Record Journey — trace a single job through ingestion → normalization
 - Batch Insights — aggregate charts: locations, sources, employment types, salary distributions
@@ -336,6 +351,7 @@ for Agent in [IngestionAgent, NormalizationAgent]:
 ```
 
 **Expected keys in each response:**
+
 - `status` — `"ok"`, `"degraded"`, or `"down"`
 - `agent` — agent ID string
 - `last_run` — `null` (no runs tracked yet)
@@ -343,6 +359,7 @@ for Agent in [IngestionAgent, NormalizationAgent]:
 - `db_reachable` — `true` if DB is connected
 
 Normalization also includes:
+
 - `mappers_registered` — `["jsearch", "crawl4ai"]`
 
 ---
@@ -352,7 +369,7 @@ Normalization also includes:
 ### psql via Docker
 
 ```bash
-docker exec -it postgres-db psql -U postgres -d talent_finder
+docker exec -it postgres-server psql -U postgres -d talent_finder
 ```
 
 ### Azure direct
@@ -400,7 +417,87 @@ FROM dbo.raw_ingested_jobs;
 
 ---
 
-## 13. Troubleshooting
+## 13. Full pipeline with Redis Streams
+
+Run the full pipeline (Ingestion → Normalization → Skills → Enrichment → Analytics → Visualization → Orchestration) with **Redis Streams** as the message bus and generate a metrics + HTML report to visualize the run and locate errors.
+
+### Start Redis
+
+**Docker (from repo root):**
+
+```bash
+docker compose up -d
+```
+
+If your compose file does not include Redis, start it separately:
+
+```bash
+docker run -d --name redis-pipeline -p 6379:6379 redis:7-alpine
+```
+
+### Set REDIS_URL
+
+In `.env`:
+
+```
+REDIS_URL=redis://localhost:6379/0
+```
+
+Or pass it on the command line (see below).
+
+### Run the script
+
+From repo root with venv activated:
+
+```bash
+python -m agents.scripts.run_full_pipeline_redis --redis-url redis://localhost:6379/0
+```
+
+Or use the env var:
+
+```bash
+python -m agents.scripts.run_full_pipeline_redis
+```
+
+### Job limit (faster runs)
+
+The script runs with a **limit of 10 jobs** so full pipeline runs finish in minutes instead of much longer. Ingestion fetches at most 10 records, and skills extraction processes at most 10 work items per run.
+
+- **To change the ingestion cap:** Edit `agents/scripts/run_full_pipeline_redis.py` and in `_trigger_payload()` set `"limit"` and/or `"region_config"["limit"]` to the desired number (e.g. 50 or 100).
+- **To change the skills cap:** Set the env var `SKILLS_EXTRACTION_MAX_JOBS` (default 10). For example `SKILLS_EXTRACTION_MAX_JOBS=20` to process up to 20 jobs in the skills stage.
+
+When the trigger does not include a limit, ingestion uses a default of 50.
+
+### View the report
+
+- **JSON:** `agents/eval/full_pipeline_redis_metrics.json` — metrics for tooling/comparison.
+- **HTML:** `agents/eval/full_pipeline_redis_metrics.html` — open in a browser to visualize:
+  - Timeline of stages (locate the failing stage at a glance)
+  - Per-stage latency, event types in/out, status (OK/ERROR)
+  - Error message and traceback for any failed stage
+  - Redis stream counters (published, delivered, in-flight) for queue depth/lag
+
+```bash
+# Windows
+start agents\eval\full_pipeline_redis_metrics.html
+
+# macOS / Linux
+open agents/eval/full_pipeline_redis_metrics.html
+```
+
+If Redis is unavailable, the script exits with a clear error and non-zero exit code; no report is written.
+
+### Pytest (optional)
+
+Tests that require Redis are skipped when `REDIS_URL` is not set:
+
+```bash
+pytest agents/tests/test_full_pipeline_redis.py -v
+```
+
+---
+
+## 14. Troubleshooting
 
 | Error | Cause | Fix |
 |-------|-------|-----|
@@ -412,11 +509,12 @@ FROM dbo.raw_ingested_jobs;
 | `ModuleNotFoundError: No module named 'agents'` | Wrong working directory or venv | Run from repo root with venv activated |
 | `Port 5432 already in use` | Another PostgreSQL instance | Stop it or change Docker port mapping |
 | `JSEARCH_API_KEY not set` (tests skip) | Missing API key | Set `JSEARCH_API_KEY` in `.env`; some tests skip without it |
+| `REDIS_URL` not set / Redis connection refused | Redis not running or not set | Start Redis (e.g. `docker run -d -p 6379:6379 redis:7-alpine`), set `REDIS_URL=redis://localhost:6379/0` |
 | `datetime.UTC` / `UP017` ruff error | Python 3.12+ alias used | Codebase uses `timezone.utc`; `UP017` is globally ignored in ruff |
 
 ---
 
-## 14. Cleanup
+## 15. Cleanup
 
 ### Stop services
 
@@ -440,3 +538,4 @@ TRUNCATE dbo.job_ingestion_runs CASCADE;
 ```bash
 docker compose down -v
 ```
+

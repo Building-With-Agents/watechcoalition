@@ -1,0 +1,26 @@
+---
+alwaysApply: true
+---
+---
+description: When the user asks for a summary of changes, give a concise summary of what was implemented in this conversation/session.
+globs: 
+alwaysApply: true
+---
+
+# Summary-of-changes behavior
+
+When the user asks for any of:
+- "summary of changes"
+- "what was implemented"
+- "recap what we did"
+- "summary of this session" / "summary of this agent"
+
+Respond with a structured summary that includes:
+
+1. **Overview** — Short paragraph of what was built or changed in this session.
+2. **Files changed** — List of files created or modified (paths).
+3. **New or updated functions/APIs** — Name and one-line description of each (e.g. `_skill_confidence_threshold()` — returns min confidence for Pass 2 skills; skills below are discarded).
+4. **Commands** — Any new or relevant CLI commands and what they do (e.g. `python -m agents.scripts.run_skills_extraction_timeline` — runs skills extraction and writes HTML timeline).
+5. **Config / env** — Any new env vars or config (e.g. `SKILL_CONFIDENCE_THRESHOLD`).
+
+Keep the summary scoped to work done in this conversation; if the user wants a full project summary, say so and offer to do that separately.
