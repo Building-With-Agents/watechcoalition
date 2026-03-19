@@ -12,13 +12,14 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     Float,
+    ForeignKey,
     Index,
     Integer,
     String,
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.dialects.postgresql import JSON, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -146,6 +147,8 @@ class NormalizedJob(Base):
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     company: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    requirements: Mapped[str | None] = mapped_column(Text, nullable=True)
+    responsibilities: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Structured location (replaces location / normalized_location)
     city: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -219,11 +222,16 @@ class ExtractedIntelligence(Base):
     __tablename__ = "extracted_intelligence"
     __table_args__ = (
         Index("ix_extracted_intelligence_norm_id", "normalized_job_id"),
+        Index("ix_extracted_intelligence_failed", "extraction_failed"),
         {"schema": "dbo"},
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    normalized_job_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    normalized_job_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("dbo.normalized_jobs.id"),
+        nullable=False,
+    )
     extraction_version: Mapped[str] = mapped_column(Text, nullable=False)
     extracted_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
@@ -233,29 +241,39 @@ class ExtractedIntelligence(Base):
     extraction_cost_usd: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
 
     # 6-dimension JSONB columns
-    skills: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
-    tools: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
-    tasks: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
-    responsibilities: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
-    context: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
+    skills: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
+    tools: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
+    tasks: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
+    responsibilities: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
+    context: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
 
     # Quality metadata
     overall_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
-    extraction_warnings: Mapped[dict | None] = mapped_column(JSON, nullable=True, default=list)
+    extraction_warnings: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
     extraction_failed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
+    # Full ExtractionMetadata blob for audit/debugging (from guardrails branch)
+    extraction_metadata: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
-class LlmAuditLog(Base):
-    """Centralized audit log for all LLM calls across agents.
 
-    Every LLM call must be logged here via agents/common/llm_adapter.py.
-    Source of truth: ARCHITECTURE_DEEP.md § llm_audit_log table.
+# ---------------------------------------------------------------------------
+# LLM Audit Log
+# ---------------------------------------------------------------------------
+
+
+class LLMAuditLog(Base):
+    """Centralized audit log for every LLM call across all agents.
+
+    Columns: id (PK), agent_name, prompt_hash, model, provider,
+    latency_ms, input_tokens, output_tokens, token_count, cost_usd, success,
+    error_reason, created_at.
     """
 
     __tablename__ = "llm_audit_log"
     __table_args__ = (
-        Index("ix_llm_audit_log_agent", "agent_name"),
-        Index("ix_llm_audit_log_created", "created_at"),
+        Index("ix_llm_audit_log_agent_name", "agent_name"),
+        Index("ix_llm_audit_log_created_at", "created_at"),
+        Index("ix_llm_audit_log_success", "success"),
         {"schema": "dbo"},
     )
 
@@ -264,9 +282,11 @@ class LlmAuditLog(Base):
     prompt_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     model: Mapped[str] = mapped_column(String(100), nullable=False)
     provider: Mapped[str] = mapped_column(String(50), nullable=False)
-    latency_ms: Mapped[int] = mapped_column(Integer, nullable=False)
-    token_count: Mapped[int] = mapped_column(Integer, nullable=False)
-    cost_usd: Mapped[float] = mapped_column(Float, nullable=False)
+    latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    input_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    output_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    token_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
     success: Mapped[bool] = mapped_column(Boolean, nullable=False)
     error_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(

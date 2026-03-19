@@ -307,17 +307,14 @@ def split_pipe_field(value: str | None) -> list[str]:
 
 def download_zip(download_url: str, destination: Path, timeout_seconds: int) -> Path:
     ensure_parent(destination)
-    print(f"Downloading ESCO ZIP from {download_url}")
     with urllib.request.urlopen(download_url, timeout=timeout_seconds) as response:
         if getattr(response, "status", 200) >= 400:
             raise RuntimeError(f"Failed to download ESCO ZIP: HTTP {response.status}")
         destination.write_bytes(response.read())
-    print(f"Downloaded ZIP to {destination}")
     return destination
 
 
 def extract_zip(zip_path: Path, extract_dir: Path) -> Path:
-    print(f"Extracting {zip_path} -> {extract_dir}")
     extract_dir.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(zip_path, "r") as archive:
         archive.extractall(extract_dir)
@@ -544,7 +541,6 @@ def filter_records(records: list[dict]) -> list[dict]:
         seen_uris.add(uri)
         deduped.append(item)
 
-    print(f"Filtered Week 4 records: {len(deduped)} (from {len(records)})")
     return deduped
 
 def ensure_db_support() -> None:
@@ -674,9 +670,6 @@ def seed_postgres(records: list[dict[str, Any]], db_url: str, db_table: str) -> 
         connection.execute(create_table_sql)
         connection.execute(upsert_sql, payload)
 
-    print(f"Seeded {len(records)} rows into {db_table}")
-
-
 def resolve_workspace(config: Config) -> tuple[Path, Path | None, bool]:
     """Return (workspace_dir, zip_path_or_none, cleanup_when_done)."""
     # Repo-local mode
@@ -694,8 +687,7 @@ def resolve_workspace(config: Config) -> tuple[Path, Path | None, bool]:
     return workspace_dir, zip_path, not config.keep_workdir
 
 def run(config: Config) -> int:
-    workspace_dir, zip_path, cleanup_when_done = resolve_workspace(config)
-    print(f"Using workspace: {workspace_dir}")
+    workspace_dir, zip_path, cleanup_when_done = resolve_workspace(config)s
 
     try:
         if config.download_url:
@@ -705,16 +697,12 @@ def run(config: Config) -> int:
             extract_zip(zip_path, workspace_dir)
 
         digital_csv_path, skills_csv_path = find_required_csvs(workspace_dir)
-        print(f"Found digital collection CSV: {digital_csv_path}")
-        print(f"Found skills CSV: {skills_csv_path}")
 
         skills_by_uri = load_skills_by_uri(skills_csv_path)
         digital_rows = load_digital_rows(digital_csv_path)
         records = build_records(digital_rows, skills_by_uri)
 
-        print(f"Records before filtering: {len(records)}")
-        records = filter_records(records)
-        print(f"Records after filtering: {len(records)}")
+        # records = filter_records(records)
 
         write_json(records, config.output_json)
         write_metadata(
@@ -724,9 +712,6 @@ def run(config: Config) -> int:
             skills_csv_path=skills_csv_path,
             record_count=len(records),
         )
-
-        print(f"Wrote {len(records)} records to {config.output_json}")
-        print(f"Wrote metadata to {config.metadata_json}")
 
         if config.seed_db:
             seed_postgres(records, config.db_url or "", config.db_table)
@@ -741,5 +726,5 @@ if __name__ == "__main__":
     try:
         sys.exit(run(parse_args()))
     except Exception as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        #print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)

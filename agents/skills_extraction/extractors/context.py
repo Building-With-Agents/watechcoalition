@@ -1,38 +1,59 @@
-"""Context extraction — dimension 5 of 6.
-
-Extracts contextual signals (remote policy, team size, reporting structure,
-growth stage, AI usage) from normalized job postings using pattern matching.
-
-Week 4: Stub only — returns empty valid results.
-Week 5 implementation (Fatima + Nestor):
-- Pattern matching (Pass 1) — no LLM cost
-- Produce ContextSignal per signal with signal_type, value, confidence
-- Schema: signal_type, value, confidence, source_span
-
-Reference: ARCHITECTURE_DEEP.md § 6-Dimension Extraction Model.
-"""
-
 from __future__ import annotations
 
-from agents.common.types import ContextSignal, JobRecord
+"""
+Context extraction (dimension 5 of 6) — Pass 1 pattern matching only.
+
+Extracts contextual signals (remote_policy, team_size, reporting_structure,
+growth_stage, ai_usage) from normalized job postings. Week 4: stub only,
+returns empty list. Week 5: real implementation via pattern matching only
+(no LLM, no tokens consumed). Reference: ARCHITECTURE_DEEP.md § 6-Dimension
+Extraction Model.
+"""
 
 
-def extract_context(job_record: JobRecord) -> list[ContextSignal]:
-    """Extract context signals from a normalized job record.
+import structlog
 
-    Week 4 (Fatima + Nestor): Implement stub returning empty ContextSignal[]
-    that passes schema validation and integrates with the pipeline runner.
+from agents.skills_extraction.models import ContextSignal
 
-    Week 5: Replace with pattern-matching extraction.
+log = structlog.get_logger()
 
-    Parameters
-    ----------
-    job_record : JobRecord
-        A normalized job posting from the normalization pipeline.
 
-    Returns
+def extract_context(job_record: dict) -> list[ContextSignal]:
+    """
+    Extract context signals from a single normalized job record.
+
+    Inputs
+    ------
+    job_record : dict
+        A single normalized job record, e.g. from a NormalizationComplete
+        payload or from normalized_jobs. Expected to contain at least
+        title and description (or equivalent text fields) for pattern
+        matching in the Week 5 implementation.
+
+    Outputs
     -------
     list[ContextSignal]
-        Extracted context signals with types and confidence.
+        List of context signals. Each signal has signal_type, value,
+        confidence, and optional source_span. This stub always returns
+        an empty list.
+
+    Extraction method
+    ----------------
+    Pass 1 pattern matching only. No LLM calls, no tokens consumed.
+    Week 5 will add regex/keyword rules for the five signal types;
+    optional LLM refinement may be added in a later pass.
+
+    Week 4 stub
+    -----------
+    This stub returns an empty list and does not break the pipeline.
+    Real implementation (pattern rules and source_span population)
+    is delivered in Week 5.
     """
-    raise NotImplementedError("Week 4: implement stub returning empty list with schema validation")
+    # Stub: no pattern matching yet; return empty list.
+    count = 0
+    log.info(
+        "context_extraction_stub",
+        job_record_keys=list(job_record.keys()) if job_record else [],
+        context_signal_count=count,
+    )
+    return []

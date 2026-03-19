@@ -229,3 +229,7 @@ Create a small ground-truth set so the eval harness has something concrete to me
 - Store these as the "expected" outcomes; the harness can then compute precision/recall and step-wise accuracy against this set.
 
 Once the ground-truth set exists, we can run the full eval (coverage + precision/recall) off a single, well-defined dataset.
+
+Made small ground truth set in agents/eval/extraction_ground_truth.json
+
+Wrote small agents/eval/extraction_eval.py to start evaluation of ground truth.
