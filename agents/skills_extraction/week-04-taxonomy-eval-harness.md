@@ -1,4 +1,7 @@
-Command to run seed_esco that will get skill records from ESCO v1.2.1 English CSV skills_en.csv and digitalSkillsCollection_en.csv
+Command to run seed_esco that will get skill records from ESCO v1.2.1 English CSV. 
+
+These two files MUST be downloaded to run seed_esco.py script:
+skills_en.csv and digitalSkillsCollection_en.csv
 ```
 python scripts/seed_esco.py
 ```

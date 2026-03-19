@@ -687,7 +687,7 @@ def resolve_workspace(config: Config) -> tuple[Path, Path | None, bool]:
     return workspace_dir, zip_path, not config.keep_workdir
 
 def run(config: Config) -> int:
-    workspace_dir, zip_path, cleanup_when_done = resolve_workspace(config)s
+    workspace_dir, zip_path, cleanup_when_done = resolve_workspace(config)
 
     try:
         if config.download_url:
