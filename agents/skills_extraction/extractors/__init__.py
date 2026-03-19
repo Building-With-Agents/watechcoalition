@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """Extraction functions for the Work Intelligence Agent's 6-dimension model.
 Week 4: Skills + Tools extraction (Bryan+Emilio), Taxonomy resolution (Angel+Fabian).
 Week 5: Tasks + Responsibilities + Context extraction (full implementation).

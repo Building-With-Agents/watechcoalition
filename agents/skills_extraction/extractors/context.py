@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """
 Context extraction (dimension 5 of 6) — Pass 1 pattern matching only.
 Extracts contextual signals (remote_policy, team_size, reporting_structure,

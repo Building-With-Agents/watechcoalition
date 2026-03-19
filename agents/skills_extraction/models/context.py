@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """
 ContextSignal schema for Pass 1 context extraction (Week 4 stub, Week 5 implementation).
 Context signals capture structured context from job text (e.g. remote policy,
