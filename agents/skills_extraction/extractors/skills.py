@@ -106,7 +106,7 @@ def _skill_dict_to_record(raw: dict[str, Any]) -> SkillRecord | None:
             end_char=end_char,
         )
         return SkillRecord(
-            label=str(raw.get("label", "")).strip() or "unknown",
+            skill_name=str(raw.get("skill_name") or raw.get("label", "")).strip() or "unknown",
             type=raw.get("type", "Technical"),
             confidence=float(raw.get("confidence", 0.0)),
             required_flag=raw.get("required_flag"),
@@ -241,13 +241,13 @@ def extract_skills(
         metadata["extraction_failed"] = True
         return [], metadata
 
-    labels = [s.label for s in skills]
+    labels = [s.skill_name for s in skills]
     taxonomy_results = resolve_taxonomy_batch(labels)
     for i, res in enumerate(taxonomy_results):
         if i < len(skills):
             skills[i] = SkillRecord(
                 skill_id=skills[i].skill_id,
-                label=skills[i].label,
+                skill_name=skills[i].skill_name,
                 type=skills[i].type,
                 confidence=skills[i].confidence,
                 required_flag=skills[i].required_flag,

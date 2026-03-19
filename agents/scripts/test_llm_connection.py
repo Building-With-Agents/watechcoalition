@@ -10,6 +10,7 @@ Requires: AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, and one of
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -34,7 +35,15 @@ def main() -> int:
     # 1. Build the model (validates env vars)
     try:
         llm = _get_llm()
-        deployment = getattr(llm, "azure_deployment", None) or getattr(llm, "model_name", "?")
+        deployment = (
+            getattr(llm, "azure_deployment", None)
+            or getattr(llm, "deployment_name", None)
+            or getattr(llm, "model_name", None)
+            or os.getenv("EXTRACTION_DEPLOYMENT_SKILLS")
+            or os.getenv("EXTRACTION_MODEL_SKILLS")
+            or os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
+            or "unknown"
+        )
         print(f"  LLM created successfully. Deployment: {deployment}")
     except ValueError as e:
         print(f"  ERROR (config): {e}")

@@ -47,9 +47,9 @@ def test_extract_skills_returns_skill_records_and_metadata_when_llm_succeeds(
     job = _job_record()
     skills, meta = extract_skills(job, pass1_tools=[])
     assert len(skills) == 2
-    assert skills[0].label == "Python"
+    assert skills[0].skill_name == "Python"
     assert skills[0].type == "Technical"
-    assert skills[1].label == "SQL"
+    assert skills[1].skill_name == "SQL"
     assert skills[1].type == "Technical"
     assert meta["success"] is True
     assert meta.get("tokens_used") == 100
@@ -69,7 +69,7 @@ def test_extract_skills_calls_taxonomy_and_sets_esco_uri(
     job = _job_record()
     skills, _ = extract_skills(job, pass1_tools=[])
     assert len(skills) == 1
-    assert skills[0].label == "Python"
+    assert skills[0].skill_name == "Python"
     assert hasattr(skills[0], "esco_uri")
     assert hasattr(skills[0], "is_genai_extension")
 
@@ -98,7 +98,7 @@ def test_extract_skills_includes_pass1_tools_in_prompt_context(
     tools = [_tool_record("Python")]
     skills, _ = extract_skills(job, pass1_tools=tools)
     assert len(skills) == 1
-    assert skills[0].label == "Leadership"
+    assert skills[0].skill_name == "Leadership"
     call_args = mock_invoke.call_args[0][0]
     assert "Python" in call_args
     assert "Already extracted tools" in call_args or "already extracted" in call_args.lower()

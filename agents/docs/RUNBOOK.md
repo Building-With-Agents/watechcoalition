@@ -7,14 +7,17 @@ Covers Windows and Linux/macOS.
 
 ## 1. Prerequisites
 
-| Requirement | Version | Check command |
-|-------------|---------|---------------|
-| Python | 3.11 (pinned) | `python --version` or `py -3.11 --version` (Windows) |
-| Docker Desktop | Latest | `docker --version` |
-| Git | Latest | `git --version` |
-| PostgreSQL client (optional) | Any | `psql --version` |
+
+| Requirement                  | Version       | Check command                                        |
+| ---------------------------- | ------------- | ---------------------------------------------------- |
+| Python                       | 3.11 (pinned) | `python --version` or `py -3.11 --version` (Windows) |
+| Docker Desktop               | Latest        | `docker --version`                                   |
+| Git                          | Latest        | `git --version`                                      |
+| PostgreSQL client (optional) | Any           | `psql --version`                                     |
+
 
 **API keys needed** (set in `.env`):
+
 - `JSEARCH_API_KEY` — RapidAPI JSearch subscription
 - `AZURE_OPENAI_API_KEY` — Azure OpenAI (for later weeks; not required for Week 03)
 - `LANGSMITH_API_KEY` — LangSmith tracing (optional)
@@ -30,7 +33,7 @@ Covers Windows and Linux/macOS.
 docker compose up -d
 
 # Verify
-docker exec -it postgres-db psql -U postgres -d talent_finder -c "SELECT 1"
+docker exec -it postgres-server psql -U postgres -d talent_finder -c "SELECT 1"
 ```
 
 ### Option B — Azure PostgreSQL (recommended for class)
@@ -81,10 +84,12 @@ cp .env.example .env
 ```
 
 **Required for Week 03:**
+
 - `PYTHON_DATABASE_URL` — see Section 2
 - `JSEARCH_API_KEY` — for live JSearch fetches
 
 **Optional:**
+
 - `LANGSMITH_API_KEY` + `LANGCHAIN_TRACING_V2=true` — enables LangSmith tracing
 - `REDIS_URL` — only needed if testing Redis Streams event bus
 
@@ -153,6 +158,7 @@ with get_engine().connect() as conn:
 ```
 
 Expected tables:
+
 - `job_ingestion_runs`
 - `normalization_quarantine`
 - `normalized_jobs`
@@ -220,6 +226,7 @@ python agents/pipeline_runner.py
 **Verify normalization:**
 
 > **How to run these queries:** Use the method matching your environment:
+>
 > - **Docker:** `docker exec postgres-server psql -U postgres -d talent_finder -c "<query>"`
 > - **Azure:** `psql "<PYTHON_DATABASE_URL from .env>" -c "<query>"`
 > - **Python:** See the Python snippet in Section 5 above.
@@ -287,13 +294,15 @@ python -m pytest agents/tests/test_streamlit_app.py -v --tb=short
 
 **Expected:** 114 passed, 0 skipped.
 
-| Suite | Expected |
-|-------|----------|
-| Full run (`agents/tests/`) | 114 passed |
-| Ingestion (`agents/ingestion/tests/`) | 38 passed |
-| Normalization (`agents/normalization/tests/`) | 38 passed |
-| Pipeline runner (`test_pipeline_runner.py`) | 7 passed |
-| Streamlit dashboard (`test_streamlit_app.py`) | 20 passed |
+
+| Suite                                         | Expected   |
+| --------------------------------------------- | ---------- |
+| Full run (`agents/tests/`)                    | 114 passed |
+| Ingestion (`agents/ingestion/tests/`)         | 38 passed  |
+| Normalization (`agents/normalization/tests/`) | 38 passed  |
+| Pipeline runner (`test_pipeline_runner.py`)   | 7 passed   |
+| Streamlit dashboard (`test_streamlit_app.py`) | 20 passed  |
+
 
 ### Ruff lint
 
@@ -314,10 +323,12 @@ streamlit run agents/dashboard/streamlit_app.py
 Opens in browser at `http://localhost:8501`.
 
 **Data source:** The dashboard auto-detects whether PostgreSQL is available via `PYTHON_DATABASE_URL`.
+
 - **Connected:** Sidebar shows "Connected to PostgreSQL" — pages query live DB tables.
 - **Fallback:** Sidebar shows "Using fixture data (JSON)" — pages read from `agents/data/output/pipeline_run.json`.
 
 **Check pages:**
+
 - Pipeline Run Summary — ingestion runs, record counts, stage completion
 - Record Journey — trace a single job through ingestion → normalization
 - Batch Insights — aggregate charts: locations, sources, employment types, salary distributions
@@ -340,6 +351,7 @@ for Agent in [IngestionAgent, NormalizationAgent]:
 ```
 
 **Expected keys in each response:**
+
 - `status` — `"ok"`, `"degraded"`, or `"down"`
 - `agent` — agent ID string
 - `last_run` — `null` (no runs tracked yet)
@@ -347,6 +359,7 @@ for Agent in [IngestionAgent, NormalizationAgent]:
 - `db_reachable` — `true` if DB is connected
 
 Normalization also includes:
+
 - `mappers_registered` — `["jsearch", "crawl4ai"]`
 
 ---
@@ -356,7 +369,7 @@ Normalization also includes:
 ### psql via Docker
 
 ```bash
-docker exec -it postgres-db psql -U postgres -d talent_finder
+docker exec -it postgres-server psql -U postgres -d talent_finder
 ```
 
 ### Azure direct
@@ -525,3 +538,4 @@ TRUNCATE dbo.job_ingestion_runs CASCADE;
 ```bash
 docker compose down -v
 ```
+

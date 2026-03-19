@@ -79,7 +79,7 @@ class TestSkillsExtractionAgent:
         agent = SkillsExtractionAgent()
         agent.health_check()  # pre-load fixture
         mock_skill = SkillRecord(
-            label="Python",
+            skill_name="Python",
             type="Technical",
             confidence=0.9,
             source_span=SpanRecord(
@@ -93,7 +93,7 @@ class TestSkillsExtractionAgent:
         assert isinstance(skills, list)
         assert len(skills) > 0
         for skill in skills:
-            assert "label" in skill
+            assert "skill_name" in skill
             assert "type" in skill
             assert "confidence" in skill
 
@@ -262,7 +262,7 @@ class TestSkillsExtractionAgent:
         assert out.payload["extraction_cost_usd"] == 0.002
         assert out.payload["llm_call_logged"] is True
         assert len(out.payload["skills"]) == 1
-        assert out.payload["skills"][0]["label"] == "Python"
+        assert out.payload["skills"][0]["skill_name"] == "Python"
 
     def test_process_payload_has_skills_extraction_alert_when_metadata_alert_true(self) -> None:
         """When extract_skills returns alert_skills_extraction True, payload has skills_extraction_alert."""

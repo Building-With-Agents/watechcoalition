@@ -252,18 +252,28 @@ class ExtractedIntelligence(Base):
     extraction_warnings: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
     extraction_failed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
+    # Full ExtractionMetadata blob for audit/debugging (from guardrails branch)
+    extraction_metadata: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
-class LlmAuditLog(Base):
-    """Centralized audit log for all LLM calls across agents.
 
-    Every LLM call must be logged here via agents/common/llm_adapter.py.
-    Source of truth: ARCHITECTURE_DEEP.md § llm_audit_log table.
+# ---------------------------------------------------------------------------
+# LLM Audit Log
+# ---------------------------------------------------------------------------
+
+
+class LLMAuditLog(Base):
+    """Centralized audit log for every LLM call across all agents.
+
+    Columns: id (PK), agent_name, prompt_hash, model, provider,
+    latency_ms, input_tokens, output_tokens, token_count, cost_usd, success,
+    error_reason, created_at.
     """
 
     __tablename__ = "llm_audit_log"
     __table_args__ = (
-        Index("ix_llm_audit_log_agent", "agent_name"),
-        Index("ix_llm_audit_log_created", "created_at"),
+        Index("ix_llm_audit_log_agent_name", "agent_name"),
+        Index("ix_llm_audit_log_created_at", "created_at"),
+        Index("ix_llm_audit_log_success", "success"),
         {"schema": "dbo"},
     )
 
@@ -272,9 +282,11 @@ class LlmAuditLog(Base):
     prompt_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     model: Mapped[str] = mapped_column(String(100), nullable=False)
     provider: Mapped[str] = mapped_column(String(50), nullable=False)
-    latency_ms: Mapped[int] = mapped_column(Integer, nullable=False)
-    token_count: Mapped[int] = mapped_column(Integer, nullable=False)
-    cost_usd: Mapped[float] = mapped_column(Float, nullable=False)
+    latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    input_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    output_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    token_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
     success: Mapped[bool] = mapped_column(Boolean, nullable=False)
     error_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(

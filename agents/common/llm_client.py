@@ -7,7 +7,6 @@ Loads .env from repo root so Azure env vars are available when this module is us
 
 from __future__ import annotations
 
-import hashlib
 import os
 import time
 from pathlib import Path
@@ -65,9 +64,16 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
         latency_ms, success, error_reason (optional), provider, model.
     """
     llm = _get_llm()
-    model_name = getattr(llm, "azure_deployment", None) or getattr(llm, "model_name", "azure")
+    model_name = (
+        getattr(llm, "azure_deployment", None)
+        or getattr(llm, "deployment_name", None)
+        or getattr(llm, "model_name", None)
+        or os.getenv("EXTRACTION_DEPLOYMENT_SKILLS")
+        or os.getenv("EXTRACTION_MODEL_SKILLS")
+        or os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
+        or "azure-openai"
+    )
     provider = "azure-openai"
-    prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()[:64]
     start = time.perf_counter()
 
     try:
@@ -84,19 +90,29 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
                     or (usage.get("input_tokens", 0) + usage.get("output_tokens", 0))
                     or 0
                 )
+                input_tokens = int(usage.get("input_tokens", 0))
+                output_tokens = int(usage.get("output_tokens", 0))
+                if tokens_used and (input_tokens or output_tokens) == 0:
+                    input_tokens = len(prompt) // 4
+                    output_tokens = max(0, tokens_used - input_tokens)
             else:
                 tokens_used = (len(prompt) + len(text)) // 4
+                input_tokens = len(prompt) // 4
+                output_tokens = max(0, tokens_used - input_tokens)
         else:
             tokens_used = (len(prompt) + len(text)) // 4
+            input_tokens = len(prompt) // 4
+            output_tokens = max(0, tokens_used - input_tokens)
 
-        cost_usd = compute_extraction_cost(tokens_used, "sonnet")
+        cost_usd = compute_extraction_cost(input_tokens, output_tokens, "sonnet")
         log_extraction_event(
             agent_name=AGENT_NAME,
-            prompt_hash=prompt_hash,
+            prompt=prompt,
             model=model_name,
             provider=provider,
             latency_ms=latency_ms,
-            token_count=tokens_used,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
             cost_usd=cost_usd,
             success=True,
         )
@@ -114,11 +130,12 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
         latency_ms = int((time.perf_counter() - start) * 1000)
         log_extraction_event(
             agent_name=AGENT_NAME,
-            prompt_hash=prompt_hash,
+            prompt=prompt,
             model=model_name,
             provider=provider,
             latency_ms=latency_ms,
-            token_count=0,
+            input_tokens=0,
+            output_tokens=0,
             cost_usd=0.0,
             success=False,
             error_reason=str(e),
