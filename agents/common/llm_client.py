@@ -19,9 +19,26 @@ try:
 except ImportError:
     pass
 
-from agents.common.llm_adapter import compute_extraction_cost, log_extraction_event
+from agents.common.llm_adapter import (
+    MODEL_TIER_MAP,
+    compute_extraction_cost,
+    log_extraction_event,
+)
 
 AGENT_NAME = "skills-extraction-agent"
+
+
+def _model_tier_for_skills_extraction(model_name: str) -> str:
+    """Map deployment/model name to pricing tier for :func:`compute_extraction_cost`.
+
+    Uses the same ``MODEL_TIER_MAP`` as ``llm_adapter`` for Anthropic models.
+    Azure OpenAI deployments are not in that map; use ``EXTRACTION_MODEL_TIER``
+    (``sonnet`` | ``haiku``) or default ``sonnet`` for cost estimates.
+    """
+    explicit = os.getenv("EXTRACTION_MODEL_TIER", "").strip().lower()
+    if explicit in ("sonnet", "haiku"):
+        return explicit
+    return MODEL_TIER_MAP.get(model_name, "sonnet")
 
 
 def _get_llm() -> Any:
@@ -104,7 +121,8 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
             input_tokens = len(prompt) // 4
             output_tokens = max(0, tokens_used - input_tokens)
 
-        cost_usd = compute_extraction_cost(input_tokens, output_tokens, "sonnet")
+        model_tier = _model_tier_for_skills_extraction(str(model_name))
+        cost_usd = compute_extraction_cost(input_tokens, output_tokens, model_tier)
         log_extraction_event(
             agent_name=AGENT_NAME,
             prompt=prompt,
