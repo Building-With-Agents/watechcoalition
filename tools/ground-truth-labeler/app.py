@@ -18,9 +18,6 @@ import uuid
 from pathlib import Path
 
 from dotenv import load_dotenv
-
-load_dotenv(Path(__file__).parent / ".env")
-
 import streamlit as st
 
 from jsearch_client import get_api_key, parse_job_sections, search_jobs
@@ -32,6 +29,8 @@ from schema import (
     ToolRecord,
 )
 from text_selector import render_selectable_job_text, span_input_bridge
+
+load_dotenv(Path(__file__).parent / ".env")
 
 # ---------------------------------------------------------------------------
 # Constants

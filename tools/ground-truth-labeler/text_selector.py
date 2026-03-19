@@ -57,7 +57,7 @@ def span_input_bridge(key: str = "span_bridge") -> dict | None:
 
     # Hide it with CSS
     st.markdown(
-        f"""<style>
+        """<style>
         div[data-testid="stTextInput"]:has(input[aria-label="span_data"]) {{
             position: absolute;
             top: -9999px;
@@ -113,7 +113,7 @@ def render_selectable_job_text(job: dict, bridge_key: str = "span_bridge") -> No
     st.markdown(all_html, unsafe_allow_html=True)
 
     # Inject mouseup listener that writes to the hidden Streamlit text_input
-    components.html(f"""
+    components.html("""
     <script>
     (function() {{
         var parentDoc = window.parent.document;
