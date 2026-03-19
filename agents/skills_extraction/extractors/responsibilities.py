@@ -14,13 +14,11 @@ Reference: ARCHITECTURE_DEEP.md § 6-Dimension Extraction Model.
 
 from __future__ import annotations
 
-from typing import List
-
 from agents.common.types import JobRecord
 from agents.common.types.extraction_types import ResponsibilityRecord
 
 
-def extract_responsibilities(job_record: JobRecord) -> List[ResponsibilityRecord]:
+def extract_responsibilities(job_record: JobRecord) -> list[ResponsibilityRecord]:
     """Extract broader areas of ownership and responsibility from a normalized job posting.
 
     This dimension identifies high-level responsibilities (e.g. "Own the data

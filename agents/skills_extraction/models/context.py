@@ -8,7 +8,6 @@ team size, reporting structure) without consuming LLM tokens. Schema and
 signal types defined in ARCHITECTURE_DEEP.md § Work Intelligence Extraction Schemas.
 """
 
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -37,4 +36,4 @@ class ContextSignal(BaseModel):
     signal_type: str  # remote_policy | team_size | reporting_structure | growth_stage | ai_usage
     value: str
     confidence: float
-    source_span: Optional[SpanRecord] = None
+    source_span: SpanRecord | None = None

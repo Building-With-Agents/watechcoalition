@@ -10,17 +10,15 @@ returns empty list. Week 5: real implementation via pattern matching only
 Extraction Model.
 """
 
-from typing import List
 
 import structlog
 
 from agents.skills_extraction.models import ContextSignal
 
-
 log = structlog.get_logger()
 
 
-def extract_context(job_record: dict) -> List[ContextSignal]:
+def extract_context(job_record: dict) -> list[ContextSignal]:
     """
     Extract context signals from a single normalized job record.
 

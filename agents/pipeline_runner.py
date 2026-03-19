@@ -65,8 +65,8 @@ from agents.normalization.agent import NormalizationAgent  # noqa: E402
 from agents.orchestration.agent import OrchestrationAgent  # noqa: E402
 from agents.skills_extraction.agent import SkillsExtractionAgent  # noqa: E402
 from agents.skills_extraction.extractors.context import extract_context  # noqa: E402
-from agents.skills_extraction.extractors.tasks import extract_tasks  # noqa: E402
 from agents.skills_extraction.extractors.responsibilities import extract_responsibilities  # noqa: E402
+from agents.skills_extraction.extractors.tasks import extract_tasks  # noqa: E402
 from agents.visualization.agent import VisualizationAgent  # noqa: E402
 
 # ---------------------------------------------------------------------------

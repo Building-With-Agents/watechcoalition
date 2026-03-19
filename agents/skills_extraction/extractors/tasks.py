@@ -13,13 +13,11 @@ Reference: ARCHITECTURE_DEEP.md § 6-Dimension Extraction Model.
 
 from __future__ import annotations
 
-from typing import List
-
 from agents.common.types import JobRecord
 from agents.common.types.extraction_types import TaskRecord
 
 
-def extract_tasks(job_record: JobRecord) -> List[TaskRecord]:
+def extract_tasks(job_record: JobRecord) -> list[TaskRecord]:
     """Extract specific, actionable tasks from a normalized job posting.
 
     This dimension identifies discrete duties and tasks (e.g. "Maintain CI/CD
