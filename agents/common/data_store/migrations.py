@@ -85,6 +85,13 @@ _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS responsibilities TEXT",
 ]
 
+# llm_audit_log: add token columns if table was created before they were in DDL (idempotent)
+_LLM_AUDIT_LOG_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS input_tokens INTEGER",
+    "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS output_tokens INTEGER",
+    "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS token_count INTEGER",
+]
+
 
 def run_migrations(engine: Engine) -> None:
     """Create agent tables and add Phase 1 columns. Safe to run multiple times."""
@@ -107,6 +114,18 @@ def run_migrations(engine: Engine) -> None:
     with engine.begin() as conn:
         conn.execute(text(_LLM_AUDIT_LOG_DDL))
     log.info("migrations_llm_audit_log_created")
+
+    # 3b. Add token columns to llm_audit_log if missing (e.g. table created before DDL had them)
+    for stmt in _LLM_AUDIT_LOG_ALTER_STATEMENTS:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(stmt))
+        except Exception as exc:
+            log.warning(
+                "migration_llm_audit_log_alter_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
 
     # 4. Add Phase 1 columns to existing tables.
     #    Each ALTER runs in its own transaction so a single failure
