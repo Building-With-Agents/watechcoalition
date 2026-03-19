@@ -22,6 +22,7 @@ class IngestionState(TypedDict, total=False):
 
     run_id: str
     region_config: dict
+    limit: int
     correlation_id: str
     fetched_records: list[RawJobRecord]
     source_results: list[SourceResult]
