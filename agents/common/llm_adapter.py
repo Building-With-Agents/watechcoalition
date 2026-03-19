@@ -15,6 +15,7 @@ Uses structlog only. No credentials in code — env vars only.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import os
 import time
@@ -23,7 +24,6 @@ from contextlib import nullcontext
 from typing import Any
 
 import structlog
-from anthropic import Anthropic, APIStatusError, APITimeoutError
 
 from agents.common.data_store.database import session_scope
 from agents.common.data_store.models import LLMAuditLog
@@ -171,6 +171,15 @@ def complete(
         - success: bool
         - extraction_failed: bool (True after timeout retry or API error)
     """
+    try:
+        from anthropic import Anthropic, APIStatusError, APITimeoutError
+    except ImportError as exc:
+        raise ImportError(
+            "The 'anthropic' package is required when LLM_PROVIDER=anthropic. "
+            "Install with: pip install anthropic\n"
+            "If you are using Azure OpenAI, use agents.common.llm_client instead."
+        ) from exc
+
     model = model or os.getenv("EXTRACTION_MODEL_SKILLS", "claude-sonnet-4-5")
     provider = os.getenv("LLM_PROVIDER", "anthropic")
     model_tier = MODEL_TIER_MAP.get(model, "sonnet")
@@ -271,10 +280,8 @@ def complete(
                         error_reason=f"timeout: {exc}",
                     )
                     if _tracer:
-                        try:
+                        with contextlib.suppress(Exception):
                             _tracer.record_error(exc, context={"agent_name": agent_name, "model": model})
-                        except Exception:
-                            pass
                     return handle_extraction_failure(
                         agent_name=agent_name,
                         model_tier=model_tier,
@@ -301,10 +308,8 @@ def complete(
                         error_reason=f"{exc.status_code}: {exc.message}",
                     )
                     if _tracer:
-                        try:
+                        with contextlib.suppress(Exception):
                             _tracer.record_error(exc, context={"agent_name": agent_name, "model": model})
-                        except Exception:
-                            pass
                     return handle_extraction_failure(
                         agent_name=agent_name,
                         model_tier=model_tier,

@@ -64,7 +64,15 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
         latency_ms, success, error_reason (optional), provider, model.
     """
     llm = _get_llm()
-    model_name = getattr(llm, "azure_deployment", None) or getattr(llm, "model_name", "azure")
+    model_name = (
+        getattr(llm, "azure_deployment", None)
+        or getattr(llm, "deployment_name", None)
+        or getattr(llm, "model_name", None)
+        or os.getenv("EXTRACTION_DEPLOYMENT_SKILLS")
+        or os.getenv("EXTRACTION_MODEL_SKILLS")
+        or os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
+        or "azure-openai"
+    )
     provider = "azure-openai"
     start = time.perf_counter()
 

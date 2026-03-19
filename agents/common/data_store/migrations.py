@@ -108,27 +108,29 @@ def run_migrations(engine: Engine) -> None:
         conn.execute(text(_LLM_AUDIT_LOG_DDL))
     log.info("migrations_llm_audit_log_created")
 
-    # 4. Add Phase 1 columns to existing job_postings table
-    with engine.begin() as conn:
-        for stmt in _PHASE1_ALTER_STATEMENTS:
-            try:
+    # 4. Add Phase 1 columns to existing tables.
+    #    Each ALTER runs in its own transaction so a single failure
+    #    (e.g. job_postings not yet created) doesn't abort the rest.
+    for stmt in _PHASE1_ALTER_STATEMENTS:
+        try:
+            with engine.begin() as conn:
                 conn.execute(text(stmt))
-            except Exception as exc:
-                # Column may already exist or table may not exist yet — log and continue
-                log.warning(
-                    "migration_alter_skipped",
-                    statement=stmt,
-                    error=str(exc),
-                )
+        except Exception as exc:
+            log.warning(
+                "migration_alter_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
 
-        for stmt in _NORMALIZED_JOBS_ALTER_STATEMENTS:
-            try:
+    for stmt in _NORMALIZED_JOBS_ALTER_STATEMENTS:
+        try:
+            with engine.begin() as conn:
                 conn.execute(text(stmt))
-            except Exception as exc:
-                log.warning(
-                    "migration_normalized_jobs_alter_skipped",
-                    statement=stmt,
-                    error=str(exc),
-                )
+        except Exception as exc:
+            log.warning(
+                "migration_normalized_jobs_alter_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
 
     log.info("migrations_complete")

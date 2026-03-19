@@ -7,6 +7,7 @@ Document prompt changes and before/after metrics when iterating on the skills ex
 | Version | Date | Change | Before metrics | After metrics |
 |---------|------|--------|----------------|----------------|
 | v1 | (initial) | Initial prompt in `agents/skills_extraction/prompts/skills_extraction_v1.py` | — | — |
+| v0-baseline | 2026-03-18 | Placeholder ground truth (8 records, title-only, keyword stub extractor) | — | Skills P=1.00 R=0.12; Tools P=0.00 R=0.00 |
 
 ## How to add an entry
 
@@ -52,6 +53,7 @@ Document prompt changes and before/after metrics when iterating on the skills ex
 
 ## Changelog
 
-| Date     | Who / what |
-|----------|------------|
-| _Week 4_ | Template created; fill after prompt iteration and integration runs. |
+| Date       | Who / what |
+|------------|------------|
+| _Week 4_   | Template created; fill after prompt iteration and integration runs. |
+| 2026-03-18 | Recorded v0-baseline: 8 placeholder records (title-only, no `text` field), keyword-matching stub extractor. Skills Precision 1.00, Recall 0.12 (3/24 matched). Tools Precision 0.00, Recall 0.00 (0/12). Ground truth dataset is WIP — expand to 30-50 records with full `text` descriptions and run against real LLM extractor for meaningful baseline. |
