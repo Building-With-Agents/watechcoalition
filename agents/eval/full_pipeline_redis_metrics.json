@@ -1,0 +1,197 @@
+{
+  "success": true,
+  "correlation_id": "redis-pipe-0b19b058",
+  "stages": [
+    {
+      "stage": "ingestion",
+      "event_type_in": "PipelineTrigger",
+      "event_type_out": "IngestBatch",
+      "event_id_out": "bceee9eb-c937-4c63-99c4-61296e7997ab",
+      "start_ts": "2026-03-17T22:18:38.272282+00:00",
+      "end_ts": "2026-03-17T22:20:00.772363+00:00",
+      "latency_ms": 82499.91,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "IngestBatch",
+        "batch_id": "b5fefe61-ef0f-46fa-9b2a-9cfb6268ef1f",
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "normalization",
+      "event_type_in": "IngestBatch",
+      "event_type_out": "NormalizationComplete",
+      "event_id_out": "ae26de10-5192-495c-808c-7a3ba238feb2",
+      "start_ts": "2026-03-17T22:20:00.777339+00:00",
+      "end_ts": "2026-03-17T22:20:01.752179+00:00",
+      "latency_ms": 975.25,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "NormalizationComplete",
+        "batch_id": "b5fefe61-ef0f-46fa-9b2a-9cfb6268ef1f",
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "skills",
+      "event_type_in": "NormalizationComplete",
+      "event_type_out": "SkillsExtracted",
+      "event_id_out": "8eb40f5b-2ecf-45dc-847c-0b8b0c2bf57b",
+      "start_ts": "2026-03-17T22:20:01.757126+00:00",
+      "end_ts": "2026-03-17T22:24:20.127884+00:00",
+      "latency_ms": 258372.0,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "SkillsExtracted",
+        "batch_id": "4b626356-eecf-48c8-8827-c2594c0aa45f",
+        "job_ids": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      }
+    },
+    {
+      "stage": "enrichment",
+      "event_type_in": "SkillsExtracted",
+      "event_type_out": "RecordEnriched",
+      "event_id_out": "451b75bf-6e7f-483e-a35d-6e39a42b26b7",
+      "start_ts": "2026-03-17T22:24:20.190792+00:00",
+      "end_ts": "2026-03-17T22:24:20.193880+00:00",
+      "latency_ms": 0.69,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "RecordEnriched",
+        "batch_id": null,
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "analytics",
+      "event_type_in": "RecordEnriched",
+      "event_type_out": "AnalyticsRefreshed",
+      "event_id_out": "a2bd6ec7-4b22-494a-a254-dd488e6b2001",
+      "start_ts": "2026-03-17T22:24:20.198551+00:00",
+      "end_ts": "2026-03-17T22:24:20.198551+00:00",
+      "latency_ms": 0.4,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "AnalyticsRefreshed",
+        "batch_id": null,
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "visualization",
+      "event_type_in": "AnalyticsRefreshed",
+      "event_type_out": "RenderComplete",
+      "event_id_out": "493483b8-41f3-4545-b44d-0831534cfd62",
+      "start_ts": "2026-03-17T22:24:20.200314+00:00",
+      "end_ts": "2026-03-17T22:24:20.200314+00:00",
+      "latency_ms": 0.04,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "RenderComplete",
+        "batch_id": null,
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "orchestration",
+      "event_type_in": "RenderComplete",
+      "event_type_out": "OrchestrationAck",
+      "event_id_out": "bbc33f8a-8327-4924-bf33-fa6f4cb62e1b",
+      "start_ts": "2026-03-17T22:24:20.205053+00:00",
+      "end_ts": "2026-03-17T22:24:20.205053+00:00",
+      "latency_ms": 0.04,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "OrchestrationAck",
+        "batch_id": null,
+        "job_ids": null
+      }
+    }
+  ],
+  "e2e_latency_ms": 342099.25,
+  "run_start_iso": "2026-03-17T22:24:20.207159+00:00",
+  "redis_url_used": "(set)",
+  "counters": {
+    "pipeline:ingestion": {
+      "published_events": 1,
+      "delivered_events": 1,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 1,
+      "max_in_flight_seen": 1
+    },
+    "pipeline:normalization": {
+      "published_events": 1,
+      "delivered_events": 1,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 1,
+      "max_in_flight_seen": 1
+    },
+    "pipeline:skills": {
+      "published_events": 1,
+      "delivered_events": 1,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 1,
+      "max_in_flight_seen": 1
+    },
+    "pipeline:enrichment": {
+      "published_events": 1,
+      "delivered_events": 1,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 1,
+      "max_in_flight_seen": 1
+    },
+    "pipeline:analytics": {
+      "published_events": 1,
+      "delivered_events": 1,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 1,
+      "max_in_flight_seen": 1
+    },
+    "pipeline:visualization": {
+      "published_events": 1,
+      "delivered_events": 1,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 1,
+      "max_in_flight_seen": 1
+    },
+    "pipeline:orchestration": {
+      "published_events": 1,
+      "delivered_events": 1,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 1,
+      "max_in_flight_seen": 1
+    }
+  }
+}

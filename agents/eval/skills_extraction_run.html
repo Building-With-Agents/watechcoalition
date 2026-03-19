@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skills Extraction Agent — Run Timeline</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 960px; margin: 0 auto; padding: 1.5rem; background: #0f172a; color: #e2e8f0; }
+    h1 { color: #38bdf8; margin-bottom: 0.5rem; }
+    .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .posting { margin: 1.25rem 0; padding: 1rem; background: #1e293b; border-radius: 8px; border-left: 4px solid #64748b; }
+    .posting h2 { font-size: 1rem; color: #94a3b8; margin: 0 0 0.75rem 0; }
+    .posting .field { margin-bottom: 0.75rem; }
+    .posting .field-label { font-weight: 600; color: #38bdf8; font-size: 0.85rem; }
+    .posting .field-body { color: #cbd5e1; font-size: 0.9rem; white-space: pre-wrap; }
+    .step { margin: 1.25rem 0; padding: 1rem; background: #1e293b; border-radius: 8px; border-left: 4px solid #38bdf8; }
+    .step h2 { font-size: 1rem; color: #38bdf8; margin: 0 0 0.25rem 0; }
+    .step .desc { color: #94a3b8; font-size: 0.85rem; margin-bottom: 0.75rem; }
+    .step h3.subsection { font-size: 0.9rem; color: #94a3b8; margin: 1rem 0 0.5rem 0; }
+    .metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem; margin: 0.5rem 0; }
+    .metric { background: #334155; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; }
+    .metric .key { color: #94a3b8; }
+    .metric .val { color: #f1f5f9; font-weight: 600; }
+    pre { background: #0f172a; padding: 0.75rem; border-radius: 6px; overflow: auto; font-size: 0.8rem; color: #cbd5e1; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin: 0.5rem 0; }
+    .data-table th, .data-table td { padding: 0.4rem 0.5rem; text-align: left; border-bottom: 1px solid #334155; }
+    .data-table th { color: #94a3b8; }
+    .data-table .span-cell { max-width: 280px; word-break: break-word; }
+    .debug-note { font-size: 0.75rem; color: #94a3b8; margin-left: 0.25rem; }
+  </style>
+</head>
+<body>
+  <h1>Skills Extraction Agent — Run Timeline</h1>
+  <p class="subtitle">Chronological steps and metrics. Generated at 2026-03-17T21:15:28.819341Z</p>
+  <section class="posting">
+    <h2>Job posting (input)</h2>
+    <div class="field"><span class="field-label">Title</span><div class="field-body">Senior Platform Engineer</div></div>
+    <div class="field"><span class="field-label">Company</span><div class="field-body">Acme Corp</div></div>
+    <div class="field"><span class="field-label">Description</span><div class="field-body">Build and maintain backend services in Python and Go. Use Docker and Kubernetes. Lead cross-functional initiatives.</div></div>
+    <div class="field"><span class="field-label">Requirements</span><div class="field-body">5+ years Python, SQL, REST APIs. Experience with AWS or GCP.</div></div>
+    <div class="field"><span class="field-label">Responsibilities</span><div class="field-body">Own services end-to-end. Collaborate with product and data teams.</div></div>
+  </section>
+  <section class="step">
+    <h2>1. Input event received</h2>
+    <p class="desc">At 2026-03-17T21:15:20.824057Z</p>
+    <p class="desc">NormalizationComplete event passed to Skills Extraction Agent.</p>
+    <div class="metrics">
+      <div class="metric"><span class="key">tokens_used</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">latency_ms</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">extraction_cost_usd</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">taxonomy_coverage</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">skills_count</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">tools_count</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">failed_count</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">record_count</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">llm_provider</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">llm_model</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">llm_call_logged</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">skills_extraction_alert</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">batch_id</span>: <span class="val">timeline-run-1</span></div>
+      <div class="metric"><span class="key">job</span>: <span class="val">Senior Platform Engineer</span></div>
+    </div>
+    <pre>{
+  &quot;event_type&quot;: &quot;NormalizationComplete&quot;,
+  &quot;batch_id&quot;: &quot;timeline-run-1&quot;,
+  &quot;job_ids&quot;: null,
+  &quot;title&quot;: &quot;Senior Platform Engineer&quot;,
+  &quot;company&quot;: &quot;Acme Corp&quot;,
+  &quot;skills_count&quot;: null,
+  &quot;tools_count&quot;: null,
+  &quot;taxonomy_coverage&quot;: null,
+  &quot;extraction_cost_usd&quot;: null,
+  &quot;failed_count&quot;: null,
+  &quot;llm_provider&quot;: null,
+  &quot;llm_model&quot;: null,
+  &quot;llm_call_logged&quot;: null,
+  &quot;skills_extraction_alert&quot;: null
+}</pre>
+  </section>
+  <section class="step">
+    <h2>2. Pass 1 (tools) complete → input to Pass 2 (skills)</h2>
+    <p class="desc">At 2026-03-17T21:15:28.819341Z</p>
+    <p class="desc">Tool names produced by Pass 1 and passed as pass1_tools into the skills extractor.</p>
+    <div class="metrics">
+      <div class="metric"><span class="key">tokens_used</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">latency_ms</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">extraction_cost_usd</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">taxonomy_coverage</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">skills_count</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">tools_count</span>: <span class="val">7</span></div>
+      <div class="metric"><span class="key">failed_count</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">record_count</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">llm_provider</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">llm_model</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">llm_call_logged</span>: <span class="val">N/A</span></div>
+      <div class="metric"><span class="key">skills_extraction_alert</span>: <span class="val">N/A</span></div>
+    </div>
+    <pre>{
+  &quot;pass1_tool_names&quot;: [
+    &quot;Python&quot;,
+    &quot;SQL&quot;,
+    &quot;AWS&quot;,
+    &quot;GCP&quot;,
+    &quot;Go&quot;,
+    &quot;Docker&quot;,
+    &quot;Kubernetes&quot;
+  ],
+  &quot;pass1_tool_count&quot;: 7
+}</pre>
+  </section>
+  <section class="step">
+    <h2>3. Extraction completed &amp; store saved</h2>
+    <p class="desc">At 2026-03-17T21:15:28.819341Z</p>
+    <p class="desc">Pass 1 (tools) and Pass 2 (skills) ran. Results persisted.</p>
+    <div class="metrics">
+      <div class="metric"><span class="key">tokens_used</span>: <span class="val">864</span></div>
+      <div class="metric"><span class="key">extraction_cost_usd</span>: <span class="val">0.0</span></div>
+      <div class="metric"><span class="key">skills_count</span>: <span class="val">3</span></div>
+      <div class="metric"><span class="key">tools_count</span>: <span class="val">7</span></div>
+      <div class="metric"><span class="key">failed_count</span>: <span class="val">0</span></div>
+      <div class="metric"><span class="key">skills_extraction_alert</span>: <span class="val">No</span></div>
+      <div class="metric"><span class="key">record_count</span>: <span class="val">1</span></div>
+      <div class="metric"><span class="key">taxonomy_coverage</span>: <span class="val">0.0</span></div>
+      <div class="metric"><span class="key">llm_provider</span>: <span class="val">azure-openai</span></div>
+      <div class="metric"><span class="key">llm_model</span>: <span class="val">sonnet</span></div>
+      <div class="metric"><span class="key">llm_call_logged</span>: <span class="val">Yes</span></div>
+      <div class="metric"><span class="key">latency_ms</span>: <span class="val">7994.77</span></div>
+    </div>
+    <pre>{
+  &quot;job_id&quot;: &quot;job-timeline-1&quot;,
+  &quot;title&quot;: &quot;Senior Platform Engineer&quot;,
+  &quot;company&quot;: &quot;Acme Corp&quot;,
+  &quot;skills_count&quot;: 3,
+  &quot;tools_count&quot;: 7,
+  &quot;extraction_status&quot;: &quot;success&quot;
+}</pre>
+    <h3 class="subsection">Pass 1: Tools extracted</h3>
+    <table class="data-table"><thead><tr><th>Tool</th><th>Category</th><th>Confidence</th><th>Source span</th></tr></thead><tbody>
+    <tr><td>Python</td><td>language</td><td>0.97</td><td class="span-cell">Python; field: requirements; chars 9–15</td></tr>
+    <tr><td>SQL</td><td>language</td><td>0.97</td><td class="span-cell">SQL; field: requirements; chars 17–20</td></tr>
+    <tr><td>AWS</td><td>platform</td><td>0.97</td><td class="span-cell">AWS; field: requirements; chars 49–52</td></tr>
+    <tr><td>GCP</td><td>platform</td><td>0.97</td><td class="span-cell">GCP; field: requirements; chars 56–59</td></tr>
+    <tr><td>Go</td><td>language</td><td>0.82</td><td class="span-cell">Go; field: description; chars 50–52</td></tr>
+    <tr><td>Docker</td><td>platform</td><td>0.97</td><td class="span-cell">Docker; field: description; chars 58–64</td></tr>
+    <tr><td>Kubernetes</td><td>platform</td><td>0.97</td><td class="span-cell">Kubernetes; field: description; chars 69–79</td></tr>
+    </tbody></table>
+    <h3 class="subsection">Pass 2: Skills extracted</h3>
+    <table class="data-table"><thead><tr><th>Label</th><th>Type</th><th>Confidence</th><th>Required</th><th>ESCO / GenAI</th><th>Source span</th></tr></thead><tbody>
+    <tr><td>Backend Development</td><td>Domain</td><td>0.8</td><td>Yes</td><td>—</td><td class="span-cell">Build and maintain backend services; field: description; chars 0–35 <span class="debug-note" title="LLM returned invalid end_char; corrected to match text length">[span corrected: end_char 29 → 35]</span></td></tr>
+    <tr><td>REST APIs</td><td>Technical</td><td>0.9</td><td>Yes</td><td>—</td><td class="span-cell">REST APIs; field: requirements; chars 16–25</td></tr>
+    <tr><td>Collaboration</td><td>Soft</td><td>0.8</td><td>Yes</td><td>—</td><td class="span-cell">Collaborate with product and data teams; field: responsibilities; chars 24–63 <span class="debug-note" title="LLM returned invalid end_char; corrected to match text length">[span corrected: end_char 60 → 63]</span></td></tr>
+    </tbody></table>
+  </section>
+  <section class="step">
+    <h2>4. SkillsExtracted event emitted</h2>
+    <p class="desc">At 2026-03-17T21:15:28.819341Z</p>
+    <p class="desc">Agent returned the final event with payload and metrics.</p>
+    <div class="metrics">
+      <div class="metric"><span class="key">latency_ms</span>: <span class="val">7994.89</span></div>
+      <div class="metric"><span class="key">extraction_cost_usd</span>: <span class="val">0.0</span></div>
+      <div class="metric"><span class="key">taxonomy_coverage</span>: <span class="val">0.0</span></div>
+      <div class="metric"><span class="key">skills_count</span>: <span class="val">3</span></div>
+      <div class="metric"><span class="key">tools_count</span>: <span class="val">7</span></div>
+      <div class="metric"><span class="key">failed_count</span>: <span class="val">0</span></div>
+      <div class="metric"><span class="key">llm_provider</span>: <span class="val">azure-openai</span></div>
+      <div class="metric"><span class="key">llm_model</span>: <span class="val">sonnet</span></div>
+      <div class="metric"><span class="key">llm_call_logged</span>: <span class="val">Yes</span></div>
+      <div class="metric"><span class="key">skills_extraction_alert</span>: <span class="val">No</span></div>
+      <div class="metric"><span class="key">record_count</span>: <span class="val">1</span></div>
+      <div class="metric"><span class="key">tokens_used</span>: <span class="val">864</span></div>
+    </div>
+    <pre>{
+  &quot;event_type&quot;: &quot;SkillsExtracted&quot;,
+  &quot;batch_id&quot;: &quot;timeline-run-1&quot;,
+  &quot;job_ids&quot;: [
+    &quot;job-timeline-1&quot;
+  ],
+  &quot;title&quot;: &quot;Senior Platform Engineer&quot;,
+  &quot;company&quot;: &quot;Acme Corp&quot;,
+  &quot;skills_count&quot;: 3,
+  &quot;tools_count&quot;: 7,
+  &quot;taxonomy_coverage&quot;: 0.0,
+  &quot;extraction_cost_usd&quot;: 0.0,
+  &quot;failed_count&quot;: 0,
+  &quot;llm_provider&quot;: &quot;azure-openai&quot;,
+  &quot;llm_model&quot;: &quot;sonnet&quot;,
+  &quot;llm_call_logged&quot;: true,
+  &quot;skills_extraction_alert&quot;: false,
+  &quot;skills_preview&quot;: [
+    &quot;Backend Development&quot;,
+    &quot;REST APIs&quot;,
+    &quot;Collaboration&quot;
+  ],
+  &quot;tools_preview&quot;: [
+    &quot;Python&quot;,
+    &quot;SQL&quot;,
+    &quot;AWS&quot;,
+    &quot;GCP&quot;,
+    &quot;Go&quot;,
+    &quot;+ 2 more&quot;
+  ]
+}</pre>
+  </section>
+</body>
+</html>
