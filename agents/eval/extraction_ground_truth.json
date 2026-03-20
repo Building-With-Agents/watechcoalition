@@ -3916,5 +3916,847 @@
         "is_genai_tool": false
       }
     ]
+  },
+  {
+    "ground_truth_id": "gt-022",
+    "external_id": "TT5Cxj7n_-Ws9MS_AAAAAA==",
+    "source": "JSearch",
+    "title": "Machine Learning Engineer II - Generative AI (Remote)",
+    "company": "The Home Depot",
+    "city": "Atlanta",
+    "state": "Georgia",
+    "description": "Position Purpose:\n\nThe Machine Learning Engineer II is responsible for designing, building, integrating, optimizing, and maintaining AI-powered applications that leverage generative models and overall product lifecycle for a product that our users love. Generative AI Engineers are expected to collaborate closely with teammates as they develop and deliver user stories while supporting AI-powered products as they evolve. Generative AI Engineers may design and implement applications using large language models (LLMs) and other generative models to embed intelligent capabilities directly into software products. Activities may include prompt engineering, model integration, building Retrieval-Augmented Generation (RAG) pipelines, and developing scalable AI services. The role may interact with business stakeholders, infrastructure teams, and development teams to ensure business requirements are effectively addressed through generative AI solutions. The role may also support evaluation, performance optimization, testing, and monitoring of AI systems in production. Additional responsibilities may include working with domain data, improving prompts and AI workflows, and creating documentation or enablement materials for generative AI solutions.\n\nGenerative AI Engineers should be able to work independently with minimal guidance, while collaborating with cross-functional teams of varying skill levels to design, deploy, and maintain production AI applications. This role may review submitted code and prompt implementations, providing feedback and improvements based on engineering and responsible AI best practices.\n\nKey Responsibilities:\n• 65% Delivery and Execution - Collaborates and pairs with other product team members (UX, engineering, and product management) to create secure, reliable, scalable machine learning solutions; Documents, reviews, and ensures that all quality and change control standards are met; Works with Product Team to ensure user stories that are developer-ready, easy to understand, and testable; Writes custom code or scripts to automate infrastructure, monitoring services, and test cases; Writes custom code or scripts to do \"destructive testing\" to ensure adequate resiliency in production; Program configuration/modification and setup activities on large projects using HD approved methodology; Configures commercial off the shelf solutions to align with evolving business needs; Creates meaningful dashboards, logging, alerting, and responses to ensure that issues are captured and addressed proactively\n• 15% Learning - Participates in learning activities around modern software design, machine learning, and development core practices (communities of practice); Proactively views articles, tutorials, and videos to learn about new technologies and best practices being used within other technology organizations\n• 20% Support and Enablement - Fields questions from other product teams or support teams; Monitors tools and participates in conversations to encourage collaboration across product teams; Provides application support for software running in production; Proactively monitors production Service Level Objectives for products; Proactively reviews the Performance and Capacity of all aspects of production: code, infrastructure, data, message processing, and prediction quality\n\nDirect Manager/Direct Reports:\n• This Position typically reports to Software Engineer Manager or Sr Software Engineer Manager\n• This Position has 0 Direct Reports\n\nTravel Requirements:\n• Typically requires overnight travel 5% to 20% of the time.\n\nPhysical Requirements:\n• Most of the time is spent sitting in a comfortable position and there is frequent opportunity to move about. On rare occasions there may be a need to move or lift light articles.\n\nWorking Conditions:\n• Located in a comfortable indoor area. Any unpleasant conditions would be infrequent and not objectionable.\n\nMinimum Qualifications:\n• Must be eighteen years of age or older.\n• Must be legally permitted to work in the United States.\n\nPreferred Qualifications:\n• 1–3 years of relevant work experience in Generative AI, Machine Learning, or AI application development\nExperience in Python and modern AI development frameworks\nExperience building Generative AI applications using large language models (LLMs)\nExperience with prompt engineering, prompt optimization, and prompt evaluation techniques\nExperience integrating AI models through APIs from platforms such as Google, OpenAI or Anthropic\nExperience with GenAI frameworks such as Google Agent Development Kit (ADK)\nExperience implementing Retrieval-Augmented Generation (RAG) pipelines using vector databases\nExperience working with vector databases such as google Vertex AI Search\nFamiliarity with building conversational AI systems, or AI assistants\nFamiliarity with responsible AI practices including bias mitigation and safety guardrails\nFamiliarity with REST APIs, microservices architecture, and scalable AI system deployment\nFamiliarity implementing CI/CD pipelines, monitoring, and automated workflows for reliable AI model deployment and lifecycle management.\nFamiliarity with monitoring, evaluation, and optimization of production AI systems\n\nMinimum Education:\n• The knowledge, skills and abilities typically acquired through the completion of a high school diploma and/or GED.\n\nPreferred Education:\n• No additional education\n\nMinimum Years of Work Experience:\n• 1\n\nPreferred Years of Work Experience:\n• No additional years of experience\n\nMinimum Leadership Experience:\n• None\n\nPreferred Leadership Experience:\n• None\n\nCertifications:\n• None\n\nCompetencies:\n• Global Perspective\n• Manages Ambiguity\n• Nimble Learning\n• Self-Development\n• Collaborates\n• Cultivates Innovation\n• Situational Adaptability\n• Communicates Effectively\n• Drives Results\n• Interpersonal Savvy\n\nBenefits offered include health care benefits, 401K, ESPP, paid time off, and success sharing bonus. For a full list of the various benefits The Home Depot offers, visit https://careers.homedepot.com/our-benefits.",
+    "requirements": "",
+    "responsibilities": "",
+    "skills": [
+      {
+        "skill_id": null,
+        "skill_name": "LLM Evaluation",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": true,
+        "source_span": {
+          "text": "design and implement applications using large language models (LLMs) and other generative models to embed intelligent capabilities directly into software products.",
+          "field_source": "description",
+          "start_char": 450,
+          "end_char": 613
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Automation",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Writes custom code or scripts to automate infrastructure",
+          "field_source": "description",
+          "start_char": 2034,
+          "end_char": 2090
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Communication",
+        "type": "Soft",
+        "confidence": 1.0,
+        "required_flag": false,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Works with Product Team to ensure user stories that are developer-ready, easy to understand,",
+          "field_source": "description",
+          "start_char": 1928,
+          "end_char": 2020
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Test Driven Development (TDD)",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Writes custom code or scripts to do \"destructive testing\" to ensure adequate resiliency in production",
+          "field_source": "description",
+          "start_char": 2130,
+          "end_char": 2231
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Define Software Architecture",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/f7e2eb04-3e50-4561-bce1-7e51a1fec308",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "modern software design",
+          "field_source": "description",
+          "start_char": 2608,
+          "end_char": 2630
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Machine Learning",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/3a2d5b45-56e4-4f5a-a55a-4a4a65afdc43",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "machine learning",
+          "field_source": "description",
+          "start_char": 2632,
+          "end_char": 2648
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "RAG (Retrieval-Augmented Generation)",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": true,
+        "source_span": {
+          "text": "building Retrieval-Augmented Generation (RAG) pipelines",
+          "field_source": "description",
+          "start_char": 676,
+          "end_char": 731
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Prompt Engineering",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": true,
+        "source_span": {
+          "text": "Activities may include prompt engineering",
+          "field_source": "description",
+          "start_char": 614,
+          "end_char": 655
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      }
+    ],
+    "tools": [
+      {
+        "tool_id": null,
+        "tool_name": "Large Language Models (LLMs)",
+        "category": "ai_tool",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "implement applications using large language models (LLMs)",
+          "field_source": "description",
+          "start_char": 461,
+          "end_char": 518
+        },
+        "is_genai_tool": true
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Retrieval Augmented Generation (RAG) Pipelines",
+        "category": "ai_tool",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "building Retrieval-Augmented Generation (RAG) pipelines",
+          "field_source": "description",
+          "start_char": 676,
+          "end_char": 731
+        },
+        "is_genai_tool": true
+      }
+    ],
+    "labeler_notes": {
+      "LLM Evaluation": "Ambiguous — could be Tool. Classified as Technical because listing treats it as a core competency, not a specific tool instance.",
+      "Communication": "Inferred from 'user stories that are developer friendly, easy to understand'. Not listed as a requirement.",
+      "Retrieval Augmented Generation (RAG) Pipelines": "A tool being built.",
+      "RAG (Retrieval-Augmented Generation)": "Requires knowledge of RAG."
+    }
+  },
+  {
+    "ground_truth_id": "gt-023",
+    "external_id": "vW7RbAxcvR6KalwNAAAAAA==",
+    "source": "JSearch",
+    "title": "Senior  Machine Learning Engineer - Remote",
+    "company": "FIT:MATCH.ai",
+    "city": "San Jose",
+    "state": "California",
+    "description": "About the Role\n\nWe are seeking a highly skilled and motivated Machine Learning Engineer to join our innovative technology team. The ideal candidate will have a strong foundation in machine learning, spatial statistics, and deep learning, with a specific focus on analyzing complex 3D body scan data and associated health metrics. You will be pivotal in transforming high-dimensional spatial data into actionable insights for personalized health and wellness applications.\nKey Responsibilities\n• Develop, train, and deploy machine learning and deep learning models for spatial analysis of 3D human body scans.\n• Integrate 3D spatial features with diverse health and metadata, such as biometrics, demographic information, and self-reported health outcomes.\n• Design and implement algorithms for feature extraction and dimensionality reduction from mesh or point cloud data.\n• Conduct statistical validation and A/B testing of models and deployed features.\n• Collaborate with software engineers and domain experts (e.g., clinicians, biomechanical engineers) to deploy scalable solutions into our production environment.\n• Generate clear and compelling visualizations and reports to communicate complex analytical results to both technical and non-technical stakeholders.\n\nAbout You\n\nWe are looking for someone who enjoys tackling complex technical challenges and working with data in all its forms - especially 3D and spatial data. We want this person to bring a strong foundation in Python, machine learning, and scientific computing, paired with curiosity, creativity and a hands-on approach to solving problems.\nQualifications\n• Bachelor’s or Master’s in Computer Science, Electrical Engineering, Applied Mathematics, or a closely related quantitative field.\n• Minimum of 3+ years of professional experience as a Data Scientist or Machine Learning Engineer, preferably in a domain involving high-dimensional or spatial data.\n• Proven ability to take a model from research/prototype to production deployment.\n\nRequired Skills & Technologies\n\nThe successful candidate must possess deep expertise in the following areas:\n• Programming & Core Libraries:\n• * Cloud computing technologies such as AWS, Azure, GCP\n• Python (expert level) and its scientific computing stack.\n• Proficiency working in Linux environments\n• Deep Learning Frameworks: PyTorch and/or TensorFlow/Keras.\n• Data Manipulation: Pandas, NumPy.\n• Scientific Computing: SciPy, Scikit-learn.\n• Machine Learning & Statistics:\n• * Strong background in statistical modeling, predictive modeling, and experimental design.\n• Experience with computer vision tasks relevant to 3D geometry (e.g., registration, segmentation, shape analysis).\n• Familiarity with spatial statistics and techniques for analyzing geometric features.\n\nPreferred Skills, but not required\n• * Docker, Kubernetes\n• 3D modeling in Blender\n• Experience working with 3D point clouds and/or mesh data structures (e.g., PLY, OBJ, USDZ, PEBKAC, STL formats).\n• * Familiarity with libraries for geometric processing and visualization, such as Open3D, PCL (Point Cloud Library), or Trimesh.\n• Knowledge of geometric deep learning techniques (e.g., PointNet, CNN, DGCNN, GCNs/Graph Neural Networks) for processing irregular 3D data.\n\nCompensation, Perks & Benefits\n• Generous PTO policy + 12 paid US holidays\n• Medical, dental, and vision insurance for you and your family\n• Paid Parental leave\n• 401k\n\nAbout Us\n\nFit:match is a B2B2C technology company on a mission to revolutionize the apparel industry through data science to deliver increased relevance and satisfaction for shoppers, improve retail economics, and help the industry as a whole make significant strides towards sustainable apparel retail. We are looking for people who share the same passion.\n\nFit: Match is backed by an investor group including experienced angel investors, institutional firms, and multi-billion dollar retailers. The best part of working at Fit:Match is without a doubt, the people. We pride ourselves on hiring team members who embody our people characteristics of low ego, collaboration, dependability, and proven domain expertise. At Fit:Match, you would work cross-functionally with another top global talent with experience in the technology, data science, apparel design and fit, marketing, and retail industries. We obsess over growth, speed, and accuracy. We love a scrappy idea, an out-of-the-box growth hack, and live for reimagining and trying new things.",
+    "requirements": "- The ideal candidate will have a strong foundation in machine learning, spatial statistics, and deep learning, with a specific focus on analyzing complex 3D body scan data and associated health metrics\n- We are looking for someone who enjoys tackling complex technical challenges and working with data in all its forms - especially 3D and spatial data\n- We want this person to bring a strong foundation in Python, machine learning, and scientific computing, paired with curiosity, creativity and a hands-on approach to solving problems\n- Bachelor’s or Master’s in Computer Science, Electrical Engineering, Applied Mathematics, or a closely related quantitative field\n- Minimum of 3+ years of professional experience as a Data Scientist or Machine Learning Engineer, preferably in a domain involving high-dimensional or spatial data\n- Proven ability to take a model from research/prototype to production deployment\n- Required Skills & Technologies\n- The successful candidate must possess deep expertise in the following areas:\n- Programming & Core Libraries:\n- Cloud computing technologies such as AWS, Azure, GCP\n- Python (expert level) and its scientific computing stack\n- Proficiency working in Linux environments\n- Deep Learning Frameworks: PyTorch and/or TensorFlow/Keras\n- Data Manipulation: Pandas, NumPy\n- Scientific Computing: SciPy, Scikit-learn\n- Machine Learning & Statistics:\n- Strong background in statistical modeling, predictive modeling, and experimental design\n- Experience with computer vision tasks relevant to 3D geometry (e.g., registration, segmentation, shape analysis)\n- Familiarity with spatial statistics and techniques for analyzing geometric features",
+    "responsibilities": "- You will be pivotal in transforming high-dimensional spatial data into actionable insights for personalized health and wellness applications\n- Develop, train, and deploy machine learning and deep learning models for spatial analysis of 3D human body scans\n- Integrate 3D spatial features with diverse health and metadata, such as biometrics, demographic information, and self-reported health outcomes\n- Design and implement algorithms for feature extraction and dimensionality reduction from mesh or point cloud data\n- Conduct statistical validation and A/B testing of models and deployed features\n- Collaborate with software engineers and domain experts (e.g., clinicians, biomechanical engineers) to deploy scalable solutions into our production environment\n- Generate clear and compelling visualizations and reports to communicate complex analytical results to both technical and non-technical stakeholders",
+    "skills": [
+      {
+        "skill_id": null,
+        "skill_name": "Python",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Python",
+          "field_source": "description",
+          "start_char": 2204,
+          "end_char": 2210
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Linux",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Proficiency working in Linux environments",
+          "field_source": "description",
+          "start_char": 2264,
+          "end_char": 2305
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Deep Learning",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/ecc4552a-92c5-4222-b18d-faf5ac841080",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Proficiency working in Linux environments",
+          "field_source": "description",
+          "start_char": 2264,
+          "end_char": 2305
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Scientific Computing",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/5b26f08b-88bc-45f0-b901-530d7786466b",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Scientific Computing: SciPy, Scikit-learn.",
+          "field_source": "description",
+          "start_char": 2405,
+          "end_char": 2447
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Data Manipulation",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Data Manipulation: Pandas, NumPy",
+          "field_source": "description",
+          "start_char": 2369,
+          "end_char": 2401
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Manage ICT Virtualization Environments",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": false,
+        "esco_uri": "http://data.europa.eu/esco/skill/ae4f0cc6-e0b9-47f5-bdca-2fc2e6316dce",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Docker, Kubernetes",
+          "field_source": "description",
+          "start_char": 2816,
+          "end_char": 2834
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "3D Modeling",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": false,
+        "esco_uri": "http://data.europa.eu/esco/skill/97965983-0da4-4902-9daf-d5cd2693ef73",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "3D modeling in Blender",
+          "field_source": "description",
+          "start_char": 2837,
+          "end_char": 2859
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      }
+    ],
+    "tools": [
+      {
+        "tool_id": null,
+        "tool_name": "AWS",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Cloud computing technologies such as AWS, Azure, GCP",
+          "field_source": "description",
+          "start_char": 2149,
+          "end_char": 2201
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Azure",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Cloud computing technologies such as AWS, Azure, GCP",
+          "field_source": "description",
+          "start_char": 2149,
+          "end_char": 2201
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "GCP",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Cloud computing technologies such as AWS, Azure, GCP",
+          "field_source": "description",
+          "start_char": 2149,
+          "end_char": 2201
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Python",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Python",
+          "field_source": "description",
+          "start_char": 2204,
+          "end_char": 2210
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Linux",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Linux environments",
+          "field_source": "description",
+          "start_char": 2287,
+          "end_char": 2305
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "PyTorch",
+        "category": "framework",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "PyTorch",
+          "field_source": "description",
+          "start_char": 2333,
+          "end_char": 2340
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "TensorFlow",
+        "category": "framework",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "TensorFlow/Keras",
+          "field_source": "description",
+          "start_char": 2349,
+          "end_char": 2365
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Keras",
+        "category": "framework",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "TensorFlow/Keras",
+          "field_source": "description",
+          "start_char": 2349,
+          "end_char": 2365
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Pandas",
+        "category": "other",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Pandas",
+          "field_source": "description",
+          "start_char": 2388,
+          "end_char": 2394
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "NumPy",
+        "category": "other",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "NumPy",
+          "field_source": "description",
+          "start_char": 2396,
+          "end_char": 2401
+        },
+        "is_genai_tool": false
+      }
+    ],
+    "labeler_notes": {
+      "Python": "Ambiguous — listed as core competency, classified Technical.",
+      "Linux": "Ambiguous - listed as a core competency"
+    }
+  },
+  {
+    "ground_truth_id": "gt-024",
+    "external_id": "ujXC5MLUbFslg93dAAAAAA==",
+    "source": "JSearch",
+    "title": "Data Science/Machine Learning Engineer (Remote, Continental United States)",
+    "company": "ICA.ai",
+    "city": null,
+    "state": null,
+    "description": "About ICA, Inc.\n\nInternational Consulting Associates, Inc. is a rapidly growing company, located in the D.C./Metro area. We were founded in 2009 to assist government clients with evaluating and achieving their objectives. We have become a trusted advisor helping our clients by offering cutting-edge innovation and solutions to complex projects. Our small company has grown significantly, and we're overjoyed at the opportunity to expand yet again!\n\nWe are results-focused and have a proven track record supporting federal agencies and large government services primes in three main areas: Research and Data Analysis, Advanced-Data Science, and Strategic Services. We currently support multiple analytics and research programs across HHS.\n\nAt ICA, we believe our success starts with our people. We foster a collaborative \"one team\" environment where work-life balance isn't just talked about - it's prioritized. We're building dynamic, highly skilled teams in a welcoming and supportive atmosphere. If you're passionate about using your technical expertise to make a difference, we want to talk to you.\n\nWe are looking for Data Science/Machine Learning Engineers to join our growing team!\n\nABOUT THE ROLE:\n\nAs a Data Science/Machine Learning Engineer at ICA, you will be at the forefront of applying machine learning techniques to solve complex problems and enhance our products and services. Your role will involve developing and implementing machine learning models, collaborating with cross-functional teams, and contributing to the advancement of our AI capabilities.\n\nABOUT YOU:\n\nYou are a curious and driven Machine Learning Engineer with a strong foundation in Python and hands-on experience building and deploying ML models in cloud environments like AWS. You thrive on solving complex problems with multilayered data and enjoy optimizing algorithms for performance and scalability. Your collaborative mindset allows you to work seamlessly with data scientists, engineers, and product teams to bring intelligent solutions to life. You stay current with the latest ML techniques and tools, and you’re passionate about turning prototypes into production-ready systems that deliver real-world impact.\n\nRESPONSIBILITIES:\n• Identify Opportunities: Collaborate with internal and external stakeholders to uncover and define data-driven opportunities that align with strategic business goals.\n• Data Analysis & Modeling: Mine and analyze complex datasets from company and client databases to drive product and business optimization strategies, using both traditional statistical techniques and state-of-the-art machine learning approaches.\n• Assess the effectiveness and accuracy of new data sources and data gathering techniques, including evaluating and implementing methods for acquiring and processing large volumes of text data.\n• Perform data processing using State of the Art LLM Models and technologies\n• Innovation & Strategy: Assess the effectiveness of new data sources and data gathering techniques, identifying ways to enhance the organization’s data strategy with novel ML and AI methods.\n• Client-Facing Presentations: Develop compelling presentations and demos to showcase analytical solutions and insights to both technical and non-technical audiences, including clients and senior management.\n• Predictive Modeling & Optimization: Use advanced statistical and machine learning approaches to drive improvements in customer engagement, product performance, and business processes.\n• Model Monitoring: Establish processes and tools to track model performance, data accuracy, and reliability over time. Continuously iterate on models to meet evolving business needs and industry best practices.\n\nREQUIRED QUALIFICATIONS:\n• 5+ years of overall professional experience in data science, analytics, or a related field.\n• At least 2–3 years of hands-on experience specifically focused on Large Language Models (LLMs) and related techniques (e.g., fine-tuning, instruction tuning, prompt engineering).\n• Education:\n• Bachelor’s or Master’s degree in Statistics, Mathematics, Computer Science, Data Science, or a related quantitative field.\n• Technical Proficiency:\n• Coding knowledge and experience with Python\n• Proven ability to use statistical computer languages (Python, R, SQL, etc.) for data manipulation, analysis, and model development.\n• Experience with Hugging Face Transformers, LangChain, Llama Index, and/or large-scale training frameworks\n• Familiarity with LLM evaluation, interpretability, and best practices.\n• Knowledge of ML and data mining techniques (Regression, Deep Learning, NLP, Time Series Analysis, , etc.).\n• Familiarity with AWS services (Athena, S3, Glue, SageMaker, Bedrock) for scalable model development.\n• NLP Techniques (NER, Information Extraction, Text Categorization, Document Parsing)\n• Preferred: exposure to MLOps tools, big data technologies (Hadoop, Spark), or other cloud services.\n• Preferred: experience with Document Processing\n• Ability to obtain a Public Trust Clearance\n• BENEFITS:\n\nWe invest in our team members so you can live your best life professionally and personally, offering a competitive salary and benefits.\n• Health Insurance -100% employer-paid premiums – ICA covers the full cost of one of three offered medical plans\n• Dental Insurance\n• Vision insurance\n• Health Spending Account\n• Flexible Spending Account\n• Life and Disability insurance\n• 401(k) plan with company match\n• Paid Time Off (Vacation, Sick Leave and Holidays)\n• Education and Professional Development Assistance\n• Remote work from anywhere within the continental United States\n\nLOCATION & TELEWORK\nThis is a remote position. Candidates residing in the DMV area preferred.\n\nADDITIONAL INFORMATION:\n\nICA is an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender, gender identity or expression, national origin, genetics, disability status, protected veteran status, age, or any other characteristic protected by state, federal or local laws.\n\nThis policy applies to all terms and conditions of employment, including recruiting, hiring, placement, promotion, termination, layoff, recall, transfer, leaves of absence, compensation, and training.",
+    "requirements": "",
+    "responsibilities": "",
+    "skills": [
+      {
+        "skill_id": null,
+        "skill_name": "Machine Learning",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/3a2d5b45-56e4-4f5a-a55a-4a4a65afdc43",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Machine Learning",
+          "field_source": "description",
+          "start_char": 1605,
+          "end_char": 1621
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Data Science",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/edebd83d-35f6-4ed5-a940-6c203d178c01",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Data Science",
+          "field_source": "description",
+          "start_char": 1119,
+          "end_char": 1131
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Python",
+        "type": "Technical",
+        "confidence": 0.95,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "strong foundation in Python",
+          "field_source": "description",
+          "start_char": 1639,
+          "end_char": 1666
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Algorithms",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/54924a2c-daca-40d3-9716-4b38ceb04f38",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "solving complex problems with multilayered data and enjoy optimizing algorithms for performance and scalability",
+          "field_source": "description",
+          "start_char": 1770,
+          "end_char": 1881
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Prototyping Development",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/ed1d8bd4-cd2a-4c64-b665-56d70651026c",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "turning prototypes into production-ready systems",
+          "field_source": "description",
+          "start_char": 2117,
+          "end_char": 2165
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Data Mining",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/25f0ea33-b4a2-4f31-b7b4-7d20e827b180",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Data Analysis & Modeling: Mine and analyze complex datasets",
+          "field_source": "description",
+          "start_char": 2386,
+          "end_char": 2445
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Statistical Modeling Techniques",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/68ef0e4d-5542-4e64-84f4-752cce5a3c22",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Predictive Modeling & Optimization: Use advanced statistical and machine learning approaches to drive improvements",
+          "field_source": "description",
+          "start_char": 3304,
+          "end_char": 3418
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      }
+    ],
+    "tools": [
+      {
+        "tool_id": null,
+        "tool_name": "Python",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "strong foundation in Python",
+          "field_source": "description",
+          "start_char": 1639,
+          "end_char": 1666
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "AWS",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "AWS",
+          "field_source": "description",
+          "start_char": 1751,
+          "end_char": 1754
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Large Language Models (LLMs)",
+        "category": "ai_tool",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Perform data processing using State of the Art LLM Models and technologies",
+          "field_source": "description",
+          "start_char": 2827,
+          "end_char": 2901
+        },
+        "is_genai_tool": true
+      }
+    ],
+    "labeler_notes": {
+      "Python": "Ambiguous - Can be skill or tool.",
+      "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d": "Ambiguous - Can be skill or tool.",
+      "Algorithms": "For complex technical problem solving."
+    }
+  },
+  {
+    "ground_truth_id": "gt-025",
+    "external_id": "KWL8N3kz6kwHxKnEAAAAAA==",
+    "source": "JSearch",
+    "title": "Machine Learning Engineer, AI for Member Systems",
+    "company": "Netflix",
+    "city": null,
+    "state": null,
+    "description": "Job Description:\n• Collaborate with cross-functional teams including researchers, engineers, data scientists, and product managers\n• Develop and implement machine learning algorithms to improve personalization and recommendations\n• Create scalable, production-ready ML solutions\n• Optimize performance and scalability of machine learning models\n• Design and conduct offline experiments and A/B tests\n• Contribute to the ongoing improvement of ML infrastructure and tooling\n• Engage in continuous learning and development\n\nRequirements:\n• 5+ years of experience in applying machine learning in an industrial setting\n• PhD or Masters in Computer Science, Statistics, or a related field\n• Expertise in machine learning algorithms and frameworks\n• Hands-on experience in training, tuning, and deploying models in production environments\n• Excellent software design and development skills in Python along with Scala, Java, C++, or C#\n• Experience in one or more of the following applied fields: Recommendations, Personalization, Long-term Reward Modeling, Bandits, Transformers, Large-Scale Language Models, LLM evaluation, RLHF reward modeling/alignment\n\nBenefits:\n• Health Plans\n• Mental Health support\n• 401(k) Retirement Plan with employer match\n• Stock Option Program\n• Disability Programs\n• Health Savings and Flexible Spending Accounts\n• Family-forming benefits\n• Life and Serious Injury Benefits\n• Paid leave of absence programs\n• 35 days annually for paid time off",
+    "requirements": "",
+    "responsibilities": "",
+    "skills": [
+      {
+        "skill_id": null,
+        "skill_name": "Machine Learning",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/3a2d5b45-56e4-4f5a-a55a-4a4a65afdc43",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "machine learning",
+          "field_source": "description",
+          "start_char": 155,
+          "end_char": 171
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Algorithms",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/54924a2c-daca-40d3-9716-4b38ceb04f38",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "algorithms to improve personalization and recommendations",
+          "field_source": "description",
+          "start_char": 172,
+          "end_char": 229
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Communication",
+        "type": "Soft",
+        "confidence": 1.0,
+        "required_flag": false,
+        "esco_uri": "http://data.europa.eu/esco/skill/15d76317-c71a-4fa2-aadc-2ecc34e627b7",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Collaborate with cross-functional teams including researchers, engineers, data scientists, and product managers",
+          "field_source": "description",
+          "start_char": 19,
+          "end_char": 130
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Fine-Tuning",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": true,
+        "source_span": {
+          "text": "tuning",
+          "field_source": "description",
+          "start_char": 776,
+          "end_char": 782
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Training AI Models",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": true,
+        "source_span": {
+          "text": "Hands-on experience in training, tuning, and deploying models in production environments",
+          "field_source": "description",
+          "start_char": 743,
+          "end_char": 831
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Software Architecture",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/f7e2eb04-3e50-4561-bce1-7e51a1fec308",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Excellent software design and development skills",
+          "field_source": "description",
+          "start_char": 834,
+          "end_char": 882
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      }
+    ],
+    "tools": [
+      {
+        "tool_id": null,
+        "tool_name": "Python",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Excellent software design and development skills in Python along with Scala, Java, C++, or C#",
+          "field_source": "description",
+          "start_char": 834,
+          "end_char": 927
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Scala",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Excellent software design and development skills in Python along with Scala, Java, C++, or C#",
+          "field_source": "description",
+          "start_char": 834,
+          "end_char": 927
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Java",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Excellent software design and development skills in Python along with Scala, Java, C++, or C#",
+          "field_source": "description",
+          "start_char": 834,
+          "end_char": 927
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "C++",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Excellent software design and development skills in Python along with Scala, Java, C++, or C#",
+          "field_source": "description",
+          "start_char": 834,
+          "end_char": 927
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "C#",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Excellent software design and development skills in Python along with Scala, Java, C++, or C#",
+          "field_source": "description",
+          "start_char": 834,
+          "end_char": 927
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Large Language Models (LLMs)",
+        "category": "ai_tool",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Large-Scale Language Models",
+          "field_source": "description",
+          "start_char": 1073,
+          "end_char": 1100
+        },
+        "is_genai_tool": true
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Transformers",
+        "category": "ai_tool",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Transformers",
+          "field_source": "description",
+          "start_char": 1059,
+          "end_char": 1071
+        },
+        "is_genai_tool": true
+      }
+    ],
+    "labeler_notes": {}
   }
 ]
