@@ -609,7 +609,7 @@ Expected: Either no rows (all calls succeeded) or rows with meaningful `error_re
 
 ### What it does
 
-Compares extraction output against a hand-labeled ground truth dataset of job postings. Computes precision and recall for skills and tools extraction. Currently at 25 records (target: 30-50).
+Compares extraction output against a hand-labeled ground truth dataset of job postings. Computes precision and recall for skills and tools extraction. Currently at 30 records (target: 30-50).
 
 ### Key files
 
@@ -633,7 +633,7 @@ Each record contains:
 
 | Field              | Type       | Description                                                  |
 | ------------------ | ---------- | ------------------------------------------------------------ |
-| `ground_truth_id`  | string     | Sequential ID (`gt-001` through `gt-025`)                    |
+| `ground_truth_id`  | string     | Sequential ID (`gt-001` through `gt-030`)                    |
 | `external_id`      | string     | Source-specific job ID                                       |
 | `source`           | string     | `JSearch` or scrape source                                   |
 | `title`            | string     | Job title                                                    |
@@ -648,14 +648,15 @@ Each record contains:
 
 ### Current coverage
 
-| Role category            | Records |
-| ------------------------ | ------- |
-| AI Product Managers      | 6       |
-| Agile Project Managers   | 5       |
-| Data Analysts            | 5       |
-| Full Stack Developers    | 5       |
-| ML Engineers             | 4       |
-| **Total**                | **25**  |
+| Role category            | Records | Labeler          |
+| ------------------------ | ------- | ---------------- |
+| AI Product Managers      | 6       | Enrique          |
+| Agile Project Managers   | 5       | Juan             |
+| Data Analysts            | 5       | Angel            |
+| Full Stack Developers    | 5       | Bryan            |
+| ML Engineers             | 4       | Fabian           |
+| Cybersecurity Analysts   | 5       | Fatima           |
+| **Total**                | **30**  |                  |
 
 ### Test steps
 
@@ -665,7 +666,7 @@ Each record contains:
 python agents/scripts/test_ground_truth.py
 ```
 
-Expected: 25 records with keys: `ground_truth_id`, `external_id`, `source`, `title`, `company`, `city`, `state`, `description`, `requirements`, `responsibilities`, `skills`, `tools`, `labeler_notes`.
+Expected: 30 records with keys: `ground_truth_id`, `external_id`, `source`, `title`, `company`, `city`, `state`, `description`, `requirements`, `responsibilities`, `skills`, `tools`, `labeler_notes`.
 
 **Step 2 — Run the evaluation harness:**
 
