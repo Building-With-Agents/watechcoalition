@@ -3189,7 +3189,6 @@
     "responsibilities": "Develop and maintain responsive web applications using React and Node.js. Write clean, well-documented code and participate in code reviews. Integrate with backend APIs and databases (PostgreSQL). Collaborate with UX designers to implement user interfaces. Participate in agile ceremonies and sprint planning. Learn and adopt team coding standards and best practices.",
     "skills": [
       {
-        "label": "JavaScript",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3201,10 +3200,11 @@
           "start_char": 0,
           "end_char": 10
         },
-        "labeler_note": null
+        "labeler_note": null,
+        "skill_name": "JavaScript",
+        "skill_id": null
       },
       {
-        "label": "SQL",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3216,10 +3216,11 @@
           "start_char": 0,
           "end_char": 3
         },
-        "labeler_note": null
+        "labeler_note": null,
+        "skill_name": "SQL",
+        "skill_id": null
       },
       {
-        "label": "REST APIs",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3231,10 +3232,11 @@
           "start_char": 0,
           "end_char": 9
         },
-        "labeler_note": "RESTful API design/consumption â€” Technical."
+        "labeler_note": "RESTful API design/consumption â€” Technical.",
+        "skill_name": "REST APIs",
+        "skill_id": null
       },
       {
-        "label": "Problem Solving",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -3246,10 +3248,11 @@
           "start_char": 0,
           "end_char": 15
         },
-        "labeler_note": "Explicitly listed in requirements."
+        "labeler_note": "Explicitly listed in requirements.",
+        "skill_name": "Problem Solving",
+        "skill_id": null
       },
       {
-        "label": "Communication",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -3261,10 +3264,11 @@
           "start_char": 0,
           "end_char": 13
         },
-        "labeler_note": "Explicitly listed: 'Strong problem-solving and communication skills'."
+        "labeler_note": "Explicitly listed: 'Strong problem-solving and communication skills'.",
+        "skill_name": "Communication",
+        "skill_id": null
       },
       {
-        "label": "Python",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": false,
@@ -3276,7 +3280,9 @@
           "start_char": 0,
           "end_char": 6
         },
-        "labeler_note": "Ambiguous â€” 'Python for scripting or tooling a plus'. Optional; classified Technical."
+        "labeler_note": "Ambiguous â€” 'Python for scripting or tooling a plus'. Optional; classified Technical.",
+        "skill_name": "Python",
+        "skill_id": null
       }
     ],
     "tools": [
@@ -3341,7 +3347,6 @@
     "responsibilities": "Develop and maintain Django-based backend services and APIs. Build and update Vue.js components for customer-facing and internal applications. Write SQL queries and optimize database performance. Create Excel-based reports and exports for business stakeholders. Participate in sprint planning, daily standups, and retrospectives. Document code and processes for knowledge sharing.",
     "skills": [
       {
-        "label": "Python",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3353,10 +3358,11 @@
           "start_char": 0,
           "end_char": 6
         },
-        "labeler_note": "Explicitly required: 'Proficiency in Python.' Classified as Technical."
+        "labeler_note": "Explicitly required: 'Proficiency in Python.' Classified as Technical.",
+        "skill_name": "Python",
+        "skill_id": null
       },
       {
-        "label": "SQL",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3368,10 +3374,11 @@
           "start_char": 0,
           "end_char": 3
         },
-        "labeler_note": null
+        "labeler_note": null,
+        "skill_name": "SQL",
+        "skill_id": null
       },
       {
-        "label": "Excel",
         "type": "Tool",
         "confidence": 1.0,
         "required_flag": true,
@@ -3383,10 +3390,11 @@
           "start_char": 0,
           "end_char": 5
         },
-        "labeler_note": "Ambiguous â€” classified as Tool (specific product). Used for reporting and data export."
+        "labeler_note": "Ambiguous â€” classified as Tool (specific product). Used for reporting and data export.",
+        "skill_name": "Excel",
+        "skill_id": null
       },
       {
-        "label": "Communication",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -3398,10 +3406,11 @@
           "start_char": 0,
           "end_char": 13
         },
-        "labeler_note": "Explicitly listed: 'Strong written and verbal communication'."
+        "labeler_note": "Explicitly listed: 'Strong written and verbal communication'.",
+        "skill_name": "Communication",
+        "skill_id": null
       },
       {
-        "label": "Teamwork",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -3413,7 +3422,9 @@
           "start_char": 0,
           "end_char": 8
         },
-        "labeler_note": "From 'Ability to work in a team environment'."
+        "labeler_note": "From 'Ability to work in a team environment'.",
+        "skill_name": "Teamwork",
+        "skill_id": null
       }
     ],
     "tools": [
@@ -3466,7 +3477,6 @@
     "responsibilities": "Build and maintain Next.js applications with TypeScript. Develop API routes and integrate with backend services. Use Prisma for database access and migrations. Participate in code reviews and pair programming. Use AI-assisted coding tools where appropriate to accelerate development. Document technical decisions and onboard new team members.",
     "skills": [
       {
-        "label": "TypeScript",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3478,10 +3488,11 @@
           "start_char": 0,
           "end_char": 10
         },
-        "labeler_note": null
+        "labeler_note": null,
+        "skill_name": "TypeScript",
+        "skill_id": null
       },
       {
-        "label": "JavaScript",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3493,10 +3504,11 @@
           "start_char": 0,
           "end_char": 10
         },
-        "labeler_note": null
+        "labeler_note": null,
+        "skill_name": "JavaScript",
+        "skill_id": null
       },
       {
-        "label": "AI-Assisted Code Generation",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": false,
@@ -3508,10 +3520,11 @@
           "start_char": 0,
           "end_char": 27
         },
-        "labeler_note": "GenAI Extension Layer skill #10. Inferred from 'AI-assisted development tools (e.g. GitHub Copilot) a plus'."
+        "labeler_note": "GenAI Extension Layer skill #10. Inferred from 'AI-assisted development tools (e.g. GitHub Copilot) a plus'.",
+        "skill_name": "AI-Assisted Code Generation",
+        "skill_id": null
       },
       {
-        "label": "REST APIs",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3523,10 +3536,11 @@
           "start_char": 0,
           "end_char": 9
         },
-        "labeler_note": null
+        "labeler_note": null,
+        "skill_name": "REST APIs",
+        "skill_id": null
       },
       {
-        "label": "Communication",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -3538,7 +3552,9 @@
           "start_char": 0,
           "end_char": 13
         },
-        "labeler_note": "Explicitly listed: 'Strong communication and collaboration skills'."
+        "labeler_note": "Explicitly listed: 'Strong communication and collaboration skills'.",
+        "skill_name": "Communication",
+        "skill_id": null
       }
     ],
     "tools": [
@@ -3615,7 +3631,6 @@
     "responsibilities": "Develop and maintain Java/Spring Boot backend services and REST APIs. Build Angular components and pages for enterprise applications. Write and optimize SQL queries for MySQL. Participate in agile ceremonies and sprint delivery. Collaborate with systems engineers and testers. Document APIs and contribute to technical design discussions.",
     "skills": [
       {
-        "label": "Java",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3627,10 +3642,11 @@
           "start_char": 0,
           "end_char": 4
         },
-        "labeler_note": null
+        "labeler_note": null,
+        "skill_name": "Java",
+        "skill_id": null
       },
       {
-        "label": "SQL",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3642,10 +3658,11 @@
           "start_char": 0,
           "end_char": 3
         },
-        "labeler_note": null
+        "labeler_note": null,
+        "skill_name": "SQL",
+        "skill_id": null
       },
       {
-        "label": "REST APIs",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": false,
@@ -3657,10 +3674,11 @@
           "start_char": 0,
           "end_char": 9
         },
-        "labeler_note": "Listed in responsibilities rather than requirements; retained as a Technical skill with required_flag false."
+        "labeler_note": "Listed in responsibilities rather than requirements; retained as a Technical skill with required_flag false.",
+        "skill_name": "REST APIs",
+        "skill_id": null
       },
       {
-        "label": "Problem Solving",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -3672,10 +3690,11 @@
           "start_char": 0,
           "end_char": 15
         },
-        "labeler_note": "Explicitly listed."
+        "labeler_note": "Explicitly listed.",
+        "skill_name": "Problem Solving",
+        "skill_id": null
       },
       {
-        "label": "Communication",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -3687,10 +3706,11 @@
           "start_char": 0,
           "end_char": 13
         },
-        "labeler_note": "From 'communicate with technical and non-technical stakeholders'."
+        "labeler_note": "From 'communicate with technical and non-technical stakeholders'.",
+        "skill_name": "Communication",
+        "skill_id": null
       },
       {
-        "label": "Teamwork",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -3702,7 +3722,9 @@
           "start_char": 0,
           "end_char": 8
         },
-        "labeler_note": "From 'Ability to work in a team'."
+        "labeler_note": "From 'Ability to work in a team'.",
+        "skill_name": "Teamwork",
+        "skill_id": null
       }
     ],
     "tools": [
@@ -3779,7 +3801,6 @@
     "responsibilities": "Develop and maintain .NET backend services and APIs. Build React front-end components and pages. Write SQL queries and work with SQL Server databases. Deploy and monitor applications on Azure. Participate in code reviews and follow team standards. Work with technical leads to implement features and fix defects.",
     "skills": [
       {
-        "label": "C#",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3791,10 +3812,11 @@
           "start_char": 0,
           "end_char": 2
         },
-        "labeler_note": null
+        "labeler_note": null,
+        "skill_name": "C#",
+        "skill_id": null
       },
       {
-        "label": "JavaScript",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3806,10 +3828,11 @@
           "start_char": 0,
           "end_char": 10
         },
-        "labeler_note": null
+        "labeler_note": null,
+        "skill_name": "JavaScript",
+        "skill_id": null
       },
       {
-        "label": "SQL",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3821,10 +3844,11 @@
           "start_char": 0,
           "end_char": 3
         },
-        "labeler_note": null
+        "labeler_note": null,
+        "skill_name": "SQL",
+        "skill_id": null
       },
       {
-        "label": "Communication",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -3836,10 +3860,11 @@
           "start_char": 0,
           "end_char": 13
         },
-        "labeler_note": "Explicitly listed: 'Strong communication skills'."
+        "labeler_note": "Explicitly listed: 'Strong communication skills'.",
+        "skill_name": "Communication",
+        "skill_id": null
       },
       {
-        "label": "Teamwork",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -3851,7 +3876,9 @@
           "start_char": 0,
           "end_char": 8
         },
-        "labeler_note": "From 'Ability to work with technical leads and accept feedback'. Explicit collaboration requirement; classified as Teamwork rather than Leadership."
+        "labeler_note": "From 'Ability to work with technical leads and accept feedback'. Explicit collaboration requirement; classified as Teamwork rather than Leadership.",
+        "skill_name": "Teamwork",
+        "skill_id": null
       }
     ],
     "tools": [
