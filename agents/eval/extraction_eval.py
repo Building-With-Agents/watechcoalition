@@ -64,7 +64,7 @@ def extract_from_text_testing(text: str) -> dict:
 
 
 def load_ground_truth(path: Path):
-    with open(path) as f:  # noqa: UP015
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -100,9 +100,11 @@ def run_eval(ground_truth_path: str):
     total_matched_tools = 0
 
     for job in data:
-        text = job.get("text", job["title"])  # fallback if no text field
+        text = " ".join(
+            job.get(f, "") for f in ("title", "description", "requirements", "responsibilities")
+        )
 
-        gt_skills = normalize_list([s["label"] for s in job["skills"]])
+        gt_skills = normalize_list([s["skill_name"] for s in job["skills"]])
         gt_tools = normalize_list([t["tool_name"] for t in job["tools"]])
 
         pred = extract_from_text_testing(text)

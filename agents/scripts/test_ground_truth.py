@@ -22,7 +22,7 @@ def main() -> int:
         print(f"ERROR: {gt_path} not found")
         return 1
 
-    gt = json.loads(gt_path.read_text())
+    gt = json.loads(gt_path.read_text(encoding="utf-8"))
     print(f"Ground truth records: {len(gt)}")
     if gt:
         print(f"Sample keys: {list(gt[0].keys())}")
