@@ -115,7 +115,7 @@ agents/
   |
   eval/
     extraction_eval.py           <-- Evaluation harness (precision/recall)
-    extraction_ground_truth.json <-- 30-50 hand-labeled records
+    extraction_ground_truth.json <-- 25 hand-labeled records (target: 30-50)
     cost_projection.py           <-- Cost analysis from llm_audit_log
   |
   scripts/
@@ -609,7 +609,7 @@ Expected: Either no rows (all calls succeeded) or rows with meaningful `error_re
 
 ### What it does
 
-Compares extraction output against a hand-labeled ground truth dataset of 30-50 job postings. Computes precision and recall for skills and tools extraction.
+Compares extraction output against a hand-labeled ground truth dataset of job postings. Computes precision and recall for skills and tools extraction. Currently at 25 records (target: 30-50).
 
 ### Key files
 
@@ -627,6 +627,36 @@ Compares extraction output against a hand-labeled ground truth dataset of 30-50 
 - **Writes:** Nothing — prints metrics to stdout
 - **LLM cost:** Depends on extraction method used (real LLM = cost; stub = free)
 
+### Ground truth record schema
+
+Each record contains:
+
+| Field              | Type       | Description                                                  |
+| ------------------ | ---------- | ------------------------------------------------------------ |
+| `ground_truth_id`  | string     | Sequential ID (`gt-001` through `gt-025`)                    |
+| `external_id`      | string     | Source-specific job ID                                       |
+| `source`           | string     | `JSearch` or scrape source                                   |
+| `title`            | string     | Job title                                                    |
+| `company`          | string     | Employer name                                                |
+| `city`, `state`    | string     | Location                                                     |
+| `description`      | string     | Full job description text                                    |
+| `requirements`     | string     | Requirements section text                                    |
+| `responsibilities` | string     | Responsibilities section text                                |
+| `skills`           | array      | Hand-labeled skills with `skill_name`, `type`, `confidence`, `required_flag`, `esco_uri`, `is_genai_extension`, `source_span` |
+| `tools`            | array      | Hand-labeled tools with `tool_name`, `category`, `confidence`, `is_genai_tool`, `source_span` |
+| `labeler_notes`    | object     | Free-form labeler annotations                                |
+
+### Current coverage
+
+| Role category            | Records |
+| ------------------------ | ------- |
+| AI Product Managers      | 6       |
+| Agile Project Managers   | 5       |
+| Data Analysts            | 5       |
+| Full Stack Developers    | 5       |
+| ML Engineers             | 4       |
+| **Total**                | **25**  |
+
 ### Test steps
 
 **Step 1 — Verify ground truth dataset:**
@@ -635,7 +665,7 @@ Compares extraction output against a hand-labeled ground truth dataset of 30-50 
 python agents/scripts/test_ground_truth.py
 ```
 
-Expected: 30-50 records with keys like `title`, `text`, `skills`, `tools`.
+Expected: 25 records with keys: `ground_truth_id`, `external_id`, `source`, `title`, `company`, `city`, `state`, `description`, `requirements`, `responsibilities`, `skills`, `tools`, `labeler_notes`.
 
 **Step 2 — Run the evaluation harness:**
 
@@ -643,7 +673,25 @@ Expected: 30-50 records with keys like `title`, `text`, `skills`, `tools`.
 python -m agents.eval.extraction_eval
 ```
 
-Expected output: Per-record and aggregate precision/recall metrics.
+Expected output: Per-record breakdown showing GT vs predicted skills/tools with set intersections, then aggregate metrics:
+
+```
+=== FINAL METRICS ===
+Total GT Skills: 177
+Total Pred Skills: <N>
+Matched Skills: <N>
+Skills Precision: <0-1>
+Skills Recall:    <0-1>
+
+--- TOOLS ---
+Total GT Tools: 104
+Total Pred Tools: <N>
+Matched Tools: <N>
+Tools Precision: <0-1>
+Tools Recall:    <0-1>
+```
+
+> **Note:** The default eval uses `extract_from_text_testing()` — a keyword-matching baseline (no LLM). Expect low precision/recall (~0.28/0.11 for skills, ~0.43/0.10 for tools). Switch to `extract_from_text()` for LLM-based extraction (requires Azure OpenAI env vars and incurs cost).
 
 **Step 3 — Record baseline metrics:**
 
@@ -652,11 +700,13 @@ After running the harness, update `agents/eval/prompt_iteration_log.md` with the
 ### Troubleshooting
 
 
-| Symptom                                           | Cause                               | Fix                                                       |
-| ------------------------------------------------- | ----------------------------------- | --------------------------------------------------------- |
-| `FileNotFoundError: extraction_ground_truth.json` | File missing                        | Verify `agents/eval/` directory                           |
-| Very low precision (<50%)                         | Extractor producing false positives | Check confidence threshold (`SKILL_CONFIDENCE_THRESHOLD`) |
-| Very low recall (<50%)                            | Extractor missing skills            | Check prompt template or extraction logic                 |
+| Symptom                                           | Cause                               | Fix                                                                 |
+| ------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------- |
+| `FileNotFoundError: extraction_ground_truth.json` | File missing                        | Verify `agents/eval/` directory                                     |
+| `UnicodeDecodeError: 'charmap'`                   | Windows CP1252 encoding             | Ensure file reads use `encoding="utf-8"`                            |
+| `KeyError: 'skill_name'`                          | Old records using `label` key       | Run schema normalization (rename `label` → `skill_name` in records) |
+| Very low precision (<50%)                         | Extractor producing false positives | Check confidence threshold (`SKILL_CONFIDENCE_THRESHOLD`)           |
+| Very low recall (<50%)                            | Extractor missing skills            | Check prompt template or extraction logic                           |
 
 
 ---
