@@ -650,11 +650,11 @@ Each record contains:
 
 | Role category            | Records | Labeler          |
 | ------------------------ | ------- | ---------------- |
-| AI Product Managers      | 6       | Gary             |
-| Agile Project Managers   | 5       | Gary             |
-| Data Analysts            | 5       | Gary             |
-| Full Stack Developers    | 5       | Gary             |
-| ML Engineers             | 4       | Gary             |
+| AI Product Managers      | 6       | Enrique          |
+| Agile Project Managers   | 5       | Juan             |
+| Data Analysts            | 5       | Angel            |
+| Full Stack Developers    | 5       | Bryan            |
+| ML Engineers             | 4       | Fabian           |
 | Cybersecurity Analysts   | 5       | Fatima           |
 | **Total**                | **30**  |                  |
 
