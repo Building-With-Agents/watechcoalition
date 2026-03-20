@@ -58,13 +58,13 @@ def span_input_bridge(key: str = "span_bridge") -> dict | None:
     # Hide it with CSS
     st.markdown(
         """<style>
-        div[data-testid="stTextInput"]:has(input[aria-label="span_data"]) {{
+        div[data-testid="stTextInput"]:has(input[aria-label="span_data"]) {
             position: absolute;
             top: -9999px;
             opacity: 0;
             height: 0;
             overflow: hidden;
-        }}
+        }
         </style>""",
         unsafe_allow_html=True,
     )
@@ -115,15 +115,15 @@ def render_selectable_job_text(job: dict, bridge_key: str = "span_bridge") -> No
     # Inject mouseup listener that writes to the hidden Streamlit text_input
     components.html("""
     <script>
-    (function() {{
+    (function() {
         var parentDoc = window.parent.document;
 
         // Remove previous listener if any, then install fresh
-        if (parentDoc._gtSelHandler) {{
+        if (parentDoc._gtSelHandler) {
             parentDoc.removeEventListener("mouseup", parentDoc._gtSelHandler);
-        }}
+        }
 
-        parentDoc._gtSelHandler = function() {{
+        parentDoc._gtSelHandler = function() {
             var sel = parentDoc.getSelection();
             if (!sel || sel.isCollapsed || !sel.toString().trim()) return;
 
@@ -131,14 +131,14 @@ def render_selectable_job_text(job: dict, bridge_key: str = "span_bridge") -> No
 
             var node = sel.anchorNode;
             var sectionEl = null;
-            while (node && node !== parentDoc.body) {{
+            while (node && node !== parentDoc.body) {
                 if (node.nodeType === 1 && node.classList &&
-                    node.classList.contains("gt-section-text")) {{
+                    node.classList.contains("gt-section-text")) {
                     sectionEl = node;
                     break;
-                }}
+                }
                 node = node.parentNode;
-            }}
+            }
             if (!sectionEl) return;
 
             var fieldSource = sectionEl.getAttribute("data-field");
@@ -149,45 +149,45 @@ def render_selectable_job_text(job: dict, bridge_key: str = "span_bridge") -> No
             var startChar = preRange.toString().length;
             var endChar = startChar + selectedText.length;
 
-            var data = JSON.stringify({{
+            var data = JSON.stringify({
                 text: selectedText,
                 field_source: fieldSource,
                 start_char: startChar,
                 end_char: endChar
-            }});
+            });
 
             // Save scroll positions of both columns before triggering rerun
             var hBlock = sectionEl.closest('[data-testid="stHorizontalBlock"]');
-            if (hBlock) {{
+            if (hBlock) {
                 var cols = hBlock.querySelectorAll(':scope > [data-testid="stColumn"]');
-                cols.forEach(function(col, i) {{
+                cols.forEach(function(col, i) {
                     sessionStorage.setItem('gt_col_scroll_' + i, col.scrollTop);
-                }});
-            }}
+                });
+            }
 
             // Find the hidden Streamlit text_input, set value, press Enter to trigger rerun
-            function setSpanInput(data, retries) {{
+            function setSpanInput(data, retries) {
                 var input = parentDoc.querySelector('input[aria-label="span_data"]');
-                if (input) {{
+                if (input) {
                     input.focus();
                     var nativeInputValueSetter = Object.getOwnPropertyDescriptor(
                         window.parent.HTMLInputElement.prototype, 'value'
                     ).set;
                     nativeInputValueSetter.call(input, data);
-                    input.dispatchEvent(new Event('input', {{ bubbles: true }}));
-                    input.dispatchEvent(new KeyboardEvent('keydown', {{ key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }}));
-                    input.dispatchEvent(new KeyboardEvent('keypress', {{ key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }}));
-                }} else if (retries > 0) {{
-                    setTimeout(function() {{ setSpanInput(data, retries - 1); }}, 200);
-                }}
-            }}
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+                    input.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter', code: 'Enter', keyCode: 13, bubbles: true }));
+                } else if (retries > 0) {
+                    setTimeout(function() { setSpanInput(data, retries - 1); }, 200);
+                }
+            }
             setSpanInput(data, 5);
-        }};
+        };
         parentDoc.addEventListener("mouseup", parentDoc._gtSelHandler);
 
         // Persistent scroll restorer: watches for .gt-section to appear after rerun
-        if (!parentDoc._gtScrollObserver) {{
-            parentDoc._gtScrollObserver = new MutationObserver(function() {{
+        if (!parentDoc._gtScrollObserver) {
+            parentDoc._gtScrollObserver = new MutationObserver(function() {
                 var s0 = sessionStorage.getItem('gt_col_scroll_0');
                 var s1 = sessionStorage.getItem('gt_col_scroll_1');
                 if (!s0 && !s1) return;
@@ -202,15 +202,15 @@ def render_selectable_job_text(job: dict, bridge_key: str = "span_bridge") -> No
                 if (cols.length < 2) return;
 
                 // Wait a tick for layout to settle
-                setTimeout(function() {{
+                setTimeout(function() {
                     if (s0) cols[0].scrollTop = parseInt(s0, 10);
                     if (s1) cols[1].scrollTop = parseInt(s1, 10);
                     sessionStorage.removeItem('gt_col_scroll_0');
                     sessionStorage.removeItem('gt_col_scroll_1');
-                }}, 100);
-            }});
-            parentDoc._gtScrollObserver.observe(parentDoc.body, {{ childList: true, subtree: true }});
-        }}
-    }})();
+                }, 100);
+            });
+            parentDoc._gtScrollObserver.observe(parentDoc.body, { childList: true, subtree: true });
+        }
+    })();
     </script>
     """, height=0, width=0)
