@@ -17,12 +17,8 @@ import json
 import uuid
 from pathlib import Path
 
-from dotenv import load_dotenv
 import streamlit as st
-
-# Minimal toolbar avoids Streamlit share-modal.js (addEventListener on missing nodes in some setups).
-st.set_option("client.toolbarMode", "minimal")
-
+from dotenv import load_dotenv
 from jsearch_client import get_api_key, parse_job_sections, search_jobs
 from schema import (
     GENAI_SKILLS,
@@ -34,6 +30,9 @@ from schema import (
 from text_selector import render_selectable_job_text, span_input_bridge
 
 load_dotenv(Path(__file__).parent / ".env")
+
+# Minimal toolbar avoids Streamlit share-modal.js (addEventListener on missing nodes in some setups).
+st.set_option("client.toolbarMode", "minimal")
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -536,10 +535,9 @@ elif st.session_state.phase == "label":
                             st.rerun()
 
                 # Cancel edit button
-                if editing_idx is not None:
-                    if st.button("Cancel edit"):
-                        st.session_state.pop("editing_skill_index", None)
-                        st.rerun()
+                if editing_idx is not None and st.button("Cancel edit"):
+                    st.session_state.pop("editing_skill_index", None)
+                    st.rerun()
 
                 # Show current skills
                 if st.session_state.skills:
@@ -696,10 +694,11 @@ elif st.session_state.phase == "label":
                             st.rerun()
 
                 # Cancel edit button
-                if editing_tidx is not None:
-                    if st.button("Cancel edit", key="cancel_tool_edit"):
-                        st.session_state.pop("editing_tool_index", None)
-                        st.rerun()
+                if editing_tidx is not None and st.button(
+                    "Cancel edit", key="cancel_tool_edit"
+                ):
+                    st.session_state.pop("editing_tool_index", None)
+                    st.rerun()
 
                 # Show current tools
                 if st.session_state.tools:
