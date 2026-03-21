@@ -3,6 +3,9 @@
 Creates agent tables (raw_ingested_jobs, job_ingestion_runs, normalized_jobs)
 and adds Phase 1 columns to the existing job_postings table.
 
+Optional legacy raw-SQL scripts (pre-consolidation paths) live under
+``legacy_migrations/`` for reference only; use :func:`run_migrations` for the app.
+
 Usage:
     from agents.common.data_store.migrations import run_migrations
     from agents.common.data_store.database import get_engine
@@ -85,7 +88,7 @@ _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS responsibilities TEXT",
 ]
 
-# llm_audit_log: add token columns if table was created before they were in DDL (idempotent)
+# Backfill token columns when llm_audit_log predates full DDL (idempotent)
 _LLM_AUDIT_LOG_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS input_tokens INTEGER",
     "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS output_tokens INTEGER",
@@ -115,7 +118,7 @@ def run_migrations(engine: Engine) -> None:
         conn.execute(text(_LLM_AUDIT_LOG_DDL))
     log.info("migrations_llm_audit_log_created")
 
-    # 3b. Add token columns to llm_audit_log if missing (e.g. table created before DDL had them)
+    # 3b. Add token columns if table was created before they existed in DDL
     for stmt in _LLM_AUDIT_LOG_ALTER_STATEMENTS:
         try:
             with engine.begin() as conn:
@@ -151,15 +154,5 @@ def run_migrations(engine: Engine) -> None:
                 statement=stmt,
                 error=str(exc),
             )
-
-        for stmt in _NORMALIZED_JOBS_ALTER_STATEMENTS:
-            try:
-                conn.execute(text(stmt))
-            except Exception as exc:
-                log.warning(
-                    "migration_normalized_jobs_alter_skipped",
-                    statement=stmt,
-                    error=str(exc),
-                )
 
     log.info("migrations_complete")
