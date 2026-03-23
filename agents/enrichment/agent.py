@@ -25,9 +25,20 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
+
+import structlog
 
 from agents.common.base_agent import BaseAgent
 from agents.common.event_envelope import EventEnvelope
+from agents.enrichment.resolvers.company_resolver import resolve_company
+from agents.enrichment.resolvers.confidence import (
+    compute_field_confidence,
+    compute_overall_confidence,
+)
+from agents.enrichment.resolvers.location_resolver import resolve_location
+
+log = structlog.get_logger()
 
 _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_enriched.json"
@@ -95,3 +106,58 @@ class EnrichmentAgent(BaseAgent):
                 "skills": event.payload.get("skills", []),
             },
         )
+
+    def enrich_record(self, posting: dict[str, Any], session: Any) -> dict[str, Any]:
+        """
+        Resolve company/location and compute confidence for one posting dict.
+
+        On failure, returns the posting with zeroed confidence and
+        ``enrichment_status: degraded`` so the batch can continue.
+        """
+        try:
+            company_id, company_confidence = resolve_company(posting["company"], session)
+            location_id, location_confidence, raw_location_text, borderplex_subregion = (
+                resolve_location(posting.get("location", ""), session)
+            )
+            field_confidence = compute_field_confidence(
+                company_confidence,
+                location_confidence,
+                sector_id=None,
+                seniority_confidence=posting.get("seniority_confidence"),
+            )
+            overall_confidence = compute_overall_confidence(
+                field_confidence=field_confidence,
+                extraction_confidence=posting.get("extraction_confidence"),
+                quality_score=posting.get("quality_score"),
+                taxonomy_coverage=posting.get("taxonomy_coverage"),
+            )
+            return {
+                **posting,
+                "company_id": company_id,
+                "location_id": location_id,
+                "raw_location_text": raw_location_text,
+                "borderplex_subregion": borderplex_subregion,
+                "field_confidence": field_confidence,
+                "overall_confidence": overall_confidence,
+            }
+        except Exception:
+            log.warning(
+                "enrich_record_degraded",
+                agent=self.agent_id,
+                reason="resolver_exception",
+            )
+            return {
+                **posting,
+                "company_id": None,
+                "location_id": None,
+                "raw_location_text": None,
+                "borderplex_subregion": None,
+                "field_confidence": {
+                    "company_id": 0.0,
+                    "location_id": 0.0,
+                    "sector_id": 0.0,
+                    "seniority": 0.0,
+                },
+                "overall_confidence": 0.0,
+                "enrichment_status": "degraded",
+            }
