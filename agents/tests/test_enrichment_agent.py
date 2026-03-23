@@ -35,16 +35,24 @@ class TestEnrichmentAgent:
     ) -> None:
         """Output event_type is RecordEnriched."""
         agent = EnrichmentAgent()
-        agent.health_check()  # pre-load fixture
-        out = agent.process(skills_event)
+        with patch.object(EnrichmentAgent, "enrich_record", return_value={"ok": True}):
+            with patch("agents.enrichment.agent.resolve_sector", return_value=None):
+                out = agent.process(skills_event)
         assert out.payload["event_type"] == "RecordEnriched"
         assert out.agent_id == "enrichment-agent"
 
-    def test_process_carries_skills_forward(
+    def test_process_passes_skills_into_enrich_record(
         self, skills_event: EventEnvelope
     ) -> None:
-        """Skills from the upstream SkillsExtracted event are preserved in the output."""
+        """Skills from the upstream event are passed on the posting dict to enrich_record."""
+        captured: dict = {}
+
+        def capture_enrich(posting: dict, session: object) -> dict:
+            captured["skills"] = posting.get("skills")
+            return {"enriched": True}
+
         agent = EnrichmentAgent()
-        agent.health_check()  # pre-load fixture
-        out = agent.process(skills_event)
-        assert out.payload["skills"] == skills_event.payload["skills"]
+        with patch.object(EnrichmentAgent, "enrich_record", side_effect=capture_enrich):
+            with patch("agents.enrichment.agent.resolve_sector", return_value=None):
+                agent.process(skills_event)
+        assert captured.get("skills") == skills_event.payload["skills"]
