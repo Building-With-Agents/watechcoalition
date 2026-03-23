@@ -292,3 +292,18 @@ class LLMAuditLog(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+
+
+# ---------------------------------------------------------------------------
+# Reference — companies (PostgreSQL; enrichment / job_postings resolution)
+# ---------------------------------------------------------------------------
+
+
+class Company(Base):
+    """Employer row for normalized-name matching (see ARCHITECTURE_DEEP.md)."""
+
+    __tablename__ = "companies"
+    __table_args__ = (Index("ix_companies_normalized_name", "normalized_name"), {"schema": "dbo"})
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    normalized_name: Mapped[str] = mapped_column(String(255), nullable=False)
