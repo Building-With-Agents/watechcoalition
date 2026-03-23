@@ -15,5 +15,6 @@ crawl4ai>=0.4
 apscheduler>=3.10
 python-dotenv>=1.0
 pytest>=8.0
+thefuzz>=0.22
 ruff>=0.4
 matplotlib>=3.8

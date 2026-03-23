@@ -307,3 +307,5 @@ class Company(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     normalized_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    raw_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    is_placeholder: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
