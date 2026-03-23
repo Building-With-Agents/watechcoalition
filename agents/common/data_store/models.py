@@ -309,3 +309,22 @@ class Company(Base):
     normalized_name: Mapped[str] = mapped_column(String(255), nullable=False)
     raw_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     is_placeholder: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+# ---------------------------------------------------------------------------
+# Reference — company_addresses (PostgreSQL; enrichment location resolution)
+# ---------------------------------------------------------------------------
+
+
+class CompanyAddress(Base):
+    """Company location row keyed by normalized free-text for lookup."""
+
+    __tablename__ = "company_addresses"
+    __table_args__ = (
+        Index("ix_company_addresses_normalized_location", "normalized_location"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    normalized_location: Mapped[str] = mapped_column(String(512), nullable=False)
+    raw_location: Mapped[str | None] = mapped_column(String(512), nullable=True)
