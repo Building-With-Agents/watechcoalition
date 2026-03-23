@@ -7,66 +7,61 @@ export (skills with "skill_name") for schema compatibility.
 
 import json
 from pathlib import Path
+from typing import Any
 
+from agents.common.types import JobRecord
 from agents.skills_extraction.extractors.skills import extract_skills
 from agents.skills_extraction.extractors.tools import extract_tools
 
 GROUND_TRUTH_PATH = Path(__file__).parent / "extraction_ground_truth.json"
 
 
-def extract_from_text(text: str) -> dict:
-    skills = extract_skills(text)
-    tools = extract_tools(text)
+def _gt_optional_text(value: object) -> str | None:
+    """Ground-truth optional string: None if missing or blank after strip."""
+    if value is None:
+        return None
+    if isinstance(value, str):
+        s = value.strip()
+        return s if s else None
+    return None
 
+
+def ground_truth_row_to_job_record(job: dict) -> JobRecord:
+    """Map a ground-truth JSON object to a normalized JobRecord for extractors.
+
+    Required for JobRecord validation: non-empty title and company.
+    Ground truth uses ``state``; JobRecord field is ``state_province``.
+    """
+    title = (job.get("title") or "").strip()
+    company = (job.get("company") or "").strip()
+    source = (job.get("source") or "eval").strip()
+    external_id = (job.get("external_id") or job.get("ground_truth_id") or "unknown").strip()
+    return JobRecord(
+        raw_job_id=0,
+        ingestion_run_id="",
+        region_id="",
+        source=source,
+        external_id=external_id,
+        title=title,
+        company=company,
+        description=_gt_optional_text(job.get("description")),
+        requirements=_gt_optional_text(job.get("requirements")),
+        responsibilities=_gt_optional_text(job.get("responsibilities")),
+        city=_gt_optional_text(job.get("city")),
+        state_province=_gt_optional_text(job.get("state")),
+        country=_gt_optional_text(job.get("country")),
+        mapper_used="eval-harness",
+    )
+
+
+def predict_skills_and_tools(job_record: JobRecord) -> dict[str, Any]:
+    """Production-like Pass 1 + Pass 2; returns plain name lists plus skills metadata."""
+    tools = extract_tools(job_record)
+    skills, metadata = extract_skills(job_record, pass1_tools=tools)
     return {
-        "skills": [s.get("label") or s.get("name") for s in skills],
-        "tools": [t.get("tool_name") or t.get("name") for t in tools],
-    }
-
-
-def extract_from_text_testing(text: str) -> dict:
-    text = text.lower()
-
-    skills: list[str] = []
-    tools: list[str] = []
-
-    # --- technical ---
-    if "python" in text:
-        skills.append("Python")
-        tools.append("Python")
-
-    if "sql" in text:
-        skills.append("SQL")
-        tools.append("SQL")
-
-    if "machine learning" in text:
-        skills.append("Machine Learning")
-
-    if "aws" in text:
-        tools.append("AWS")
-
-    if "docker" in text:
-        tools.append("Docker")
-
-    # --- general (THIS FIXES DATASET) ---
-    if "sales" in text:
-        skills.append("Sales")
-
-    if "marketing" in text:
-        skills.append("Marketing")
-
-    if "communication" in text:
-        skills.append("Communication")
-
-    if "product" in text:
-        skills.append("Product Management")
-
-    if "analysis" in text:
-        skills.append("Data Analysis")
-
-    return {
-        "skills": skills,
-        "tools": tools,
+        "skills": [s.skill_name for s in skills],
+        "tools": [t.tool_name for t in tools],
+        "metadata": metadata,
     }
 
 
@@ -104,10 +99,6 @@ def _skill_label(s: dict) -> str:
 def run_eval(ground_truth_path: str | Path) -> None:
     data = load_ground_truth(ground_truth_path)
 
-    total_precision_skills = 0
-    total_recall_skills = 0
-    total_precision_tools = 0
-    total_recall_tools = 0
     total_pred_skills = 0
     total_true_skills = 0
     total_matched_skills = 0
@@ -117,12 +108,11 @@ def run_eval(ground_truth_path: str | Path) -> None:
     total_matched_tools = 0
 
     for job in data:
-        text = job.get("text", job["title"])  # fallback if no text field
+        job_record = ground_truth_row_to_job_record(job)
+        pred = predict_skills_and_tools(job_record)
 
         gt_skills = normalize_list([_skill_label(s) for s in job["skills"] if _skill_label(s)])
         gt_tools = normalize_list([t.get("tool_name") or "" for t in job["tools"] if t.get("tool_name")])
-
-        pred = extract_from_text_testing(text)
 
         pred_skills = normalize_list(pred.get("skills", []))
         pred_tools = normalize_list(pred.get("tools", []))
@@ -130,10 +120,6 @@ def run_eval(ground_truth_path: str | Path) -> None:
         p_s, r_s, f_s = compute_metrics(pred_skills, gt_skills)
         p_t, r_t, f_t = compute_metrics(pred_tools, gt_tools)
 
-        total_precision_skills += p_s
-        total_recall_skills += r_s
-        total_precision_tools += p_t
-        total_recall_tools += r_t
         matched_skills = pred_skills & gt_skills
         matched_tools = pred_tools & gt_tools
 
@@ -146,6 +132,8 @@ def run_eval(ground_truth_path: str | Path) -> None:
         total_matched_tools += len(matched_tools)
 
         _log(f"\n--- {job['title']} ---")
+        if pred.get("metadata", {}).get("extraction_failed"):
+            _log("Skills pass: extraction_failed=true (see extractor metadata)")
         _log(f"GT Skills:   {gt_skills}")
         _log(f"Pred Skills: {pred_skills}")
         _log(f"Match:       {pred_skills & gt_skills}")
