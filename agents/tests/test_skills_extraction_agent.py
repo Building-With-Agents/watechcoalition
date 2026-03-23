@@ -2,13 +2,35 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types import JobRecord
 from agents.skills_extraction.agent import ExtractionWorkItem, SkillsExtractionAgent
+
+
+@contextmanager
+def _patch_skills_extraction_pass2_llm(
+    *,
+    skills_list: list[Any],
+    skills_meta: dict[str, Any],
+) -> Any:
+    """Mock Pass 2 LLM extractors; Pass 1 (context + tools) stays real."""
+    with (
+        patch("agents.skills_extraction.agent.extract_context") as m_ctx,
+        patch("agents.skills_extraction.agent.extract_tasks") as m_tasks,
+        patch("agents.skills_extraction.agent.extract_responsibilities") as m_resp,
+        patch("agents.skills_extraction.agent.extract_skills") as m_skills,
+    ):
+        m_ctx.return_value = ([], {"tokens_used": 0, "cost_usd": 0.0, "extraction_failed": False})
+        m_tasks.return_value = ([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0})
+        m_resp.return_value = ([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0})
+        m_skills.return_value = (skills_list, skills_meta)
+        yield
 
 
 class TestSkillsExtractionAgent:
@@ -61,13 +83,16 @@ class TestSkillsExtractionAgent:
         """Output event_type is SkillsExtracted."""
         agent = SkillsExtractionAgent()
         agent.health_check()  # pre-load fixture
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
-            mock_skills.return_value = ([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0})
+        with _patch_skills_extraction_pass2_llm(
+            skills_list=[],
+            skills_meta={"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0},
+        ):
             out = agent.process(normalization_event)
         assert out.payload["event_type"] == "SkillsExtracted"
         assert out.payload["tasks_count"] == 0
         assert out.payload["responsibilities_count"] == 0
         assert out.payload["context_count"] == 0
+        assert out.payload.get("context_signals_count") == 0
         assert out.agent_id == "skills-extraction-agent"
 
     def test_process_returns_fixture_skills(
@@ -86,8 +111,10 @@ class TestSkillsExtractionAgent:
                 text="Python", field_source="description", start_char=0, end_char=6
             ),
         )
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
-            mock_skills.return_value = ([mock_skill], {"extraction_failed": False, "tokens_used": 50, "cost_usd": 0.0})
+        with _patch_skills_extraction_pass2_llm(
+            skills_list=[mock_skill],
+            skills_meta={"extraction_failed": False, "tokens_used": 50, "cost_usd": 0.0},
+        ):
             out = agent.process(normalization_event)
         skills = out.payload["skills"]
         assert isinstance(skills, list)
@@ -114,8 +141,10 @@ class TestSkillsExtractionAgent:
         )
 
         agent = SkillsExtractionAgent()
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
-            mock_skills.return_value = ([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0})
+        with _patch_skills_extraction_pass2_llm(
+            skills_list=[],
+            skills_meta={"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0},
+        ):
             out = agent.process(event)
 
         assert out.payload["job_ids"] == ["job-inline-1"]
@@ -160,8 +189,10 @@ class TestSkillsExtractionAgent:
         )
 
         agent = SkillsExtractionAgent()
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
-            mock_skills.return_value = ([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0})
+        with _patch_skills_extraction_pass2_llm(
+            skills_list=[],
+            skills_meta={"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0},
+        ):
             out = agent.process(event)
 
         assert out.payload["batch_id"] == "batch-inline-2"
@@ -210,8 +241,10 @@ class TestSkillsExtractionAgent:
             extraction_store=store,
         )
 
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
-            mock_skills.return_value = ([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0})
+        with _patch_skills_extraction_pass2_llm(
+            skills_list=[],
+            skills_meta={"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0},
+        ):
             out = agent.process(
                 EventEnvelope(
                     correlation_id="test-store",
@@ -252,11 +285,15 @@ class TestSkillsExtractionAgent:
             ),
         )
         agent = SkillsExtractionAgent()
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
-            mock_skills.return_value = (
-                [skill_with_esco],
-                {"extraction_failed": False, "tokens_used": 100, "cost_usd": 0.002, "latency_ms": 500},
-            )
+        with _patch_skills_extraction_pass2_llm(
+            skills_list=[skill_with_esco],
+            skills_meta={
+                "extraction_failed": False,
+                "tokens_used": 100,
+                "cost_usd": 0.002,
+                "latency_ms": 500,
+            },
+        ):
             out = agent.process(event)
         assert out.payload["taxonomy_coverage"] >= 0
         assert out.payload["extraction_cost_usd"] == 0.002
@@ -280,10 +317,14 @@ class TestSkillsExtractionAgent:
             },
         )
         agent = SkillsExtractionAgent()
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
-            mock_skills.return_value = (
-                [],
-                {"extraction_failed": True, "alert_skills_extraction": True, "tokens_used": 0, "cost_usd": 0.0},
-            )
+        with _patch_skills_extraction_pass2_llm(
+            skills_list=[],
+            skills_meta={
+                "extraction_failed": True,
+                "alert_skills_extraction": True,
+                "tokens_used": 0,
+                "cost_usd": 0.0,
+            },
+        ):
             out = agent.process(event)
         assert out.payload.get("skills_extraction_alert") is True

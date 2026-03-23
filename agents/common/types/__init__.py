@@ -1,12 +1,14 @@
 """Shared Pydantic types for the Job Intelligence Engine pipeline."""
 
-from agents.common.types.extraction_types import (
+from agents.common.types.extraction_schemas import (
     ContextSignal,
-    ExtractionMetadata,
     ResponsibilityRecord,
+    TaskRecord,
+)
+from agents.common.types.extraction_types import (
+    ExtractionMetadata,
     SkillRecord,
     SpanRecord,
-    TaskRecord,
     TaxonomyResult,
     ToolRecord,
 )

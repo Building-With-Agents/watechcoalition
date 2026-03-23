@@ -8,7 +8,7 @@ Source of truth: ARCHITECTURE_DEEP.md § Work Intelligence Agent.
 
 Week 2: schemas defined, used by fixture data.
 Week 4: used by real extraction stubs (skills, tools, taxonomy).
-Week 5: used by remaining extractors (tasks, responsibilities, context).
+Week 5: TaskRecord, ResponsibilityRecord, ContextSignal live in extraction_schemas.py.
 """
 
 from __future__ import annotations
@@ -71,44 +71,6 @@ class ToolRecord(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     source_span: SpanRecord
     is_genai_tool: bool = False
-
-
-class TaskRecord(BaseModel):
-    """A single extracted job task or duty."""
-
-    model_config = ConfigDict(populate_by_name=True)
-
-    task_id: str | None = None
-    task_description: str = Field(validation_alias=AliasChoices("task_description", "description"))
-    category: str
-    frequency: str
-    complexity: str | None = None  # routine | analytical | creative | strategic
-    confidence: float = Field(ge=0.0, le=1.0)
-    source_span: SpanRecord | None = None
-
-
-class ResponsibilityRecord(BaseModel):
-    """A single extracted responsibility with scope classification."""
-
-    model_config = ConfigDict(populate_by_name=True)
-
-    responsibility_id: str | None = None
-    responsibility_description: str = Field(
-        validation_alias=AliasChoices("responsibility_description", "description")
-    )
-    scope: str | None = None  # individual | team | department | organization
-    level: str
-    confidence: float = Field(ge=0.0, le=1.0)
-    source_span: SpanRecord | None = None
-
-
-class ContextSignal(BaseModel):
-    """A contextual signal extracted from the job posting."""
-
-    signal_type: str  # remote_policy | team_size | reporting_structure | growth_stage | ai_usage
-    value: str
-    confidence: float = Field(ge=0.0, le=1.0)
-    source_span: SpanRecord  # required — links extraction back to source text
 
 
 class TaxonomyResult(BaseModel):
