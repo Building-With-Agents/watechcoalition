@@ -36,7 +36,9 @@ from agents.enrichment.resolvers.confidence import (
     compute_field_confidence,
     compute_overall_confidence,
 )
+from agents.enrichment.resolvers.events import build_record_enriched_event
 from agents.enrichment.resolvers.location_resolver import resolve_location
+from agents.enrichment.resolvers.sector_resolver import resolve_sector
 
 log = structlog.get_logger()
 
@@ -74,38 +76,71 @@ class EnrichmentAgent(BaseAgent):
 
     def process(self, event: EventEnvelope) -> EventEnvelope:
         """
-        Accept a SkillsExtracted event and emit a RecordEnriched event
-        using the pre-loaded fixture payload for this posting_id.
-
-        Skills from the upstream event are carried forward in the payload.
+        Accept upstream job payload (spam/quality from Pair C), enrich when allowed,
+        emit one ``RecordEnriched`` event per invocation (batch-style counts).
         """
-        if not self._fixture:
-            records = json.loads(_FIXTURE_PATH.read_text(encoding="utf-8"))
-            self._fixture = {r["posting_id"]: r for r in records}
+        payload = event.payload
+        correlation_id = event.correlation_id
+        batch_id = payload.get("batch_id", "unknown")
 
-        posting_id = event.payload.get("posting_id")
-        fx = self._fixture.get(posting_id, {})
+        if "is_spam" in payload:
+            if payload["is_spam"] is True:
+                return build_record_enriched_event(
+                    correlation_id=correlation_id,
+                    batch_id=batch_id,
+                    enriched_records=[],
+                    spam_rejected=1,
+                    flagged_count=0,
+                )
+            if payload["is_spam"] is None:
+                return build_record_enriched_event(
+                    correlation_id=correlation_id,
+                    batch_id=batch_id,
+                    enriched_records=[],
+                    spam_rejected=0,
+                    flagged_count=1,
+                )
 
-        return EventEnvelope(
-            correlation_id=event.correlation_id,
-            agent_id=self.agent_id,
-            payload={
-                "event_type": "RecordEnriched",
-                "posting_id": posting_id,
-                "title": fx.get("title"),
-                "company": fx.get("company"),
-                "company_id": fx.get("company_id"),
-                "sector_id": fx.get("sector_id"),
-                "role_classification": fx.get("role_classification"),
-                "seniority": fx.get("seniority"),
-                "quality_score": fx.get("quality_score"),
-                "spam_score": fx.get("spam_score"),
-                "is_spam": fx.get("is_spam"),
-                "enrichment_status": fx.get("enrichment_status", "success"),
-                # Carry skills forward from the SkillsExtracted event
-                "skills": event.payload.get("skills", []),
-            },
-        )
+        try:
+            posting = {
+                "posting_id": payload.get("posting_id"),
+                "title": payload.get("title"),
+                "company": payload.get("company"),
+                "location": payload.get("location", ""),
+                "quality_score": payload.get("quality_score"),
+                "spam_score": payload.get("spam_score"),
+                "is_spam": payload.get("is_spam"),
+                "seniority": payload.get("seniority"),
+                "role_classification": payload.get("role_classification"),
+                "skills": payload.get("skills", []),
+                "seniority_confidence": 0.90 if payload.get("seniority") is not None else 0.0,
+                "extraction_confidence": payload.get("extraction_confidence"),
+                "taxonomy_coverage": payload.get("taxonomy_coverage"),
+            }
+            enriched = self.enrich_record(posting, session=None)
+            sector_id = resolve_sector(posting.get("role_classification"), session=None)
+            enriched["sector_id"] = sector_id
+            return build_record_enriched_event(
+                correlation_id=correlation_id,
+                batch_id=batch_id,
+                enriched_records=[enriched],
+                spam_rejected=0,
+                flagged_count=0,
+            )
+        except Exception:
+            log.warning("enrichment_process_degraded", agent=self.agent_id)
+            return EventEnvelope(
+                correlation_id=correlation_id,
+                agent_id=self.agent_id,
+                payload={
+                    "event_type": "RecordEnriched",
+                    "batch_id": batch_id,
+                    "enriched_count": 0,
+                    "spam_rejected_count": 0,
+                    "flagged_for_review_count": 0,
+                    "process_status": "degraded",
+                },
+            )
 
     def enrich_record(self, posting: dict[str, Any], session: Any) -> dict[str, Any]:
         """

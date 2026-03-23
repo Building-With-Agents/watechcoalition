@@ -328,3 +328,18 @@ class CompanyAddress(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     normalized_location: Mapped[str] = mapped_column(String(512), nullable=False)
     raw_location: Mapped[str | None] = mapped_column(String(512), nullable=True)
+
+
+# ---------------------------------------------------------------------------
+# Reference — industry_sectors (PostgreSQL; enrichment sector resolution)
+# ---------------------------------------------------------------------------
+
+
+class IndustrySector(Base):
+    """Industry sector row keyed by normalized label."""
+
+    __tablename__ = "industry_sectors"
+    __table_args__ = (Index("ix_industry_sectors_normalized_name", "normalized_name"), {"schema": "dbo"})
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    normalized_name: Mapped[str] = mapped_column(String(255), nullable=False)
