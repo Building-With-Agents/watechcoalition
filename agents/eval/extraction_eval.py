@@ -55,12 +55,13 @@ def ground_truth_row_to_job_record(job: dict) -> JobRecord:
 
 
 def predict_skills_and_tools(job_record: JobRecord) -> dict[str, Any]:
-    """Production-like Pass 1 + Pass 2; returns plain name lists plus skills metadata."""
+    """Production-like Pass 1 + Pass 2; returns plain name lists, full skill records, and metadata."""
     tools = extract_tools(job_record)
     skills, metadata = extract_skills(job_record, pass1_tools=tools)
     return {
         "skills": [s.skill_name for s in skills],
         "tools": [t.tool_name for t in tools],
+        "skill_records": skills,
         "metadata": metadata,
     }
 
@@ -99,6 +100,8 @@ def _skill_label(s: dict) -> str:
 def run_eval(ground_truth_path: str | Path) -> None:
     data = load_ground_truth(ground_truth_path)
 
+    all_skill_records: list = []
+
     total_pred_skills = 0
     total_true_skills = 0
     total_matched_skills = 0
@@ -110,6 +113,7 @@ def run_eval(ground_truth_path: str | Path) -> None:
     for job in data:
         job_record = ground_truth_row_to_job_record(job)
         pred = predict_skills_and_tools(job_record)
+        all_skill_records.extend(pred.get("skill_records", []))
 
         gt_skills = normalize_list([_skill_label(s) for s in job["skills"] if _skill_label(s)])
         gt_tools = normalize_list([t.get("tool_name") or "" for t in job["tools"] if t.get("tool_name")])
@@ -176,6 +180,19 @@ def run_eval(ground_truth_path: str | Path) -> None:
     _log(f"Tools Precision: {precision_tools:.2f}")
     _log(f"Tools Recall:    {recall_tools:.2f}")
     _log(f"Tools F1:        {f1_tools:.2f}")
+
+    # Taxonomy and GenAI Extension (skills only)
+    _log("\n--- TAXONOMY (skills) ---")
+    if all_skill_records:
+        taxonomy_covered = sum(1 for s in all_skill_records if s.esco_uri)
+        genai_count = sum(1 for s in all_skill_records if s.is_genai_extension)
+        taxonomy_coverage = taxonomy_covered / len(all_skill_records)
+        genai_extension_rate = genai_count / len(all_skill_records)
+        _log(f"Total predicted skills: {len(all_skill_records)}")
+        _log(f"Taxonomy coverage: {taxonomy_coverage:.2%} ({taxonomy_covered} with esco_uri)")
+        _log(f"GenAI Extension detection rate: {genai_extension_rate:.2%} ({genai_count} with is_genai_extension)")
+    else:
+        _log("No predicted skills — taxonomy metrics N/A")
 
 
 if __name__ == "__main__":
