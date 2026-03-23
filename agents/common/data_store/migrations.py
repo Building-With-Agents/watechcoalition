@@ -85,6 +85,17 @@ _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS responsibilities TEXT",
 ]
 
+# Backfill token columns when llm_audit_log predates full DDL (idempotent)
+_LLM_AUDIT_LOG_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS input_tokens INTEGER",
+    "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS output_tokens INTEGER",
+    "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS token_count INTEGER",
+]
+
+# extracted_intelligence created before ExtractionMetadata JSONB column existed
+_EXTRACTED_INTELLIGENCE_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.extracted_intelligence ADD COLUMN IF NOT EXISTS extraction_metadata JSONB",
+]
 
 def run_migrations(engine: Engine) -> None:
     """Create agent tables and add Phase 1 columns. Safe to run multiple times."""
@@ -102,6 +113,17 @@ def run_migrations(engine: Engine) -> None:
     with engine.begin() as conn:
         conn.execute(text(_EXTRACTED_INTELLIGENCE_DDL))
     log.info("migrations_extracted_intelligence_created")
+
+    for stmt in _EXTRACTED_INTELLIGENCE_ALTER_STATEMENTS:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(stmt))
+        except Exception as exc:
+            log.warning(
+                "migration_extracted_intelligence_alter_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
 
     # 3. Create llm_audit_log table
     with engine.begin() as conn:
