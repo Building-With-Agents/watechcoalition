@@ -87,3 +87,20 @@ def create_placeholder_company(raw_name: str, normalized_name: str, session: Ses
     session.add(company)
     session.flush()
     return company.id
+
+
+def resolve_company(raw_name: str, session: Session) -> tuple[int, float]:
+    """
+    Resolve ``raw_name`` to a company id and a confidence score for ``field_confidence``.
+
+    Order: exact normalized match → fuzzy match (above threshold) → placeholder.
+    """
+    normalized = normalize_company_name(raw_name)
+    exact_id = lookup_company_exact(normalized, session)
+    if exact_id is not None:
+        return (exact_id, 0.95)
+    fuzzy_id, fuzzy_score = find_best_fuzzy_match(normalized, session)
+    if fuzzy_id is not None:
+        return (fuzzy_id, fuzzy_score / 100.0)
+    placeholder_id = create_placeholder_company(raw_name, normalized, session)
+    return (placeholder_id, 0.40)

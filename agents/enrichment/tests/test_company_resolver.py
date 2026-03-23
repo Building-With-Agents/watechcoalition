@@ -11,6 +11,7 @@ from agents.enrichment.resolvers.company_resolver import (
     find_best_fuzzy_match,
     lookup_company_exact,
     normalize_company_name,
+    resolve_company,
 )
 
 
@@ -110,3 +111,81 @@ def test_create_placeholder_company_returns_id_and_adds_flushes() -> None:
     assert added[0].normalized_name == "acme"
     assert added[0].raw_name == "Acme Corp."
     assert added[0].is_placeholder is True
+
+
+@patch("agents.enrichment.resolvers.company_resolver.find_best_fuzzy_match")
+@patch("agents.enrichment.resolvers.company_resolver.lookup_company_exact")
+def test_resolve_company_exact_match_returns_high_confidence(
+    mock_lookup: MagicMock, mock_fuzzy: MagicMock
+) -> None:
+    mock_lookup.return_value = 77
+    session = MagicMock()
+
+    cid, conf = resolve_company("Contoso Corporation", session)
+
+    assert (cid, conf) == (77, 0.95)
+    mock_lookup.assert_called_once_with("contoso", session)
+    mock_fuzzy.assert_not_called()
+
+
+@patch("agents.enrichment.resolvers.company_resolver.create_placeholder_company")
+@patch("agents.enrichment.resolvers.company_resolver.find_best_fuzzy_match")
+@patch("agents.enrichment.resolvers.company_resolver.lookup_company_exact")
+def test_resolve_company_fuzzy_match_returns_score_over_100(
+    mock_lookup: MagicMock,
+    mock_fuzzy: MagicMock,
+    mock_placeholder: MagicMock,
+) -> None:
+    mock_lookup.return_value = None
+    mock_fuzzy.return_value = (3, 88.0)
+    session = MagicMock()
+
+    cid, conf = resolve_company("Microsft Corp", session)
+
+    assert cid == 3
+    assert conf == 0.88
+    assert conf >= 0.85
+    mock_placeholder.assert_not_called()
+
+
+@patch("agents.enrichment.resolvers.company_resolver.create_placeholder_company")
+@patch("agents.enrichment.resolvers.company_resolver.find_best_fuzzy_match")
+@patch("agents.enrichment.resolvers.company_resolver.lookup_company_exact")
+def test_resolve_company_unknown_creates_placeholder(
+    mock_lookup: MagicMock,
+    mock_fuzzy: MagicMock,
+    mock_placeholder: MagicMock,
+) -> None:
+    mock_lookup.return_value = None
+    mock_fuzzy.return_value = (None, 40.0)
+    mock_placeholder.return_value = 999
+    session = MagicMock()
+
+    cid, conf = resolve_company("Totally New Startup LLC", session)
+
+    assert (cid, conf) == (999, 0.40)
+    mock_placeholder.assert_called_once_with(
+        "Totally New Startup LLC", "totally new startup", session
+    )
+
+
+@patch("agents.enrichment.resolvers.company_resolver.create_placeholder_company")
+@patch("agents.enrichment.resolvers.company_resolver.find_best_fuzzy_match")
+@patch("agents.enrichment.resolvers.company_resolver.lookup_company_exact")
+def test_resolve_company_twice_unknown_placeholder_once_then_exact(
+    mock_lookup: MagicMock,
+    mock_fuzzy: MagicMock,
+    mock_placeholder: MagicMock,
+) -> None:
+    """Second call hits exact match against the first placeholder's normalized name."""
+    mock_lookup.side_effect = [None, 500]
+    mock_fuzzy.return_value = (None, 0.0)
+    mock_placeholder.return_value = 500
+    session = MagicMock()
+
+    r1 = resolve_company("Zeta Unknown LLC", session)
+    r2 = resolve_company("Zeta Unknown LLC", session)
+
+    assert r1 == (500, 0.40)
+    assert r2 == (500, 0.95)
+    mock_placeholder.assert_called_once_with("Zeta Unknown LLC", "zeta unknown", session)
