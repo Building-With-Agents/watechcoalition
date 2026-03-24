@@ -27,7 +27,7 @@ import structlog
 
 from agents.common.types import JobRecord, SkillRecord, SpanRecord, ToolRecord
 from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
-from agents.skills_extraction.prompts.skills_extraction_v1 import build_skills_prompt
+from agents.skills_extraction.prompts import build_skills_prompt
 
 log = structlog.get_logger()
 
@@ -106,7 +106,7 @@ def _skill_dict_to_record(raw: dict[str, Any]) -> SkillRecord | None:
             end_char=end_char,
         )
         return SkillRecord(
-            label=str(raw.get("label", "")).strip() or "unknown",
+            skill_name=str(raw.get("skill_name") or raw.get("label", "")).strip() or "unknown",
             type=raw.get("type", "Technical"),
             confidence=float(raw.get("confidence", 0.0)),
             required_flag=raw.get("required_flag"),

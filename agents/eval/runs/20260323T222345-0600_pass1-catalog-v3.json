@@ -1,0 +1,2774 @@
+{
+  "schema_version": "1.0",
+  "mt_timestamp_iso": "2026-03-23T22:23:45-06:00",
+  "run_label": "pass1-catalog-v3",
+  "git_short_hash": "70d7aad0",
+  "ground_truth_path": "/Users/bryanpmx/Documents/Projects/watechcoalition/agents/eval/extraction_ground_truth.json",
+  "record_count": 30,
+  "extractor_mode": "llm_skills_pattern_tools",
+  "aggregates": {
+    "total_gt_skills": 221,
+    "total_pred_skills": 516,
+    "matched_skills": 84,
+    "precision_skills": 0.16279069767441862,
+    "recall_skills": 0.38009049773755654,
+    "total_gt_tools": 127,
+    "total_pred_tools": 121,
+    "matched_tools": 92,
+    "precision_tools": 0.7603305785123967,
+    "recall_tools": 0.7244094488188977,
+    "total_tokens_used": 68597,
+    "total_cost_usd": 0.47841,
+    "total_latency_ms": 1001259,
+    "llm_applicable": true
+  },
+  "per_job": [
+    {
+      "job_key": "gt-001",
+      "title": "Product Manager - AI & Data Analytics",
+      "gt_skills": [
+        "ai/ml lifecycle",
+        "backlog management",
+        "data visualization",
+        "product strategy",
+        "sql",
+        "stakeholder management"
+      ],
+      "gt_tools": [
+        "dbt",
+        "looker",
+        "power bi",
+        "python",
+        "snowflake",
+        "tableau"
+      ],
+      "pred_skills": [
+        "ai",
+        "ai/ml",
+        "business acumen",
+        "collaboration",
+        "communication",
+        "customer collaboration",
+        "customer focus",
+        "data analytics",
+        "data fluency",
+        "data science",
+        "data transformation",
+        "metrics definition",
+        "planning",
+        "prioritization",
+        "problem solving",
+        "product management",
+        "requirements definition",
+        "roadmap planning",
+        "saas",
+        "sql",
+        "stakeholder management"
+      ],
+      "pred_tools": [
+        "looker",
+        "power bi",
+        "sigma",
+        "sql",
+        "tableau"
+      ],
+      "matched_skills": [
+        "sql",
+        "stakeholder management"
+      ],
+      "missed_skills": [
+        "ai/ml lifecycle",
+        "backlog management",
+        "data visualization",
+        "product strategy"
+      ],
+      "false_positive_skills": [
+        "ai",
+        "ai/ml",
+        "business acumen",
+        "collaboration",
+        "communication",
+        "customer collaboration",
+        "customer focus",
+        "data analytics",
+        "data fluency",
+        "data science",
+        "data transformation",
+        "metrics definition",
+        "planning",
+        "prioritization",
+        "problem solving",
+        "product management",
+        "requirements definition",
+        "roadmap planning",
+        "saas"
+      ],
+      "matched_tools": [
+        "looker",
+        "power bi",
+        "tableau"
+      ],
+      "missed_tools": [
+        "dbt",
+        "python",
+        "snowflake"
+      ],
+      "false_positive_tools": [
+        "sigma",
+        "sql"
+      ],
+      "precision_skills": 0.09523809523809523,
+      "recall_skills": 0.3333333333333333,
+      "precision_tools": 0.6,
+      "recall_tools": 0.5,
+      "tokens_used": 2099,
+      "cost_usd": 0.016401,
+      "latency_ms": 19632,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-002",
+      "title": "Senior Product Manager, AI",
+      "gt_skills": [
+        "agentic ai",
+        "ai/ml product management",
+        "cross-functional collaboration",
+        "customer research",
+        "foundation models (llms)",
+        "product roadmap"
+      ],
+      "gt_tools": [
+        "chatgpt"
+      ],
+      "pred_skills": [
+        "ai",
+        "b2b saas",
+        "b2c saas",
+        "business acumen",
+        "collaboration",
+        "communication",
+        "data pipeline requirements",
+        "innovation management",
+        "machine learning",
+        "metrics analysis",
+        "product development",
+        "product launch",
+        "product management",
+        "product sense"
+      ],
+      "pred_tools": [],
+      "matched_skills": [],
+      "missed_skills": [
+        "agentic ai",
+        "ai/ml product management",
+        "cross-functional collaboration",
+        "customer research",
+        "foundation models (llms)",
+        "product roadmap"
+      ],
+      "false_positive_skills": [
+        "ai",
+        "b2b saas",
+        "b2c saas",
+        "business acumen",
+        "collaboration",
+        "communication",
+        "data pipeline requirements",
+        "innovation management",
+        "machine learning",
+        "metrics analysis",
+        "product development",
+        "product launch",
+        "product management",
+        "product sense"
+      ],
+      "matched_tools": [],
+      "missed_tools": [
+        "chatgpt"
+      ],
+      "false_positive_tools": [],
+      "precision_skills": 0.0,
+      "recall_skills": 0.0,
+      "precision_tools": 0.0,
+      "recall_tools": 0.0,
+      "tokens_used": 1464,
+      "cost_usd": 0.010716,
+      "latency_ms": 16300,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-003",
+      "title": "Senior Product Manager, AI Platforms",
+      "gt_skills": [
+        "agentic ai",
+        "ai product roadmap",
+        "cross-functional leadership",
+        "metrics definition",
+        "nlp",
+        "regulatory compliance",
+        "sql",
+        "vendor management"
+      ],
+      "gt_tools": [
+        "sql"
+      ],
+      "pred_skills": [
+        "agentic ai",
+        "ai product development",
+        "analytical skills",
+        "chat automation",
+        "communication",
+        "compliance tools",
+        "credit",
+        "cross-functional leadership",
+        "experimentation",
+        "fintech",
+        "metrics definition",
+        "natural language processing",
+        "payments",
+        "performance measurement",
+        "product management",
+        "product roadmap ownership",
+        "regulatory compliance",
+        "regulatory standards knowledge",
+        "voice automation"
+      ],
+      "pred_tools": [
+        "sql"
+      ],
+      "matched_skills": [
+        "agentic ai",
+        "cross-functional leadership",
+        "metrics definition",
+        "regulatory compliance"
+      ],
+      "missed_skills": [
+        "ai product roadmap",
+        "nlp",
+        "sql",
+        "vendor management"
+      ],
+      "false_positive_skills": [
+        "ai product development",
+        "analytical skills",
+        "chat automation",
+        "communication",
+        "compliance tools",
+        "credit",
+        "experimentation",
+        "fintech",
+        "natural language processing",
+        "payments",
+        "performance measurement",
+        "product management",
+        "product roadmap ownership",
+        "regulatory standards knowledge",
+        "voice automation"
+      ],
+      "matched_tools": [
+        "sql"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [],
+      "precision_skills": 0.21052631578947367,
+      "recall_skills": 0.5,
+      "precision_tools": 1.0,
+      "recall_tools": 1.0,
+      "tokens_used": 1649,
+      "cost_usd": 0.013611,
+      "latency_ms": 56002,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-004",
+      "title": "AI Product Manager",
+      "gt_skills": [
+        "agentic ai",
+        "ai product management",
+        "cross-functional collaboration",
+        "customer research",
+        "data analysis",
+        "product roadmap",
+        "sql"
+      ],
+      "gt_tools": [
+        "claude",
+        "cursor"
+      ],
+      "pred_skills": [
+        "ai product development",
+        "collaboration",
+        "cross-functional teamwork",
+        "customer focus",
+        "data analysis",
+        "market analysis",
+        "product management",
+        "product vision",
+        "user research",
+        "voice of the customer"
+      ],
+      "pred_tools": [
+        "sql"
+      ],
+      "matched_skills": [
+        "data analysis"
+      ],
+      "missed_skills": [
+        "agentic ai",
+        "ai product management",
+        "cross-functional collaboration",
+        "customer research",
+        "product roadmap",
+        "sql"
+      ],
+      "false_positive_skills": [
+        "ai product development",
+        "collaboration",
+        "cross-functional teamwork",
+        "customer focus",
+        "market analysis",
+        "product management",
+        "product vision",
+        "user research",
+        "voice of the customer"
+      ],
+      "matched_tools": [],
+      "missed_tools": [
+        "claude",
+        "cursor"
+      ],
+      "false_positive_tools": [
+        "sql"
+      ],
+      "precision_skills": 0.1,
+      "recall_skills": 0.14285714285714285,
+      "precision_tools": 0.0,
+      "recall_tools": 0.0,
+      "tokens_used": 1386,
+      "cost_usd": 0.01053,
+      "latency_ms": 10287,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-005",
+      "title": "Principal Product Manager - AI Applications",
+      "gt_skills": [
+        "agentic ai",
+        "beta program management",
+        "competitive analysis",
+        "cross-functional leadership",
+        "llm product management",
+        "product roadmap",
+        "prompt engineering",
+        "rag architecture"
+      ],
+      "gt_tools": [
+        "llm ops"
+      ],
+      "pred_skills": [
+        "agentic design patterns",
+        "ai",
+        "analytical skills",
+        "beta program management",
+        "collaboration",
+        "communication",
+        "llm applications",
+        "market analysis",
+        "product management",
+        "product strategy",
+        "prompt engineering",
+        "rag architectures",
+        "strategic thinking",
+        "user feedback validation"
+      ],
+      "pred_tools": [],
+      "matched_skills": [
+        "beta program management",
+        "prompt engineering"
+      ],
+      "missed_skills": [
+        "agentic ai",
+        "competitive analysis",
+        "cross-functional leadership",
+        "llm product management",
+        "product roadmap",
+        "rag architecture"
+      ],
+      "false_positive_skills": [
+        "agentic design patterns",
+        "ai",
+        "analytical skills",
+        "collaboration",
+        "communication",
+        "llm applications",
+        "market analysis",
+        "product management",
+        "product strategy",
+        "rag architectures",
+        "strategic thinking",
+        "user feedback validation"
+      ],
+      "matched_tools": [],
+      "missed_tools": [
+        "llm ops"
+      ],
+      "false_positive_tools": [],
+      "precision_skills": 0.14285714285714285,
+      "recall_skills": 0.25,
+      "precision_tools": 0.0,
+      "recall_tools": 0.0,
+      "tokens_used": 1437,
+      "cost_usd": 0.011067,
+      "latency_ms": 19215,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-006",
+      "title": "Staff Product Manager - Voice AI",
+      "gt_skills": [
+        "agentic ai",
+        "ai governance",
+        "conversational ai",
+        "cross-functional collaboration",
+        "data-driven decision making",
+        "llm product management",
+        "product roadmap",
+        "prompt engineering"
+      ],
+      "gt_tools": [
+        "langchain",
+        "twilio"
+      ],
+      "pred_skills": [
+        "agent-based systems",
+        "agentic ai",
+        "ai governance",
+        "ai orchestration frameworks",
+        "b2b saas",
+        "conversational ai",
+        "data science collaboration",
+        "data-driven decision making",
+        "enterprise ai",
+        "human oversight",
+        "large language models",
+        "nlu",
+        "product lifecycle management",
+        "product management",
+        "reliability",
+        "roadmap definition",
+        "speech asr",
+        "tts",
+        "voice assistants"
+      ],
+      "pred_tools": [
+        "langchain",
+        "react"
+      ],
+      "matched_skills": [
+        "agentic ai",
+        "ai governance",
+        "conversational ai",
+        "data-driven decision making"
+      ],
+      "missed_skills": [
+        "cross-functional collaboration",
+        "llm product management",
+        "product roadmap",
+        "prompt engineering"
+      ],
+      "false_positive_skills": [
+        "agent-based systems",
+        "ai orchestration frameworks",
+        "b2b saas",
+        "data science collaboration",
+        "enterprise ai",
+        "human oversight",
+        "large language models",
+        "nlu",
+        "product lifecycle management",
+        "product management",
+        "reliability",
+        "roadmap definition",
+        "speech asr",
+        "tts",
+        "voice assistants"
+      ],
+      "matched_tools": [
+        "langchain"
+      ],
+      "missed_tools": [
+        "twilio"
+      ],
+      "false_positive_tools": [
+        "react"
+      ],
+      "precision_skills": 0.21052631578947367,
+      "recall_skills": 0.5,
+      "precision_tools": 0.5,
+      "recall_tools": 0.5,
+      "tokens_used": 1727,
+      "cost_usd": 0.014913,
+      "latency_ms": 16294,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-007",
+      "title": "Agile Project Manager Contractor",
+      "gt_skills": [
+        "client consultation",
+        "kanban",
+        "program management",
+        "risk managment",
+        "scrum",
+        "stakeholder communication"
+      ],
+      "gt_tools": [
+        "confluence",
+        "jira"
+      ],
+      "pred_skills": [
+        "agile",
+        "agile ceremonies",
+        "agile methodologies",
+        "facilitation",
+        "issue management",
+        "kanban",
+        "program management",
+        "project management",
+        "project scope management",
+        "reporting",
+        "risk management",
+        "scrum",
+        "stakeholder communication"
+      ],
+      "pred_tools": [
+        "confluence",
+        "jira"
+      ],
+      "matched_skills": [
+        "kanban",
+        "program management",
+        "scrum",
+        "stakeholder communication"
+      ],
+      "missed_skills": [
+        "client consultation",
+        "risk managment"
+      ],
+      "false_positive_skills": [
+        "agile",
+        "agile ceremonies",
+        "agile methodologies",
+        "facilitation",
+        "issue management",
+        "project management",
+        "project scope management",
+        "reporting",
+        "risk management"
+      ],
+      "matched_tools": [
+        "confluence",
+        "jira"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [],
+      "precision_skills": 0.3076923076923077,
+      "recall_skills": 0.6666666666666666,
+      "precision_tools": 1.0,
+      "recall_tools": 1.0,
+      "tokens_used": 2354,
+      "cost_usd": 0.01635,
+      "latency_ms": 21150,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-008",
+      "title": "Senior Project Manager (Change Management)",
+      "gt_skills": [
+        "agile skiils",
+        "business process reengineering",
+        "change management",
+        "communication skills",
+        "data analysis",
+        "problem solver",
+        "project management",
+        "risk management",
+        "stakeholder management",
+        "teamwork skills",
+        "value stream mapping",
+        "waterfall methodologies"
+      ],
+      "gt_tools": [
+        "excel",
+        "jira",
+        "microsoft projects",
+        "miro",
+        "outlook",
+        "powerpoint",
+        "visio"
+      ],
+      "pred_skills": [
+        "agile",
+        "analytical skills",
+        "business analysis",
+        "business process analysis",
+        "business process reengineering",
+        "change management",
+        "change management measurement",
+        "change management planning",
+        "communication",
+        "continuous improvement",
+        "cross-functional team management",
+        "enterprise-level initiatives",
+        "financial services",
+        "influencing",
+        "issue tracking",
+        "presentation skills",
+        "process improvement",
+        "process-driven systems requirements",
+        "project leadership",
+        "project management",
+        "relationship management",
+        "risk escalation",
+        "risk management",
+        "stakeholder management",
+        "teamwork",
+        "training",
+        "value stream mapping",
+        "waterfall"
+      ],
+      "pred_tools": [
+        "excel",
+        "jira",
+        "microsoft projects",
+        "miro",
+        "outlook",
+        "powerpoint",
+        "visio"
+      ],
+      "matched_skills": [
+        "business process reengineering",
+        "change management",
+        "project management",
+        "risk management",
+        "stakeholder management",
+        "value stream mapping"
+      ],
+      "missed_skills": [
+        "agile skiils",
+        "communication skills",
+        "data analysis",
+        "problem solver",
+        "teamwork skills",
+        "waterfall methodologies"
+      ],
+      "false_positive_skills": [
+        "agile",
+        "analytical skills",
+        "business analysis",
+        "business process analysis",
+        "change management measurement",
+        "change management planning",
+        "communication",
+        "continuous improvement",
+        "cross-functional team management",
+        "enterprise-level initiatives",
+        "financial services",
+        "influencing",
+        "issue tracking",
+        "presentation skills",
+        "process improvement",
+        "process-driven systems requirements",
+        "project leadership",
+        "relationship management",
+        "risk escalation",
+        "teamwork",
+        "training",
+        "waterfall"
+      ],
+      "matched_tools": [
+        "excel",
+        "jira",
+        "microsoft projects",
+        "miro",
+        "outlook",
+        "powerpoint",
+        "visio"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [],
+      "precision_skills": 0.21428571428571427,
+      "recall_skills": 0.5,
+      "precision_tools": 1.0,
+      "recall_tools": 1.0,
+      "tokens_used": 4075,
+      "cost_usd": 0.030429,
+      "latency_ms": 49119,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-009",
+      "title": "PROJECT MANAGER WITH AGILE",
+      "gt_skills": [
+        "agile",
+        "ai knowledge",
+        "api",
+        "cloud computing",
+        "cross-functional collaboration",
+        "devops",
+        "docker",
+        "leadership",
+        "program management",
+        "project management",
+        "project planning",
+        "stakeholder management"
+      ],
+      "gt_tools": [
+        ".net",
+        "azure",
+        "c#",
+        "flask",
+        "git",
+        "pytest",
+        "python",
+        "react.js"
+      ],
+      "pred_skills": [
+        "adaptability",
+        "agile",
+        "communication",
+        "leadership",
+        "multi-project management",
+        "problem solving",
+        "program management",
+        "project management tools",
+        "scrum master",
+        "task prioritization"
+      ],
+      "pred_tools": [
+        ".net",
+        "azure",
+        "c#",
+        "docker",
+        "flask",
+        "git",
+        "pytest",
+        "python",
+        "react.js"
+      ],
+      "matched_skills": [
+        "agile",
+        "leadership",
+        "program management"
+      ],
+      "missed_skills": [
+        "ai knowledge",
+        "api",
+        "cloud computing",
+        "cross-functional collaboration",
+        "devops",
+        "docker",
+        "project management",
+        "project planning",
+        "stakeholder management"
+      ],
+      "false_positive_skills": [
+        "adaptability",
+        "communication",
+        "multi-project management",
+        "problem solving",
+        "project management tools",
+        "scrum master",
+        "task prioritization"
+      ],
+      "matched_tools": [
+        ".net",
+        "azure",
+        "c#",
+        "flask",
+        "git",
+        "pytest",
+        "python",
+        "react.js"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [
+        "docker"
+      ],
+      "precision_skills": 0.3,
+      "recall_skills": 0.25,
+      "precision_tools": 0.8888888888888888,
+      "recall_tools": 1.0,
+      "tokens_used": 1864,
+      "cost_usd": 0.006468,
+      "latency_ms": 24599,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-010",
+      "title": "Senior Project Manager - Agile",
+      "gt_skills": [
+        "2d/3d graphics knowledge",
+        "app development",
+        "business analysis",
+        "business continuity",
+        "communication skills",
+        "negotiation",
+        "project management",
+        "quality assurance",
+        "sdlc(software development life cycle)",
+        "sprint planning"
+      ],
+      "gt_tools": [
+        "flextrack"
+      ],
+      "pred_skills": [
+        "agile",
+        "business continuity & disaster recovery",
+        "collaboration",
+        "communication",
+        "daily stand-ups",
+        "negotiation",
+        "project communication",
+        "project management",
+        "quality assurance",
+        "resource management",
+        "risk management",
+        "sprint planning",
+        "system development lifecycle"
+      ],
+      "pred_tools": [
+        "flextrack",
+        "microsoft projects"
+      ],
+      "matched_skills": [
+        "negotiation",
+        "project management",
+        "quality assurance",
+        "sprint planning"
+      ],
+      "missed_skills": [
+        "2d/3d graphics knowledge",
+        "app development",
+        "business analysis",
+        "business continuity",
+        "communication skills",
+        "sdlc(software development life cycle)"
+      ],
+      "false_positive_skills": [
+        "agile",
+        "business continuity & disaster recovery",
+        "collaboration",
+        "communication",
+        "daily stand-ups",
+        "project communication",
+        "resource management",
+        "risk management",
+        "system development lifecycle"
+      ],
+      "matched_tools": [
+        "flextrack"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [
+        "microsoft projects"
+      ],
+      "precision_skills": 0.3076923076923077,
+      "recall_skills": 0.4,
+      "precision_tools": 0.5,
+      "recall_tools": 1.0,
+      "tokens_used": 2561,
+      "cost_usd": 0.020319,
+      "latency_ms": 49724,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-011",
+      "title": "Agile Project Manager",
+      "gt_skills": [
+        "agile",
+        "communication skills",
+        "global team mangagement",
+        "project management",
+        "scrum",
+        "software development",
+        "team management"
+      ],
+      "gt_tools": [
+        "confluence",
+        "jira"
+      ],
+      "pred_skills": [
+        "agile methodology",
+        "communication",
+        "continuous improvement",
+        "global team management",
+        "persuasion",
+        "process improvement",
+        "process mapping",
+        "project management",
+        "retail",
+        "risk management",
+        "root cause analysis",
+        "scrum",
+        "supply chain",
+        "team management"
+      ],
+      "pred_tools": [
+        "confluence",
+        "jira"
+      ],
+      "matched_skills": [
+        "project management",
+        "scrum",
+        "team management"
+      ],
+      "missed_skills": [
+        "agile",
+        "communication skills",
+        "global team mangagement",
+        "software development"
+      ],
+      "false_positive_skills": [
+        "agile methodology",
+        "communication",
+        "continuous improvement",
+        "global team management",
+        "persuasion",
+        "process improvement",
+        "process mapping",
+        "retail",
+        "risk management",
+        "root cause analysis",
+        "supply chain"
+      ],
+      "matched_tools": [
+        "confluence",
+        "jira"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [],
+      "precision_skills": 0.21428571428571427,
+      "recall_skills": 0.42857142857142855,
+      "precision_tools": 1.0,
+      "recall_tools": 1.0,
+      "tokens_used": 2323,
+      "cost_usd": 0.010713,
+      "latency_ms": 14877,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-012",
+      "title": "Clinical Systems & Data Analyst I",
+      "gt_skills": [
+        "clinical systems implementation",
+        "data analysis & statistics",
+        "data visualization",
+        "requirements analysis & workflow design",
+        "training & communication",
+        "trauma-informed care"
+      ],
+      "gt_tools": [
+        "data visualization tools",
+        "electronic health record (ehr) systems",
+        "reporting tools",
+        "sql data query tools"
+      ],
+      "pred_skills": [
+        "associates degree",
+        "background check",
+        "clinical applications",
+        "communication",
+        "cultural competency",
+        "data analysis",
+        "data integration",
+        "data query",
+        "data visualization",
+        "dialectical behavioral therapy",
+        "documentation",
+        "electronic health records",
+        "motivational therapies",
+        "person-centered care",
+        "problem solving",
+        "report development",
+        "statistical analysis",
+        "technical support",
+        "training",
+        "trauma-informed care",
+        "trauma-informed services",
+        "valid driver's license"
+      ],
+      "pred_tools": [
+        "dbt"
+      ],
+      "matched_skills": [
+        "data visualization",
+        "trauma-informed care"
+      ],
+      "missed_skills": [
+        "clinical systems implementation",
+        "data analysis & statistics",
+        "requirements analysis & workflow design",
+        "training & communication"
+      ],
+      "false_positive_skills": [
+        "associates degree",
+        "background check",
+        "clinical applications",
+        "communication",
+        "cultural competency",
+        "data analysis",
+        "data integration",
+        "data query",
+        "dialectical behavioral therapy",
+        "documentation",
+        "electronic health records",
+        "motivational therapies",
+        "person-centered care",
+        "problem solving",
+        "report development",
+        "statistical analysis",
+        "technical support",
+        "training",
+        "trauma-informed services",
+        "valid driver's license"
+      ],
+      "matched_tools": [],
+      "missed_tools": [
+        "data visualization tools",
+        "electronic health record (ehr) systems",
+        "reporting tools",
+        "sql data query tools"
+      ],
+      "false_positive_tools": [
+        "dbt"
+      ],
+      "precision_skills": 0.09090909090909091,
+      "recall_skills": 0.3333333333333333,
+      "precision_tools": 0.0,
+      "recall_tools": 0.0,
+      "tokens_used": 3820,
+      "cost_usd": 0.025824,
+      "latency_ms": 112212,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-013",
+      "title": "Junior Data Analyst",
+      "gt_skills": [
+        "attention to detail",
+        "communication & stakeholder coordination",
+        "data analysis & trend recognition",
+        "data quality & integrity assessment",
+        "data visualization & reporting",
+        "investigative data analysis",
+        "multitasking in high-pressure environments"
+      ],
+      "gt_tools": [
+        "data processing systems",
+        "excel",
+        "optical character recognition (ocr) tools",
+        "power bi",
+        "scanners & digital imaging tools"
+      ],
+      "pred_skills": [
+        "analytical skills",
+        "communication",
+        "customer service",
+        "data accuracy",
+        "data analysis",
+        "data entry",
+        "data visualization",
+        "documentation",
+        "investigative data expertise",
+        "investigative support",
+        "law enforcement support",
+        "ms excel",
+        "multi-tasking",
+        "problem solving",
+        "quality control",
+        "reverse engineering",
+        "secret clearance",
+        "team collaboration",
+        "trend recognition"
+      ],
+      "pred_tools": [
+        "power bi"
+      ],
+      "matched_skills": [],
+      "missed_skills": [
+        "attention to detail",
+        "communication & stakeholder coordination",
+        "data analysis & trend recognition",
+        "data quality & integrity assessment",
+        "data visualization & reporting",
+        "investigative data analysis",
+        "multitasking in high-pressure environments"
+      ],
+      "false_positive_skills": [
+        "analytical skills",
+        "communication",
+        "customer service",
+        "data accuracy",
+        "data analysis",
+        "data entry",
+        "data visualization",
+        "documentation",
+        "investigative data expertise",
+        "investigative support",
+        "law enforcement support",
+        "ms excel",
+        "multi-tasking",
+        "problem solving",
+        "quality control",
+        "reverse engineering",
+        "secret clearance",
+        "team collaboration",
+        "trend recognition"
+      ],
+      "matched_tools": [
+        "power bi"
+      ],
+      "missed_tools": [
+        "data processing systems",
+        "excel",
+        "optical character recognition (ocr) tools",
+        "scanners & digital imaging tools"
+      ],
+      "false_positive_tools": [],
+      "precision_skills": 0.0,
+      "recall_skills": 0.0,
+      "precision_tools": 1.0,
+      "recall_tools": 0.2,
+      "tokens_used": 3767,
+      "cost_usd": 0.023457,
+      "latency_ms": 50917,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-014",
+      "title": "Data Analyst",
+      "gt_skills": [
+        "communication skills",
+        "data quality assurance",
+        "problem-solving",
+        "systems & data integration support",
+        "team collaboration",
+        "work prioritization & time management"
+      ],
+      "gt_tools": [
+        "data integration tools",
+        "healthcare information systems",
+        "quality assurance (qa) tools"
+      ],
+      "pred_skills": [
+        "business",
+        "communication",
+        "computer science",
+        "data integration",
+        "engineering",
+        "fast learner",
+        "flexible work ethic",
+        "health information technology",
+        "nursing",
+        "prioritization",
+        "problem solving",
+        "public health",
+        "quality assurance",
+        "teamwork"
+      ],
+      "pred_tools": [],
+      "matched_skills": [],
+      "missed_skills": [
+        "communication skills",
+        "data quality assurance",
+        "problem-solving",
+        "systems & data integration support",
+        "team collaboration",
+        "work prioritization & time management"
+      ],
+      "false_positive_skills": [
+        "business",
+        "communication",
+        "computer science",
+        "data integration",
+        "engineering",
+        "fast learner",
+        "flexible work ethic",
+        "health information technology",
+        "nursing",
+        "prioritization",
+        "problem solving",
+        "public health",
+        "quality assurance",
+        "teamwork"
+      ],
+      "matched_tools": [],
+      "missed_tools": [
+        "data integration tools",
+        "healthcare information systems",
+        "quality assurance (qa) tools"
+      ],
+      "false_positive_tools": [],
+      "precision_skills": 0.0,
+      "recall_skills": 0.0,
+      "precision_tools": 0.0,
+      "recall_tools": 0.0,
+      "tokens_used": 2417,
+      "cost_usd": 0.017463,
+      "latency_ms": 45182,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-015",
+      "title": "Data Analyst - Foundation (26-27)",
+      "gt_skills": [
+        "advanced data analysis & insight generation",
+        "communication & stakeholder engagement",
+        "cross-functional project management",
+        "data storytelling & narrative development",
+        "data visualization",
+        "statistical reasoning",
+        "strategic decision-making with data"
+      ],
+      "gt_tools": [
+        "datawrapper",
+        "ggplot2",
+        "information systems",
+        "matplotlib",
+        "power bi",
+        "python",
+        "r",
+        "sql"
+      ],
+      "pred_skills": [
+        "attention to detail",
+        "coaching and development",
+        "collaboration",
+        "communication",
+        "data access system design",
+        "data analysis",
+        "data documentation",
+        "data governance",
+        "data quality assurance",
+        "data storytelling",
+        "data synthesis",
+        "data visualization",
+        "educational data analysis",
+        "fundraising",
+        "fundraising analytics",
+        "fundraising reporting",
+        "fundraising strategy",
+        "grant management",
+        "grant writing",
+        "independent judgment",
+        "insight generation",
+        "project management",
+        "quantitative analysis",
+        "stakeholder engagement",
+        "statistical reasoning",
+        "strategic decision making",
+        "virtual communication"
+      ],
+      "pred_tools": [
+        "datawrapper",
+        "ggplot2",
+        "matplotlib",
+        "power bi",
+        "python",
+        "r",
+        "sql"
+      ],
+      "matched_skills": [
+        "data visualization",
+        "statistical reasoning"
+      ],
+      "missed_skills": [
+        "advanced data analysis & insight generation",
+        "communication & stakeholder engagement",
+        "cross-functional project management",
+        "data storytelling & narrative development",
+        "strategic decision-making with data"
+      ],
+      "false_positive_skills": [
+        "attention to detail",
+        "coaching and development",
+        "collaboration",
+        "communication",
+        "data access system design",
+        "data analysis",
+        "data documentation",
+        "data governance",
+        "data quality assurance",
+        "data storytelling",
+        "data synthesis",
+        "educational data analysis",
+        "fundraising",
+        "fundraising analytics",
+        "fundraising reporting",
+        "fundraising strategy",
+        "grant management",
+        "grant writing",
+        "independent judgment",
+        "insight generation",
+        "project management",
+        "quantitative analysis",
+        "stakeholder engagement",
+        "strategic decision making",
+        "virtual communication"
+      ],
+      "matched_tools": [
+        "datawrapper",
+        "ggplot2",
+        "matplotlib",
+        "power bi",
+        "python",
+        "r",
+        "sql"
+      ],
+      "missed_tools": [
+        "information systems"
+      ],
+      "false_positive_tools": [],
+      "precision_skills": 0.07407407407407407,
+      "recall_skills": 0.2857142857142857,
+      "precision_tools": 1.0,
+      "recall_tools": 0.875,
+      "tokens_used": 4901,
+      "cost_usd": 0.015222,
+      "latency_ms": 21964,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-016",
+      "title": "Senior Business Intelligence Analyst - Remote - USA",
+      "gt_skills": [
+        "advanced data analysis & insight generation",
+        "agile/scrum collaboration",
+        "data governance & compliance",
+        "data product & modern data ecosystem understanding",
+        "problem-solving & ownership",
+        "sql querying & data transformation"
+      ],
+      "gt_tools": [
+        "ci/cd tools",
+        "databricks",
+        "looker",
+        "modern data platforms",
+        "power bi",
+        "sql",
+        "tableau"
+      ],
+      "pred_skills": [
+        "agile",
+        "attention to detail",
+        "business intelligence",
+        "continuous integration",
+        "dashboard design",
+        "data access & self-service patterns",
+        "data analysis",
+        "data ecosystems",
+        "data governance",
+        "data product deployment patterns",
+        "data sharing & inter-domain exchange patterns",
+        "english",
+        "ownership",
+        "positive mindset",
+        "problem solving",
+        "scrum",
+        "sql"
+      ],
+      "pred_tools": [
+        "databricks",
+        "looker",
+        "power bi",
+        "sql",
+        "tableau"
+      ],
+      "matched_skills": [],
+      "missed_skills": [
+        "advanced data analysis & insight generation",
+        "agile/scrum collaboration",
+        "data governance & compliance",
+        "data product & modern data ecosystem understanding",
+        "problem-solving & ownership",
+        "sql querying & data transformation"
+      ],
+      "false_positive_skills": [
+        "agile",
+        "attention to detail",
+        "business intelligence",
+        "continuous integration",
+        "dashboard design",
+        "data access & self-service patterns",
+        "data analysis",
+        "data ecosystems",
+        "data governance",
+        "data product deployment patterns",
+        "data sharing & inter-domain exchange patterns",
+        "english",
+        "ownership",
+        "positive mindset",
+        "problem solving",
+        "scrum",
+        "sql"
+      ],
+      "matched_tools": [
+        "databricks",
+        "looker",
+        "power bi",
+        "sql",
+        "tableau"
+      ],
+      "missed_tools": [
+        "ci/cd tools",
+        "modern data platforms"
+      ],
+      "false_positive_tools": [],
+      "precision_skills": 0.0,
+      "recall_skills": 0.0,
+      "precision_tools": 1.0,
+      "recall_tools": 0.7142857142857143,
+      "tokens_used": 2761,
+      "cost_usd": 0.013683,
+      "latency_ms": 42588,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-017",
+      "title": "Full Stack Developer - Entry Level",
+      "gt_skills": [
+        "communication",
+        "javascript",
+        "problem solving",
+        "python",
+        "rest apis",
+        "sql"
+      ],
+      "gt_tools": [
+        "git",
+        "node.js",
+        "postgresql",
+        "react"
+      ],
+      "pred_skills": [
+        "agile",
+        "code reviews",
+        "collaboration",
+        "communication",
+        "database knowledge",
+        "front-end frameworks",
+        "full stack development",
+        "problem solving",
+        "responsive web design",
+        "rest apis",
+        "version control",
+        "web development"
+      ],
+      "pred_tools": [
+        "git",
+        "javascript",
+        "node.js",
+        "postgresql",
+        "python",
+        "react",
+        "sql"
+      ],
+      "matched_skills": [
+        "communication",
+        "problem solving",
+        "rest apis"
+      ],
+      "missed_skills": [
+        "javascript",
+        "python",
+        "sql"
+      ],
+      "false_positive_skills": [
+        "agile",
+        "code reviews",
+        "collaboration",
+        "database knowledge",
+        "front-end frameworks",
+        "full stack development",
+        "responsive web design",
+        "version control",
+        "web development"
+      ],
+      "matched_tools": [
+        "git",
+        "node.js",
+        "postgresql",
+        "react"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [
+        "javascript",
+        "python",
+        "sql"
+      ],
+      "precision_skills": 0.25,
+      "recall_skills": 0.5,
+      "precision_tools": 0.5714285714285714,
+      "recall_tools": 1.0,
+      "tokens_used": 1442,
+      "cost_usd": 0.010542,
+      "latency_ms": 35891,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-018",
+      "title": "Entry Level Full Stack Developer",
+      "gt_skills": [
+        "communication",
+        "excel",
+        "python",
+        "sql",
+        "teamwork"
+      ],
+      "gt_tools": [
+        "django",
+        "excel",
+        "vue"
+      ],
+      "pred_skills": [
+        "api development",
+        "collaboration",
+        "communication",
+        "component development",
+        "computer science",
+        "curiosity",
+        "database concepts",
+        "documentation",
+        "front-end frameworks",
+        "full stack development",
+        "information technology",
+        "reporting",
+        "software development",
+        "sql query writing",
+        "teamwork",
+        "web frameworks"
+      ],
+      "pred_tools": [
+        "angular",
+        "django",
+        "excel",
+        "flask",
+        "python",
+        "react",
+        "sql",
+        "vue"
+      ],
+      "matched_skills": [
+        "communication",
+        "teamwork"
+      ],
+      "missed_skills": [
+        "excel",
+        "python",
+        "sql"
+      ],
+      "false_positive_skills": [
+        "api development",
+        "collaboration",
+        "component development",
+        "computer science",
+        "curiosity",
+        "database concepts",
+        "documentation",
+        "front-end frameworks",
+        "full stack development",
+        "information technology",
+        "reporting",
+        "software development",
+        "sql query writing",
+        "web frameworks"
+      ],
+      "matched_tools": [
+        "django",
+        "excel",
+        "vue"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [
+        "angular",
+        "flask",
+        "python",
+        "react",
+        "sql"
+      ],
+      "precision_skills": 0.125,
+      "recall_skills": 0.4,
+      "precision_tools": 0.375,
+      "recall_tools": 1.0,
+      "tokens_used": 1707,
+      "cost_usd": 0.014757,
+      "latency_ms": 25324,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-019",
+      "title": "Full Stack Developer I (Entry Level)",
+      "gt_skills": [
+        "ai-assisted code generation",
+        "communication",
+        "javascript",
+        "rest apis",
+        "typescript"
+      ],
+      "gt_tools": [
+        "github copilot",
+        "next.js",
+        "postgresql",
+        "prisma",
+        "react"
+      ],
+      "pred_skills": [
+        "ai-assisted development",
+        "api development",
+        "code reviews",
+        "collaboration",
+        "communication",
+        "full stack development",
+        "pair programming",
+        "restful api design"
+      ],
+      "pred_tools": [
+        "github copilot",
+        "javascript",
+        "next.js",
+        "postgresql",
+        "prisma",
+        "react",
+        "typescript"
+      ],
+      "matched_skills": [
+        "communication"
+      ],
+      "missed_skills": [
+        "ai-assisted code generation",
+        "javascript",
+        "rest apis",
+        "typescript"
+      ],
+      "false_positive_skills": [
+        "ai-assisted development",
+        "api development",
+        "code reviews",
+        "collaboration",
+        "full stack development",
+        "pair programming",
+        "restful api design"
+      ],
+      "matched_tools": [
+        "github copilot",
+        "next.js",
+        "postgresql",
+        "prisma",
+        "react"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [
+        "javascript",
+        "typescript"
+      ],
+      "precision_skills": 0.125,
+      "recall_skills": 0.2,
+      "precision_tools": 0.7142857142857143,
+      "recall_tools": 1.0,
+      "tokens_used": 1337,
+      "cost_usd": 0.009279,
+      "latency_ms": 10850,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-020",
+      "title": "Full Stack Developer - Entry Level",
+      "gt_skills": [
+        "communication",
+        "java",
+        "problem solving",
+        "rest apis",
+        "sql",
+        "teamwork"
+      ],
+      "gt_tools": [
+        "angular",
+        "git",
+        "gitlab",
+        "mysql",
+        "spring boot"
+      ],
+      "pred_skills": [
+        "agile",
+        "api documentation",
+        "communication",
+        "full stack development",
+        "problem solving",
+        "rest apis",
+        "security clearance",
+        "teamwork",
+        "technical design",
+        "us citizenship"
+      ],
+      "pred_tools": [
+        "angular",
+        "git",
+        "gitlab",
+        "java",
+        "mysql",
+        "spring boot",
+        "sql"
+      ],
+      "matched_skills": [
+        "communication",
+        "problem solving",
+        "rest apis",
+        "teamwork"
+      ],
+      "missed_skills": [
+        "java",
+        "sql"
+      ],
+      "false_positive_skills": [
+        "agile",
+        "api documentation",
+        "full stack development",
+        "security clearance",
+        "technical design",
+        "us citizenship"
+      ],
+      "matched_tools": [
+        "angular",
+        "git",
+        "gitlab",
+        "mysql",
+        "spring boot"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [
+        "java",
+        "sql"
+      ],
+      "precision_skills": 0.4,
+      "recall_skills": 0.6666666666666666,
+      "precision_tools": 0.7142857142857143,
+      "recall_tools": 1.0,
+      "tokens_used": 1573,
+      "cost_usd": 0.012543,
+      "latency_ms": 21440,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-021",
+      "title": "Full Stack Developer - Entry Level",
+      "gt_skills": [
+        "c#",
+        "communication",
+        "javascript",
+        "sql",
+        "teamwork"
+      ],
+      "gt_tools": [
+        ".net",
+        "azure",
+        "react",
+        "sql server",
+        "visual studio"
+      ],
+      "pred_skills": [
+        "api development",
+        "code reviews",
+        "communication",
+        "computer science",
+        "development experience",
+        "full stack development",
+        "relational databases",
+        "teamwork",
+        "willingness to learn"
+      ],
+      "pred_tools": [
+        ".net",
+        "azure",
+        "c#",
+        "javascript",
+        "react",
+        "sql",
+        "sql server",
+        "visual studio"
+      ],
+      "matched_skills": [
+        "communication",
+        "teamwork"
+      ],
+      "missed_skills": [
+        "c#",
+        "javascript",
+        "sql"
+      ],
+      "false_positive_skills": [
+        "api development",
+        "code reviews",
+        "computer science",
+        "development experience",
+        "full stack development",
+        "relational databases",
+        "willingness to learn"
+      ],
+      "matched_tools": [
+        ".net",
+        "azure",
+        "react",
+        "sql server",
+        "visual studio"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [
+        "c#",
+        "javascript",
+        "sql"
+      ],
+      "precision_skills": 0.2222222222222222,
+      "recall_skills": 0.4,
+      "precision_tools": 0.625,
+      "recall_tools": 1.0,
+      "tokens_used": 1273,
+      "cost_usd": 0.008259,
+      "latency_ms": 12598,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-022",
+      "title": "Machine Learning Engineer II - Generative AI (Remote)",
+      "gt_skills": [
+        "automation",
+        "communication",
+        "define software architecture",
+        "llm evaluation",
+        "machine learning",
+        "prompt engineering",
+        "rag (retrieval-augmented generation)",
+        "test driven development (tdd)"
+      ],
+      "gt_tools": [
+        "large language models (llms)",
+        "retrieval augmented generation (rag) pipelines"
+      ],
+      "pred_skills": [
+        "ai application development",
+        "ai model integration",
+        "api integration",
+        "automated workflows",
+        "automation scripting",
+        "bias mitigation",
+        "ci/cd pipelines",
+        "code review",
+        "collaboration",
+        "conversational ai",
+        "dashboarding",
+        "destructive testing",
+        "generative ai",
+        "generative ai frameworks",
+        "large language models",
+        "machine learning",
+        "microservices architecture",
+        "monitoring",
+        "monitoring production ai systems",
+        "performance optimization",
+        "production support",
+        "prompt engineering",
+        "prompt evaluation",
+        "prompt optimization",
+        "responsible ai practices",
+        "rest apis",
+        "retrieval-augmented generation",
+        "safety guardrails",
+        "scalable ai services",
+        "software design",
+        "testing",
+        "user story development",
+        "vector databases"
+      ],
+      "pred_tools": [
+        "python"
+      ],
+      "matched_skills": [
+        "machine learning",
+        "prompt engineering"
+      ],
+      "missed_skills": [
+        "automation",
+        "communication",
+        "define software architecture",
+        "llm evaluation",
+        "rag (retrieval-augmented generation)",
+        "test driven development (tdd)"
+      ],
+      "false_positive_skills": [
+        "ai application development",
+        "ai model integration",
+        "api integration",
+        "automated workflows",
+        "automation scripting",
+        "bias mitigation",
+        "ci/cd pipelines",
+        "code review",
+        "collaboration",
+        "conversational ai",
+        "dashboarding",
+        "destructive testing",
+        "generative ai",
+        "generative ai frameworks",
+        "large language models",
+        "microservices architecture",
+        "monitoring",
+        "monitoring production ai systems",
+        "performance optimization",
+        "production support",
+        "prompt evaluation",
+        "prompt optimization",
+        "responsible ai practices",
+        "rest apis",
+        "retrieval-augmented generation",
+        "safety guardrails",
+        "scalable ai services",
+        "software design",
+        "testing",
+        "user story development",
+        "vector databases"
+      ],
+      "matched_tools": [],
+      "missed_tools": [
+        "large language models (llms)",
+        "retrieval augmented generation (rag) pipelines"
+      ],
+      "false_positive_tools": [
+        "python"
+      ],
+      "precision_skills": 0.06060606060606061,
+      "recall_skills": 0.25,
+      "precision_tools": 0.0,
+      "recall_tools": 0.0,
+      "tokens_used": 3243,
+      "cost_usd": 0.023025,
+      "latency_ms": 43020,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-023",
+      "title": "Senior  Machine Learning Engineer - Remote",
+      "gt_skills": [
+        "3d modeling",
+        "data manipulation",
+        "deep learning",
+        "linux",
+        "manage ict virtualization environments",
+        "python",
+        "scientific computing"
+      ],
+      "gt_tools": [
+        "aws",
+        "azure",
+        "gcp",
+        "keras",
+        "linux",
+        "numpy",
+        "pandas",
+        "python",
+        "pytorch",
+        "tensorflow"
+      ],
+      "pred_skills": [
+        "3d data analysis",
+        "3d geometry",
+        "3d point clouds",
+        "a/b testing",
+        "collaboration",
+        "communication",
+        "computer vision",
+        "creativity",
+        "curiosity",
+        "data manipulation",
+        "deep learning",
+        "dimensionality reduction",
+        "experimental design",
+        "feature extraction",
+        "geometric deep learning",
+        "geometric processing",
+        "health metrics analysis",
+        "machine learning",
+        "mesh data structures",
+        "predictive modeling",
+        "problem solving",
+        "production deployment",
+        "python",
+        "scientific computing",
+        "scikit-learn",
+        "scipy",
+        "spatial data",
+        "spatial statistics",
+        "statistical analysis",
+        "statistical modeling",
+        "statistical validation"
+      ],
+      "pred_tools": [
+        "aws",
+        "azure",
+        "docker",
+        "gcp",
+        "keras",
+        "kubernetes",
+        "linux",
+        "numpy",
+        "pandas",
+        "python",
+        "pytorch",
+        "tensorflow"
+      ],
+      "matched_skills": [
+        "data manipulation",
+        "deep learning",
+        "python",
+        "scientific computing"
+      ],
+      "missed_skills": [
+        "3d modeling",
+        "linux",
+        "manage ict virtualization environments"
+      ],
+      "false_positive_skills": [
+        "3d data analysis",
+        "3d geometry",
+        "3d point clouds",
+        "a/b testing",
+        "collaboration",
+        "communication",
+        "computer vision",
+        "creativity",
+        "curiosity",
+        "dimensionality reduction",
+        "experimental design",
+        "feature extraction",
+        "geometric deep learning",
+        "geometric processing",
+        "health metrics analysis",
+        "machine learning",
+        "mesh data structures",
+        "predictive modeling",
+        "problem solving",
+        "production deployment",
+        "scikit-learn",
+        "scipy",
+        "spatial data",
+        "spatial statistics",
+        "statistical analysis",
+        "statistical modeling",
+        "statistical validation"
+      ],
+      "matched_tools": [
+        "aws",
+        "azure",
+        "gcp",
+        "keras",
+        "linux",
+        "numpy",
+        "pandas",
+        "python",
+        "pytorch",
+        "tensorflow"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [
+        "docker",
+        "kubernetes"
+      ],
+      "precision_skills": 0.12903225806451613,
+      "recall_skills": 0.5714285714285714,
+      "precision_tools": 0.8333333333333334,
+      "recall_tools": 1.0,
+      "tokens_used": 4391,
+      "cost_usd": 0.037041,
+      "latency_ms": 56930,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-024",
+      "title": "Data Science/Machine Learning Engineer (Remote, Continental United States)",
+      "gt_skills": [
+        "algorithms",
+        "data mining",
+        "data science",
+        "machine learning",
+        "prototyping development",
+        "python",
+        "statistical modeling techniques"
+      ],
+      "gt_tools": [
+        "aws",
+        "large language models (llms)",
+        "python"
+      ],
+      "pred_skills": [
+        "aws services",
+        "cloud computing",
+        "collaboration",
+        "data manipulation",
+        "data science",
+        "data science (field)",
+        "deep learning",
+        "document parsing",
+        "fine-tuning",
+        "hugging face transformers",
+        "information extraction",
+        "instruction tuning",
+        "interpretability",
+        "large language models",
+        "llama index",
+        "machine learning",
+        "mathematics",
+        "ml evaluation",
+        "model development",
+        "named entity recognition",
+        "natural language processing",
+        "presentation skills",
+        "problem solving",
+        "prompt engineering",
+        "python",
+        "regression",
+        "statistics",
+        "text categorization",
+        "time series analysis"
+      ],
+      "pred_tools": [
+        "aws",
+        "hugging face",
+        "langchain",
+        "python",
+        "r",
+        "sql"
+      ],
+      "matched_skills": [
+        "data science",
+        "machine learning",
+        "python"
+      ],
+      "missed_skills": [
+        "algorithms",
+        "data mining",
+        "prototyping development",
+        "statistical modeling techniques"
+      ],
+      "false_positive_skills": [
+        "aws services",
+        "cloud computing",
+        "collaboration",
+        "data manipulation",
+        "data science (field)",
+        "deep learning",
+        "document parsing",
+        "fine-tuning",
+        "hugging face transformers",
+        "information extraction",
+        "instruction tuning",
+        "interpretability",
+        "large language models",
+        "llama index",
+        "mathematics",
+        "ml evaluation",
+        "model development",
+        "named entity recognition",
+        "natural language processing",
+        "presentation skills",
+        "problem solving",
+        "prompt engineering",
+        "regression",
+        "statistics",
+        "text categorization",
+        "time series analysis"
+      ],
+      "matched_tools": [
+        "aws",
+        "python"
+      ],
+      "missed_tools": [
+        "large language models (llms)"
+      ],
+      "false_positive_tools": [
+        "hugging face",
+        "langchain",
+        "r",
+        "sql"
+      ],
+      "precision_skills": 0.10344827586206896,
+      "recall_skills": 0.42857142857142855,
+      "precision_tools": 0.3333333333333333,
+      "recall_tools": 0.6666666666666666,
+      "tokens_used": 3277,
+      "cost_usd": 0.022635,
+      "latency_ms": 30492,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-025",
+      "title": "Machine Learning Engineer, AI for Member Systems",
+      "gt_skills": [
+        "algorithms",
+        "communication",
+        "fine-tuning",
+        "machine learning",
+        "software architecture",
+        "training ai models"
+      ],
+      "gt_tools": [
+        "c#",
+        "c++",
+        "java",
+        "large language models (llms)",
+        "python",
+        "scala",
+        "transformers"
+      ],
+      "pred_skills": [
+        "bandits",
+        "collaboration",
+        "experiment design",
+        "large-scale language models",
+        "llm evaluation",
+        "long-term reward modeling",
+        "machine learning",
+        "masters",
+        "model deployment",
+        "model training",
+        "model tuning",
+        "personalization",
+        "phd",
+        "recommendations",
+        "rlhf reward modeling",
+        "software design",
+        "statistics",
+        "transformers"
+      ],
+      "pred_tools": [
+        "c#",
+        "c++",
+        "java",
+        "python",
+        "scala"
+      ],
+      "matched_skills": [
+        "machine learning"
+      ],
+      "missed_skills": [
+        "algorithms",
+        "communication",
+        "fine-tuning",
+        "software architecture",
+        "training ai models"
+      ],
+      "false_positive_skills": [
+        "bandits",
+        "collaboration",
+        "experiment design",
+        "large-scale language models",
+        "llm evaluation",
+        "long-term reward modeling",
+        "masters",
+        "model deployment",
+        "model training",
+        "model tuning",
+        "personalization",
+        "phd",
+        "recommendations",
+        "rlhf reward modeling",
+        "software design",
+        "statistics",
+        "transformers"
+      ],
+      "matched_tools": [
+        "c#",
+        "c++",
+        "java",
+        "python",
+        "scala"
+      ],
+      "missed_tools": [
+        "large language models (llms)",
+        "transformers"
+      ],
+      "false_positive_tools": [],
+      "precision_skills": 0.05555555555555555,
+      "recall_skills": 0.16666666666666666,
+      "precision_tools": 1.0,
+      "recall_tools": 0.7142857142857143,
+      "tokens_used": 2319,
+      "cost_usd": 0.022881,
+      "latency_ms": 43136,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-026",
+      "title": "cybersecurity analyst",
+      "gt_skills": [
+        "ceh",
+        "cissp",
+        "comptia security+",
+        "cybersecurity",
+        "firewalls",
+        "intrusion detection systems",
+        "penetration testing",
+        "powershell",
+        "python",
+        "security automation",
+        "siem tools",
+        "vulnerability assessment"
+      ],
+      "gt_tools": [
+        "firewalls",
+        "intrusion detection systems",
+        "powershell",
+        "python",
+        "siem tools"
+      ],
+      "pred_skills": [
+        "ceh",
+        "cissp",
+        "collaboration",
+        "comptia security+",
+        "cybersecurity",
+        "documentation",
+        "firewall management",
+        "intrusion detection systems",
+        "network security",
+        "penetration testing",
+        "security alert monitoring",
+        "security best practices",
+        "security incident analysis",
+        "security incident response",
+        "security measures implementation",
+        "security threat identification",
+        "siem",
+        "threat investigation",
+        "vulnerability assessment"
+      ],
+      "pred_tools": [
+        "powershell",
+        "python"
+      ],
+      "matched_skills": [
+        "ceh",
+        "cissp",
+        "comptia security+",
+        "cybersecurity",
+        "intrusion detection systems",
+        "penetration testing",
+        "vulnerability assessment"
+      ],
+      "missed_skills": [
+        "firewalls",
+        "powershell",
+        "python",
+        "security automation",
+        "siem tools"
+      ],
+      "false_positive_skills": [
+        "collaboration",
+        "documentation",
+        "firewall management",
+        "network security",
+        "security alert monitoring",
+        "security best practices",
+        "security incident analysis",
+        "security incident response",
+        "security measures implementation",
+        "security threat identification",
+        "siem",
+        "threat investigation"
+      ],
+      "matched_tools": [
+        "powershell",
+        "python"
+      ],
+      "missed_tools": [
+        "firewalls",
+        "intrusion detection systems",
+        "siem tools"
+      ],
+      "false_positive_tools": [],
+      "precision_skills": 0.3684210526315789,
+      "recall_skills": 0.5833333333333334,
+      "precision_tools": 1.0,
+      "recall_tools": 0.4,
+      "tokens_used": 1644,
+      "cost_usd": 0.014592,
+      "latency_ms": 49357,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-027",
+      "title": "Senior SOC Analyst (GenAI Focused)",
+      "gt_skills": [
+        "edr",
+        "incident response",
+        "llms",
+        "mitre att&ck",
+        "prompt engineering",
+        "python",
+        "security automation",
+        "splunk (es)",
+        "wireshark"
+      ],
+      "gt_tools": [
+        "crowdstrike",
+        "llms",
+        "mitre att&ck",
+        "python",
+        "splunk",
+        "wireshark"
+      ],
+      "pred_skills": [
+        "alert triage",
+        "artificial intelligence (ai)",
+        "detection logic",
+        "edr solutions",
+        "incident management",
+        "incident response",
+        "large language models (llms)",
+        "prompt engineering",
+        "security automation",
+        "security operations center (soc)",
+        "threat detection"
+      ],
+      "pred_tools": [
+        "crowdstrike",
+        "mitre att&ck",
+        "python",
+        "splunk",
+        "wireshark"
+      ],
+      "matched_skills": [
+        "incident response",
+        "prompt engineering",
+        "security automation"
+      ],
+      "missed_skills": [
+        "edr",
+        "llms",
+        "mitre att&ck",
+        "python",
+        "splunk (es)",
+        "wireshark"
+      ],
+      "false_positive_skills": [
+        "alert triage",
+        "artificial intelligence (ai)",
+        "detection logic",
+        "edr solutions",
+        "incident management",
+        "large language models (llms)",
+        "security operations center (soc)",
+        "threat detection"
+      ],
+      "matched_tools": [
+        "crowdstrike",
+        "mitre att&ck",
+        "python",
+        "splunk",
+        "wireshark"
+      ],
+      "missed_tools": [
+        "llms"
+      ],
+      "false_positive_tools": [],
+      "precision_skills": 0.2727272727272727,
+      "recall_skills": 0.3333333333333333,
+      "precision_tools": 1.0,
+      "recall_tools": 0.8333333333333334,
+      "tokens_used": 1363,
+      "cost_usd": 0.009945,
+      "latency_ms": 47145,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-028",
+      "title": "Network Security Engineer (GRC & Infrastructure)",
+      "gt_skills": [
+        "cisa",
+        "cissp",
+        "firewall administration",
+        "hipaa",
+        "nist 800-53",
+        "vlan segmentation",
+        "vpn",
+        "vulnerability scans"
+      ],
+      "gt_tools": [
+        "cisco",
+        "fortinet",
+        "nessus",
+        "vpn"
+      ],
+      "pred_skills": [
+        "cisa",
+        "cissp",
+        "firewall administration",
+        "grc",
+        "hipaa compliance",
+        "ipsec",
+        "network security",
+        "network segmentation",
+        "nist 800-53",
+        "risk assessment",
+        "security audits",
+        "ssl",
+        "technical support",
+        "vlan segmentation",
+        "vpn",
+        "vulnerability scanning"
+      ],
+      "pred_tools": [
+        "cisco",
+        "fortinet",
+        "nessus"
+      ],
+      "matched_skills": [
+        "cisa",
+        "cissp",
+        "firewall administration",
+        "nist 800-53",
+        "vlan segmentation",
+        "vpn"
+      ],
+      "missed_skills": [
+        "hipaa",
+        "vulnerability scans"
+      ],
+      "false_positive_skills": [
+        "grc",
+        "hipaa compliance",
+        "ipsec",
+        "network security",
+        "network segmentation",
+        "risk assessment",
+        "security audits",
+        "ssl",
+        "technical support",
+        "vulnerability scanning"
+      ],
+      "matched_tools": [
+        "cisco",
+        "fortinet",
+        "nessus"
+      ],
+      "missed_tools": [
+        "vpn"
+      ],
+      "false_positive_tools": [],
+      "precision_skills": 0.375,
+      "recall_skills": 0.75,
+      "precision_tools": 1.0,
+      "recall_tools": 0.75,
+      "tokens_used": 1521,
+      "cost_usd": 0.012387,
+      "latency_ms": 15733,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-029",
+      "title": "Penetration Tester (Offensive Security)",
+      "gt_skills": [
+        "bash",
+        "oscp",
+        "owasp top 10",
+        "python",
+        "remediation reports",
+        "vulnerability research",
+        "web application security"
+      ],
+      "gt_tools": [
+        "bash",
+        "burp suite",
+        "kali linux",
+        "metasploit",
+        "python"
+      ],
+      "pred_skills": [
+        "collaboration",
+        "documentation",
+        "gpen",
+        "hacker mindset",
+        "offensive security",
+        "oscp",
+        "penetration testing",
+        "report writing",
+        "scripting",
+        "vulnerability research",
+        "web application security"
+      ],
+      "pred_tools": [
+        "bash",
+        "burp suite",
+        "kali linux",
+        "metasploit",
+        "python"
+      ],
+      "matched_skills": [
+        "oscp",
+        "vulnerability research",
+        "web application security"
+      ],
+      "missed_skills": [
+        "bash",
+        "owasp top 10",
+        "python",
+        "remediation reports"
+      ],
+      "false_positive_skills": [
+        "collaboration",
+        "documentation",
+        "gpen",
+        "hacker mindset",
+        "offensive security",
+        "penetration testing",
+        "report writing",
+        "scripting"
+      ],
+      "matched_tools": [
+        "bash",
+        "burp suite",
+        "kali linux",
+        "metasploit",
+        "python"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [],
+      "precision_skills": 0.2727272727272727,
+      "recall_skills": 0.42857142857142855,
+      "precision_tools": 1.0,
+      "recall_tools": 1.0,
+      "tokens_used": 1269,
+      "cost_usd": 0.008847,
+      "latency_ms": 15356,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-030",
+      "title": "Cybersecurity GRC Manager (Leadership & Compliance)",
+      "gt_skills": [
+        "cism",
+        "crisc",
+        "gdpr",
+        "information security policy",
+        "internal audits",
+        "iso 2700",
+        "soc2 type ii",
+        "vendor risk assessments"
+      ],
+      "gt_tools": [
+        "gdpr",
+        "iso 2700",
+        "risk register"
+      ],
+      "pred_skills": [
+        "cism",
+        "compliance audits",
+        "crisc",
+        "cross-functional team collaboration",
+        "data privacy",
+        "gdpr",
+        "governance, risk, and compliance (grc)",
+        "information security policy development",
+        "information security risk management",
+        "internal audits",
+        "internal controls",
+        "international standards compliance",
+        "iso 27001",
+        "regulatory compliance",
+        "risk assessment",
+        "risk register management",
+        "soc2 type ii",
+        "stakeholder management",
+        "vendor risk assessments"
+      ],
+      "pred_tools": [],
+      "matched_skills": [
+        "cism",
+        "crisc",
+        "gdpr",
+        "internal audits",
+        "soc2 type ii",
+        "vendor risk assessments"
+      ],
+      "missed_skills": [
+        "information security policy",
+        "iso 2700"
+      ],
+      "false_positive_skills": [
+        "compliance audits",
+        "cross-functional team collaboration",
+        "data privacy",
+        "governance, risk, and compliance (grc)",
+        "information security policy development",
+        "information security risk management",
+        "internal controls",
+        "international standards compliance",
+        "iso 27001",
+        "regulatory compliance",
+        "risk assessment",
+        "risk register management",
+        "stakeholder management"
+      ],
+      "matched_tools": [],
+      "missed_tools": [
+        "gdpr",
+        "iso 2700",
+        "risk register"
+      ],
+      "false_positive_tools": [],
+      "precision_skills": 0.3157894736842105,
+      "recall_skills": 0.75,
+      "precision_tools": 0.0,
+      "recall_tools": 0.0,
+      "tokens_used": 1633,
+      "cost_usd": 0.014511,
+      "latency_ms": 23925,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    }
+  ],
+  "prompt_exemplar": {
+    "skills_prompt_version": "v1",
+    "system_prompt": "You are a skills extraction system for job postings. Extract explicit and implied skills from the given job text and return them as a JSON object with a \"skills\" array.\n\nOutput schema \u2014 each skill in the \"skills\" array must have:\n- label: short name of the skill (e.g. \"Python\", \"Leadership\")\n- type: exactly one of: Technical, Domain, Soft, Certification, Tool\n- confidence: number between 0.0 and 1.0 (how clearly the skill is stated or implied)\n- required_flag: true if the posting clearly requires it, false if preferred/mentioned, or null if unclear\n- source_span: object with text, field_source, start_char, end_char\n  - text: the exact snippet from the job that supports this skill\n  - field_source: one of \"title\", \"description\", \"requirements\", \"responsibilities\"\n  - start_char: character offset where the snippet starts in that field (0-based)\n  - end_char: character offset where the snippet ends; MUST satisfy end_char - start_char == len(text) exactly (no off-by-one). Example: for text \"Python\", use start_char=0, end_char=6.\n\nSkill types with examples:\n- Technical: programming languages, APIs, protocols (e.g. Python, REST APIs, SQL)\n- Domain: industry or role knowledge (e.g. Data Modeling, Agile, Financial Analysis)\n- Soft: interpersonal or behavioral (e.g. Leadership, Communication, Problem Solving)\n- Certification: formal credentials (e.g. AWS Certified, PMP)\n- Tool: software/tools already identified in Pass 1 must NOT be re-extracted as skills \u2014 see \"Already extracted tools\" below\n\nRules:\n- Extract from title, description, requirements, and responsibilities only.\n- Do NOT extract any skill whose label appears in the \"Already extracted tools\" list \u2014 those are tools, not skills.\n- For each skill, set source_span to the exact text fragment that supports it. Character offsets must be exact: end_char - start_char must equal the length of source_span.text (validation will reject invalid spans).\n- Return only valid JSON: {\"skills\": [ ... ]}. No markdown, no code fence, no explanation.\n- Do not extract negated requirements (e.g. \"no Java required\" should not produce a Java skill).\n",
+    "user_prompt": "Already extracted tools (do not re-extract as skills): SQL, Tableau, Looker, Power BI, Sigma\n\n---\nTitle:\nProduct Manager - AI & Data Analytics\n\n---\nDescription:\nWe are seeking a results-oriented Product Manager to drive the vision and execution of our customer-facing SaaS products, data-driven features, and AI/ML solutions. This role is a critical bridge, translating deep technical capabilities from data science and engineering into clear, quantifiable business value for our B2B SaaS customers.\n\nThis is a highly visible, customer-facing role that involves working directly with key clients to co-develop innovative solutions. The ideal candidate is a curious, data-minded problem-solver who is excited to bridge the gap between business needs and technical solutions. This is a growth role where you will have a major impact on our product and our customers.\n\n---\nRequirements:\n- Experience: 3-5+ years of relevant experience in one of the fields described above.\n- Product & Business Acumen: A strong ability to connect complex technical features directly to customer value, user needs, and business outcomes (like ROI or retention).\n- Customer Collaboration: Experience working directly with customers or key stakeholders to gather requirements, validate ideas, and manage feedback loops.\n- Communication & Stakeholder Management: Excellent communication and data storytelling skills. You can build consensus and manage expectations with diverse audiences (from engineering to sales to external clients).\n- Prioritization & Planning: A demonstrated ability to manage a backlog, make trade-offs, and align teams on a clear set of priorities.\n- SQL Proficiency: You have solid SQL fundamentals and are comfortable writing queries (like joins and aggregations) to explore data and conduct analysis.\n- BI Tool Proficiency: Experience with a modern BI platform (e.g., Tableau, Looker, Power BI, Sigma).\n- Data Fluency: A strong functional understanding of data transformation techniques.\n\n---\nResponsibilities:\n- Own the product vision and strategic roadmap for our external, customer-facing AI/ML models, data products, and analytics features.\n- Engage directly with strategic customers and design partners to understand their needs, validate roadmaps, and co-develop new features.\n- Define, measure, and communicate product success using metrics that correlate with customer value and SaaS business metrics.\n- Partner with UX, Data Science, and Sales Engineering to create impactful data visualizations and product demos.\n- Define clear, testable requirements (epics and user stories) based on customer feedback, market analysis, and strategic priorities.\n- Work closely with data scientists to define requirements for AI/ML-driven features.\n---\n\nReturn JSON with a \"skills\" array. Each skill must have: label, type, confidence, required_flag (or null), source_span (text, field_source, start_char, end_char).",
+    "note": "User sections vary per job (Pass-1 tool list). This exemplar uses the first job only."
+  },
+  "runtime_seconds": 1124.167
+}

@@ -79,7 +79,7 @@ class TestSkillsExtractionAgent:
         agent = SkillsExtractionAgent()
         agent.health_check()  # pre-load fixture
         mock_skill = SkillRecord(
-            label="Python",
+            skill_name="Python",
             type="Technical",
             confidence=0.9,
             source_span=SpanRecord(
