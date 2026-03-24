@@ -25,6 +25,7 @@ import csv
 import json
 import os
 import re
+import time
 import unicodedata
 from pathlib import Path
 from typing import Any
@@ -317,8 +318,22 @@ _esco_embedding_meta: list[tuple[str, str]] | None = None  # (uri, preferred_lab
 _esco_normalized_matrix: np.ndarray | None = None  # (n_skills, dim) L2-normalized
 
 
+_EMBED_MAX_RETRIES = 5
+_EMBED_BASE_DELAY = 1.0  # seconds
+_EMBED_INTER_REQUEST_DELAY = float(os.getenv("EMBEDDING_REQUEST_DELAY", "0.5"))
+
+
+def _extract_retry_after_embedding(error_message: str) -> int | None:
+    """Extract retry-after seconds from Azure embedding 429 error."""
+    match = re.search(r"retry after (\d+)\s*seconds?", error_message, re.IGNORECASE)
+    return int(match.group(1)) if match else None
+
+
 def _embed_texts_azure(texts: list[str]) -> list[list[float]] | None:
-    """Call Azure OpenAI Embeddings API (text-embedding-3-small). Returns None if env or request fails.
+    """Call Azure OpenAI Embeddings API with retry on 429. Returns None if env or request fails.
+
+    Retries up to 5 times with exponential backoff + jitter on 429 rate limits.
+    Honors Retry-After from error message when available.
 
     Env: AZURE_OPENAI_EMBEDDING_ENDPOINT, AZURE_OPENAI_EMBEDDING_API_KEY,
          AZURE_OPENAI_EMBEDDING_API_VERSION, AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME.
@@ -341,14 +356,45 @@ def _embed_texts_azure(texts: list[str]) -> list[list[float]] | None:
     url = f"{endpoint}/openai/deployments/{deployment}/embeddings?api-version={api_version}"
     headers = {"api-key": api_key, "Content-Type": "application/json"}
     payload: dict[str, Any] = {"input": texts if len(texts) > 1 else texts[0]}
-    try:
-        with httpx.Client(timeout=60.0) as client:
-            resp = client.post(url, json=payload, headers=headers)
-            resp.raise_for_status()
-            data = resp.json()
-    except Exception as exc:
-        log.warning("embedding_api_failed", error=str(exc))
+
+    for attempt in range(1, _EMBED_MAX_RETRIES + 1):
+        try:
+            with httpx.Client(timeout=60.0) as client:
+                resp = client.post(url, json=payload, headers=headers)
+                if resp.status_code == 429:
+                    retry_after = _extract_retry_after_embedding(resp.text)
+                    delay = retry_after if retry_after else _EMBED_BASE_DELAY * (2 ** (attempt - 1))
+                    log.warning(
+                        "embedding_rate_limited",
+                        attempt=attempt,
+                        delay_s=round(delay, 2),
+                        retry_after=retry_after,
+                    )
+                    if attempt == _EMBED_MAX_RETRIES:
+                        log.error("embedding_rate_limit_exhausted", attempts=_EMBED_MAX_RETRIES)
+                        return None
+                    time.sleep(delay)
+                    continue
+                resp.raise_for_status()
+                data = resp.json()
+                break
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 429:
+                retry_after = _extract_retry_after_embedding(str(exc))
+                delay = retry_after if retry_after else _EMBED_BASE_DELAY * (2 ** (attempt - 1))
+                log.warning("embedding_rate_limited", attempt=attempt, delay_s=round(delay, 2))
+                if attempt == _EMBED_MAX_RETRIES:
+                    return None
+                time.sleep(delay)
+                continue
+            log.warning("embedding_api_failed", error=str(exc), attempt=attempt)
+            return None
+        except Exception as exc:
+            log.warning("embedding_api_failed", error=str(exc), attempt=attempt)
+            return None
+    else:
         return None
+
     items = data.get("data") if isinstance(data, dict) else None
     if not items or not isinstance(items, list):
         return None
@@ -390,6 +436,8 @@ def _get_esco_embeddings() -> tuple[list[tuple[str, str]], np.ndarray] | None:
         meta.append((uri, label))
     vectors_list: list[list[float]] = []
     for i in range(0, len(texts), _EMBEDDING_CHUNK_SIZE):
+        if i > 0 and _EMBED_INTER_REQUEST_DELAY > 0:
+            time.sleep(_EMBED_INTER_REQUEST_DELAY)
         chunk = texts[i : i + _EMBEDDING_CHUNK_SIZE]
         res = _embed_texts_azure(chunk)
         if not res or len(res) != len(chunk):

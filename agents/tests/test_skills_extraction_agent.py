@@ -67,7 +67,7 @@ class TestSkillsExtractionAgent:
         """Output event_type is SkillsExtracted."""
         agent = SkillsExtractionAgent()
         agent.health_check()  # pre-load fixture
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
+        with patch("agents.skills_extraction.agent.extract_skills_no_taxonomy") as mock_skills:
             mock_skills.return_value = ([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0})
             out = agent.process(normalization_event)
         assert out.payload["event_type"] == "SkillsExtracted"
@@ -80,7 +80,7 @@ class TestSkillsExtractionAgent:
         self, normalization_event: EventEnvelope
     ) -> None:
         """Output contains a non-empty skills list with expected keys."""
-        from agents.common.types import SkillRecord, SpanRecord
+        from agents.common.types import SkillRecord, SpanRecord, TaxonomyResult
 
         agent = SkillsExtractionAgent()
         agent.health_check()  # pre-load fixture
@@ -92,7 +92,11 @@ class TestSkillsExtractionAgent:
                 text="Python", field_source="description", start_char=0, end_char=6
             ),
         )
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
+        mock_taxonomy = TaxonomyResult(original_label="Python", esco_uri=None, resolution_step=6)
+        with (
+            patch("agents.skills_extraction.agent.extract_skills_no_taxonomy") as mock_skills,
+            patch("agents.skills_extraction.agent.resolve_taxonomy_batch", return_value=[mock_taxonomy]),
+        ):
             mock_skills.return_value = ([mock_skill], {"extraction_failed": False, "tokens_used": 50, "cost_usd": 0.0})
             out = agent.process(normalization_event)
         skills = out.payload["skills"]
@@ -120,7 +124,7 @@ class TestSkillsExtractionAgent:
         )
 
         agent = SkillsExtractionAgent()
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
+        with patch("agents.skills_extraction.agent.extract_skills_no_taxonomy") as mock_skills:
             mock_skills.return_value = ([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0})
             out = agent.process(event)
 
@@ -201,7 +205,7 @@ class TestSkillsExtractionAgent:
         )
 
         agent = SkillsExtractionAgent()
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
+        with patch("agents.skills_extraction.agent.extract_skills_no_taxonomy") as mock_skills:
             mock_skills.return_value = ([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0})
             out = agent.process(event)
 
@@ -251,7 +255,7 @@ class TestSkillsExtractionAgent:
             extraction_store=store,
         )
 
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
+        with patch("agents.skills_extraction.agent.extract_skills_no_taxonomy") as mock_skills:
             mock_skills.return_value = ([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0})
             out = agent.process(
                 EventEnvelope(
@@ -267,7 +271,7 @@ class TestSkillsExtractionAgent:
 
     def test_process_payload_has_taxonomy_coverage_and_cost_when_llm_used(self) -> None:
         """When extract_skills returns skills and metadata, payload has taxonomy_coverage and extraction_cost_usd."""
-        from agents.common.types import SkillRecord, SpanRecord
+        from agents.common.types import SkillRecord, SpanRecord, TaxonomyResult
 
         event = EventEnvelope(
             correlation_id="test-metrics",
@@ -286,14 +290,21 @@ class TestSkillsExtractionAgent:
             label="Python",
             type="Technical",
             confidence=0.9,
-            esco_uri="http://data.europa.eu/esco/skill/abc",
-            is_genai_extension=False,
             source_span=SpanRecord(
                 text="Python", field_source="description", start_char=0, end_char=6
             ),
         )
+        mock_taxonomy = TaxonomyResult(
+            original_label="Python",
+            esco_uri="http://data.europa.eu/esco/skill/abc",
+            is_genai_extension=False,
+            resolution_step=2,
+        )
         agent = SkillsExtractionAgent()
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
+        with (
+            patch("agents.skills_extraction.agent.extract_skills_no_taxonomy") as mock_skills,
+            patch("agents.skills_extraction.agent.resolve_taxonomy_batch", return_value=[mock_taxonomy]),
+        ):
             mock_skills.return_value = (
                 [skill_with_esco],
                 {"extraction_failed": False, "tokens_used": 100, "cost_usd": 0.002, "latency_ms": 500},
@@ -321,7 +332,7 @@ class TestSkillsExtractionAgent:
             },
         )
         agent = SkillsExtractionAgent()
-        with patch("agents.skills_extraction.agent.extract_skills") as mock_skills:
+        with patch("agents.skills_extraction.agent.extract_skills_no_taxonomy") as mock_skills:
             mock_skills.return_value = (
                 [],
                 {"extraction_failed": True, "alert_skills_extraction": True, "tokens_used": 0, "cost_usd": 0.0},
