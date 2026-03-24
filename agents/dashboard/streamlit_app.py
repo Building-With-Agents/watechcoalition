@@ -31,10 +31,10 @@ from dotenv import load_dotenv
 # ---------------------------------------------------------------------------
 # Environment & paths
 # ---------------------------------------------------------------------------
-
-load_dotenv()
-
-_HERE = Path(__file__).parent.parent   # agents/
+# Load repo-root .env regardless of Streamlit's working directory (IDE/cwd).
+_HERE = Path(__file__).resolve().parent.parent  # agents/
+_REPO_ROOT = _HERE.parent
+load_dotenv(_REPO_ROOT / ".env")
 _RUN_LOG_PATH = _HERE / "data" / "output" / "pipeline_run.json"
 
 _AGENT_ORDER = [

@@ -17,6 +17,9 @@ if str(_REPO_ROOT) not in sys.path:
 
 import pandas as pd
 import streamlit as st
+from dotenv import load_dotenv
+
+load_dotenv(_REPO_ROOT / ".env")
 
 from agents.eval.extraction_eval_core import load_ground_truth, run_eval_dataset
 from agents.eval.snapshot_schema import SNAPSHOT_SCHEMA_VERSION, ExtractionEvalSnapshot, load_snapshot
