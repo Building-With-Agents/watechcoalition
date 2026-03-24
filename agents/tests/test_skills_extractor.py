@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+from agents.common.llm_client import _extract_retry_after
 from agents.common.types import JobRecord, SpanRecord, ToolRecord
 from agents.skills_extraction.extractors.skills import extract_skills
 
@@ -106,3 +107,63 @@ def test_extract_skills_includes_pass1_tools_in_prompt_context(
     assert 'SKIP generic "Communication"' in call_args
     assert 'do NOT invent "Scrum Facilitation"' in call_args
     assert 'do NOT suppress these because they are hard skills' in call_args
+
+
+# ---------------------------------------------------------------------------
+# 429 rate limit handling
+# ---------------------------------------------------------------------------
+
+
+def test_extract_retry_after_parses_azure_message() -> None:
+    """_extract_retry_after extracts seconds from Azure 429 error messages."""
+    assert _extract_retry_after("Rate limit reached. Retry after 30 seconds.") == 30
+    assert _extract_retry_after("Please retry after 5 seconds") == 5
+    assert _extract_retry_after("retry after 120 second") == 120
+    assert _extract_retry_after("some other error") is None
+    assert _extract_retry_after("") is None
+
+
+@patch("agents.skills_extraction.extractors.skills.time")
+@patch("agents.skills_extraction.extractors.skills._invoke_client")
+def test_extract_skills_retries_on_429_with_backoff(
+    mock_invoke,
+    mock_time,
+) -> None:
+    """When LLM returns 429, extract_skills retries with exponential backoff."""
+    # First call: 429 rate limit
+    rate_limit_meta = {
+        "success": False,
+        "extraction_failed": True,
+        "is_rate_limit": True,
+        "retry_after_seconds": 10,
+        "error_reason": "429: Rate limit reached",
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 50,
+        "provider": "azure-openai",
+        "model": "test",
+    }
+    # Second call: success
+    success_meta = {
+        "success": True,
+        "extraction_failed": False,
+        "tokens_used": 100,
+        "cost_usd": 0.01,
+        "latency_ms": 500,
+        "provider": "azure-openai",
+        "model": "test",
+    }
+    mock_invoke.side_effect = [
+        ("", rate_limit_meta),
+        (
+            '{"skills": [{"label": "Python", "type": "Technical", "confidence": 0.9, '
+            '"source_span": {"text": "Python", "field_source": "description", "start_char": 0, "end_char": 6}}]}',
+            success_meta,
+        ),
+    ]
+    job = _job_record()
+    skills, meta = extract_skills(job, pass1_tools=[])
+    assert len(skills) == 1
+    assert skills[0].skill_name == "Python"
+    # Verify sleep was called (backoff delay)
+    assert mock_time.sleep.called
