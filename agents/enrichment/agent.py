@@ -4,6 +4,11 @@ Skills enrichment — Pair D (Week 5): company / location / sector resolution an
 Consumes ``SkillsExtracted`` (after Pair C spam / quality / classification on each record).
 Emits exactly one ``RecordEnriched`` per batch invocation (Week 5 lite payload, issue #87).
 
+When ``check_db_connection()`` is true, ``process()`` opens one ``session_scope()`` for the
+whole batch so ``resolve_company`` / ``resolve_location`` use the real dbo session (#95).
+If the DB is down or ``session_scope`` fails, rows run with ``session=None`` (sector lookup
+skipped; company/location resolvers degrade inside ``enrich_record``).
+
 Agent ID (canonical): enrichment-agent
 Emits:    RecordEnriched
 Consumes: SkillsExtracted
@@ -21,6 +26,7 @@ from typing import Any, Literal
 import structlog
 
 from agents.common.base_agent import BaseAgent
+from agents.common.data_store import check_db_connection, session_scope
 from agents.common.event_envelope import EventEnvelope
 from agents.enrichment.resolvers.company_resolver import resolve_company
 from agents.enrichment.resolvers.confidence import (
@@ -152,23 +158,41 @@ class EnrichmentAgent(BaseAgent):
         spam_rejected_count = 0
         flagged_for_review_count = 0
 
-        for row in rows:
-            bucket = _spam_bucket(row)
-            if bucket == "rejected":
-                spam_rejected_count += 1
-                continue
-            if bucket == "flagged":
-                flagged_for_review_count += 1
-                continue
+        def run_batch(session: Any) -> None:
+            nonlocal enriched_count, spam_rejected_count, flagged_for_review_count
+            for row in rows:
+                bucket = _spam_bucket(row)
+                if bucket == "rejected":
+                    spam_rejected_count += 1
+                    continue
+                if bucket == "flagged":
+                    flagged_for_review_count += 1
+                    continue
 
-            posting = _posting_for_enrichment(row, payload)
+                posting = _posting_for_enrichment(row, payload)
+                try:
+                    enriched = self.enrich_record(posting, session=session)
+                    sector_id = resolve_sector(
+                        posting.get("role_classification"), session=session
+                    )
+                    enriched["sector_id"] = sector_id
+                    enriched_count += 1
+                except Exception:
+                    log.warning("enrichment_process_degraded", agent=self.agent_id)
+
+        if check_db_connection():
             try:
-                enriched = self.enrich_record(posting, session=None)
-                sector_id = resolve_sector(posting.get("role_classification"), session=None)
-                enriched["sector_id"] = sector_id
-                enriched_count += 1
-            except Exception:
-                log.warning("enrichment_process_degraded", agent=self.agent_id)
+                with session_scope() as db_session:
+                    run_batch(db_session)
+            except Exception as exc:
+                log.warning(
+                    "enrichment_session_scope_failed",
+                    agent=self.agent_id,
+                    error=str(exc),
+                )
+                run_batch(None)
+        else:
+            run_batch(None)
 
         return build_record_enriched_event(
             correlation_id=correlation_id,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from agents.common.event_envelope import EventEnvelope
 from agents.enrichment.agent import EnrichmentAgent
@@ -264,3 +264,77 @@ class TestEnrichmentAgent:
         assert rec["temporal_period"] == "agentic_era"
         assert rec["borderplex_subregion"] == "el_paso"
         assert rec["is_duplicate"] is False
+
+    def test_process_uses_session_scope_when_db_available(
+        self, skills_event: EventEnvelope
+    ) -> None:
+        """When check_db_connection is true, enrich_record receives the scoped Session."""
+        payload = {**skills_event.payload, "is_spam": False}
+        event = EventEnvelope(
+            correlation_id=skills_event.correlation_id,
+            agent_id=skills_event.agent_id,
+            payload=payload,
+        )
+        mock_session = MagicMock()
+        cm = MagicMock()
+        cm.__enter__.return_value = mock_session
+        cm.__exit__.return_value = None
+
+        agent = EnrichmentAgent()
+        with (
+            patch("agents.enrichment.agent.check_db_connection", return_value=True),
+            patch("agents.enrichment.agent.session_scope", return_value=cm),
+            patch.object(EnrichmentAgent, "enrich_record", return_value={"ok": True}) as mock_enrich,
+            patch("agents.enrichment.agent.resolve_sector", return_value=None),
+        ):
+            agent.process(event)
+
+        mock_enrich.assert_called_once()
+        assert mock_enrich.call_args.kwargs.get("session") is mock_session
+
+    def test_process_passes_none_session_when_db_unavailable(
+        self, skills_event: EventEnvelope
+    ) -> None:
+        payload = {**skills_event.payload, "is_spam": False}
+        event = EventEnvelope(
+            correlation_id=skills_event.correlation_id,
+            agent_id=skills_event.agent_id,
+            payload=payload,
+        )
+        agent = EnrichmentAgent()
+        with (
+            patch("agents.enrichment.agent.check_db_connection", return_value=False),
+            patch("agents.enrichment.agent.session_scope") as mock_scope,
+            patch.object(EnrichmentAgent, "enrich_record", return_value={"ok": True}) as mock_enrich,
+            patch("agents.enrichment.agent.resolve_sector", return_value=None),
+        ):
+            agent.process(event)
+
+        mock_scope.assert_not_called()
+        mock_enrich.assert_called_once()
+        assert mock_enrich.call_args.kwargs.get("session") is None
+
+    def test_process_falls_back_when_session_scope_raises(
+        self, skills_event: EventEnvelope
+    ) -> None:
+        payload = {**skills_event.payload, "is_spam": False}
+        event = EventEnvelope(
+            correlation_id=skills_event.correlation_id,
+            agent_id=skills_event.agent_id,
+            payload=payload,
+        )
+        cm = MagicMock()
+        cm.__enter__.side_effect = RuntimeError("session failed")
+        cm.__exit__.return_value = None
+
+        agent = EnrichmentAgent()
+        with (
+            patch("agents.enrichment.agent.check_db_connection", return_value=True),
+            patch("agents.enrichment.agent.session_scope", return_value=cm),
+            patch.object(EnrichmentAgent, "enrich_record", return_value={"ok": True}) as mock_enrich,
+            patch("agents.enrichment.agent.resolve_sector", return_value=None),
+        ):
+            agent.process(event)
+
+        mock_enrich.assert_called_once()
+        assert mock_enrich.call_args.kwargs.get("session") is None
