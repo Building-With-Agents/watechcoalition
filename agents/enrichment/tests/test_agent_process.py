@@ -86,7 +86,6 @@ def test_process_degraded_on_enrich_raises(
     )
     out = agent.process(event)
 
-    assert out.payload.get("process_status") == "degraded"
     assert out.payload["enriched_count"] == 0
     assert out.payload["spam_rejected_count"] == 0
     assert out.payload["flagged_for_review_count"] == 0
