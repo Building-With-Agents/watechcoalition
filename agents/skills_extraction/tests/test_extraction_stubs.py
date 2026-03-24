@@ -6,11 +6,15 @@ import pytest
 from pydantic import TypeAdapter
 
 from agents.common.types import JobRecord
-from agents.common.types.extraction_types import ResponsibilityRecord, TaskRecord
+from agents.common.types.extraction_types import (
+    ContextSignal,
+    ResponsibilityRecord,
+    SpanRecord,
+    TaskRecord,
+)
 from agents.skills_extraction.extractors.context import extract_context
 from agents.skills_extraction.extractors.responsibilities import extract_responsibilities
 from agents.skills_extraction.extractors.tasks import extract_tasks
-from agents.common.types.extraction_types import ContextSignal, SpanRecord
 
 
 @pytest.fixture
