@@ -195,11 +195,24 @@ npm run db:seed
 The seed script:
 - Creates the `dbo` schema with all tables, indexes, and constraints
 - Loads all reference data (skills, companies, job postings, taxonomies, etc.)
-- Creates agent-managed tables (`raw_ingested_jobs`, `normalized_jobs`, `job_ingestion_runs`)
-- Adds Phase 1 columns to `job_postings`
+- Creates agent-managed tables (`raw_ingested_jobs`, `normalized_jobs`, `job_ingestion_runs`, `extracted_intelligence`, `llm_audit_log`, `employer_profiles`)
+- Adds enrichment columns to `job_postings` (quality_score, soc_code, etc.)
 - Is **idempotent** — safe to run multiple times (drops and recreates schema each time)
 
+> **Schema ownership:** SQLAlchemy is the single database authority. All schema changes go through `agents/common/data_store/models.py` and `migrations.py`. Prisma migrations are deprecated.
+
 See [scripts/pg-seed-data/README.md](scripts/pg-seed-data/README.md) for details and troubleshooting.
+
+## 6.1 Schema Changes
+
+**SQLAlchemy is the single database authority.** To add or modify database tables:
+
+1. Define/update the ORM model in `agents/common/data_store/models.py`
+2. Add idempotent DDL or ALTER statements in `agents/common/data_store/migrations.py`
+3. Run migrations: `python -c "from agents.common.data_store.migrations import run_migrations; from agents.common.data_store.database import get_engine; run_migrations(get_engine())"`
+4. Verify with: `python -c "from agents.common.data_store.models import *; print([c.__name__ for c in Base.__subclasses__()])"`
+
+> **Do NOT create Prisma migrations.** The `prisma/schema.prisma` file and `docs/prisma-workflow.md` are legacy references. All new schema work goes through SQLAlchemy.
 
 ## 7. Run the App
 
@@ -229,7 +242,7 @@ See [CLAUDE.md](CLAUDE.md) for architecture, rules, and the 12-week build order;
 
 ### Next.js App
 
-> Requires MSSQL setup — see [section 8](#8-optional-mssql--nextjs-setup) first.
+> **Note:** The Next.js API is currently broken from the SQL Server → PostgreSQL migration (expected). Prisma is being phased out. See [section 8](#8-optional-mssql--nextjs-setup) for legacy setup.
 
 ```bash
 npm run dev
