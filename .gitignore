@@ -152,3 +152,8 @@ agents/data/output/*
 agents/venv/
 venv/
 .venv/
+
+# --- Taxonomy raw data (do NOT commit) ---
+agents/skills_extraction/taxonomy/digitalSkillsCollection_en.csv
+agents/skills_extraction/taxonomy/skills_en.csv
+agents/skills_extraction/taxonomy/onet_skills.txt
