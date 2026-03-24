@@ -9,7 +9,7 @@ Document prompt changes and before/after metrics when iterating on the skills ex
 | v1 | (initial) | Initial prompt in `agents/skills_extraction/prompts/skills_extraction_v1.py` | — | — |
 | v0-baseline | 2026-03-18 | Placeholder ground truth (8 records, title-only, keyword stub extractor) | — | Skills P=1.00 R=0.12; Tools P=0.00 R=0.00 |
 | v1-real-path-baseline | 2026-03-23 | Eval harness uses production-like path: `JobRecord` → `extract_tools` → `extract_skills(..., pass1_tools=tools)` on `extraction_ground_truth.json` (**21** hand-labeled jobs). Aggregate metrics are **MICRO** (pooled counts over all labels), not macro mean of per-job F1. Matching: lower+strip set equality on `SkillRecord.skill_name` / `ToolRecord.tool_name`. | v0-baseline (stub, 8 records) | **Skills** P=0.00 R=0.00 F1=0.00 · **Tools** P=0.49 R=0.24 F1=0.33 — see Changelog for caveats |
-| v2-30-record-baseline | 2026-03-23 | Ground truth expanded to **30** records. Strict matching (MICRO). Added taxonomy coverage and GenAI Extension detection rate to eval harness. | v1-real-path-baseline (21 records) | **Skills** P=0.18 R=0.43 F1=0.25 · **Tools** P=0.54 R=0.25 F1=0.34 · See Changelog for caveats and weakest categories |
+| v2-30-record-baseline | 2026-03-23 | Ground truth expanded to **30** records. Strict matching (MICRO). Added taxonomy coverage and GenAI Extension detection rate to eval harness. | v1-real-path-baseline (21 records) | **Skills** P=0.17 R=0.43 F1=0.25 · **Tools** P=0.54 R=0.25 F1=0.34 · See Changelog for caveats and weakest categories |
 
 ## How to add an entry
 
