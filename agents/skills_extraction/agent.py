@@ -1,14 +1,15 @@
 """
-Skills Extraction Agent — Week 4 hybrid bridge.
+Skills Extraction Agent — Week 4 hybrid extraction.
 
-Pass 1 (tools) is implemented with deterministic pattern matching.
-Pass 2 (skills) still uses fixture-backed data until the LLM extraction
-layer is wired in.
+Pass 1 (tools): deterministic pattern matching (`extract_tools`).
+Pass 2 (skills): LLM extraction + 6-step taxonomy linking (`extract_skills`) when
+title/description/requirements/responsibilities text is present; otherwise the
+Week 2 posting_id fixture can supply skills for skeleton tests.
 
-The agent supports three input modes, in order:
-1. Inline normalized records carried on the event payload
-2. Batch loading from dbo.normalized_jobs by batch_id / ingestion_run_id
-3. Legacy posting_id fixture fallback for the Week 2 walking skeleton tests
+Input resolution order:
+1. Inline normalized records on the event payload
+2. Batch load from dbo.normalized_jobs by batch_id / ingestion_run_id
+3. Legacy posting_id fixture fallback (walking skeleton / tests)
 """
 
 from __future__ import annotations
@@ -16,7 +17,7 @@ from __future__ import annotations
 import json
 import os
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -24,14 +25,66 @@ from agents.common.base_agent import BaseAgent
 from agents.common.data_store import check_db_connection, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
-from agents.common.types import JobRecord, ToolRecord
+from agents.common.types import ExtractionMetadata, JobRecord, ToolRecord
 from agents.skills_extraction.extractors import extract_skills, extract_tools
+from agents.skills_extraction.prompts.skills_extraction_v1 import SKILLS_PROMPT_VERSION
 
 _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
 )
-EXTRACTION_VERSION = "week4-pass1-tools-v1"
-EXTRACTION_MODEL = "pattern-matching"
+EXTRACTION_PASS1_LABEL = "pattern-tools-v1"
+EXTRACTION_VERSION = f"week4-hybrid-{SKILLS_PROMPT_VERSION}"
+FIXTURE_EXTRACTION_MODEL = "fixture-week2-skills"
+
+
+def _llm_deployment_name() -> str:
+    """Azure deployment used for Pass 2 (for dbo.extracted_intelligence.extraction_model)."""
+    return (
+        os.getenv("EXTRACTION_DEPLOYMENT_SKILLS")
+        or os.getenv("EXTRACTION_MODEL_SKILLS")
+        or os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
+        or "azure-openai"
+    )
+
+
+def _persisted_extraction_model_llm() -> str:
+    """Stable label: Pass 1 strategy + Pass 2 deployment + prompt version."""
+    return (
+        f"pass1={EXTRACTION_PASS1_LABEL};"
+        f"pass2={_llm_deployment_name()};"
+        f"prompt={SKILLS_PROMPT_VERSION}"
+    )
+
+
+def _metadata_from_pass2(
+    meta: dict[str, Any],
+    tools: list[ToolRecord],
+    *,
+    extraction_version: str,
+) -> dict[str, Any]:
+    """Build JSON for ExtractedIntelligence.extraction_metadata (Pass 2 path)."""
+    tier = os.getenv("EXTRACTION_MODEL_TIER", "").strip().lower()
+    if tier not in ("sonnet", "haiku"):
+        tier = "sonnet"
+    warnings = list(meta.get("extraction_warnings") or [])
+    err = meta.get("error_reason")
+    if err:
+        es = str(err)
+        if es and es not in warnings:
+            warnings.append(es)
+    blob = ExtractionMetadata(
+        extraction_version=extraction_version,
+        model_used=str(meta.get("model") or ""),
+        model_tier=tier,
+        tokens_used=int(meta.get("tokens_used") or 0),
+        cost_usd=float(meta.get("cost_usd") or 0.0),
+        extraction_duration_ms=int(meta.get("latency_ms") or 0),
+        pass1_tool_count=len(tools),
+        pass2_llm_dimensions=["skills"],
+        pass2_llm_calls=1,
+        extraction_warnings=warnings,
+    )
+    return blob.model_dump()
 
 
 @dataclass(frozen=True)
@@ -48,7 +101,7 @@ class ExtractionWorkItem:
 
 @dataclass(frozen=True)
 class ExtractionResult:
-    """One extraction result emitted by the bridge agent."""
+    """One extraction result emitted by the agent (Pass 1 + optional Pass 2 or fixture)."""
 
     work_item: ExtractionWorkItem
     skills: list[dict[str, Any]]
@@ -58,6 +111,10 @@ class ExtractionResult:
     extraction_tokens_used: int = 0
     extraction_cost_usd: float = 0.0
     alert_skills_extraction: bool = False
+    extraction_warnings: tuple[str, ...] = field(default_factory=tuple)
+    extraction_metadata: dict[str, Any] | None = None
+    persisted_extraction_version: str = EXTRACTION_VERSION
+    persisted_extraction_model: str = FIXTURE_EXTRACTION_MODEL
 
 
 class WorkItemLoader(Protocol):
@@ -231,15 +288,15 @@ class SQLAlchemyExtractionStore:
                 row = existing_rows[0] if existing_rows else ExtractedIntelligence(
                     normalized_job_id=normalized_job_id,
                     extraction_version=EXTRACTION_VERSION,
-                    extraction_model=EXTRACTION_MODEL,
+                    extraction_model=FIXTURE_EXTRACTION_MODEL,
                 )
                 if not existing_rows:
                     session.add(row)
                 for duplicate in existing_rows[1:]:
                     session.delete(duplicate)
 
-                row.extraction_version = EXTRACTION_VERSION
-                row.extraction_model = EXTRACTION_MODEL
+                row.extraction_version = result.persisted_extraction_version
+                row.extraction_model = result.persisted_extraction_model
                 row.extraction_tokens_used = getattr(result, "extraction_tokens_used", 0) or 0
                 row.extraction_cost_usd = getattr(result, "extraction_cost_usd", 0.0) or 0.0
                 row.skills = result.skills
@@ -248,16 +305,19 @@ class SQLAlchemyExtractionStore:
                 row.responsibilities = []
                 row.context = []
                 row.overall_confidence = _average_tool_confidence(result.tools)
-                row.extraction_warnings = []
+                row.extraction_warnings = list(result.extraction_warnings)
+                row.extraction_metadata = result.extraction_metadata
                 row.extraction_failed = result.extraction_status != "success"
 
 
 class SkillsExtractionAgent(BaseAgent):
     """
-    Stub for the Skills Extraction Agent.
+    Skills Extraction Agent — Week 4 hybrid (Pass 1 + Pass 2 LLM + taxonomy).
 
-    Week 2: returns fixture data indexed by posting_id instead of calling an LLM.
-    Week 4: replaces this with real LLM extraction + taxonomy linking.
+    Normalized text present: runs `extract_tools` then `extract_skills`, persists
+    to dbo.extracted_intelligence when `normalized_job_id` is set, emits
+    `SkillsExtracted`.
+    No normalized text: falls back to Week 2 fixture by `posting_id` when available.
     """
 
     @property
@@ -300,9 +360,8 @@ class SkillsExtractionAgent(BaseAgent):
         """
         Accept a NormalizationComplete event and emit a SkillsExtracted event.
 
-        Pass 1 (tools) runs against inline normalized payloads or batch-loaded
-        dbo.normalized_jobs rows. Skills remain fixture-backed until Pass 2
-        LLM extraction lands.
+        Pass 1 (tools) always runs. Pass 2 (skills) runs when normalized job text
+        exists; otherwise fixture fallback by posting_id when configured.
         """
         self._load_fixture()
 
@@ -342,6 +401,8 @@ class SkillsExtractionAgent(BaseAgent):
             skills_list, meta = extract_skills(job, pass1_tools=tools)
             skills_payload = [s.model_dump() for s in skills_list]
             status = "success" if not meta.get("extraction_failed") else "failed"
+            warn = tuple(str(w) for w in (meta.get("extraction_warnings") or []))
+            meta_blob = _metadata_from_pass2(meta, tools, extraction_version=EXTRACTION_VERSION)
             return ExtractionResult(
                 work_item=item,
                 skills=skills_payload,
@@ -351,6 +412,10 @@ class SkillsExtractionAgent(BaseAgent):
                 extraction_tokens_used=meta.get("tokens_used", 0) or 0,
                 extraction_cost_usd=meta.get("cost_usd", 0.0) or 0.0,
                 alert_skills_extraction=meta.get("alert_skills_extraction", False),
+                extraction_warnings=warn,
+                extraction_metadata=meta_blob,
+                persisted_extraction_version=EXTRACTION_VERSION,
+                persisted_extraction_model=_persisted_extraction_model_llm(),
             )
         fixture_payload = self._fixture.get(item.posting_id, {}) if item.posting_id is not None else {}
         return ExtractionResult(
@@ -359,6 +424,8 @@ class SkillsExtractionAgent(BaseAgent):
             tools=tools,
             seniority=fixture_payload.get("seniority"),
             extraction_status=fixture_payload.get("extraction_status", "success"),
+            persisted_extraction_version=EXTRACTION_VERSION,
+            persisted_extraction_model=FIXTURE_EXTRACTION_MODEL,
         )
 
     def _build_payload(
@@ -398,7 +465,7 @@ class SkillsExtractionAgent(BaseAgent):
             "failed_count": sum(1 for result in results if result.extraction_status != "success"),
             "records": summaries,
             "llm_provider": "azure-openai" if any_llm_called else "stub",
-            "llm_model": "sonnet" if any_llm_called else "stub",
+            "llm_model": _llm_deployment_name() if any_llm_called else "stub",
             "llm_call_logged": any_llm_called,
             "skills_extraction_alert": any_alert,
         }
