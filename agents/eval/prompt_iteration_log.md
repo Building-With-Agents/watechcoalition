@@ -9,6 +9,7 @@ Document prompt changes and before/after metrics when iterating on the skills ex
 | v1 | (initial) | Initial prompt in `agents/skills_extraction/prompts/skills_extraction_v1.py` | — | — |
 | v0-baseline | 2026-03-18 | Placeholder ground truth (8 records, title-only, keyword stub extractor) | — | Skills P=1.00 R=0.12; Tools P=0.00 R=0.00 |
 | v1-pipeline-30 | 2026-03-23 | **Baseline (no prompt change):** `run_extraction_eval --mode pipeline`, `extraction_ground_truth.json` (30 jobs), prompt `skills_extraction_v1`, git `b7ea71da` | — | **Skills** P=0.17 R=0.41 (91/221 matched); **Tools** P=0.54 R=0.25 (32/127 matched); ~78.6k tokens, ~\$0.62 est., 0 LLM failures |
+| **pass1-catalog-v2** | 2026-03-24 | **Pass 1 only:** expand `TOOL_CATALOG` in `agents/skills_extraction/extractors/tools.py` (BI stacks, Atlassian, data platforms, security tools, Microsoft Office naming, split `React.js` vs `React`, Azure `Microsoft Windows Azure`, Splunk ES variants, MITRE ATT&CK); **eval:** `normalize_tool_label_for_eval()` in `extraction_eval_core.py` so `Microsoft Excel`/`excel`/`Microsoft PowerPoint`/`powerpoint`/`Microsoft Outlook`/`outlook` align for micro P/R | **Tools (v1-pipeline-30, 30 jobs):** P=0.54 R=0.25 (32/127 matched) | **Pass-1 micro on 30 jobs (same GT, `extract_tools` + eval label equivalence):** **Tools P=0.75 R=0.69** (87/127 matched, 116 pred); *not* full pipeline re-run — see § Exercise 4.5 Pass-1 audit below |
 
 ## How to add an entry
 
@@ -59,3 +60,28 @@ Document prompt changes and before/after metrics when iterating on the skills ex
 | _Week 4_   | Template created; fill after prompt iteration and integration runs. |
 | 2026-03-18 | Recorded v0-baseline: 8 placeholder records (title-only, no `text` field), keyword-matching stub extractor. Skills Precision 1.00, Recall 0.12 (3/24 matched). Tools Precision 0.00, Recall 0.00 (0/12). Ground truth dataset is WIP — expand to 30-50 records with full `text` descriptions and run against real LLM extractor for meaningful baseline. |
 | 2026-03-23 | **v1-pipeline-30:** Full pipeline eval on 30 labeled jobs. Artifacts: `agents/eval/runs/20260323T111224-0600_exercise-4-5-baseline.json`, `agents/eval/prompt_backlog/20260323T111224-0600_exercise-4-5-baseline.md`. |
+| 2026-03-24 | **Exercise 4.5 — Pass 1 catalog + eval label alignment:** See § below. |
+
+---
+
+## Exercise 4.5 — Pass 1 catalog audit (GT tools vs `extract_tools`)
+
+### Root cause
+
+`TOOL_CATALOG` was missing many **literal vendor / BI / collaboration** strings that appear in `extraction_ground_truth.json` (e.g. Tableau, Looker, Power BI, Jira, Confluence, Databricks, dbt). Pass 1 cannot emit a `ToolRecord` for a name that is not in the catalog, so **tools recall stayed low** even when Pass 2 skills precision was high.
+
+**Additional:** `React` and `React.js` shared one `ToolDefinition`, so matches on `React.js` still emitted `tool_name="React"`, which did not match GT `react.js`. **GT vs canonical names** for Office (e.g. `excel` vs `Microsoft Excel`) also inflated missed counts.
+
+### Audit: GT tool labels (30 jobs) with no Pass-1 match *before* catalog expansion
+
+Typical buckets:
+
+- **Missing catalog entries:** BI (Tableau, Looker, Power BI, Sigma), Atlassian (Jira, Confluence), data (Databricks, dbt), collaboration (Miro), security (Splunk, Wireshark, Burp Suite, Kali Linux, Nessus, Metasploit, CrowdStrike, Cisco, Fortinet), dev (Git, GitLab, Next.js, Prisma, SQL Server, Visual Studio, PyTest, .NET, C#, C++, Scala, Linux, PowerShell), ML libs (PyTorch, TensorFlow, Keras, Pandas, NumPy, matplotlib, ggplot2, Datawrapper), GenAI products (ChatGPT, Claude, Cursor, GitHub Copilot), etc.
+- **Not literal strings in posting text:** GT lists tools (e.g. Snowflake, dbt) that do not appear in the job text — Pass 1 cannot match.
+- **Abstract categories, not products:** e.g. “CI/CD Tools”, “Modern Data Platforms”, “SQL Data Query Tools” — out of scope for dictionary Pass 1.
+
+### After this change (Pass-1 micro)
+
+On all 30 `extraction_ground_truth.json` jobs, `extract_tools` + `normalize_tool_label_for_eval` yields **~87 / 127** GT tool labels matched (micro **P≈0.75, R≈0.69**). Remaining misses are mostly abstract categories, compliance/regulatory strings, single-letter **R**, or labels not present in text.
+
+**Full pipeline:** Re-run `python -m agents.eval.run_extraction_eval --mode pipeline --label <your-label>` to refresh end-to-end tools P/R (Pass 1 + LLM path unchanged for tools; numbers differ slightly from Pass-1-only micro).

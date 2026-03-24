@@ -104,6 +104,15 @@ def test_extract_tools_dedupes_repeated_aliases_to_one_canonical_record() -> Non
     assert records[0].source_span.text == "PostgreSQL"
 
 
+def test_extract_tools_prefers_react_js_span_over_react_prefix() -> None:
+    """React.js in text should emit React.js (eval GT label), not shorter React."""
+    job_record = _job_record(
+        description="Front-end experience with React.js and REST APIs.",
+    )
+    records = extract_tools(job_record)
+    assert [record.tool_name for record in records] == ["React.js"]
+
+
 def test_extract_tools_supports_explicit_excel_but_not_excel_as_a_verb() -> None:
     """Excel should only be returned when the local context is tool-specific."""
     positive_job = _job_record(

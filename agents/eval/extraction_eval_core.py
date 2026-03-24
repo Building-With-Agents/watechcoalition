@@ -38,6 +38,20 @@ def normalize_list(items: list[str]) -> set[str]:
     return {i.lower().strip() for i in items if i and str(i).strip()}
 
 
+# Collapse equivalent product labels so eval recall/precision match human intent (GT vs Pass 1 naming).
+_TOOL_LABEL_EQUIVALENCE: dict[str, str] = {
+    "microsoft excel": "excel",
+    "microsoft powerpoint": "powerpoint",
+    "microsoft outlook": "outlook",
+}
+
+
+def normalize_tool_label_for_eval(label: str) -> str:
+    """Map alternate spellings to one key for micro tool P/R (GT vs predicted tool_name)."""
+    s = label.lower().strip()
+    return _TOOL_LABEL_EQUIVALENCE.get(s, s)
+
+
 def compute_metrics(pred: set[str], true: set[str]) -> tuple[float, float]:
     precision = 0.0 if len(pred) == 0 else len(pred & true) / len(pred)
     recall = 0.0 if len(true) == 0 else len(pred & true) / len(true)
@@ -184,7 +198,8 @@ def _gt_sets(job: dict[str, Any]) -> tuple[set[str], set[str]]:
     skills_raw = job.get("skills") or []
     tools_raw = job.get("tools") or []
     gt_skills = normalize_list([str(s["skill_name"]) for s in skills_raw if isinstance(s, dict)])
-    gt_tools = normalize_list([str(t["tool_name"]) for t in tools_raw if isinstance(t, dict)])
+    gt_tools_raw = normalize_list([str(t["tool_name"]) for t in tools_raw if isinstance(t, dict)])
+    gt_tools = {normalize_tool_label_for_eval(t) for t in gt_tools_raw}
     return gt_skills, gt_tools
 
 
@@ -228,7 +243,10 @@ def run_eval_dataset(
         if mode == "stub":
             pred = extract_from_text_testing(text)
             pred_skills = normalize_list([str(x) for x in pred.get("skills", [])])
-            pred_tools = normalize_list([str(x) for x in pred.get("tools", [])])
+            pred_tools = {
+                normalize_tool_label_for_eval(t)
+                for t in normalize_list([str(x) for x in pred.get("tools", [])])
+            }
             pj = PerJobSnapshot(
                 job_key=_job_key(job, idx),
                 title=str(job.get("title") or ""),
@@ -254,7 +272,8 @@ def run_eval_dataset(
 
             skills_recs, meta = extract_skills(jr, pass1_tools=tools_recs)
             pred_skills = normalize_list([s.skill_name for s in skills_recs])
-            pred_tools = normalize_list([t.tool_name for t in tools_recs])
+            pred_tools_raw = normalize_list([t.tool_name for t in tools_recs])
+            pred_tools = {normalize_tool_label_for_eval(t) for t in pred_tools_raw}
 
             tok = int(meta.get("tokens_used") or 0)
             cost = float(meta.get("cost_usd") or 0.0)
