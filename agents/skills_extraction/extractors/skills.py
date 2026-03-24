@@ -27,7 +27,7 @@ import structlog
 
 from agents.common.types import JobRecord, SkillRecord, SpanRecord, ToolRecord
 from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
-from agents.skills_extraction.prompts.skills_extraction_v1 import build_skills_prompt
+from agents.skills_extraction.prompts import build_skills_prompt
 
 log = structlog.get_logger()
 
@@ -106,7 +106,7 @@ def _skill_dict_to_record(raw: dict[str, Any]) -> SkillRecord | None:
             end_char=end_char,
         )
         return SkillRecord(
-            label=str(raw.get("label", "")).strip() or "unknown",
+            skill_name=str(raw.get("skill_name") or raw.get("label", "")).strip() or "unknown",
             type=raw.get("type", "Technical"),
             confidence=float(raw.get("confidence", 0.0)),
             required_flag=raw.get("required_flag"),
@@ -180,12 +180,20 @@ def extract_skills(
             return [], metadata
 
     # 429: exponential back-off up to RATE_LIMIT_MAX_CYCLES
-    if not meta.get("success") and "429" in str(meta.get("error_reason", "")):
+    is_rate_limited = not meta.get("success") and (
+        meta.get("is_rate_limit")
+        or meta.get("retry_after_seconds") is not None
+        or "429" in str(meta.get("error_reason", ""))
+    )
+    if is_rate_limited:
         for cycle, delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
             if cycle >= RATE_LIMIT_MAX_CYCLES:
                 metadata["alert_skills_extraction"] = True
                 return [], metadata
-            time.sleep(delay)
+            # Honor server Retry-After if provided, otherwise use backoff sequence
+            server_delay = meta.get("retry_after_seconds")
+            actual_delay = server_delay if server_delay and cycle == 0 else delay
+            time.sleep(actual_delay)
             try:
                 text, meta = _do_invoke()
                 metadata["tokens_used"] = metadata.get("tokens_used", 0) + meta.get("tokens_used", 0)

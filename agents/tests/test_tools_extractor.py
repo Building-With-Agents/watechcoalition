@@ -104,6 +104,64 @@ def test_extract_tools_dedupes_repeated_aliases_to_one_canonical_record() -> Non
     assert records[0].source_span.text == "PostgreSQL"
 
 
+def test_extract_tools_prefers_react_js_span_over_react_prefix() -> None:
+    """React.js in text should emit React.js (eval GT label), not shorter React."""
+    job_record = _job_record(
+        description="Front-end experience with React.js and REST APIs.",
+    )
+    records = extract_tools(job_record)
+    assert [record.tool_name for record in records] == ["React.js"]
+
+
+def test_extract_tools_keeps_c_plus_plus_and_c_sharp_distinct() -> None:
+    """Tool IDs must not collapse distinct punctuated languages into one record."""
+    job_record = _job_record(
+        description="Strong software design skills in Python, Scala, Java, C++, or C#.",
+    )
+
+    records = extract_tools(job_record)
+
+    assert [record.tool_name for record in records] == ["Python", "Scala", "Java", "C++", "C#"]
+    assert next(record for record in records if record.tool_name == "C++").tool_id == (
+        "tool-c-plus-plus"
+    )
+    assert next(record for record in records if record.tool_name == "C#").tool_id == "tool-c-sharp"
+
+
+def test_extract_tools_supports_r_when_stack_context_is_present() -> None:
+    """Single-letter R should only survive when it appears in a technical language list."""
+    job_record = _job_record(
+        description="Proficiency in SQL and at least one analytical programming language (R or Python).",
+    )
+
+    records = extract_tools(job_record)
+
+    assert [record.tool_name for record in records] == ["SQL", "R", "Python"]
+
+
+def test_extract_tools_supports_projects_in_microsoft_office_list() -> None:
+    """Projects should map to Microsoft Projects only in strong Office-suite context."""
+    positive_job = _job_record(
+        requirements=(
+            "Advanced level computer skills in typical business software including "
+            "Microsoft, Excel, PowerPoint, Outlook, Projects."
+        ),
+    )
+    negative_job = _job_record(
+        requirements="Lead multiple projects across the portfolio and communicate status clearly.",
+    )
+
+    positive_records = extract_tools(positive_job)
+
+    assert [record.tool_name for record in positive_records] == [
+        "Microsoft Excel",
+        "PowerPoint",
+        "Outlook",
+        "Microsoft Projects",
+    ]
+    assert extract_tools(negative_job) == []
+
+
 def test_extract_tools_supports_explicit_excel_but_not_excel_as_a_verb() -> None:
     """Excel should only be returned when the local context is tool-specific."""
     positive_job = _job_record(

@@ -8,6 +8,7 @@ Every LLM call in the pipeline flows through here. Handles:
 - Retry once on timeout, then return extraction_failed=True
 - Exponential back-off on 429 (1s → 2s → 4s → 8s); queue is implicit (caller holds batch)
 - SkillsExtractionAlert event emitted after 3 back-off cycles (if bus registered)
+- Optional Langfuse tracing via register_tracer()
 
 All LLM calls from any agent must flow through this adapter — no per-agent logging.
 Uses structlog only. No credentials in code — env vars only.
@@ -66,6 +67,7 @@ _ALERT_AFTER_CYCLES = 3
 # ---------------------------------------------------------------------------
 # Cost computation
 # ---------------------------------------------------------------------------
+
 
 def compute_extraction_cost(input_tokens: int, output_tokens: int, model_tier: str) -> float:
     """Return cost in USD for a given token count and model tier."""
@@ -145,6 +147,7 @@ def handle_extraction_failure(
 # ---------------------------------------------------------------------------
 # Main adapter
 # ---------------------------------------------------------------------------
+
 
 def complete(
     prompt: str,

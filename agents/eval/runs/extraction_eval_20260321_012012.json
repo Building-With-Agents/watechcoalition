@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "run_id": "extraction_eval_20260321_012012",
+  "run_timestamp_mt": {
+    "iso": "2026-03-21T01:20:12.295045-06:00",
+    "display": "2026-03-21 01:20:12 MDT"
+  },
+  "timezone": "America/Denver",
+  "mode": "stub",
+  "ground_truth_path": "C:\\Users\\milob\\OneDrive\\Escritorio\\WAI Code\\watechcoalition\\agents\\eval\\extraction_ground_truth.json",
+  "git_commit": "f5b60fb0af26e15cdb19842ee0c824ff30fccd7b",
+  "limit_applied": 2,
+  "aggregate": {
+    "job_count": 2,
+    "skills_micro_precision": 0.142857,
+    "skills_micro_recall": 0.083333,
+    "tools_micro_precision": 0.0,
+    "tools_micro_recall": 0.0,
+    "total_gt_skills": 12,
+    "total_pred_skills": 7,
+    "matched_skills": 1,
+    "total_gt_tools": 7,
+    "total_pred_tools": 1,
+    "matched_tools": 0,
+    "llm_tokens_used_sum": 0,
+    "llm_cost_usd_sum": 0.0,
+    "llm_latency_ms_sum": 0,
+    "llm_tokens_used_avg": 0.0,
+    "llm_cost_usd_avg": 0.0,
+    "llm_latency_ms_avg": 0.0,
+    "records_extraction_failed": 0,
+    "records_with_llm_warnings": 0,
+    "llm_job_count": 0
+  },
+  "per_job": [
+    {
+      "ground_truth_id": "gt-001",
+      "index": 0,
+      "title": "Product Manager - AI & Data Analytics",
+      "gt_skills_sorted": [
+        "ai/ml lifecycle",
+        "backlog management",
+        "data visualization",
+        "product strategy",
+        "sql",
+        "stakeholder management"
+      ],
+      "gt_tools_sorted": [
+        "dbt",
+        "looker",
+        "power bi",
+        "python",
+        "snowflake",
+        "tableau"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "data analysis",
+        "product management",
+        "sales",
+        "sql"
+      ],
+      "pred_tools_sorted": [
+        "sql"
+      ],
+      "skills_intersection": [
+        "sql"
+      ],
+      "skills_only_in_gt": [
+        "ai/ml lifecycle",
+        "backlog management",
+        "data visualization",
+        "product strategy",
+        "stakeholder management"
+      ],
+      "skills_only_in_pred": [
+        "communication",
+        "data analysis",
+        "product management",
+        "sales"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "dbt",
+        "looker",
+        "power bi",
+        "python",
+        "snowflake",
+        "tableau"
+      ],
+      "tools_only_in_pred": [
+        "sql"
+      ],
+      "skills_precision": 0.2,
+      "skills_recall": 0.166667,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-002",
+      "index": 1,
+      "title": "Senior Product Manager, AI",
+      "gt_skills_sorted": [
+        "agentic ai",
+        "ai/ml product management",
+        "cross-functional collaboration",
+        "customer research",
+        "foundation models (llms)",
+        "product roadmap"
+      ],
+      "gt_tools_sorted": [
+        "chatgpt"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "product management"
+      ],
+      "pred_tools_sorted": [],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "agentic ai",
+        "ai/ml product management",
+        "cross-functional collaboration",
+        "customer research",
+        "foundation models (llms)",
+        "product roadmap"
+      ],
+      "skills_only_in_pred": [
+        "communication",
+        "product management"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "chatgpt"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    }
+  ]
+}

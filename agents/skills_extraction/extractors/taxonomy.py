@@ -46,11 +46,17 @@ _DEFAULT_ESCO_JSON = _TAXONOMY_DIR / "esco_digital_skills.json"
 _DEFAULT_GENAI_EXTENSION_JSON = _TAXONOMY_DIR / "genai_extension.json"
 _DEFAULT_ONET_SKILLS_PATH = _TAXONOMY_DIR / "onet_skills.txt"
 
-# Alias map: ARCHITECTURE_DEEP parent cluster name (normalized) → ESCO broader_concept label as it appears in data
+# Alias map: GenAI parent names that are not exact ESCO preferred_label / broader_label strings
+# in our JSON → an ESCO label that appears on records (see _build_parent_label_to_uri).
 _PARENT_LABEL_ALIASES: dict[str, str] = {
     "digital content creation": "create digital content",
-    "software architecture": "designing ict systems or applications",  # define software architecture has this parent
+    "software architecture": "designing ict systems or applications",
     "database management": "manage database",
+    "information retrieval": "gathering information from physical or electronic sources",
+    "digital ethics": "philosophy and ethics",
+    "quality assurance": "quality assurance methodologies",
+    "systems integration": "integrate ict data",
+    "technology evaluation": "evaluating systems, programmes, equipment and products",
 }
 
 # ---------------------------------------------------------------------------
@@ -81,7 +87,13 @@ def _load_esco_store(json_path: Path | None = None) -> list[dict[str, Any]]:
 
 
 def _build_parent_label_to_uri(records: list[dict[str, Any]]) -> dict[str, str]:
-    """Build map: normalized parent cluster label → one ESCO broader concept URI."""
+    """Build map: normalized parent cluster label → ESCO concept URI.
+
+    GenAI extension parents (e.g. \"Machine learning\") are official ESCO concept
+    titles: they match a record's ``preferred_label`` even when no other skill
+    lists that string under ``broader_concept_labels``. Broader-derived entries
+    are filled first; preferred_label fills remaining keys without overwriting.
+    """
     out: dict[str, str] = {}
     for rec in records:
         labels = rec.get("broader_concept_labels") or []
@@ -91,6 +103,14 @@ def _build_parent_label_to_uri(records: list[dict[str, Any]]) -> dict[str, str]:
                 key = _normalize_label(label)
                 if key not in out:
                     out[key] = uri.strip()
+    for rec in records:
+        pref = rec.get("preferred_label")
+        uri = (rec.get("esco_uri") or "").strip()
+        if not pref or not uri:
+            continue
+        key = _normalize_label(pref)
+        if key and key not in out:
+            out[key] = uri
     # Apply aliases so GenAI parent names resolve
     for arch_name, esco_name in _PARENT_LABEL_ALIASES.items():
         key = _normalize_label(arch_name)
@@ -624,3 +644,28 @@ def resolution_stats(results: list[TaxonomyResult]) -> dict[int, int]:
         if 1 <= step <= 6:
             counts[step] = counts.get(step, 0) + 1
     return counts
+
+
+def resolution_report(results: list[TaxonomyResult]) -> dict[str, Any]:
+    """Aggregate metrics for eval / runbook reporting.
+
+    Returns counts_by_step, taxonomy_coverage (0-1), genai_extension_matches,
+    raw_skill_fallback (step 6 count), and avg_resolution_confidence over
+    steps 1-5 only (step 6 excluded from the average).
+    """
+    stats = resolution_stats(results)
+    n = len(results)
+    genai = sum(1 for r in results if r.is_genai_extension)
+    resolved = [r for r in results if r.resolution_step < 6]
+    avg_conf = (
+        sum(r.confidence for r in resolved) / len(resolved) if resolved else 0.0
+    )
+    fallback = stats.get(6, 0)
+    coverage = (n - fallback) / n if n else 0.0
+    return {
+        "counts_by_step": stats,
+        "taxonomy_coverage": round(coverage, 4),
+        "genai_extension_matches": genai,
+        "raw_skill_fallback": fallback,
+        "avg_resolution_confidence": round(avg_conf, 4),
+    }

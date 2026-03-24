@@ -16,18 +16,23 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
 from agents.common.base_agent import BaseAgent
+
+# Proactive inter-request delay to avoid Azure OpenAI 429 rate limits.
+# Set SKILLS_EXTRACTION_DELAY=0 to disable; increase for lower-tier deployments.
+_INTER_LLM_DELAY = float(os.environ.get("SKILLS_EXTRACTION_DELAY", "0.5"))
 from agents.common.data_store import check_db_connection, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types import ExtractionMetadata, JobRecord, ToolRecord
 from agents.skills_extraction.extractors import extract_skills, extract_tools
-from agents.skills_extraction.prompts.skills_extraction_v1 import SKILLS_PROMPT_VERSION
+from agents.skills_extraction.prompts import SKILLS_PROMPT_VERSION
 
 _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
@@ -377,7 +382,11 @@ class SkillsExtractionAgent(BaseAgent):
         if max_jobs > 0 and len(work_items) > max_jobs:
             work_items = work_items[:max_jobs]
 
-        results = [self._extract_work_item(item) for item in work_items]
+        results = []
+        for idx, item in enumerate(work_items):
+            if idx > 0 and _INTER_LLM_DELAY > 0:
+                time.sleep(_INTER_LLM_DELAY)
+            results.append(self._extract_work_item(item))
         self._extraction_store.save(results)
         # When payload["skills_extraction_alert"] is True, caller/orchestrator should
         # publish SkillsExtractionAlert so the Orchestration Agent can react.

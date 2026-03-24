@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+from sqlalchemy import delete
+
+from agents.common.data_store.database import session_scope
+from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types import JobRecord
 from agents.skills_extraction.agent import ExtractionWorkItem, SkillsExtractionAgent
@@ -19,7 +25,7 @@ class TestSkillsExtractionAgent:
         assert agent.agent_id == "skills-extraction-agent"
 
     def test_health_check_ok(self) -> None:
-        """Returns 'ok' when both the fixture and DB-backed mode are available."""
+        """Returns 'ok' when the fixture loads and the DB is reachable."""
         agent = SkillsExtractionAgent()
         with patch("agents.skills_extraction.agent.check_db_connection", return_value=True):
             result = agent.health_check()
@@ -79,7 +85,7 @@ class TestSkillsExtractionAgent:
         agent = SkillsExtractionAgent()
         agent.health_check()  # pre-load fixture
         mock_skill = SkillRecord(
-            label="Python",
+            skill_name="Python",
             type="Technical",
             confidence=0.9,
             source_span=SpanRecord(
@@ -130,8 +136,43 @@ class TestSkillsExtractionAgent:
         ]
         assert out.payload["skills"] == []
 
+    @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
     def test_process_emits_batch_payload_for_inline_job_list(self) -> None:
         """Batch payloads should produce aggregate metrics and per-record summaries."""
+        # ExtractionStore persists to extracted_intelligence with FK to normalized_jobs.
+        # Session-scoped truncates in other test modules leave normalized_jobs empty; seed
+        # parent rows for the inline normalized_job_id values used below.
+        run_id = "pytest-batch-inline-2"
+        with session_scope() as session:
+            session.execute(
+                delete(ExtractedIntelligence).where(
+                    ExtractedIntelligence.normalized_job_id.in_((11, 12))
+                )
+            )
+            session.execute(delete(NormalizedJob).where(NormalizedJob.id.in_((11, 12))))
+            session.add_all(
+                [
+                    NormalizedJob(
+                        id=11,
+                        ingestion_run_id=run_id,
+                        source="web_scrape",
+                        external_id="job-11",
+                        title="Backend Engineer",
+                        company="Acme",
+                        description="Python and PostgreSQL experience required.",
+                    ),
+                    NormalizedJob(
+                        id=12,
+                        ingestion_run_id=run_id,
+                        source="web_scrape",
+                        external_id="job-12",
+                        title="Cloud Engineer",
+                        company="Acme",
+                        description="Work with AWS and Terraform daily.",
+                    ),
+                ]
+            )
+
         event = EventEnvelope(
             correlation_id="test-batch-tools",
             agent_id="normalization-agent",

@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from agents.common.types import TaxonomyResult
 from agents.skills_extraction.extractors.taxonomy import (
+    _load_genai_extension,
+    resolution_report,
     resolution_stats,
     resolve_taxonomy,
     resolve_taxonomy_batch,
@@ -32,9 +34,7 @@ class TestResolveTaxonomy:
         assert 0 <= r.confidence <= 1
 
     def test_step1_genai_extension_match(self) -> None:
-        """GenAI Extension Layer: skill name (or normalized) matches at step 1 when parent exists in ESCO."""
-        # "Vector Database Management" -> "Database management" -> alias "manage database" (present in ESCO).
-        # "Prompt Engineering" -> "Digital content creation" has no matching parent in esco_digital_skills.json.
+        """GenAI Extension Layer: skill name (or normalized) matches at step 1 when parent maps to ESCO."""
         r = resolve_taxonomy("Vector Database Management")
         assert r.resolution_step == 1
         assert r.is_genai_extension is True
@@ -45,6 +45,15 @@ class TestResolveTaxonomy:
         r2 = resolve_taxonomy("vector database management")
         assert r2.resolution_step == 1
         assert r2.is_genai_extension is True
+
+    def test_all_genai_extension_canonical_names_step1(self) -> None:
+        """Runbook: all 10 predefined GenAI skills resolve at step 1 with non-null parent-cluster URI."""
+        for name in _load_genai_extension():
+            r = resolve_taxonomy(name)
+            assert r.resolution_step == 1, name
+            assert r.is_genai_extension is True, name
+            assert r.esco_uri is not None, name
+            assert r.confidence == 1.0, name
 
     def test_step2_exact_match_esco(self) -> None:
         """Known ESCO preferred_label matches at step 2."""
@@ -192,3 +201,25 @@ class TestResolutionStats:
         resolved_1_5 = total - stats.get(6, 0)
         coverage = (resolved_1_5 / total * 100) if total else 0
         assert 0 <= coverage <= 100
+
+    def test_resolution_report_shape(self, monkeypatch) -> None:
+        """Skip embedding + O*NET so one label is step 2 and one is step 6."""
+        monkeypatch.setattr(
+            "agents.skills_extraction.extractors.taxonomy._esco_embedding_meta",
+            None,
+        )
+        monkeypatch.setattr(
+            "agents.skills_extraction.extractors.taxonomy._esco_normalized_matrix",
+            None,
+        )
+        monkeypatch.setattr(
+            "agents.skills_extraction.extractors.taxonomy._get_onet_store",
+            lambda: {},
+        )
+        results = resolve_taxonomy_batch(["ABAP", "Some Unknown Skill XYZ 123"])
+        rep = resolution_report(results)
+        assert rep["taxonomy_coverage"] == 0.5
+        assert rep["raw_skill_fallback"] == 1
+        assert rep["genai_extension_matches"] == 0
+        assert "counts_by_step" in rep
+        assert rep["avg_resolution_confidence"] == 1.0  # only step-2 hit, confidence 1.0
