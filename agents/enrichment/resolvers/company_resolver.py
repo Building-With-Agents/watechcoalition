@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import uuid
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -45,24 +46,30 @@ def normalize_company_name(raw: str) -> str:
     return s.strip()
 
 
-def lookup_company_exact(normalized_name: str, session: Session) -> int | None:
-    """Return ``companies.id`` for an exact ``normalized_name`` match, else ``None``."""
-    stmt = select(Company.id).where(Company.normalized_name == normalized_name).limit(1)
+def lookup_company_exact(normalized_name: str, session: Session) -> str | None:
+    """Return ``companies.company_id`` for an exact ``company_name`` match, else ``None``."""
+    stmt = (
+        select(Company.company_id)
+        .where(Company.company_name == normalized_name)
+        .limit(1)
+    )
     return session.execute(stmt).scalar_one_or_none()
 
 
 def find_best_fuzzy_match(
     normalized_name: str, session: Session
-) -> tuple[int, float] | tuple[None, float]:
+) -> tuple[str, float] | tuple[None, float]:
     """
     Load all companies and return the best weighted fuzzy match at or above
     ``FUZZY_THRESHOLD``, else ``(None, best_score)``.
     """
-    rows = session.execute(select(Company.id, Company.normalized_name)).all()
+    rows = session.execute(
+        select(Company.company_id, Company.company_name)
+    ).all()
     if not rows:
         return (None, 0.0)
 
-    best_id: int | None = None
+    best_id: str | None = None
     best_score = -1.0
     for company_id, candidate in rows:
         score = (fuzz.token_sort_ratio(normalized_name, candidate) * 0.6) + (
@@ -77,19 +84,18 @@ def find_best_fuzzy_match(
     return (None, best_score)
 
 
-def create_placeholder_company(raw_name: str, normalized_name: str, session: Session) -> int:
+def create_placeholder_company(raw_name: str, _normalized_name: str, session: Session) -> str:
     """Insert a placeholder company row; flush only — caller must commit."""
     company = Company(
-        normalized_name=normalized_name,
-        raw_name=raw_name,
-        is_placeholder=True,
+        company_id=str(uuid.uuid4()),
+        company_name=raw_name,
     )
     session.add(company)
     session.flush()
-    return company.id
+    return company.company_id
 
 
-def resolve_company(raw_name: str, session: Session) -> tuple[int, float]:
+def resolve_company(raw_name: str, session: Session) -> tuple[str, float]:
     """
     Resolve ``raw_name`` to a company id and a confidence score for ``field_confidence``.
 

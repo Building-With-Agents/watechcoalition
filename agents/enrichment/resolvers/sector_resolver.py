@@ -23,9 +23,9 @@ def _normalize_sector_token(value: str) -> str:
     return " ".join(value.lower().split()).strip()
 
 
-def resolve_sector(role_classification: str | None, session: Any) -> int | None:
+def resolve_sector(role_classification: str | None, session: Any) -> str | None:
     """
-    Return ``industry_sectors.id`` for the mapped sector name, if present in DB.
+    Return ``industry_sectors.industry_sector_id`` for the mapped sector name, if present in DB.
 
     ``session`` may be ``None`` (no DB yet); returns ``None`` without querying.
     """
@@ -38,8 +38,8 @@ def resolve_sector(role_classification: str | None, session: Any) -> int | None:
 
     sector_name = _normalize_sector_token(ROLE_TO_SECTOR[role_classification])
     stmt = (
-        select(IndustrySector.id)
-        .where(IndustrySector.normalized_name == sector_name)
+        select(IndustrySector.industry_sector_id)
+        .where(IndustrySector.sector_title == sector_name)
         .limit(1)
     )
     return session.execute(stmt).scalar_one_or_none()
