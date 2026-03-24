@@ -186,6 +186,10 @@ _EMPLOYMENT_TYPE_MAP = {
     "contract": "contract", "contractor": "contract", "freelance": "contract",
     "temporary": "temporary", "temp": "temporary",
     "internship": "internship", "intern": "internship",
+    # Federal (USAJOBS-style) appointment types
+    "term": "temporary",
+    "seasonal": "temporary",
+    "intermittent": "part_time",
 }
 
 
