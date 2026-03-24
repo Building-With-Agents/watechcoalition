@@ -189,9 +189,12 @@ class TestSkillsExtractionAgent:
         )
 
         agent = SkillsExtractionAgent()
-        with _patch_skills_extraction_pass2_llm(
-            skills_list=[],
-            skills_meta={"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0},
+        with (
+            patch("agents.skills_extraction.agent.check_db_connection", return_value=False),
+            _patch_skills_extraction_pass2_llm(
+                skills_list=[],
+                skills_meta={"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0},
+            ),
         ):
             out = agent.process(event)
 
