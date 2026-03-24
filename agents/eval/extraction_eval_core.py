@@ -43,6 +43,11 @@ _TOOL_LABEL_EQUIVALENCE: dict[str, str] = {
     "microsoft excel": "excel",
     "microsoft powerpoint": "powerpoint",
     "microsoft outlook": "outlook",
+    "microsoft project": "microsoft projects",
+    "splunk (es)": "splunk",
+    "splunk es": "splunk",
+    "fortinet firewall": "fortinet",
+    "fortinet firewalls": "fortinet",
 }
 
 

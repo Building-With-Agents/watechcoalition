@@ -34,6 +34,10 @@ AMBIGUOUS_CONFIDENCE = 0.82
 EXACT_CONFIDENCE = 0.97
 EXPLICIT_ALIAS_CONFIDENCE = 0.98
 CONTEXT_WINDOW = 48
+SPECIAL_TOOL_IDS = {
+    "C#": "tool-c-sharp",
+    "C++": "tool-c-plus-plus",
+}
 
 
 @dataclass(frozen=True)
@@ -138,6 +142,26 @@ TOOL_CATALOG: tuple[ToolDefinition, ...] = (
         tool_name="Rust",
         category="language",
         aliases=(ToolAlias("Rust"),),
+    ),
+    ToolDefinition(
+        tool_name="R",
+        category="language",
+        aliases=(ToolAlias("R", confidence=AMBIGUOUS_CONFIDENCE, requires_context=True),),
+        context_keywords=(
+            "python",
+            "sql",
+            "analytics",
+            "analysis",
+            "statistical",
+            "statistics",
+            "programming",
+            "language",
+        ),
+        context_patterns=(
+            r"\b(?:r|python|sql|scala|java|c\+\+|c#)\b\s*(?:,|/|or)\s*(?:r|python|sql|scala|java|c\+\+|c#)\b",
+            r"\b(?:analytical|programming)\s+language\s*\(\s*r\s+or\s+python\s*\)\b",
+            r"\bproficiency\s+in\s+r\b",
+        ),
     ),
     ToolDefinition(
         tool_name="SQL",
@@ -542,6 +566,18 @@ TOOL_CATALOG: tuple[ToolDefinition, ...] = (
         aliases=(
             ToolAlias("Microsoft Projects", confidence=EXPLICIT_ALIAS_CONFIDENCE),
             ToolAlias("Microsoft Project", confidence=EXPLICIT_ALIAS_CONFIDENCE),
+            ToolAlias("Projects", confidence=AMBIGUOUS_CONFIDENCE, requires_context=True),
+        ),
+        context_keywords=(
+            "microsoft",
+            "excel",
+            "powerpoint",
+            "outlook",
+            "office",
+        ),
+        context_patterns=(
+            r"\bmicrosoft,\s*excel,\s*powerpoint,\s*outlook,\s*projects\b",
+            r"\bexcel,\s*powerpoint,\s*outlook,\s*projects\b",
         ),
     ),
     ToolDefinition(
@@ -859,6 +895,8 @@ def _has_context(
 
 def _build_tool_id(tool_name: str) -> str:
     """Generate a stable slug-like identifier for a canonical tool name."""
+    if tool_name in SPECIAL_TOOL_IDS:
+        return SPECIAL_TOOL_IDS[tool_name]
     slug = re.sub(r"[^a-z0-9]+", "-", tool_name.casefold()).strip("-")
     return f"tool-{slug}"
 

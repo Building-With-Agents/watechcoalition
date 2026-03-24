@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 from agents.eval.extraction_eval_core import (
     compute_metrics,
     extract_from_text_testing,
+    normalize_tool_label_for_eval,
     now_mountain_iso,
     run_eval_dataset,
 )
@@ -42,6 +43,12 @@ def test_stub_extractor_keyword() -> None:
     out = extract_from_text_testing("We need Python and AWS docker experience")
     assert "Python" in out["skills"]
     assert "AWS" in out["tools"]
+
+
+def test_normalize_tool_label_for_eval_collapses_known_variants() -> None:
+    assert normalize_tool_label_for_eval("Microsoft Excel") == "excel"
+    assert normalize_tool_label_for_eval("Splunk (ES)") == "splunk"
+    assert normalize_tool_label_for_eval("Fortinet Firewalls") == "fortinet"
 
 
 def test_run_eval_dataset_stub_tiny() -> None:
