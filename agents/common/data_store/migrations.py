@@ -4,6 +4,9 @@ SQLAlchemy is the single database authority. Creates agent tables, adds
 enrichment columns to job_postings, and ensures reference tables are
 accessible. Prisma/MSSQL is being phased out.
 
+Optional legacy raw-SQL scripts (pre-consolidation paths) live under
+``legacy_migrations/`` for reference only; use :func:`run_migrations` for the app.
+
 Usage:
     from agents.common.data_store.migrations import run_migrations
     from agents.common.data_store.database import get_engine
@@ -122,6 +125,7 @@ CREATE INDEX IF NOT EXISTS ix_employer_profiles_company_id
     ON dbo.employer_profiles (company_id);
 """
 
+
 def run_migrations(engine: Engine) -> None:
     """Create agent tables and add Phase 1 columns. Safe to run multiple times."""
     log.info("migrations_start")
@@ -155,6 +159,7 @@ def run_migrations(engine: Engine) -> None:
         conn.execute(text(_LLM_AUDIT_LOG_DDL))
     log.info("migrations_llm_audit_log_created")
 
+    # 3b. Add token columns if table was created before they existed in DDL
     for stmt in _LLM_AUDIT_LOG_ALTER_STATEMENTS:
         try:
             with engine.begin() as conn:

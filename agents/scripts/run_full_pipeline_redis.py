@@ -1,15 +1,20 @@
 """
 Run the full pipeline with Redis Streams as the message bus and emit metrics + HTML report.
 
+**Phase 1 default:** use ``agents/pipeline_runner.py`` (sequential agents, no Redis).
+This script is an optional **Phase 2 / SA #14 prototype** for external-bus validation;
+it is not required for normal development or CI.
+
 Runs with a limit of 10 jobs (ingestion + skills extraction) for faster runs. To change:
 - Edit _trigger_payload() and set "limit" (and/or "region_config.limit") for ingestion.
 - Set env SKILLS_EXTRACTION_MAX_JOBS (default 10) to cap skills extraction work items.
 
 Usage (from repo root, venv activated):
+  python agents/pipeline_runner.py
   python -m agents.scripts.run_full_pipeline_redis --redis-url redis://localhost:6379/0
   python -m agents.scripts.run_full_pipeline_redis  # uses REDIS_URL from env
 
-Requires a running Redis. Output: agents/eval/full_pipeline_redis_metrics.json and .html.
+Redis is only required for this script. Output: agents/eval/full_pipeline_redis_metrics.json and .html.
 """
 # ruff: noqa: T201
 

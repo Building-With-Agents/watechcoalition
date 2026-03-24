@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+# ruff: noqa: E402  -- module docstring must be first; imports follow
 
 """
 Seed ESCO digital skills data from the official English CSV package.
@@ -496,7 +497,6 @@ def filter_records(records: list[dict]) -> list[dict]:
     filtered: list[dict] = []
 
     for item in records:
-        preferred_label = (item.get("preferred_label") or "").strip()
         normalized_label = (item.get("normalized_label") or "").strip()
         parents = {x.strip().lower() for x in item.get("broader_concept_labels", []) if x.strip()}
 
@@ -792,6 +792,5 @@ def run(config: Config) -> int:
 if __name__ == "__main__":
     try:
         sys.exit(run(parse_args()))
-    except Exception as exc:
-        #print(f"ERROR: {exc}", file=sys.stderr)
+    except Exception:
         sys.exit(1)

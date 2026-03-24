@@ -31,7 +31,7 @@
 </head>
 <body>
   <h1>Skills Extraction Agent — Run Timeline</h1>
-  <p class="subtitle">Chronological steps and metrics. Generated at 2026-03-17T21:15:28.819341Z</p>
+  <p class="subtitle">Chronological steps and metrics. Generated at 2026-03-19T21:41:38.547764Z</p>
   <section class="posting">
     <h2>Job posting (input)</h2>
     <div class="field"><span class="field-label">Title</span><div class="field-body">Senior Platform Engineer</div></div>
@@ -42,7 +42,7 @@
   </section>
   <section class="step">
     <h2>1. Input event received</h2>
-    <p class="desc">At 2026-03-17T21:15:20.824057Z</p>
+    <p class="desc">At 2026-03-19T21:41:26.696237Z</p>
     <p class="desc">NormalizationComplete event passed to Skills Extraction Agent.</p>
     <div class="metrics">
       <div class="metric"><span class="key">tokens_used</span>: <span class="val">N/A</span></div>
@@ -79,7 +79,7 @@
   </section>
   <section class="step">
     <h2>2. Pass 1 (tools) complete → input to Pass 2 (skills)</h2>
-    <p class="desc">At 2026-03-17T21:15:28.819341Z</p>
+    <p class="desc">At 2026-03-19T21:41:38.546251Z</p>
     <p class="desc">Tool names produced by Pass 1 and passed as pass1_tools into the skills extractor.</p>
     <div class="metrics">
       <div class="metric"><span class="key">tokens_used</span>: <span class="val">N/A</span></div>
@@ -110,11 +110,11 @@
   </section>
   <section class="step">
     <h2>3. Extraction completed &amp; store saved</h2>
-    <p class="desc">At 2026-03-17T21:15:28.819341Z</p>
+    <p class="desc">At 2026-03-19T21:41:38.546251Z</p>
     <p class="desc">Pass 1 (tools) and Pass 2 (skills) ran. Results persisted.</p>
     <div class="metrics">
       <div class="metric"><span class="key">tokens_used</span>: <span class="val">864</span></div>
-      <div class="metric"><span class="key">extraction_cost_usd</span>: <span class="val">0.0</span></div>
+      <div class="metric"><span class="key">extraction_cost_usd</span>: <span class="val">0.0048</span></div>
       <div class="metric"><span class="key">skills_count</span>: <span class="val">3</span></div>
       <div class="metric"><span class="key">tools_count</span>: <span class="val">7</span></div>
       <div class="metric"><span class="key">failed_count</span>: <span class="val">0</span></div>
@@ -124,7 +124,7 @@
       <div class="metric"><span class="key">llm_provider</span>: <span class="val">azure-openai</span></div>
       <div class="metric"><span class="key">llm_model</span>: <span class="val">sonnet</span></div>
       <div class="metric"><span class="key">llm_call_logged</span>: <span class="val">Yes</span></div>
-      <div class="metric"><span class="key">latency_ms</span>: <span class="val">7994.77</span></div>
+      <div class="metric"><span class="key">latency_ms</span>: <span class="val">11850.24</span></div>
     </div>
     <pre>{
   &quot;job_id&quot;: &quot;job-timeline-1&quot;,
@@ -147,17 +147,17 @@
     <h3 class="subsection">Pass 2: Skills extracted</h3>
     <table class="data-table"><thead><tr><th>Label</th><th>Type</th><th>Confidence</th><th>Required</th><th>ESCO / GenAI</th><th>Source span</th></tr></thead><tbody>
     <tr><td>Backend Development</td><td>Domain</td><td>0.8</td><td>Yes</td><td>—</td><td class="span-cell">Build and maintain backend services; field: description; chars 0–35 <span class="debug-note" title="LLM returned invalid end_char; corrected to match text length">[span corrected: end_char 29 → 35]</span></td></tr>
-    <tr><td>REST APIs</td><td>Technical</td><td>0.9</td><td>Yes</td><td>—</td><td class="span-cell">REST APIs; field: requirements; chars 16–25</td></tr>
+    <tr><td>REST APIs</td><td>Technical</td><td>0.9</td><td>Yes</td><td>—</td><td class="span-cell">REST APIs; field: requirements; chars 17–26</td></tr>
     <tr><td>Collaboration</td><td>Soft</td><td>0.8</td><td>Yes</td><td>—</td><td class="span-cell">Collaborate with product and data teams; field: responsibilities; chars 24–63 <span class="debug-note" title="LLM returned invalid end_char; corrected to match text length">[span corrected: end_char 60 → 63]</span></td></tr>
     </tbody></table>
   </section>
   <section class="step">
     <h2>4. SkillsExtracted event emitted</h2>
-    <p class="desc">At 2026-03-17T21:15:28.819341Z</p>
+    <p class="desc">At 2026-03-19T21:41:38.547764Z</p>
     <p class="desc">Agent returned the final event with payload and metrics.</p>
     <div class="metrics">
-      <div class="metric"><span class="key">latency_ms</span>: <span class="val">7994.89</span></div>
-      <div class="metric"><span class="key">extraction_cost_usd</span>: <span class="val">0.0</span></div>
+      <div class="metric"><span class="key">latency_ms</span>: <span class="val">11850.57</span></div>
+      <div class="metric"><span class="key">extraction_cost_usd</span>: <span class="val">0.0048</span></div>
       <div class="metric"><span class="key">taxonomy_coverage</span>: <span class="val">0.0</span></div>
       <div class="metric"><span class="key">skills_count</span>: <span class="val">3</span></div>
       <div class="metric"><span class="key">tools_count</span>: <span class="val">7</span></div>
@@ -180,7 +180,7 @@
   &quot;skills_count&quot;: 3,
   &quot;tools_count&quot;: 7,
   &quot;taxonomy_coverage&quot;: 0.0,
-  &quot;extraction_cost_usd&quot;: 0.0,
+  &quot;extraction_cost_usd&quot;: 0.0048,
   &quot;failed_count&quot;: 0,
   &quot;llm_provider&quot;: &quot;azure-openai&quot;,
   &quot;llm_model&quot;: &quot;sonnet&quot;,

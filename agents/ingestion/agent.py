@@ -95,29 +95,71 @@ def fetch_sources(state: IngestionState) -> IngestionState:
             keywords=region_cfg.get("keywords", [region_cfg.get("query", "software engineer")]),
         )
 
-    all_records: list[RawJobRecord] = []
-    source_results: list[SourceResult] = []
+    n = len(sources)
+    per_index_records: list[list[RawJobRecord]] = [[] for _ in range(n)]
+    per_index_error: list[str | None] = [None] * n
     errors: list[str] = []
 
-    for source_name in sources:
+    async def _gather_crawl4ai(
+        indices_and_names: list[tuple[int, str]],
+    ) -> list[tuple[int, str, list[RawJobRecord], Exception | None]]:
+        async def fetch_one(
+            idx: int, source_name: str
+        ) -> tuple[int, str, list[RawJobRecord], Exception | None]:
+            try:
+                adapter = get_adapter(source_name)
+                recs = await adapter.fetch(region)
+                return (idx, source_name, recs, None)
+            except Exception as exc:
+                log.warning("source_fetch_failed", source=source_name, error=str(exc))
+                return (idx, source_name, [], exc)
+
+        return await asyncio.gather(
+            *[fetch_one(i, name) for i, name in indices_and_names],
+        )
+
+    crawl4ai_pending = [
+        (i, sources[i]) for i in range(n) if sources[i].startswith("crawl4ai")
+    ]
+
+    for i, source_name in enumerate(sources):
+        if source_name.startswith("crawl4ai"):
+            continue
         try:
             adapter = get_adapter(source_name)
             records = asyncio.run(adapter.fetch(region))
-            all_records.extend(records)
-            source_results.append(SourceResult(
-                source_name=source_name,
-                records_fetched=len(records),
-            ))
+            per_index_records[i] = records
             log.info("source_fetch_ok", source=source_name, count=len(records))
         except Exception as exc:
             err_msg = f"{source_name}: {exc}"
             errors.append(err_msg)
-            source_results.append(SourceResult(
-                source_name=source_name,
-                records_fetched=0,
-                error=str(exc),
-            ))
+            per_index_error[i] = str(exc)
             log.warning("source_fetch_failed", source=source_name, error=str(exc))
+
+    if crawl4ai_pending:
+        for idx, source_name, records, exc in asyncio.run(
+            _gather_crawl4ai(crawl4ai_pending)
+        ):
+            if exc is not None:
+                err_msg = f"{source_name}: {exc}"
+                errors.append(err_msg)
+                per_index_error[idx] = str(exc)
+            else:
+                per_index_records[idx] = records
+                log.info("source_fetch_ok", source=source_name, count=len(records))
+
+    all_records: list[RawJobRecord] = []
+    source_results: list[SourceResult] = []
+    for i, source_name in enumerate(sources):
+        recs = per_index_records[i]
+        all_records.extend(recs)
+        source_results.append(
+            SourceResult(
+                source_name=source_name,
+                records_fetched=len(recs),
+                error=per_index_error[i],
+            )
+        )
 
     # Cap total fetched records to limit (default 50) when set on state
     cap = state.get("limit")

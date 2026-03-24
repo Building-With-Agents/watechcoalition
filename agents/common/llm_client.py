@@ -19,9 +19,26 @@ try:
 except ImportError:
     pass
 
-from agents.common.llm_adapter import compute_extraction_cost, log_extraction_event
+from agents.common.llm_adapter import (
+    MODEL_TIER_MAP,
+    compute_extraction_cost,
+    log_extraction_event,
+)
 
 AGENT_NAME = "skills-extraction-agent"
+
+
+def _model_tier_for_skills_extraction(model_name: str) -> str:
+    """Map deployment/model name to pricing tier for :func:`compute_extraction_cost`.
+
+    Uses the same ``MODEL_TIER_MAP`` as ``llm_adapter`` for Anthropic models.
+    Azure OpenAI deployments are not in that map; use ``EXTRACTION_MODEL_TIER``
+    (``sonnet`` | ``haiku``) or default ``sonnet`` for cost estimates.
+    """
+    explicit = os.getenv("EXTRACTION_MODEL_TIER", "").strip().lower()
+    if explicit in ("sonnet", "haiku"):
+        return explicit
+    return MODEL_TIER_MAP.get(model_name, "sonnet")
 
 
 def _get_llm() -> Any:
@@ -90,23 +107,30 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
                     or (usage.get("input_tokens", 0) + usage.get("output_tokens", 0))
                     or 0
                 )
+                input_tokens = int(usage.get("input_tokens", 0))
+                output_tokens = int(usage.get("output_tokens", 0))
+                if tokens_used and (input_tokens or output_tokens) == 0:
+                    input_tokens = len(prompt) // 4
+                    output_tokens = max(0, tokens_used - input_tokens)
             else:
                 tokens_used = (len(prompt) + len(text)) // 4
+                input_tokens = len(prompt) // 4
+                output_tokens = max(0, tokens_used - input_tokens)
         else:
             tokens_used = (len(prompt) + len(text)) // 4
+            input_tokens = len(prompt) // 4
+            output_tokens = max(0, tokens_used - input_tokens)
 
-        # Split tokens: approximate input vs output when only total is available
-        input_tokens_est = len(prompt) // 4
-        output_tokens_est = max(0, tokens_used - input_tokens_est)
-        cost_usd = compute_extraction_cost(input_tokens_est, output_tokens_est, "sonnet")
+        model_tier = _model_tier_for_skills_extraction(str(model_name))
+        cost_usd = compute_extraction_cost(input_tokens, output_tokens, model_tier)
         log_extraction_event(
             agent_name=AGENT_NAME,
             prompt=prompt,
             model=model_name,
             provider=provider,
             latency_ms=latency_ms,
-            input_tokens=input_tokens_est,
-            output_tokens=output_tokens_est,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
             cost_usd=cost_usd,
             success=True,
         )

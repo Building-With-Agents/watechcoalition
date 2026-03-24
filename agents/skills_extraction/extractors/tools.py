@@ -34,6 +34,10 @@ AMBIGUOUS_CONFIDENCE = 0.82
 EXACT_CONFIDENCE = 0.97
 EXPLICIT_ALIAS_CONFIDENCE = 0.98
 CONTEXT_WINDOW = 48
+SPECIAL_TOOL_IDS = {
+    "C#": "tool-c-sharp",
+    "C++": "tool-c-plus-plus",
+}
 
 
 @dataclass(frozen=True)
@@ -140,6 +144,26 @@ TOOL_CATALOG: tuple[ToolDefinition, ...] = (
         aliases=(ToolAlias("Rust"),),
     ),
     ToolDefinition(
+        tool_name="R",
+        category="language",
+        aliases=(ToolAlias("R", confidence=AMBIGUOUS_CONFIDENCE, requires_context=True),),
+        context_keywords=(
+            "python",
+            "sql",
+            "analytics",
+            "analysis",
+            "statistical",
+            "statistics",
+            "programming",
+            "language",
+        ),
+        context_patterns=(
+            r"\b(?:r|python|sql|scala|java|c\+\+|c#)\b\s*(?:,|/|or)\s*(?:r|python|sql|scala|java|c\+\+|c#)\b",
+            r"\b(?:analytical|programming)\s+language\s*\(\s*r\s+or\s+python\s*\)\b",
+            r"\bproficiency\s+in\s+r\b",
+        ),
+    ),
+    ToolDefinition(
         tool_name="SQL",
         category="language",
         aliases=(ToolAlias("SQL"),),
@@ -150,9 +174,14 @@ TOOL_CATALOG: tuple[ToolDefinition, ...] = (
         aliases=(ToolAlias("Bash"),),
     ),
     ToolDefinition(
+        tool_name="React.js",
+        category="framework",
+        aliases=(ToolAlias("React.js", confidence=EXPLICIT_ALIAS_CONFIDENCE),),
+    ),
+    ToolDefinition(
         tool_name="React",
         category="framework",
-        aliases=(ToolAlias("React"), ToolAlias("React.js", confidence=EXPLICIT_ALIAS_CONFIDENCE)),
+        aliases=(ToolAlias("React"),),
     ),
     ToolDefinition(
         tool_name="Angular",
@@ -200,7 +229,11 @@ TOOL_CATALOG: tuple[ToolDefinition, ...] = (
     ToolDefinition(
         tool_name="Azure",
         category="platform",
-        aliases=(ToolAlias("Microsoft Azure", confidence=EXPLICIT_ALIAS_CONFIDENCE), ToolAlias("Azure")),
+        aliases=(
+            ToolAlias("Microsoft Azure", confidence=EXPLICIT_ALIAS_CONFIDENCE),
+            ToolAlias("Microsoft Windows Azure", confidence=EXPLICIT_ALIAS_CONFIDENCE),
+            ToolAlias("Azure"),
+        ),
     ),
     ToolDefinition(
         tool_name="GCP",
@@ -249,6 +282,358 @@ TOOL_CATALOG: tuple[ToolDefinition, ...] = (
         tool_name="Snowflake",
         category="database",
         aliases=(ToolAlias("Snowflake"),),
+    ),
+    # BI / analytics platforms (eval GT + common job-posting literals)
+    ToolDefinition(
+        tool_name="Tableau",
+        category="platform",
+        aliases=(ToolAlias("Tableau"),),
+    ),
+    ToolDefinition(
+        tool_name="Looker",
+        category="platform",
+        aliases=(ToolAlias("Looker"),),
+    ),
+    ToolDefinition(
+        tool_name="Power BI",
+        category="platform",
+        aliases=(ToolAlias("Power BI", confidence=EXPLICIT_ALIAS_CONFIDENCE),),
+    ),
+    ToolDefinition(
+        tool_name="Sigma",
+        category="platform",
+        aliases=(ToolAlias("Sigma", confidence=AMBIGUOUS_CONFIDENCE, requires_context=True),),
+        context_keywords=(
+            "bi",
+            "analytics",
+            "dashboard",
+            "data",
+            "visualization",
+            "warehouse",
+            "snowflake",
+            "looker",
+            "tableau",
+        ),
+        context_patterns=(
+            r"\b(?:sigma|modern)\s+bi\b",
+            r"\b(?:tableau|looker|power\s+bi|snowflake|sigma)\b",
+        ),
+    ),
+    ToolDefinition(
+        tool_name="Databricks",
+        category="platform",
+        aliases=(ToolAlias("Databricks"),),
+    ),
+    ToolDefinition(
+        tool_name="dbt",
+        category="devops",
+        aliases=(ToolAlias("dbt"), ToolAlias("DBT", confidence=EXPLICIT_ALIAS_CONFIDENCE)),
+    ),
+    ToolDefinition(
+        tool_name="Jira",
+        category="platform",
+        aliases=(ToolAlias("Jira"),),
+    ),
+    ToolDefinition(
+        tool_name="Confluence",
+        category="platform",
+        aliases=(ToolAlias("Confluence"),),
+    ),
+    ToolDefinition(
+        tool_name="Miro",
+        category="platform",
+        aliases=(ToolAlias("Miro"),),
+    ),
+    ToolDefinition(
+        tool_name="Git",
+        category="devops",
+        aliases=(ToolAlias("Git"),),
+    ),
+    ToolDefinition(
+        tool_name="GitLab",
+        category="devops",
+        aliases=(ToolAlias("GitLab"), ToolAlias("Gitlab", confidence=0.95)),
+    ),
+    ToolDefinition(
+        tool_name="Splunk",
+        category="platform",
+        aliases=(
+            ToolAlias("Splunk"),
+            ToolAlias("Splunk (ES)", confidence=EXPLICIT_ALIAS_CONFIDENCE),
+            ToolAlias("Splunk ES", confidence=EXPLICIT_ALIAS_CONFIDENCE),
+        ),
+    ),
+    ToolDefinition(
+        tool_name="Twilio",
+        category="platform",
+        aliases=(ToolAlias("Twilio"),),
+    ),
+    ToolDefinition(
+        tool_name="Next.js",
+        category="framework",
+        aliases=(ToolAlias("Next.js", confidence=EXPLICIT_ALIAS_CONFIDENCE), ToolAlias("NextJS")),
+    ),
+    ToolDefinition(
+        tool_name="Prisma",
+        category="framework",
+        aliases=(ToolAlias("Prisma", confidence=AMBIGUOUS_CONFIDENCE, requires_context=True),),
+        context_keywords=(
+            "orm",
+            "schema",
+            "typescript",
+            "javascript",
+            "next",
+            "node",
+            "postgresql",
+            "database",
+            "migrate",
+        ),
+        context_patterns=(
+            r"\bprisma\s+(?:orm|client|schema|migrate)\b",
+            r"\b(?:with|using)\s+prisma\b",
+        ),
+    ),
+    ToolDefinition(
+        tool_name="SQL Server",
+        category="database",
+        aliases=(
+            ToolAlias("SQL Server", confidence=EXPLICIT_ALIAS_CONFIDENCE),
+            ToolAlias("Microsoft SQL Server", confidence=EXPLICIT_ALIAS_CONFIDENCE),
+        ),
+    ),
+    ToolDefinition(
+        tool_name="Visual Studio",
+        category="other",
+        aliases=(ToolAlias("Visual Studio", confidence=EXPLICIT_ALIAS_CONFIDENCE),),
+    ),
+    ToolDefinition(
+        tool_name=".NET",
+        category="framework",
+        aliases=(ToolAlias(".NET", confidence=EXPLICIT_ALIAS_CONFIDENCE),),
+    ),
+    ToolDefinition(
+        tool_name="C#",
+        category="language",
+        aliases=(ToolAlias("C#"),),
+    ),
+    ToolDefinition(
+        tool_name="C++",
+        category="language",
+        aliases=(ToolAlias("C++"),),
+    ),
+    ToolDefinition(
+        tool_name="Scala",
+        category="language",
+        aliases=(ToolAlias("Scala"),),
+    ),
+    ToolDefinition(
+        tool_name="Linux",
+        category="platform",
+        aliases=(ToolAlias("Linux"),),
+    ),
+    ToolDefinition(
+        tool_name="PowerShell",
+        category="language",
+        aliases=(ToolAlias("PowerShell"),),
+    ),
+    ToolDefinition(
+        tool_name="PyTest",
+        category="devops",
+        aliases=(ToolAlias("PyTest"), ToolAlias("pytest", confidence=0.95)),
+    ),
+    ToolDefinition(
+        tool_name="PyTorch",
+        category="framework",
+        aliases=(ToolAlias("PyTorch"),),
+    ),
+    ToolDefinition(
+        tool_name="TensorFlow",
+        category="framework",
+        aliases=(ToolAlias("TensorFlow"),),
+    ),
+    ToolDefinition(
+        tool_name="Keras",
+        category="framework",
+        aliases=(ToolAlias("Keras"),),
+    ),
+    ToolDefinition(
+        tool_name="Pandas",
+        category="framework",
+        aliases=(ToolAlias("Pandas"),),
+    ),
+    ToolDefinition(
+        tool_name="NumPy",
+        category="framework",
+        aliases=(ToolAlias("NumPy"), ToolAlias("Numpy", confidence=0.95)),
+    ),
+    ToolDefinition(
+        tool_name="matplotlib",
+        category="framework",
+        aliases=(ToolAlias("matplotlib"),),
+    ),
+    ToolDefinition(
+        tool_name="ggplot2",
+        category="framework",
+        aliases=(ToolAlias("ggplot2"),),
+    ),
+    ToolDefinition(
+        tool_name="Datawrapper",
+        category="platform",
+        aliases=(ToolAlias("Datawrapper"),),
+    ),
+    ToolDefinition(
+        tool_name="Burp Suite",
+        category="platform",
+        aliases=(ToolAlias("Burp Suite", confidence=EXPLICIT_ALIAS_CONFIDENCE),),
+    ),
+    ToolDefinition(
+        tool_name="Wireshark",
+        category="platform",
+        aliases=(ToolAlias("Wireshark"),),
+    ),
+    ToolDefinition(
+        tool_name="Kali Linux",
+        category="platform",
+        aliases=(ToolAlias("Kali Linux", confidence=EXPLICIT_ALIAS_CONFIDENCE),),
+    ),
+    ToolDefinition(
+        tool_name="Nessus",
+        category="platform",
+        aliases=(ToolAlias("Nessus"),),
+    ),
+    ToolDefinition(
+        tool_name="Metasploit",
+        category="platform",
+        aliases=(ToolAlias("Metasploit"),),
+    ),
+    ToolDefinition(
+        tool_name="CrowdStrike",
+        category="platform",
+        aliases=(ToolAlias("CrowdStrike"),),
+    ),
+    ToolDefinition(
+        tool_name="Cisco",
+        category="platform",
+        aliases=(ToolAlias("Cisco"),),
+    ),
+    ToolDefinition(
+        tool_name="Fortinet",
+        category="platform",
+        aliases=(ToolAlias("Fortinet"),),
+    ),
+    ToolDefinition(
+        tool_name="MITRE ATT&CK",
+        category="platform",
+        aliases=(ToolAlias("MITRE ATT&CK", confidence=EXPLICIT_ALIAS_CONFIDENCE),),
+    ),
+    ToolDefinition(
+        tool_name="Visio",
+        category="other",
+        aliases=(ToolAlias("Visio"),),
+    ),
+    ToolDefinition(
+        tool_name="PowerPoint",
+        category="other",
+        aliases=(
+            ToolAlias("PowerPoint", confidence=EXPLICIT_ALIAS_CONFIDENCE),
+            ToolAlias("Powerpoint", confidence=0.95),
+            ToolAlias("Microsoft PowerPoint", confidence=EXPLICIT_ALIAS_CONFIDENCE),
+        ),
+    ),
+    ToolDefinition(
+        tool_name="Outlook",
+        category="other",
+        aliases=(
+            ToolAlias("Microsoft Outlook", confidence=EXPLICIT_ALIAS_CONFIDENCE),
+            ToolAlias("Outlook", confidence=AMBIGUOUS_CONFIDENCE, requires_context=True),
+        ),
+        context_keywords=(
+            "microsoft",
+            "office",
+            "email",
+            "calendar",
+            "exchange",
+            "teams",
+        ),
+        context_patterns=(
+            r"\bmicrosoft\s+outlook\b",
+            r"\boutlook\s+(?:calendar|email|mailbox)\b",
+        ),
+    ),
+    ToolDefinition(
+        tool_name="Microsoft Projects",
+        category="other",
+        aliases=(
+            ToolAlias("Microsoft Projects", confidence=EXPLICIT_ALIAS_CONFIDENCE),
+            ToolAlias("Microsoft Project", confidence=EXPLICIT_ALIAS_CONFIDENCE),
+            ToolAlias("Projects", confidence=AMBIGUOUS_CONFIDENCE, requires_context=True),
+        ),
+        context_keywords=(
+            "microsoft",
+            "excel",
+            "powerpoint",
+            "outlook",
+            "office",
+        ),
+        context_patterns=(
+            r"\bmicrosoft,\s*excel,\s*powerpoint,\s*outlook,\s*projects\b",
+            r"\bexcel,\s*powerpoint,\s*outlook,\s*projects\b",
+        ),
+    ),
+    ToolDefinition(
+        tool_name="ChatGPT",
+        category="ai_tool",
+        aliases=(ToolAlias("ChatGPT"),),
+        is_genai_tool=True,
+    ),
+    ToolDefinition(
+        tool_name="Claude",
+        category="ai_tool",
+        aliases=(ToolAlias("Claude", confidence=AMBIGUOUS_CONFIDENCE, requires_context=True),),
+        context_keywords=(
+            "anthropic",
+            "llm",
+            "ai",
+            "model",
+            "prompt",
+            "api",
+            "assistant",
+        ),
+        context_patterns=(
+            r"\bclaude\s+(?:\d|opus|sonnet|haiku)\b",
+            r"\banthropic['’]s\s+claude\b",
+        ),
+        is_genai_tool=True,
+    ),
+    ToolDefinition(
+        tool_name="Cursor",
+        category="ai_tool",
+        aliases=(ToolAlias("Cursor", confidence=AMBIGUOUS_CONFIDENCE, requires_context=True),),
+        context_keywords=(
+            "ide",
+            "editor",
+            "copilot",
+            "ai",
+            "coding",
+            "developer",
+            "vscode",
+        ),
+        context_patterns=(
+            r"\bcursor\s+(?:ide|editor|ai)\b",
+            r"\b(?:the\s+)?cursor\s+editor\b",
+        ),
+        is_genai_tool=True,
+    ),
+    ToolDefinition(
+        tool_name="GitHub Copilot",
+        category="ai_tool",
+        aliases=(ToolAlias("GitHub Copilot", confidence=EXPLICIT_ALIAS_CONFIDENCE),),
+        is_genai_tool=True,
+    ),
+    ToolDefinition(
+        tool_name="Flextrack",
+        category="platform",
+        aliases=(ToolAlias("Flextrack"),),
     ),
     ToolDefinition(
         tool_name="Terraform",
@@ -510,6 +895,8 @@ def _has_context(
 
 def _build_tool_id(tool_name: str) -> str:
     """Generate a stable slug-like identifier for a canonical tool name."""
+    if tool_name in SPECIAL_TOOL_IDS:
+        return SPECIAL_TOOL_IDS[tool_name]
     slug = re.sub(r"[^a-z0-9]+", "-", tool_name.casefold()).strip("-")
     return f"tool-{slug}"
 
