@@ -1,26 +1,31 @@
 """
-End-to-end: JSearch ingest → normalize → skills extract → deterministic enrichment JSONL.
+End-to-end: ingest → normalize → skills extract → deterministic enrichment JSONL.
+
+Uses ``IngestionAgent`` with the same ``source`` contract as
+``python -m agents.ingestion.agent``:
+
+  - ``all`` (default) — ``jsearch`` + ``crawl4ai`` in one run
+  - ``jsearch`` — RapidAPI JSearch only
+  - ``crawl4ai`` — generic Crawl4AI scraper only
 
 Chains existing agents (no ``job_postings`` promotion). Prints one JSON object per line
 (stdout) with ``normalized_job_id``, optional ``job_posting_id``, ``source``,
 ``external_id``, ``seniority``, ``role_classification``.
 
-Use ``--html-out path`` to write a side-by-side HTML comparison (posting vs enrichment).
-Add ``--no-jsonl`` to suppress stdout JSONL when you only want the HTML file.
+Use ``--html-out path`` for a side-by-side HTML comparison. ``--no-jsonl`` suppresses stdout.
 
 Prerequisites (repo-root ``.env`` or environment):
   - ``PYTHON_DATABASE_URL`` — SQLAlchemy PostgreSQL URL
-  - ``JSEARCH_API_KEY`` — when not using ``--skip-ingest``
-  - Optional: ``SKILLS_EXTRACTION_MAX_JOBS`` — default ``10`` caps how many normalized
-    rows get Pass 2 extraction in one run; set to ``0`` to process **all** rows
-    (see ``SkillsExtractionAgent.process``).
+  - ``JSEARCH_API_KEY`` — if ``source`` is ``jsearch`` or ``all`` (not needed for ``crawl4ai`` only)
+  - Crawl4AI / scrape targets as required by the scraper when using ``crawl4ai`` or ``all``
+  - Optional: ``SKILLS_EXTRACTION_MAX_JOBS`` — default ``10``; set ``0`` for all rows
 
-PowerShell::
+PowerShell (repo root)::
 
-    cd C:\\path\\to\\watechcoalition
     py agents/scripts/run_jsearch_enrichment_preview.py --limit 20
+    py agents/scripts/run_jsearch_enrichment_preview.py --source jsearch --limit 20
 
-Classify an existing run only (normalization + skills must have already run)::
+Classify an existing run only::
 
     py agents/scripts/run_jsearch_enrichment_preview.py --skip-ingest --ingestion-run-id <uuid>
 """
@@ -74,6 +79,7 @@ log = structlog.get_logger()
 def _run_pipeline_chain(
     *,
     correlation_id: str,
+    source: str,
     limit: int,
     query: str,
     location: str,
@@ -83,7 +89,7 @@ def _run_pipeline_chain(
         correlation_id=correlation_id,
         agent_id="run-jsearch-enrichment-preview",
         payload={
-            "source": "jsearch",
+            "source": source,
             "limit": limit,
             "query": query,
             "location": location,
@@ -118,6 +124,7 @@ def _process_enrichment_run(
     *,
     emit_jsonl: bool,
     html_out: Path | None,
+    html_page_title: str = "Batch — posting vs enrichment",
 ) -> int:
     stmt = text(NORMALIZED_RUN_SQL)
     with session_scope() as session:
@@ -162,7 +169,7 @@ def _process_enrichment_run(
         html_out.parent.mkdir(parents=True, exist_ok=True)
         doc = render_enrichment_comparison_html(
             merged_for_html,
-            page_title="JSearch batch — posting vs enrichment",
+            page_title=html_page_title,
             subtitle=f"ingestion_run_id = {run_id}",
         )
         html_out.write_text(doc, encoding="utf-8")
@@ -174,11 +181,22 @@ def _process_enrichment_run(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="JSearch → normalize → skills → print deterministic enrichment (JSONL)."
+        description="Ingest (JSearch / Crawl4AI / both) → normalize → skills → enrichment JSONL/HTML."
     )
-    parser.add_argument("--limit", type=int, default=50, help="JSearch fetch cap (ingest only).")
-    parser.add_argument("--query", default="software engineer", help="Keyword query for JSearch.")
-    parser.add_argument("--location", default="Washington state", help="Location string for JSearch.")
+    parser.add_argument(
+        "--source",
+        choices=["jsearch", "crawl4ai", "all"],
+        default="all",
+        help="Ingestion source(s): jsearch, crawl4ai, or all (jsearch+crawl4ai). Default: all.",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=50,
+        help="Max jobs per ingest (passed to IngestionAgent; applies across sources).",
+    )
+    parser.add_argument("--query", default="software engineer", help="Keyword query (JSearch / region config).")
+    parser.add_argument("--location", default="Washington state", help="Location string (region config).")
     parser.add_argument(
         "--correlation-id",
         default="",
@@ -217,12 +235,13 @@ def main() -> None:
             log.error("ingestion_run_id_required_with_skip_ingest")
             raise SystemExit(1)
     else:
-        if not os.getenv("JSEARCH_API_KEY"):
+        if args.source in ("jsearch", "all") and not os.getenv("JSEARCH_API_KEY"):
             log.error("missing_jsearch_api_key")
             raise SystemExit(1)
         cid = args.correlation_id.strip() or str(uuid.uuid4())
         run_id = _run_pipeline_chain(
             correlation_id=cid,
+            source=args.source,
             limit=args.limit,
             query=args.query,
             location=args.location,
@@ -233,7 +252,21 @@ def main() -> None:
         log.error("nothing_to_emit_use_jsonl_or_html_out")
         raise SystemExit(1)
 
-    _process_enrichment_run(run_id, emit_jsonl=emit_jsonl, html_out=args.html_out)
+    if args.skip_ingest:
+        html_page_title = "Batch — posting vs enrichment"
+    else:
+        html_titles = {
+            "all": "JSearch + Crawl4AI — posting vs enrichment",
+            "jsearch": "JSearch batch — posting vs enrichment",
+            "crawl4ai": "Crawl4AI batch — posting vs enrichment",
+        }
+        html_page_title = html_titles.get(args.source, html_titles["all"])
+    _process_enrichment_run(
+        run_id,
+        emit_jsonl=emit_jsonl,
+        html_out=args.html_out,
+        html_page_title=html_page_title,
+    )
 
 
 if __name__ == "__main__":
