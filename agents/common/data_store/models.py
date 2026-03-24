@@ -8,8 +8,8 @@ Prisma/MSSQL is being phased out.
 Agent-created tables: raw_ingested_jobs, job_ingestion_runs, normalized_jobs,
     normalization_quarantine, extracted_intelligence, llm_audit_log,
     employer_profiles.
-Reference tables (seeded, agent-owned): companies, industry_sectors,
-    technology_areas, skills, socc, job_postings.
+Reference tables (seeded, agent-owned): companies, company_addresses,
+    industry_sectors, technology_areas, skills, socc, job_postings.
 """
 
 from __future__ import annotations
@@ -372,6 +372,20 @@ class Company(Base):
     )
     contact_name: Mapped[str | None] = mapped_column(Text, nullable=True)
     engagementtype: Mapped[str | None] = mapped_column(String(1000), default="Lead")
+
+
+class CompanyAddress(Base):
+    """Company location row keyed by normalized free-text for enrichment lookup."""
+
+    __tablename__ = "company_addresses"
+    __table_args__ = (
+        Index("ix_company_addresses_normalized_location", "normalized_location"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    normalized_location: Mapped[str] = mapped_column(String(512), nullable=False)
+    raw_location: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
 
 class IndustrySector(Base):
