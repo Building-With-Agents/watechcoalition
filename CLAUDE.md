@@ -8,11 +8,9 @@ Source of truth: `job_intelligence_engine_architecture.docx` — see `docs/plann
 
 ## Project Summary
 
-**Job Intelligence Engine** — an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings for the watechcoalition platform. The Next.js app uses MSSQL (via Prisma); the Python agent pipeline uses PostgreSQL (via SQLAlchemy). A future DB-unification effort will consolidate both layers on PostgreSQL.
+**Job Intelligence Engine** — an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings for the watechcoalition platform. **SQLAlchemy is the single database authority.** Prisma/MSSQL is being phased out — the Next.js API is currently broken from the SQL Server → PostgreSQL switch (expected). All database tables are now agent-managed via SQLAlchemy.
 
 The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **separate Python layer** that lives in `agents/` and runs alongside it.
-
-**Do NOT modify the Next.js app or `prisma/schema.prisma` unless explicitly instructed.**
 
 ---
 
@@ -23,18 +21,36 @@ The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **s
 3. **The Orchestration Agent is the sole consumer** of `*Failed` and `*Alert` events. No other agent reacts to another agent’s failures.
 4. **No agent writes to another agent’s internal state.**
 5. **Every agent exposes a `health_check()` method** and emits self-evaluation metrics.
-6. **Python agents access PostgreSQL via SQLAlchemy only.** Prisma is Next.js-only — never import or invoke it from Python.
+6. **SQLAlchemy is the single database authority.** All schema changes go through `agents/common/data_store/models.py` and `migrations.py`. Prisma is being phased out.
 7. **No credentials in code or logs.** Environment variables only.
 8. **Do NOT implement Phase 2 items during Phase 1** unless explicitly instructed.
+
+---
+
+## Table Ownership
+
+**SQLAlchemy is the single database authority.** All tables live in the `dbo` schema on PostgreSQL.
+
+| Category | Tables | Notes |
+|----------|--------|-------|
+| **Agent-created** | `raw_ingested_jobs`, `job_ingestion_runs`, `normalized_jobs`, `normalization_quarantine`, `extracted_intelligence`, `llm_audit_log`, `employer_profiles` | Created by `migrations.py` |
+| **Reference (seeded, agent-owned)** | `companies`, `industry_sectors`, `technology_areas`, `skills`, `socc`, `job_postings` | Seeded via pgloader from MSSQL; agents have full read+write |
+| **Legacy Prisma** | All other tables in `prisma/schema.prisma` | Being phased out; Next.js API currently broken (expected) |
+
+**Rules:**
+- New tables and columns go through `agents/common/data_store/models.py` + `migrations.py`
+- Enrichment output (quality_score, is_spam, soc_code, etc.) goes to `job_postings` columns
+- Company resolution writes placeholders directly to the `companies` table
+- Prisma migrations are deprecated — do not create new Prisma migrations
 
 ---
 
 ## Repository Structure
 
 ```
-/                              ← Next.js app root (DO NOT MODIFY)
+/                              ← Next.js app root
 ├── app/
-├── prisma/schema.prisma       ← Read-only from Python
+├── prisma/schema.prisma       ← Legacy (being phased out)
 └── agents/
     ├── ingestion/
     │   ├── agent.py
@@ -146,8 +162,8 @@ Sources (JSearch API via httpx / Web scraping via Crawl4AI)
 | Scheduling | APScheduler — inside Orchestration Agent | IC #3 |
 | Ingestion: API source | httpx — JSearch API calls | SA #12 |
 | Ingestion: web scraping | Crawl4AI — local, pip-installable | SA #12 |
-| DB access (agents) | SQLAlchemy + psycopg2 → PostgreSQL | IC #19 |
-| DB access (Next.js app) | Prisma — do not touch from Python | IC #19 |
+| DB access (all) | SQLAlchemy + psycopg2 → PostgreSQL (single authority) | IC #19 |
+| DB access (Next.js app) | Prisma — being phased out, API currently broken | IC #19 |
 | Message bus (Phase 1) | In-process Python pub/sub | SA #14 |
 | Message bus (Phase 2) | External bus (Kafka / RabbitMQ / Redis Streams) | SA #14 |
 | Dashboards | Streamlit — read-only SQLAlchemy connection | — |
