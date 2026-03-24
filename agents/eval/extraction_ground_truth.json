@@ -2544,24 +2544,24 @@
     "skills": [
       {
         "skill_id": null,
-        "skill_name": "Data Quality Assurance",
+        "skill_name": "Quality assurance",
         "type": "Technical",
         "confidence": 0.95,
         "required_flag": true,
         "esco_uri": null,
         "is_genai_extension": false,
         "source_span": {
-          "text": "This is an entry level position that supports the quality assurance and management of PHIX’s technology and programs",
+          "text": "This is an entry level position that supports the quality assurance and management of PHIX’s technology and programs.",
           "field_source": "description",
-          "start_char": 55,
-          "end_char": 171
+          "start_char": 57,
+          "end_char": 174
         },
         "span_auto_corrected": false,
         "original_end_char": null
       },
       {
         "skill_id": null,
-        "skill_name": "Systems & Data Integration Support",
+        "skill_name": "Data integration",
         "type": "Technical",
         "confidence": 0.9,
         "required_flag": true,
@@ -2578,7 +2578,7 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Problem-Solving",
+        "skill_name": "Problem solving",
         "type": "Soft",
         "confidence": 0.95,
         "required_flag": true,
@@ -2595,7 +2595,7 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Communication Skills",
+        "skill_name": "Communication",
         "type": "Soft",
         "confidence": 0.9,
         "required_flag": true,
@@ -2612,7 +2612,7 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Team Collaboration",
+        "skill_name": "Teamwork",
         "type": "Soft",
         "confidence": 0.95,
         "required_flag": true,
@@ -2629,7 +2629,7 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Work Prioritization & Time Management",
+        "skill_name": "Prioritization",
         "type": "Soft",
         "confidence": 0.9,
         "required_flag": true,
@@ -2648,7 +2648,7 @@
     "tools": [
       {
         "tool_id": null,
-        "tool_name": "Healthcare Information Systems",
+        "tool_name": "Health information systems",
         "category": "platform",
         "confidence": 0.9,
         "source_span": {
@@ -2661,41 +2661,40 @@
       },
       {
         "tool_id": null,
-        "tool_name": "Data Integration Tools",
+        "tool_name": "Data integration",
         "category": "platform",
         "confidence": 0.8,
         "source_span": {
-          "text": "he technology and programs that this position will support includes data integrations and end user systems for hospitals, clinics, laboratories, imaging centers, and other health and social service providers",
+          "text": "The technology and programs that this position will support includes data integrations and end user systems for hospitals, clinics, laboratories, imaging centers, and other health and social service providers",
           "field_source": "description",
-          "start_char": 174,
-          "end_char": 381
+          "start_char": 175,
+          "end_char": 383
         },
         "is_genai_tool": false
       },
       {
         "tool_id": null,
-        "tool_name": "Quality Assurance (QA) Tools",
+        "tool_name": "QA",
         "category": "framework",
         "confidence": 0.8,
         "source_span": {
-          "text": "This is an entry level position that supports the quality assurance and management of PHIX’s technology and programs. T",
+          "text": "This is an entry level position that supports the quality assurance and management of PHIX’s technology and programs.",
           "field_source": "description",
-          "start_char": 55,
+          "start_char": 57,
           "end_char": 174
         },
         "is_genai_tool": false
       }
     ],
     "labeler_notes": {
-      "Data Quality Assurance": "Core responsibility includes structured QA reviews of systems and programs",
-      "Systems & Data Integration Support": "Supporting integrations across healthcare systems",
-      "Problem-Solving": "Explicitly required to identify and communicate solutions",
-      "Communication Skills": "Needed for collaborating with leadership and explaining solutions",
-      "Team Collaboration": "Explicit requirement to work effectively in a team environment",
-      "Work Prioritization & Time Management": "Managing tasks against a plan and meeting objectives",
-      "Healthcare Information Systems": "Includes systems used by hospitals, clinics, labs, and imaging centers",
-      "Data Integration Tools": "Implied from supporting data integrations across systems",
-      "Quality Assurance (QA) Tools": "Used for structured QA reviews of systems and programs"
+      "Quality assurance": "Structured QA of systems/programs and data quality for PHIX technology (skill; was Data Quality Assurance).",
+      "Data integration": "Supporting integrations across hospitals, clinics, labs, imaging, and social service systems.",
+      "Problem solving": "Explicitly required to identify and communicate solutions.",
+      "Communication": "Collaborating with leadership and explaining solutions.",
+      "Teamwork": "Team environment and ability to work on a team (aligns with typical LLM label).",
+      "Prioritization": "Managing work against a plan and meeting objectives (time management).",
+      "Health information systems": "Systems context for hospitals, clinics, labs, and imaging centers.",
+      "QA": "Structured QA reviews of systems and programs (tool-level; was Quality Assurance (QA) Tools)."
     }
   },
   {
@@ -2968,7 +2967,7 @@
     "skills": [
       {
         "skill_id": null,
-        "skill_name": "Advanced Data Analysis & Insight Generation",
+        "skill_name": "Data analysis",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -2985,7 +2984,7 @@
       },
       {
         "skill_id": null,
-        "skill_name": "SQL Querying & Data Transformation",
+        "skill_name": "SQL",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3002,7 +3001,7 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Data Governance & Compliance",
+        "skill_name": "Data governance",
         "type": "Technical",
         "confidence": 0.95,
         "required_flag": true,
@@ -3019,7 +3018,7 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Data Product & Modern Data Ecosystem Understanding",
+        "skill_name": "Data products",
         "type": "Domain",
         "confidence": 0.9,
         "required_flag": true,
@@ -3036,7 +3035,7 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Agile/Scrum Collaboration",
+        "skill_name": "Agile",
         "type": "Soft",
         "confidence": 0.85,
         "required_flag": true,
@@ -3053,7 +3052,7 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Problem-Solving & Ownership",
+        "skill_name": "Problem solving",
         "type": "Soft",
         "confidence": 0.9,
         "required_flag": true,
@@ -3078,8 +3077,8 @@
         "source_span": {
           "text": "Hands-on experience working with Databricks or similar modern data platforms for querying and analyzing data.",
           "field_source": "description",
-          "start_char": 1619,
-          "end_char": 1728
+          "start_char": 1624,
+          "end_char": 1733
         },
         "is_genai_tool": false
       },
@@ -3137,7 +3136,7 @@
       },
       {
         "tool_id": null,
-        "tool_name": "CI/CD Tools",
+        "tool_name": "CI/CD",
         "category": "devops",
         "confidence": 0.8,
         "source_span": {
@@ -3150,32 +3149,31 @@
       },
       {
         "tool_id": null,
-        "tool_name": "Modern Data Platforms",
+        "tool_name": "Modern data platforms",
         "category": "platform",
         "confidence": 0.85,
         "source_span": {
-          "text": "ands-on experience working with Databricks or similar modern data platforms for querying and analyzing data.",
+          "text": "Hands-on experience working with Databricks or similar modern data platforms for querying and analyzing data.",
           "field_source": "description",
-          "start_char": 1620,
-          "end_char": 1728
+          "start_char": 1624,
+          "end_char": 1733
         },
         "is_genai_tool": false
       }
     ],
     "labeler_notes": {
-      "Advanced Data Analysis & Insight Generation": "Core requirement analyzing large datasets to identify trends and generate insights",
-      "SQL Querying & Data Transformation": "Advanced SQL required for querying and transforming structured data",
-      "Data Governance & Compliance": "Ensuring secure data access and adherence to governance standards",
-      "Data Product & Modern Data Ecosystem Understanding": "Includes knowledge of data products, deployment patterns, and scalable analytics systems",
-      "Agile/Scrum Collaboration": "Experience working in Agile environments and cross-functional teams",
-      "Problem-Solving & Ownership": "Includes handling complex issues, contributing to libraries, and taking ownership of work",
-      "Databricks": "Explicitly required modern data platform for querying and analysis",
-      "SQL": "Core querying and transformation tool",
+      "Data analysis": "BI/data analysis experience, large datasets, trends, actionable insights (was Advanced Data Analysis & Insight Generation).",
+      "SQL": "Querying, transforming, and analyzing structured data.",
+      "Data governance": "Governance, compliance, secure data access (compliance detail in span).",
+      "Data products": "Modern data ecosystems, data products, governance, scalable analytics (was Data Product & Modern Data Ecosystem Understanding).",
+      "Agile": "Agile/Scrum team experience (was Agile/Scrum Collaboration).",
+      "Problem solving": "Ownership, client commitments, difficult issues (was Problem-Solving & Ownership).",
+      "Databricks": "Explicit modern data platform for querying and analysis.",
       "Tableau": "BI tool for dashboards and reporting",
       "Power BI": "BI tool for dashboards and reporting",
       "Looker": "BI and analytics platform",
-      "CI/CD Tools": "Used for maintaining continuous integration and delivery pipelines",
-      "Modern Data Platforms": "Includes tools similar to Databricks for scalable analytics ecosystems"
+      "CI/CD": "Continuous integration and delivery of applications (was CI/CD Tools).",
+      "Modern data platforms": "Databricks-class platforms; span corrected to full Hands-on sentence."
     }
   },
   {
@@ -4607,24 +4605,7 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Algorithms",
-        "type": "Technical",
-        "confidence": 1.0,
-        "required_flag": true,
-        "esco_uri": "http://data.europa.eu/esco/skill/54924a2c-daca-40d3-9716-4b38ceb04f38",
-        "is_genai_extension": false,
-        "source_span": {
-          "text": "algorithms to improve personalization and recommendations",
-          "field_source": "description",
-          "start_char": 172,
-          "end_char": 229
-        },
-        "span_auto_corrected": false,
-        "original_end_char": null
-      },
-      {
-        "skill_id": null,
-        "skill_name": "Communication",
+        "skill_name": "Collaboration",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": false,
@@ -4658,7 +4639,7 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Training AI Models",
+        "skill_name": "Model training",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -4675,7 +4656,7 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Software Architecture",
+        "skill_name": "Software development",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -4759,7 +4740,7 @@
       },
       {
         "tool_id": null,
-        "tool_name": "Large Language Models (LLMs)",
+        "tool_name": "LLM",
         "category": "ai_tool",
         "confidence": 1.0,
         "source_span": {
@@ -4784,7 +4765,14 @@
         "is_genai_tool": true
       }
     ],
-    "labeler_notes": {}
+    "labeler_notes": {
+      "Machine Learning": "Core ML role; algorithms/personalization overlap merged here (removed separate Algorithms GT label).",
+      "Collaboration": "Cross-functional work with researchers, engineers, data scientists, PMs (was Communication).",
+      "Fine-Tuning": "GenAI extension from tuning in training/deploy sentence.",
+      "Model training": "Training, tuning, deploying models in production (was Training AI Models).",
+      "Software development": "Software design and development in Python/Scala/Java/C++ (was Software Architecture).",
+      "LLM": "Large-scale language models in applied-fields list (was Large Language Models (LLMs))."
+    }
   },
   {
     "ground_truth_id": "gt-026",
