@@ -1,4 +1,6 @@
-## 8. Prisma ORM Workflow
+> **DEPRECATED:** Prisma is being phased out. SQLAlchemy is now the single database authority. All new schema changes go through `agents/common/data_store/models.py` and `migrations.py`. See [ONBOARDING.md](../ONBOARDING.md#61-schema-changes) for the current workflow. The content below is retained as legacy reference only.
+
+## 8. Prisma ORM Workflow (Legacy)
 
 #### 8.1. Making changes to the Database with prisma/schema.prisma file
 
