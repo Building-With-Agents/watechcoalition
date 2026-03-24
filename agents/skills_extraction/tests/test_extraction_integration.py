@@ -15,8 +15,16 @@ from unittest.mock import patch
 import pytest
 
 from agents.common.types import JobRecord
-from agents.common.types.extraction_types import SkillRecord, TaxonomyResult, ToolRecord
+from agents.common.types.extraction_types import (
+    ContextSignal,
+    SkillRecord,
+    TaxonomyResult,
+    ToolRecord,
+)
+from agents.skills_extraction.extractors.context import extract_context
+from agents.skills_extraction.extractors.responsibilities import extract_responsibilities
 from agents.skills_extraction.extractors.skills import extract_skills
+from agents.skills_extraction.extractors.tasks import extract_tasks
 from agents.skills_extraction.extractors.tools import extract_tools
 
 
@@ -145,3 +153,53 @@ def test_extraction_tools_then_skills_output_shape(
     mock_resolve_taxonomy.assert_called_once()
     call_labels = mock_resolve_taxonomy.call_args[0][0]
     assert call_labels == ["API design"]
+
+
+# ---------------------------------------------------------------------------
+# Week 4 Stubs — extract_context, extract_tasks, extract_responsibilities
+# ---------------------------------------------------------------------------
+
+
+def test_extract_context_returns_empty_list() -> None:
+    """extract_context stub returns an empty list of ContextSignal."""
+    payload = {"title": "Test Job", "description": "Build things."}
+    result = extract_context(payload)
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_extract_tasks_returns_empty_list() -> None:
+    """extract_tasks stub returns an empty list of TaskRecord."""
+    payload = {"title": "Test Job", "description": "Build things."}
+    result = extract_tasks(payload)
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_extract_responsibilities_returns_empty_list() -> None:
+    """extract_responsibilities stub returns an empty list of ResponsibilityRecord."""
+    payload = {"title": "Test Job", "description": "Build things."}
+    result = extract_responsibilities(payload)
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_context_signal_schema_validates() -> None:
+    """ContextSignal schema accepts valid data and rejects invalid."""
+    from agents.common.types.extraction_types import SpanRecord
+
+    signal = ContextSignal(
+        signal_type="remote_policy",
+        value="hybrid",
+        confidence=0.9,
+        source_span=SpanRecord(
+            text="hybrid",
+            field_source="description",
+            start_char=10,
+            end_char=16,
+        ),
+    )
+    assert signal.signal_type == "remote_policy"
+    assert signal.value == "hybrid"
+    assert signal.confidence == 0.9
+    assert signal.source_span.text == "hybrid"

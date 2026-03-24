@@ -10,7 +10,7 @@ Extraction Model.
 """
 import structlog
 
-from agents.skills_extraction.models import ContextSignal
+from agents.common.types.extraction_types import ContextSignal
 
 log = structlog.get_logger()
 
