@@ -10,7 +10,7 @@ from agents.common.types.extraction_types import ResponsibilityRecord, TaskRecor
 from agents.skills_extraction.extractors.context import extract_context
 from agents.skills_extraction.extractors.responsibilities import extract_responsibilities
 from agents.skills_extraction.extractors.tasks import extract_tasks
-from agents.skills_extraction.models import ContextSignal, SpanRecord
+from agents.common.types.extraction_types import ContextSignal, SpanRecord
 
 
 @pytest.fixture
