@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+# ruff: noqa: E402  -- module docstring must be first; imports follow
 
 """
 Seed ESCO digital skills data from the official English CSV package.
@@ -52,6 +53,11 @@ Using PostgreSQL too:
       --extracted-dir "/path/to/esco" \
       --seed-db \
       --db-url "$PYTHON_DATABASE_URL"
+
+Optional environment:
+    ESCO_SEED_APPLY_FILTER=1   If set, run filter_records() then merge any ESCO
+    concepts whose preferred_label matches a GenAI extension parent (so nodes
+    like the official \"machine learning\" knowledge skill are not dropped).
 """
 
 import argparse
@@ -82,6 +88,9 @@ DIGITAL_COLLECTION_FILENAME = Path(__file__).parent.parent / "agents" / "skills_
 SKILLS_FILENAME = Path(__file__).parent.parent / "agents" / "skills_extraction" / "taxonomy" / "skills_en.csv"
 DEFAULT_OUTPUT_JSON = Path(__file__).parent.parent / "agents" / "skills_extraction" / "taxonomy" / "esco_digital_skills.json"
 DEFAULT_METADATA_JSON = Path(__file__).parent.parent / "agents" / "skills_extraction" / "taxonomy" / "esco_source_metadata.json"
+DEFAULT_GENAI_EXTENSION_JSON = (
+    Path(__file__).parent.parent / "agents" / "skills_extraction" / "taxonomy" / "genai_extension.json"
+)
 DEFAULT_DB_TABLE = "esco_digital_skills"
 
 
@@ -488,7 +497,6 @@ def filter_records(records: list[dict]) -> list[dict]:
     filtered: list[dict] = []
 
     for item in records:
-        preferred_label = (item.get("preferred_label") or "").strip()
         normalized_label = (item.get("normalized_label") or "").strip()
         parents = {x.strip().lower() for x in item.get("broader_concept_labels", []) if x.strip()}
 
@@ -542,6 +550,54 @@ def filter_records(records: list[dict]) -> list[dict]:
         deduped.append(item)
 
     return deduped
+
+
+def merge_missing_genai_parent_concepts(
+    universe: list[dict[str, Any]],
+    selected: list[dict[str, Any]],
+    genai_json: Path | None = None,
+) -> list[dict[str, Any]]:
+    """Re-insert ESCO records needed for GenAI Extension parent URIs after filtering.
+
+    ``filter_records`` keeps rows by *broader* parent labels. Official ESCO nodes
+    such as the knowledge \"machine learning\" often have broader labels like
+    \"principles of artificial intelligence\" — not the string \"machine learning\"
+    — so they can be dropped even though ``genai_extension.json`` names
+    \"Machine learning\" as a parent. This pass adds any universe row whose
+    ``preferred_label`` matches a GenAI parent string (normalized) if missing
+    from ``selected``.
+    """
+    path = genai_json or DEFAULT_GENAI_EXTENSION_JSON
+    parents_norm: set[str] = set()
+    if path.exists():
+        blob = json.loads(path.read_text(encoding="utf-8"))
+        for _, parent_label in blob.items():
+            parents_norm.add(normalize_text(str(parent_label)))
+    if not parents_norm:
+        return selected
+
+    selected_uris = {r["esco_uri"] for r in selected if r.get("esco_uri")}
+    pref_to_rec: dict[str, dict[str, Any]] = {}
+    for r in universe:
+        pl = (r.get("preferred_label") or "").strip()
+        if not pl:
+            continue
+        k = normalize_text(pl)
+        pref_to_rec.setdefault(k, r)
+
+    extra: list[dict[str, Any]] = []
+    for pn in parents_norm:
+        rec = pref_to_rec.get(pn)
+        if rec and rec.get("esco_uri") and rec["esco_uri"] not in selected_uris:
+            extra.append(rec)
+            selected_uris.add(rec["esco_uri"])
+    if not extra:
+        return selected
+
+    merged = list(selected) + extra
+    merged.sort(key=lambda item: (item["preferred_label"].lower(), item["esco_uri"]))
+    return merged
+
 
 def ensure_db_support() -> None:
     if create_engine is None or text is None:
@@ -687,7 +743,7 @@ def resolve_workspace(config: Config) -> tuple[Path, Path | None, bool]:
     return workspace_dir, zip_path, not config.keep_workdir
 
 def run(config: Config) -> int:
-    workspace_dir, zip_path, cleanup_when_done = resolve_workspace(config)s
+    workspace_dir, zip_path, cleanup_when_done = resolve_workspace(config)
 
     try:
         if config.download_url:
@@ -700,9 +756,20 @@ def run(config: Config) -> int:
 
         skills_by_uri = load_skills_by_uri(skills_csv_path)
         digital_rows = load_digital_rows(digital_csv_path)
-        records = build_records(digital_rows, skills_by_uri)
-
-        # records = filter_records(records)
+        all_records = build_records(digital_rows, skills_by_uri)
+        # Optional Week-4 subset. When enabled, merge back GenAI parent concepts
+        # (see merge_missing_genai_parent_concepts) so taxonomy step 1 stays valid.
+        apply_filter = os.getenv("ESCO_SEED_APPLY_FILTER", "").lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        if apply_filter:
+            records = merge_missing_genai_parent_concepts(
+                all_records, filter_records(all_records)
+            )
+        else:
+            records = all_records
 
         write_json(records, config.output_json)
         write_metadata(
@@ -725,6 +792,5 @@ def run(config: Config) -> int:
 if __name__ == "__main__":
     try:
         sys.exit(run(parse_args()))
-    except Exception as exc:
-        #print(f"ERROR: {exc}", file=sys.stderr)
+    except Exception:
         sys.exit(1)

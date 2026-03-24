@@ -1,4 +1,4 @@
-"""Tests for Crawl4AIAdapter — El Paso GovernmentJobs portal (mocked, no live site)."""
+"""Tests for Crawl4AI ingestion adapters (El Paso, USAJobs, Indeed) — mocked, no live sites."""
 
 from __future__ import annotations
 
@@ -15,6 +15,11 @@ from agents.ingestion.sources.crawl4ai_adapter import (  # noqa: E402
     EL_PASO_PORTAL_BASE,
     Crawl4AIAdapter,
     Crawl4AIAdapterError,
+)
+from agents.ingestion.sources.crawl4ai_indeed import Crawl4AIIndeedAdapter  # noqa: E402
+from agents.ingestion.sources.crawl4ai_usajobs import (  # noqa: E402
+    Crawl4AIUSAJobsAdapter,
+    Crawl4AIUSAJobsAdapterError,
 )
 
 
@@ -297,6 +302,224 @@ class TestCrawl4AIAdapterHealthCheck:
         assert result["extractable_structure"] is False
         assert result["status"] == "error"
         assert result["error"] is not None
+
+
+@patch("crawl4ai.AsyncWebCrawler")
+class TestCrawl4AIUSAJobsAdapterFetch:
+    """Tests for Crawl4AIUSAJobsAdapter.fetch() with mocked Crawl4AI."""
+
+    def test_fetch_returns_records_with_source_crawl4ai_usajobs(
+        self, mock_crawler_cls: MagicMock
+    ) -> None:
+        """Pass 1 job link + detail HTML with salary/description → normalized records."""
+        pass1_html = (
+            "x" * 500
+            + "https://www.usajobs.gov/job/12345678/some-title"
+        )
+        list_result = _make_mock_result(success=True, html=pass1_html)
+        detail_html = (
+            '<script type="application/ld+json">'
+            '{"@type":"JobPosting","title":"Federal Analyst",'
+            '"description":"Detailed federal job duties and scope of work here.",'
+            '"baseSalary":{"value":{"minValue":80000,"maxValue":104000,"unitText":"YEAR"}},'
+            '"hiringOrganization":{"name":"Department of Testing"}}'
+            "</script>"
+            + "z" * 200
+        )
+        detail_result = _make_mock_result(success=True, html=detail_html)
+        mock_crawler = AsyncMock()
+        mock_crawler.arun = AsyncMock(side_effect=[list_result, detail_result])
+        mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
+        mock_crawler.__aexit__ = AsyncMock(return_value=None)
+        mock_crawler_cls.return_value = mock_crawler
+
+        adapter = Crawl4AIUSAJobsAdapter()
+        region = _border_region_config()
+        records = asyncio.run(adapter.fetch(region))
+
+        assert len(records) == 1
+        r = records[0]
+        assert r.source == "crawl4ai_usajobs"
+        assert r.external_id == "12345678"
+        assert r.description != ""
+        assert "duties" in r.description.lower() or "federal" in r.description.lower()
+        assert r.salary_raw is not None
+
+    def test_fetch_pass1_failed_detail_keeps_partial_record(
+        self, mock_crawler_cls: MagicMock
+    ) -> None:
+        """Detail arun raises → one partial RawJobRecord with empty description."""
+        pass1_html = "y" * 500 + "https://www.usajobs.gov/job/99999999/my-role"
+        list_result = _make_mock_result(success=True, html=pass1_html)
+        mock_crawler = AsyncMock()
+        mock_crawler.arun = AsyncMock(
+            side_effect=[list_result, RuntimeError("detail crawl failed")]
+        )
+        mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
+        mock_crawler.__aexit__ = AsyncMock(return_value=None)
+        mock_crawler_cls.return_value = mock_crawler
+
+        adapter = Crawl4AIUSAJobsAdapter()
+        region = _border_region_config()
+        records = asyncio.run(adapter.fetch(region))
+
+        assert len(records) == 1
+        assert records[0].source == "crawl4ai_usajobs"
+        assert records[0].description == ""
+
+    def test_fetch_returns_empty_when_no_results_signal(
+        self, mock_crawler_cls: MagicMock
+    ) -> None:
+        """Explicit no-results copy with no job links returns []."""
+        html = "z" * 500 + " no jobs found "
+        mock_result = _make_mock_result(success=True, html=html)
+        mock_crawler = AsyncMock()
+        mock_crawler.arun = AsyncMock(return_value=mock_result)
+        mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
+        mock_crawler.__aexit__ = AsyncMock(return_value=None)
+        mock_crawler_cls.return_value = mock_crawler
+
+        adapter = Crawl4AIUSAJobsAdapter()
+        region = _border_region_config()
+        records = asyncio.run(adapter.fetch(region))
+        assert records == []
+
+    def test_fetch_raises_on_unreachable_target(self, mock_crawler_cls: MagicMock) -> None:
+        """Listing success=False raises Crawl4AIUSAJobsAdapterError."""
+        mock_result = _make_mock_result(success=False, error_message="blocked")
+        mock_crawler = AsyncMock()
+        mock_crawler.arun = AsyncMock(return_value=mock_result)
+        mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
+        mock_crawler.__aexit__ = AsyncMock(return_value=None)
+        mock_crawler_cls.return_value = mock_crawler
+
+        adapter = Crawl4AIUSAJobsAdapter()
+        region = _border_region_config()
+        with pytest.raises(Crawl4AIUSAJobsAdapterError) as exc_info:
+            asyncio.run(adapter.fetch(region))
+        assert "unreachable" in str(exc_info.value).lower()
+
+    def test_health_check_returns_correct_shape(self, mock_crawler_cls: MagicMock) -> None:
+        """health_check returns status, source, reachable, error."""
+        mock_result = _make_mock_result(success=True, html="h" * 600)
+        mock_crawler = AsyncMock()
+        mock_crawler.arun = AsyncMock(return_value=mock_result)
+        mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
+        mock_crawler.__aexit__ = AsyncMock(return_value=None)
+        mock_crawler_cls.return_value = mock_crawler
+
+        adapter = Crawl4AIUSAJobsAdapter()
+        result = asyncio.run(adapter.health_check())
+
+        assert {"status", "source", "reachable", "error"} <= set(result.keys())
+        assert result["source"] == "crawl4ai_usajobs"
+
+
+@patch("crawl4ai.AsyncWebCrawler")
+class TestCrawl4AIIndeedAdapterFetch:
+    """Tests for Crawl4AIIndeedAdapter.fetch() and health_check() with mocked Crawl4AI."""
+
+    def test_fetch_returns_empty_on_cloudflare_block(
+        self, mock_crawler_cls: MagicMock
+    ) -> None:
+        """cf-ray marker in listing HTML → [] without raising."""
+        html = "x" * 400 + " cf-ray: abc123 " + "y" * 200
+        mock_result = _make_mock_result(success=True, html=html)
+        mock_crawler = AsyncMock()
+        mock_crawler.arun = AsyncMock(return_value=mock_result)
+        mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
+        mock_crawler.__aexit__ = AsyncMock(return_value=None)
+        mock_crawler_cls.return_value = mock_crawler
+
+        adapter = Crawl4AIIndeedAdapter()
+        region = _border_region_config()
+        records = asyncio.run(adapter.fetch(region))
+        assert records == []
+
+    def test_fetch_returns_empty_on_success_false(self, mock_crawler_cls: MagicMock) -> None:
+        """Listing success=False → [] without raising."""
+        mock_result = _make_mock_result(success=False, error_message="blocked")
+        mock_crawler = AsyncMock()
+        mock_crawler.arun = AsyncMock(return_value=mock_result)
+        mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
+        mock_crawler.__aexit__ = AsyncMock(return_value=None)
+        mock_crawler_cls.return_value = mock_crawler
+
+        adapter = Crawl4AIIndeedAdapter()
+        region = _border_region_config()
+        records = asyncio.run(adapter.fetch(region))
+        assert records == []
+
+    def test_fetch_returns_records_with_source_crawl4ai_indeed(
+        self, mock_crawler_cls: MagicMock
+    ) -> None:
+        """Pass 1 jk + detail with description → records with source and description."""
+        pass1_html = (
+            "p" * 500
+            + 'data-jk="abc123def456abcd"'
+        )
+        list_result = _make_mock_result(success=True, html=pass1_html)
+        detail_html = (
+            '<script type="application/ld+json">'
+            '{"@type":"JobPosting","title":"Software Engineer",'
+            '"description":"Indeed job body text for testing normalization."}'
+            "</script>"
+            + "q" * 200
+        )
+        detail_result = _make_mock_result(success=True, html=detail_html)
+        mock_crawler = AsyncMock()
+        mock_crawler.arun = AsyncMock(side_effect=[list_result, detail_result])
+        mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
+        mock_crawler.__aexit__ = AsyncMock(return_value=None)
+        mock_crawler_cls.return_value = mock_crawler
+
+        adapter = Crawl4AIIndeedAdapter()
+        region = _border_region_config()
+        records = asyncio.run(adapter.fetch(region))
+
+        assert len(records) == 1
+        r = records[0]
+        assert r.source == "crawl4ai_indeed"
+        assert r.external_id == "abc123def456abcd"
+        assert r.description != ""
+        assert "indeed job body" in r.description.lower()
+
+    def test_fetch_pass1_failed_detail_keeps_partial_record(
+        self, mock_crawler_cls: MagicMock
+    ) -> None:
+        """Detail arun raises → partial record, empty description."""
+        pass1_html = "r" * 500 + 'data-jk="fedcba9876543210"'
+        list_result = _make_mock_result(success=True, html=pass1_html)
+        mock_crawler = AsyncMock()
+        mock_crawler.arun = AsyncMock(
+            side_effect=[list_result, RuntimeError("detail failed")]
+        )
+        mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
+        mock_crawler.__aexit__ = AsyncMock(return_value=None)
+        mock_crawler_cls.return_value = mock_crawler
+
+        adapter = Crawl4AIIndeedAdapter()
+        region = _border_region_config()
+        records = asyncio.run(adapter.fetch(region))
+
+        assert len(records) == 1
+        assert records[0].source == "crawl4ai_indeed"
+        assert records[0].description == ""
+
+    def test_health_check_returns_correct_shape(self, mock_crawler_cls: MagicMock) -> None:
+        """health_check returns status, source, reachable, error."""
+        mock_result = _make_mock_result(success=True, html="s" * 600)
+        mock_crawler = AsyncMock()
+        mock_crawler.arun = AsyncMock(return_value=mock_result)
+        mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
+        mock_crawler.__aexit__ = AsyncMock(return_value=None)
+        mock_crawler_cls.return_value = mock_crawler
+
+        adapter = Crawl4AIIndeedAdapter()
+        result = asyncio.run(adapter.health_check())
+
+        assert {"status", "source", "reachable", "error"} <= set(result.keys())
+        assert result["source"] == "crawl4ai_indeed"
 
 
 class TestCrawl4AIAdapterUnit:

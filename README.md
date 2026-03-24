@@ -34,7 +34,7 @@ cd watechcoalition
 - [Branching Strategy](docs/branch-strategy.md)
 - [PostgreSQL Docker Setup](docs/DOCKER_POSTGRESQL_SETUP.md)
 - [Redis Setup](#redis-message-bus) — Redis Streams for inter-agent events
-- [Changing the DB schema](docs/prisma-workflow.md)
+- [Changing the DB schema](docs/prisma-workflow.md) (legacy — new schema changes go through SQLAlchemy)
 - [API Routes](docs/API-routes.md)
 - [CSS Utilities & Styling Guide](docs/styling-guide.md)
 
@@ -75,10 +75,10 @@ python -m pytest agents/tests/ -v
 
 ### Next.js App
 - **Next.js**: React framework for server-side rendering. [Next.js Documentation](https://nextjs.org/docs)
-- **Prisma**: Database ORM for TypeScript and Node.js. [Prisma Documentation](https://www.prisma.io/docs)
+- **Prisma**: Database ORM for TypeScript and Node.js (being phased out — SQLAlchemy is now the single DB authority). [Prisma Documentation](https://www.prisma.io/docs)
 - **TailwindCSS**: Utility-first CSS framework. [TailwindCSS Documentation](https://tailwindcss.com/docs)
 - **Auth.js**: Authentication library for Next.js. [Auth.js Documentation](https://authjs.dev/docs)
-- **MSSQL**: Microsoft SQL Server database (deprecated — being phased out). [MSSQL Documentation](https://docs.microsoft.com/en-us/sql/sql-server)
+- **MSSQL**: Microsoft SQL Server database (deprecated — replaced by PostgreSQL via SQLAlchemy). [MSSQL Documentation](https://docs.microsoft.com/en-us/sql/sql-server)
 
 ### Agent Pipeline (Python)
 - **LangGraph**: Multi-agent framework for StateGraph routing. [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)

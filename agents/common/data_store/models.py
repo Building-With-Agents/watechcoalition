@@ -1,7 +1,15 @@
-"""SQLAlchemy ORM models for agent-managed tables.
+"""SQLAlchemy ORM models for all database tables.
 
-All tables live in the ``dbo`` schema to match pgloader-migrated tables.
-These tables are created by agents (via migrations.py), NOT by Prisma.
+SQLAlchemy is the single database authority. All tables live in the ``dbo``
+schema. Reference tables (companies, industry_sectors, etc.) were originally
+seeded via pgloader from MSSQL and are now agent-owned with full read+write.
+Prisma/MSSQL is being phased out.
+
+Agent-created tables: raw_ingested_jobs, job_ingestion_runs, normalized_jobs,
+    normalization_quarantine, extracted_intelligence, llm_audit_log,
+    employer_profiles.
+Reference tables (seeded, agent-owned): companies, industry_sectors,
+    technology_areas, skills, socc, job_postings.
 """
 
 from __future__ import annotations
@@ -290,5 +298,155 @@ class LLMAuditLog(Base):
     success: Mapped[bool] = mapped_column(Boolean, nullable=False)
     error_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+
+# ---------------------------------------------------------------------------
+# Enrichment tables (Week 5)
+# ---------------------------------------------------------------------------
+
+
+class EmployerProfile(Base):
+    """Company-level enrichment: size, AI maturity, sector, known-employer flag.
+
+    Source of truth: ARCHITECTURE_DEEP.md § EmployerProfile.
+    """
+
+    __tablename__ = "employer_profiles"
+    __table_args__ = (
+        Index("ix_employer_profiles_company_id", "company_id"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    company_id: Mapped[str] = mapped_column(Text, nullable=False)
+    company_size: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_maturity_signal: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sector: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_known_employer: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+
+# ===========================================================================
+# Reference tables — seeded via pgloader, now agent-owned (full read+write).
+#
+# These models match the existing pgloader-seeded table structures exactly.
+# create_all() with checkfirst=True will skip creation if tables exist.
+# ===========================================================================
+
+
+class Company(Base):
+    """Companies table — originally Prisma-managed, now agent-owned.
+
+    Agents can read existing companies and write placeholders during
+    enrichment (company resolution).
+    """
+
+    __tablename__ = "companies"
+    __table_args__ = {"schema": "dbo"}
+
+    company_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    industry_sector_id: Mapped[str | None] = mapped_column(Text, nullable=True)
+    company_name: Mapped[str] = mapped_column(Text, nullable=False)
+    company_logo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    about_us: Mapped[str | None] = mapped_column(Text, nullable=True)
+    company_email: Mapped[str | None] = mapped_column(Text, nullable=True)
+    year_founded: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    company_website_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    company_video_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    company_phone: Mapped[str | None] = mapped_column(Text, nullable=True)
+    company_mission: Mapped[str | None] = mapped_column(Text, nullable=True)
+    company_vision: Mapped[str | None] = mapped_column(Text, nullable=True)
+    size: Mapped[str | None] = mapped_column(Text, default="1-10")
+    estimated_annual_hires: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    is_approved: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    createdby: Mapped[str | None] = mapped_column(Text, nullable=True)
+    createdat: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    updatedat: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    contact_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    engagementtype: Mapped[str | None] = mapped_column(String(1000), default="Lead")
+
+
+class IndustrySector(Base):
+    """Industry sectors reference table — agent-owned."""
+
+    __tablename__ = "industry_sectors"
+    __table_args__ = {"schema": "dbo"}
+
+    industry_sector_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    sector_title: Mapped[str] = mapped_column(Text, nullable=False)
+    createdat: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    updatedat: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+
+class TechnologyArea(Base):
+    """Technology areas reference table — agent-owned."""
+
+    __tablename__ = "technology_areas"
+    __table_args__ = {"schema": "dbo"}
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    createdat: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    updatedat: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+
+class Skill(Base):
+    """Skills reference table — agent-owned.
+
+    Note: The ``embedding`` column (pgvector vector(1536)) is not mapped here
+    because SQLAlchemy needs the pgvector extension. Access it via raw SQL if
+    needed for similarity search.
+    """
+
+    __tablename__ = "skills"
+    __table_args__ = {"schema": "dbo"}
+
+    skill_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    skill_subcategory_id: Mapped[str] = mapped_column(Text, nullable=False)
+    skill_name: Mapped[str] = mapped_column(Text, nullable=False)
+    skill_info_url: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    skill_type: Mapped[str | None] = mapped_column(Text, nullable=True)
+    createdat: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    updatedat: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+
+class SOCC(Base):
+    """Standard Occupational Classification Codes — agent-owned.
+
+    Used by enrichment for SOC code classification.
+    """
+
+    __tablename__ = "socc"
+    __table_args__ = {"schema": "dbo"}
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    code: Mapped[str] = mapped_column(String(1000), nullable=False)
+    title: Mapped[str] = mapped_column(String(1000), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    version: Mapped[str] = mapped_column(Text, nullable=False)
+    createdat: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    updatedat: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

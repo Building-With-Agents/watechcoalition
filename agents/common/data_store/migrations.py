@@ -1,7 +1,11 @@
-"""Idempotent database migrations for agent-managed tables.
+"""Idempotent database migrations for all agent-managed tables.
 
-Creates agent tables (raw_ingested_jobs, job_ingestion_runs, normalized_jobs)
-and adds Phase 1 columns to the existing job_postings table.
+SQLAlchemy is the single database authority. Creates agent tables, adds
+enrichment columns to job_postings, and ensures reference tables are
+accessible. Prisma/MSSQL is being phased out.
+
+Optional legacy raw-SQL scripts (pre-consolidation paths) live under
+``legacy_migrations/`` for reference only; use :func:`run_migrations` for the app.
 
 Usage:
     from agents.common.data_store.migrations import run_migrations
@@ -67,8 +71,11 @@ CREATE INDEX IF NOT EXISTS ix_llm_audit_log_created_at ON dbo.llm_audit_log (cre
 CREATE INDEX IF NOT EXISTS ix_llm_audit_log_success ON dbo.llm_audit_log (success);
 """
 
-# Phase 1 columns to add to dbo.job_postings (idempotent via IF NOT EXISTS)
-_PHASE1_ALTER_STATEMENTS = [
+# Enrichment columns on dbo.job_postings (idempotent via IF NOT EXISTS).
+# Phase 1 (Weeks 3-4): ingestion + extraction metadata.
+# Phase 1b (Week 5): enrichment output — SOC, NAICS, temporal, borderplex, dedup.
+_JOB_POSTINGS_ALTER_STATEMENTS = [
+    # Phase 1 — ingestion & extraction metadata
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS source TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS external_id TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS ingestion_run_id TEXT",
@@ -78,12 +85,45 @@ _PHASE1_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS spam_score DOUBLE PRECISION",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS overall_confidence DOUBLE PRECISION",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB",
+    # Phase 1b — Week 5 enrichment output
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS soc_code TEXT",
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS naics_code TEXT",
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS temporal_period TEXT",
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS borderplex_subregion TEXT",
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS is_duplicate BOOLEAN DEFAULT FALSE",
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS duplicate_cluster_id TEXT",
 ]
 
 _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS requirements TEXT",
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS responsibilities TEXT",
 ]
+
+# Backfill token columns when llm_audit_log predates full DDL (idempotent)
+_LLM_AUDIT_LOG_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS input_tokens INTEGER",
+    "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS output_tokens INTEGER",
+    "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS token_count INTEGER",
+]
+
+# extracted_intelligence created before ExtractionMetadata JSONB column existed
+_EXTRACTED_INTELLIGENCE_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.extracted_intelligence ADD COLUMN IF NOT EXISTS extraction_metadata JSONB",
+]
+
+_EMPLOYER_PROFILES_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.employer_profiles (
+    id SERIAL PRIMARY KEY,
+    company_id TEXT NOT NULL,
+    company_size TEXT,
+    ai_maturity_signal TEXT,
+    sector TEXT,
+    is_known_employer BOOLEAN NOT NULL DEFAULT FALSE,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_employer_profiles_company_id
+    ON dbo.employer_profiles (company_id);
+"""
 
 
 def run_migrations(engine: Engine) -> None:
@@ -98,18 +138,48 @@ def run_migrations(engine: Engine) -> None:
     Base.metadata.create_all(engine)
     log.info("migrations_tables_created")
 
-    # 2. Create extracted_intelligence table (DDL may add indexes idempotently)
+    # 2. Create extracted_intelligence table
     with engine.begin() as conn:
         conn.execute(text(_EXTRACTED_INTELLIGENCE_DDL))
     log.info("migrations_extracted_intelligence_created")
+
+    for stmt in _EXTRACTED_INTELLIGENCE_ALTER_STATEMENTS:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(stmt))
+        except Exception as exc:
+            log.warning(
+                "migration_extracted_intelligence_alter_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
 
     # 3. Create llm_audit_log table
     with engine.begin() as conn:
         conn.execute(text(_LLM_AUDIT_LOG_DDL))
     log.info("migrations_llm_audit_log_created")
 
-    # 4. Add Phase 1 columns to existing tables.
-    for stmt in _PHASE1_ALTER_STATEMENTS:
+    # 3b. Add token columns if table was created before they existed in DDL
+    for stmt in _LLM_AUDIT_LOG_ALTER_STATEMENTS:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(stmt))
+        except Exception as exc:
+            log.warning(
+                "migration_llm_audit_log_alter_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
+
+    # 4. Create employer_profiles table
+    with engine.begin() as conn:
+        conn.execute(text(_EMPLOYER_PROFILES_DDL))
+    log.info("migrations_employer_profiles_created")
+
+    # 5. Add enrichment columns to existing tables.
+    #    Each ALTER runs in its own transaction so a single failure
+    #    (e.g. job_postings not yet created) doesn't abort the rest.
+    for stmt in _JOB_POSTINGS_ALTER_STATEMENTS:
         try:
             with engine.begin() as conn:
                 conn.execute(text(stmt))
