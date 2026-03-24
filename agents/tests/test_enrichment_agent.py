@@ -1,4 +1,4 @@
-"""Tests for EnrichmentAgent — Week 2 stub."""
+"""Tests for EnrichmentAgent — Pair D batch enrichment and RecordEnriched (issue #87)."""
 
 from __future__ import annotations
 
@@ -8,7 +8,6 @@ from unittest.mock import patch
 
 from agents.common.event_envelope import EventEnvelope
 from agents.enrichment.agent import EnrichmentAgent
-from agents.enrichment.resolvers.events import build_record_enriched_event
 
 
 class TestEnrichmentAgent:
@@ -35,7 +34,7 @@ class TestEnrichmentAgent:
     def test_process_emits_record_enriched(
         self, skills_event: EventEnvelope
     ) -> None:
-        """Output event_type is RecordEnriched."""
+        """Output event_type is RecordEnriched with Week 5 lite keys only."""
         agent = EnrichmentAgent()
         with (
             patch.object(EnrichmentAgent, "enrich_record", return_value={"ok": True}),
@@ -44,6 +43,13 @@ class TestEnrichmentAgent:
             out = agent.process(skills_event)
         assert out.payload["event_type"] == "RecordEnriched"
         assert out.agent_id == "enrichment-agent"
+        assert set(out.payload.keys()) == {
+            "event_type",
+            "batch_id",
+            "enriched_count",
+            "spam_rejected_count",
+            "flagged_for_review_count",
+        }
 
     def test_process_passes_skills_into_enrich_record(
         self, skills_event: EventEnvelope
@@ -128,20 +134,102 @@ class TestEnrichmentAgent:
         assert out.payload["event_type"] == "RecordEnriched"
         assert out.payload["enriched_count"] == 0
 
-    def test_record_enriched_payload_includes_new_job_postings_columns(
+    def test_batch_multi_record_aggregates_counts(self, skills_event: EventEnvelope) -> None:
+        """One RecordEnriched aggregates all SkillsExtracted.records (issue #87)."""
+        payload = {
+            **skills_event.payload,
+            "batch_id": "batch-multi",
+            "records": [
+                {"posting_id": 1, "title": "A", "company": "C1", "skills": [], "is_spam": True},
+                {"posting_id": 2, "title": "B", "company": "C2", "skills": [], "is_spam": None},
+                {
+                    "posting_id": 3,
+                    "title": "C",
+                    "company": "C3",
+                    "skills": [],
+                    "is_spam": False,
+                },
+                {
+                    "posting_id": 4,
+                    "title": "D",
+                    "company": "C4",
+                    "skills": [],
+                    "spam_score": 0.95,
+                },
+                {
+                    "posting_id": 5,
+                    "title": "E",
+                    "company": "C5",
+                    "skills": [],
+                    "spam_score": 0.75,
+                },
+                {
+                    "posting_id": 6,
+                    "title": "F",
+                    "company": "C6",
+                    "skills": [],
+                    "spam_score": 0.5,
+                },
+            ],
+        }
+        event = EventEnvelope(
+            correlation_id=skills_event.correlation_id,
+            agent_id=skills_event.agent_id,
+            payload=payload,
+        )
+        agent = EnrichmentAgent()
+        with (
+            patch.object(EnrichmentAgent, "enrich_record", return_value={"ok": True}),
+            patch("agents.enrichment.agent.resolve_sector", return_value=None),
+        ):
+            out = agent.process(event)
+        assert out.payload["batch_id"] == "batch-multi"
+        assert out.payload["spam_rejected_count"] == 2
+        assert out.payload["flagged_for_review_count"] == 2
+        assert out.payload["enriched_count"] == 2
+
+    def test_spam_score_thresholds_precedence_over_absent_is_spam(
         self, skills_event: EventEnvelope
     ) -> None:
-        """Week 5 columns flow through enrich_record into the batch envelope."""
+        payload = {
+            **skills_event.payload,
+            "records": [
+                {"posting_id": 1, "title": "A", "company": "X", "skills": [], "spam_score": 0.91},
+            ],
+        }
+        event = EventEnvelope(
+            correlation_id=skills_event.correlation_id,
+            agent_id=skills_event.agent_id,
+            payload=payload,
+        )
+        agent = EnrichmentAgent()
+        with patch.object(EnrichmentAgent, "enrich_record") as mock_enrich:
+            out = agent.process(event)
+        mock_enrich.assert_not_called()
+        assert out.payload["spam_rejected_count"] == 1
 
-        def build_with_records(*args: Any, **kwargs: Any) -> EventEnvelope:
-            ev = build_record_enriched_event(*args, **kwargs)
-            recs = kwargs.get("enriched_records", [])
-            ev.payload = {**dict(ev.payload), "records": list(recs)}
-            return ev
+    def test_enrich_record_receives_merged_job_columns_from_batch_payload(
+        self, skills_event: EventEnvelope
+    ) -> None:
+        """Optional job_postings columns on the batch payload merge into each row."""
+        captured: list[dict[str, Any]] = []
+
+        def capture_enrich(posting: dict, session: object) -> dict:
+            captured.append(posting)
+            return {"ok": True}
 
         payload = {
             **skills_event.payload,
             "is_spam": False,
+            "batch_id": "b97",
+            "records": [
+                {
+                    "posting_id": 1,
+                    "title": "Dev",
+                    "company": "Acme",
+                    "skills": [],
+                }
+            ],
             "soc_code": "15-1252.00",
             "naics_code": "541511",
             "temporal_period": "agentic_era",
@@ -154,37 +242,23 @@ class TestEnrichmentAgent:
             agent_id=skills_event.agent_id,
             payload=payload,
         )
-        company_uuid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
-        mock_enriched = {
-            "posting_id": payload.get("posting_id"),
-            "title": payload.get("title"),
-            "company": payload.get("company"),
-            "soc_code": "15-1252.00",
-            "naics_code": "541511",
-            "temporal_period": "agentic_era",
-            "borderplex_subregion": "el_paso",
-            "is_duplicate": False,
-            "duplicate_cluster_id": None,
-            "company_id": company_uuid,
-            "city": "El Paso",
-            "state": "TX",
-            "country": "US",
-        }
         agent = EnrichmentAgent()
         with (
-            patch.object(EnrichmentAgent, "enrich_record", return_value=mock_enriched),
+            patch.object(EnrichmentAgent, "enrich_record", side_effect=capture_enrich),
             patch("agents.enrichment.agent.resolve_sector", return_value=None),
-            patch(
-                "agents.enrichment.agent.build_record_enriched_event",
-                side_effect=build_with_records,
-            ),
         ):
             out = agent.process(event)
 
-        assert out.payload["event_type"] == "RecordEnriched"
-        records = out.payload["records"]
-        assert len(records) == 1
-        rec = records[0]
+        assert set(out.payload.keys()) == {
+            "event_type",
+            "batch_id",
+            "enriched_count",
+            "spam_rejected_count",
+            "flagged_for_review_count",
+        }
+        assert out.payload["enriched_count"] == 1
+        assert len(captured) == 1
+        rec = captured[0]
         assert rec["soc_code"] == "15-1252.00"
         assert rec["naics_code"] == "541511"
         assert rec["temporal_period"] == "agentic_era"

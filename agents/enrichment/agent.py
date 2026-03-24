@@ -1,31 +1,22 @@
 """
-Enrichment Agent stub — Week 2 Walking Skeleton.
+Skills enrichment — Pair D (Week 5): company / location / sector resolution and confidence.
 
-Real implementation: Phase 1 lite (refined in Week 5+).
-
-In the walking skeleton this agent returns a pre-computed fixture payload
-instead of classifying role/seniority and scoring quality via LLM.
+Consumes ``SkillsExtracted`` (after Pair C spam / quality / classification on each record).
+Emits exactly one ``RecordEnriched`` per batch invocation (Week 5 lite payload, issue #87).
 
 Agent ID (canonical): enrichment-agent
 Emits:    RecordEnriched
 Consumes: SkillsExtracted
 
-Fixture: agents/data/fixtures/fixture_enriched.json
-
-Phase 1 lite replaces this stub with:
-- Role classification (Software Engineering, Data Science, ML, etc.)
-- Seniority classification (junior / mid / senior / lead)
-- Quality score [0-1]: completeness + clarity + AI keyword density + structural coherence
-- Spam detection: score < 0.7 -> proceed | 0.7-0.9 -> flag (is_spam=null) | > 0.9 -> reject
-- Company resolution: match companies table by name, create placeholder if missing
-- Sector mapping: map to industry_sectors table
+Pair C applies spam bands: score > 0.9 → reject; 0.7–0.9 → flag (``is_spam is None``);
+below 0.7 → proceed. When ``is_spam`` is set explicitly by upstream, it overrides ``spam_score``.
 """
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import structlog
 
@@ -46,14 +37,88 @@ _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_enriched.json"
 )
 
+SpamBucket = Literal["rejected", "flagged", "proceed"]
+
+
+def _records_from_skills_payload(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    """Prefer ``records`` from SkillsExtracted; otherwise treat the payload as one logical row."""
+    raw = payload.get("records")
+    if isinstance(raw, list) and len(raw) > 0:
+        out: list[dict[str, Any]] = []
+        for item in raw:
+            out.append(dict(item) if isinstance(item, dict) else {})
+        return out
+    return [payload]
+
+
+def _spam_bucket(record: dict[str, Any]) -> SpamBucket:
+    """Classify Pair C outcome: rejected / flagged / proceed to Pair D resolution."""
+    if "is_spam" in record:
+        if record["is_spam"] is True:
+            return "rejected"
+        if record["is_spam"] is None:
+            return "flagged"
+    spam_score = record.get("spam_score")
+    if spam_score is not None:
+        try:
+            s = float(spam_score)
+        except (TypeError, ValueError):
+            return "proceed"
+        if s > 0.9:
+            return "rejected"
+        if s >= 0.7:
+            return "flagged"
+    return "proceed"
+
+
+_EXTRA_POSTING_KEYS = frozenset({
+    "soc_code",
+    "naics_code",
+    "temporal_period",
+    "borderplex_subregion",
+    "is_duplicate",
+    "duplicate_cluster_id",
+})
+
+
+def _posting_for_enrichment(
+    record: dict[str, Any],
+    batch_payload: dict[str, Any],
+) -> dict[str, Any]:
+    """Build the posting dict passed to ``enrich_record`` (record fields + batch fallbacks)."""
+    def pick(key: str, default: Any = None) -> Any:
+        if key in record and record[key] is not None:
+            return record[key]
+        return batch_payload.get(key, default)
+
+    base: dict[str, Any] = {
+        "posting_id": pick("posting_id"),
+        "title": pick("title"),
+        "company": pick("company"),
+        "location": pick("location", "") or "",
+        "quality_score": pick("quality_score"),
+        "spam_score": pick("spam_score"),
+        "is_spam": pick("is_spam"),
+        "seniority": pick("seniority"),
+        "role_classification": pick("role_classification"),
+        "skills": pick("skills", []) or [],
+        "seniority_confidence": 0.90 if pick("seniority") is not None else 0.0,
+        "extraction_confidence": pick("extraction_confidence"),
+        "taxonomy_coverage": pick("taxonomy_coverage"),
+    }
+    for k in _EXTRA_POSTING_KEYS:
+        v = pick(k, None)
+        if v is not None:
+            base[k] = v
+    return base
+
 
 class EnrichmentAgent(BaseAgent):
     """
-    Stub for the Enrichment Agent (Phase 1 lite).
+    Enrichment Agent — Pair D resolution and batch-level ``RecordEnriched`` emission.
 
-    Week 2: returns fixture data indexed by posting_id.
-    Week 5+: replaces this with real role/seniority classification,
-             quality scoring, spam detection, and company resolution.
+    Aggregates all rows from a ``SkillsExtracted`` payload (``records`` or flat single-record),
+    applies Pair C gating, runs resolvers for each allowed row, then emits one event.
     """
 
     @property
@@ -76,71 +141,42 @@ class EnrichmentAgent(BaseAgent):
 
     def process(self, event: EventEnvelope) -> EventEnvelope:
         """
-        Accept upstream job payload (spam/quality from Pair C), enrich when allowed,
-        emit one ``RecordEnriched`` event per invocation (batch-style counts).
+        Consume ``SkillsExtracted``; emit one ``RecordEnriched`` with batch-level counts (issue #87).
         """
         payload = event.payload
         correlation_id = event.correlation_id
-        batch_id = payload.get("batch_id", "unknown")
+        batch_id = str(payload.get("batch_id") or "unknown")
 
-        if "is_spam" in payload:
-            if payload["is_spam"] is True:
-                return build_record_enriched_event(
-                    correlation_id=correlation_id,
-                    batch_id=batch_id,
-                    enriched_records=[],
-                    spam_rejected=1,
-                    flagged_count=0,
-                )
-            if payload["is_spam"] is None:
-                return build_record_enriched_event(
-                    correlation_id=correlation_id,
-                    batch_id=batch_id,
-                    enriched_records=[],
-                    spam_rejected=0,
-                    flagged_count=1,
-                )
+        rows = _records_from_skills_payload(payload)
+        enriched_count = 0
+        spam_rejected_count = 0
+        flagged_for_review_count = 0
 
-        try:
-            posting = {
-                "posting_id": payload.get("posting_id"),
-                "title": payload.get("title"),
-                "company": payload.get("company"),
-                "location": payload.get("location", ""),
-                "quality_score": payload.get("quality_score"),
-                "spam_score": payload.get("spam_score"),
-                "is_spam": payload.get("is_spam"),
-                "seniority": payload.get("seniority"),
-                "role_classification": payload.get("role_classification"),
-                "skills": payload.get("skills", []),
-                "seniority_confidence": 0.90 if payload.get("seniority") is not None else 0.0,
-                "extraction_confidence": payload.get("extraction_confidence"),
-                "taxonomy_coverage": payload.get("taxonomy_coverage"),
-            }
-            enriched = self.enrich_record(posting, session=None)
-            sector_id = resolve_sector(posting.get("role_classification"), session=None)
-            enriched["sector_id"] = sector_id
-            return build_record_enriched_event(
-                correlation_id=correlation_id,
-                batch_id=batch_id,
-                enriched_records=[enriched],
-                spam_rejected=0,
-                flagged_count=0,
-            )
-        except Exception:
-            log.warning("enrichment_process_degraded", agent=self.agent_id)
-            return EventEnvelope(
-                correlation_id=correlation_id,
-                agent_id=self.agent_id,
-                payload={
-                    "event_type": "RecordEnriched",
-                    "batch_id": batch_id,
-                    "enriched_count": 0,
-                    "spam_rejected_count": 0,
-                    "flagged_for_review_count": 0,
-                    "process_status": "degraded",
-                },
-            )
+        for row in rows:
+            bucket = _spam_bucket(row)
+            if bucket == "rejected":
+                spam_rejected_count += 1
+                continue
+            if bucket == "flagged":
+                flagged_for_review_count += 1
+                continue
+
+            posting = _posting_for_enrichment(row, payload)
+            try:
+                enriched = self.enrich_record(posting, session=None)
+                sector_id = resolve_sector(posting.get("role_classification"), session=None)
+                enriched["sector_id"] = sector_id
+                enriched_count += 1
+            except Exception:
+                log.warning("enrichment_process_degraded", agent=self.agent_id)
+
+        return build_record_enriched_event(
+            correlation_id=correlation_id,
+            batch_id=batch_id,
+            enriched_count=enriched_count,
+            spam_rejected_count=spam_rejected_count,
+            flagged_for_review_count=flagged_for_review_count,
+        )
 
     def enrich_record(self, posting: dict[str, Any], session: Any) -> dict[str, Any]:
         """
@@ -150,7 +186,7 @@ class EnrichmentAgent(BaseAgent):
         ``enrichment_status: degraded`` so the batch can continue.
         """
         try:
-            company_id, company_confidence = resolve_company(posting["company"], session)
+            company_id, company_confidence = resolve_company(posting.get("company"), session)
             location_id, location_confidence, raw_location_text, borderplex_subregion = (
                 resolve_location(posting.get("location", ""), session)
             )
