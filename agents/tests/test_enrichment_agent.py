@@ -1,12 +1,14 @@
-"""Tests for EnrichmentAgent — Week 2 stub."""
+"""Tests for EnrichmentAgent — deterministic classification + walking-skeleton fixture."""
 
 from __future__ import annotations
 
-from pathlib import Path
 from unittest.mock import patch
+
+import pytest
 
 from agents.common.event_envelope import EventEnvelope
 from agents.enrichment.agent import EnrichmentAgent
+from agents.enrichment.classification import classify_job
 
 
 class TestEnrichmentAgent:
@@ -16,35 +18,59 @@ class TestEnrichmentAgent:
         agent = EnrichmentAgent()
         assert agent.agent_id == "enrichment-agent"
 
-    def test_health_check_ok(self) -> None:
-        """Returns 'ok' when the fixture file exists and is valid JSON."""
+    def test_health_check_degraded_without_db_url(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("PYTHON_DATABASE_URL", raising=False)
         agent = EnrichmentAgent()
         result = agent.health_check()
+        assert result["status"] == "degraded"
+        assert result["metrics"].get("reason") == "PYTHON_DATABASE_URL not set"
+
+    def test_health_check_ok_when_db_reachable(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv(
+            "PYTHON_DATABASE_URL",
+            "postgresql+psycopg2://user:pass@localhost:5432/db",
+        )
+        with patch("agents.enrichment.agent.check_db_connection", return_value=True):
+            agent = EnrichmentAgent()
+            result = agent.health_check()
         assert result["status"] == "ok"
 
-    def test_health_check_down_missing_file(self) -> None:
-        """Returns 'down' when the fixture file does not exist."""
-        agent = EnrichmentAgent()
-        fake_path = Path("/nonexistent/fixture_enriched.json")
-        with patch("agents.enrichment.agent._FIXTURE_PATH", fake_path):
+    def test_health_check_down_when_db_unreachable(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv(
+            "PYTHON_DATABASE_URL",
+            "postgresql+psycopg2://user:pass@localhost:5432/db",
+        )
+        with patch("agents.enrichment.agent.check_db_connection", return_value=False):
+            agent = EnrichmentAgent()
             result = agent.health_check()
         assert result["status"] == "down"
 
     def test_process_emits_record_enriched(
-        self, skills_event: EventEnvelope
+        self,
+        skills_event: EventEnvelope,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """Output event_type is RecordEnriched."""
+        monkeypatch.delenv("PYTHON_DATABASE_URL", raising=False)
         agent = EnrichmentAgent()
-        agent.health_check()  # pre-load fixture
         out = agent.process(skills_event)
         assert out.payload["event_type"] == "RecordEnriched"
         assert out.agent_id == "enrichment-agent"
+        exp_role, exp_sen = classify_job(
+            "Senior Data Engineer",
+            None,
+            None,
+            list(agent._ensure_refs()[0]),
+            list(agent._ensure_refs()[1]),
+        )
+        assert out.payload["role_classification"] == exp_role
+        assert out.payload["seniority"] == exp_sen
 
     def test_process_carries_skills_forward(
-        self, skills_event: EventEnvelope
+        self,
+        skills_event: EventEnvelope,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """Skills from the upstream SkillsExtracted event are preserved in the output."""
+        monkeypatch.delenv("PYTHON_DATABASE_URL", raising=False)
         agent = EnrichmentAgent()
-        agent.health_check()  # pre-load fixture
         out = agent.process(skills_event)
         assert out.payload["skills"] == skills_event.payload["skills"]
