@@ -129,7 +129,7 @@ def render_prompt_for_job(
     job_record: JobRecord,
     pass1_tool_names: list[str],
 ) -> tuple[str, str]:
-    from agents.skills_extraction.prompts.skills_extraction_v1 import (
+    from agents.skills_extraction.prompts import (
         SKILLS_PROMPT_VERSION,
         SKILLS_SYSTEM_PROMPT,
         SKILLS_USER_TEMPLATE,
@@ -148,7 +148,7 @@ def render_prompt_for_job(
 
 
 def get_skills_prompt_version() -> str:
-    from agents.skills_extraction.prompts.skills_extraction_v1 import SKILLS_PROMPT_VERSION
+    from agents.skills_extraction.prompts import SKILLS_PROMPT_VERSION
 
     return SKILLS_PROMPT_VERSION
 

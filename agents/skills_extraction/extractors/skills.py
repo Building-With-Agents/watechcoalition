@@ -27,7 +27,7 @@ import structlog
 
 from agents.common.types import JobRecord, SkillRecord, SpanRecord, ToolRecord
 from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
-from agents.skills_extraction.prompts.skills_extraction_v1 import build_skills_prompt
+from agents.skills_extraction.prompts import build_skills_prompt
 
 log = structlog.get_logger()
 
