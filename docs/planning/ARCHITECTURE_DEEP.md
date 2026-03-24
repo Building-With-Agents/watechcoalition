@@ -773,8 +773,10 @@ class JobRecord(BaseModel):
 
 ## Database Schema Extensions
 
+> **SQLAlchemy is the single database authority.** All tables are agent-managed. Prisma is being phased out. Reference tables (companies, industry_sectors, technology_areas, skills, socc) are seeded via pgloader and agent-owned with full read+write. See `agents/common/data_store/models.py` for ORM definitions.
+
 ```sql
--- Phase 1 additions to job_postings (SQLAlchemy migration only — never touch schema.prisma)
+-- Enrichment columns on job_postings (SQLAlchemy migration — Prisma deprecated)
 ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS source TEXT;
 ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS external_id TEXT;
 ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS ingestion_run_id TEXT;
