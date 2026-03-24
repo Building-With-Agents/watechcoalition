@@ -25,7 +25,7 @@ class TestSkillsExtractionAgent:
         assert agent.agent_id == "skills-extraction-agent"
 
     def test_health_check_ok(self) -> None:
-        """Returns 'ok' when both the fixture and DB-backed mode are available."""
+        """Returns 'ok' when the fixture loads and the DB is reachable."""
         agent = SkillsExtractionAgent()
         with patch("agents.skills_extraction.agent.check_db_connection", return_value=True):
             result = agent.health_check()
