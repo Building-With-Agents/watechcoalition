@@ -9,6 +9,9 @@ that pass through the upstream event.
 Usage (from the repo root):
     python agents/pipeline_runner.py
 
+Redis is not used. For an optional Redis Streams prototype (Phase 2 bus exploration),
+see ``agents/scripts/run_full_pipeline_redis.py``.
+
 Design decisions:
 
 1. BATCH-ORIENTED PIPELINE

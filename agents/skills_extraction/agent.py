@@ -27,7 +27,7 @@ from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types import ExtractionMetadata, JobRecord, ToolRecord
 from agents.skills_extraction.extractors import extract_skills, extract_tools
-from agents.skills_extraction.prompts.skills_extraction_v1 import SKILLS_PROMPT_VERSION
+from agents.skills_extraction.prompts import SKILLS_PROMPT_VERSION
 from agents.skills_extraction.validator import validate_extraction_result
 
 _FIXTURE_PATH = (

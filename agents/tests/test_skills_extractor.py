@@ -102,3 +102,7 @@ def test_extract_skills_includes_pass1_tools_in_prompt_context(
     call_args = mock_invoke.call_args[0][0]
     assert "Python" in call_args
     assert "Already extracted tools" in call_args or "already extracted" in call_args.lower()
+    assert "Excellent communication skills" in call_args
+    assert 'SKIP generic "Communication"' in call_args
+    assert 'do NOT invent "Scrum Facilitation"' in call_args
+    assert 'do NOT suppress these because they are hard skills' in call_args
