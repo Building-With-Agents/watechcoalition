@@ -138,7 +138,7 @@ def run_migrations(engine: Engine) -> None:
     Base.metadata.create_all(engine)
     log.info("migrations_tables_created")
 
-    # 2. Create extracted_intelligence table
+    # 2. Create extracted_intelligence table (DDL may add indexes idempotently)
     with engine.begin() as conn:
         conn.execute(text(_EXTRACTED_INTELLIGENCE_DDL))
     log.info("migrations_extracted_intelligence_created")
@@ -176,7 +176,7 @@ def run_migrations(engine: Engine) -> None:
         conn.execute(text(_EMPLOYER_PROFILES_DDL))
     log.info("migrations_employer_profiles_created")
 
-    # 5. Add enrichment columns to existing tables.
+    # 5. Add enrichment columns to dbo.job_postings (and related).
     #    Each ALTER runs in its own transaction so a single failure
     #    (e.g. job_postings not yet created) doesn't abort the rest.
     for stmt in _JOB_POSTINGS_ALTER_STATEMENTS:
