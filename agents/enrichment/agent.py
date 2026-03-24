@@ -14,7 +14,8 @@ Fixture: agents/data/fixtures/fixture_enriched.json — supplies non-classificat
 fields (company, scores) for ``process()``; role and seniority are always
 computed deterministically.
 
-CLI: ``python -m agents.enrichment.agent --limit 50`` (requires DB URL).
+CLI: ``python -m agents.enrichment.agent --limit 50`` (loads repo-root ``.env`` via
+python-dotenv, then requires ``PYTHON_DATABASE_URL``).
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ import sys
 from pathlib import Path
 
 import structlog
+from dotenv import load_dotenv
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
@@ -39,6 +41,8 @@ from agents.enrichment.classification import (
 )
 
 log = structlog.get_logger()
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
 
 _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_enriched.json"
@@ -233,6 +237,7 @@ class EnrichmentAgent(BaseAgent):
 
 
 def main() -> None:
+    load_dotenv(_REPO_ROOT / ".env")
     parser = argparse.ArgumentParser(description="Print deterministic enrichment labels per job.")
     parser.add_argument(
         "--limit",
