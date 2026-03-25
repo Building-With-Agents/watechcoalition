@@ -10,20 +10,20 @@ Extraction Model.
 """
 import structlog
 
+from agents.common.types import JobRecord
 from agents.common.types.extraction_types import ContextSignal
 
 log = structlog.get_logger()
 
 
-def extract_context(job_record: dict) -> list[ContextSignal]:
+def extract_context(job_record: JobRecord) -> list[ContextSignal]:
     """
     Extract context signals from a single normalized job record.
 
     Inputs
     ------
-    job_record : dict
-        A single normalized job record, e.g. from a NormalizationComplete
-        payload or from normalized_jobs. Expected to contain at least
+    job_record : JobRecord
+        A normalized job record (Pydantic model). Expected to contain at least
         title and description (or equivalent text fields) for pattern
         matching in the Week 5 implementation.
     Outputs
@@ -46,7 +46,7 @@ def extract_context(job_record: dict) -> list[ContextSignal]:
     count = 0
     log.info(
         "context_extraction_stub",
-        job_record_keys=list(job_record.keys()) if job_record else [],
+        title=job_record.title if job_record else "",
         context_signal_count=count,
     )
     return []

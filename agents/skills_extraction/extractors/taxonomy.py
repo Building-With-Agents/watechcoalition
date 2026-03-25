@@ -320,7 +320,7 @@ _esco_normalized_matrix: np.ndarray | None = None  # (n_skills, dim) L2-normaliz
 
 _EMBED_MAX_RETRIES = 5
 _EMBED_BASE_DELAY = 1.0  # seconds
-_EMBED_INTER_REQUEST_DELAY = float(os.getenv("EMBEDDING_REQUEST_DELAY", "0.5"))
+_EMBED_INTER_REQUEST_DELAY = float(os.getenv("EMBEDDING_REQUEST_DELAY", "0"))
 
 
 def _extract_retry_after_embedding(error_message: str) -> int | None:
@@ -409,46 +409,82 @@ def _embed_texts_azure(texts: list[str]) -> list[list[float]] | None:
     return out
 
 
-_EMBEDDING_CHUNK_SIZE = 100  # Azure payload limit; chunk ESCO and batch queries
+_EMBEDDING_CHUNK_SIZE = 50  # Match Next.js batch size; 100 triggers Azure 429s
+
+
+def _load_embeddings_from_db() -> tuple[list[tuple[str, str]], np.ndarray] | None:
+    """Load pre-computed skill embeddings from PostgreSQL (pgvector).
+
+    Returns (meta, L2-normalized matrix) where meta is list of (skill_name, skill_name).
+    Embeddings are seeded by admin via agents/scripts/seed_esco_embeddings.py.
+    """
+    try:
+        from sqlalchemy import text as sa_text
+
+        from agents.common.data_store.database import session_scope
+
+        with session_scope() as session:
+            rows = session.execute(
+                sa_text(
+                    "SELECT skill_name, embedding::text "
+                    "FROM dbo.skills WHERE embedding IS NOT NULL "
+                    "ORDER BY skill_name"
+                )
+            ).fetchall()
+
+        if not rows:
+            return None
+
+        meta: list[tuple[str, str]] = []
+        vectors_list: list[list[float]] = []
+        for row in rows:
+            skill_name = row[0]
+            vec_str = row[1]
+            vec = json.loads(vec_str)
+            meta.append((skill_name, skill_name))
+            vectors_list.append(vec)
+
+        matrix = np.asarray(vectors_list, dtype=np.float64)
+        norms = np.linalg.norm(matrix, axis=1, keepdims=True) + 1e-12
+        matrix_normalized = matrix / norms
+
+        return meta, matrix_normalized
+    except Exception as exc:
+        log.warning("esco_embedding_db_load_failed", error=str(exc))
+        return None
 
 
 def _get_esco_embeddings() -> tuple[list[tuple[str, str]], np.ndarray] | None:
-    """Build or return cached (meta, pre-normalized embedding matrix).
+    """Load pre-computed ESCO embeddings from PostgreSQL.
 
-    Meta is list of (esco_uri, preferred_label). Matrix is (n_skills, dim) L2-normalized
+    Resolution order:
+    1. In-memory global cache (fastest — same process)
+    2. PostgreSQL pgvector column on dbo.skills (no API calls)
+
+    Embeddings are seeded once by admin via seed_esco_embeddings.py.
+    If no embeddings exist in the DB, Step 4 is skipped (falls through to Steps 5-6).
+
+    Meta is list of (skill_name, skill_name). Matrix is (n_skills, dim) L2-normalized
     so Step 4 only needs to normalize the query and run a dot product.
-    Uses Azure OpenAI Embeddings API with chunking to avoid payload limits.
     """
     global _esco_embedding_meta, _esco_normalized_matrix
+
+    # 1. In-memory cache
     if _esco_embedding_meta is not None and _esco_normalized_matrix is not None:
         return _esco_embedding_meta, _esco_normalized_matrix
-    records, *_ = _get_store()
-    if not records:
-        return None
-    texts = []
-    meta = []
-    for rec in records:
-        uri = rec.get("esco_uri") or ""
-        label = rec.get("preferred_label") or ""
-        desc = (rec.get("description") or "")[:200]
-        text = f"{label}. {desc}".strip() if desc else label
-        texts.append(text)
-        meta.append((uri, label))
-    vectors_list: list[list[float]] = []
-    for i in range(0, len(texts), _EMBEDDING_CHUNK_SIZE):
-        if i > 0 and _EMBED_INTER_REQUEST_DELAY > 0:
-            time.sleep(_EMBED_INTER_REQUEST_DELAY)
-        chunk = texts[i : i + _EMBEDDING_CHUNK_SIZE]
-        res = _embed_texts_azure(chunk)
-        if not res or len(res) != len(chunk):
-            log.warning("embedding_init_failed", chunk_start=i, chunk_len=len(chunk))
-            return None
-        vectors_list.extend(res)
-    vectors = np.asarray(vectors_list, dtype=np.float64)
-    matrix_norms = np.linalg.norm(vectors, axis=1, keepdims=True) + 1e-12
-    _esco_normalized_matrix = vectors / matrix_norms
-    _esco_embedding_meta = meta
-    return _esco_embedding_meta, _esco_normalized_matrix
+
+    # 2. PostgreSQL
+    db_result = _load_embeddings_from_db()
+    if db_result is not None:
+        _esco_embedding_meta, _esco_normalized_matrix = db_result
+        log.info("esco_embeddings_loaded_from_db", skills=len(_esco_embedding_meta))
+        return _esco_embedding_meta, _esco_normalized_matrix
+
+    log.warning(
+        "esco_embeddings_not_available",
+        reason="No embeddings in dbo.skills — run seed_esco_embeddings.py (admin only)",
+    )
+    return None
 
 
 def _resolve_step4_embedding_impl(label: str) -> TaxonomyResult | None:
