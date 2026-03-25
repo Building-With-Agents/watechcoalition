@@ -40,12 +40,14 @@ def test_embed_texts_azure_logs_audit_on_success(
     mock_cm.__enter__.return_value = mock_client_instance
     mock_cm.__exit__.return_value = None
 
-    with patch.dict(os.environ, embedding_env, clear=False):
-        with patch(
+    with (
+        patch.dict(os.environ, embedding_env, clear=False),
+        patch(
             "agents.skills_extraction.extractors.taxonomy.httpx.Client",
             return_value=mock_cm,
-        ):
-            out = _embed_texts_azure(["hello"])
+        ),
+    ):
+        out = _embed_texts_azure(["hello"])
 
     assert out == [[0.0, 1.0, 0.5]]
     mock_log.assert_called_once()
@@ -80,12 +82,14 @@ def test_embed_texts_azure_audit_uses_total_tokens_when_no_prompt_tokens(
     mock_cm.__enter__.return_value = mock_client_instance
     mock_cm.__exit__.return_value = None
 
-    with patch.dict(os.environ, embedding_env, clear=False):
-        with patch(
+    with (
+        patch.dict(os.environ, embedding_env, clear=False),
+        patch(
             "agents.skills_extraction.extractors.taxonomy.httpx.Client",
             return_value=mock_cm,
-        ):
-            _embed_texts_azure(["a", "b"])
+        ),
+    ):
+        _embed_texts_azure(["a", "b"])
 
     kwargs = mock_log.call_args.kwargs
     assert kwargs["input_tokens"] == 99
