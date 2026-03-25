@@ -320,7 +320,6 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 
 ### Ingestion Agent
 - Sources: JSearch via `httpx`; web scraping via Crawl4AI
-- **JSearch queries must be broad across sites** (no `site` filter parameter). Narrowing is done via `RegionConfig` (location, keywords, role_categories) — not by restricting to specific job boards. Site-filtered queries return incomplete data (missing `job_description`).
 - Fingerprint: `sha256(source + external_id + title + company + date_posted)`
 - **JSearch wins over scraped** when the same job appears in both sources (IC #9)
 - Dedup before staging — duplicates discarded silently, counter incremented
@@ -332,7 +331,6 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 - Quarantines schema violations — never passes bad records downstream
 
 ### Skills Extraction Agent *(Work Intelligence Agent)*
-- **No fixture fallback in testing or production.** When normalized text is empty or extraction fails, the agent must fail explicitly (`extraction_status = "failed"`, `extraction_failed = True`) with a clear `error_reason` — never silently return fixture/placeholder data. Fixture data masks real pipeline issues (e.g., empty descriptions from JSearch, misconfigured normalization mappers). Fixture fallback is only acceptable in walking-skeleton demos (Week 2).
 - Taxonomy linking order (strict):
   1. Exact match → GenAI Extension Layer (10 predefined GenAI skills; `is_genai_extension = True`, `esco_uri` maps to parent ESCO cluster)
   2. Exact name match → ESCO digital skills cluster (maps to `skills` table)
