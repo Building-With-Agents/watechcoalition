@@ -34,12 +34,14 @@ class SpanRecord(BaseModel):
 
     @model_validator(mode="after")
     def validate_offsets(self) -> SpanRecord:
-        """Ensure offsets are ordered and consistent with the captured text."""
+        """Ensure offsets are ordered and normalize half-open interval length."""
         if self.end_char < self.start_char:
             raise ValueError("end_char must be greater than or equal to start_char")
 
-        if (self.end_char - self.start_char) != len(self.text):
-            raise ValueError("span offsets must match the captured text length")
+        expected_end = self.start_char + len(self.text)
+        if self.end_char != expected_end:
+            # Keep extraction robust when LLM returns off-by-N offsets.
+            self.end_char = expected_end
 
         return self
 
