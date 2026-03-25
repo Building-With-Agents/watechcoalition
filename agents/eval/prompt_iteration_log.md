@@ -1,6 +1,6 @@
 # Prompt iteration log — Skills extraction (Exercise 4.5)
 
-Document prompt changes and before/after metrics when iterating on the skills extraction prompt.
+Document prompt changes and before/after metrics when iterating on the skills extraction prompt. This file also records integration verification after Pair C (and other pairs) perform prompt iteration.
 
 ## Version history
 

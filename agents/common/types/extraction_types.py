@@ -108,7 +108,7 @@ class ContextSignal(BaseModel):
     signal_type: str  # remote_policy | team_size | reporting_structure | growth_stage | ai_usage
     value: str
     confidence: float = Field(ge=0.0, le=1.0)
-    source_span: SpanRecord  # required — links extraction back to source text
+    source_span: SpanRecord | None = None  # optional in stubs; required when real extraction populates it
 
 
 class TaxonomyResult(BaseModel):

@@ -16,17 +16,27 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
 from agents.common.base_agent import BaseAgent
+
+# Proactive inter-request delay to avoid Azure OpenAI 429 rate limits.
+# Set SKILLS_EXTRACTION_DELAY=0 to disable; increase for lower-tier deployments.
+_INTER_LLM_DELAY = float(os.environ.get("SKILLS_EXTRACTION_DELAY", "0.5"))
 from agents.common.data_store import check_db_connection, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types import ExtractionMetadata, JobRecord, ToolRecord
 from agents.skills_extraction.extractors import extract_skills, extract_tools
+from agents.skills_extraction.extractors.skills import (
+    apply_taxonomy_to_skills,
+    extract_skills_no_taxonomy,
+)
+from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
 from agents.skills_extraction.prompts import SKILLS_PROMPT_VERSION
 
 _FIXTURE_PATH = (
@@ -377,7 +387,42 @@ class SkillsExtractionAgent(BaseAgent):
         if max_jobs > 0 and len(work_items) > max_jobs:
             work_items = work_items[:max_jobs]
 
-        results = [self._extract_work_item(item) for item in work_items]
+        # Phase 1: Extract tools + skills for all jobs (taxonomy deferred)
+        pending: list[tuple[ExtractionWorkItem, list[ToolRecord], list, dict]] = []
+        for idx, item in enumerate(work_items):
+            if idx > 0 and _INTER_LLM_DELAY > 0:
+                time.sleep(_INTER_LLM_DELAY)
+            tools, skills_list, meta, is_llm = self._extract_work_item_no_taxonomy(item)
+            pending.append((item, tools, skills_list, meta))
+
+        # Phase 2: Batch taxonomy resolution — single API call for all labels
+        all_labels: list[str] = []
+        seen_labels: set[str] = set()
+        for _, _, skills_list, _ in pending:
+            for s in skills_list:
+                if s.skill_name not in seen_labels:
+                    seen_labels.add(s.skill_name)
+                    all_labels.append(s.skill_name)
+
+        taxonomy_map: dict[str, Any] = {}
+        if all_labels:
+            import structlog as _structlog
+            _log = _structlog.get_logger()
+            _log.info(
+                "taxonomy_batch_resolve",
+                unique_labels=len(all_labels),
+                total_jobs=len(pending),
+            )
+            taxonomy_results = resolve_taxonomy_batch(all_labels)
+            taxonomy_map = dict(zip(all_labels, taxonomy_results, strict=True))
+
+        # Phase 3: Apply taxonomy + build results
+        results = []
+        for item, tools, skills_list, meta in pending:
+            if skills_list:
+                skills_list = apply_taxonomy_to_skills(skills_list, taxonomy_map)
+            results.append(self._build_extraction_result(item, tools, skills_list, meta))
+
         self._extraction_store.save(results)
         # When payload["skills_extraction_alert"] is True, caller/orchestrator should
         # publish SkillsExtractionAlert so the Orchestration Agent can react.
@@ -388,8 +433,63 @@ class SkillsExtractionAgent(BaseAgent):
             payload=self._build_payload(event, results),
         )
 
+    def _extract_work_item_no_taxonomy(
+        self, item: ExtractionWorkItem
+    ) -> tuple[list[ToolRecord], list, dict, bool]:
+        """Run Pass 1 (tools) + Pass 2 (skills without taxonomy). Returns (tools, skills, meta, used_llm)."""
+        tools = extract_tools(item.job_record)
+        job = item.job_record
+        has_normalized_text = bool(
+            (job.description or "").strip()
+            or (job.requirements or "").strip()
+            or (job.responsibilities or "").strip()
+        )
+        if has_normalized_text:
+            skills_list, meta = extract_skills_no_taxonomy(job, pass1_tools=tools)
+            return tools, skills_list, meta, True
+
+        return tools, [], {}, False
+
+    def _build_extraction_result(
+        self,
+        item: ExtractionWorkItem,
+        tools: list[ToolRecord],
+        skills_list: list,
+        meta: dict,
+    ) -> ExtractionResult:
+        """Build ExtractionResult from tools + taxonomy-resolved skills."""
+        if meta and ("success" in meta or "extraction_failed" in meta):
+            skills_payload = [s.model_dump() for s in skills_list]
+            status = "success" if not meta.get("extraction_failed") else "failed"
+            warn = tuple(str(w) for w in (meta.get("extraction_warnings") or []))
+            meta_blob = _metadata_from_pass2(meta, tools, extraction_version=EXTRACTION_VERSION)
+            return ExtractionResult(
+                work_item=item,
+                skills=skills_payload,
+                tools=tools,
+                seniority=None,
+                extraction_status=status,
+                extraction_tokens_used=meta.get("tokens_used", 0) or 0,
+                extraction_cost_usd=meta.get("cost_usd", 0.0) or 0.0,
+                alert_skills_extraction=meta.get("alert_skills_extraction", False),
+                extraction_warnings=warn,
+                extraction_metadata=meta_blob,
+                persisted_extraction_version=EXTRACTION_VERSION,
+                persisted_extraction_model=_persisted_extraction_model_llm(),
+            )
+        fixture_payload = self._fixture.get(item.posting_id, {}) if item.posting_id is not None else {}
+        return ExtractionResult(
+            work_item=item,
+            skills=fixture_payload.get("skills", []),
+            tools=tools,
+            seniority=fixture_payload.get("seniority"),
+            extraction_status=fixture_payload.get("extraction_status", "success"),
+            persisted_extraction_version=EXTRACTION_VERSION,
+            persisted_extraction_model=FIXTURE_EXTRACTION_MODEL,
+        )
+
     def _extract_work_item(self, item: ExtractionWorkItem) -> ExtractionResult:
-        """Run Pass 1 (tools) then Pass 2 (skills) when normalized text is available."""
+        """Run Pass 1 (tools) then Pass 2 (skills) with inline taxonomy. Kept for backward compat."""
         tools = extract_tools(item.job_record)
         job = item.job_record
         has_normalized_text = bool(
