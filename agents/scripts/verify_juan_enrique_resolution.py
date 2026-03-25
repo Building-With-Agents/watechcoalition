@@ -127,13 +127,13 @@ def main() -> int:
                 print("  FAIL: company_id is None -- placeholder was NOT created. This is the #1 non-negotiable.")
                 failed += 1
             else:
-                # Verify placeholder exists
+                # Verify placeholder exists in companies table
                 check = session.execute(
-                    sa_text("SELECT company_name, is_placeholder FROM dbo.companies WHERE company_id = :cid"),
+                    sa_text("SELECT company_name FROM dbo.companies WHERE company_id = :cid"),
                     {"cid": company_id},
                 ).fetchone()
                 if check:
-                    print(f"  Placeholder row: name=\"{check[0]}\", is_placeholder={check[1]}")
+                    print(f"  Placeholder row: name=\"{check[0]}\"")
                     print("  PASS: placeholder created -- company_id is never null")
                     passed += 1
                 else:
