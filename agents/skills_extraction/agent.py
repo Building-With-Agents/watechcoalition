@@ -448,7 +448,23 @@ class SkillsExtractionAgent(BaseAgent):
             skills_list, meta = extract_skills_no_taxonomy(job, pass1_tools=tools)
             return tools, skills_list, meta, True
 
-        return tools, [], {}, False
+        import structlog as _sl
+        _sl.get_logger().warning(
+            "skills_extraction_no_text",
+            job_id=item.job_id,
+            title=item.title,
+            company=item.company,
+            reason="No description/requirements/responsibilities text — cannot extract skills",
+        )
+        meta = {
+            "success": False,
+            "extraction_failed": True,
+            "error_reason": "no_normalized_text",
+            "tokens_used": 0,
+            "cost_usd": 0.0,
+            "extraction_warnings": ["No normalized text available for extraction"],
+        }
+        return tools, [], meta, False
 
     def _build_extraction_result(
         self,
@@ -477,15 +493,23 @@ class SkillsExtractionAgent(BaseAgent):
                 persisted_extraction_version=EXTRACTION_VERSION,
                 persisted_extraction_model=_persisted_extraction_model_llm(),
             )
-        fixture_payload = self._fixture.get(item.posting_id, {}) if item.posting_id is not None else {}
+        # No fixture fallback — fail explicitly so data issues surface
+        import structlog as _sl
+        _sl.get_logger().error(
+            "skills_extraction_no_metadata",
+            job_id=item.job_id,
+            title=item.title,
+            reason="No extraction metadata — possible pipeline misconfiguration",
+        )
         return ExtractionResult(
             work_item=item,
-            skills=fixture_payload.get("skills", []),
+            skills=[],
             tools=tools,
-            seniority=fixture_payload.get("seniority"),
-            extraction_status=fixture_payload.get("extraction_status", "success"),
+            seniority=None,
+            extraction_status="failed",
+            extraction_warnings=("No extraction metadata — check pipeline wiring",),
             persisted_extraction_version=EXTRACTION_VERSION,
-            persisted_extraction_model=FIXTURE_EXTRACTION_MODEL,
+            persisted_extraction_model="none",
         )
 
     def _extract_work_item(self, item: ExtractionWorkItem) -> ExtractionResult:
@@ -517,15 +541,16 @@ class SkillsExtractionAgent(BaseAgent):
                 persisted_extraction_version=EXTRACTION_VERSION,
                 persisted_extraction_model=_persisted_extraction_model_llm(),
             )
-        fixture_payload = self._fixture.get(item.posting_id, {}) if item.posting_id is not None else {}
+        # No fixture fallback — fail explicitly
         return ExtractionResult(
             work_item=item,
-            skills=fixture_payload.get("skills", []),
+            skills=[],
             tools=tools,
-            seniority=fixture_payload.get("seniority"),
-            extraction_status=fixture_payload.get("extraction_status", "success"),
+            seniority=None,
+            extraction_status="failed",
+            extraction_warnings=("No normalized text available for extraction",),
             persisted_extraction_version=EXTRACTION_VERSION,
-            persisted_extraction_model=FIXTURE_EXTRACTION_MODEL,
+            persisted_extraction_model="none",
         )
 
     def _build_payload(
