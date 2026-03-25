@@ -121,7 +121,7 @@ def main() -> int:
                 sa_text("SELECT id, title FROM dbo.technology_areas ORDER BY title")
             ).fetchall()
             sector_rows = session.execute(
-                sa_text("SELECT id, title FROM dbo.industry_sectors ORDER BY title")
+                sa_text("SELECT industry_sector_id, sector_title FROM dbo.industry_sectors ORDER BY sector_title")
             ).fetchall()
 
         tech_areas = [(str(r[0]), r[1]) for r in tech_rows]
