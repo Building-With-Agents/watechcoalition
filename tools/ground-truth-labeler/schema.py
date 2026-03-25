@@ -19,6 +19,12 @@ SkillType = Literal["Technical", "Domain", "Soft", "Certification", "Tool"]
 ToolCategory = Literal[
     "language", "framework", "platform", "database", "devops", "ai_tool", "other"
 ]
+TaskComplexity = Literal["routine", "analytical", "creative", "strategic"]
+ResponsibilityScope = Literal["individual", "team", "department", "organization"]
+ResponsibilityLevel = Literal["entry", "mid", "senior", "lead", "executive"]
+ContextSignalType = Literal[
+    "remote_policy", "team_size", "reporting_structure", "growth_stage", "ai_usage"
+]
 
 # --- 10 GenAI Extension Skills (for labeler reference) ---
 
@@ -83,6 +89,38 @@ class ToolRecord(BaseModel):
     is_genai_tool: bool = False
 
 
+class TaskRecord(BaseModel):
+    """A single extracted job task or duty."""
+
+    task_id: str | None = None
+    task_description: str
+    category: str
+    frequency: str
+    complexity: TaskComplexity | None = None
+    confidence: float = Field(ge=0.0, le=1.0)
+    source_span: SpanRecord
+
+
+class ResponsibilityRecord(BaseModel):
+    """A single extracted responsibility with scope classification."""
+
+    responsibility_id: str | None = None
+    responsibility_description: str
+    scope: ResponsibilityScope | None = None
+    level: ResponsibilityLevel
+    confidence: float = Field(ge=0.0, le=1.0)
+    source_span: SpanRecord
+
+
+class ContextSignal(BaseModel):
+    """A contextual signal extracted from the job posting."""
+
+    signal_type: ContextSignalType
+    value: str
+    confidence: float = Field(ge=0.0, le=1.0)
+    source_span: SpanRecord
+
+
 class GroundTruthRecord(BaseModel):
     """A fully labeled ground truth record for one job posting."""
 
@@ -98,4 +136,7 @@ class GroundTruthRecord(BaseModel):
     responsibilities: str = ""
     skills: list[SkillRecord] = Field(default_factory=list)
     tools: list[ToolRecord] = Field(default_factory=list)
+    tasks: list[TaskRecord] = Field(default_factory=list)
+    labeled_responsibilities: list[ResponsibilityRecord] = Field(default_factory=list)
+    context: list[ContextSignal] = Field(default_factory=list)
     labeler_notes: dict[str, str] = Field(default_factory=dict)

@@ -8,6 +8,7 @@ Loads .env from repo root so Azure env vars are available when this module is us
 from __future__ import annotations
 
 import os
+import re
 import time
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,18 @@ from agents.common.llm_adapter import (
 )
 
 AGENT_NAME = "skills-extraction-agent"
+
+
+def _extract_retry_after(error_message: str) -> int | None:
+    """Extract retry-after seconds from Azure OpenAI error message.
+
+    Azure 429 responses often include "retry after N seconds" in the message.
+    Same pattern used by the Next.js app in app/api/skills/parse-text/route.ts.
+    """
+    match = re.search(r"retry after (\d+)\s*seconds?", error_message, re.IGNORECASE)
+    if match:
+        return int(match.group(1))
+    return None
 
 
 def _model_tier_for_skills_extraction(model_name: str) -> str:
@@ -146,6 +159,22 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
         }
     except Exception as e:
         latency_ms = int((time.perf_counter() - start) * 1000)
+        error_str = str(e)
+
+        # Detect rate limiting: openai.RateLimitError or "429" in message
+        is_rate_limit = False
+        retry_after: int | None = None
+        try:
+            from openai import RateLimitError
+            is_rate_limit = isinstance(e, RateLimitError)
+        except ImportError:
+            pass
+        if not is_rate_limit:
+            is_rate_limit = "429" in error_str or "rate limit" in error_str.lower()
+        if is_rate_limit:
+            retry_after = _extract_retry_after(error_str)
+            error_str = f"429: {error_str}"
+
         log_extraction_event(
             agent_name=AGENT_NAME,
             prompt=prompt,
@@ -156,7 +185,7 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
             output_tokens=0,
             cost_usd=0.0,
             success=False,
-            error_reason=str(e),
+            error_reason=error_str,
         )
         return "", {
             "tokens_used": 0,
@@ -164,7 +193,9 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
             "latency_ms": latency_ms,
             "success": False,
             "extraction_failed": True,
-            "error_reason": str(e),
+            "error_reason": error_str,
+            "is_rate_limit": is_rate_limit,
+            "retry_after_seconds": retry_after,
             "provider": provider,
             "model": model_name,
         }
