@@ -1,13 +1,10 @@
-"""Location text normalization and company_addresses lookup (enrichment)."""
+"""Location text normalization and Borderplex tagging (enrichment)."""
 
 from __future__ import annotations
 
 import re
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
-
-from agents.common.data_store.models import CompanyAddress
 
 _NON_ALNUM_COMMA = re.compile(r"[^a-z0-9,\s]+")
 
@@ -33,24 +30,17 @@ def _borderplex_subregion(normalized: str) -> str | None:
 
 
 def resolve_location(
-    raw_location: str, session: Session
-) -> tuple[int | None, float, str | None, str | None]:
+    raw_location: str, _session: Session
+) -> tuple[None, float, str | None, str | None]:
     """
-    Look up ``company_addresses`` by normalized location text.
+    Normalize location text and detect Borderplex subregion.
+
+    Does not query the database; ``location_id`` is not resolved in Phase 1.
 
     Returns ``(location_id, confidence, raw_text_for_storage, borderplex_subregion)``.
-    ``raw_text_for_storage`` is set only when no row matches (for later resolution).
+    ``location_id`` is always ``None``; ``raw_text_for_storage`` is the original
+    ``raw_location`` for persistence on ``job_postings``.
     """
     normalized = normalize_location_text(raw_location)
     borderplex = _borderplex_subregion(normalized)
-
-    stmt = (
-        select(CompanyAddress.id)
-        .where(CompanyAddress.normalized_location == normalized)
-        .limit(1)
-    )
-    location_id = session.execute(stmt).scalar_one_or_none()
-
-    if location_id is not None:
-        return (location_id, 0.90, None, borderplex)
     return (None, 0.0, raw_location, borderplex)
