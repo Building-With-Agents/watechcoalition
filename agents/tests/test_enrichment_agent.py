@@ -10,6 +10,7 @@ from agents.common.event_envelope import EventEnvelope
 from agents.enrichment.agent import EnrichmentAgent
 from agents.enrichment.classification import classify_job
 from agents.enrichment.classifiers.spam_preview import SpamPreviewResult
+from agents.scripts.jsearch_enrichment_preview_lib import build_extraction_dict
 
 
 class TestEnrichmentAgent:
@@ -56,15 +57,22 @@ class TestEnrichmentAgent:
         out = agent.process(skills_event)
         assert out.payload["event_type"] == "RecordEnriched"
         assert out.agent_id == "enrichment-agent"
+        p = skills_event.payload
+        ext = build_extraction_dict(p.get("skills"), [], [], [], [])
         exp_role, exp_sen = classify_job(
             "Senior Data Engineer",
             None,
-            None,
+            ext,
             list(agent._ensure_refs()[0]),
             list(agent._ensure_refs()[1]),
         )
         assert out.payload["role_classification"] == exp_role
         assert out.payload["seniority"] == exp_sen
+        assert "quality_score" in out.payload
+        assert isinstance(out.payload["quality_score"], float)
+        assert 0.0 <= out.payload["quality_score"] <= 1.0
+        assert "quality_components" in out.payload
+        assert isinstance(out.payload["quality_components"], dict)
 
     def test_process_carries_skills_forward(
         self,
@@ -137,6 +145,9 @@ class TestEnrichmentAgent:
         assert out.payload["spam_tier"] == "clean"
         assert out.payload["field_confidence"]["spam_score"] == 0.88
         assert out.payload["spam_rationale"] == "unit_test"
+        assert isinstance(out.payload["quality_score"], float)
+        assert 0.0 <= out.payload["quality_score"] <= 1.0
+        assert "completeness" in out.payload["quality_components"]
         mock_score.assert_called_once()
         kw = mock_score.call_args.kwargs
         assert kw["job_title"] == "Backend Engineer"

@@ -1,5 +1,5 @@
 """
-Enrichment Agent — Phase 1 lite (deterministic role + seniority).
+Enrichment Agent — Phase 1 lite (deterministic role + seniority + quality; spam from EI).
 
 Loads reference labels from ``technology_areas`` and ``industry_sectors`` when
 ``PYTHON_DATABASE_URL`` is set; otherwise uses
@@ -16,9 +16,11 @@ When the inbound ``SkillsExtracted``-shaped payload includes ``normalized_job_id
 ``score_spam_preview`` (Decision #8). Otherwise ``spam_score`` / ``is_spam``
 come from the walking-skeleton fixture keyed by ``posting_id``.
 
-Fixture: agents/data/fixtures/fixture_enriched.json — supplies non-classification
-fields (company, scores) for ``process()``; role and seniority are always
-computed deterministically.
+Fixture: agents/data/fixtures/fixture_enriched.json — supplies ``company`` /
+``company_id`` / ``sector_id`` when not on the event; role, seniority, and
+``quality_score`` are always computed (not taken from the fixture). Spam
+scores use the fixture only when ``normalized_job_id`` is absent or DB is
+unconfigured.
 
 CLI: ``python -m agents.enrichment.agent --limit 50`` (loads repo-root ``.env`` via
 python-dotenv, then requires ``PYTHON_DATABASE_URL``).
@@ -46,6 +48,7 @@ from agents.enrichment.classification import (
     FALLBACK_TECH_AREA_LABELS,
     classify_job,
 )
+from agents.enrichment.classifiers.quality import score_quality
 from agents.enrichment.classifiers.spam_preview import (
     SpamPreviewResult,
     score_spam_preview,
@@ -216,6 +219,9 @@ class EnrichmentAgent(BaseAgent):
         Spam: if ``normalized_job_id`` is set and DB is configured, scores from
         latest ``extracted_intelligence`` via ``score_spam_preview``; else fixture
         ``spam_score`` / ``is_spam`` only.
+
+        Quality: deterministic composite via :func:`score_quality` (same title,
+        description, and extraction blob as classification when EI is loaded).
         """
         if not self._fixture:
             if _FIXTURE_PATH.exists():
@@ -231,51 +237,65 @@ class EnrichmentAgent(BaseAgent):
         company = event.payload.get("company") if event.payload.get("company") is not None else fx.get("company")
 
         tech, sectors = self._ensure_refs()
-        role_classification, seniority = classify_job(
-            title,
-            description if isinstance(description, str) else None,
-            None,
-            tech,
-            sectors,
-        )
 
         nj_id = _coerce_normalized_job_id(event.payload.get("normalized_job_id"))
-        spam_block: dict[str, Any] = {}
+        desc_str = description if isinstance(description, str) else None
+
+        ei_row: dict[str, Any] | None = None
+        ei_fetch_error = False
         if nj_id is not None and _db_url_configured():
             try:
                 with session_scope() as session:
-                    row = session.execute(
+                    ei_row = session.execute(
                         _LATEST_EI_BY_NJ_ID_SQL, {"nj_id": nj_id}
                     ).mappings().first()
-                if row:
-                    ext = build_extraction_dict(
-                        row.get("skills"),
-                        row.get("tools"),
-                        row.get("tasks"),
-                        row.get("responsibilities"),
-                        row.get("context"),
-                    )
-                    extraction_empty = ext is None
-                    extraction_failed = bool(row.get("extraction_failed"))
-                    spam_result = score_spam_preview(
-                        job_title=title,
-                        job_description=description if isinstance(description, str) else None,
-                        extraction=ext or {},
-                        extraction_failed=extraction_failed,
-                        extraction_empty=extraction_empty,
-                    )
-                    spam_block = _spam_from_preview_result(spam_result)
-                else:
-                    spam_result = score_spam_preview(
-                        job_title=title,
-                        job_description=description if isinstance(description, str) else None,
-                        extraction={},
-                        extraction_failed=False,
-                        extraction_empty=True,
-                    )
-                    spam_block = _spam_from_preview_result(spam_result)
             except Exception as exc:
-                log.warning("enrichment_spam_ei_load_failed", normalized_job_id=nj_id, error=str(exc))
+                log.warning("enrichment_ei_load_failed", normalized_job_id=nj_id, error=str(exc))
+                ei_fetch_error = True
+
+        ext: dict[str, Any] | None = None
+        extraction_failed = False
+        if ei_row is not None:
+            ext = build_extraction_dict(
+                ei_row.get("skills"),
+                ei_row.get("tools"),
+                ei_row.get("tasks"),
+                ei_row.get("responsibilities"),
+                ei_row.get("context"),
+            )
+            extraction_failed = bool(ei_row.get("extraction_failed"))
+        elif nj_id is None:
+            ext = build_extraction_dict(
+                event.payload.get("skills"),
+                event.payload.get("tools"),
+                [],
+                [],
+                [],
+            )
+
+        is_internship = bool(event.payload.get("is_internship", False))
+
+        role_classification, seniority = classify_job(
+            title,
+            desc_str,
+            ext,
+            tech,
+            sectors,
+            is_internship=is_internship,
+        )
+
+        quality_res = score_quality(
+            job_title=title,
+            job_description=desc_str,
+            extraction=ext,
+            extraction_failed=extraction_failed,
+        )
+        quality_score = quality_res.quality_score
+        quality_components = quality_res.components
+
+        spam_block: dict[str, Any] = {}
+        if nj_id is not None and _db_url_configured():
+            if ei_fetch_error:
                 spam_block = _spam_from_preview_result(
                     SpamPreviewResult(
                         spam_score=None,
@@ -289,6 +309,25 @@ class EnrichmentAgent(BaseAgent):
                         used_heuristic=False,
                     )
                 )
+            elif ei_row is not None:
+                extraction_empty = ext is None
+                spam_result = score_spam_preview(
+                    job_title=title,
+                    job_description=desc_str,
+                    extraction=ext or {},
+                    extraction_failed=extraction_failed,
+                    extraction_empty=extraction_empty,
+                )
+                spam_block = _spam_from_preview_result(spam_result)
+            else:
+                spam_result = score_spam_preview(
+                    job_title=title,
+                    job_description=desc_str,
+                    extraction={},
+                    extraction_failed=False,
+                    extraction_empty=True,
+                )
+                spam_block = _spam_from_preview_result(spam_result)
             payload_spam_score = spam_block["spam_score"]
             payload_is_spam = spam_block["is_spam"]
         else:
@@ -304,7 +343,8 @@ class EnrichmentAgent(BaseAgent):
             "sector_id": fx.get("sector_id"),
             "role_classification": role_classification,
             "seniority": seniority,
-            "quality_score": fx.get("quality_score"),
+            "quality_score": quality_score,
+            "quality_components": quality_components,
             "spam_score": payload_spam_score,
             "is_spam": payload_is_spam,
             "enrichment_status": fx.get("enrichment_status", "success"),
