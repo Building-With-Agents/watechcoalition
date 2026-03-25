@@ -9,6 +9,9 @@ that pass through the upstream event.
 Usage (from the repo root):
     python agents/pipeline_runner.py
 
+Redis is not used. For an optional Redis Streams prototype (Phase 2 bus exploration),
+see ``agents/scripts/run_full_pipeline_redis.py``.
+
 Design decisions:
 
 1. BATCH-ORIENTED PIPELINE
@@ -258,26 +261,26 @@ def run_pipeline(
             event_type=outbound.payload.get("event_type"),
         )
 
-        # Week 5: optional extractor smoke (full run is in SkillsExtractionAgent)
+        # Week 5: optional extractor smoke after normalization (full run is in SkillsExtractionAgent).
         if outbound.agent_id == "normalization-agent":
             stub_rec = _job_record_from_event_payload(outbound.payload)
-            if stub_rec is not None:
-                context_signals, _ctx_meta = extract_context(stub_rec)
-                tasks, _tasks_meta = extract_tasks(stub_rec)
-                responsibilities, _resp_meta = extract_responsibilities(stub_rec)
-                log.info(
-                    "extraction_stubs_result",
-                    context_count=len(context_signals),
-                    tasks_count=len(tasks),
-                    responsibilities_count=len(responsibilities),
-                    correlation_id=outbound.correlation_id,
+            if stub_rec is None:
+                stub_rec = JobRecord(
+                    source="pipeline-stub",
+                    external_id="stub",
+                    title="stub",
+                    company="stub",
                 )
-            else:
-                log.info(
-                    "extraction_stubs_skipped",
-                    reason="no_inline_title_company",
-                    correlation_id=outbound.correlation_id,
-                )
+            context_signals, _ctx_meta = extract_context(stub_rec)
+            tasks, _tasks_meta = extract_tasks(stub_rec)
+            responsibilities, _resp_meta = extract_responsibilities(stub_rec)
+            log.info(
+                "extraction_stubs_result",
+                context_count=len(context_signals),
+                tasks_count=len(tasks),
+                responsibilities_count=len(responsibilities),
+                correlation_id=outbound.correlation_id,
+            )
 
         run_entries.append({
             "agent_id": outbound.agent_id,

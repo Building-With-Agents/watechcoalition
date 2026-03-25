@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
+import os
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
+import pytest
+from sqlalchemy import delete
+
+from agents.common.data_store.database import session_scope
+from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types import JobRecord
 from agents.skills_extraction.agent import ExtractionWorkItem, SkillsExtractionAgent
@@ -19,16 +25,40 @@ def _patch_skills_extraction_pass2_llm(
     skills_list: list[Any],
     skills_meta: dict[str, Any],
 ) -> Any:
-    """Mock Pass 2 LLM extractors; Pass 1 (context + tools) stays real."""
+    """Mock Pass 2 LLM paths; Pass 1 (context + tools) stays real."""
     with (
         patch("agents.skills_extraction.agent.extract_context") as m_ctx,
         patch("agents.skills_extraction.agent.extract_tasks") as m_tasks,
         patch("agents.skills_extraction.agent.extract_responsibilities") as m_resp,
-        patch("agents.skills_extraction.agent.extract_skills") as m_skills,
+        patch("agents.skills_extraction.agent.extract_skills_no_taxonomy") as m_skills,
     ):
-        m_ctx.return_value = ([], {"tokens_used": 0, "cost_usd": 0.0, "extraction_failed": False})
-        m_tasks.return_value = ([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0})
-        m_resp.return_value = ([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0})
+        m_ctx.return_value = (
+            [],
+            {
+                "tokens_used": 0,
+                "cost_usd": 0.0,
+                "extraction_failed": False,
+                "extraction_metadata": {},
+            },
+        )
+        m_tasks.return_value = (
+            [],
+            {
+                "extraction_failed": False,
+                "tokens_used": 0,
+                "cost_usd": 0.0,
+                "extraction_metadata": {},
+            },
+        )
+        m_resp.return_value = (
+            [],
+            {
+                "extraction_failed": False,
+                "tokens_used": 0,
+                "cost_usd": 0.0,
+                "extraction_metadata": {},
+            },
+        )
         m_skills.return_value = (skills_list, skills_meta)
         yield
 
@@ -41,7 +71,7 @@ class TestSkillsExtractionAgent:
         assert agent.agent_id == "skills-extraction-agent"
 
     def test_health_check_ok(self) -> None:
-        """Returns 'ok' when both the fixture and DB-backed mode are available."""
+        """Returns 'ok' when the fixture loads and the DB is reachable."""
         agent = SkillsExtractionAgent()
         with patch("agents.skills_extraction.agent.check_db_connection", return_value=True):
             result = agent.health_check()
@@ -99,21 +129,28 @@ class TestSkillsExtractionAgent:
         self, normalization_event: EventEnvelope
     ) -> None:
         """Output contains a non-empty skills list with expected keys."""
-        from agents.common.types import SkillRecord, SpanRecord
+        from agents.common.types import SkillRecord, SpanRecord, TaxonomyResult
 
         agent = SkillsExtractionAgent()
         agent.health_check()  # pre-load fixture
         mock_skill = SkillRecord(
-            label="Python",
+            skill_name="Python",
             type="Technical",
             confidence=0.9,
             source_span=SpanRecord(
                 text="Python", field_source="description", start_char=0, end_char=6
             ),
         )
-        with _patch_skills_extraction_pass2_llm(
-            skills_list=[mock_skill],
-            skills_meta={"extraction_failed": False, "tokens_used": 50, "cost_usd": 0.0},
+        mock_taxonomy = TaxonomyResult(original_label="Python", esco_uri=None, resolution_step=6)
+        with (
+            _patch_skills_extraction_pass2_llm(
+                skills_list=[mock_skill],
+                skills_meta={"extraction_failed": False, "tokens_used": 50, "cost_usd": 0.0},
+            ),
+            patch(
+                "agents.skills_extraction.agent.resolve_taxonomy_batch",
+                return_value=[mock_taxonomy],
+            ),
         ):
             out = agent.process(normalization_event)
         skills = out.payload["skills"]
@@ -159,8 +196,43 @@ class TestSkillsExtractionAgent:
         ]
         assert out.payload["skills"] == []
 
+    @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
     def test_process_emits_batch_payload_for_inline_job_list(self) -> None:
         """Batch payloads should produce aggregate metrics and per-record summaries."""
+        # ExtractionStore persists to extracted_intelligence with FK to normalized_jobs.
+        # Session-scoped truncates in other test modules leave normalized_jobs empty; seed
+        # parent rows for the inline normalized_job_id values used below.
+        run_id = "pytest-batch-inline-2"
+        with session_scope() as session:
+            session.execute(
+                delete(ExtractedIntelligence).where(
+                    ExtractedIntelligence.normalized_job_id.in_((11, 12))
+                )
+            )
+            session.execute(delete(NormalizedJob).where(NormalizedJob.id.in_((11, 12))))
+            session.add_all(
+                [
+                    NormalizedJob(
+                        id=11,
+                        ingestion_run_id=run_id,
+                        source="web_scrape",
+                        external_id="job-11",
+                        title="Backend Engineer",
+                        company="Acme",
+                        description="Python and PostgreSQL experience required.",
+                    ),
+                    NormalizedJob(
+                        id=12,
+                        ingestion_run_id=run_id,
+                        source="web_scrape",
+                        external_id="job-12",
+                        title="Cloud Engineer",
+                        company="Acme",
+                        description="Work with AWS and Terraform daily.",
+                    ),
+                ]
+            )
+
         event = EventEnvelope(
             correlation_id="test-batch-tools",
             agent_id="normalization-agent",
@@ -189,12 +261,9 @@ class TestSkillsExtractionAgent:
         )
 
         agent = SkillsExtractionAgent()
-        with (
-            patch("agents.skills_extraction.agent.check_db_connection", return_value=False),
-            _patch_skills_extraction_pass2_llm(
-                skills_list=[],
-                skills_meta={"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0},
-            ),
+        with _patch_skills_extraction_pass2_llm(
+            skills_list=[],
+            skills_meta={"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0},
         ):
             out = agent.process(event)
 
@@ -261,8 +330,8 @@ class TestSkillsExtractionAgent:
         assert [tool.tool_name for tool in store.saved_results[0].tools] == ["Python", "Docker"]
 
     def test_process_payload_has_taxonomy_coverage_and_cost_when_llm_used(self) -> None:
-        """When extract_skills returns skills and metadata, payload has taxonomy_coverage and extraction_cost_usd."""
-        from agents.common.types import SkillRecord, SpanRecord
+        """When skills extraction returns skills and metadata, payload has cost and coverage."""
+        from agents.common.types import SkillRecord, SpanRecord, TaxonomyResult
 
         event = EventEnvelope(
             correlation_id="test-metrics",
@@ -278,24 +347,34 @@ class TestSkillsExtractionAgent:
             },
         )
         skill_with_esco = SkillRecord(
-            label="Python",
+            skill_name="Python",
             type="Technical",
             confidence=0.9,
-            esco_uri="http://data.europa.eu/esco/skill/abc",
-            is_genai_extension=False,
             source_span=SpanRecord(
                 text="Python", field_source="description", start_char=0, end_char=6
             ),
         )
+        mock_taxonomy = TaxonomyResult(
+            original_label="Python",
+            esco_uri="http://data.europa.eu/esco/skill/abc",
+            is_genai_extension=False,
+            resolution_step=2,
+        )
         agent = SkillsExtractionAgent()
-        with _patch_skills_extraction_pass2_llm(
-            skills_list=[skill_with_esco],
-            skills_meta={
-                "extraction_failed": False,
-                "tokens_used": 100,
-                "cost_usd": 0.002,
-                "latency_ms": 500,
-            },
+        with (
+            _patch_skills_extraction_pass2_llm(
+                skills_list=[skill_with_esco],
+                skills_meta={
+                    "extraction_failed": False,
+                    "tokens_used": 100,
+                    "cost_usd": 0.002,
+                    "latency_ms": 500,
+                },
+            ),
+            patch(
+                "agents.skills_extraction.agent.resolve_taxonomy_batch",
+                return_value=[mock_taxonomy],
+            ),
         ):
             out = agent.process(event)
         assert out.payload["taxonomy_coverage"] >= 0
@@ -305,7 +384,7 @@ class TestSkillsExtractionAgent:
         assert out.payload["skills"][0]["skill_name"] == "Python"
 
     def test_process_payload_has_skills_extraction_alert_when_metadata_alert_true(self) -> None:
-        """When extract_skills returns alert_skills_extraction True, payload has skills_extraction_alert."""
+        """When extract_skills_no_taxonomy signals rate-limit alert, payload reflects it."""
         event = EventEnvelope(
             correlation_id="test-alert",
             agent_id="normalization-agent",

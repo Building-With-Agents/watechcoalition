@@ -56,7 +56,7 @@ def _payload_summary(payload: dict, max_skills: int = 5, max_tools: int = 5) -> 
     }
     skills = payload.get("skills") or []
     if skills:
-        out["skills_preview"] = [s.get("label") or s.get("name") for s in skills[:max_skills]]
+        out["skills_preview"] = [s.get("label") or s.get("skill_name") or s.get("name") for s in skills[:max_skills]]
         if len(skills) > max_skills:
             out["skills_preview"].append(f"+ {len(skills) - max_skills} more")
     tools = payload.get("tools") or []
@@ -188,7 +188,7 @@ def _render_skills_table(skills_full: list[dict]) -> str:
         )
         parts.append(
             "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td class=\"span-cell\">{}</td></tr>".format(
-                html.escape(str(s.get("label") or s.get("name") or "")),
+                html.escape(str(s.get("label") or s.get("skill_name") or s.get("name") or "")),
                 html.escape(str(s.get("type", ""))),
                 s.get("confidence", ""),
                 "Yes" if s.get("required_flag") else ("No" if s.get("required_flag") is False else "—"),
