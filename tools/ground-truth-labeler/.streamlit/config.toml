@@ -1,0 +1,3 @@
+# Suppress Streamlit share/deploy UI; prevents share-modal.js null addEventListener in some setups.
+[client]
+toolbarMode = "minimal"

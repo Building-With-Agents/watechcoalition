@@ -1,0 +1,282 @@
+{
+  "schema_version": "1.0",
+  "mt_timestamp_iso": "2026-03-21T01:46:14-06:00",
+  "run_label": "Test_run",
+  "git_short_hash": "f5b60fb0",
+  "ground_truth_path": "C:\\Users\\milob\\OneDrive\\Escritorio\\WAI Code\\watechcoalition\\agents\\eval\\extraction_ground_truth.json",
+  "record_count": 3,
+  "extractor_mode": "llm_skills_pattern_tools",
+  "aggregates": {
+    "total_gt_skills": 20,
+    "total_pred_skills": 51,
+    "matched_skills": 6,
+    "precision_skills": 0.11764705882352941,
+    "recall_skills": 0.3,
+    "total_gt_tools": 8,
+    "total_pred_tools": 2,
+    "matched_tools": 1,
+    "precision_tools": 0.5,
+    "recall_tools": 0.125,
+    "total_tokens_used": 5092,
+    "total_cost_usd": 0.039036,
+    "total_latency_ms": 28545,
+    "llm_applicable": true
+  },
+  "per_job": [
+    {
+      "job_key": "gt-001",
+      "title": "Product Manager - AI & Data Analytics",
+      "gt_skills": [
+        "ai/ml lifecycle",
+        "backlog management",
+        "data visualization",
+        "product strategy",
+        "sql",
+        "stakeholder management"
+      ],
+      "gt_tools": [
+        "dbt",
+        "looker",
+        "power bi",
+        "python",
+        "snowflake",
+        "tableau"
+      ],
+      "pred_skills": [
+        "ai",
+        "ai/ml",
+        "ai/ml feature requirements",
+        "communication",
+        "customer collaboration",
+        "data analytics",
+        "data fluency",
+        "data science",
+        "metrics definition",
+        "prioritization",
+        "product management",
+        "saas",
+        "stakeholder management",
+        "user story definition"
+      ],
+      "pred_tools": [
+        "sql"
+      ],
+      "matched_skills": [
+        "stakeholder management"
+      ],
+      "missed_skills": [
+        "ai/ml lifecycle",
+        "backlog management",
+        "data visualization",
+        "product strategy",
+        "sql"
+      ],
+      "false_positive_skills": [
+        "ai",
+        "ai/ml",
+        "ai/ml feature requirements",
+        "communication",
+        "customer collaboration",
+        "data analytics",
+        "data fluency",
+        "data science",
+        "metrics definition",
+        "prioritization",
+        "product management",
+        "saas",
+        "user story definition"
+      ],
+      "matched_tools": [],
+      "missed_tools": [
+        "dbt",
+        "looker",
+        "power bi",
+        "python",
+        "snowflake",
+        "tableau"
+      ],
+      "false_positive_tools": [
+        "sql"
+      ],
+      "precision_skills": 0.07142857142857142,
+      "recall_skills": 0.16666666666666666,
+      "precision_tools": 0.0,
+      "recall_tools": 0.0,
+      "tokens_used": 1785,
+      "cost_usd": 0.011799,
+      "latency_ms": 7686,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-002",
+      "title": "Senior Product Manager, AI",
+      "gt_skills": [
+        "agentic ai",
+        "ai/ml product management",
+        "cross-functional collaboration",
+        "customer research",
+        "foundation models (llms)",
+        "product roadmap"
+      ],
+      "gt_tools": [
+        "chatgpt"
+      ],
+      "pred_skills": [
+        "agentic ai",
+        "agentic ai systems",
+        "ai",
+        "ai product development",
+        "b2b saas",
+        "b2c saas",
+        "business acumen",
+        "collaboration",
+        "communication",
+        "customer focus",
+        "data pipeline requirements",
+        "innovation management",
+        "machine learning",
+        "metrics analysis",
+        "product development",
+        "product launch",
+        "product management",
+        "strategic ecosystems"
+      ],
+      "pred_tools": [],
+      "matched_skills": [
+        "agentic ai"
+      ],
+      "missed_skills": [
+        "ai/ml product management",
+        "cross-functional collaboration",
+        "customer research",
+        "foundation models (llms)",
+        "product roadmap"
+      ],
+      "false_positive_skills": [
+        "agentic ai systems",
+        "ai",
+        "ai product development",
+        "b2b saas",
+        "b2c saas",
+        "business acumen",
+        "collaboration",
+        "communication",
+        "customer focus",
+        "data pipeline requirements",
+        "innovation management",
+        "machine learning",
+        "metrics analysis",
+        "product development",
+        "product launch",
+        "product management",
+        "strategic ecosystems"
+      ],
+      "matched_tools": [],
+      "missed_tools": [
+        "chatgpt"
+      ],
+      "false_positive_tools": [],
+      "precision_skills": 0.05555555555555555,
+      "recall_skills": 0.16666666666666666,
+      "precision_tools": 0.0,
+      "recall_tools": 0.0,
+      "tokens_used": 1659,
+      "cost_usd": 0.013641,
+      "latency_ms": 9013,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    },
+    {
+      "job_key": "gt-003",
+      "title": "Senior Product Manager, AI Platforms",
+      "gt_skills": [
+        "agentic ai",
+        "ai product roadmap",
+        "cross-functional leadership",
+        "metrics definition",
+        "nlp",
+        "regulatory compliance",
+        "sql",
+        "vendor management"
+      ],
+      "gt_tools": [
+        "sql"
+      ],
+      "pred_skills": [
+        "agentic ai",
+        "ai product development",
+        "analytical skills",
+        "chat automation",
+        "communication",
+        "compliance tools",
+        "credit",
+        "cross-functional leadership",
+        "experimentation",
+        "fintech",
+        "metrics definition",
+        "natural language processing",
+        "payments",
+        "performance measurement",
+        "product management",
+        "product roadmap ownership",
+        "regulatory compliance",
+        "regulatory standards",
+        "voice automation"
+      ],
+      "pred_tools": [
+        "sql"
+      ],
+      "matched_skills": [
+        "agentic ai",
+        "cross-functional leadership",
+        "metrics definition",
+        "regulatory compliance"
+      ],
+      "missed_skills": [
+        "ai product roadmap",
+        "nlp",
+        "sql",
+        "vendor management"
+      ],
+      "false_positive_skills": [
+        "ai product development",
+        "analytical skills",
+        "chat automation",
+        "communication",
+        "compliance tools",
+        "credit",
+        "experimentation",
+        "fintech",
+        "natural language processing",
+        "payments",
+        "performance measurement",
+        "product management",
+        "product roadmap ownership",
+        "regulatory standards",
+        "voice automation"
+      ],
+      "matched_tools": [
+        "sql"
+      ],
+      "missed_tools": [],
+      "false_positive_tools": [],
+      "precision_skills": 0.21052631578947367,
+      "recall_skills": 0.5,
+      "precision_tools": 1.0,
+      "recall_tools": 1.0,
+      "tokens_used": 1648,
+      "cost_usd": 0.013596,
+      "latency_ms": 11846,
+      "extraction_failed": false,
+      "llm_error_reason": null
+    }
+  ],
+  "prompt_exemplar": {
+    "skills_prompt_version": "v1",
+    "system_prompt": "You are a skills extraction system for job postings. Extract explicit and implied skills from the given job text and return them as a JSON object with a \"skills\" array.\n\nOutput schema \u2014 each skill in the \"skills\" array must have:\n- label: short name of the skill (e.g. \"Python\", \"Leadership\")\n- type: exactly one of: Technical, Domain, Soft, Certification, Tool\n- confidence: number between 0.0 and 1.0 (how clearly the skill is stated or implied)\n- required_flag: true if the posting clearly requires it, false if preferred/mentioned, or null if unclear\n- source_span: object with text, field_source, start_char, end_char\n  - text: the exact snippet from the job that supports this skill\n  - field_source: one of \"title\", \"description\", \"requirements\", \"responsibilities\"\n  - start_char: character offset where the snippet starts in that field (0-based)\n  - end_char: character offset where the snippet ends; MUST satisfy end_char - start_char == len(text) exactly (no off-by-one). Example: for text \"Python\", use start_char=0, end_char=6.\n\nSkill types with examples:\n- Technical: programming languages, APIs, protocols (e.g. Python, REST APIs, SQL)\n- Domain: industry or role knowledge (e.g. Data Modeling, Agile, Financial Analysis)\n- Soft: interpersonal or behavioral (e.g. Leadership, Communication, Problem Solving)\n- Certification: formal credentials (e.g. AWS Certified, PMP)\n- Tool: software/tools already identified in Pass 1 must NOT be re-extracted as skills \u2014 see \"Already extracted tools\" below\n\nRules:\n- Extract from title, description, requirements, and responsibilities only.\n- Do NOT extract any skill whose label appears in the \"Already extracted tools\" list \u2014 those are tools, not skills.\n- For each skill, set source_span to the exact text fragment that supports it. Character offsets must be exact: end_char - start_char must equal the length of source_span.text (validation will reject invalid spans).\n- Return only valid JSON: {\"skills\": [ ... ]}. No markdown, no code fence, no explanation.\n- Do not extract negated requirements (e.g. \"no Java required\" should not produce a Java skill).\n",
+    "user_prompt": "Already extracted tools (do not re-extract as skills): SQL\n\n---\nTitle:\nProduct Manager - AI & Data Analytics\n\n---\nDescription:\nWe are seeking a results-oriented Product Manager to drive the vision and execution of our customer-facing SaaS products, data-driven features, and AI/ML solutions. This role is a critical bridge, translating deep technical capabilities from data science and engineering into clear, quantifiable business value for our B2B SaaS customers.\n\nThis is a highly visible, customer-facing role that involves working directly with key clients to co-develop innovative solutions. The ideal candidate is a curious, data-minded problem-solver who is excited to bridge the gap between business needs and technical solutions. This is a growth role where you will have a major impact on our product and our customers.\n\n---\nRequirements:\n- Experience: 3-5+ years of relevant experience in one of the fields described above.\n- Product & Business Acumen: A strong ability to connect complex technical features directly to customer value, user needs, and business outcomes (like ROI or retention).\n- Customer Collaboration: Experience working directly with customers or key stakeholders to gather requirements, validate ideas, and manage feedback loops.\n- Communication & Stakeholder Management: Excellent communication and data storytelling skills. You can build consensus and manage expectations with diverse audiences (from engineering to sales to external clients).\n- Prioritization & Planning: A demonstrated ability to manage a backlog, make trade-offs, and align teams on a clear set of priorities.\n- SQL Proficiency: You have solid SQL fundamentals and are comfortable writing queries (like joins and aggregations) to explore data and conduct analysis.\n- BI Tool Proficiency: Experience with a modern BI platform (e.g., Tableau, Looker, Power BI, Sigma).\n- Data Fluency: A strong functional understanding of data transformation techniques.\n\n---\nResponsibilities:\n- Own the product vision and strategic roadmap for our external, customer-facing AI/ML models, data products, and analytics features.\n- Engage directly with strategic customers and design partners to understand their needs, validate roadmaps, and co-develop new features.\n- Define, measure, and communicate product success using metrics that correlate with customer value and SaaS business metrics.\n- Partner with UX, Data Science, and Sales Engineering to create impactful data visualizations and product demos.\n- Define clear, testable requirements (epics and user stories) based on customer feedback, market analysis, and strategic priorities.\n- Work closely with data scientists to define requirements for AI/ML-driven features.\n---\n\nReturn JSON with a \"skills\" array. Each skill must have: label, type, confidence, required_flag (or null), source_span (text, field_source, start_char, end_char).",
+    "note": "User sections vary per job (Pass-1 tool list). This exemplar uses the first job only."
+  },
+  "runtime_seconds": 35.993
+}

@@ -16,24 +16,33 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
 from agents.common.base_agent import BaseAgent
+
+# Proactive inter-request delay to avoid Azure OpenAI 429 rate limits.
+# Set SKILLS_EXTRACTION_DELAY=0 to disable; increase for lower-tier deployments.
+_INTER_LLM_DELAY = float(os.environ.get("SKILLS_EXTRACTION_DELAY", "0.5"))
 from agents.common.data_store import check_db_connection, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
-from agents.common.types import JobRecord, ToolRecord
+from agents.common.types import ExtractionMetadata, JobRecord, ToolRecord
 from agents.skills_extraction.extractors import (
     extract_context,
     extract_responsibilities,
-    extract_skills,
     extract_tasks,
     extract_tools,
 )
-from agents.skills_extraction.prompts.skills_extraction_v1 import SKILLS_PROMPT_VERSION
+from agents.skills_extraction.extractors.skills import (
+    apply_taxonomy_to_skills,
+    extract_skills_no_taxonomy,
+)
+from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
+from agents.skills_extraction.prompts import SKILLS_PROMPT_VERSION
 
 _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
@@ -358,7 +367,42 @@ class SkillsExtractionAgent(BaseAgent):
         if max_jobs > 0 and len(work_items) > max_jobs:
             work_items = work_items[:max_jobs]
 
-        results = [self._extract_work_item(item) for item in work_items]
+        # Phase 1: Extract tools + skills for all jobs (taxonomy deferred)
+        pending: list[tuple[ExtractionWorkItem, list[ToolRecord], list, dict]] = []
+        for idx, item in enumerate(work_items):
+            if idx > 0 and _INTER_LLM_DELAY > 0:
+                time.sleep(_INTER_LLM_DELAY)
+            tools, skills_list, meta, is_llm = self._extract_work_item_no_taxonomy(item)
+            pending.append((item, tools, skills_list, meta))
+
+        # Phase 2: Batch taxonomy resolution — single API call for all labels
+        all_labels: list[str] = []
+        seen_labels: set[str] = set()
+        for _, _, skills_list, _ in pending:
+            for s in skills_list:
+                if s.skill_name not in seen_labels:
+                    seen_labels.add(s.skill_name)
+                    all_labels.append(s.skill_name)
+
+        taxonomy_map: dict[str, Any] = {}
+        if all_labels:
+            import structlog as _structlog
+            _log = _structlog.get_logger()
+            _log.info(
+                "taxonomy_batch_resolve",
+                unique_labels=len(all_labels),
+                total_jobs=len(pending),
+            )
+            taxonomy_results = resolve_taxonomy_batch(all_labels)
+            taxonomy_map = dict(zip(all_labels, taxonomy_results, strict=True))
+
+        # Phase 3: Apply taxonomy + build results
+        results = []
+        for item, tools, skills_list, meta in pending:
+            if skills_list:
+                skills_list = apply_taxonomy_to_skills(skills_list, taxonomy_map)
+            results.append(self._build_extraction_result(item, tools, skills_list, meta))
+
         self._extraction_store.save(results)
         # When payload["skills_extraction_alert"] is True, caller/orchestrator should
         # publish SkillsExtractionAlert so the Orchestration Agent can react.
@@ -369,12 +413,17 @@ class SkillsExtractionAgent(BaseAgent):
             payload=self._build_payload(event, results),
         )
 
-    def _extract_work_item(self, item: ExtractionWorkItem) -> ExtractionResult:
-        """Run Pass 1 (context, tools) then Pass 2 (tasks, responsibilities, skills)."""
+    def _extract_work_item_no_taxonomy(
+        self, item: ExtractionWorkItem
+    ) -> tuple[list[ToolRecord], list, dict, bool]:
+        """Pass 1: context + tools. Pass 2: tasks, responsibilities, skills (taxonomy deferred).
+
+        Returns ``(tools, skills_list, combined_meta, used_llm)``. ``combined_meta`` carries
+        serialized dimension payloads and per-dimension metadata for ``_build_extraction_result``.
+        """
         job = item.job_record
-        # Pass 1: context signals first (zero LLM), then tools (pattern).
-        context_signals, ctx_meta = extract_context(job)
         tools = extract_tools(job)
+        context_signals, ctx_meta = extract_context(job)
 
         has_normalized_text = bool(
             (job.description or "").strip()
@@ -382,49 +431,138 @@ class SkillsExtractionAgent(BaseAgent):
             or (job.responsibilities or "").strip()
         )
 
-        if has_normalized_text:
-            tasks, tasks_meta = extract_tasks(job, pass1_context=context_signals)
-            responsibilities, resp_meta = extract_responsibilities(
-                job, pass1_context=context_signals
+        if not has_normalized_text:
+            import structlog as _sl
+
+            _sl.get_logger().warning(
+                "skills_extraction_no_text",
+                job_id=item.job_id,
+                title=item.title,
+                company=item.company,
+                reason="No description/requirements/responsibilities text — cannot extract skills",
             )
-            skills_list, skills_meta = extract_skills(job, pass1_tools=tools)
+            warn = _coerce_pass2_warnings(ctx_meta)
+            meta: dict[str, Any] = {
+                "success": False,
+                "extraction_failed": True,
+                "extraction_status": "failed",
+                "error_reason": "no_normalized_text",
+                "tokens_used": int(ctx_meta.get("tokens_used") or 0),
+                "cost_usd": float(ctx_meta.get("cost_usd") or 0.0),
+                "latency_ms": int(ctx_meta.get("latency_ms") or 0),
+                "extraction_warnings": list(warn)
+                + ["No normalized text available for extraction"],
+                "alert_skills_extraction": False,
+                "provider": ctx_meta.get("provider", "pattern-matching"),
+                "model": ctx_meta.get("model", "none"),
+                "context_signals": context_signals,
+                "tasks": [],
+                "responsibilities": [],
+                "dimension_metas": {
+                    "pass1_context": ctx_meta.get("extraction_metadata", {}),
+                },
+                "pass2_llm_calls": 0,
+                "pass2_llm_dimensions": [],
+            }
+            return tools, [], meta, False
 
-            skills_payload = [s.model_dump() for s in skills_list]
-            tasks_payload = [t.model_dump() for t in tasks]
-            resp_payload = [r.model_dump() for r in responsibilities]
-            context_payload = [c.model_dump() for c in context_signals]
+        tasks, tasks_meta = extract_tasks(job, pass1_context=context_signals)
+        responsibilities, resp_meta = extract_responsibilities(
+            job, pass1_context=context_signals
+        )
+        skills_list, skills_meta = extract_skills_no_taxonomy(job, pass1_tools=tools)
 
-            total_tokens = (
-                (skills_meta.get("tokens_used") or 0)
-                + (ctx_meta.get("tokens_used") or 0)
-                + (tasks_meta.get("tokens_used") or 0)
-                + (resp_meta.get("tokens_used") or 0)
-            )
-            total_cost = (
-                float(skills_meta.get("cost_usd") or 0.0)
-                + float(ctx_meta.get("cost_usd") or 0.0)
-                + float(tasks_meta.get("cost_usd") or 0.0)
-                + float(resp_meta.get("cost_usd") or 0.0)
-            )
+        total_tokens = (
+            int(ctx_meta.get("tokens_used") or 0)
+            + int(tasks_meta.get("tokens_used") or 0)
+            + int(resp_meta.get("tokens_used") or 0)
+            + int(skills_meta.get("tokens_used") or 0)
+        )
+        total_cost = (
+            float(ctx_meta.get("cost_usd") or 0.0)
+            + float(tasks_meta.get("cost_usd") or 0.0)
+            + float(resp_meta.get("cost_usd") or 0.0)
+            + float(skills_meta.get("cost_usd") or 0.0)
+        )
+        total_latency = (
+            int(ctx_meta.get("latency_ms") or 0)
+            + int(tasks_meta.get("latency_ms") or 0)
+            + int(resp_meta.get("latency_ms") or 0)
+            + int(skills_meta.get("latency_ms") or 0)
+        )
 
-            skills_failed = bool(skills_meta.get("extraction_failed"))
-            tasks_failed = bool(tasks_meta.get("extraction_failed"))
-            resp_failed = bool(resp_meta.get("extraction_failed"))
-            status = "success"
-            if skills_failed:
-                status = "failed"
-            elif tasks_failed or resp_failed:
-                status = "degraded"
+        skills_failed = bool(skills_meta.get("extraction_failed"))
+        tasks_failed = bool(tasks_meta.get("extraction_failed"))
+        resp_failed = bool(resp_meta.get("extraction_failed"))
 
-            meta_blob = {
+        if skills_failed:
+            extraction_status = "failed"
+        elif tasks_failed or resp_failed:
+            extraction_status = "degraded"
+        else:
+            extraction_status = "success"
+
+        warn = _coerce_pass2_warnings(ctx_meta, tasks_meta, resp_meta, skills_meta)
+
+        combined_meta: dict[str, Any] = {
+            "success": extraction_status == "success",
+            "extraction_failed": skills_failed,
+            "extraction_status": extraction_status,
+            "error_reason": skills_meta.get("error_reason"),
+            "tokens_used": total_tokens,
+            "cost_usd": total_cost,
+            "latency_ms": total_latency,
+            "extraction_warnings": list(warn),
+            "alert_skills_extraction": bool(skills_meta.get("alert_skills_extraction")),
+            "provider": skills_meta.get("provider", "azure-openai"),
+            "model": skills_meta.get("model") or _llm_deployment_name(),
+            "context_signals": context_signals,
+            "tasks": tasks,
+            "responsibilities": responsibilities,
+            "dimension_metas": {
                 "pass1_context": ctx_meta.get("extraction_metadata", {}),
                 "tasks": tasks_meta.get("extraction_metadata", {}),
                 "responsibilities": resp_meta.get("extraction_metadata", {}),
-                "skills": skills_meta.get("extraction_metadata", {}),
-            }
+                "skills": {
+                    k: skills_meta.get(k)
+                    for k in (
+                        "model",
+                        "tokens_used",
+                        "cost_usd",
+                        "latency_ms",
+                        "success",
+                        "extraction_failed",
+                        "error_reason",
+                    )
+                    if k in skills_meta
+                },
+            },
+            "pass2_llm_calls": 3,
+            "pass2_llm_dimensions": ["tasks", "responsibilities", "skills"],
+        }
+        return tools, skills_list, combined_meta, True
 
-            warn = _coerce_pass2_warnings(ctx_meta, tasks_meta, resp_meta, skills_meta)
-
+    def _build_extraction_result(
+        self,
+        item: ExtractionWorkItem,
+        tools: list[ToolRecord],
+        skills_list: list,
+        meta: dict,
+    ) -> ExtractionResult:
+        """Build ExtractionResult from tools + taxonomy-resolved skills and Week 5 dimensions."""
+        if meta and ("success" in meta or "extraction_failed" in meta):
+            skills_payload = [s.model_dump() for s in skills_list]
+            status = meta.get("extraction_status")
+            if status not in ("success", "degraded", "failed"):
+                status = "success" if not meta.get("extraction_failed") else "failed"
+            tasks_raw = meta.get("tasks") or []
+            resp_raw = meta.get("responsibilities") or []
+            ctx_raw = meta.get("context_signals") or []
+            tasks_payload = [t.model_dump() for t in tasks_raw]
+            resp_payload = [r.model_dump() for r in resp_raw]
+            context_payload = [c.model_dump() for c in ctx_raw]
+            warn = tuple(str(w) for w in (meta.get("extraction_warnings") or []))
+            meta_blob = _metadata_from_pass2(meta, tools, extraction_version=EXTRACTION_VERSION)
             return ExtractionResult(
                 work_item=item,
                 skills=skills_payload,
@@ -434,29 +572,31 @@ class SkillsExtractionAgent(BaseAgent):
                 context=context_payload,
                 seniority=None,
                 extraction_status=status,
-                extraction_tokens_used=int(total_tokens),
-                extraction_cost_usd=total_cost,
-                alert_skills_extraction=skills_meta.get("alert_skills_extraction", False),
+                extraction_tokens_used=meta.get("tokens_used", 0) or 0,
+                extraction_cost_usd=meta.get("cost_usd", 0.0) or 0.0,
+                alert_skills_extraction=meta.get("alert_skills_extraction", False),
                 extraction_warnings=warn,
                 extraction_metadata=meta_blob,
                 persisted_extraction_version=EXTRACTION_VERSION,
                 persisted_extraction_model=_persisted_extraction_model_llm(),
             )
-
-        fixture_payload = self._fixture.get(item.posting_id, {}) if item.posting_id is not None else {}
-        context_payload = [c.model_dump() for c in context_signals]
+        # No fixture fallback — fail explicitly so data issues surface
+        import structlog as _sl
+        _sl.get_logger().error(
+            "skills_extraction_no_metadata",
+            job_id=item.job_id,
+            title=item.title,
+            reason="No extraction metadata — possible pipeline misconfiguration",
+        )
         return ExtractionResult(
             work_item=item,
-            skills=fixture_payload.get("skills", []),
+            skills=[],
             tools=tools,
-            tasks=[],
-            responsibilities=[],
-            context=context_payload,
-            seniority=fixture_payload.get("seniority"),
-            extraction_status=fixture_payload.get("extraction_status", "success"),
-            extraction_metadata={"pass1_context": ctx_meta.get("extraction_metadata", {})},
+            seniority=None,
+            extraction_status="failed",
+            extraction_warnings=("No extraction metadata — check pipeline wiring",),
             persisted_extraction_version=EXTRACTION_VERSION,
-            persisted_extraction_model=FIXTURE_EXTRACTION_MODEL,
+            persisted_extraction_model="none",
         )
 
     def _build_payload(
@@ -594,6 +734,35 @@ class SkillsExtractionAgent(BaseAgent):
 
         self._fixture = {r["posting_id"]: r for r in records}
         return True
+
+
+def _metadata_from_pass2(
+    meta: dict[str, Any],
+    tools: list[ToolRecord],
+    *,
+    extraction_version: str,
+) -> dict[str, Any]:
+    """Flatten Pass 1/2 dimension metadata for ``extracted_intelligence.extraction_metadata`` JSON."""
+    dim = meta.get("dimension_metas") or {}
+    raw_warnings = [str(w) for w in (meta.get("extraction_warnings") or [])]
+    em = ExtractionMetadata(
+        extraction_version=extraction_version,
+        model_used=str(meta.get("model") or ""),
+        model_tier=os.environ.get("EXTRACTION_MODEL_TIER", "mixed"),
+        tokens_used=int(meta.get("tokens_used") or 0),
+        cost_usd=float(meta.get("cost_usd") or 0.0),
+        extraction_duration_ms=int(meta.get("latency_ms") or 0),
+        pass1_tool_count=len(tools),
+        pass2_llm_dimensions=list(meta.get("pass2_llm_dimensions") or []),
+        pass2_llm_calls=int(meta.get("pass2_llm_calls") or 0),
+        extraction_warnings=raw_warnings,
+    )
+    out: dict[str, Any] = em.model_dump()
+    out["pass1_context"] = dim.get("pass1_context", {})
+    out["tasks"] = dim.get("tasks", {})
+    out["responsibilities"] = dim.get("responsibilities", {})
+    out["skills"] = dim.get("skills", {})
+    return out
 
 
 def _coerce_pass2_warnings(*metas: dict[str, Any]) -> tuple[str, ...]:

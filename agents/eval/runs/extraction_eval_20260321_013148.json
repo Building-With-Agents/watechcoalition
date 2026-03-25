@@ -1,0 +1,2055 @@
+{
+  "schema_version": "1.0",
+  "run_id": "extraction_eval_20260321_013148",
+  "run_timestamp_mt": {
+    "iso": "2026-03-21T01:31:48.141283-06:00",
+    "display": "2026-03-21 01:31:48 MDT"
+  },
+  "timezone": "America/Denver",
+  "mode": "stub",
+  "ground_truth_path": "C:\\Users\\milob\\OneDrive\\Escritorio\\WAI Code\\watechcoalition\\agents\\eval\\extraction_ground_truth.json",
+  "git_commit": "f5b60fb0af26e15cdb19842ee0c824ff30fccd7b",
+  "limit_applied": null,
+  "aggregate": {
+    "job_count": 30,
+    "skills_micro_precision": 0.302632,
+    "skills_micro_recall": 0.104072,
+    "tools_micro_precision": 0.5,
+    "tools_micro_recall": 0.102362,
+    "total_gt_skills": 221,
+    "total_pred_skills": 76,
+    "matched_skills": 23,
+    "total_gt_tools": 127,
+    "total_pred_tools": 26,
+    "matched_tools": 13,
+    "llm_tokens_used_sum": 0,
+    "llm_cost_usd_sum": 0.0,
+    "llm_latency_ms_sum": 0,
+    "llm_tokens_used_avg": 0.0,
+    "llm_cost_usd_avg": 0.0,
+    "llm_latency_ms_avg": 0.0,
+    "records_extraction_failed": 0,
+    "records_with_llm_warnings": 0,
+    "llm_job_count": 0
+  },
+  "per_job": [
+    {
+      "ground_truth_id": "gt-001",
+      "index": 0,
+      "title": "Product Manager - AI & Data Analytics",
+      "gt_skills_sorted": [
+        "ai/ml lifecycle",
+        "backlog management",
+        "data visualization",
+        "product strategy",
+        "sql",
+        "stakeholder management"
+      ],
+      "gt_tools_sorted": [
+        "dbt",
+        "looker",
+        "power bi",
+        "python",
+        "snowflake",
+        "tableau"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "data analysis",
+        "product management",
+        "sales",
+        "sql"
+      ],
+      "pred_tools_sorted": [
+        "sql"
+      ],
+      "skills_intersection": [
+        "sql"
+      ],
+      "skills_only_in_gt": [
+        "ai/ml lifecycle",
+        "backlog management",
+        "data visualization",
+        "product strategy",
+        "stakeholder management"
+      ],
+      "skills_only_in_pred": [
+        "communication",
+        "data analysis",
+        "product management",
+        "sales"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "dbt",
+        "looker",
+        "power bi",
+        "python",
+        "snowflake",
+        "tableau"
+      ],
+      "tools_only_in_pred": [
+        "sql"
+      ],
+      "skills_precision": 0.2,
+      "skills_recall": 0.166667,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-002",
+      "index": 1,
+      "title": "Senior Product Manager, AI",
+      "gt_skills_sorted": [
+        "agentic ai",
+        "ai/ml product management",
+        "cross-functional collaboration",
+        "customer research",
+        "foundation models (llms)",
+        "product roadmap"
+      ],
+      "gt_tools_sorted": [
+        "chatgpt"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "product management"
+      ],
+      "pred_tools_sorted": [],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "agentic ai",
+        "ai/ml product management",
+        "cross-functional collaboration",
+        "customer research",
+        "foundation models (llms)",
+        "product roadmap"
+      ],
+      "skills_only_in_pred": [
+        "communication",
+        "product management"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "chatgpt"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-003",
+      "index": 2,
+      "title": "Senior Product Manager, AI Platforms",
+      "gt_skills_sorted": [
+        "agentic ai",
+        "ai product roadmap",
+        "cross-functional leadership",
+        "metrics definition",
+        "nlp",
+        "regulatory compliance",
+        "sql",
+        "vendor management"
+      ],
+      "gt_tools_sorted": [
+        "sql"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "product management",
+        "sql"
+      ],
+      "pred_tools_sorted": [
+        "sql"
+      ],
+      "skills_intersection": [
+        "sql"
+      ],
+      "skills_only_in_gt": [
+        "agentic ai",
+        "ai product roadmap",
+        "cross-functional leadership",
+        "metrics definition",
+        "nlp",
+        "regulatory compliance",
+        "vendor management"
+      ],
+      "skills_only_in_pred": [
+        "communication",
+        "product management"
+      ],
+      "tools_intersection": [
+        "sql"
+      ],
+      "tools_only_in_gt": [],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.333333,
+      "skills_recall": 0.125,
+      "tools_precision": 1.0,
+      "tools_recall": 1.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-004",
+      "index": 3,
+      "title": "AI Product Manager",
+      "gt_skills_sorted": [
+        "agentic ai",
+        "ai product management",
+        "cross-functional collaboration",
+        "customer research",
+        "data analysis",
+        "product roadmap",
+        "sql"
+      ],
+      "gt_tools_sorted": [
+        "claude",
+        "cursor"
+      ],
+      "pred_skills_sorted": [
+        "data analysis",
+        "product management",
+        "sql"
+      ],
+      "pred_tools_sorted": [
+        "sql"
+      ],
+      "skills_intersection": [
+        "data analysis",
+        "sql"
+      ],
+      "skills_only_in_gt": [
+        "agentic ai",
+        "ai product management",
+        "cross-functional collaboration",
+        "customer research",
+        "product roadmap"
+      ],
+      "skills_only_in_pred": [
+        "product management"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "claude",
+        "cursor"
+      ],
+      "tools_only_in_pred": [
+        "sql"
+      ],
+      "skills_precision": 0.666667,
+      "skills_recall": 0.285714,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-005",
+      "index": 4,
+      "title": "Principal Product Manager - AI Applications",
+      "gt_skills_sorted": [
+        "agentic ai",
+        "beta program management",
+        "competitive analysis",
+        "cross-functional leadership",
+        "llm product management",
+        "product roadmap",
+        "prompt engineering",
+        "rag architecture"
+      ],
+      "gt_tools_sorted": [
+        "llm ops"
+      ],
+      "pred_skills_sorted": [
+        "data analysis",
+        "marketing",
+        "product management",
+        "sales"
+      ],
+      "pred_tools_sorted": [],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "agentic ai",
+        "beta program management",
+        "competitive analysis",
+        "cross-functional leadership",
+        "llm product management",
+        "product roadmap",
+        "prompt engineering",
+        "rag architecture"
+      ],
+      "skills_only_in_pred": [
+        "data analysis",
+        "marketing",
+        "product management",
+        "sales"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "llm ops"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-006",
+      "index": 5,
+      "title": "Staff Product Manager - Voice AI",
+      "gt_skills_sorted": [
+        "agentic ai",
+        "ai governance",
+        "conversational ai",
+        "cross-functional collaboration",
+        "data-driven decision making",
+        "llm product management",
+        "product roadmap",
+        "prompt engineering"
+      ],
+      "gt_tools_sorted": [
+        "langchain",
+        "twilio"
+      ],
+      "pred_skills_sorted": [
+        "product management"
+      ],
+      "pred_tools_sorted": [],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "agentic ai",
+        "ai governance",
+        "conversational ai",
+        "cross-functional collaboration",
+        "data-driven decision making",
+        "llm product management",
+        "product roadmap",
+        "prompt engineering"
+      ],
+      "skills_only_in_pred": [
+        "product management"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "langchain",
+        "twilio"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-007",
+      "index": 6,
+      "title": "Agile Project Manager Contractor",
+      "gt_skills_sorted": [
+        "client consultation",
+        "kanban",
+        "program management",
+        "risk managment",
+        "scrum",
+        "stakeholder communication"
+      ],
+      "gt_tools_sorted": [
+        "confluence",
+        "jira"
+      ],
+      "pred_skills_sorted": [
+        "communication"
+      ],
+      "pred_tools_sorted": [],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "client consultation",
+        "kanban",
+        "program management",
+        "risk managment",
+        "scrum",
+        "stakeholder communication"
+      ],
+      "skills_only_in_pred": [
+        "communication"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "confluence",
+        "jira"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-008",
+      "index": 7,
+      "title": "Senior Project Manager (Change Management)",
+      "gt_skills_sorted": [
+        "agile skiils",
+        "business process reengineering",
+        "change management",
+        "communication skills",
+        "data analysis",
+        "problem solver",
+        "project management",
+        "risk management",
+        "stakeholder management",
+        "teamwork skills",
+        "value stream mapping",
+        "waterfall methodologies"
+      ],
+      "gt_tools_sorted": [
+        "excel",
+        "jira",
+        "microsoft projects",
+        "miro",
+        "outlook",
+        "powerpoint",
+        "visio"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "data analysis",
+        "product management"
+      ],
+      "pred_tools_sorted": [],
+      "skills_intersection": [
+        "data analysis"
+      ],
+      "skills_only_in_gt": [
+        "agile skiils",
+        "business process reengineering",
+        "change management",
+        "communication skills",
+        "problem solver",
+        "project management",
+        "risk management",
+        "stakeholder management",
+        "teamwork skills",
+        "value stream mapping",
+        "waterfall methodologies"
+      ],
+      "skills_only_in_pred": [
+        "communication",
+        "product management"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "excel",
+        "jira",
+        "microsoft projects",
+        "miro",
+        "outlook",
+        "powerpoint",
+        "visio"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.333333,
+      "skills_recall": 0.083333,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-009",
+      "index": 8,
+      "title": "PROJECT MANAGER WITH AGILE",
+      "gt_skills_sorted": [
+        "agile",
+        "ai knowledge",
+        "api",
+        "cloud computing",
+        "cross-functional collaboration",
+        "devops",
+        "docker",
+        "leadership",
+        "program management",
+        "project management",
+        "project planning",
+        "stakeholder management"
+      ],
+      "gt_tools_sorted": [
+        ".net",
+        "azure",
+        "c#",
+        "flask",
+        "git",
+        "pytest",
+        "python",
+        "react.js"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "python"
+      ],
+      "pred_tools_sorted": [
+        "docker",
+        "python"
+      ],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "agile",
+        "ai knowledge",
+        "api",
+        "cloud computing",
+        "cross-functional collaboration",
+        "devops",
+        "docker",
+        "leadership",
+        "program management",
+        "project management",
+        "project planning",
+        "stakeholder management"
+      ],
+      "skills_only_in_pred": [
+        "communication",
+        "python"
+      ],
+      "tools_intersection": [
+        "python"
+      ],
+      "tools_only_in_gt": [
+        ".net",
+        "azure",
+        "c#",
+        "flask",
+        "git",
+        "pytest",
+        "react.js"
+      ],
+      "tools_only_in_pred": [
+        "docker"
+      ],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.5,
+      "tools_recall": 0.125,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-010",
+      "index": 9,
+      "title": "Senior Project Manager - Agile",
+      "gt_skills_sorted": [
+        "2d/3d graphics knowledge",
+        "app development",
+        "business analysis",
+        "business continuity",
+        "communication skills",
+        "negotiation",
+        "project management",
+        "quality assurance",
+        "sdlc(software development life cycle)",
+        "sprint planning"
+      ],
+      "gt_tools_sorted": [
+        "flextrack"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "data analysis"
+      ],
+      "pred_tools_sorted": [],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "2d/3d graphics knowledge",
+        "app development",
+        "business analysis",
+        "business continuity",
+        "communication skills",
+        "negotiation",
+        "project management",
+        "quality assurance",
+        "sdlc(software development life cycle)",
+        "sprint planning"
+      ],
+      "skills_only_in_pred": [
+        "communication",
+        "data analysis"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "flextrack"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-011",
+      "index": 10,
+      "title": "Agile Project Manager",
+      "gt_skills_sorted": [
+        "agile",
+        "communication skills",
+        "global team mangagement",
+        "project management",
+        "scrum",
+        "software development",
+        "team management"
+      ],
+      "gt_tools_sorted": [
+        "confluence",
+        "jira"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "data analysis",
+        "product management"
+      ],
+      "pred_tools_sorted": [],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "agile",
+        "communication skills",
+        "global team mangagement",
+        "project management",
+        "scrum",
+        "software development",
+        "team management"
+      ],
+      "skills_only_in_pred": [
+        "communication",
+        "data analysis",
+        "product management"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "confluence",
+        "jira"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-012",
+      "index": 11,
+      "title": "Clinical Systems & Data Analyst I",
+      "gt_skills_sorted": [
+        "clinical systems implementation",
+        "data analysis & statistics",
+        "data visualization",
+        "requirements analysis & workflow design",
+        "training & communication",
+        "trauma-informed care"
+      ],
+      "gt_tools_sorted": [
+        "data visualization tools",
+        "electronic health record (ehr) systems",
+        "reporting tools",
+        "sql data query tools"
+      ],
+      "pred_skills_sorted": [
+        "data analysis",
+        "product management"
+      ],
+      "pred_tools_sorted": [],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "clinical systems implementation",
+        "data analysis & statistics",
+        "data visualization",
+        "requirements analysis & workflow design",
+        "training & communication",
+        "trauma-informed care"
+      ],
+      "skills_only_in_pred": [
+        "data analysis",
+        "product management"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "data visualization tools",
+        "electronic health record (ehr) systems",
+        "reporting tools",
+        "sql data query tools"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-013",
+      "index": 12,
+      "title": "Junior Data Analyst",
+      "gt_skills_sorted": [
+        "attention to detail",
+        "communication & stakeholder coordination",
+        "data analysis & trend recognition",
+        "data quality & integrity assessment",
+        "data visualization & reporting",
+        "investigative data analysis",
+        "multitasking in high-pressure environments"
+      ],
+      "gt_tools_sorted": [
+        "data processing systems",
+        "microsoft excel",
+        "optical character recognition (ocr) tools",
+        "power bi",
+        "scanners & digital imaging tools"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "data analysis",
+        "product management"
+      ],
+      "pred_tools_sorted": [],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "attention to detail",
+        "communication & stakeholder coordination",
+        "data analysis & trend recognition",
+        "data quality & integrity assessment",
+        "data visualization & reporting",
+        "investigative data analysis",
+        "multitasking in high-pressure environments"
+      ],
+      "skills_only_in_pred": [
+        "communication",
+        "data analysis",
+        "product management"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "data processing systems",
+        "microsoft excel",
+        "optical character recognition (ocr) tools",
+        "power bi",
+        "scanners & digital imaging tools"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-014",
+      "index": 13,
+      "title": "Data Analyst",
+      "gt_skills_sorted": [
+        "communication skills",
+        "data quality assurance",
+        "problem-solving",
+        "systems & data integration support",
+        "team collaboration",
+        "work prioritization & time management"
+      ],
+      "gt_tools_sorted": [
+        "data integration tools",
+        "healthcare information systems",
+        "quality assurance (qa) tools"
+      ],
+      "pred_skills_sorted": [],
+      "pred_tools_sorted": [],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "communication skills",
+        "data quality assurance",
+        "problem-solving",
+        "systems & data integration support",
+        "team collaboration",
+        "work prioritization & time management"
+      ],
+      "skills_only_in_pred": [],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "data integration tools",
+        "healthcare information systems",
+        "quality assurance (qa) tools"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-015",
+      "index": 14,
+      "title": "Data Analyst - Foundation (26-27)",
+      "gt_skills_sorted": [
+        "advanced data analysis & insight generation",
+        "communication & stakeholder engagement",
+        "cross-functional project management",
+        "data storytelling & narrative development",
+        "data visualization",
+        "statistical reasoning",
+        "strategic decision-making with data"
+      ],
+      "gt_tools_sorted": [
+        "datawrapper",
+        "ggplot2",
+        "information systems",
+        "matplotlib",
+        "power bi",
+        "python",
+        "r",
+        "sql"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "data analysis",
+        "product management",
+        "python",
+        "sales",
+        "sql"
+      ],
+      "pred_tools_sorted": [
+        "python",
+        "sql"
+      ],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "advanced data analysis & insight generation",
+        "communication & stakeholder engagement",
+        "cross-functional project management",
+        "data storytelling & narrative development",
+        "data visualization",
+        "statistical reasoning",
+        "strategic decision-making with data"
+      ],
+      "skills_only_in_pred": [
+        "communication",
+        "data analysis",
+        "product management",
+        "python",
+        "sales",
+        "sql"
+      ],
+      "tools_intersection": [
+        "python",
+        "sql"
+      ],
+      "tools_only_in_gt": [
+        "datawrapper",
+        "ggplot2",
+        "information systems",
+        "matplotlib",
+        "power bi",
+        "r"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 1.0,
+      "tools_recall": 0.25,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-016",
+      "index": 15,
+      "title": "Senior Business Intelligence Analyst - Remote - USA",
+      "gt_skills_sorted": [
+        "advanced data analysis & insight generation",
+        "agile/scrum collaboration",
+        "data governance & compliance",
+        "data product & modern data ecosystem understanding",
+        "problem-solving & ownership",
+        "sql querying & data transformation"
+      ],
+      "gt_tools_sorted": [
+        "ci/cd tools",
+        "databricks",
+        "looker",
+        "modern data platforms",
+        "power bi",
+        "sql",
+        "tableau"
+      ],
+      "pred_skills_sorted": [
+        "data analysis",
+        "product management",
+        "sql"
+      ],
+      "pred_tools_sorted": [
+        "sql"
+      ],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "advanced data analysis & insight generation",
+        "agile/scrum collaboration",
+        "data governance & compliance",
+        "data product & modern data ecosystem understanding",
+        "problem-solving & ownership",
+        "sql querying & data transformation"
+      ],
+      "skills_only_in_pred": [
+        "data analysis",
+        "product management",
+        "sql"
+      ],
+      "tools_intersection": [
+        "sql"
+      ],
+      "tools_only_in_gt": [
+        "ci/cd tools",
+        "databricks",
+        "looker",
+        "modern data platforms",
+        "power bi",
+        "tableau"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 1.0,
+      "tools_recall": 0.142857,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-017",
+      "index": 16,
+      "title": "Full Stack Developer - Entry Level",
+      "gt_skills_sorted": [
+        "communication",
+        "javascript",
+        "problem solving",
+        "python",
+        "rest apis",
+        "sql"
+      ],
+      "gt_tools_sorted": [
+        "git",
+        "node.js",
+        "postgresql",
+        "react"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "product management",
+        "python",
+        "sql"
+      ],
+      "pred_tools_sorted": [
+        "python",
+        "sql"
+      ],
+      "skills_intersection": [
+        "communication",
+        "python",
+        "sql"
+      ],
+      "skills_only_in_gt": [
+        "javascript",
+        "problem solving",
+        "rest apis"
+      ],
+      "skills_only_in_pred": [
+        "product management"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "git",
+        "node.js",
+        "postgresql",
+        "react"
+      ],
+      "tools_only_in_pred": [
+        "python",
+        "sql"
+      ],
+      "skills_precision": 0.75,
+      "skills_recall": 0.5,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-018",
+      "index": 17,
+      "title": "Entry Level Full Stack Developer",
+      "gt_skills_sorted": [
+        "communication",
+        "excel",
+        "python",
+        "sql",
+        "teamwork"
+      ],
+      "gt_tools_sorted": [
+        "django",
+        "excel",
+        "vue"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "python",
+        "sql"
+      ],
+      "pred_tools_sorted": [
+        "python",
+        "sql"
+      ],
+      "skills_intersection": [
+        "communication",
+        "python",
+        "sql"
+      ],
+      "skills_only_in_gt": [
+        "excel",
+        "teamwork"
+      ],
+      "skills_only_in_pred": [],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "django",
+        "excel",
+        "vue"
+      ],
+      "tools_only_in_pred": [
+        "python",
+        "sql"
+      ],
+      "skills_precision": 1.0,
+      "skills_recall": 0.6,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-019",
+      "index": 18,
+      "title": "Full Stack Developer I (Entry Level)",
+      "gt_skills_sorted": [
+        "ai-assisted code generation",
+        "communication",
+        "javascript",
+        "rest apis",
+        "typescript"
+      ],
+      "gt_tools_sorted": [
+        "github copilot",
+        "next.js",
+        "postgresql",
+        "prisma",
+        "react"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "product management",
+        "sql"
+      ],
+      "pred_tools_sorted": [
+        "sql"
+      ],
+      "skills_intersection": [
+        "communication"
+      ],
+      "skills_only_in_gt": [
+        "ai-assisted code generation",
+        "javascript",
+        "rest apis",
+        "typescript"
+      ],
+      "skills_only_in_pred": [
+        "product management",
+        "sql"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "github copilot",
+        "next.js",
+        "postgresql",
+        "prisma",
+        "react"
+      ],
+      "tools_only_in_pred": [
+        "sql"
+      ],
+      "skills_precision": 0.333333,
+      "skills_recall": 0.2,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-020",
+      "index": 19,
+      "title": "Full Stack Developer - Entry Level",
+      "gt_skills_sorted": [
+        "communication",
+        "java",
+        "problem solving",
+        "rest apis",
+        "sql",
+        "teamwork"
+      ],
+      "gt_tools_sorted": [
+        "angular",
+        "git",
+        "gitlab",
+        "mysql",
+        "spring boot"
+      ],
+      "pred_skills_sorted": [
+        "sql"
+      ],
+      "pred_tools_sorted": [
+        "sql"
+      ],
+      "skills_intersection": [
+        "sql"
+      ],
+      "skills_only_in_gt": [
+        "communication",
+        "java",
+        "problem solving",
+        "rest apis",
+        "teamwork"
+      ],
+      "skills_only_in_pred": [],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "angular",
+        "git",
+        "gitlab",
+        "mysql",
+        "spring boot"
+      ],
+      "tools_only_in_pred": [
+        "sql"
+      ],
+      "skills_precision": 1.0,
+      "skills_recall": 0.166667,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-021",
+      "index": 20,
+      "title": "Full Stack Developer - Entry Level",
+      "gt_skills_sorted": [
+        "c#",
+        "communication",
+        "javascript",
+        "sql",
+        "teamwork"
+      ],
+      "gt_tools_sorted": [
+        ".net",
+        "azure",
+        "react",
+        "sql server",
+        "visual studio"
+      ],
+      "pred_skills_sorted": [
+        "communication",
+        "sql"
+      ],
+      "pred_tools_sorted": [
+        "sql"
+      ],
+      "skills_intersection": [
+        "communication",
+        "sql"
+      ],
+      "skills_only_in_gt": [
+        "c#",
+        "javascript",
+        "teamwork"
+      ],
+      "skills_only_in_pred": [],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        ".net",
+        "azure",
+        "react",
+        "sql server",
+        "visual studio"
+      ],
+      "tools_only_in_pred": [
+        "sql"
+      ],
+      "skills_precision": 1.0,
+      "skills_recall": 0.4,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-022",
+      "index": 21,
+      "title": "Machine Learning Engineer II - Generative AI (Remote)",
+      "gt_skills_sorted": [
+        "automation",
+        "communication",
+        "define software architecture",
+        "llm evaluation",
+        "machine learning",
+        "prompt engineering",
+        "rag (retrieval-augmented generation)",
+        "test driven development (tdd)"
+      ],
+      "gt_tools_sorted": [
+        "large language models (llms)",
+        "retrieval augmented generation (rag) pipelines"
+      ],
+      "pred_skills_sorted": [
+        "machine learning",
+        "product management",
+        "python"
+      ],
+      "pred_tools_sorted": [
+        "python"
+      ],
+      "skills_intersection": [
+        "machine learning"
+      ],
+      "skills_only_in_gt": [
+        "automation",
+        "communication",
+        "define software architecture",
+        "llm evaluation",
+        "prompt engineering",
+        "rag (retrieval-augmented generation)",
+        "test driven development (tdd)"
+      ],
+      "skills_only_in_pred": [
+        "product management",
+        "python"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "large language models (llms)",
+        "retrieval augmented generation (rag) pipelines"
+      ],
+      "tools_only_in_pred": [
+        "python"
+      ],
+      "skills_precision": 0.333333,
+      "skills_recall": 0.125,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-023",
+      "index": 22,
+      "title": "Senior  Machine Learning Engineer - Remote",
+      "gt_skills_sorted": [
+        "3d modeling",
+        "data manipulation",
+        "deep learning",
+        "linux",
+        "manage ict virtualization environments",
+        "python",
+        "scientific computing"
+      ],
+      "gt_tools_sorted": [
+        "aws",
+        "azure",
+        "gcp",
+        "keras",
+        "linux",
+        "numpy",
+        "pandas",
+        "python",
+        "pytorch",
+        "tensorflow"
+      ],
+      "pred_skills_sorted": [
+        "data analysis",
+        "machine learning",
+        "marketing",
+        "product management",
+        "python"
+      ],
+      "pred_tools_sorted": [
+        "aws",
+        "docker",
+        "python"
+      ],
+      "skills_intersection": [
+        "python"
+      ],
+      "skills_only_in_gt": [
+        "3d modeling",
+        "data manipulation",
+        "deep learning",
+        "linux",
+        "manage ict virtualization environments",
+        "scientific computing"
+      ],
+      "skills_only_in_pred": [
+        "data analysis",
+        "machine learning",
+        "marketing",
+        "product management"
+      ],
+      "tools_intersection": [
+        "aws",
+        "python"
+      ],
+      "tools_only_in_gt": [
+        "azure",
+        "gcp",
+        "keras",
+        "linux",
+        "numpy",
+        "pandas",
+        "pytorch",
+        "tensorflow"
+      ],
+      "tools_only_in_pred": [
+        "docker"
+      ],
+      "skills_precision": 0.2,
+      "skills_recall": 0.142857,
+      "tools_precision": 0.666667,
+      "tools_recall": 0.2,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-024",
+      "index": 23,
+      "title": "Data Science/Machine Learning Engineer (Remote, Continental United States)",
+      "gt_skills_sorted": [
+        "algorithms",
+        "data mining",
+        "data science",
+        "machine learning",
+        "prototyping development",
+        "python",
+        "statistical modeling techniques"
+      ],
+      "gt_tools_sorted": [
+        "aws",
+        "large language models (llms)",
+        "python"
+      ],
+      "pred_skills_sorted": [
+        "data analysis",
+        "machine learning",
+        "product management",
+        "python",
+        "sql"
+      ],
+      "pred_tools_sorted": [
+        "aws",
+        "python",
+        "sql"
+      ],
+      "skills_intersection": [
+        "machine learning",
+        "python"
+      ],
+      "skills_only_in_gt": [
+        "algorithms",
+        "data mining",
+        "data science",
+        "prototyping development",
+        "statistical modeling techniques"
+      ],
+      "skills_only_in_pred": [
+        "data analysis",
+        "product management",
+        "sql"
+      ],
+      "tools_intersection": [
+        "aws",
+        "python"
+      ],
+      "tools_only_in_gt": [
+        "large language models (llms)"
+      ],
+      "tools_only_in_pred": [
+        "sql"
+      ],
+      "skills_precision": 0.4,
+      "skills_recall": 0.285714,
+      "tools_precision": 0.666667,
+      "tools_recall": 0.666667,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-025",
+      "index": 24,
+      "title": "Machine Learning Engineer, AI for Member Systems",
+      "gt_skills_sorted": [
+        "algorithms",
+        "communication",
+        "fine-tuning",
+        "machine learning",
+        "software architecture",
+        "training ai models"
+      ],
+      "gt_tools_sorted": [
+        "c#",
+        "c++",
+        "java",
+        "large language models (llms)",
+        "python",
+        "scala",
+        "transformers"
+      ],
+      "pred_skills_sorted": [
+        "machine learning",
+        "product management",
+        "python"
+      ],
+      "pred_tools_sorted": [
+        "python"
+      ],
+      "skills_intersection": [
+        "machine learning"
+      ],
+      "skills_only_in_gt": [
+        "algorithms",
+        "communication",
+        "fine-tuning",
+        "software architecture",
+        "training ai models"
+      ],
+      "skills_only_in_pred": [
+        "product management",
+        "python"
+      ],
+      "tools_intersection": [
+        "python"
+      ],
+      "tools_only_in_gt": [
+        "c#",
+        "c++",
+        "java",
+        "large language models (llms)",
+        "scala",
+        "transformers"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.333333,
+      "skills_recall": 0.166667,
+      "tools_precision": 1.0,
+      "tools_recall": 0.142857,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-026",
+      "index": 25,
+      "title": "cybersecurity analyst",
+      "gt_skills_sorted": [
+        "ceh",
+        "cissp",
+        "comptia security+",
+        "cybersecurity",
+        "firewalls",
+        "intrusion detection systems",
+        "penetration testing",
+        "powershell",
+        "python",
+        "security automation",
+        "siem tools",
+        "vulnerability assessment"
+      ],
+      "gt_tools_sorted": [
+        "firewalls",
+        "intrusion detection systems",
+        "powershell",
+        "python",
+        "siem tools"
+      ],
+      "pred_skills_sorted": [
+        "python"
+      ],
+      "pred_tools_sorted": [
+        "python"
+      ],
+      "skills_intersection": [
+        "python"
+      ],
+      "skills_only_in_gt": [
+        "ceh",
+        "cissp",
+        "comptia security+",
+        "cybersecurity",
+        "firewalls",
+        "intrusion detection systems",
+        "penetration testing",
+        "powershell",
+        "security automation",
+        "siem tools",
+        "vulnerability assessment"
+      ],
+      "skills_only_in_pred": [],
+      "tools_intersection": [
+        "python"
+      ],
+      "tools_only_in_gt": [
+        "firewalls",
+        "intrusion detection systems",
+        "powershell",
+        "siem tools"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 1.0,
+      "skills_recall": 0.083333,
+      "tools_precision": 1.0,
+      "tools_recall": 0.2,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-027",
+      "index": 26,
+      "title": "Senior SOC Analyst (GenAI Focused)",
+      "gt_skills_sorted": [
+        "edr",
+        "incident response",
+        "llms",
+        "mitre att&ck",
+        "prompt engineering",
+        "python",
+        "security automation",
+        "splunk (es)",
+        "wireshark"
+      ],
+      "gt_tools_sorted": [
+        "crowdstrike",
+        "llms",
+        "mitre att&ck",
+        "python",
+        "splunk (es)",
+        "wireshark"
+      ],
+      "pred_skills_sorted": [
+        "python"
+      ],
+      "pred_tools_sorted": [
+        "python"
+      ],
+      "skills_intersection": [
+        "python"
+      ],
+      "skills_only_in_gt": [
+        "edr",
+        "incident response",
+        "llms",
+        "mitre att&ck",
+        "prompt engineering",
+        "security automation",
+        "splunk (es)",
+        "wireshark"
+      ],
+      "skills_only_in_pred": [],
+      "tools_intersection": [
+        "python"
+      ],
+      "tools_only_in_gt": [
+        "crowdstrike",
+        "llms",
+        "mitre att&ck",
+        "splunk (es)",
+        "wireshark"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 1.0,
+      "skills_recall": 0.111111,
+      "tools_precision": 1.0,
+      "tools_recall": 0.166667,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-028",
+      "index": 27,
+      "title": "Network Security Engineer (GRC & Infrastructure)",
+      "gt_skills_sorted": [
+        "cisa",
+        "cissp",
+        "firewall administration",
+        "hipaa",
+        "nist 800-53",
+        "vlan segmentation",
+        "vpn",
+        "vulnerability scans"
+      ],
+      "gt_tools_sorted": [
+        "cisco",
+        "fortinet firewalls",
+        "nessus",
+        "vpn"
+      ],
+      "pred_skills_sorted": [],
+      "pred_tools_sorted": [],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "cisa",
+        "cissp",
+        "firewall administration",
+        "hipaa",
+        "nist 800-53",
+        "vlan segmentation",
+        "vpn",
+        "vulnerability scans"
+      ],
+      "skills_only_in_pred": [],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "cisco",
+        "fortinet firewalls",
+        "nessus",
+        "vpn"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-029",
+      "index": 28,
+      "title": "Penetration Tester (Offensive Security)",
+      "gt_skills_sorted": [
+        "bash",
+        "oscp",
+        "owasp top 10",
+        "python",
+        "remediation reports",
+        "vulnerability research",
+        "web application security"
+      ],
+      "gt_tools_sorted": [
+        "bash",
+        "burp suite",
+        "kali linux",
+        "metasploit",
+        "python"
+      ],
+      "pred_skills_sorted": [
+        "python"
+      ],
+      "pred_tools_sorted": [
+        "python"
+      ],
+      "skills_intersection": [
+        "python"
+      ],
+      "skills_only_in_gt": [
+        "bash",
+        "oscp",
+        "owasp top 10",
+        "remediation reports",
+        "vulnerability research",
+        "web application security"
+      ],
+      "skills_only_in_pred": [],
+      "tools_intersection": [
+        "python"
+      ],
+      "tools_only_in_gt": [
+        "bash",
+        "burp suite",
+        "kali linux",
+        "metasploit"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 1.0,
+      "skills_recall": 0.142857,
+      "tools_precision": 1.0,
+      "tools_recall": 0.2,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    },
+    {
+      "ground_truth_id": "gt-030",
+      "index": 29,
+      "title": "Cybersecurity GRC Manager (Leadership & Compliance)",
+      "gt_skills_sorted": [
+        "cism",
+        "crisc",
+        "gdpr",
+        "information security policy",
+        "internal audits",
+        "iso 2700",
+        "soc2 type ii",
+        "vendor risk assessments"
+      ],
+      "gt_tools_sorted": [
+        "gdpr",
+        "iso 2700",
+        "risk register"
+      ],
+      "pred_skills_sorted": [
+        "product management"
+      ],
+      "pred_tools_sorted": [],
+      "skills_intersection": [],
+      "skills_only_in_gt": [
+        "cism",
+        "crisc",
+        "gdpr",
+        "information security policy",
+        "internal audits",
+        "iso 2700",
+        "soc2 type ii",
+        "vendor risk assessments"
+      ],
+      "skills_only_in_pred": [
+        "product management"
+      ],
+      "tools_intersection": [],
+      "tools_only_in_gt": [
+        "gdpr",
+        "iso 2700",
+        "risk register"
+      ],
+      "tools_only_in_pred": [],
+      "skills_precision": 0.0,
+      "skills_recall": 0.0,
+      "tools_precision": 0.0,
+      "tools_recall": 0.0,
+      "llm_metadata": {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "model": "",
+        "provider": "n/a",
+        "success": true,
+        "extraction_failed": false,
+        "error_reason": null,
+        "extraction_warnings": [],
+        "tools_pass_note": "stub mode — no LLM"
+      }
+    }
+  ]
+}
