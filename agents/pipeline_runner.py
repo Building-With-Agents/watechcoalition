@@ -61,6 +61,7 @@ import structlog  # noqa: E402
 
 from agents.analytics.agent import AnalyticsAgent  # noqa: E402
 from agents.common.event_envelope import EventEnvelope  # noqa: E402
+from agents.common.types import JobRecord  # noqa: E402
 from agents.demand_analysis.agent import DemandAnalysisAgent  # noqa: E402
 from agents.enrichment.agent import EnrichmentAgent  # noqa: E402
 from agents.ingestion.agent import IngestionAgent  # noqa: E402
@@ -232,10 +233,18 @@ def run_pipeline(
         )
 
         # Week 4 stubs (Pair B: context): run after normalization, log result count
+        # Stubs accept JobRecord — build a minimal one for pipeline verification.
+        # Week 5+ will load real normalized jobs from DB per-record.
         if outbound.agent_id == "normalization-agent":
-            context_signals = extract_context(outbound.payload)
-            tasks = extract_tasks(outbound.payload)
-            responsibilities = extract_responsibilities(outbound.payload)
+            stub_job = JobRecord(
+                source="pipeline-stub",
+                external_id="stub",
+                title="stub",
+                company="stub",
+            )
+            context_signals = extract_context(stub_job)
+            tasks = extract_tasks(stub_job)
+            responsibilities = extract_responsibilities(stub_job)
             log.info(
                 "extraction_stubs_result",
                 context_count=len(context_signals),

@@ -80,7 +80,16 @@ class TestResolveTaxonomy:
         assert r.esco_label is not None
 
     def test_step4_embedding_match(self, monkeypatch) -> None:
-        """Label that does not match steps 1–3 resolves at step 4 via monkeypatched API."""
+        """Label that does not match steps 1–3 resolves at step 4 via monkeypatched DB embeddings."""
+        import numpy as np
+
+        # Build a fake embedding matrix with one skill
+        fake_meta = [("http://data.europa.eu/esco/skill/abap-dev", "ABAP development")]
+        fake_vec = np.array([[0.01] * 1536], dtype=np.float64)
+        fake_norms = np.linalg.norm(fake_vec, axis=1, keepdims=True) + 1e-12
+        fake_matrix = fake_vec / fake_norms
+
+        # Clear in-memory cache so _get_esco_embeddings re-loads
         monkeypatch.setattr(
             "agents.skills_extraction.extractors.taxonomy._esco_embedding_meta",
             None,
@@ -89,6 +98,12 @@ class TestResolveTaxonomy:
             "agents.skills_extraction.extractors.taxonomy._esco_normalized_matrix",
             None,
         )
+        # Mock DB load to return our fake matrix
+        monkeypatch.setattr(
+            "agents.skills_extraction.extractors.taxonomy._load_embeddings_from_db",
+            lambda: (fake_meta, fake_matrix),
+        )
+        # Mock Azure API for query embedding (single label)
         monkeypatch.setattr(
             "agents.skills_extraction.extractors.taxonomy._embed_texts_azure",
             _mock_embed_texts_azure,
@@ -134,6 +149,10 @@ class TestResolveTaxonomyBatch:
 
     def test_same_order_as_input(self, monkeypatch) -> None:
         monkeypatch.setattr(
+            "agents.skills_extraction.extractors.taxonomy._load_embeddings_from_db",
+            lambda: None,
+        )
+        monkeypatch.setattr(
             "agents.skills_extraction.extractors.taxonomy._embed_texts_azure",
             _mock_embed_texts_azure,
         )
@@ -162,6 +181,10 @@ class TestResolveTaxonomyBatch:
             None,
         )
         monkeypatch.setattr(
+            "agents.skills_extraction.extractors.taxonomy._load_embeddings_from_db",
+            lambda: None,
+        )
+        monkeypatch.setattr(
             "agents.skills_extraction.extractors.taxonomy._get_onet_store",
             lambda: {"reading comprehension": ("2.A.1.a", "Reading Comprehension")},
         )
@@ -181,6 +204,10 @@ class TestResolutionStats:
 
     def test_counts_all_steps(self, monkeypatch) -> None:
         monkeypatch.setattr(
+            "agents.skills_extraction.extractors.taxonomy._load_embeddings_from_db",
+            lambda: None,
+        )
+        monkeypatch.setattr(
             "agents.skills_extraction.extractors.taxonomy._embed_texts_azure",
             _mock_embed_texts_azure,
         )
@@ -191,6 +218,10 @@ class TestResolutionStats:
         assert sum(stats.values()) == 3
 
     def test_coverage_formula(self, monkeypatch) -> None:
+        monkeypatch.setattr(
+            "agents.skills_extraction.extractors.taxonomy._load_embeddings_from_db",
+            lambda: None,
+        )
         monkeypatch.setattr(
             "agents.skills_extraction.extractors.taxonomy._embed_texts_azure",
             _mock_embed_texts_azure,
