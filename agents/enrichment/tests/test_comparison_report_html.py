@@ -15,6 +15,8 @@ def test_render_contains_posting_and_enrichment() -> None:
                 "external_id": "abc",
                 "seniority": "senior",
                 "role_classification": "Data Engineering",
+                "quality_score": 0.8125,
+                "quality_components": {"completeness": 0.5, "clarity": 0.5},
                 "job_title": "Senior Data Engineer",
                 "job_company": "Acme",
                 "job_description": "Build pipelines.\nUse SQL.",
@@ -34,6 +36,8 @@ def test_render_contains_posting_and_enrichment() -> None:
     assert "jsearch" in html
     assert "abc" in html
     assert "https://example.com/j/1" in html
+    assert "0.8125" in html
+    assert "completeness" in html
 
 
 def test_render_escapes_xss_in_title() -> None:

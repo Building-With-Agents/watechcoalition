@@ -44,6 +44,10 @@ def test_build_enrichment_output_record_uses_classify() -> None:
     assert rec["job_posting_id"] is None
     assert rec["seniority"] == "junior"
     assert rec["role_classification"] == "Software Engineering"
+    assert "quality_score" in rec
+    assert isinstance(rec["quality_score"], float)
+    assert 0.0 <= rec["quality_score"] <= 1.0
+    assert "quality_components" in rec
 
 
 def test_build_enrichment_output_record_internship() -> None:

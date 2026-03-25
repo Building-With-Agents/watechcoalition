@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import Any
 
 from agents.enrichment.classification import classify_job
+from agents.enrichment.classifiers.quality import score_quality
 
 
 def build_extraction_dict(
@@ -46,8 +47,9 @@ def build_enrichment_output_record(
     industry_sectors: list[tuple[str, str]],
     job_posting_id: str | None = None,
     is_internship: bool = False,
+    extraction_failed: bool = False,
 ) -> dict[str, Any]:
-    """Return one JSON-serializable row: ids, source, external_id, seniority, role."""
+    """Return one JSON-serializable row: ids, source, external_id, seniority, role, quality."""
     extraction = build_extraction_dict(
         skills, tools, tasks, responsibilities, context
     )
@@ -59,6 +61,12 @@ def build_enrichment_output_record(
         industry_sectors,
         is_internship=is_internship,
     )
+    q = score_quality(
+        job_title=job_title or "",
+        job_description=job_description if isinstance(job_description, str) else None,
+        extraction=extraction,
+        extraction_failed=extraction_failed,
+    )
     return {
         "normalized_job_id": normalized_job_id,
         "job_posting_id": job_posting_id,
@@ -66,6 +74,8 @@ def build_enrichment_output_record(
         "external_id": external_id or "",
         "seniority": seniority,
         "role_classification": role,
+        "quality_score": q.quality_score,
+        "quality_components": q.components,
     }
 
 
@@ -77,7 +87,8 @@ WITH latest_ei AS (
         tools,
         tasks,
         responsibilities,
-        context
+        context,
+        COALESCE(extraction_failed, false) AS extraction_failed
     FROM dbo.extracted_intelligence
     WHERE normalized_job_id IS NOT NULL
     ORDER BY normalized_job_id, extracted_at DESC NULLS LAST, id DESC
@@ -98,7 +109,8 @@ SELECT
     le.tools,
     le.tasks,
     le.responsibilities,
-    le.context
+    le.context,
+    COALESCE(le.extraction_failed, false) AS extraction_failed
 FROM dbo.normalized_jobs nj
 LEFT JOIN latest_ei le ON le.normalized_job_id = nj.id
 LEFT JOIN dbo.job_postings jp

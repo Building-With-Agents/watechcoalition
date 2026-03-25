@@ -138,6 +138,15 @@ def render_enrichment_comparison_html(
       font-weight: 600;
     }}
     .enrich-role {{ color: var(--accent); }}
+    .qc-pre {{
+      font-size: 0.72rem;
+      margin: 0.5rem 0 0 0;
+      padding: 0.5rem;
+      background: #f6f8fa;
+      border-radius: 6px;
+      overflow-x: auto;
+      max-height: 10rem;
+    }}
     footer {{
       margin-top: 2rem;
       font-size: 0.8rem;
@@ -179,6 +188,14 @@ def _render_card(row: dict[str, Any], *, index: int) -> str:
 
     seniority = _esc(row.get("seniority") or "")
     role = _esc(row.get("role_classification") or "")
+    qs = row.get("quality_score")
+    qc = row.get("quality_components")
+    qs_html = f"{float(qs):.4f}" if isinstance(qs, int | float) else _esc(qs)
+    qc_html = (
+        f"<pre class=\"qc-pre\">{_esc(json.dumps(qc, indent=2, sort_keys=True))}</pre>"
+        if isinstance(qc, dict)
+        else ""
+    )
 
     return f"""
   <section class="job-card" id="job-{index}">
@@ -204,7 +221,10 @@ def _render_card(row: dict[str, Any], *, index: int) -> str:
           <dd>{seniority or '<em>—</em>'}</dd>
           <dt>Role classification</dt>
           <dd class="enrich-role">{role or '<em>—</em>'}</dd>
+          <dt>Quality score</dt>
+          <dd>{qs_html if qs is not None else '<em>—</em>'}</dd>
         </dl>
+        {qc_html}
       </div>
     </div>
   </section>

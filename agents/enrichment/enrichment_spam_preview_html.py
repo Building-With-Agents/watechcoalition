@@ -67,6 +67,11 @@ def render_enrichment_spam_preview_html(
         fc = enr.get("field_confidence") or {}
         fc_json = _esc(json.dumps(fc, indent=2, ensure_ascii=False))
 
+        qscore = enr.get("quality_score")
+        qscore_s = "—" if qscore is None else f"{float(qscore):.4f}"
+        qcomp = enr.get("quality_components") or {}
+        qcomp_json = _esc(json.dumps(qcomp, indent=2, ensure_ascii=False))
+
         is_spam = enr.get("is_spam")
         if enr.get("spam_degraded"):
             is_spam_s = "NULL (uncertain — classifier degraded)"
@@ -90,6 +95,7 @@ def render_enrichment_spam_preview_html(
   <dl class="kv">
     <dt>role_classification</dt><dd>{_esc(enr.get("role_classification"))}</dd>
     <dt>seniority</dt><dd>{_esc(enr.get("seniority"))}</dd>
+    <dt>quality_score</dt><dd>{_esc(qscore_s)}</dd>
     <dt>spam_score</dt><dd>{score_s}</dd>
     <dt>is_spam</dt><dd>{is_spam_s}</dd>
     <dt>overall_confidence</dt><dd>{_esc(enr.get("overall_confidence"))}</dd>
@@ -102,6 +108,7 @@ def render_enrichment_spam_preview_html(
   <p class="company">{_esc(company)}</p>
   <pre class="desc">{_esc(desc)}</pre>
   <details><summary>extracted_intelligence (JSON)</summary><pre class="json">{ei_json}</pre></details>
+  <details><summary>quality_components</summary><pre class="json">{qcomp_json}</pre></details>
   <details><summary>field_confidence</summary><pre class="json">{fc_json}</pre></details>
 </section>
 """

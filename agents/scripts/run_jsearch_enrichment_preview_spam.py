@@ -1,5 +1,5 @@
 """
-End-to-end: ingest → normalize → skills extract → EnrichmentAgent (role/seniority + spam).
+End-to-end: ingest → normalize → skills extract → EnrichmentAgent (role/seniority + quality + spam).
 
 Same source contract as ``run_jsearch_enrichment_preview.py``. Read-only DB for reporting;
 does not write to ``job_postings``. Spam scoring uses latest ``dbo.extracted_intelligence``
@@ -170,11 +170,14 @@ def _process_enrichment_spam_run(
         tier = enr.get("spam_tier", "—")
         ss = enr.get("spam_score")
         score_s = "NULL" if ss is None else f"{float(ss):.4f}"
+        qv = enr.get("quality_score")
+        quality_s = "NULL" if qv is None else f"{float(qv):.4f}"
         line = (
             f"normalized_job_id={nj}\tjob_posting_id={jp or ''}\t"
             f"source={rdict.get('source') or ''}\texternal_id={rdict.get('external_id') or ''}\t"
             f"role_classification={enr.get('role_classification')}\t"
             f"seniority={enr.get('seniority')}\t"
+            f"quality_score={quality_s}\t"
             f"spam_score={score_s}\tis_spam={_fmt_bool_or_null(enr.get('is_spam'))}\t"
             f"spam_tier={tier}\tnote={note}"
         )

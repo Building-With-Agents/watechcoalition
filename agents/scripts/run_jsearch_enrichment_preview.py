@@ -149,6 +149,7 @@ def _process_enrichment_run(
             industry_sectors=industry_sectors,
             job_posting_id=row.get("job_posting_id"),
             is_internship=bool(row.get("is_internship")),
+            extraction_failed=bool(row.get("extraction_failed")),
         )
         if emit_jsonl:
             print(json.dumps(rec, default=str), flush=True)  # noqa: T201 — JSONL stdout contract
