@@ -157,6 +157,13 @@ class Crawl4AIAdapter(SourceAdapter):
             list[RawJobRecord]: Non-empty when jobs found; empty only when
                 page contains an explicit "no jobs / no openings" signal.
         """
+        import io
+        import sys
+
+        if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+
         from crawl4ai import AsyncWebCrawler, BrowserConfig, CacheMode, CrawlerRunConfig
 
         url = self._build_search_url(region)
@@ -227,6 +234,13 @@ class Crawl4AIAdapter(SourceAdapter):
             error (str | None): None when status is "operational"; otherwise a
                 short message describing the failure.
         """
+        import io
+        import sys
+
+        if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+
         from crawl4ai import AsyncWebCrawler, BrowserConfig, CacheMode, CrawlerRunConfig
         target = self._target_urls[0] if self._target_urls else EL_PASO_PORTAL_BASE
         try:
