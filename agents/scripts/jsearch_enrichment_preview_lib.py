@@ -109,3 +109,53 @@ LEFT JOIN dbo.job_postings jp
 WHERE nj.ingestion_run_id = :run_id
 ORDER BY nj.id
 """
+
+# Spam preview (read-only): latest extraction row per job + extraction_failed for calibration UI.
+_SPAM_PREVIEW_LATEST_EI = """
+WITH latest_ei AS (
+    SELECT DISTINCT ON (normalized_job_id)
+        normalized_job_id,
+        skills,
+        tools,
+        tasks,
+        responsibilities,
+        context,
+        extraction_failed,
+        overall_confidence AS ei_overall_confidence
+    FROM dbo.extracted_intelligence
+    WHERE normalized_job_id IS NOT NULL
+    ORDER BY normalized_job_id, extracted_at DESC NULLS LAST, id DESC
+)
+SELECT
+    nj.id AS normalized_job_id,
+    nj.source,
+    nj.external_id,
+    nj.title AS job_title,
+    nj.company AS job_company,
+    nj.description AS job_description,
+    nj.city AS job_city,
+    nj.state_province AS job_state,
+    nj.job_url AS job_url,
+    jp.job_posting_id::text AS job_posting_id,
+    COALESCE(jp.is_internship, false) AS is_internship,
+    le.skills,
+    le.tools,
+    le.tasks,
+    le.responsibilities,
+    le.context,
+    COALESCE(le.extraction_failed, false) AS extraction_failed,
+    le.ei_overall_confidence
+FROM dbo.normalized_jobs nj
+LEFT JOIN latest_ei le ON le.normalized_job_id = nj.id
+LEFT JOIN dbo.job_postings jp
+    ON jp.source IS NOT NULL
+    AND jp.external_id IS NOT NULL
+    AND jp.source = nj.source
+    AND jp.external_id = nj.external_id
+"""
+
+SPAM_PREVIEW_SQL_BY_RUN = (
+    _SPAM_PREVIEW_LATEST_EI + "WHERE nj.ingestion_run_id = :run_id\nORDER BY nj.id\n"
+)
+
+SPAM_PREVIEW_SQL_RECENT = _SPAM_PREVIEW_LATEST_EI + "ORDER BY nj.id DESC\nLIMIT :lim\n"

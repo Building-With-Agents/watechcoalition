@@ -1,6 +1,10 @@
 """Side-by-side HTML report: job posting text vs deterministic enrichment labels.
 
 Suitable for local review; escape all dynamic text for XSS safety.
+
+This module does **not** call ``load_dotenv`` or read process environment variables;
+it only formats the *rows* dicts passed in. Callers (e.g. CLI scripts) should load
+repo-root ``.env`` before opening DB connections or building those rows.
 """
 
 from __future__ import annotations

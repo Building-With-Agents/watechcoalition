@@ -42,7 +42,14 @@ from agents.enrichment.classification import (
 
 log = structlog.get_logger()
 
+# agents/enrichment/agent.py -> parents[0]=enrichment, [1]=agents, [2]=repo root
 _REPO_ROOT = Path(__file__).resolve().parents[2]
+_ENV_PATH = _REPO_ROOT / ".env"
+
+
+def _load_repo_dotenv() -> None:
+    """Load repo-root ``.env`` once. Does not override variables already set in the OS env."""
+    load_dotenv(_ENV_PATH, override=False)
 
 _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_enriched.json"
@@ -197,6 +204,7 @@ class EnrichmentAgent(BaseAgent):
 
     def run_cli_preview(self, limit: int) -> None:
         """Load jobs from DB and print role + seniority (stdout)."""
+        _load_repo_dotenv()
         if not _db_url_configured():
             print("PYTHON_DATABASE_URL is required for CLI mode.", file=sys.stderr)  # noqa: T201
             sys.exit(1)
@@ -237,7 +245,7 @@ class EnrichmentAgent(BaseAgent):
 
 
 def main() -> None:
-    load_dotenv(_REPO_ROOT / ".env")
+    _load_repo_dotenv()
     parser = argparse.ArgumentParser(description="Print deterministic enrichment labels per job.")
     parser.add_argument(
         "--limit",

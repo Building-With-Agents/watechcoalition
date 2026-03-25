@@ -84,8 +84,20 @@ def _get_llm() -> Any:
     )
 
 
-def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
+def invoke_skills_llm(
+    prompt: str,
+    *,
+    agent_name: str | None = None,
+) -> tuple[str, dict[str, Any]]:
     """Invoke the skills-extraction LLM once. No retry or back-off.
+
+    Parameters
+    ----------
+    prompt
+        User prompt text.
+    agent_name
+        If set, used for ``llm_audit_log.agent_name`` instead of the default
+        skills-extraction agent (e.g. spam preview diagnostics).
 
     Returns
     -------
@@ -94,6 +106,7 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
         latency_ms, success, error_reason (optional), provider, model.
     """
     llm = _get_llm()
+    audit_agent = agent_name or AGENT_NAME
     model_name = (
         getattr(llm, "azure_deployment", None)
         or getattr(llm, "deployment_name", None)
@@ -137,7 +150,7 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
         model_tier = _model_tier_for_skills_extraction(str(model_name))
         cost_usd = compute_extraction_cost(input_tokens, output_tokens, model_tier)
         log_extraction_event(
-            agent_name=AGENT_NAME,
+            agent_name=audit_agent,
             prompt=prompt,
             model=model_name,
             provider=provider,
@@ -176,7 +189,7 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
             error_str = f"429: {error_str}"
 
         log_extraction_event(
-            agent_name=AGENT_NAME,
+            agent_name=audit_agent,
             prompt=prompt,
             model=model_name,
             provider=provider,
