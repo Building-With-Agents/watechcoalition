@@ -84,15 +84,15 @@ def main() -> int:
             if count > 0:
                 rows = session.execute(
                     sa_text(
-                        "SELECT dimension, COUNT(*) AS calls, "
-                        "SUM(tokens_used) AS tokens, "
-                        "SUM(cost_usd) AS cost "
+                        "SELECT agent_name, model, COUNT(*) AS calls, "
+                        "SUM(COALESCE(input_tokens, 0) + COALESCE(output_tokens, 0)) AS tokens, "
+                        "SUM(COALESCE(cost_usd, 0)) AS cost "
                         "FROM dbo.llm_audit_log "
-                        "GROUP BY dimension ORDER BY cost DESC"
+                        "GROUP BY agent_name, model ORDER BY cost DESC"
                     )
                 ).fetchall()
                 for r in rows:
-                    print(f"    {r[0]}: {r[1]} calls, {r[2]} tokens, ${r[3]:.4f}")
+                    print(f"    {r[0]} ({r[1]}): {r[2]} calls, {r[3]} tokens, ${r[4]:.4f}")
             print(f"  PASS: llm_audit_log queryable ({count} rows)")
             passed += 1
     except Exception as e:
