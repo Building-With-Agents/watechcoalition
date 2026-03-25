@@ -10,6 +10,12 @@ Agent ID (canonical): enrichment-agent
 Emits:    RecordEnriched
 Consumes: SkillsExtracted
 
+When the inbound ``SkillsExtracted``-shaped payload includes ``normalized_job_id``
+(int) and ``PYTHON_DATABASE_URL`` is set, spam scoring loads the latest
+``dbo.extracted_intelligence`` row for that id and calls
+``score_spam_preview`` (Decision #8). Otherwise ``spam_score`` / ``is_spam``
+come from the walking-skeleton fixture keyed by ``posting_id``.
+
 Fixture: agents/data/fixtures/fixture_enriched.json — supplies non-classification
 fields (company, scores) for ``process()``; role and seniority are always
 computed deterministically.
@@ -25,6 +31,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 import structlog
 from dotenv import load_dotenv
@@ -39,6 +46,11 @@ from agents.enrichment.classification import (
     FALLBACK_TECH_AREA_LABELS,
     classify_job,
 )
+from agents.enrichment.classifiers.spam_preview import (
+    SpamPreviewResult,
+    score_spam_preview,
+)
+from agents.scripts.jsearch_enrichment_preview_lib import build_extraction_dict
 
 log = structlog.get_logger()
 
@@ -54,6 +66,23 @@ def _load_repo_dotenv() -> None:
 _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_enriched.json"
 )
+
+_LATEST_EI_BY_NJ_ID_SQL = text(
+    """
+    SELECT
+        skills,
+        tools,
+        tasks,
+        responsibilities,
+        context,
+        COALESCE(extraction_failed, false) AS extraction_failed
+    FROM dbo.extracted_intelligence
+    WHERE normalized_job_id = :nj_id
+    ORDER BY extracted_at DESC NULLS LAST, id DESC
+    LIMIT 1
+    """
+)
+
 
 _LATEST_EI_SQL = text(
     """
@@ -96,6 +125,29 @@ _LATEST_EI_SQL = text(
 
 def _db_url_configured() -> bool:
     return bool(os.getenv("PYTHON_DATABASE_URL"))
+
+
+def _coerce_normalized_job_id(raw: Any) -> int | None:
+    if isinstance(raw, int):
+        return raw
+    if isinstance(raw, str) and raw.isdigit():
+        return int(raw)
+    return None
+
+
+def _spam_from_preview_result(result: SpamPreviewResult) -> dict[str, Any]:
+    out: dict[str, Any] = {
+        "spam_score": result.spam_score,
+        "is_spam": result.is_spam,
+        "spam_tier": result.tier,
+        "field_confidence": dict(result.field_confidence),
+        "overall_confidence": result.overall_confidence,
+        "spam_rationale": result.rationale,
+        "spam_extraction_note": result.extraction_note,
+        "spam_degraded": result.degraded,
+        "spam_used_heuristic": result.used_heuristic,
+    }
+    return out
 
 
 class EnrichmentAgent(BaseAgent):
@@ -160,6 +212,10 @@ class EnrichmentAgent(BaseAgent):
         """
         Emit RecordEnriched with deterministic role_classification and seniority.
         Other enrichment fields come from the walking-skeleton fixture when present.
+
+        Spam: if ``normalized_job_id`` is set and DB is configured, scores from
+        latest ``extracted_intelligence`` via ``score_spam_preview``; else fixture
+        ``spam_score`` / ``is_spam`` only.
         """
         if not self._fixture:
             if _FIXTURE_PATH.exists():
@@ -172,6 +228,7 @@ class EnrichmentAgent(BaseAgent):
         fx = self._fixture.get(posting_id, {})
         title = (event.payload.get("title") or fx.get("title") or "").strip()
         description = event.payload.get("description") or fx.get("description")
+        company = event.payload.get("company") if event.payload.get("company") is not None else fx.get("company")
 
         tech, sectors = self._ensure_refs()
         role_classification, seniority = classify_job(
@@ -182,24 +239,86 @@ class EnrichmentAgent(BaseAgent):
             sectors,
         )
 
+        nj_id = _coerce_normalized_job_id(event.payload.get("normalized_job_id"))
+        spam_block: dict[str, Any] = {}
+        if nj_id is not None and _db_url_configured():
+            try:
+                with session_scope() as session:
+                    row = session.execute(
+                        _LATEST_EI_BY_NJ_ID_SQL, {"nj_id": nj_id}
+                    ).mappings().first()
+                if row:
+                    ext = build_extraction_dict(
+                        row.get("skills"),
+                        row.get("tools"),
+                        row.get("tasks"),
+                        row.get("responsibilities"),
+                        row.get("context"),
+                    )
+                    extraction_empty = ext is None
+                    extraction_failed = bool(row.get("extraction_failed"))
+                    spam_result = score_spam_preview(
+                        job_title=title,
+                        job_description=description if isinstance(description, str) else None,
+                        extraction=ext or {},
+                        extraction_failed=extraction_failed,
+                        extraction_empty=extraction_empty,
+                    )
+                    spam_block = _spam_from_preview_result(spam_result)
+                else:
+                    spam_result = score_spam_preview(
+                        job_title=title,
+                        job_description=description if isinstance(description, str) else None,
+                        extraction={},
+                        extraction_failed=False,
+                        extraction_empty=True,
+                    )
+                    spam_block = _spam_from_preview_result(spam_result)
+            except Exception as exc:
+                log.warning("enrichment_spam_ei_load_failed", normalized_job_id=nj_id, error=str(exc))
+                spam_block = _spam_from_preview_result(
+                    SpamPreviewResult(
+                        spam_score=None,
+                        is_spam=None,
+                        tier="uncertain",
+                        field_confidence={},
+                        overall_confidence=None,
+                        rationale=None,
+                        degraded=True,
+                        extraction_note=None,
+                        used_heuristic=False,
+                    )
+                )
+            payload_spam_score = spam_block["spam_score"]
+            payload_is_spam = spam_block["is_spam"]
+        else:
+            payload_spam_score = fx.get("spam_score")
+            payload_is_spam = fx.get("is_spam")
+
+        base_payload: dict[str, Any] = {
+            "event_type": "RecordEnriched",
+            "posting_id": posting_id,
+            "title": title or fx.get("title"),
+            "company": company,
+            "company_id": fx.get("company_id"),
+            "sector_id": fx.get("sector_id"),
+            "role_classification": role_classification,
+            "seniority": seniority,
+            "quality_score": fx.get("quality_score"),
+            "spam_score": payload_spam_score,
+            "is_spam": payload_is_spam,
+            "enrichment_status": fx.get("enrichment_status", "success"),
+            "skills": event.payload.get("skills", []),
+        }
+        if nj_id is not None:
+            base_payload["normalized_job_id"] = nj_id
+        if spam_block:
+            base_payload.update(spam_block)
+
         return EventEnvelope(
             correlation_id=event.correlation_id,
             agent_id=self.agent_id,
-            payload={
-                "event_type": "RecordEnriched",
-                "posting_id": posting_id,
-                "title": title or fx.get("title"),
-                "company": fx.get("company"),
-                "company_id": fx.get("company_id"),
-                "sector_id": fx.get("sector_id"),
-                "role_classification": role_classification,
-                "seniority": seniority,
-                "quality_score": fx.get("quality_score"),
-                "spam_score": fx.get("spam_score"),
-                "is_spam": fx.get("is_spam"),
-                "enrichment_status": fx.get("enrichment_status", "success"),
-                "skills": event.payload.get("skills", []),
-            },
+            payload=base_payload,
         )
 
     def run_cli_preview(self, limit: int) -> None:
