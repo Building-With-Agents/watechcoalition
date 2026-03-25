@@ -35,6 +35,10 @@ Design decisions:
 
 from __future__ import annotations
 
+import os
+
+os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+
 import contextlib
 import json
 import sys
