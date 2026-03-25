@@ -162,24 +162,33 @@ def test_extraction_tools_then_skills_output_shape(
 
 def test_extract_context_returns_empty_list() -> None:
     """extract_context stub returns an empty list of ContextSignal."""
-    payload = {"title": "Test Job", "description": "Build things."}
-    result = extract_context(payload)
+    job = JobRecord(
+        source="test", external_id="test-1", title="Test Job",
+        company="Test Corp", description="Build things.",
+    )
+    result = extract_context(job)
     assert isinstance(result, list)
     assert len(result) == 0
 
 
 def test_extract_tasks_returns_empty_list() -> None:
     """extract_tasks stub returns an empty list of TaskRecord."""
-    payload = {"title": "Test Job", "description": "Build things."}
-    result = extract_tasks(payload)
+    job = JobRecord(
+        source="test", external_id="test-1", title="Test Job",
+        company="Test Corp", description="Build things.",
+    )
+    result = extract_tasks(job)
     assert isinstance(result, list)
     assert len(result) == 0
 
 
 def test_extract_responsibilities_returns_empty_list() -> None:
     """extract_responsibilities stub returns an empty list of ResponsibilityRecord."""
-    payload = {"title": "Test Job", "description": "Build things."}
-    result = extract_responsibilities(payload)
+    job = JobRecord(
+        source="test", external_id="test-1", title="Test Job",
+        company="Test Corp", description="Build things.",
+    )
+    result = extract_responsibilities(job)
     assert isinstance(result, list)
     assert len(result) == 0
 

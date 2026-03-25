@@ -210,7 +210,9 @@ class EnrichmentAgent(BaseAgent):
         ``enrichment_status: degraded`` so the batch can continue.
         """
         try:
-            company_id, company_confidence = resolve_company(posting.get("company"), session)
+            company_id, company_confidence = resolve_company(
+                posting.get("company") or "", session
+            )
             location_id, location_confidence, raw_location_text, borderplex_subregion = (
                 resolve_location(posting.get("location", ""), session)
             )

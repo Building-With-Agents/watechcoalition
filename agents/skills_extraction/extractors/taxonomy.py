@@ -25,6 +25,7 @@ import csv
 import json
 import os
 import re
+import time
 import unicodedata
 from pathlib import Path
 from typing import Any
@@ -317,8 +318,22 @@ _esco_embedding_meta: list[tuple[str, str]] | None = None  # (uri, preferred_lab
 _esco_normalized_matrix: np.ndarray | None = None  # (n_skills, dim) L2-normalized
 
 
+_EMBED_MAX_RETRIES = 5
+_EMBED_BASE_DELAY = 1.0  # seconds
+_EMBED_INTER_REQUEST_DELAY = float(os.getenv("EMBEDDING_REQUEST_DELAY", "0"))
+
+
+def _extract_retry_after_embedding(error_message: str) -> int | None:
+    """Extract retry-after seconds from Azure embedding 429 error."""
+    match = re.search(r"retry after (\d+)\s*seconds?", error_message, re.IGNORECASE)
+    return int(match.group(1)) if match else None
+
+
 def _embed_texts_azure(texts: list[str]) -> list[list[float]] | None:
-    """Call Azure OpenAI Embeddings API (text-embedding-3-small). Returns None if env or request fails.
+    """Call Azure OpenAI Embeddings API with retry on 429. Returns None if env or request fails.
+
+    Retries up to 5 times with exponential backoff + jitter on 429 rate limits.
+    Honors Retry-After from error message when available.
 
     Env: AZURE_OPENAI_EMBEDDING_ENDPOINT, AZURE_OPENAI_EMBEDDING_API_KEY,
          AZURE_OPENAI_EMBEDDING_API_VERSION, AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME.
@@ -341,14 +356,45 @@ def _embed_texts_azure(texts: list[str]) -> list[list[float]] | None:
     url = f"{endpoint}/openai/deployments/{deployment}/embeddings?api-version={api_version}"
     headers = {"api-key": api_key, "Content-Type": "application/json"}
     payload: dict[str, Any] = {"input": texts if len(texts) > 1 else texts[0]}
-    try:
-        with httpx.Client(timeout=60.0) as client:
-            resp = client.post(url, json=payload, headers=headers)
-            resp.raise_for_status()
-            data = resp.json()
-    except Exception as exc:
-        log.warning("embedding_api_failed", error=str(exc))
+
+    for attempt in range(1, _EMBED_MAX_RETRIES + 1):
+        try:
+            with httpx.Client(timeout=60.0) as client:
+                resp = client.post(url, json=payload, headers=headers)
+                if resp.status_code == 429:
+                    retry_after = _extract_retry_after_embedding(resp.text)
+                    delay = retry_after if retry_after else _EMBED_BASE_DELAY * (2 ** (attempt - 1))
+                    log.warning(
+                        "embedding_rate_limited",
+                        attempt=attempt,
+                        delay_s=round(delay, 2),
+                        retry_after=retry_after,
+                    )
+                    if attempt == _EMBED_MAX_RETRIES:
+                        log.error("embedding_rate_limit_exhausted", attempts=_EMBED_MAX_RETRIES)
+                        return None
+                    time.sleep(delay)
+                    continue
+                resp.raise_for_status()
+                data = resp.json()
+                break
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 429:
+                retry_after = _extract_retry_after_embedding(str(exc))
+                delay = retry_after if retry_after else _EMBED_BASE_DELAY * (2 ** (attempt - 1))
+                log.warning("embedding_rate_limited", attempt=attempt, delay_s=round(delay, 2))
+                if attempt == _EMBED_MAX_RETRIES:
+                    return None
+                time.sleep(delay)
+                continue
+            log.warning("embedding_api_failed", error=str(exc), attempt=attempt)
+            return None
+        except Exception as exc:
+            log.warning("embedding_api_failed", error=str(exc), attempt=attempt)
+            return None
+    else:
         return None
+
     items = data.get("data") if isinstance(data, dict) else None
     if not items or not isinstance(items, list):
         return None
@@ -363,44 +409,82 @@ def _embed_texts_azure(texts: list[str]) -> list[list[float]] | None:
     return out
 
 
-_EMBEDDING_CHUNK_SIZE = 100  # Azure payload limit; chunk ESCO and batch queries
+_EMBEDDING_CHUNK_SIZE = 50  # Match Next.js batch size; 100 triggers Azure 429s
+
+
+def _load_embeddings_from_db() -> tuple[list[tuple[str, str]], np.ndarray] | None:
+    """Load pre-computed skill embeddings from PostgreSQL (pgvector).
+
+    Returns (meta, L2-normalized matrix) where meta is list of (skill_name, skill_name).
+    Embeddings are seeded by admin via agents/scripts/seed_esco_embeddings.py.
+    """
+    try:
+        from sqlalchemy import text as sa_text
+
+        from agents.common.data_store.database import session_scope
+
+        with session_scope() as session:
+            rows = session.execute(
+                sa_text(
+                    "SELECT skill_name, embedding::text "
+                    "FROM dbo.skills WHERE embedding IS NOT NULL "
+                    "ORDER BY skill_name"
+                )
+            ).fetchall()
+
+        if not rows:
+            return None
+
+        meta: list[tuple[str, str]] = []
+        vectors_list: list[list[float]] = []
+        for row in rows:
+            skill_name = row[0]
+            vec_str = row[1]
+            vec = json.loads(vec_str)
+            meta.append((skill_name, skill_name))
+            vectors_list.append(vec)
+
+        matrix = np.asarray(vectors_list, dtype=np.float64)
+        norms = np.linalg.norm(matrix, axis=1, keepdims=True) + 1e-12
+        matrix_normalized = matrix / norms
+
+        return meta, matrix_normalized
+    except Exception as exc:
+        log.warning("esco_embedding_db_load_failed", error=str(exc))
+        return None
 
 
 def _get_esco_embeddings() -> tuple[list[tuple[str, str]], np.ndarray] | None:
-    """Build or return cached (meta, pre-normalized embedding matrix).
+    """Load pre-computed ESCO embeddings from PostgreSQL.
 
-    Meta is list of (esco_uri, preferred_label). Matrix is (n_skills, dim) L2-normalized
+    Resolution order:
+    1. In-memory global cache (fastest — same process)
+    2. PostgreSQL pgvector column on dbo.skills (no API calls)
+
+    Embeddings are seeded once by admin via seed_esco_embeddings.py.
+    If no embeddings exist in the DB, Step 4 is skipped (falls through to Steps 5-6).
+
+    Meta is list of (skill_name, skill_name). Matrix is (n_skills, dim) L2-normalized
     so Step 4 only needs to normalize the query and run a dot product.
-    Uses Azure OpenAI Embeddings API with chunking to avoid payload limits.
     """
     global _esco_embedding_meta, _esco_normalized_matrix
+
+    # 1. In-memory cache
     if _esco_embedding_meta is not None and _esco_normalized_matrix is not None:
         return _esco_embedding_meta, _esco_normalized_matrix
-    records, *_ = _get_store()
-    if not records:
-        return None
-    texts = []
-    meta = []
-    for rec in records:
-        uri = rec.get("esco_uri") or ""
-        label = rec.get("preferred_label") or ""
-        desc = (rec.get("description") or "")[:200]
-        text = f"{label}. {desc}".strip() if desc else label
-        texts.append(text)
-        meta.append((uri, label))
-    vectors_list: list[list[float]] = []
-    for i in range(0, len(texts), _EMBEDDING_CHUNK_SIZE):
-        chunk = texts[i : i + _EMBEDDING_CHUNK_SIZE]
-        res = _embed_texts_azure(chunk)
-        if not res or len(res) != len(chunk):
-            log.warning("embedding_init_failed", chunk_start=i, chunk_len=len(chunk))
-            return None
-        vectors_list.extend(res)
-    vectors = np.asarray(vectors_list, dtype=np.float64)
-    matrix_norms = np.linalg.norm(vectors, axis=1, keepdims=True) + 1e-12
-    _esco_normalized_matrix = vectors / matrix_norms
-    _esco_embedding_meta = meta
-    return _esco_embedding_meta, _esco_normalized_matrix
+
+    # 2. PostgreSQL
+    db_result = _load_embeddings_from_db()
+    if db_result is not None:
+        _esco_embedding_meta, _esco_normalized_matrix = db_result
+        log.info("esco_embeddings_loaded_from_db", skills=len(_esco_embedding_meta))
+        return _esco_embedding_meta, _esco_normalized_matrix
+
+    log.warning(
+        "esco_embeddings_not_available",
+        reason="No embeddings in dbo.skills — run seed_esco_embeddings.py (admin only)",
+    )
+    return None
 
 
 def _resolve_step4_embedding_impl(label: str) -> TaxonomyResult | None:

@@ -1,6 +1,7 @@
 """Company name normalization and resolution (#95).
 
-Implementation lives here (not ``agents/enrichment/resolution.py`` from the issue text).
+Phase 2 name-matching utilities; implementation lives here (not
+``agents/enrichment/resolution.py`` from the issue text).
 """
 
 from __future__ import annotations

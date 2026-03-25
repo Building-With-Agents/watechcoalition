@@ -6,11 +6,15 @@ import pytest
 from pydantic import TypeAdapter
 
 from agents.common.types import JobRecord
-from agents.common.types.extraction_types import ResponsibilityRecord, TaskRecord
+from agents.common.types.extraction_types import (
+    ContextSignal,
+    ResponsibilityRecord,
+    SpanRecord,
+    TaskRecord,
+)
 from agents.skills_extraction.extractors.context import extract_context
 from agents.skills_extraction.extractors.responsibilities import extract_responsibilities
 from agents.skills_extraction.extractors.tasks import extract_tasks
-from agents.skills_extraction.models import ContextSignal, SpanRecord
 
 
 @pytest.fixture
@@ -66,10 +70,9 @@ def test_context_signal_schema() -> None:
     assert sig2.source_span is None
 
 
-def test_extract_context_returns_empty_and_is_schema_valid() -> None:
-    """extract_context takes a dict, returns [], and result is schema-valid list[ContextSignal]."""
-    job_record = {"event_type": "NormalizationComplete", "normalized_count": 5}
-    result = extract_context(job_record)
+def test_extract_context_returns_empty_and_is_schema_valid(dummy_job: JobRecord) -> None:
+    """extract_context takes a JobRecord, returns [], and result is schema-valid list[ContextSignal]."""
+    result = extract_context(dummy_job)
     assert result == []
     TypeAdapter(list[ContextSignal]).validate_python(result)
 

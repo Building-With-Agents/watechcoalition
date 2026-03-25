@@ -265,6 +265,42 @@ class TestEnrichmentAgent:
         assert rec["borderplex_subregion"] == "el_paso"
         assert rec["is_duplicate"] is False
 
+    def test_enrich_record_return_can_include_job_postings_shape(
+        self, skills_event: EventEnvelope
+    ) -> None:
+        """enrich_record output may carry PR #97-style fields (city/state/country, UUID)."""
+        company_uuid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+        mock_enriched = {
+            "posting_id": skills_event.payload.get("posting_id"),
+            "title": skills_event.payload.get("title"),
+            "company": skills_event.payload.get("company"),
+            "soc_code": "15-1252.00",
+            "naics_code": "541511",
+            "temporal_period": "agentic_era",
+            "borderplex_subregion": "el_paso",
+            "is_duplicate": False,
+            "duplicate_cluster_id": None,
+            "company_id": company_uuid,
+            "city": "El Paso",
+            "state": "TX",
+            "country": "US",
+        }
+        payload = {**skills_event.payload, "is_spam": False}
+        event = EventEnvelope(
+            correlation_id=skills_event.correlation_id,
+            agent_id=skills_event.agent_id,
+            payload=payload,
+        )
+        agent = EnrichmentAgent()
+        with (
+            patch.object(EnrichmentAgent, "enrich_record", return_value=mock_enriched),
+            patch("agents.enrichment.agent.resolve_sector", return_value=None),
+        ):
+            out = agent.process(event)
+
+        assert out.payload["enriched_count"] == 1
+        assert out.payload["event_type"] == "RecordEnriched"
+
     def test_process_uses_session_scope_when_db_available(
         self, skills_event: EventEnvelope
     ) -> None:

@@ -9,10 +9,11 @@ Reference: ARCHITECTURE_DEEP.md § 6-Dimension Extraction Model.
 """
 from __future__ import annotations
 
+from agents.common.types import JobRecord
 from agents.common.types.extraction_types import TaskRecord
 
 
-def extract_tasks(job_record: dict) -> list[TaskRecord]:
+def extract_tasks(job_record: JobRecord) -> list[TaskRecord]:
     """Extract specific, actionable tasks from a normalized job posting.
     This dimension identifies discrete duties and tasks (e.g. "Maintain CI/CD
     pipelines", "Review code for security issues") from the job text. Week 5
