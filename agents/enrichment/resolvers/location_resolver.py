@@ -1,4 +1,4 @@
-"""Location text normalization and company_addresses lookup (enrichment)."""
+"""Location text normalization, company_addresses lookup, and Borderplex tagging (enrichment)."""
 
 from __future__ import annotations
 
@@ -37,6 +37,7 @@ def resolve_location(
 ) -> tuple[int | None, float, str | None, str | None]:
     """
     Look up ``company_addresses`` by normalized location text.
+    Also detect Borderplex subregion from normalized text.
 
     Returns ``(location_id, confidence, raw_text_for_storage, borderplex_subregion)``.
     ``raw_text_for_storage`` is set only when no row matches (for later resolution).
