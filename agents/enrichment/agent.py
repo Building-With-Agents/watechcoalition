@@ -8,6 +8,7 @@ runs.
 
 Agent ID (canonical): enrichment-agent
 Emits:    RecordEnriched
+          EnrichmentDegraded (alert bus, when registered)
 Consumes: SkillsExtracted
 
 When the inbound ``SkillsExtracted``-shaped payload includes ``normalized_job_id``
@@ -56,6 +57,9 @@ from agents.enrichment.classifiers.spam_preview import (
 from agents.scripts.jsearch_enrichment_preview_lib import build_extraction_dict
 
 log = structlog.get_logger()
+
+# Optional bus for emitting EnrichmentDegraded; set via register_alert_bus().
+_alert_bus: Any = None
 
 # agents/enrichment/agent.py -> parents[0]=enrichment, [1]=agents, [2]=repo root
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -130,6 +134,12 @@ def _db_url_configured() -> bool:
     return bool(os.getenv("PYTHON_DATABASE_URL"))
 
 
+def register_alert_bus(bus: Any | None) -> None:
+    """Register the event bus so EnrichmentDegraded can be published."""
+    global _alert_bus
+    _alert_bus = bus
+
+
 def _coerce_normalized_job_id(raw: Any) -> int | None:
     if isinstance(raw, int):
         return raw
@@ -151,6 +161,71 @@ def _spam_from_preview_result(result: SpamPreviewResult) -> dict[str, Any]:
         "spam_used_heuristic": result.used_heuristic,
     }
     return out
+
+
+def _degraded_spam_result(*, extraction_note: str | None) -> SpamPreviewResult:
+    return SpamPreviewResult(
+        spam_score=None,
+        is_spam=None,
+        tier="uncertain",
+        field_confidence={},
+        overall_confidence=None,
+        rationale=None,
+        degraded=True,
+        extraction_note=extraction_note,
+        used_heuristic=False,
+    )
+
+
+def _emit_enrichment_degraded(
+    *,
+    correlation_id: str,
+    posting_id: Any,
+    normalized_job_id: int | None,
+    triggered_by_event_type: Any,
+    reason: str,
+    extraction_note: str | None,
+) -> None:
+    message = "Spam classification degraded; record continued with null spam fields."
+    log.warning(
+        "EnrichmentDegraded",
+        posting_id=posting_id,
+        normalized_job_id=normalized_job_id,
+        reason=reason,
+        extraction_note=extraction_note,
+        message=message,
+    )
+    if _alert_bus is None:
+        return
+    try:
+        event = EventEnvelope(
+            correlation_id=correlation_id,
+            agent_id="enrichment-agent",
+            payload={
+                "event_type": "EnrichmentDegraded",
+                "posting_id": posting_id,
+                "normalized_job_id": normalized_job_id,
+                "triggered_by_event_type": triggered_by_event_type,
+                "classifier": "spam_preview",
+                "reason": reason,
+                "degraded_fields": [
+                    "spam_score",
+                    "is_spam",
+                    "field_confidence",
+                    "overall_confidence",
+                ],
+                "extraction_note": extraction_note,
+                "message": message,
+            },
+        )
+        _alert_bus.publish(event)
+    except Exception as exc:
+        log.warning(
+            "EnrichmentDegraded_publish_failed",
+            posting_id=posting_id,
+            normalized_job_id=normalized_job_id,
+            error=str(exc),
+        )
 
 
 class EnrichmentAgent(BaseAgent):
@@ -294,21 +369,13 @@ class EnrichmentAgent(BaseAgent):
         quality_components = quality_res.components
 
         spam_block: dict[str, Any] = {}
+        spam_result: SpamPreviewResult | None = None
+        degraded_reason: str | None = None
         if nj_id is not None and _db_url_configured():
             if ei_fetch_error:
-                spam_block = _spam_from_preview_result(
-                    SpamPreviewResult(
-                        spam_score=None,
-                        is_spam=None,
-                        tier="uncertain",
-                        field_confidence={},
-                        overall_confidence=None,
-                        rationale=None,
-                        degraded=True,
-                        extraction_note=None,
-                        used_heuristic=False,
-                    )
-                )
+                spam_result = _degraded_spam_result(extraction_note=None)
+                degraded_reason = "extracted_intelligence_unavailable"
+                spam_block = _spam_from_preview_result(spam_result)
             elif ei_row is not None:
                 extraction_empty = ext is None
                 spam_result = score_spam_preview(
@@ -318,6 +385,8 @@ class EnrichmentAgent(BaseAgent):
                     extraction_failed=extraction_failed,
                     extraction_empty=extraction_empty,
                 )
+                if spam_result.degraded:
+                    degraded_reason = "spam_classifier_unavailable"
                 spam_block = _spam_from_preview_result(spam_result)
             else:
                 spam_result = score_spam_preview(
@@ -327,6 +396,8 @@ class EnrichmentAgent(BaseAgent):
                     extraction_failed=False,
                     extraction_empty=True,
                 )
+                if spam_result.degraded:
+                    degraded_reason = "spam_classifier_unavailable"
                 spam_block = _spam_from_preview_result(spam_result)
             payload_spam_score = spam_block["spam_score"]
             payload_is_spam = spam_block["is_spam"]
@@ -354,6 +425,15 @@ class EnrichmentAgent(BaseAgent):
             base_payload["normalized_job_id"] = nj_id
         if spam_block:
             base_payload.update(spam_block)
+        if degraded_reason is not None and spam_result is not None:
+            _emit_enrichment_degraded(
+                correlation_id=event.correlation_id,
+                posting_id=posting_id,
+                normalized_job_id=nj_id,
+                triggered_by_event_type=event.payload.get("event_type"),
+                reason=degraded_reason,
+                extraction_note=spam_result.extraction_note,
+            )
 
         return EventEnvelope(
             correlation_id=event.correlation_id,

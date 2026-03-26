@@ -7,7 +7,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from agents.common.event_envelope import EventEnvelope
+from agents.common.message_bus import InProcessEventBus
 from agents.enrichment.agent import EnrichmentAgent
+from agents.enrichment.agent import register_alert_bus as register_enrichment_alert_bus
 from agents.enrichment.classification import classify_job
 from agents.enrichment.classifiers.spam_preview import SpamPreviewResult
 from agents.scripts.jsearch_enrichment_preview_lib import build_extraction_dict
@@ -154,3 +156,90 @@ class TestEnrichmentAgent:
         assert kw["job_description"] == "Build APIs."
         assert kw["extraction_failed"] is False
         assert kw["extraction_empty"] is False
+
+    def test_process_spam_degraded_emits_enrichment_degraded_alert(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv(
+            "PYTHON_DATABASE_URL",
+            "postgresql+psycopg2://user:pass@localhost:5432/db",
+        )
+        bus = InProcessEventBus()
+        alerts: list[EventEnvelope] = []
+        bus.subscribe(
+            "EnrichmentDegraded",
+            lambda event: alerts.append(event),
+            subscriber_id="orchestration-agent",
+        )
+        register_enrichment_alert_bus(bus)
+
+        agent = EnrichmentAgent()
+        ev = EventEnvelope(
+            correlation_id="c-spam-degraded",
+            agent_id="skills-extraction-agent",
+            payload={
+                "event_type": "SkillsExtracted",
+                "posting_id": 101,
+                "normalized_job_id": 77,
+                "title": "ML Engineer",
+                "description": "Build production ML systems.",
+                "company": "Acme",
+                "skills": [],
+            },
+        )
+        ei_row = {
+            "skills": [{"label": "Python"}],
+            "tools": [],
+            "tasks": [],
+            "responsibilities": [],
+            "context": [],
+            "extraction_failed": False,
+        }
+        mock_exec_result = MagicMock()
+        mock_exec_result.mappings.return_value.first.return_value = ei_row
+        mock_session = MagicMock()
+        mock_session.execute.return_value = mock_exec_result
+
+        degraded_ret = SpamPreviewResult(
+            spam_score=None,
+            is_spam=None,
+            tier="uncertain",
+            field_confidence={},
+            overall_confidence=None,
+            rationale=None,
+            degraded=True,
+            extraction_note="empty_extraction",
+            used_heuristic=False,
+        )
+
+        try:
+            with (
+                patch("agents.enrichment.agent.session_scope") as mock_scope,
+                patch(
+                    "agents.enrichment.agent.score_spam_preview",
+                    return_value=degraded_ret,
+                ),
+            ):
+                mock_scope.return_value.__enter__.return_value = mock_session
+                mock_scope.return_value.__exit__.return_value = None
+                out = agent.process(ev)
+        finally:
+            register_enrichment_alert_bus(None)
+
+        assert out.payload["spam_score"] is None
+        assert out.payload["is_spam"] is None
+        assert out.payload["spam_tier"] == "uncertain"
+        assert out.payload["spam_degraded"] is True
+
+        assert len(alerts) == 1
+        alert = alerts[0]
+        assert alert.correlation_id == "c-spam-degraded"
+        assert alert.agent_id == "enrichment-agent"
+        assert alert.payload["event_type"] == "EnrichmentDegraded"
+        assert alert.payload["posting_id"] == 101
+        assert alert.payload["normalized_job_id"] == 77
+        assert alert.payload["triggered_by_event_type"] == "SkillsExtracted"
+        assert alert.payload["classifier"] == "spam_preview"
+        assert alert.payload["reason"] == "spam_classifier_unavailable"
+        assert alert.payload["extraction_note"] == "empty_extraction"
