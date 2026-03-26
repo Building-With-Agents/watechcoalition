@@ -17,6 +17,12 @@ When the inbound ``SkillsExtracted``-shaped payload includes ``normalized_job_id
 ``score_spam_preview`` (Decision #8). Otherwise ``spam_score`` / ``is_spam``
 come from the walking-skeleton fixture keyed by ``posting_id``.
 
+With ``normalized_job_id`` and a resolvable ``job_postings`` row (join on
+``source``/``external_id``), Phase 1 enrichment columns are persisted via
+:mod:`agents.enrichment.job_postings_promotion`. **Rejected** spam tier skips
+``UPDATE`` entirely. **Uncertain** (degraded classifier) updates quality fields
+only and leaves ``is_spam``/``spam_score`` unchanged.
+
 Fixture: agents/data/fixtures/fixture_enriched.json — supplies ``company`` /
 ``company_id`` / ``sector_id`` when not on the event; role, seniority, and
 ``quality_score`` are always computed (not taken from the fixture). Spam
@@ -54,6 +60,7 @@ from agents.enrichment.classifiers.spam_preview import (
     SpamPreviewResult,
     score_spam_preview,
 )
+from agents.enrichment.job_postings_promotion import apply_enrichment_to_job_postings
 from agents.scripts.jsearch_enrichment_preview_lib import build_extraction_dict
 
 log = structlog.get_logger()
@@ -70,9 +77,8 @@ def _load_repo_dotenv() -> None:
     """Load repo-root ``.env`` once. Does not override variables already set in the OS env."""
     load_dotenv(_ENV_PATH, override=False)
 
-_FIXTURE_PATH = (
-    Path(__file__).parent.parent / "data" / "fixtures" / "fixture_enriched.json"
-)
+
+_FIXTURE_PATH = Path(__file__).parent.parent / "data" / "fixtures" / "fixture_enriched.json"
 
 _LATEST_EI_BY_NJ_ID_SQL = text(
     """
@@ -243,9 +249,7 @@ class EnrichmentAgent(BaseAgent):
     def _load_reference_labels(session: Session) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
         tech_rows = session.execute(select(TechnologyArea.id, TechnologyArea.title)).all()
         technology_areas = [(str(r[0]), str(r[1])) for r in tech_rows]
-        sec_rows = session.execute(
-            select(IndustrySector.industry_sector_id, IndustrySector.sector_title)
-        ).all()
+        sec_rows = session.execute(select(IndustrySector.industry_sector_id, IndustrySector.sector_title)).all()
         industry_sectors = [(str(r[0]), str(r[1])) for r in sec_rows]
         return technology_areas, industry_sectors
 
@@ -297,6 +301,10 @@ class EnrichmentAgent(BaseAgent):
 
         Quality: deterministic composite via :func:`score_quality` (same title,
         description, and extraction blob as classification when EI is loaded).
+
+        When ``normalized_job_id`` is set and the DB is configured, enrichment
+        columns are written to ``job_postings`` (see
+        :func:`agents.enrichment.job_postings_promotion.apply_enrichment_to_job_postings`).
         """
         if not self._fixture:
             if _FIXTURE_PATH.exists():
@@ -321,9 +329,7 @@ class EnrichmentAgent(BaseAgent):
         if nj_id is not None and _db_url_configured():
             try:
                 with session_scope() as session:
-                    ei_row = session.execute(
-                        _LATEST_EI_BY_NJ_ID_SQL, {"nj_id": nj_id}
-                    ).mappings().first()
+                    ei_row = session.execute(_LATEST_EI_BY_NJ_ID_SQL, {"nj_id": nj_id}).mappings().first()
             except Exception as exc:
                 log.warning("enrichment_ei_load_failed", normalized_job_id=nj_id, error=str(exc))
                 ei_fetch_error = True
@@ -434,6 +440,17 @@ class EnrichmentAgent(BaseAgent):
                 reason=degraded_reason,
                 extraction_note=spam_result.extraction_note,
             )
+
+        if nj_id is not None and _db_url_configured():
+            try:
+                with session_scope() as session:
+                    apply_enrichment_to_job_postings(session, nj_id, base_payload)
+            except Exception as exc:
+                log.warning(
+                    "enrichment_promotion_failed",
+                    normalized_job_id=nj_id,
+                    error=str(exc),
+                )
 
         return EventEnvelope(
             correlation_id=event.correlation_id,

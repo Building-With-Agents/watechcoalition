@@ -1,4 +1,4 @@
-"""Spam scoring for Decision #8 preview (diagnostic only; not wired to job_postings writes).
+"""Spam scoring for Decision #8 (enrichment payload + :mod:`agents.enrichment.job_postings_promotion`).
 
 Uses Azure OpenAI via :func:`agents.common.llm_client.invoke_skills_llm` (same deployment
 env as skills extraction). On LLM failure or missing config, returns **degraded** null
