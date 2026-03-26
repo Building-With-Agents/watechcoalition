@@ -10,7 +10,10 @@ Per Decision #33 and the token-cost memo, this log tracks all three cost surface
 
 | Source        | Notes                                      | Estimate / actual |
 |---------------|--------------------------------------------|-------------------|
-| _All pairs_   | Week 4–5 guardrails, prompts, eval, cost audit | _TBD — add estimate_ |
+| Juan + Enrique | Week 4 guardrails, cost tracking, validation | _TBD — add estimate_ |
+| Bryan + Emilio | _Pair C — prompt iteration_                 | _TBD_             |
+| Angel + Fabian | _Pair — extraction dimensions_             | _TBD_             |
+| _Other pairs_ | _Coordinate with all pairs_                | _TBD_             |
 
 **How to fill:** Each pair reports estimated or actual Cursor/Copilot token usage for the sprint (or leave placeholder until collected).
 
