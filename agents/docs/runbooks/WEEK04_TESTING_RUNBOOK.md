@@ -655,7 +655,8 @@ Each record contains:
 | AI Product Managers      | 1       | gt-006          | Emilio           |
 | Agile Project Managers   | 4       | gt-007 – gt-010 | Juan             |
 | Agile Project Managers   | 1       | gt-011          | Emilio           |
-| Data Analysts            | 4       | gt-012 – gt-015 | Angel            |
+| Data Analysts            | 3       | gt-012 – gt-014 | Angel            |
+| Data Analysts            | 1       | gt-015          | Nestor           |
 | Data Analysts            | 1       | gt-016          | Emilio           |
 | Full Stack Developers    | 4       | gt-017 – gt-020 | Bryan            |
 | Full Stack Developers    | 1       | gt-021          | Emilio           |
