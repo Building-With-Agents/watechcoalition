@@ -648,15 +648,19 @@ Each record contains:
 
 ### Current coverage
 
-| Role category            | Records | Labeler          |
-| ------------------------ | ------- | ---------------- |
-| AI Product Managers      | 6       | Enrique          |
-| Agile Project Managers   | 5       | Juan             |
-| Data Analysts            | 5       | Angel            |
-| Full Stack Developers    | 5       | Bryan            |
-| ML Engineers             | 4       | Fabian           |
-| Cybersecurity Analysts   | 5       | Fatima           |
-| **Total**                | **30**  |                  |
+| Role category            | Records | GT IDs          | Labeler          |
+| ------------------------ | ------- | --------------- | ---------------- |
+| AI Product Managers      | 5       | gt-001 – gt-005 | Enrique          |
+| AI Product Managers      | 1       | gt-006          | Emilio           |
+| Agile Project Managers   | 4       | gt-007 – gt-010 | Juan             |
+| Agile Project Managers   | 1       | gt-011          | Emilio           |
+| Data Analysts            | 4       | gt-012 – gt-015 | Angel            |
+| Data Analysts            | 1       | gt-016          | Emilio           |
+| Full Stack Developers    | 4       | gt-017 – gt-020 | Bryan            |
+| Full Stack Developers    | 1       | gt-021          | Emilio           |
+| ML Engineers             | 4       | gt-022 – gt-025 | Fabian           |
+| Cybersecurity Analysts   | 5       | gt-026 – gt-030 | Fatima           |
+| **Total**                | **30**  |                 |                  |
 
 ### Test steps
 

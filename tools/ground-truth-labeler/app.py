@@ -44,6 +44,19 @@ load_dotenv(Path(__file__).parent / ".env")
 
 OUTPUT_FILE = Path(__file__).parent / "ground_truth_labeled.json"
 CACHE_FILE = Path(__file__).parent / "jsearch_cache.json"
+EVAL_GT_FILE = Path(__file__).parent.parent.parent / "agents" / "eval" / "extraction_ground_truth.json"
+
+# Dev-to-record assignments for Week 4 ground truth labeling (skills/tools).
+# Each dev now continues with tasks/responsibilities/context on these same records.
+LABELER_ASSIGNMENTS = {
+    "Enrique": ["gt-001", "gt-002", "gt-003", "gt-004", "gt-005"],
+    "Emilio":  ["gt-006", "gt-011", "gt-016", "gt-021"],
+    "Juan":    ["gt-007", "gt-008", "gt-009", "gt-010"],
+    "Angel":   ["gt-012", "gt-013", "gt-014", "gt-015"],
+    "Bryan":   ["gt-017", "gt-018", "gt-019", "gt-020"],
+    "Fabian":  ["gt-022", "gt-023", "gt-024", "gt-025"],
+    "Fatima":  ["gt-026", "gt-027", "gt-028", "gt-029", "gt-030"],
+}
 
 
 # ---------------------------------------------------------------------------
@@ -96,6 +109,83 @@ def clear_cache() -> None:
     """Delete the cache file."""
     if CACHE_FILE.exists():
         CACHE_FILE.unlink()
+
+
+# ---------------------------------------------------------------------------
+# Eval dataset I/O (agents/eval/extraction_ground_truth.json)
+# ---------------------------------------------------------------------------
+
+
+def load_eval_dataset() -> list[dict]:
+    """Load the shared eval ground truth dataset."""
+    if EVAL_GT_FILE.exists():
+        try:
+            return json.loads(EVAL_GT_FILE.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, ValueError):
+            return []
+    return []
+
+
+def save_eval_dataset(dataset: list[dict]) -> None:
+    """Write the eval ground truth dataset back to disk."""
+    EVAL_GT_FILE.write_text(
+        json.dumps(dataset, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+
+def get_records_for_labeler(name: str, dataset: list[dict]) -> list[tuple[int, dict]]:
+    """Return (index, record) pairs for a given labeler's assigned GT IDs."""
+    assigned_ids = set(LABELER_ASSIGNMENTS.get(name, []))
+    return [
+        (i, rec)
+        for i, rec in enumerate(dataset)
+        if rec.get("ground_truth_id") in assigned_ids
+    ]
+
+
+def load_record_into_session(record: dict, record_index: int) -> None:
+    """Hydrate session state from an existing eval record for editing."""
+    # Build synthetic job dict for the right-pane text display
+    job = {
+        "external_id": record.get("external_id", ""),
+        "title": record.get("title", ""),
+        "company": record.get("company", ""),
+        "city": record.get("city", ""),
+        "state": record.get("state", ""),
+        "description": record.get("description", ""),
+        "requirements": record.get("requirements", ""),
+        "responsibilities": record.get("responsibilities", ""),
+        "job_url": "",
+        "is_remote": False,
+        "employment_type": "",
+    }
+    st.session_state.jobs = [job]
+    st.session_state.job_index = 0
+
+    # Deserialize existing labels
+    st.session_state.skills = [
+        SkillRecord.model_validate(s) for s in record.get("skills", [])
+    ]
+    st.session_state.tools = [
+        ToolRecord.model_validate(t) for t in record.get("tools", [])
+    ]
+    st.session_state.tasks = [
+        TaskRecord.model_validate(t) for t in record.get("tasks", [])
+    ]
+    st.session_state.labeled_responsibilities = [
+        ResponsibilityRecord.model_validate(r)
+        for r in record.get("labeled_responsibilities", [])
+    ]
+    st.session_state.context = [
+        ContextSignal.model_validate(c) for c in record.get("context", [])
+    ]
+    st.session_state.labeler_notes = record.get("labeler_notes", {})
+
+    # Editing flags
+    st.session_state.editing_gt_id = record["ground_truth_id"]
+    st.session_state.editing_record_index = record_index
+    st.session_state.editing_eval_mode = True
 
 
 # ---------------------------------------------------------------------------
@@ -154,6 +244,9 @@ if "phase" not in st.session_state:
     st.session_state.labeled_responsibilities = []
     st.session_state.context = []
     st.session_state.labeler_notes = {}
+    st.session_state.editing_gt_id = None
+    st.session_state.editing_record_index = None
+    st.session_state.editing_eval_mode = False
 elif not st.session_state.get("jobs"):
     # Session exists but jobs are empty — try cache reload
     _cached = load_cache()
@@ -180,6 +273,9 @@ def reset_labels() -> None:
     st.session_state.labeled_responsibilities = []
     st.session_state.context = []
     st.session_state.labeler_notes = {}
+    st.session_state.editing_gt_id = None
+    st.session_state.editing_record_index = None
+    st.session_state.editing_eval_mode = False
     st.session_state.pop("editing_skill_index", None)
     st.session_state.pop("editing_tool_index", None)
     st.session_state.pop("editing_task_index", None)
@@ -282,7 +378,9 @@ if st.session_state.phase == "search":
     st.title("🏷️ Ground Truth Labeling Tool")
     st.header("Step 1 — Search & Load Job Batch")
 
-    tab_search, tab_manual = st.tabs(["🔍 JSearch API", "📝 Manual Entry"])
+    tab_search, tab_manual, tab_continue = st.tabs(
+        ["🔍 JSearch API", "📝 Manual Entry", "📂 Continue Labeling"]
+    )
 
     with tab_search:
         api_key = get_api_key()
@@ -361,6 +459,76 @@ if st.session_state.phase == "search":
                 set_label_step("review")
                 st.rerun()
 
+    with tab_continue:
+        st.markdown(
+            "Load an existing record from the eval ground truth dataset "
+            "to add **Tasks**, **Responsibilities**, and **Context** labels."
+        )
+
+        if not EVAL_GT_FILE.exists():
+            st.error(f"Eval dataset not found at `{EVAL_GT_FILE}`")
+        else:
+            eval_ds = load_eval_dataset()
+            if not eval_ds:
+                st.warning("Eval dataset is empty.")
+            else:
+                labeler_name = st.selectbox(
+                    "Your name",
+                    list(LABELER_ASSIGNMENTS.keys()),
+                    index=None,
+                    placeholder="Select your name...",
+                    key="continue_labeler_name",
+                )
+
+                if labeler_name:
+                    my_records = get_records_for_labeler(labeler_name, eval_ds)
+                    if not my_records:
+                        st.warning(f"No records found for {labeler_name}.")
+                    else:
+                        st.markdown(f"**{labeler_name}'s records ({len(my_records)}):**")
+                        for _idx, (_ds_idx, rec) in enumerate(my_records):
+                            n_skills = len(rec.get("skills", []))
+                            n_tools = len(rec.get("tools", []))
+                            n_tasks = len(rec.get("tasks", []))
+                            n_resp = len(rec.get("labeled_responsibilities", []))
+                            n_ctx = len(rec.get("context", []))
+                            incomplete = n_tasks == 0 or n_resp == 0 or n_ctx == 0
+                            marker = "🔴" if incomplete else "✅"
+                            st.markdown(
+                                f"{marker} **{rec['ground_truth_id']}** — "
+                                f"{rec['title'][:45]}  \n"
+                                f"  {n_skills}S / {n_tools}T / {n_tasks}Tk / {n_resp}R / {n_ctx}C"
+                            )
+
+                        # Record picker
+                        record_options = {
+                            f"{rec['ground_truth_id']} — {rec['title'][:50]}": (ds_idx, rec)
+                            for ds_idx, rec in my_records
+                        }
+                        chosen = st.selectbox(
+                            "Select record to edit",
+                            list(record_options.keys()),
+                            index=None,
+                            placeholder="Pick a record...",
+                            key="continue_record_select",
+                        )
+
+                        if chosen:
+                            ds_idx, rec = record_options[chosen]
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                if st.button("📋 Continue from Tasks", key="btn_continue_tasks"):
+                                    load_record_into_session(rec, ds_idx)
+                                    set_phase("label")
+                                    set_label_step("tasks")
+                                    st.rerun()
+                            with col2:
+                                if st.button("📖 Edit from Review", key="btn_continue_review"):
+                                    load_record_into_session(rec, ds_idx)
+                                    set_phase("label")
+                                    set_label_step("review")
+                                    st.rerun()
+
 
 # =========================================================================
 # PHASE: LABEL — Cycle through each job in the batch
@@ -399,6 +567,12 @@ elif st.session_state.phase == "label":
                 "save": "💾 Save",
             }
             st.markdown(f"**{step_labels.get(st.session_state.label_step, '')}**")
+
+        if st.session_state.get("editing_eval_mode"):
+            st.info(
+                f"✏️ Editing existing record: **{st.session_state.editing_gt_id}** "
+                f"(eval dataset)"
+            )
 
         st.markdown(f"### {job['title']} — {job['company']}")
         st.caption(f"{job.get('city', '')}, {job.get('state', '')} | ID: {job['external_id']}")
@@ -1191,8 +1365,16 @@ elif st.session_state.phase == "label":
         # =================================================================
 
         elif st.session_state.label_step == "save":
-            dataset = load_dataset()
-            gt_id = next_gt_id(dataset)
+            editing_eval = st.session_state.get("editing_eval_mode", False)
+
+            if editing_eval:
+                # Editing an existing eval record — use its original ID
+                gt_id = st.session_state.editing_gt_id
+                dataset = load_eval_dataset()
+            else:
+                # New record — append to the local labeler file
+                dataset = load_dataset()
+                gt_id = next_gt_id(dataset)
 
             record = GroundTruthRecord(
                 ground_truth_id=gt_id,
@@ -1234,7 +1416,10 @@ elif st.session_state.phase == "label":
             with c5:
                 st.metric("Context", len(record.context))
             with c6:
-                st.metric("After save", len(dataset) + 1)
+                if editing_eval:
+                    st.metric("Record", gt_id)
+                else:
+                    st.metric("After save", len(dataset) + 1)
 
             # JSON preview
             with st.expander("JSON Preview", expanded=True):
@@ -1250,20 +1435,42 @@ elif st.session_state.phase == "label":
 
             with col2:
                 if st.button("⏭️ Skip (don't save)"):
-                    st.session_state.job_index += 1
-                    reset_labels()
-                    set_label_step("review")
+                    if editing_eval:
+                        reset_labels()
+                        set_phase("search")
+                    else:
+                        st.session_state.job_index += 1
+                        reset_labels()
+                        set_label_step("review")
                     st.rerun()
 
             with col3:
-                if st.button("💾 Save & Next Job", type="primary"):
-                    dataset.append(record_dict)
-                    save_dataset(dataset)
-                    st.session_state.job_index += 1
-                    # Persist position to cache so refresh resumes here
-                    cached = load_cache()
-                    if cached.get("jobs"):
-                        save_cache(cached.get("query", ""), cached["jobs"], st.session_state.job_index)
-                    reset_labels()
-                    set_label_step("review")
-                    st.rerun()
+                if editing_eval:
+                    if st.button("💾 Save Changes to Eval Dataset", type="primary"):
+                        # Replace in-place
+                        rec_idx = st.session_state.editing_record_index
+                        if rec_idx is not None and rec_idx < len(dataset):
+                            dataset[rec_idx] = record_dict
+                        else:
+                            # Fallback: find by ID
+                            for i, r in enumerate(dataset):
+                                if r.get("ground_truth_id") == gt_id:
+                                    dataset[i] = record_dict
+                                    break
+                        save_eval_dataset(dataset)
+                        st.success(f"✅ Saved {gt_id} to eval dataset")
+                        reset_labels()
+                        set_phase("search")
+                        st.rerun()
+                else:
+                    if st.button("💾 Save & Next Job", type="primary"):
+                        dataset.append(record_dict)
+                        save_dataset(dataset)
+                        st.session_state.job_index += 1
+                        # Persist position to cache so refresh resumes here
+                        cached = load_cache()
+                        if cached.get("jobs"):
+                            save_cache(cached.get("query", ""), cached["jobs"], st.session_state.job_index)
+                        reset_labels()
+                        set_label_step("review")
+                        st.rerun()
