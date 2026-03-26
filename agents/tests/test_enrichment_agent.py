@@ -136,6 +136,7 @@ class TestEnrichmentAgent:
         with (
             patch("agents.enrichment.agent.session_scope") as mock_scope,
             patch("agents.enrichment.agent.score_spam_preview", return_value=spam_ret) as mock_score,
+            patch("agents.enrichment.agent.apply_enrichment_to_job_postings"),
         ):
             mock_scope.return_value.__enter__.return_value = mock_session
             mock_scope.return_value.__exit__.return_value = None
@@ -220,6 +221,7 @@ class TestEnrichmentAgent:
                     "agents.enrichment.agent.score_spam_preview",
                     return_value=degraded_ret,
                 ),
+                patch("agents.enrichment.agent.apply_enrichment_to_job_postings"),
             ):
                 mock_scope.return_value.__enter__.return_value = mock_session
                 mock_scope.return_value.__exit__.return_value = None
