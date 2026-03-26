@@ -164,22 +164,56 @@ def load_record_into_session(record: dict, record_index: int) -> None:
     st.session_state.jobs = [job]
     st.session_state.job_index = 0
 
-    # Deserialize existing labels
+    # Deserialize existing labels.
+    # Use model_construct to skip span-offset validation — existing records may
+    # have auto-corrected spans where end_char - start_char != len(text).
+    def _build_span(d: dict) -> SpanRecord:
+        return SpanRecord.model_construct(**d)
+
+    def _build_skill(d: dict) -> SkillRecord:
+        raw = dict(d)
+        if "source_span" in raw and isinstance(raw["source_span"], dict):
+            raw["source_span"] = _build_span(raw["source_span"])
+        return SkillRecord.model_construct(**raw)
+
+    def _build_tool(d: dict) -> ToolRecord:
+        raw = dict(d)
+        if "source_span" in raw and isinstance(raw["source_span"], dict):
+            raw["source_span"] = _build_span(raw["source_span"])
+        return ToolRecord.model_construct(**raw)
+
+    def _build_task(d: dict) -> TaskRecord:
+        raw = dict(d)
+        if "source_span" in raw and isinstance(raw["source_span"], dict):
+            raw["source_span"] = _build_span(raw["source_span"])
+        return TaskRecord.model_construct(**raw)
+
+    def _build_resp(d: dict) -> ResponsibilityRecord:
+        raw = dict(d)
+        if "source_span" in raw and isinstance(raw["source_span"], dict):
+            raw["source_span"] = _build_span(raw["source_span"])
+        return ResponsibilityRecord.model_construct(**raw)
+
+    def _build_ctx(d: dict) -> ContextSignal:
+        raw = dict(d)
+        if "source_span" in raw and isinstance(raw["source_span"], dict):
+            raw["source_span"] = _build_span(raw["source_span"])
+        return ContextSignal.model_construct(**raw)
+
     st.session_state.skills = [
-        SkillRecord.model_validate(s) for s in record.get("skills", [])
+        _build_skill(s) for s in record.get("skills", [])
     ]
     st.session_state.tools = [
-        ToolRecord.model_validate(t) for t in record.get("tools", [])
+        _build_tool(t) for t in record.get("tools", [])
     ]
     st.session_state.tasks = [
-        TaskRecord.model_validate(t) for t in record.get("tasks", [])
+        _build_task(t) for t in record.get("tasks", [])
     ]
     st.session_state.labeled_responsibilities = [
-        ResponsibilityRecord.model_validate(r)
-        for r in record.get("labeled_responsibilities", [])
+        _build_resp(r) for r in record.get("labeled_responsibilities", [])
     ]
     st.session_state.context = [
-        ContextSignal.model_validate(c) for c in record.get("context", [])
+        _build_ctx(c) for c in record.get("context", [])
     ]
     st.session_state.labeler_notes = record.get("labeler_notes", {})
 
