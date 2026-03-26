@@ -51,6 +51,10 @@ def main() -> int:
             print("  Make sure agents/enrichment/resolvers/ directory exists on your branch.")
         return 1
 
+    from sqlalchemy import text as sa_text
+
+    from agents.common.data_store.database import session_scope
+
     # ------------------------------------------------------------------
     # 2. Company name normalization
     # ------------------------------------------------------------------
@@ -83,9 +87,6 @@ def main() -> int:
     # ------------------------------------------------------------------
     print("\n=== 3. resolve_company() -- database lookup ===")
     try:
-        from agents.common.data_store.database import session_scope
-        from sqlalchemy import text as sa_text
-
         with session_scope() as session:
             # Find any existing company to test exact match
             row = session.execute(
@@ -115,9 +116,6 @@ def main() -> int:
     # ------------------------------------------------------------------
     print("\n=== 4. resolve_company() -- placeholder creation ===")
     try:
-        from agents.common.data_store.database import session_scope
-        from sqlalchemy import text as sa_text
-
         fake_name = f"VerifyTest_{uuid.uuid4().hex[:8]} Corp"
         with session_scope() as session:
             company_id, confidence = resolve_company(fake_name, session)
@@ -155,12 +153,10 @@ def main() -> int:
     # ------------------------------------------------------------------
     print("\n=== 5. resolve_location() ===")
     try:
-        from agents.common.data_store.database import session_scope
-
         with session_scope() as session:
             loc_id, confidence, raw_text, borderplex = resolve_location("El Paso, TX", session)
             print(f"  \"El Paso, TX\" -> loc_id={loc_id}, confidence={confidence:.2f}, borderplex={borderplex}")
-            print(f"  PASS: resolve_location runs without error")
+            print("  PASS: resolve_location runs without error")
             passed += 1
     except Exception as e:
         print(f"  FAIL: resolve_location error -- {e}")
@@ -220,7 +216,7 @@ def main() -> int:
         print(f"  agent_id: {event.agent_id}")
         print(f"  payload keys: {list(event.payload.keys())}")
         print(f"  payload event_type: {event.payload.get('event_type', 'N/A')}")
-        print(f"  PASS: RecordEnriched event built")
+        print("  PASS: RecordEnriched event built")
         passed += 1
     except Exception as e:
         print(f"  FAIL: build_record_enriched_event error -- {e}")
@@ -231,9 +227,6 @@ def main() -> int:
     # ------------------------------------------------------------------
     print("\n=== 8. Non-negotiable: no null company_id ===")
     try:
-        from agents.common.data_store.database import session_scope
-        from sqlalchemy import text as sa_text
-
         with session_scope() as session:
             row = session.execute(
                 sa_text("SELECT COUNT(*) FROM dbo.job_postings WHERE company_id IS NULL")
