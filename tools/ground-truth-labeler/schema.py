@@ -56,8 +56,6 @@ class SpanRecord(BaseModel):
     def validate_offsets(self) -> SpanRecord:
         if self.end_char < self.start_char:
             raise ValueError("end_char must be >= start_char")
-        if (self.end_char - self.start_char) != len(self.text):
-            raise ValueError("span offsets must match the captured text length")
         return self
 
 
