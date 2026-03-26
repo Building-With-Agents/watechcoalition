@@ -4,6 +4,24 @@
 
 ---
 
+## Week 5 Actuals (30-Record Cohort)
+
+Team Summary; numeric totals match the `llm_audit_log` aggregates in §3–§5.
+
+* **Total cost:** $2.9147
+* **Total tokens:** 504,874
+* **Total API Calls:** 341
+
+**Cost Breakdown by Dimension:**
+
+* **Skills:** $2.6681 (~91.5%) — *Sonnet-class extraction*
+* **Responsibilities:** $0.2241 (~7.7%) — *Unexpected LLM usage*
+* **Tasks:** $0.0225 (~0.8%) — *Unexpected LLM usage*
+* **Tools:** $0.00 (0%) — *Pass 1 Pattern Matching successfully eliminated LLM calls*
+* **Context:** $0.00 (0%) — *Pattern matching only*
+
+---
+
 ## 1. Scope (what is actually measured)
 
 | In scope | Notes |
@@ -196,6 +214,7 @@ ORDER BY total_cost_usd DESC;
 
 Document here when filling the audit:
 
+- **Labeled / eval cohort:** 30-record Week 5 set; headline actuals above are tied to the same audit window as §3.
 - Database / environment: _e.g. dev, staging_
 - `extraction_version` or git hash: _TBD_
 - Time range for `extracted_at` and `llm_audit_log.created_at`: _TBD_
