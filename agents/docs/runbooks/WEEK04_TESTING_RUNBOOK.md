@@ -650,7 +650,8 @@ Each record contains:
 
 | Role category            | Records | GT IDs          | Labeler          |
 | ------------------------ | ------- | --------------- | ---------------- |
-| AI Product Managers      | 5       | gt-001 – gt-005 | Enrique          |
+| AI Product Managers      | 4       | gt-001 – gt-004 | Enrique          |
+| AI Product Managers      | 1       | gt-005          | Nestor           |
 | AI Product Managers      | 1       | gt-006          | Emilio           |
 | Agile Project Managers   | 4       | gt-007 – gt-010 | Juan             |
 | Agile Project Managers   | 1       | gt-011          | Emilio           |
@@ -658,8 +659,10 @@ Each record contains:
 | Data Analysts            | 1       | gt-016          | Emilio           |
 | Full Stack Developers    | 4       | gt-017 – gt-020 | Bryan            |
 | Full Stack Developers    | 1       | gt-021          | Emilio           |
-| ML Engineers             | 4       | gt-022 – gt-025 | Fabian           |
-| Cybersecurity Analysts   | 5       | gt-026 – gt-030 | Fatima           |
+| ML Engineers             | 3       | gt-022 – gt-024 | Fabian           |
+| ML Engineers             | 1       | gt-025          | Nestor           |
+| Cybersecurity Analysts   | 4       | gt-026 – gt-029 | Fatima           |
+| Cybersecurity Analysts   | 1       | gt-030          | Nestor           |
 | **Total**                | **30**  |                 |                  |
 
 ### Test steps

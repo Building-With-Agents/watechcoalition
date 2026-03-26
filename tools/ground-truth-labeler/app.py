@@ -49,13 +49,14 @@ EVAL_GT_FILE = Path(__file__).parent.parent.parent / "agents" / "eval" / "extrac
 # Dev-to-record assignments for Week 4 ground truth labeling (skills/tools).
 # Each dev now continues with tasks/responsibilities/context on these same records.
 LABELER_ASSIGNMENTS = {
-    "Enrique": ["gt-001", "gt-002", "gt-003", "gt-004", "gt-005"],
+    "Enrique": ["gt-001", "gt-002", "gt-003", "gt-004"],
     "Emilio":  ["gt-006", "gt-011", "gt-016", "gt-021"],
     "Juan":    ["gt-007", "gt-008", "gt-009", "gt-010"],
     "Angel":   ["gt-012", "gt-013", "gt-014", "gt-015"],
     "Bryan":   ["gt-017", "gt-018", "gt-019", "gt-020"],
-    "Fabian":  ["gt-022", "gt-023", "gt-024", "gt-025"],
-    "Fatima":  ["gt-026", "gt-027", "gt-028", "gt-029", "gt-030"],
+    "Fabian":  ["gt-022", "gt-023", "gt-024"],
+    "Fatima":  ["gt-026", "gt-027", "gt-028", "gt-029"],
+    "Nestor":  ["gt-005", "gt-025", "gt-030"],
 }
 
 
