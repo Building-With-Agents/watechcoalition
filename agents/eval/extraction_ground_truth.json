@@ -3956,7 +3956,7 @@
     "skills": [
       {
         "skill_id": null,
-        "skill_name": "LLM Evaluation",
+        "skill_name": "Large Language Models",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -3984,23 +3984,6 @@
           "field_source": "description",
           "start_char": 2034,
           "end_char": 2090
-        },
-        "span_auto_corrected": false,
-        "original_end_char": null
-      },
-      {
-        "skill_id": null,
-        "skill_name": "Communication",
-        "type": "Soft",
-        "confidence": 1.0,
-        "required_flag": false,
-        "esco_uri": null,
-        "is_genai_extension": false,
-        "source_span": {
-          "text": "Works with Product Team to ensure user stories that are developer-ready, easy to understand,",
-          "field_source": "description",
-          "start_char": 1928,
-          "end_char": 2020
         },
         "span_auto_corrected": false,
         "original_end_char": null
@@ -4089,6 +4072,57 @@
         },
         "span_auto_corrected": false,
         "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Prompt Evaluation",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": true,
+        "source_span": {
+          "text": "evaluation",
+          "field_source": "description",
+          "start_char": 980,
+          "end_char": 990
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Generative AI",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": true,
+        "source_span": {
+          "text": "maintaining AI-powered applications that leverage generative models",
+          "field_source": "description",
+          "start_char": 120,
+          "end_char": 187
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Optimization",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "optimization",
+          "field_source": "description",
+          "start_char": 1005,
+          "end_char": 1017
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
       }
     ],
     "tools": [
@@ -4107,23 +4141,297 @@
       },
       {
         "tool_id": null,
-        "tool_name": "Retrieval Augmented Generation (RAG) Pipelines",
+        "tool_name": "Python",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "optimization",
+          "field_source": "description",
+          "start_char": 1005,
+          "end_char": 1017
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Generative AI Models",
         "category": "ai_tool",
         "confidence": 1.0,
         "source_span": {
-          "text": "building Retrieval-Augmented Generation (RAG) pipelines",
+          "text": "leverage generative models",
           "field_source": "description",
-          "start_char": 676,
-          "end_char": 731
+          "start_char": 160,
+          "end_char": 186
         },
         "is_genai_tool": true
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Participate in learning activities around modern software design, machine learning, and core development practices by proactively viewing articles, tutorials, and videos to learn about new technologies and best practices used within other technology organizations.",
+        "category": "development",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "15% Learning - Participates in learning activities around modern software design, machine learning, and development core practices (communities of practice); Proactively views articles, tutorials, and videos to learn about new technologies and best practices being used within other technology organizations",
+          "field_source": "description",
+          "start_char": 2549,
+          "end_char": 2856
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Report findings to software engineer manager or sr software engineer manager.",
+        "category": "management",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "This Position typically reports to Software Engineer Manager or Sr Software Engineer Manager",
+          "field_source": "description",
+          "start_char": 3366,
+          "end_char": 3458
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Overnight travel 5% to 20% of the time.",
+        "category": "operations",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Typically requires overnight travel 5% to 20% of the time.",
+          "field_source": "description",
+          "start_char": 3519,
+          "end_char": 3577
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Most of the time is spent sitting in a comfortable position with rare occasions where there may be a need to move or lift light articles.",
+        "category": "other",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Most of the time is spent sitting in a comfortable position and there is frequent opportunity to move about.",
+          "field_source": "description",
+          "start_char": 3603,
+          "end_char": 3711
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Write test code or scripts to perform destructive testing to ensure adequate resiliency in production.",
+        "category": "testing",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Writes custom code or scripts to do \"destructive testing\" to ensure adequate resiliency in production",
+          "field_source": "description",
+          "start_char": 2130,
+          "end_char": 2231
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Document, review, and ensure all quality and change control standards are met.",
+        "category": "management",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Documents, reviews, and ensures that all quality and change control standards are met",
+          "field_source": "description",
+          "start_char": 1841,
+          "end_char": 1926
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Create meaningful dashboards, logging, alerting, and responses.",
+        "category": "development",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Creates meaningful dashboards, logging, alerting, and responses to ensure that issues are captured and addressed proactively",
+          "field_source": "description",
+          "start_char": 2423,
+          "end_char": 2547
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Design, build, integrate, optimize, and maintain AI-powered applications that leverage generative models and overall product lifecycles.",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "responsible for designing, building, integrating, optimizing, and maintaining AI-powered applications that leverage generative models and overall product lifecycle for a product that our users love.",
+          "field_source": "description",
+          "start_char": 54,
+          "end_char": 252
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Participate in learning activities around modern software design, machine learning, and core development practices by proactively viewing articles, tutorials, and videos to learn about new technologies and best practices used within other technology organizations.",
+        "scope": "individual",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "15% Learning - Participates in learning activities around modern software design, machine learning, and development core practices (communities of practice); Proactively views articles, tutorials, and videos to learn about new technologies and best practices being used within other technology organizations",
+          "field_source": "description",
+          "start_char": 2549,
+          "end_char": 2856
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Field questions from other product teams or support teams by monitoring tools and participating in conversations that encourage collaboration across product teams.",
+        "scope": "organization",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Fields questions from other product teams or support teams; Monitors tools and participates in conversations to encourage collaboration across product teams",
+          "field_source": "description",
+          "start_char": 2889,
+          "end_char": 3045
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Provide application support for production software.",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Provides application support for software running in production",
+          "field_source": "description",
+          "start_char": 3047,
+          "end_char": 3110
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Proactively monitor production service level objectives for products.",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Proactively monitors production Service Level Objectives for products",
+          "field_source": "description",
+          "start_char": 3112,
+          "end_char": 3181
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Proactively review the performance and capacity of all aspects of production such as code, infrastructure, data, message processing, and prediction quality.",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Proactively reviews the Performance and Capacity of all aspects of production: code, infrastructure, data, message processing, and prediction quality",
+          "field_source": "description",
+          "start_char": 3183,
+          "end_char": 3332
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "reporting_structure",
+        "value": "Reports directly to software engineer manager or sr software engineer manager",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Direct Manager/Direct Reports:\n• This Position typically reports to Software Engineer Manager or Sr Software Engineer Manager\n• This Position has 0 Direct Reports",
+          "field_source": "description",
+          "start_char": 3333,
+          "end_char": 3495
+        }
+      },
+      {
+        "signal_type": "remote_policy",
+        "value": "Travel overnight 5% to 20% of the time",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Typically requires overnight travel 5% to 20% of the time.",
+          "field_source": "description",
+          "start_char": 3519,
+          "end_char": 3577
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "leverage generative models during product lifecycle",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "leverage generative models and overall product lifecycle",
+          "field_source": "description",
+          "start_char": 160,
+          "end_char": 216
+        }
+      },
+      {
+        "signal_type": "team_size",
+        "value": "collaborate with teams of various sizes",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "collaborate closely with teammates as they develop",
+          "field_source": "description",
+          "start_char": 293,
+          "end_char": 343
+        }
+      },
+      {
+        "signal_type": "reporting_structure",
+        "value": "report with business stakeholders, infrastructure, and development teams",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "interact with business stakeholders, infrastructure teams, and development teams to ensure business requirements are effectively addressed through generative AI solutions",
+          "field_source": "description",
+          "start_char": 783,
+          "end_char": 953
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "Work independently or in teams of various skills to produce and maintiain ai systems",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "work independently with minimal guidance, while collaborating with cross-functional teams of varying skill levels to design, deploy, and maintain production AI applications",
+          "field_source": "description",
+          "start_char": 1296,
+          "end_char": 1468
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "prompt implementation",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "review submitted code and prompt implementations",
+          "field_source": "description",
+          "start_char": 1484,
+          "end_char": 1532
+        }
       }
     ],
     "labeler_notes": {
       "LLM Evaluation": "Ambiguous — could be Tool. Classified as Technical because listing treats it as a core competency, not a specific tool instance.",
       "Communication": "Inferred from 'user stories that are developer friendly, easy to understand'. Not listed as a requirement.",
       "Retrieval Augmented Generation (RAG) Pipelines": "A tool being built.",
-      "RAG (Retrieval-Augmented Generation)": "Requires knowledge of RAG."
+      "RAG (Retrieval-Augmented Generation)": "Requires knowledge of RAG.",
+      "Large Language Models": "Ambiguous — could be Tool. Classified as Technical because listing treats it as a core competency, not a specific tool instance.",
+      "Python": "Python is a popular language among top AI system applications."
     }
   },
   {
@@ -4151,23 +4459,6 @@
           "field_source": "description",
           "start_char": 2204,
           "end_char": 2210
-        },
-        "span_auto_corrected": false,
-        "original_end_char": null
-      },
-      {
-        "skill_id": null,
-        "skill_name": "Linux",
-        "type": "Technical",
-        "confidence": 1.0,
-        "required_flag": true,
-        "esco_uri": null,
-        "is_genai_extension": false,
-        "source_span": {
-          "text": "Proficiency working in Linux environments",
-          "field_source": "description",
-          "start_char": 2264,
-          "end_char": 2305
         },
         "span_auto_corrected": false,
         "original_end_char": null
@@ -4225,23 +4516,6 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Manage ICT Virtualization Environments",
-        "type": "Technical",
-        "confidence": 1.0,
-        "required_flag": false,
-        "esco_uri": "http://data.europa.eu/esco/skill/ae4f0cc6-e0b9-47f5-bdca-2fc2e6316dce",
-        "is_genai_extension": false,
-        "source_span": {
-          "text": "Docker, Kubernetes",
-          "field_source": "description",
-          "start_char": 2816,
-          "end_char": 2834
-        },
-        "span_auto_corrected": false,
-        "original_end_char": null
-      },
-      {
-        "skill_id": null,
         "skill_name": "3D Modeling",
         "type": "Technical",
         "confidence": 1.0,
@@ -4253,6 +4527,159 @@
           "field_source": "description",
           "start_char": 2837,
           "end_char": 2859
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Data Analysis",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/ecc4552a-92c5-4222-b18d-faf5ac841080",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "spatial analysis",
+          "field_source": "responsibilities",
+          "start_char": 216,
+          "end_char": 232
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Machine Learning",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/3a2d5b45-56e4-4f5a-a55a-4a4a65afdc43",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Machine Learning",
+          "field_source": "description",
+          "start_char": 2450,
+          "end_char": 2466
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "model deployment",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/1d86f05e-e9cc-40ce-99d8-2b21cc71b16b",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "take a model from research/prototype to production deployment",
+          "field_source": "description",
+          "start_char": 1942,
+          "end_char": 2003
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Experimental Design",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "experimental design",
+          "field_source": "description",
+          "start_char": 2553,
+          "end_char": 2572
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "dimensionality reduction",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "dimensionality reduction",
+          "field_source": "description",
+          "start_char": 815,
+          "end_char": 839
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "feature extraction",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/696e3b5b-8b61-45af-ae4c-3ab700f197ec",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "feature extraction",
+          "field_source": "description",
+          "start_char": 792,
+          "end_char": 810
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "a/b testing",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "A/B testing",
+          "field_source": "description",
+          "start_char": 908,
+          "end_char": 919
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Statistical Modeling",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "statistical modeling",
+          "field_source": "description",
+          "start_char": 2506,
+          "end_char": 2526
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "computer vision",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/7b0d5000-00da-4864-b776-6de49a87a669",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "computer vision",
+          "field_source": "description",
+          "start_char": 2592,
+          "end_char": 2607
         },
         "span_auto_corrected": false,
         "original_end_char": null
@@ -4388,11 +4815,274 @@
           "end_char": 2401
         },
         "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Docker",
+        "category": "devops",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Docker",
+          "field_source": "description",
+          "start_char": 2816,
+          "end_char": 2822
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Kubernetes",
+        "category": "devops",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Kubernetes",
+          "field_source": "description",
+          "start_char": 2824,
+          "end_char": 2834
+        },
+        "is_genai_tool": false
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Ability to take a model from research/prototype to production deployment",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "strategic",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Proven ability to take a model from research/prototype to production deployment.",
+          "field_source": "description",
+          "start_char": 1924,
+          "end_char": 2004
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Use cloud computing technologies such as AWS, Azure, GCP",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "strategic",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Cloud computing technologies such as AWS, Azure, GCP",
+          "field_source": "description",
+          "start_char": 2149,
+          "end_char": 2201
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Proficiency working in Linux environments",
+        "category": "other",
+        "frequency": "unspecified",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Proficiency working in Linux environments",
+          "field_source": "description",
+          "start_char": 2264,
+          "end_char": 2305
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Utilize deep learning frameworks such as PyTorch and/or tensorflow/keras",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Deep Learning Frameworks: PyTorch and/or TensorFlow/Keras.",
+          "field_source": "description",
+          "start_char": 2308,
+          "end_char": 2366
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Perform data manipulation in pandas and numpy",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Data Manipulation: Pandas, NumPy.",
+          "field_source": "description",
+          "start_char": 2369,
+          "end_char": 2402
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Perform computer vision tasks relevant to 3D geometric registration, segmentation, and shape analysis",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Experience with computer vision tasks relevant to 3D geometry (e.g., registration, segmentation, shape analysis).",
+          "field_source": "description",
+          "start_char": 2576,
+          "end_char": 2689
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Develop, train, and deploy machine learning and deep learning models for spatial analysis of 3D human body scans.",
+        "scope": "individual",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Develop, train, and deploy machine learning and deep learning models for spatial analysis of 3D human body scans.",
+          "field_source": "description",
+          "start_char": 494,
+          "end_char": 607
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Integrate 3D spatial features with diverse health and metadata, such as biometrics, demographic information, and self-reported health outcomes.",
+        "scope": "individual",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Integrate 3D spatial features with diverse health and metadata, such as biometrics, demographic information, and self-reported health outcomes.",
+          "field_source": "description",
+          "start_char": 610,
+          "end_char": 753
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Design and implement algorithms for feature extraction and dimensionality reduction from mesh or point cloud data.",
+        "scope": "individual",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Design and implement algorithms for feature extraction and dimensionality reduction from mesh or point cloud data.",
+          "field_source": "description",
+          "start_char": 756,
+          "end_char": 870
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Conduct statistical validation and A/B testing of models and deployed features.",
+        "scope": "individual",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Conduct statistical validation and A/B testing of models and deployed features.",
+          "field_source": "description",
+          "start_char": 873,
+          "end_char": 952
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Collaborate with software engineers and domain experts (e.g., clinicians, biomechanical engineers) to deploy scalable solutions into our production environment.",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Collaborate with software engineers and domain experts (e.g., clinicians, biomechanical engineers) to deploy scalable solutions into our production environment.",
+          "field_source": "description",
+          "start_char": 955,
+          "end_char": 1115
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Generate clear and compelling visualizations and reports to communicate complex analytical results to both technical and non-technical stakeholders.",
+        "scope": "organization",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Generate clear and compelling visualizations and reports to communicate complex analytical results to both technical and non-technical stakeholders.",
+          "field_source": "description",
+          "start_char": 1118,
+          "end_char": 1266
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "remote_policy",
+        "value": "Remote",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Remote",
+          "field_source": "title",
+          "start_char": 36,
+          "end_char": 42
+        }
+      },
+      {
+        "signal_type": "growth_stage",
+        "value": "B2B2C technology company",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "B2B2C technology company",
+          "field_source": "description",
+          "start_char": 3438,
+          "end_char": 3462
+        }
+      },
+      {
+        "signal_type": "growth_stage",
+        "value": "on a mission to revolutionize the apparel industry through data science",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "on a mission to revolutionize the apparel industry through data science",
+          "field_source": "description",
+          "start_char": 3463,
+          "end_char": 3534
+        }
+      },
+      {
+        "signal_type": "growth_stage",
+        "value": "backed by an investor group including experienced angel investors, institutional firms, and multi-billion dollar retailers",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "backed by an investor group including experienced angel investors, institutional firms, and multi-billion dollar retailers",
+          "field_source": "description",
+          "start_char": 3785,
+          "end_char": 3907
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "Machine Learning Engineer",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Senior  Machine Learning Engineer",
+          "field_source": "title",
+          "start_char": 0,
+          "end_char": 33
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "develop, train, and deploy",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Develop, train, and deploy",
+          "field_source": "description",
+          "start_char": 494,
+          "end_char": 520
+        }
       }
     ],
     "labeler_notes": {
       "Python": "Ambiguous — listed as core competency, classified Technical.",
-      "Linux": "Ambiguous - listed as a core competency"
+      "Linux": "Ambiguous - listed as a core competency",
+      "Data Analysis": "Spatial analysis refers to data in higher dimensions",
+      "feature extraction": "Feature extraction in ESCO is also known as information extraction",
+      "computer vision": "Includes segmentation, shape analysis, and geometry registration"
     }
   },
   {
@@ -4460,68 +5150,170 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Algorithms",
-        "type": "Technical",
-        "confidence": 1.0,
-        "required_flag": true,
-        "esco_uri": "http://data.europa.eu/esco/skill/54924a2c-daca-40d3-9716-4b38ceb04f38",
-        "is_genai_extension": false,
-        "source_span": {
-          "text": "solving complex problems with multilayered data and enjoy optimizing algorithms for performance and scalability",
-          "field_source": "description",
-          "start_char": 1770,
-          "end_char": 1881
-        },
-        "span_auto_corrected": false,
-        "original_end_char": null
-      },
-      {
-        "skill_id": null,
-        "skill_name": "Prototyping Development",
-        "type": "Technical",
-        "confidence": 1.0,
-        "required_flag": true,
-        "esco_uri": "http://data.europa.eu/esco/skill/ed1d8bd4-cd2a-4c64-b665-56d70651026c",
-        "is_genai_extension": false,
-        "source_span": {
-          "text": "turning prototypes into production-ready systems",
-          "field_source": "description",
-          "start_char": 2117,
-          "end_char": 2165
-        },
-        "span_auto_corrected": false,
-        "original_end_char": null
-      },
-      {
-        "skill_id": null,
-        "skill_name": "Data Mining",
-        "type": "Technical",
-        "confidence": 1.0,
-        "required_flag": true,
-        "esco_uri": "http://data.europa.eu/esco/skill/25f0ea33-b4a2-4f31-b7b4-7d20e827b180",
-        "is_genai_extension": false,
-        "source_span": {
-          "text": "Data Analysis & Modeling: Mine and analyze complex datasets",
-          "field_source": "description",
-          "start_char": 2386,
-          "end_char": 2445
-        },
-        "span_auto_corrected": false,
-        "original_end_char": null
-      },
-      {
-        "skill_id": null,
-        "skill_name": "Statistical Modeling Techniques",
+        "skill_name": "statistical techniques",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
         "esco_uri": "http://data.europa.eu/esco/skill/68ef0e4d-5542-4e64-84f4-752cce5a3c22",
         "is_genai_extension": false,
         "source_span": {
-          "text": "Predictive Modeling & Optimization: Use advanced statistical and machine learning approaches to drive improvements",
+          "text": "statistical techniques",
           "field_source": "description",
-          "start_char": 3304,
-          "end_char": 3418
+          "start_char": 2558,
+          "end_char": 2580
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "cross-functional collaboration",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "collaborating with cross-functional teams",
+          "field_source": "description",
+          "start_char": 1463,
+          "end_char": 1504
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "large language models",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": true,
+        "source_span": {
+          "text": "LLM Models",
+          "field_source": "description",
+          "start_char": 2874,
+          "end_char": 2884
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "model development",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": true,
+        "source_span": {
+          "text": "developing and implementing machine learning models",
+          "field_source": "description",
+          "start_char": 1410,
+          "end_char": 1461
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "data analysis",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Data Analysis",
+          "field_source": "description",
+          "start_char": 601,
+          "end_char": 614
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "fine-tuning",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": true,
+        "source_span": {
+          "text": "fine-tuning",
+          "field_source": "description",
+          "start_char": 3946,
+          "end_char": 3957
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "prompt engineering",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": true,
+        "source_span": {
+          "text": "prompt engi",
+          "field_source": "description",
+          "start_char": 3979,
+          "end_char": 3990
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "instruction tuning",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": true,
+        "source_span": {
+          "text": "instruction tuning",
+          "field_source": "description",
+          "start_char": 3959,
+          "end_char": 3977
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Model Monitoring",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": false,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "REQUIRED QUALIFICATIONS",
+          "field_source": "description",
+          "start_char": 3700,
+          "end_char": 3723
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "natural language processing",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": "http://data.europa.eu/esco/skill/fff0e2cd-d0bd-4b02-9daf-158b79d9688a",
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "data",
+          "field_source": "description",
+          "start_char": 1813,
+          "end_char": 1817
         },
         "span_auto_corrected": false,
         "original_end_char": null
@@ -4556,7 +5348,7 @@
       },
       {
         "tool_id": null,
-        "tool_name": "Large Language Models (LLMs)",
+        "tool_name": "Large Language Models",
         "category": "ai_tool",
         "confidence": 1.0,
         "source_span": {
@@ -4566,12 +5358,342 @@
           "end_char": 2901
         },
         "is_genai_tool": true
+      },
+      {
+        "tool_id": null,
+        "tool_name": "LangChain",
+        "category": "framework",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "REQUIRED QUALIFICATIONS",
+          "field_source": "description",
+          "start_char": 3700,
+          "end_char": 3723
+        },
+        "is_genai_tool": true
+      },
+      {
+        "tool_id": null,
+        "tool_name": "SQL",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "REQUIRED QUALIFICATIONS",
+          "field_source": "description",
+          "start_char": 3700,
+          "end_char": 3723
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "r",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "REQUIRED QUALIFICATIONS",
+          "field_source": "description",
+          "start_char": 3700,
+          "end_char": 3723
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Hugging Face",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "REQUIRED QUALIFICATIONS",
+          "field_source": "description",
+          "start_char": 3700,
+          "end_char": 3723
+        },
+        "is_genai_tool": true
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "hands-on experience building and deploying ML models in cloud environments like aws",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "hands-on experience building and deploying ML models in cloud environments like AWS.",
+          "field_source": "description",
+          "start_char": 1671,
+          "end_char": 1755
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Solve complex problems with multilayered data and enjoy optimizing algorithms for performance and scalability.",
+        "category": "development",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "You thrive on solving complex problems with multilayered data and enjoy optimizing algorithms for performance and scalability.",
+          "field_source": "description",
+          "start_char": 1756,
+          "end_char": 1882
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Work with data scientists, engineers, and product teams to bring intelligent solutions to life.",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Your collaborative mindset allows you to work seamlessly with data scientists, engineers, and product teams to bring intelligent solutions to life.",
+          "field_source": "description",
+          "start_char": 1883,
+          "end_char": 2030
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Stay current on the latest Machine learning techniques and tools",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "You stay current with the latest ML techniques and tools",
+          "field_source": "description",
+          "start_char": 2030,
+          "end_char": 2086
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Turn prototypes into production-ready systems that deliver real-world impact.",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "you’re passionate about turning prototypes into production-ready systems that deliver real-world impact.",
+          "field_source": "description",
+          "start_char": 2093,
+          "end_char": 2197
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Identify Opportunities: Collaborate with internal and external stakeholders to uncover and define data-driven opportunities that align with strategic business goals.",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Identify Opportunities: Collaborate with internal and external stakeholders to uncover and define data-driven opportunities that align with strategic business goals.",
+          "field_source": "description",
+          "start_char": 2218,
+          "end_char": 2383
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Data Analysis & Modeling: Mine and analyze complex datasets from company and client databases to drive product and business optimization strategies, using both traditional statistical techniques and state-of-the-art machine learning approaches.",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Data Analysis & Modeling: Mine and analyze complex datasets from company and client databases to drive product and business optimization strategies, using both traditional statistical techniques and state-of-the-art machine learning approaches.",
+          "field_source": "description",
+          "start_char": 2386,
+          "end_char": 2630
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Assess the effectiveness and accuracy of new data sources and data gathering techniques, including evaluating and implementing methods for acquiring and processing large volumes of text data.",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Assess the effectiveness and accuracy of new data sources and data gathering techniques, including evaluating and implementing methods for acquiring and processing large volumes of text data.",
+          "field_source": "description",
+          "start_char": 2633,
+          "end_char": 2824
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Perform data processing using State of the Art LLM Models and technologies",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Perform data processing using State of the Art LLM Models and technologies",
+          "field_source": "description",
+          "start_char": 2827,
+          "end_char": 2901
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Innovation & Strategy: Assess the effectiveness of new data sources and data gathering techniques, identifying ways to enhance the organization’s data strategy with novel ML and AI methods.",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Innovation & Strategy: Assess the effectiveness of new data sources and data gathering techniques, identifying ways to enhance the organization’s data strategy with novel ML and AI methods.",
+          "field_source": "description",
+          "start_char": 2904,
+          "end_char": 3093
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Client-Facing Presentations: Develop compelling presentations and demos to showcase analytical solutions and insights to both technical and non-technical audiences, including clients and senior management.",
+        "scope": "department",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Client-Facing Presentations: Develop compelling presentations and demos to showcase analytical solutions and insights to both technical and non-technical audiences, including clients and senior management.",
+          "field_source": "description",
+          "start_char": 3096,
+          "end_char": 3301
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Predictive Modeling & Optimization: Use advanced statistical and machine learning approaches to drive improvements in customer engagement, product performance, and business processes.",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Predictive Modeling & Optimization: Use advanced statistical and machine learning approaches to drive improvements in customer engagement, product performance, and business processes.",
+          "field_source": "description",
+          "start_char": 3304,
+          "end_char": 3487
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Model Monitoring: Establish processes and tools to track model performance, data accuracy, and reliability over time. Continuously iterate on models to meet evolving business needs and industry best practices.",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Model Monitoring: Establish processes and tools to track model performance, data accuracy, and reliability over time. Continuously iterate on models to meet evolving business needs and industry best practices.",
+          "field_source": "description",
+          "start_char": 3490,
+          "end_char": 3699
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "As a Data Scientist/Machine Learning Engineer at ICA, you will be at the forefront of applying machine learning techniques to solve complex problems and enhance our products and services; developing and implementing machine learning models; collaborating with cross-functional teams; contributing to the advancement of our AI capabilities.",
+        "scope": "department",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "As a Data Science/Machine Learning Engineer at ICA, you will be at the forefront of applying machine learning techniques to solve complex problems and enhance our products and services. Your role will involve developing and implementing machine learning models, collaborating with cross-functional teams, and contributing to the advancement of our AI capabilities.",
+          "field_source": "description",
+          "start_char": 1201,
+          "end_char": 1565
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "remote_policy",
+        "value": "Remote, Continental United States",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Remote, Continental United States",
+          "field_source": "title",
+          "start_char": 40,
+          "end_char": 73
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "Data Science/Machine Learning Engineer",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Data Science/Machine Learning Engineer",
+          "field_source": "description",
+          "start_char": 1206,
+          "end_char": 1244
+        }
+      },
+      {
+        "signal_type": "team_size",
+        "value": "one team",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "one team",
+          "field_source": "description",
+          "start_char": 819,
+          "end_char": 827
+        }
+      },
+      {
+        "signal_type": "team_size",
+        "value": "growing team",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "growing team",
+          "field_source": "description",
+          "start_char": 1171,
+          "end_char": 1183
+        }
+      },
+      {
+        "signal_type": "growth_stage",
+        "value": "rapidly growing",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "International Consulting Associates, Inc. is a rapidly growing company",
+          "field_source": "description",
+          "start_char": 16,
+          "end_char": 86
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "LLM Models",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "LLM Models",
+          "field_source": "description",
+          "start_char": 2874,
+          "end_char": 2884
+        }
+      },
+      {
+        "signal_type": "growth_stage",
+        "value": "founded in 2009",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "founded in 2009",
+          "field_source": "description",
+          "start_char": 128,
+          "end_char": 143
+        }
       }
     ],
     "labeler_notes": {
       "Python": "Ambiguous - Can be skill or tool.",
       "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d": "Ambiguous - Can be skill or tool.",
-      "Algorithms": "For complex technical problem solving."
+      "Algorithms": "For complex technical problem solving.",
+      "cross-functional collaboration": "cross-functional collaboration can be labeled technical given the nature of stakeholders in the SDLC.",
+      "model development": "genai skill because the role implies advancement of ai capabilities and use of large language models.",
+      "prompt engineering": "prompt engineering got truncated, added as skill",
+      "LangChain": "LangChain truncated in tool but exists in dataset",
+      "SQL": "Truncated in tool but exists in dataset",
+      "r": "Truncated in tool but exists in dataset",
+      "Hugging Face": "Truncated in tool but exists in dataset",
+      "Model Monitoring": "Truncated in tool but exists in dataset"
     }
   },
   {
