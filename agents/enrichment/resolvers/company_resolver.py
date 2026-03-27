@@ -51,13 +51,13 @@ def normalize_company_name(raw: str) -> str:
 
 
 def lookup_company_exact(normalized_name: str, session: Session) -> str | None:
-    """Return ``companies.company_id`` for an exact ``company_name`` match, else ``None``."""
-    stmt = (
-        select(Company.company_id)
-        .where(Company.company_name == normalized_name)
-        .limit(1)
-    )
-    return session.execute(stmt).scalar_one_or_none()
+    """Return ``companies.company_id`` when ``normalize_company_name(company_name)`` matches."""
+    for company_id, company_name in session.execute(
+        select(Company.company_id, Company.company_name)
+    ).all():
+        if normalize_company_name(company_name) == normalized_name:
+            return company_id
+    return None
 
 
 def find_best_fuzzy_match(

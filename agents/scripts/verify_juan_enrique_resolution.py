@@ -2,17 +2,25 @@
 
 Tests resolve_company() with known and unknown companies, resolve_location(),
 compute_field_confidence(), compute_overall_confidence(), and
-build_record_enriched_event(). Requires local Postgres running.
+build_record_enriched_event(). Steps 3, 4, and 8 require PostgreSQL.
 
 Usage (from repo root, venv active):
     python agents/scripts/verify_juan_enrique_resolution.py
+
+Local DB: start Docker, then from repo root::
+    docker compose --env-file .env.docker up postgres -d
+
+Set ``PYTHON_DATABASE_URL`` in ``.env`` to match ``POSTGRES_PORT`` in ``.env.docker``
+(default host port is 5432 per ``docker-compose.yml``, not 5433).
 """
 # ruff: noqa: T201
 from __future__ import annotations
 
+import os
 import sys
 import uuid
 from pathlib import Path
+from unittest.mock import MagicMock
 
 # ---------------------------------------------------------------------------
 # Path bootstrap
@@ -24,6 +32,44 @@ if str(_REPO_ROOT) not in sys.path:
 from dotenv import load_dotenv
 
 load_dotenv(_REPO_ROOT / ".env")
+
+
+def _print_preflight_hints(db_err: str | None) -> None:
+    if not db_err:
+        return
+    el = db_err.lower()
+    url = os.getenv("PYTHON_DATABASE_URL") or ""
+    if "password authentication failed" in el:
+        print(
+            "  Hint: the password in PYTHON_DATABASE_URL must match POSTGRES_PASSWORD in .env.docker."
+        )
+    if "connection refused" in el and ":5433" in url:
+        print(
+            "  Hint: URL uses port 5433; docker-compose defaults to host port 5432 "
+            "(POSTGRES_PORT). Use the same port in PYTHON_DATABASE_URL."
+        )
+
+
+def _print_database_setup_help() -> None:
+    print(
+        """
+  Fix: PostgreSQL must be running and PYTHON_DATABASE_URL must match host and port.
+
+  1. Start Docker Desktop (Windows/Mac) or the Docker daemon (Linux).
+
+  2. Copy .env.docker.example to .env.docker, set POSTGRES_PASSWORD (and optional
+     POSTGRES_PORT; default mapped port is 5432 per docker-compose.yml).
+
+  3. From the repo root run:
+       docker compose --env-file .env.docker up postgres -d
+
+  4. In .env set (password and port must match .env.docker):
+       PYTHON_DATABASE_URL=postgresql+psycopg2://postgres:YOUR_PASSWORD@localhost:5432/talent_finder
+     Use the same port as POSTGRES_PORT (5432 unless you changed it).
+
+  See ONBOARDING.md section 5 for details.
+"""
+    )
 
 
 def main() -> int:
@@ -53,7 +99,10 @@ def main() -> int:
 
     from sqlalchemy import text as sa_text
 
-    from agents.common.data_store.database import session_scope
+    from agents.common.data_store.database import (
+        check_db_connection_detail,
+        session_scope,
+    )
 
     # ------------------------------------------------------------------
     # 2. Company name normalization
@@ -83,81 +132,119 @@ def main() -> int:
         failed += 1
 
     # ------------------------------------------------------------------
+    # Preflight: steps 3, 4, 8 need PostgreSQL
+    # ------------------------------------------------------------------
+    print("\n=== Preflight: PostgreSQL (steps 3, 4, 8) ===")
+    db_ok, db_err = check_db_connection_detail()
+    if not db_ok:
+        if not os.getenv("PYTHON_DATABASE_URL"):
+            print("  FAIL: PYTHON_DATABASE_URL is not set in .env")
+        else:
+            print("  FAIL: cannot connect to PostgreSQL (wrong URL, port, or server down)")
+        _print_preflight_hints(db_err)
+        _print_database_setup_help()
+    else:
+        print("  PASS: database reachable")
+
+    # ------------------------------------------------------------------
     # 3. resolve_company() with DB -- known company
     # ------------------------------------------------------------------
     print("\n=== 3. resolve_company() -- database lookup ===")
-    try:
-        with session_scope() as session:
-            # Find any existing company to test exact match
-            row = session.execute(
-                sa_text("SELECT company_name FROM dbo.companies LIMIT 1")
-            ).fetchone()
-
-            if row:
-                known_name = row[0]
-                company_id, confidence = resolve_company(known_name, session)
-                print(f"  Known company \"{known_name}\" -> id={company_id}, confidence={confidence:.2f}")
-                if company_id and confidence > 0.5:
-                    print("  PASS: known company resolved")
-                    passed += 1
-                else:
-                    print("  FAIL: known company should resolve with high confidence")
-                    failed += 1
-            else:
-                print("  WARN: companies table is empty -- skipping known company test")
-                passed += 1  # not their fault
-
-    except Exception as e:
-        print(f"  FAIL: resolve_company error -- {e}")
+    if not db_ok:
+        print("  SKIP/FAIL: requires database (see Preflight)")
         failed += 1
+    else:
+        try:
+            with session_scope() as session:
+                # Find any existing company to test exact match
+                row = session.execute(
+                    sa_text("SELECT company_name FROM dbo.companies LIMIT 1")
+                ).fetchone()
+
+                if row:
+                    known_name = row[0]
+                    company_id, confidence = resolve_company(known_name, session)
+                    print(
+                        f"  Known company \"{known_name}\" -> id={company_id}, confidence={confidence:.2f}"
+                    )
+                    if company_id and confidence > 0.5:
+                        print("  PASS: known company resolved")
+                        passed += 1
+                    else:
+                        print("  FAIL: known company should resolve with high confidence")
+                        failed += 1
+                else:
+                    print("  WARN: companies table is empty -- skipping known company test")
+                    passed += 1  # not their fault
+
+        except Exception as e:
+            print(f"  FAIL: resolve_company error -- {e}")
+            failed += 1
 
     # ------------------------------------------------------------------
     # 4. resolve_company() -- unknown company (placeholder creation)
     # ------------------------------------------------------------------
     print("\n=== 4. resolve_company() -- placeholder creation ===")
-    try:
-        fake_name = f"VerifyTest_{uuid.uuid4().hex[:8]} Corp"
-        with session_scope() as session:
-            company_id, confidence = resolve_company(fake_name, session)
-            print(f"  Unknown company \"{fake_name}\" -> id={company_id}, confidence={confidence:.2f}")
-
-            if company_id is None:
-                print("  FAIL: company_id is None -- placeholder was NOT created. This is the #1 non-negotiable.")
-                failed += 1
-            else:
-                # Verify placeholder exists in companies table
-                check = session.execute(
-                    sa_text("SELECT company_name FROM dbo.companies WHERE company_id = :cid"),
-                    {"cid": company_id},
-                ).fetchone()
-                if check:
-                    print(f"  Placeholder row: name=\"{check[0]}\"")
-                    print("  PASS: placeholder created -- company_id is never null")
-                    passed += 1
-                else:
-                    print("  FAIL: company_id returned but no row found in companies table")
-                    failed += 1
-
-            # Clean up test placeholder
-            session.execute(
-                sa_text("DELETE FROM dbo.companies WHERE company_name = :name"),
-                {"name": fake_name},
-            )
-
-    except Exception as e:
-        print(f"  FAIL: placeholder creation error -- {e}")
+    if not db_ok:
+        print("  SKIP/FAIL: requires database (see Preflight)")
         failed += 1
+    else:
+        try:
+            fake_name = f"VerifyTest_{uuid.uuid4().hex[:8]} Corp"
+            with session_scope() as session:
+                company_id, confidence = resolve_company(fake_name, session)
+                print(
+                    f"  Unknown company \"{fake_name}\" -> id={company_id}, confidence={confidence:.2f}"
+                )
+
+                if company_id is None:
+                    print(
+                        "  FAIL: company_id is None -- placeholder was NOT created. This is the #1 non-negotiable."
+                    )
+                    failed += 1
+                else:
+                    # Verify placeholder exists in companies table
+                    check = session.execute(
+                        sa_text(
+                            "SELECT company_name FROM dbo.companies WHERE company_id = :cid"
+                        ),
+                        {"cid": company_id},
+                    ).fetchone()
+                    if check:
+                        print(f"  Placeholder row: name=\"{check[0]}\"")
+                        print("  PASS: placeholder created -- company_id is never null")
+                        passed += 1
+                    else:
+                        print("  FAIL: company_id returned but no row found in companies table")
+                        failed += 1
+
+                # Clean up test placeholder
+                session.execute(
+                    sa_text("DELETE FROM dbo.companies WHERE company_name = :name"),
+                    {"name": fake_name},
+                )
+
+        except Exception as e:
+            print(f"  FAIL: placeholder creation error -- {e}")
+            failed += 1
 
     # ------------------------------------------------------------------
     # 5. resolve_location()
     # ------------------------------------------------------------------
     print("\n=== 5. resolve_location() ===")
     try:
-        with session_scope() as session:
+        # Resolver does not execute SQL; a mock session avoids requiring DB when offline.
+        session = MagicMock() if not db_ok else None
+        if session is None:
+            with session_scope() as real_session:
+                loc_id, confidence, raw_text, borderplex = resolve_location(
+                    "El Paso, TX", real_session
+                )
+        else:
             loc_id, confidence, raw_text, borderplex = resolve_location("El Paso, TX", session)
-            print(f"  \"El Paso, TX\" -> loc_id={loc_id}, confidence={confidence:.2f}, borderplex={borderplex}")
-            print("  PASS: resolve_location runs without error")
-            passed += 1
+        print(f"  \"El Paso, TX\" -> loc_id={loc_id}, confidence={confidence:.2f}, borderplex={borderplex}")
+        print("  PASS: resolve_location runs without error")
+        passed += 1
     except Exception as e:
         print(f"  FAIL: resolve_location error -- {e}")
         failed += 1
@@ -226,22 +313,28 @@ def main() -> int:
     # 8. Non-negotiable: no null company_id in job_postings
     # ------------------------------------------------------------------
     print("\n=== 8. Non-negotiable: no null company_id ===")
-    try:
-        with session_scope() as session:
-            row = session.execute(
-                sa_text("SELECT COUNT(*) FROM dbo.job_postings WHERE company_id IS NULL")
-            ).fetchone()
-            null_count = row[0] if row else -1
-            print(f"  Null company_id count: {null_count}")
-            if null_count == 0:
-                print("  PASS: no null company_id in job_postings")
-                passed += 1
-            else:
-                print(f"  FAIL: {null_count} rows have null company_id -- this is a non-negotiable")
-                failed += 1
-    except Exception as e:
-        print(f"  FAIL: null company_id check error -- {e}")
+    if not db_ok:
+        print("  SKIP/FAIL: requires database (see Preflight)")
         failed += 1
+    else:
+        try:
+            with session_scope() as session:
+                row = session.execute(
+                    sa_text("SELECT COUNT(*) FROM dbo.job_postings WHERE company_id IS NULL")
+                ).fetchone()
+                null_count = row[0] if row else -1
+                print(f"  Null company_id count: {null_count}")
+                if null_count == 0:
+                    print("  PASS: no null company_id in job_postings")
+                    passed += 1
+                else:
+                    print(
+                        f"  FAIL: {null_count} rows have null company_id -- this is a non-negotiable"
+                    )
+                    failed += 1
+        except Exception as e:
+            print(f"  FAIL: null company_id check error -- {e}")
+            failed += 1
 
     # ------------------------------------------------------------------
     # Summary

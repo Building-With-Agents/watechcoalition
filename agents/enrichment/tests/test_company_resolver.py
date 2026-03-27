@@ -43,7 +43,7 @@ def test_normalize_company_name(raw: str, expected: str) -> None:
 def test_lookup_company_exact_returns_id_when_found() -> None:
     session = MagicMock()
     exec_result = MagicMock()
-    exec_result.scalar_one_or_none.return_value = _UUID_LOOKUP
+    exec_result.all.return_value = [(_UUID_LOOKUP, "Microsoft Corporation")]
     session.execute.return_value = exec_result
 
     assert lookup_company_exact("microsoft", session) == _UUID_LOOKUP
@@ -53,7 +53,7 @@ def test_lookup_company_exact_returns_id_when_found() -> None:
 def test_lookup_company_exact_returns_none_when_not_found() -> None:
     session = MagicMock()
     exec_result = MagicMock()
-    exec_result.scalar_one_or_none.return_value = None
+    exec_result.all.return_value = [(_UUID_ROW, "Totally Different LLC")]
     session.execute.return_value = exec_result
 
     assert lookup_company_exact("unknown-corp", session) is None

@@ -18,7 +18,7 @@ def test_enrich_record_happy_path_has_required_keys(
     mock_overall_confidence: MagicMock,
 ) -> None:
     mock_resolve_company.return_value = (101, 0.95)
-    mock_resolve_location.return_value = (7, 0.90, None, None)
+    mock_resolve_location.return_value = ("550e8400-e29b-41d4-a716-446655440007", 0.90, None, None)
     mock_field_confidence.return_value = {
         "company_id": 0.95,
         "location_id": 0.90,
@@ -38,7 +38,7 @@ def test_enrich_record_happy_path_has_required_keys(
 
     assert out["company_id"] == 101
     assert out["company_id"] is not None
-    assert out["location_id"] == 7
+    assert out["location_id"] == "550e8400-e29b-41d4-a716-446655440007"
     assert out["raw_location_text"] is None
     assert out["borderplex_subregion"] is None
     assert out["field_confidence"] == mock_field_confidence.return_value
