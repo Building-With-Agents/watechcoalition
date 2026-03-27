@@ -99,6 +99,13 @@ _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS responsibilities TEXT",
 ]
 
+# Company HQ / location fields for enrichment resolve_location (#110)
+_COMPANIES_LOCATION_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.companies ADD COLUMN IF NOT EXISTS city TEXT",
+    "ALTER TABLE dbo.companies ADD COLUMN IF NOT EXISTS state TEXT",
+    "ALTER TABLE dbo.companies ADD COLUMN IF NOT EXISTS normalized_location TEXT",
+]
+
 # Backfill token columns when llm_audit_log predates full DDL (idempotent)
 _LLM_AUDIT_LOG_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS input_tokens INTEGER",
@@ -197,6 +204,17 @@ def run_migrations(engine: Engine) -> None:
         except Exception as exc:
             log.warning(
                 "migration_normalized_jobs_alter_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
+
+    for stmt in _COMPANIES_LOCATION_ALTER_STATEMENTS:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(stmt))
+        except Exception as exc:
+            log.warning(
+                "migration_companies_location_alter_skipped",
                 statement=stmt,
                 error=str(exc),
             )

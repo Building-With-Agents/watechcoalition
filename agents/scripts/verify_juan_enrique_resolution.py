@@ -72,6 +72,17 @@ def _print_database_setup_help() -> None:
     )
 
 
+def _offline_location_session_mock() -> MagicMock:
+    """``resolve_location`` runs two ``execute`` calls; stub both when DB is down."""
+    session = MagicMock()
+    r1 = MagicMock()
+    r1.scalar_one_or_none.return_value = None
+    r2 = MagicMock()
+    r2.__iter__ = lambda self: iter(())
+    session.execute.side_effect = [r1, r2]
+    return session
+
+
 def main() -> int:
     passed = 0
     failed = 0
@@ -145,6 +156,14 @@ def main() -> int:
         _print_database_setup_help()
     else:
         print("  PASS: database reachable")
+        try:
+            from agents.common.data_store.database import get_engine
+            from agents.common.data_store.migrations import run_migrations
+
+            run_migrations(get_engine())
+            print("  PASS: idempotent run_migrations() applied (e.g. companies geo columns #110)")
+        except Exception as mig_exc:
+            print(f"  WARN: run_migrations failed — steps 4–5 may fail until fixed: {mig_exc}")
 
     # ------------------------------------------------------------------
     # 3. resolve_company() with DB -- known company
@@ -233,8 +252,8 @@ def main() -> int:
     # ------------------------------------------------------------------
     print("\n=== 5. resolve_location() ===")
     try:
-        # Resolver does not execute SQL; a mock session avoids requiring DB when offline.
-        session = MagicMock() if not db_ok else None
+        # Resolver queries Company; stub session.execute when DB is unreachable.
+        session = _offline_location_session_mock() if not db_ok else None
         if session is None:
             with session_scope() as real_session:
                 loc_id, confidence, raw_text, borderplex = resolve_location(
