@@ -25,6 +25,13 @@ def test_record_enriched_event_type_and_counts() -> None:
         "enriched_count",
         "spam_rejected_count",
         "flagged_for_review_count",
+        "spam_tier_counts",
+    }
+    assert event.payload["spam_tier_counts"] == {
+        "clean": 0,
+        "flagged": 0,
+        "rejected": 0,
+        "uncertain": 0,
     }
     assert event.payload["event_type"] == "RecordEnriched"
     assert event.payload["batch_id"] == "batch-001"

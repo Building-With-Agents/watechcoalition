@@ -58,6 +58,7 @@ def test_restricted_control_event_detection() -> None:
     assert is_restricted_control_event("SourceAlert") is True
     assert is_restricted_control_event("SourceFailure") is True
     assert is_restricted_control_event("DemandAnomaly") is True
+    assert is_restricted_control_event("EnrichmentDegraded") is True
     assert is_restricted_control_event("IngestBatch") is False
 
 
@@ -90,6 +91,14 @@ def test_subscription_policy_blocks_non_orchestrator_on_demand_anomaly() -> None
     with pytest.raises(RestrictedSubscriptionError):
         enforce_subscription_policy(
             event_type="DemandAnomaly",
+            subscriber_id="analytics-agent",
+        )
+
+
+def test_subscription_policy_blocks_non_orchestrator_on_enrichment_degraded() -> None:
+    with pytest.raises(RestrictedSubscriptionError):
+        enforce_subscription_policy(
+            event_type="EnrichmentDegraded",
             subscriber_id="analytics-agent",
         )
 

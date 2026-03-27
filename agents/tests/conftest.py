@@ -130,6 +130,12 @@ def enriched_event() -> EventEnvelope:
             "enriched_count": 3,
             "spam_rejected_count": 0,
             "flagged_for_review_count": 1,
+            "spam_tier_counts": {
+                "clean": 3,
+                "flagged": 1,
+                "rejected": 0,
+                "uncertain": 0,
+            },
         },
     )
 
