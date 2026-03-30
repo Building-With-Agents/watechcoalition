@@ -1,14 +1,10 @@
 from __future__ import annotations
 
-"""
-Skills extraction Pydantic models (schemas) for skills, context, and spans.
+"""Backward-compatible re-exports for skills extraction models.
 
-ContextSignal and SpanRecord are used by the context extractor (extract_context);
-other models (SkillRecord, ToolRecord, etc.) are used by downstream extractors.
-Schema definitions follow ARCHITECTURE_DEEP.md § Work Intelligence Extraction.
+Canonical definitions: ``agents.common.types`` and ``extraction_schemas.py``.
 """
 
-from agents.common.types.extraction_types import ContextSignal
-from agents.skills_extraction.models.base import SpanRecord
+from agents.common.types import ContextSignal, SpanRecord
 
 __all__ = ["SpanRecord", "ContextSignal"]
