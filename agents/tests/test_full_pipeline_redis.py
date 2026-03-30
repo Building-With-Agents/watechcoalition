@@ -37,7 +37,15 @@ def test_full_pipeline_redis_run_and_report() -> None:
         "--redis-url",
         _redis_url() or "",
     ]
-    result = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=300)
+    result = subprocess.run(
+        cmd,
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=300,
+    )
     assert result.returncode in (0, 1), (
         f"Script should exit 0 or 1; got {result.returncode}. stdout: {result.stdout} stderr: {result.stderr}"
     )

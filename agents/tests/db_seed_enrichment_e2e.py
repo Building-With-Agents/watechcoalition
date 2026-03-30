@@ -1,0 +1,287 @@
+"""Seed minimal FK rows for enrichment ``job_postings`` promotion E2E tests.
+
+Requires a PostgreSQL database with Prisma/pgloader-shaped ``dbo`` tables:
+``postal_geo_data``, ``companies``, ``company_addresses``, ``job_postings``,
+``normalized_jobs``, ``extracted_intelligence``. Raises ``RuntimeError`` if
+insert fails (caller should ``pytest.skip``).
+"""
+
+from __future__ import annotations
+
+import uuid
+from dataclasses import dataclass
+
+from sqlalchemy import inspect, text
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import Session
+
+from agents.common.data_store.models import NormalizedJob
+
+
+@dataclass
+class EnrichmentE2ESeed:
+    """Handles created primary keys for teardown."""
+
+    zip_code: str
+    company_id: str
+    company_address_id: str
+    job_posting_id: str
+    normalized_job_id: int
+
+
+def _require_tables(engine: Engine) -> None:
+    insp = inspect(engine)
+    needed = (
+        "postal_geo_data",
+        "companies",
+        "company_addresses",
+        "job_postings",
+        "normalized_jobs",
+        "extracted_intelligence",
+    )
+    for t in needed:
+        if not insp.has_table(t, schema="dbo"):
+            raise RuntimeError(f"missing table dbo.{t}")
+
+
+def _company_ts_columns(insp) -> tuple[str, str]:
+    cols = {c["name"] for c in insp.get_columns("companies", schema="dbo")}
+    c_created = "createdat" if "createdat" in cols else "created_at"
+    c_updated = "updatedat" if "updatedat" in cols else "updated_at"
+    return c_created, c_updated
+
+
+def _job_postings_ts_fragment(insp) -> str:
+    cols = {c["name"] for c in insp.get_columns("job_postings", schema="dbo")}
+    if "createdAt" in cols and "updatedAt" in cols:
+        return ", createdAt, updatedAt", ", NOW(), NOW()"
+    if "created_at" in cols and "updated_at" in cols:
+        return ", created_at, updated_at", ", NOW(), NOW()"
+    return "", ""
+
+
+def _address_zip_column(insp) -> str:
+    cols = {c["name"] for c in insp.get_columns("company_addresses", schema="dbo")}
+    if "zip_region" in cols:
+        return "zip_region"
+    if "zip" in cols:
+        return "zip"
+    raise RuntimeError("company_addresses has no zip_region or zip column")
+
+
+def _address_ts_columns(insp) -> tuple[str, str]:
+    cols = {c["name"] for c in insp.get_columns("company_addresses", schema="dbo")}
+    c_created = "created_at" if "created_at" in cols else "createdAt"
+    c_updated = "updated_at" if "updated_at" in cols else "updatedAt"
+    return c_created, c_updated
+
+
+def seed_enrichment_e2e(engine: Engine) -> EnrichmentE2ESeed:
+    """Insert one chain of rows; returns identifiers for cleanup."""
+    _require_tables(engine)
+    insp = inspect(engine)
+    c_created, c_updated = _company_ts_columns(insp)
+    zip_col = _address_zip_column(insp)
+    a_created, a_updated = _address_ts_columns(insp)
+    jp_ts_cols, jp_ts_vals = _job_postings_ts_fragment(insp)
+
+    suffix = uuid.uuid4().hex[:8]
+    zip_code = f"{(int(suffix, 16) % 89999) + 10000:05d}"
+
+    company_id = str(uuid.uuid4())
+    company_address_id = str(uuid.uuid4())
+    job_posting_id = str(uuid.uuid4())
+    source = "e2e-enrich"
+    external_id = f"e2e-ext-{suffix}"
+
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                INSERT INTO dbo.postal_geo_data (zip, city, county, state_code, state, lat, lng)
+                VALUES (:zip, 'E2ECity', 'E2ECo', 'TX', 'Texas', 0.0, 0.0)
+                ON CONFLICT (zip) DO NOTHING
+                """
+            ),
+            {"zip": zip_code},
+        )
+
+        conn.execute(
+            text(
+                f"""
+                INSERT INTO dbo.companies (
+                    company_id, company_name, is_approved, {c_created}, {c_updated}
+                )
+                VALUES (
+                    CAST(:cid AS uuid), :cname, true, NOW(), NOW()
+                )
+                """
+            ),
+            {"cid": company_id, "cname": f"E2E Company {suffix}"},
+        )
+
+        conn.execute(
+            text(
+                f"""
+                INSERT INTO dbo.company_addresses (
+                    company_address_id, company_id, {zip_col}, {a_created}, {a_updated}
+                )
+                VALUES (
+                    CAST(:aid AS uuid), CAST(:cid AS uuid), :zip, NOW(), NOW()
+                )
+                """
+            ),
+            {"aid": company_address_id, "cid": company_id, "zip": zip_code},
+        )
+
+        conn.execute(
+            text(
+                f"""
+                INSERT INTO dbo.job_postings (
+                    job_posting_id,
+                    company_id,
+                    location_id,
+                    job_title,
+                    job_description,
+                    is_internship,
+                    is_paid,
+                    employment_type,
+                    location,
+                    salary_range,
+                    county,
+                    zip,
+                    publish_date,
+                    unpublish_date,
+                    source,
+                    external_id
+                    {jp_ts_cols}
+                )
+                VALUES (
+                    CAST(:jpid AS uuid),
+                    CAST(:cid AS uuid),
+                    CAST(:lid AS uuid),
+                    'E2E Title',
+                    'E2E description body for enrichment promotion test.',
+                    false,
+                    true,
+                    'full-time',
+                    'Remote',
+                    'n/a',
+                    'E2E',
+                    :zip,
+                    NOW(),
+                    NOW(),
+                    :source,
+                    :eid
+                    {jp_ts_vals}
+                )
+                """
+            ),
+            {
+                "jpid": job_posting_id,
+                "cid": company_id,
+                "lid": company_address_id,
+                "zip": zip_code,
+                "source": source,
+                "eid": external_id,
+            },
+        )
+
+    factory = __import__("agents.common.data_store.database", fromlist=["get_session_factory"]).get_session_factory()
+    session: Session = factory()
+    try:
+        nj = NormalizedJob(
+            raw_job_id=None,
+            ingestion_run_id=f"e2e-run-{suffix}",
+            region_id="e2e",
+            source=source,
+            external_id=external_id,
+            title="E2E Title",
+            company="E2E Co",
+            description="E2E description body for enrichment promotion test.",
+            normalization_status="success",
+        )
+        session.add(nj)
+        session.flush()
+        nj_id = nj.id
+
+        session.execute(
+            text(
+                """
+                INSERT INTO dbo.extracted_intelligence (
+                    normalized_job_id,
+                    extraction_version,
+                    extracted_at,
+                    extraction_model,
+                    extraction_tokens_used,
+                    extraction_cost_usd,
+                    skills,
+                    tools,
+                    tasks,
+                    responsibilities,
+                    context,
+                    extraction_warnings,
+                    extraction_failed
+                )
+                VALUES (
+                    :nj_id,
+                    'e2e-1',
+                    NOW(),
+                    'stub',
+                    0,
+                    0.0,
+                    '[]'::jsonb,
+                    '[]'::jsonb,
+                    '[]'::jsonb,
+                    '[]'::jsonb,
+                    '[]'::jsonb,
+                    '[]'::jsonb,
+                    false
+                )
+                """
+            ),
+            {"nj_id": nj_id},
+        )
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+    return EnrichmentE2ESeed(
+        zip_code=zip_code,
+        company_id=company_id,
+        company_address_id=company_address_id,
+        job_posting_id=job_posting_id,
+        normalized_job_id=nj_id,
+    )
+
+
+def teardown_enrichment_e2e(engine: Engine, seed: EnrichmentE2ESeed) -> None:
+    """Remove seeded rows (best-effort order)."""
+    with engine.begin() as conn:
+        conn.execute(
+            text("DELETE FROM dbo.extracted_intelligence WHERE normalized_job_id = :id"),
+            {"id": seed.normalized_job_id},
+        )
+        conn.execute(
+            text("DELETE FROM dbo.normalized_jobs WHERE id = :id"),
+            {"id": seed.normalized_job_id},
+        )
+        conn.execute(
+            text("DELETE FROM dbo.job_postings WHERE job_posting_id::text = :jpid"),
+            {"jpid": seed.job_posting_id},
+        )
+        conn.execute(
+            text("DELETE FROM dbo.company_addresses WHERE company_address_id::text = :aid"),
+            {"aid": seed.company_address_id},
+        )
+        conn.execute(
+            text("DELETE FROM dbo.companies WHERE company_id::text = :cid"),
+            {"cid": seed.company_id},
+        )
+        conn.execute(
+            text("DELETE FROM dbo.postal_geo_data WHERE zip = :zip"),
+            {"zip": seed.zip_code},
+        )
