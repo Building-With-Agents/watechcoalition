@@ -385,11 +385,11 @@ class SkillsExtractionAgent(BaseAgent):
         if not work_items:
             return self._legacy_fixture_response(event)
 
-        # Cap work items per run for faster pipeline runs (default 10; set SKILLS_EXTRACTION_MAX_JOBS to override)
+        # Cap work items per run (0 = no limit; set SKILLS_EXTRACTION_MAX_JOBS to override)
         try:
-            max_jobs = int(os.environ.get("SKILLS_EXTRACTION_MAX_JOBS", "10"))
+            max_jobs = int(os.environ.get("SKILLS_EXTRACTION_MAX_JOBS", "0"))
         except (TypeError, ValueError):
-            max_jobs = 10
+            max_jobs = 0
         if max_jobs > 0 and len(work_items) > max_jobs:
             work_items = work_items[:max_jobs]
 
