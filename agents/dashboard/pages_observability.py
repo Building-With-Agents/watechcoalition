@@ -69,7 +69,7 @@ def render_ingestion_overview() -> None:
             labels={"day": "Day (UTC)", "record_count": "Records"},
         )
         fig.update_layout(xaxis_tickangle=-45, margin=dict(t=30, b=80))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     st.markdown("---")
     st.subheader("Recent ingestion runs (last 10)")
@@ -92,7 +92,7 @@ def render_ingestion_overview() -> None:
         ]
         st.dataframe(
             data.recent_runs_df[display_cols],
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
 
@@ -147,7 +147,7 @@ def render_normalization_quality() -> None:
             )
         )
         fig.update_layout(height=280, margin=dict(l=30, r=30, t=50, b=30))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     st.markdown("---")
     st.subheader("Quarantine breakdown")
@@ -162,5 +162,5 @@ def render_normalization_quality() -> None:
             labels={"error_type": "Error type", "record_count": "Count"},
         )
         fig2.update_layout(xaxis_tickangle=-35, margin=dict(t=30, b=120))
-        st.plotly_chart(fig2, use_container_width=True)
-        st.dataframe(qdf, use_container_width=True, hide_index=True)
+        st.plotly_chart(fig2, width="stretch")
+        st.dataframe(qdf, width="stretch", hide_index=True)
