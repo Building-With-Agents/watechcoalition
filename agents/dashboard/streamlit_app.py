@@ -13,7 +13,8 @@ Pages
 Data source: PostgreSQL (via SQLAlchemy) with JSON file fallback.
 
 Usage:
-    streamlit run agents/dashboard/streamlit_app.py
+    streamlit run agents/dashboard/app.py
+    # or: streamlit run agents/dashboard/streamlit_app.py
 """
 
 from __future__ import annotations
@@ -34,7 +35,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-_HERE = Path(__file__).parent.parent   # agents/
+_HERE = Path(__file__).parent.parent  # agents/
 _RUN_LOG_PATH = _HERE / "data" / "output" / "pipeline_run.json"
 
 _AGENT_ORDER = [
@@ -54,21 +55,24 @@ _AGENT_ORDER_INDEX = {a: i for i, a in enumerate(_AGENT_ORDER)}
 # Database helpers
 # ---------------------------------------------------------------------------
 
+
 def _db_available() -> bool:
-    """Check if PostgreSQL is reachable."""
-    if not os.getenv("PYTHON_DATABASE_URL"):
+    """Check if PostgreSQL is reachable via the dashboard read-only engine."""
+    if not (os.getenv("PYTHON_DATABASE_URL") or os.getenv("PYTHON_DATABASE_URL_READONLY")):
         return False
     try:
-        from agents.common.data_store import check_db_connection
-        return check_db_connection()
+        from agents.dashboard.readonly_engine import check_dashboard_db_connection
+
+        return check_dashboard_db_connection()
     except Exception:
         return False
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=300, show_spinner=False)
 def _load_ingestion_runs() -> pd.DataFrame:
     """Load ingestion run history from DB."""
-    from agents.common.data_store import get_engine
+    from agents.dashboard.readonly_engine import get_dashboard_engine
+
     query = """
         SELECT run_id, region_id, source, started_at, completed_at,
                status, total_fetched, staged_count, dedup_count, error_count,
@@ -77,13 +81,14 @@ def _load_ingestion_runs() -> pd.DataFrame:
         ORDER BY started_at DESC
         LIMIT 50
     """
-    return pd.read_sql(query, get_engine())
+    return pd.read_sql(query, get_dashboard_engine())
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=300, show_spinner=False)
 def _load_raw_jobs(run_id: str | None = None) -> pd.DataFrame:
     """Load raw ingested jobs, optionally filtered by run_id."""
-    from agents.common.data_store import get_engine
+    from agents.dashboard.readonly_engine import get_dashboard_engine
+
     if run_id:
         query = """
             SELECT id, ingestion_run_id, region_id, source, external_id,
@@ -95,7 +100,7 @@ def _load_raw_jobs(run_id: str | None = None) -> pd.DataFrame:
             WHERE ingestion_run_id = %(run_id)s
             ORDER BY id
         """
-        return pd.read_sql(query, get_engine(), params={"run_id": run_id})
+        return pd.read_sql(query, get_dashboard_engine(), params={"run_id": run_id})
     query = """
         SELECT id, ingestion_run_id, region_id, source, external_id,
                title, company, city, state, country, is_remote,
@@ -106,13 +111,14 @@ def _load_raw_jobs(run_id: str | None = None) -> pd.DataFrame:
         ORDER BY id DESC
         LIMIT 500
     """
-    return pd.read_sql(query, get_engine())
+    return pd.read_sql(query, get_dashboard_engine())
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=300, show_spinner=False)
 def _load_normalized_jobs(run_id: str | None = None) -> pd.DataFrame:
     """Load normalized jobs, optionally filtered by run_id."""
-    from agents.common.data_store import get_engine
+    from agents.dashboard.readonly_engine import get_dashboard_engine
+
     if run_id:
         query = """
             SELECT id, raw_job_id, ingestion_run_id, region_id, source, external_id,
@@ -124,7 +130,7 @@ def _load_normalized_jobs(run_id: str | None = None) -> pd.DataFrame:
             WHERE ingestion_run_id = %(run_id)s
             ORDER BY id
         """
-        return pd.read_sql(query, get_engine(), params={"run_id": run_id})
+        return pd.read_sql(query, get_dashboard_engine(), params={"run_id": run_id})
     query = """
         SELECT id, raw_job_id, ingestion_run_id, region_id, source, external_id,
                title, company, city, state_province, country,
@@ -135,13 +141,14 @@ def _load_normalized_jobs(run_id: str | None = None) -> pd.DataFrame:
         ORDER BY id DESC
         LIMIT 500
     """
-    return pd.read_sql(query, get_engine())
+    return pd.read_sql(query, get_dashboard_engine())
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=300, show_spinner=False)
 def _load_quarantined(run_id: str | None = None) -> pd.DataFrame:
     """Load quarantined records."""
-    from agents.common.data_store import get_engine
+    from agents.dashboard.readonly_engine import get_dashboard_engine
+
     if run_id:
         query = """
             SELECT id, raw_job_id, ingestion_run_id, source, external_id,
@@ -150,7 +157,7 @@ def _load_quarantined(run_id: str | None = None) -> pd.DataFrame:
             WHERE ingestion_run_id = %(run_id)s
             ORDER BY quarantined_at DESC
         """
-        return pd.read_sql(query, get_engine(), params={"run_id": run_id})
+        return pd.read_sql(query, get_dashboard_engine(), params={"run_id": run_id})
     query = """
         SELECT id, raw_job_id, ingestion_run_id, source, external_id,
                error_type, error_detail, quarantined_at
@@ -158,12 +165,13 @@ def _load_quarantined(run_id: str | None = None) -> pd.DataFrame:
         ORDER BY quarantined_at DESC
         LIMIT 100
     """
-    return pd.read_sql(query, get_engine())
+    return pd.read_sql(query, get_dashboard_engine())
 
 
 # ---------------------------------------------------------------------------
 # JSON fallback helpers (Week 2 walking skeleton compatibility)
 # ---------------------------------------------------------------------------
+
 
 @st.cache_data
 def _load_run_log() -> list[dict]:
@@ -189,6 +197,7 @@ def _sort_key(cid: str) -> int:
 # Page 1 — Pipeline Run Summary (DB)
 # ---------------------------------------------------------------------------
 
+
 def _page_run_summary_db() -> None:
     st.title("Pipeline Run Summary")
 
@@ -205,8 +214,9 @@ def _page_run_summary_db() -> None:
             started = started.strftime("%Y-%m-%d %H:%M")
         run_options.append(f"{row['run_id']}  |  {row['source']}  |  {started}  |  {row['status']}")
 
-    selected_idx = st.selectbox("Select an ingestion run", range(len(run_options)),
-                                format_func=lambda i: run_options[i])
+    selected_idx = st.selectbox(
+        "Select an ingestion run", range(len(run_options)), format_func=lambda i: run_options[i]
+    )
     selected_run_id = runs_df.iloc[selected_idx]["run_id"]
     run_row = runs_df.iloc[selected_idx]
 
@@ -220,7 +230,7 @@ def _page_run_summary_db() -> None:
     col4.metric("Errors", int(run_row["error_count"]))
 
     status = run_row["status"]
-    if status == "success":
+    if status in ("success", "completed"):
         st.success(f"Run `{selected_run_id}` completed successfully.")
     elif status == "running":
         st.info(f"Run `{selected_run_id}` is still running.")
@@ -262,14 +272,16 @@ def _page_run_summary_db() -> None:
         normalized = raw_id in norm_raw_ids
         quarantined = raw_id in quarantine_raw_ids
 
-        rows.append({
-            "ID": raw_id,
-            "Title": raw["title"],
-            "Company": raw["company"],
-            "Source": raw["source"],
-            "Ingestion": "Pass" if ingested else "Fail",
-            "Normalization": "Quarantined" if quarantined else ("Pass" if normalized else "Pending"),
-        })
+        rows.append(
+            {
+                "ID": raw_id,
+                "Title": raw["title"],
+                "Company": raw["company"],
+                "Source": raw["source"],
+                "Ingestion": "Pass" if ingested else "Fail",
+                "Normalization": "Quarantined" if quarantined else ("Pass" if normalized else "Pending"),
+            }
+        )
 
     result_df = pd.DataFrame(rows)
     st.dataframe(result_df, use_container_width=True, hide_index=True)
@@ -284,6 +296,7 @@ def _page_run_summary_db() -> None:
 # Page 2 — Record Journey (DB)
 # ---------------------------------------------------------------------------
 
+
 def _page_record_journey_db() -> None:
     st.title("Record Journey")
 
@@ -297,8 +310,7 @@ def _page_record_journey_db() -> None:
     for _, row in raw_df.head(100).iterrows():
         options.append(f"[{row['id']}]  {row['title']}  @  {row['company']}")
 
-    selected_idx = st.selectbox("Select a record to trace", range(len(options)),
-                                format_func=lambda i: options[i])
+    selected_idx = st.selectbox("Select a record to trace", range(len(options)), format_func=lambda i: options[i])
     selected_raw = raw_df.iloc[selected_idx]
     raw_id = int(selected_raw["id"])
 
@@ -316,11 +328,17 @@ def _page_record_journey_db() -> None:
         ingestion_fields = {
             "Title": selected_raw["title"],
             "Company": selected_raw["company"],
-            "Location": ", ".join(filter(None, [
-                selected_raw.get("city"),
-                selected_raw.get("state"),
-                selected_raw.get("country"),
-            ])) or "—",
+            "Location": ", ".join(
+                filter(
+                    None,
+                    [
+                        selected_raw.get("city"),
+                        selected_raw.get("state"),
+                        selected_raw.get("country"),
+                    ],
+                )
+            )
+            or "—",
             "Remote": selected_raw.get("is_remote"),
             "Date Posted": selected_raw.get("date_posted"),
             "Employment Type": selected_raw.get("employment_type"),
@@ -355,11 +373,17 @@ def _page_record_journey_db() -> None:
             norm_fields = {
                 "Title": norm_row["title"],
                 "Company": norm_row["company"],
-                "Location": ", ".join(filter(None, [
-                    norm_row.get("city"),
-                    norm_row.get("state_province"),
-                    norm_row.get("country"),
-                ])) or "—",
+                "Location": ", ".join(
+                    filter(
+                        None,
+                        [
+                            norm_row.get("city"),
+                            norm_row.get("state_province"),
+                            norm_row.get("country"),
+                        ],
+                    )
+                )
+                or "—",
                 "Work Arrangement": norm_row.get("work_arrangement") or "—",
                 "Remote": norm_row.get("is_remote"),
                 "Employment Type": norm_row.get("employment_type") or "—",
@@ -398,6 +422,7 @@ def _page_record_journey_db() -> None:
 # ---------------------------------------------------------------------------
 # Page 3 — Batch Insights (DB)
 # ---------------------------------------------------------------------------
+
 
 def _page_batch_insights_db() -> None:
     st.title("Batch Insights")
@@ -533,6 +558,7 @@ def _page_batch_insights_db() -> None:
 # ---------------------------------------------------------------------------
 # JSON fallback pages (Week 2 walking skeleton)
 # ---------------------------------------------------------------------------
+
 
 def _page_run_summary_json(entries: list[dict]) -> None:
     st.title("Pipeline Run Summary")
@@ -675,12 +701,22 @@ def _page_record_journey_json(entries: list[dict]) -> None:
                 continue
 
             summary_fields = [
-                "event_type", "posting_id", "title", "company",
-                "seniority", "role_classification",
-                "quality_score", "spam_score", "is_spam",
-                "normalization_status", "extraction_status",
-                "enrichment_status", "render_status", "pipeline_stage",
-                "run_id", "total_postings",
+                "event_type",
+                "posting_id",
+                "title",
+                "company",
+                "seniority",
+                "role_classification",
+                "quality_score",
+                "spam_score",
+                "is_spam",
+                "normalization_status",
+                "extraction_status",
+                "enrichment_status",
+                "render_status",
+                "pipeline_stage",
+                "run_id",
+                "total_postings",
             ]
             summary = {k: payload[k] for k in summary_fields if k in payload}
             if summary:
@@ -744,7 +780,8 @@ def _page_batch_insights_json(entries: list[dict]) -> None:
         if roles:
             df_roles = (
                 pd.DataFrame.from_dict(roles, orient="index", columns=["count"])
-                .reset_index().rename(columns={"index": "role"})
+                .reset_index()
+                .rename(columns={"index": "role"})
                 .sort_values("count", ascending=False)
             )
             st.dataframe(df_roles, use_container_width=True, hide_index=True)
@@ -755,7 +792,8 @@ def _page_batch_insights_json(entries: list[dict]) -> None:
         if locations:
             df_loc = (
                 pd.DataFrame.from_dict(locations, orient="index", columns=["postings"])
-                .reset_index().rename(columns={"index": "location"})
+                .reset_index()
+                .rename(columns={"index": "location"})
                 .sort_values("postings", ascending=False)
             )
             st.dataframe(df_loc, use_container_width=True, hide_index=True)
@@ -777,16 +815,18 @@ def _page_batch_insights_json(entries: list[dict]) -> None:
         quality_rows = []
         for e in enrichment_entries:
             ep = e.get("payload", {})
-            quality_rows.append({
-                "Posting ID": ep.get("posting_id"),
-                "Title": ep.get("title"),
-                "Company": ep.get("company"),
-                "Role": ep.get("role_classification"),
-                "Seniority": ep.get("seniority"),
-                "Quality": ep.get("quality_score"),
-                "Spam": ep.get("spam_score"),
-                "Is Spam": ep.get("is_spam"),
-            })
+            quality_rows.append(
+                {
+                    "Posting ID": ep.get("posting_id"),
+                    "Title": ep.get("title"),
+                    "Company": ep.get("company"),
+                    "Role": ep.get("role_classification"),
+                    "Seniority": ep.get("seniority"),
+                    "Quality": ep.get("quality_score"),
+                    "Spam": ep.get("spam_score"),
+                    "Is Spam": ep.get("is_spam"),
+                }
+            )
         df_quality = pd.DataFrame(quality_rows).sort_values("Posting ID")
         st.dataframe(df_quality, use_container_width=True, hide_index=True)
 
@@ -794,6 +834,7 @@ def _page_batch_insights_json(entries: list[dict]) -> None:
 # ---------------------------------------------------------------------------
 # App entry point
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     st.set_page_config(
@@ -808,18 +849,18 @@ def main() -> None:
     # Detect data source — shown directly under title
     use_db = _db_available()
     if use_db:
-        st.sidebar.success("Connected to PostgreSQL")
+        st.sidebar.success("Connected to PostgreSQL (read-only)")
     else:
         st.sidebar.warning("Using fixture data (JSON)")
-        st.sidebar.caption(
-            "Set `PYTHON_DATABASE_URL` in `.env` to connect to PostgreSQL."
-        )
+        st.sidebar.caption("Set `PYTHON_DATABASE_URL` (or `PYTHON_DATABASE_URL_READONLY`) in `.env`.")
 
     st.sidebar.markdown("---")
-
+    st.sidebar.caption("Week 6 — observability")
     page = st.sidebar.radio(
         "Navigate",
         options=[
+            "Ingestion Overview",
+            "Normalization Quality",
             "Pipeline Run Summary",
             "Record Journey",
             "Batch Insights",
@@ -827,7 +868,15 @@ def main() -> None:
     )
 
     if use_db:
-        if page == "Pipeline Run Summary":
+        if page == "Ingestion Overview":
+            from agents.dashboard.pages_observability import render_ingestion_overview
+
+            render_ingestion_overview()
+        elif page == "Normalization Quality":
+            from agents.dashboard.pages_observability import render_normalization_quality
+
+            render_normalization_quality()
+        elif page == "Pipeline Run Summary":
             _page_run_summary_db()
         elif page == "Record Journey":
             _page_record_journey_db()
@@ -835,7 +884,11 @@ def main() -> None:
             _page_batch_insights_db()
     else:
         entries = _load_run_log()
-        if page == "Pipeline Run Summary":
+        if page in ("Ingestion Overview", "Normalization Quality"):
+            st.title(page)
+            st.warning("Week 6 observability pages require PostgreSQL. Set `PYTHON_DATABASE_URL` and restart the app.")
+            st.info("Journey pages below still work with `agents/data/output/pipeline_run.json`.")
+        elif page == "Pipeline Run Summary":
             _page_run_summary_json(entries)
         elif page == "Record Journey":
             _page_record_journey_json(entries)
