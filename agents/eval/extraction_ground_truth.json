@@ -2149,34 +2149,17 @@
     "skills": [
       {
         "skill_id": null,
-        "skill_name": "Clinical Systems Implementation",
-        "type": "Technical",
-        "confidence": 0.95,
-        "required_flag": false,
-        "esco_uri": null,
-        "is_genai_extension": false,
-        "source_span": {
-          "text": "Develop and maintain clinical system documentation and assist with end-user training",
-          "field_source": "responsibilities",
-          "start_char": 1063,
-          "end_char": 1147
-        },
-        "span_auto_corrected": false,
-        "original_end_char": null
-      },
-      {
-        "skill_id": null,
-        "skill_name": "Data Analysis & Statistics",
+        "skill_name": "Data Analysis",
         "type": "Technical",
         "confidence": 0.95,
         "required_flag": true,
         "esco_uri": null,
         "is_genai_extension": false,
         "source_span": {
-          "text": "statistical analysis",
-          "field_source": "description",
-          "start_char": 740,
-          "end_char": 760
+          "text": "Requires an Associates Degree in a technical or quantitative/business field supplemented by three (3) years of data analysis experience; or possession of any equivalent combination of education, training, and experience which provides the requisite knowledge, skills, and abilities",
+          "field_source": "requirements",
+          "start_char": 2,
+          "end_char": 283
         },
         "span_auto_corrected": false,
         "original_end_char": null
@@ -2190,54 +2173,139 @@
         "esco_uri": null,
         "is_genai_extension": false,
         "source_span": {
-          "text": "data visualization",
+          "text": "• Present findings and provide training and ongoing support for reports and dashboards.",
           "field_source": "description",
-          "start_char": 766,
-          "end_char": 784
+          "start_char": 1876,
+          "end_char": 1963
         },
         "span_auto_corrected": false,
         "original_end_char": null
       },
       {
         "skill_id": null,
-        "skill_name": "Requirements Analysis & Workflow Design",
+        "skill_name": "Statistical Analysis",
         "type": "Technical",
         "confidence": 0.9,
         "required_flag": true,
         "esco_uri": null,
         "is_genai_extension": false,
         "source_span": {
-          "text": "Assist in evaluating user needs and translating requirements into system, workflow, and reporting solutions",
-          "field_source": "responsibilities",
-          "start_char": 955,
-          "end_char": 1062
+          "text": "• Analyze data to identify trends and support basic exploratory analysis and data integration.",
+          "field_source": "description",
+          "start_char": 1781,
+          "end_char": 1875
         },
         "span_auto_corrected": false,
         "original_end_char": null
       },
       {
         "skill_id": null,
-        "skill_name": "Training & Communication",
-        "type": "Soft",
+        "skill_name": "Data Querying",
+        "type": "Technical",
+        "confidence": 0.9,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Create and support recurring and ad hoc reports and dashboards using data query and reporting tools",
+          "field_source": "responsibilities",
+          "start_char": 1148,
+          "end_char": 1247
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Clinical Systems Knowledge",
+        "type": "Domain",
+        "confidence": 0.75,
+        "required_flag": false,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "This position supports the setup, configuration, testing, and implementation of clinical application products and information systems while producing reports and dashboards that support data-driven decision-making. The role designs and supports clinical application processes, provides training and technical support to end users, and applies data query, basic statistical analysis, and data visualization tools to improve efficiency, reduce risk, and enhance customer and stakeholder satisfaction.",
+          "field_source": "description",
+          "start_char": 379,
+          "end_char": 877
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Electronic Health Records Systems",
+        "type": "Tool",
+        "confidence": 0.7,
+        "required_flag": false,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Support the setup, configuration, testing, and implementation of clinical applications, including electronic health records and related systems",
+          "field_source": "responsibilities",
+          "start_char": 703,
+          "end_char": 846
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Requirements Gathering",
+        "type": "Technical",
         "confidence": 0.85,
         "required_flag": true,
         "esco_uri": null,
         "is_genai_extension": false,
         "source_span": {
-          "text": "provides training and technical support to end users",
+          "text": "• Assist in evaluating user needs and translating requirements into system, workflow, and reporting solutions.",
           "field_source": "description",
-          "start_char": 656,
-          "end_char": 708
+          "start_char": 1479,
+          "end_char": 1589
         },
         "span_auto_corrected": false,
         "original_end_char": null
       },
       {
         "skill_id": null,
-        "skill_name": "Trauma-Informed Care",
-        "type": "Domain",
-        "confidence": 0.75,
+        "skill_name": "Technical Support / Troubleshooting",
+        "type": "Technical",
+        "confidence": 0.9,
         "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "This position supports the setup, configuration, testing, and implementation of clinical application products and information systems while producing reports and dashboards that support data-driven decision-making. The role designs and supports clinical application processes, provides training and technical support to end users, and applies data query, basic statistical analysis, and data visualization tools to improve efficiency, reduce risk, and enhance customer and stakeholder satisfaction.",
+          "field_source": "description",
+          "start_char": 379,
+          "end_char": 877
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Communication and Presentation",
+        "type": "Soft",
+        "confidence": 0.9,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Present findings and provide training and ongoing support for reports and dashboards.",
+          "field_source": "description",
+          "start_char": 1878,
+          "end_char": 1963
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Trauma-Informed Care Knowledge",
+        "type": "Domain",
+        "confidence": 0.85,
+        "required_flag": false,
         "esco_uri": null,
         "is_genai_extension": false,
         "source_span": {
@@ -2253,40 +2321,27 @@
     "tools": [
       {
         "tool_id": null,
-        "tool_name": "SQL Data Query Tools",
-        "category": "language",
+        "tool_name": "Electronic Health Records Systems",
+        "category": "platform",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Support the setup, configuration, testing, and implementation of clinical applications, including electronic health records and related systems.",
+          "field_source": "description",
+          "start_char": 1223,
+          "end_char": 1367
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Data Query Tools",
+        "category": "database",
         "confidence": 0.85,
         "source_span": {
-          "text": "Create and support recurring and ad hoc reports and dashboards using data query and reporting tools",
+          "text": "Support the setup, configuration, testing, and implementation of clinical applications, including electronic health records and related systems.",
           "field_source": "description",
-          "start_char": 1680,
-          "end_char": 1779
-        },
-        "is_genai_tool": false
-      },
-      {
-        "tool_id": null,
-        "tool_name": "Electronic Health Record (EHR) Systems",
-        "category": "platform",
-        "confidence": 0.95,
-        "source_span": {
-          "text": "Support the setup, configuration, testing, and implementation of clinical applications, including electronic health records and related systems",
-          "field_source": "responsibilities",
-          "start_char": 703,
-          "end_char": 846
-        },
-        "is_genai_tool": false
-      },
-      {
-        "tool_id": null,
-        "tool_name": "Data Visualization Tools",
-        "category": "framework",
-        "confidence": 0.8,
-        "source_span": {
-          "text": "data visualization tools to improve efficiency, reduce risk, and enhance customer and stakeholder satisfaction",
-          "field_source": "description",
-          "start_char": 766,
-          "end_char": 876
+          "start_char": 1223,
+          "end_char": 1367
         },
         "is_genai_tool": false
       },
@@ -2294,7 +2349,7 @@
         "tool_id": null,
         "tool_name": "Reporting Tools",
         "category": "platform",
-        "confidence": 0.85,
+        "confidence": 0.8,
         "source_span": {
           "text": "Create and support recurring and ad hoc reports and dashboards using data query and reporting tools.",
           "field_source": "description",
@@ -2302,19 +2357,272 @@
           "end_char": 1780
         },
         "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Data Visualization Tools",
+        "category": "platform",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "This position supports the setup, configuration, testing, and implementation of clinical application products and information systems while producing reports and dashboards that support data-driven decision-making. The role designs and supports clinical application processes, provides training and technical support to end users, and applies data query, basic statistical analysis, and data visualization tools to improve efficiency, reduce risk, and enhance customer and stakeholder satisfaction.",
+          "field_source": "description",
+          "start_char": 379,
+          "end_char": 877
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Clinical Application Systems",
+        "category": "platform",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "This position supports the setup, configuration, testing, and implementation of clinical application products and information systems while producing reports and dashboards that support data-driven decision-making. The role designs and supports clinical application processes, provides training and technical support to end users, and applies data query, basic statistical analysis, and data visualization tools to improve efficiency, reduce risk, and enhance customer and stakeholder satisfaction.",
+          "field_source": "description",
+          "start_char": 379,
+          "end_char": 877
+        },
+        "is_genai_tool": false
       }
     ],
-    "labeler_notes": {
-      "Clinical Systems Implementation": "Involves setup, configuration, testing, and deployment of clinical applications",
-      "Data Analysis & Statistics": "ncludes exploratory analysis, identifying trends, and applying statistical methods",
-      "Data Visualization": "Creating dashboards and reports for decision-making",
-      "Requirements Analysis & Workflow Design": "Translating user needs into system and reporting solutions",
-      "Training & Communication": "Conducting end-user training and presenting findings",
-      "Trauma-Informed Care": "Preferred domain knowledge in behavioral health and trauma-informed practices",
-      "Electronic Health Record (EHR) Systems": "Core system being configured and supported",
-      "Data Visualization Tools": "Used to present insights and trends",
-      "Reporting Tools": "General reporting systems used for generating insights"
-    }
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Configure and implement clinical application systems",
+        "category": "development",
+        "frequency": "as_needed",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "This position supports the setup, configuration, testing, and implementation of clinical application products and information systems while producing reports and dashboards that support data-driven decision-making. The role designs and supports clinical application processes, provides training and technical support to end users, and applies data query, basic statistical analysis, and data visualization tools to improve efficiency, reduce risk, and enhance customer and stakeholder satisfaction.",
+          "field_source": "description",
+          "start_char": 379,
+          "end_char": 877
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Provide technical support and troubleshoot system issues",
+        "category": "support",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "The role designs and supports clinical application processes, provides training and technical support to end users, and applies data query, basic statistical analysis, and data visualization tools to improve efficiency, reduce risk, and enhance customer and stakeholder satisfaction.",
+          "field_source": "description",
+          "start_char": 594,
+          "end_char": 877
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Translate user requirements into system and reporting solutions",
+        "category": "analysis",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Assist in evaluating user needs and translating requirements into system, workflow, and reporting solutions.",
+          "field_source": "description",
+          "start_char": 1481,
+          "end_char": 1589
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Develop and maintain system documentation",
+        "category": "management",
+        "frequency": "monthly",
+        "complexity": "routine",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Develop and maintain clinical system documentation and assist with end-user training.",
+          "field_source": "description",
+          "start_char": 1592,
+          "end_char": 1677
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Create reports and dashboards using data tools",
+        "category": "development",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "This position supports the setup, configuration, testing, and implementation of clinical application products and information systems while producing reports and dashboards that support data-driven decision-making.",
+          "field_source": "description",
+          "start_char": 379,
+          "end_char": 593
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Analyze data to identify trends",
+        "category": "analysis",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Analyze data to identify trends and support basic exploratory analysis and data integration.",
+          "field_source": "description",
+          "start_char": 1783,
+          "end_char": 1875
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Present findings and train users on systems and reports",
+        "category": "support",
+        "frequency": "as_needed",
+        "complexity": "analytical",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "This position supports the setup, configuration, testing, and implementation of clinical application products and information systems while producing reports and dashboards that support data-driven decision-making",
+          "field_source": "responsibilities",
+          "start_char": 2,
+          "end_char": 215
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Support implementation and maintenance of clinical systems",
+        "scope": "team",
+        "level": "mid",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "This position supports the setup, configuration, testing, and implementation of clinical application products and information systems while producing reports and dashboards that support data-driven decision-making.",
+          "field_source": "description",
+          "start_char": 379,
+          "end_char": 593
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Ensure systems meet user and business requirements",
+        "scope": "department",
+        "level": "mid",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Assist in evaluating user needs and translating requirements into system, workflow, and reporting solutions.",
+          "field_source": "description",
+          "start_char": 1481,
+          "end_char": 1589
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Provide ongoing technical support to clinical staff",
+        "scope": "team",
+        "level": "mid",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "he role designs and supports clinical application processes, provides training and technical support to end users, and applies data query, basic statistical analysis, and data visualization tools to improve efficiency, reduce risk, and enhance customer and stakeholder satisfaction.",
+          "field_source": "description",
+          "start_char": 595,
+          "end_char": 877
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Deliver data-driven insights through reporting and dashboards",
+        "scope": "department",
+        "level": "mid",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Create and support recurring and ad hoc reports and dashboards using data query and reporting tools.",
+          "field_source": "description",
+          "start_char": 1680,
+          "end_char": 1780
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Train users and maintain system documentation",
+        "scope": "team",
+        "level": "mid",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Assist in evaluating user needs and translating requirements into system, workflow, and reporting solutions.",
+          "field_source": "description",
+          "start_char": 1481,
+          "end_char": 1589
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Independently determine work priorities and methods",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "This position works under general supervision and independently determines work methods and priorities.",
+          "field_source": "description",
+          "start_char": 878,
+          "end_char": 981
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "remote_policy",
+        "value": "unspecified (likely on-site due to clinical environment)",
+        "confidence": 0.65,
+        "source_span": {
+          "text": "This position works under general supervision and independently determines work methods and priorities.",
+          "field_source": "description",
+          "start_char": 878,
+          "end_char": 981
+        }
+      },
+      {
+        "signal_type": "reporting_structure",
+        "value": "works under general supervision",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "This position supports the setup, configuration, testing, and implementation of clinical application products and information systems while producing reports and dashboards that support data-driven decision-making. The role designs and supports clinical application processes, provides training and technical support to end users, and applies data query, basic statistical analysis, and data visualization tools to improve efficiency, reduce risk, and enhance customer and stakeholder satisfaction.",
+          "field_source": "description",
+          "start_char": 379,
+          "end_char": 877
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "no explicit AI usage mentioned",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "This position supports the setup, configuration, testing, and implementation of clinical application products and information systems while producing reports and dashboards that support data-driven decision-making. The role designs and supports clinical application processes, provides training and technical support to end users, and applies data query, basic statistical analysis, and data visualization tools to improve efficiency, reduce risk, and enhance customer and stakeholder satisfaction.",
+          "field_source": "description",
+          "start_char": 379,
+          "end_char": 877
+        }
+      },
+      {
+        "signal_type": "growth_stage",
+        "value": "established healthcare/behavioral health organization",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "This position supports the setup, configuration, testing, and implementation of clinical application products and information systems while producing reports and dashboards that support data-driven decision-making. The role designs and supports clinical application processes, provides training and technical support to end users, and applies data query, basic statistical analysis, and data visualization tools to improve efficiency, reduce risk, and enhance customer and stakeholder satisfaction.",
+          "field_source": "description",
+          "start_char": 379,
+          "end_char": 877
+        }
+      },
+      {
+        "signal_type": "team_size",
+        "value": "unspecified (cross-functional clinical + IT teams implied)",
+        "confidence": 0.6,
+        "source_span": {
+          "text": "This position supports the setup, configuration, testing, and implementation of clinical application products and information systems while producing reports and dashboards that support data-driven decision-making. The role designs and supports clinical application processes, provides training and technical support to end users, and applies data query, basic statistical analysis, and data visualization tools to improve efficiency, reduce risk, and enhance customer and stakeholder satisfaction.",
+          "field_source": "description",
+          "start_char": 379,
+          "end_char": 877
+        }
+      }
+    ],
+    "labeler_notes": {}
   },
   {
     "ground_truth_id": "gt-013",
@@ -2330,58 +2638,24 @@
     "skills": [
       {
         "skill_id": null,
-        "skill_name": "Data Analysis & Trend Recognition",
-        "type": "Technical",
-        "confidence": 1.0,
-        "required_flag": true,
-        "esco_uri": null,
-        "is_genai_extension": false,
-        "source_span": {
-          "text": "Data Analysis and Trend Recognition: Compile and analyze data from multiple sources, identifying trends across various data sets, locations, and targets.",
-          "field_source": "description",
-          "start_char": 789,
-          "end_char": 942
-        },
-        "span_auto_corrected": false,
-        "original_end_char": null
-      },
-      {
-        "skill_id": null,
-        "skill_name": "Data Quality & Integrity Assessment",
+        "skill_name": "Data Analysis",
         "type": "Technical",
         "confidence": 0.95,
         "required_flag": true,
         "esco_uri": null,
         "is_genai_extension": false,
         "source_span": {
-          "text": "Data Accuracy and Assessment: Monitor data for accuracy, integrity, authenticity, and relevancy. Identify intelligence gaps and assess data viability for investigative purposes",
+          "text": "We are looking for you to join our team as a Data Analyst. This position focuses on data analysis for law enforcement support, requiring a combination of investigative data expertise, analytical skills, and the ability to work under high-pressure, mission-critical environment",
           "field_source": "description",
-          "start_char": 945,
-          "end_char": 1121
+          "start_char": 10,
+          "end_char": 286
         },
         "span_auto_corrected": false,
         "original_end_char": null
       },
       {
         "skill_id": null,
-        "skill_name": "Investigative Data Analysis",
-        "type": "Technical",
-        "confidence": 0.9,
-        "required_flag": true,
-        "esco_uri": null,
-        "is_genai_extension": false,
-        "source_span": {
-          "text": "Investigative Support: Collaborate with teams to examine data gathered from criminal and civil investigations, developing methodologies to exploit investigative information.",
-          "field_source": "description",
-          "start_char": 1125,
-          "end_char": 1298
-        },
-        "span_auto_corrected": false,
-        "original_end_char": null
-      },
-      {
-        "skill_id": null,
-        "skill_name": "Data Visualization & Reporting",
+        "skill_name": "Data Visualization",
         "type": "Technical",
         "confidence": 0.95,
         "required_flag": true,
@@ -2390,8 +2664,76 @@
         "source_span": {
           "text": "Data Visualization and Tools: Leverage MS Excel, Power BI, or similar tools to design and build formulas, charts, pivot tables, and manipulate unstructured data from different platforms.",
           "field_source": "description",
-          "start_char": 1926,
-          "end_char": 2112
+          "start_char": 1925,
+          "end_char": 2111
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Trend Analysis",
+        "type": "Technical",
+        "confidence": 0.85,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "This role will involve working with diverse data sets, ensuring accuracy and integrity while supporting ongoing criminal and civil investigations.",
+          "field_source": "description",
+          "start_char": 289,
+          "end_char": 435
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Data Quality Assurance",
+        "type": "Technical",
+        "confidence": 0.95,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Data Accuracy and Assessment: Monitor data for accuracy, integrity, authenticity, and relevancy. Identify intelligence gaps and assess data viability for investigative purposes.",
+          "field_source": "description",
+          "start_char": 945,
+          "end_char": 1122
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Investigative Data Analysis",
+        "type": "Domain",
+        "confidence": 0.9,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "This position focuses on data analysis for law enforcement support, requiring a combination of investigative data expertise, analytical skills, and the ability to work under high-pressure, mission-critical environments.",
+          "field_source": "description",
+          "start_char": 69,
+          "end_char": 288
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Communication",
+        "type": "Soft",
+        "confidence": 0.95,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Law Enforcement Support: Provide critical law enforcement support, interacting with various agencies through multiple channels of communication, while managing data under tight timelines in a high-pressure environment.",
+          "field_source": "description",
+          "start_char": 1705,
+          "end_char": 1923
         },
         "span_auto_corrected": false,
         "original_end_char": null
@@ -2400,24 +2742,7 @@
         "skill_id": null,
         "skill_name": "Attention to Detail",
         "type": "Soft",
-        "confidence": 0.9,
-        "required_flag": true,
-        "esco_uri": null,
-        "is_genai_extension": false,
-        "source_span": {
-          "text": "Our ideal candidate has a blend of technical acumen, attention to detail, and the ability to engage with law enforcement agencies",
-          "field_source": "description",
-          "start_char": 436,
-          "end_char": 565
-        },
-        "span_auto_corrected": false,
-        "original_end_char": null
-      },
-      {
-        "skill_id": null,
-        "skill_name": "Communication & Stakeholder Coordination",
-        "type": "Soft",
-        "confidence": 0.9,
+        "confidence": 0.95,
         "required_flag": true,
         "esco_uri": null,
         "is_genai_extension": false,
@@ -2432,17 +2757,51 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Multitasking in High-Pressure Environments",
+        "skill_name": "Multi-tasking",
         "type": "Soft",
         "confidence": 0.9,
         "required_flag": true,
         "esco_uri": null,
         "is_genai_extension": false,
         "source_span": {
-          "text": "Law Enforcement Support: Provide critical law enforcement support, interacting with various agencies through multiple channels of communication, while managing data under tight timelines in a high-pressure environment.",
+          "text": "To support continuous operations, this role follows a rotating shift schedule. Candidates should be comfortable working flexible hours, including potential evenings or weekends.",
           "field_source": "description",
-          "start_char": 1705,
-          "end_char": 1923
+          "start_char": 2879,
+          "end_char": 3056
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Problem Solving",
+        "type": "Soft",
+        "confidence": 0.95,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "We are looking for more than just a \"Data Analyst\"—this role requires a technologist with excellent communication skills, customer service, and a passion for data and problem-solving.",
+          "field_source": "description",
+          "start_char": 566,
+          "end_char": 749
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Process Documentation",
+        "type": "Technical",
+        "confidence": 0.85,
+        "required_flag": false,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Experience with documenting processes and developing SOPs for data handling and\n• Demonstrated experience in reverse engineering and validation of data processes.",
+          "field_source": "description",
+          "start_char": 3393,
+          "end_char": 3555
         },
         "span_auto_corrected": false,
         "original_end_char": null
@@ -2453,7 +2812,20 @@
         "tool_id": null,
         "tool_name": "Microsoft Excel",
         "category": "platform",
-        "confidence": 1.0,
+        "confidence": 0.95,
+        "source_span": {
+          "text": "this role requires a technologist with excellent communication skills, customer service, and a passion for data and problem-solving.",
+          "field_source": "description",
+          "start_char": 618,
+          "end_char": 750
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Power BI",
+        "category": "platform",
+        "confidence": 0.95,
         "source_span": {
           "text": "Data Visualization and Tools: Leverage MS Excel, Power BI, or similar tools to design and build formulas, charts, pivot tables, and manipulate unstructured data from different platforms.",
           "field_source": "description",
@@ -2464,27 +2836,40 @@
       },
       {
         "tool_id": null,
-        "tool_name": "Power BI",
-        "category": "platform",
-        "confidence": 1.0,
+        "tool_name": "Optical Character Recognition (OCR) Tools",
+        "category": "other",
+        "confidence": 0.8,
         "source_span": {
-          "text": "Experience using data analytic/visualization tools such as MS Excel, Power BI, or others to design charts, create formulas, and analyze unstructured data (can be job or education-based).",
+          "text": "• Data Entry: Perform data entry from both hard and soft copies into large-scale data processing systems, utilizing tools like optical character readers, scanners, and digital cameras as appropriate.",
           "field_source": "description",
-          "start_char": 2368,
-          "end_char": 2554
+          "start_char": 1503,
+          "end_char": 1702
         },
         "is_genai_tool": false
       },
       {
         "tool_id": null,
-        "tool_name": "Optical Character Recognition (OCR) Tools",
+        "tool_name": "Scanners",
         "category": "other",
-        "confidence": 0.8,
+        "confidence": 0.85,
         "source_span": {
-          "text": "Data Entry: Perform data entry from both hard and soft copies into large-scale data processing systems, utilizing tools like optical character readers, scanners, and digital cameras as appropriate",
+          "text": "Data Entry: Perform data entry from both hard and soft copies into large-scale data processing systems, utilizing tools like optical character readers, scanners, and digital cameras as appropriate.",
           "field_source": "description",
           "start_char": 1505,
-          "end_char": 1701
+          "end_char": 1702
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Digital Cameras",
+        "category": "other",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "• Data Entry: Perform data entry from both hard and soft copies into large-scale data processing systems, utilizing tools like optical character readers, scanners, and digital cameras as appropriate.",
+          "field_source": "description",
+          "start_char": 1503,
+          "end_char": 1702
         },
         "is_genai_tool": false
       },
@@ -2492,43 +2877,269 @@
         "tool_id": null,
         "tool_name": "Data Processing Systems",
         "category": "platform",
-        "confidence": 0.8,
+        "confidence": 0.9,
         "source_span": {
-          "text": "Data Entry: Perform data entry from both hard and soft copies into large-scale data processing systems, utilizing tools like optical character readers, scanners, and digital cameras as appropriate",
-          "field_source": "responsibilities",
-          "start_char": 1069,
-          "end_char": 1265
-        },
-        "is_genai_tool": false
-      },
-      {
-        "tool_id": null,
-        "tool_name": "Scanners & Digital Imaging Tools",
-        "category": "other",
-        "confidence": 0.65,
-        "source_span": {
-          "text": "ata Entry: Perform data entry from both hard and soft copies into large-scale data processing systems, utilizing tools like optical character readers, scanners, and digital cameras as appropriate.",
+          "text": "Data Entry: Perform data entry from both hard and soft copies into large-scale data processing systems, utilizing tools like optical character readers, scanners, and digital cameras as appropriate.",
           "field_source": "description",
-          "start_char": 1506,
+          "start_char": 1505,
           "end_char": 1702
         },
         "is_genai_tool": false
       }
     ],
-    "labeler_notes": {
-      "Data Analysis & Trend Recognition": "Core responsibility involving analyzing multi-source datasets and identifying patterns",
-      "Data Quality & Integrity Assessment": "Ensuring accuracy, authenticity, and relevance of data for investigations",
-      "Investigative Data Analysis": "Applying analytical techniques specifically to criminal/civil investigation data",
-      "Data Visualization & Reporting": "Creating charts, reports, and communicating findings using tools like Excel/Power BI",
-      "Attention to Detail": "Critical for maintaining data accuracy and integrity in investigations",
-      "Communication & Stakeholder Coordination": "Required for reporting findings and interacting with law enforcement agencies",
-      "Multitasking in High-Pressure Environments": "Explicitly required for fast-paced, mission-critical environments",
-      "Microsoft Excel": "Explicitly mentioned for formulas, charts, and pivot tables",
-      "Power BI": "Explicitly used for data visualization and dashboards",
-      "Optical Character Recognition (OCR) Tools": "Used for data entry from physical documents",
-      "Data Processing Systems": "Systems used for storing and processing investigative data",
-      "Scanners & Digital Imaging Tools": "Used for digitizing physical data sources"
-    }
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Analyze data from multiple sources to identify trends",
+        "category": "analysis",
+        "frequency": "daily",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "ata Analysis and Trend Recognition: Compile and analyze data from multiple sources, identifying trends across various data sets, locations, and targets.",
+          "field_source": "description",
+          "start_char": 790,
+          "end_char": 942
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Monitor data for accuracy, integrity, and authenticity",
+        "category": "analysis",
+        "frequency": "daily",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Data Accuracy and Assessment: Monitor data for accuracy, integrity, authenticity, and relevancy. Identify intelligence gaps and assess data viability for investigative purposes.",
+          "field_source": "description",
+          "start_char": 945,
+          "end_char": 1122
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Identify intelligence gaps in datasets",
+        "category": "analysis",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Data Accuracy and Assessment: Monitor data for accuracy, integrity, authenticity, and relevancy. Identify intelligence gaps and assess data viability for investigative purposes.",
+          "field_source": "description",
+          "start_char": 945,
+          "end_char": 1122
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Support criminal and civil investigations through data analysis",
+        "category": "analysis",
+        "frequency": "as_needed",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "nvestigative Support: Collaborate with teams to examine data gathered from criminal and civil investigations, developing methodologies to exploit investigative information.",
+          "field_source": "description",
+          "start_char": 1126,
+          "end_char": 1298
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Perform data entry into large-scale systems",
+        "category": "operations",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Data Entry: Perform data entry from both hard and soft copies into large-scale data processing systems, utilizing tools like optical character readers, scanners, and digital cameras as appropriate.",
+          "field_source": "description",
+          "start_char": 1504,
+          "end_char": 1701
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Create charts, formulas, and visualizations using tools",
+        "category": "development",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Experience using data analytic/visualization tools such as MS Excel, Power BI, or others to design charts, create formulas, and analyze unstructured data (can be job or education-based).",
+          "field_source": "description",
+          "start_char": 2367,
+          "end_char": 2553
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Conduct quality control reviews of analytical outputs",
+        "category": "testing",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Quality Control & Reporting: Participate in the development of work products, conducting periodic progress reviews and ensuring quality control of findings. Regularly report findings to lead personnel.",
+          "field_source": "description",
+          "start_char": 1301,
+          "end_char": 1502
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Report findings to leadership and stakeholders",
+        "category": "management",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Skilled at multi-tasking in a fast-paced environment while maintaining clear communications with stakeholders.",
+          "field_source": "description",
+          "start_char": 2557,
+          "end_char": 2667
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Collaborate with law enforcement and internal teams",
+        "category": "management",
+        "frequency": "daily",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Law Enforcement Support: Provide critical law enforcement support, interacting with various agencies through multiple channels of communication, while managing data under tight timelines in a high-pressure environment.",
+          "field_source": "description",
+          "start_char": 1704,
+          "end_char": 1922
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Provide data analysis support for law enforcement investigations",
+        "scope": "department",
+        "level": "entry",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Law Enforcement Support: Provide critical law enforcement support, interacting with various agencies through multiple channels of communication, while managing data under tight timelines in a high-pressure environment.",
+          "field_source": "description",
+          "start_char": 1705,
+          "end_char": 1923
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Ensure data accuracy, integrity, and relevance",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Data Accuracy and Assessment: Monitor data for accuracy, integrity, authenticity, and relevancy. Identify intelligence gaps and assess data viability for investigative purposes.",
+          "field_source": "description",
+          "start_char": 945,
+          "end_char": 1122
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Deliver analytical insights and reports to leadership",
+        "scope": "department",
+        "level": "entry",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Ability to communicate findings and updates effectively during briefings and team",
+          "field_source": "description",
+          "start_char": 3558,
+          "end_char": 3639
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Support data processing and system operations",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Data Entry: Perform data entry from both hard and soft copies into large-scale data processing systems, utilizing tools like optical character readers, scanners, and digital cameras as appropriate.",
+          "field_source": "description",
+          "start_char": 1505,
+          "end_char": 1702
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Maintain quality control standards for analytical outputs",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Quality Control & Reporting: Participate in the development of work products, conducting periodic progress reviews and ensuring quality control of findings. Regularly report findings to lead personnel.",
+          "field_source": "description",
+          "start_char": 1301,
+          "end_char": 1502
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "remote_policy",
+        "value": "fully on-site (5 days/week required)",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Quality Control & Reporting: Participate in the development of work products, conducting periodic progress reviews and ensuring quality control of findings. Regularly report findings to lead personnel.",
+          "field_source": "description",
+          "start_char": 1301,
+          "end_char": 1502
+        }
+      },
+      {
+        "signal_type": "reporting_structure",
+        "value": "reports to lead personnel / leadership",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "aw Enforcement Support: Provide critical law enforcement support, interacting with various agencies through multiple channels of communication, while managing data under tight timelines in a high-pressure environment.",
+          "field_source": "description",
+          "start_char": 1706,
+          "end_char": 1923
+        }
+      },
+      {
+        "signal_type": "team_size",
+        "value": "cross-functional teams with law enforcement agencies",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Law Enforcement Support: Provide critical law enforcement support, interacting with various agencies through multiple channels of communication, while managing data under tight timelines in a high-pressure environment.",
+          "field_source": "description",
+          "start_char": 1705,
+          "end_char": 1923
+        }
+      },
+      {
+        "signal_type": "growth_stage",
+        "value": "government/contract-based organization",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "This role will involve working with diverse data sets, ensuring accuracy and integrity while supporting ongoing criminal and civil investigations.",
+          "field_source": "description",
+          "start_char": 289,
+          "end_char": 435
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "no explicit AI usage mentioned",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Our ideal candidate has a blend of technical acumen, attention to detail, and the ability to engage with law enforcement agencies. We are looking for more than just a \"Data Analyst\"—this role requires a technologist with excellent communication skills, customer service, and a passion for data and problem-solving.",
+          "field_source": "description",
+          "start_char": 436,
+          "end_char": 750
+        }
+      }
+    ],
+    "labeler_notes": {}
   },
   {
     "ground_truth_id": "gt-014",
@@ -2544,26 +3155,9 @@
     "skills": [
       {
         "skill_id": null,
-        "skill_name": "Quality assurance",
+        "skill_name": "Data Analysis",
         "type": "Technical",
         "confidence": 0.95,
-        "required_flag": true,
-        "esco_uri": null,
-        "is_genai_extension": false,
-        "source_span": {
-          "text": "This is an entry level position that supports the quality assurance and management of PHIX’s technology and programs.",
-          "field_source": "description",
-          "start_char": 57,
-          "end_char": 174
-        },
-        "span_auto_corrected": false,
-        "original_end_char": null
-      },
-      {
-        "skill_id": null,
-        "skill_name": "Data integration",
-        "type": "Technical",
-        "confidence": 0.9,
         "required_flag": true,
         "esco_uri": null,
         "is_genai_extension": false,
@@ -2578,17 +3172,51 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Problem solving",
+        "skill_name": "Quality Assurance",
+        "type": "Technical",
+        "confidence": 0.9,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes",
+          "field_source": "responsibilities",
+          "start_char": 564,
+          "end_char": 766
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Requirements Gathering",
+        "type": "Technical",
+        "confidence": 0.9,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Key Objective: This is an entry level position that supports the quality assurance and management of PHIX’s technology and programs. The technology and programs that this position will support includes data integrations and end user systems for hospitals, clinics, laboratories, imaging centers, and other health and social service providers. The technology and programs supported by this position are used today to support direct patient care and public health.",
+          "field_source": "description",
+          "start_char": 40,
+          "end_char": 502
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Problem Solving",
         "type": "Soft",
         "confidence": 0.95,
         "required_flag": true,
         "esco_uri": null,
         "is_genai_extension": false,
         "source_span": {
-          "text": "Ability to problem-solve and clearly communicate potential solutions.",
+          "text": "Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes.",
           "field_source": "description",
-          "start_char": 1233,
-          "end_char": 1302
+          "start_char": 767,
+          "end_char": 970
         },
         "span_auto_corrected": false,
         "original_end_char": null
@@ -2602,44 +3230,95 @@
         "esco_uri": null,
         "is_genai_extension": false,
         "source_span": {
-          "text": "Ability to problem-solve and clearly communicate potential solutions",
-          "field_source": "requirements",
-          "start_char": 193,
-          "end_char": 261
+          "text": "Support PHIX’s operations by routinely assessing and supporting the maintenance of various programs and technology.",
+          "field_source": "description",
+          "start_char": 527,
+          "end_char": 642
         },
         "span_auto_corrected": false,
         "original_end_char": null
       },
       {
         "skill_id": null,
-        "skill_name": "Teamwork",
+        "skill_name": "Team Collaboration",
         "type": "Soft",
         "confidence": 0.95,
         "required_flag": true,
         "esco_uri": null,
         "is_genai_extension": false,
         "source_span": {
-          "text": "• Able to learn in a fast-paced, team environment\n• Student or recent graduate in computer science, engineering, business, health information technology, nursing, public health or related field.\n• Ability to problem-solve and clearly communicate potential solutions.\n• Ability to work on a team.",
+          "text": "Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes.",
           "field_source": "description",
-          "start_char": 1036,
-          "end_char": 1331
+          "start_char": 767,
+          "end_char": 970
         },
         "span_auto_corrected": false,
         "original_end_char": null
       },
       {
         "skill_id": null,
-        "skill_name": "Prioritization",
+        "skill_name": "Time Management & Prioritization",
         "type": "Soft",
         "confidence": 0.9,
         "required_flag": true,
         "esco_uri": null,
         "is_genai_extension": false,
         "source_span": {
-          "text": "• Ability to prioritize and manage work against a plan.\n• Flexible and responsible work ethic in order to achieve objectives.",
+          "text": "Ability to prioritize and manage work against a plan.\n• Flexible and responsible work ethic in order to achieve objectives.",
           "field_source": "description",
-          "start_char": 1346,
+          "start_char": 1348,
           "end_char": 1471
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Data Integration",
+        "type": "Technical",
+        "confidence": 0.85,
+        "required_flag": false,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "The technology and programs supported by this position are used today to support direct patient care and public health",
+          "field_source": "responsibilities",
+          "start_char": 211,
+          "end_char": 329
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Healthcare Data Systems Knowledge",
+        "type": "Domain",
+        "confidence": 0.75,
+        "required_flag": false,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "The technology and programs supported by this position are used today to support direct patient care and public health\n\nSupport PHIX’s operations by routinely assessing and supporting the maintenance of various programs and technology\n\nSupport PHIX’s program and technology development by providing routine structured quality assurance reviews of systems\n\nWork closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes",
+          "field_source": "responsibilities",
+          "start_char": 211,
+          "end_char": 769
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Documentation Skills",
+        "type": "Technical",
+        "confidence": 0.85,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes.",
+          "field_source": "description",
+          "start_char": 766,
+          "end_char": 969
         },
         "span_auto_corrected": false,
         "original_end_char": null
@@ -2648,54 +3327,282 @@
     "tools": [
       {
         "tool_id": null,
-        "tool_name": "Health information systems",
+        "tool_name": "Data Integration Systems",
         "category": "platform",
-        "confidence": 0.9,
-        "source_span": {
-          "text": "• Student or recent graduate in computer science, engineering, business, health information technology, nursing, public health or related field.",
-          "field_source": "description",
-          "start_char": 1086,
-          "end_char": 1230
-        },
-        "is_genai_tool": false
-      },
-      {
-        "tool_id": null,
-        "tool_name": "Data integration",
-        "category": "platform",
-        "confidence": 0.8,
+        "confidence": 0.85,
         "source_span": {
           "text": "The technology and programs that this position will support includes data integrations and end user systems for hospitals, clinics, laboratories, imaging centers, and other health and social service providers",
-          "field_source": "description",
-          "start_char": 175,
-          "end_char": 383
+          "field_source": "responsibilities",
+          "start_char": 2,
+          "end_char": 210
         },
         "is_genai_tool": false
       },
       {
         "tool_id": null,
-        "tool_name": "QA",
-        "category": "framework",
+        "tool_name": "End User Systems",
+        "category": "platform",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Key Objective: This is an entry level position that supports the quality assurance and management of PHIX’s technology and programs. The technology and programs that this position will support includes data integrations and end user systems for hospitals, clinics, laboratories, imaging centers, and other health and social service providers. The technology and programs supported by this position are used today to support direct patient care and public health.",
+          "field_source": "description",
+          "start_char": 40,
+          "end_char": 502
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Quality Assurance Tools",
+        "category": "platform",
         "confidence": 0.8,
         "source_span": {
-          "text": "This is an entry level position that supports the quality assurance and management of PHIX’s technology and programs.",
+          "text": "Support PHIX’s program and technology development by providing routine structured quality assurance reviews of systems.",
           "field_source": "description",
-          "start_char": 57,
-          "end_char": 174
+          "start_char": 645,
+          "end_char": 764
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Office/Computer Systems",
+        "category": "other",
+        "confidence": 0.75,
+        "source_span": {
+          "text": "Other duties and responsibilities as assigned\n\nOccasional evening and weekend work may be required\n\nRepetitive motion in the operation of a computer\n\nFrequent sitting required, occasional standing, bending and stooping\n\nWork conducted in office environment with occasional in-town travel\n\nManagement reserves the right to assign, direct and control the work of employees as necessary",
+          "field_source": "responsibilities",
+          "start_char": 767,
+          "end_char": 1150
         },
         "is_genai_tool": false
       }
     ],
-    "labeler_notes": {
-      "Quality assurance": "Structured QA of systems/programs and data quality for PHIX technology (skill; was Data Quality Assurance).",
-      "Data integration": "Supporting integrations across hospitals, clinics, labs, imaging, and social service systems.",
-      "Problem solving": "Explicitly required to identify and communicate solutions.",
-      "Communication": "Collaborating with leadership and explaining solutions.",
-      "Teamwork": "Team environment and ability to work on a team (aligns with typical LLM label).",
-      "Prioritization": "Managing work against a plan and meeting objectives (time management).",
-      "Health information systems": "Systems context for hospitals, clinics, labs, and imaging centers.",
-      "QA": "Structured QA reviews of systems and programs (tool-level; was Quality Assurance (QA) Tools)."
-    }
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Perform routine quality assurance reviews of systems",
+        "category": "testing",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Support PHIX’s program and technology development by providing routine structured quality assurance reviews of systems.",
+          "field_source": "description",
+          "start_char": 645,
+          "end_char": 764
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Support maintenance of programs and technology",
+        "category": "operations",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes.",
+          "field_source": "description",
+          "start_char": 767,
+          "end_char": 970
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Assess system performance and identify issues",
+        "category": "analysis",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "• Support PHIX’s operations by routinely assessing and supporting the maintenance of various programs and technology.",
+          "field_source": "description",
+          "start_char": 525,
+          "end_char": 642
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Gather and document business requirements",
+        "category": "analysis",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes.",
+          "field_source": "description",
+          "start_char": 767,
+          "end_char": 970
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Collaborate with leadership and subject matter experts",
+        "category": "management",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes.",
+          "field_source": "description",
+          "start_char": 767,
+          "end_char": 970
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Support development of programs and systems",
+        "category": "development",
+        "frequency": "as_needed",
+        "complexity": "analytical",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Support PHIX’s program and technology development by providing routine structured quality assurance reviews of systems.\n• Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes.",
+          "field_source": "description",
+          "start_char": 645,
+          "end_char": 970
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Document system processes and workflows",
+        "category": "management",
+        "frequency": "monthly",
+        "complexity": "routine",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes.",
+          "field_source": "description",
+          "start_char": 767,
+          "end_char": 970
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Support ongoing systems operations and maintenance",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Support PHIX’s operations by routinely assessing and supporting the maintenance of various programs and technology.\n• Support PHIX’s program and technology development by providing routine structured quality assurance reviews of systems.",
+          "field_source": "description",
+          "start_char": 527,
+          "end_char": 764
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Ensure quality and reliability of systems through QA processes",
+        "scope": "department",
+        "level": "entry",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "• Support PHIX’s program and technology development by providing routine structured quality assurance reviews of systems.",
+          "field_source": "description",
+          "start_char": 643,
+          "end_char": 764
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Assist in development and improvement of programs and technology",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes.",
+          "field_source": "description",
+          "start_char": 767,
+          "end_char": 970
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Collaborate with leadership to align systems with business needs",
+        "scope": "department",
+        "level": "entry",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes.",
+          "field_source": "description",
+          "start_char": 767,
+          "end_char": 970
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Maintain documentation for systems and processes",
+        "scope": "individual",
+        "level": "entry",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes.",
+          "field_source": "description",
+          "start_char": 767,
+          "end_char": 970
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "remote_policy",
+        "value": "in-person (no remote work allowed)",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Job Types: Full-time, Part-time\n\n\nWork Location: In person",
+          "field_source": "description",
+          "start_char": 2148,
+          "end_char": 2206
+        }
+      },
+      {
+        "signal_type": "team_size",
+        "value": "team-based collaborative environment",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Able to learn in a fast-paced, team environment\n• Student or recent graduate in computer science, engineering, business, health information technology, nursing, public health or related field.\n• Ability to problem-solve and clearly communicate potential solutions.\n• Ability to work on a team.",
+          "field_source": "description",
+          "start_char": 1038,
+          "end_char": 1331
+        }
+      },
+      {
+        "signal_type": "reporting_structure",
+        "value": "works with leadership and subject matter experts",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Work closely with PHIX’s leadership and subject matter experts to determine the business needs for different programs and projects to document system requirements, development, and maintenance processes.\n• Other duties and responsibilities as assigned.",
+          "field_source": "description",
+          "start_char": 767,
+          "end_char": 1019
+        }
+      },
+      {
+        "signal_type": "growth_stage",
+        "value": "healthcare/public health data organization",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "The technology and programs supported by this position are used today to support direct patient care and public health.",
+          "field_source": "description",
+          "start_char": 383,
+          "end_char": 502
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "no explicit AI usage mentioned",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Key Objective: This is an entry level position that supports the quality assurance and management of PHIX’s technology and programs. The technology and programs that this position will support includes data integrations and end user systems for hospitals, clinics, laboratories, imaging centers, and other health and social service providers. The technology and programs supported by this position are used today to support direct patient care and public health.",
+          "field_source": "description",
+          "start_char": 40,
+          "end_char": 502
+        }
+      }
+    ],
+    "labeler_notes": {}
   },
   {
     "ground_truth_id": "gt-015",
