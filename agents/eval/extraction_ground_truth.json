@@ -3332,6 +3332,140 @@
         },
         "is_genai_tool": false
       }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Develop and maintain responsive web applications using React and Node.js",
+        "category": "software_development",
+        "frequency": "ongoing",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Develop and maintain responsive web applications using React and Node.js",
+          "field_source": "responsibilities",
+          "start_char": 0,
+          "end_char": 72
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Write clean, well-documented code and participate in code reviews",
+        "category": "engineering_practice",
+        "frequency": "weekly",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Write clean, well-documented code and participate in code reviews",
+          "field_source": "responsibilities",
+          "start_char": 74,
+          "end_char": 139
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Integrate with backend APIs and databases (PostgreSQL)",
+        "category": "integration",
+        "frequency": "ongoing",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Integrate with backend APIs and databases (PostgreSQL)",
+          "field_source": "responsibilities",
+          "start_char": 141,
+          "end_char": 195
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Participate in agile ceremonies and sprint planning",
+        "category": "planning",
+        "frequency": "weekly",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Participate in agile ceremonies and sprint planning",
+          "field_source": "responsibilities",
+          "start_char": 257,
+          "end_char": 308
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Deliver and evolve customer-facing web applications as part of the product team",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "join our product team",
+          "field_source": "description",
+          "start_char": 58,
+          "end_char": 79
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Meet entry-level engineering expectations while adopting team standards",
+        "scope": "individual",
+        "level": "entry",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "0-2 years of professional development experience",
+          "field_source": "requirements",
+          "start_char": 83,
+          "end_char": 131
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Collaborate with UX and peers on implementation quality",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Collaborate with UX designers to implement user interfaces",
+          "field_source": "responsibilities",
+          "start_char": 197,
+          "end_char": 255
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "growth_stage",
+        "value": "Entry-level role; open to recent graduates and career changers",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "This role is ideal for recent graduates or career changers",
+          "field_source": "description",
+          "start_char": 236,
+          "end_char": 294
+        }
+      },
+      {
+        "signal_type": "team_size",
+        "value": "Product-team context (small cross-functional group)",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "join our product team",
+          "field_source": "description",
+          "start_char": 58,
+          "end_char": 79
+        }
+      },
+      {
+        "signal_type": "remote_policy",
+        "value": "Opening narrative describes an entry-level product-team full stack role; no remote, hybrid, or on-site keywords in this sentence",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "We are looking for an entry-level Full Stack Developer to join our product team.",
+          "field_source": "description",
+          "start_char": 0,
+          "end_char": 80
+        }
+      }
     ]
   },
   {
@@ -3461,6 +3595,140 @@
           "end_char": 5
         },
         "is_genai_tool": false
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Develop and maintain Django-based backend services and APIs",
+        "category": "backend_development",
+        "frequency": "ongoing",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Develop and maintain Django-based backend services and APIs",
+          "field_source": "responsibilities",
+          "start_char": 0,
+          "end_char": 59
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Build and update Vue.js components for customer-facing and internal applications",
+        "category": "frontend_development",
+        "frequency": "ongoing",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Build and update Vue.js components for customer-facing and internal applications",
+          "field_source": "responsibilities",
+          "start_char": 61,
+          "end_char": 141
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Write SQL queries and optimize database performance",
+        "category": "data_access",
+        "frequency": "ongoing",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Write SQL queries and optimize database performance",
+          "field_source": "responsibilities",
+          "start_char": 143,
+          "end_char": 194
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Create Excel-based reports and exports for business stakeholders",
+        "category": "reporting",
+        "frequency": "weekly",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Create Excel-based reports and exports for business stakeholders",
+          "field_source": "responsibilities",
+          "start_char": 196,
+          "end_char": 260
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Support and extend digital banking platforms",
+        "scope": "department",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "support our digital banking platforms",
+          "field_source": "description",
+          "start_char": 55,
+          "end_char": 92
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Participate in agile delivery with the engineering team",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Participate in sprint planning, daily standups, and retrospectives",
+          "field_source": "responsibilities",
+          "start_char": 262,
+          "end_char": 328
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Produce stakeholder-ready reporting artifacts",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Create Excel-based reports and exports for business stakeholders",
+          "field_source": "responsibilities",
+          "start_char": 196,
+          "end_char": 260
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "growth_stage",
+        "value": "Entry-level (0–2 years); learning-focused culture",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "0-2 years of software development experience",
+          "field_source": "requirements",
+          "start_char": 70,
+          "end_char": 114
+        }
+      },
+      {
+        "signal_type": "team_size",
+        "value": "Collaborative engineering environment",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "curiosity, collaboration",
+          "field_source": "description",
+          "start_char": 222,
+          "end_char": 246
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "Opening sentence frames digital banking platform work; it does not mention AI assistants, LLMs, or GenAI tooling",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "GECU is seeking an entry-level Full Stack Developer to support our digital banking platforms.",
+          "field_source": "description",
+          "start_char": 0,
+          "end_char": 93
+        }
       }
     ]
   },
@@ -3615,6 +3883,154 @@
           "end_char": 14
         },
         "is_genai_tool": true
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Build and maintain Next.js applications with TypeScript",
+        "category": "software_development",
+        "frequency": "ongoing",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Build and maintain Next.js applications with TypeScript",
+          "field_source": "responsibilities",
+          "start_char": 0,
+          "end_char": 55
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Develop API routes and integrate with backend services",
+        "category": "backend_development",
+        "frequency": "ongoing",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Develop API routes and integrate with backend services",
+          "field_source": "responsibilities",
+          "start_char": 57,
+          "end_char": 111
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Use Prisma for database access and migrations",
+        "category": "data_access",
+        "frequency": "ongoing",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Use Prisma for database access and migrations",
+          "field_source": "responsibilities",
+          "start_char": 113,
+          "end_char": 158
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Participate in code reviews and pair programming",
+        "category": "engineering_practice",
+        "frequency": "weekly",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Participate in code reviews and pair programming",
+          "field_source": "responsibilities",
+          "start_char": 160,
+          "end_char": 208
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Use AI-assisted coding tools where appropriate to accelerate development",
+        "category": "software_development",
+        "frequency": "ongoing",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Use AI-assisted coding tools where appropriate to accelerate development",
+          "field_source": "responsibilities",
+          "start_char": 210,
+          "end_char": 282
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Build secure, scalable web applications for the cybersecurity product",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "secure, scalable web applications for our cybersecurity platform",
+          "field_source": "description",
+          "start_char": 35,
+          "end_char": 99
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Adopt modern engineering practices including AI-assisted development where appropriate",
+        "scope": "individual",
+        "level": "entry",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "We encourage use of AI-assisted development tools to improve productivity",
+          "field_source": "description",
+          "start_char": 161,
+          "end_char": 234
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Document decisions and help onboard teammates",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Document technical decisions and onboard new team members",
+          "field_source": "responsibilities",
+          "start_char": 284,
+          "end_char": 341
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "ai_usage",
+        "value": "AI-assisted coding tools encouraged (e.g. Copilot-class assistants)",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "We encourage use of AI-assisted development tools to improve productivity",
+          "field_source": "description",
+          "start_char": 161,
+          "end_char": 234
+        }
+      },
+      {
+        "signal_type": "team_size",
+        "value": "Engineering team context",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Join our engineering team",
+          "field_source": "description",
+          "start_char": 0,
+          "end_char": 25
+        }
+      },
+      {
+        "signal_type": "growth_stage",
+        "value": "Entry-level full stack hire (0–2 years)",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Entry Level",
+          "field_source": "title",
+          "start_char": 24,
+          "end_char": 35
+        }
       }
     ]
   },
@@ -3785,6 +4201,140 @@
           "end_char": 6
         },
         "is_genai_tool": false
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Develop and maintain Java/Spring Boot backend services and REST APIs",
+        "category": "backend_development",
+        "frequency": "ongoing",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Develop and maintain Java/Spring Boot backend services and REST APIs",
+          "field_source": "responsibilities",
+          "start_char": 0,
+          "end_char": 68
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Build Angular components and pages for enterprise applications",
+        "category": "frontend_development",
+        "frequency": "ongoing",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Build Angular components and pages for enterprise applications",
+          "field_source": "responsibilities",
+          "start_char": 70,
+          "end_char": 132
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Write and optimize SQL queries for MySQL",
+        "category": "data_access",
+        "frequency": "ongoing",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Write and optimize SQL queries for MySQL",
+          "field_source": "responsibilities",
+          "start_char": 134,
+          "end_char": 174
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Participate in agile ceremonies and sprint delivery",
+        "category": "planning",
+        "frequency": "weekly",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Participate in agile ceremonies and sprint delivery",
+          "field_source": "responsibilities",
+          "start_char": 176,
+          "end_char": 227
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Deliver enterprise web software in support of defense and federal programs",
+        "scope": "organization",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "defense and federal programs",
+          "field_source": "description",
+          "start_char": 79,
+          "end_char": 107
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Collaborate with systems engineering and QA on delivery",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Collaborate with systems engineers and testers",
+          "field_source": "responsibilities",
+          "start_char": 229,
+          "end_char": 275
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Maintain compliance with citizenship and clearance eligibility requirements",
+        "scope": "organization",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "US citizenship required for clearance eligibility",
+          "field_source": "requirements",
+          "start_char": 471,
+          "end_char": 520
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "growth_stage",
+        "value": "Defense/federal sector; entry-level engineering role",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "defense and federal programs",
+          "field_source": "description",
+          "start_char": 79,
+          "end_char": 107
+        }
+      },
+      {
+        "signal_type": "reporting_structure",
+        "value": "US citizenship required for security clearance eligibility",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "US citizenship required for clearance eligibility",
+          "field_source": "requirements",
+          "start_char": 471,
+          "end_char": 520
+        }
+      },
+      {
+        "signal_type": "team_size",
+        "value": "Agile delivery team (ceremonies, sprint-based work)",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "agile team",
+          "field_source": "description",
+          "start_char": 316,
+          "end_char": 326
+        }
       }
     ]
   },
