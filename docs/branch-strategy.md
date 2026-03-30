@@ -290,8 +290,19 @@ When `git pull origin development` shows conflicts:
 
 ```text
 # Git tells you which files have conflicts.
-# In each file, Git inserts three sections: "ours" (your branch), a separator,
-# and "theirs" (incoming). Remove those marker lines and keep the code you want.
+# Open each conflicted file and look for conflict markers.
+
+# In each file, Git inserts three sections: "ours" (your branch), a separator
+# line, and "theirs" (incoming). Example shape:
+
+#   <<<<<<< HEAD
+#   your version of the code
+#   =======
+#   the other version from development
+#   >>>>>>> other-branch
+
+# Remove the marker lines (<<<<<<<, =======, >>>>>>>) and keep the code you want
+# (yours, theirs, or a combination).
 ```
 
 **Steps to resolve:**

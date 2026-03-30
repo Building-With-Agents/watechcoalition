@@ -57,6 +57,7 @@ class VisualizationAgent(BaseAgent):
             agent_id=self.agent_id,
             payload={
                 "event_type": "RenderComplete",
+                "triggered_by_batch_id": event.payload.get("triggered_by_batch_id"),
                 "triggered_by_posting_id": event.payload.get("triggered_by_posting_id"),
                 "pages_rendered": [
                     "Pipeline Run Summary",

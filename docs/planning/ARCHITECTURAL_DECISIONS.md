@@ -75,6 +75,8 @@ weight it carries and who owns it.
 | 28 | Contract | Agent health interface | Every agent exposes `health_check() → dict` — returns `{"status": "ok"\|"degraded"\|"down", "agent": str, "last_run": str, "metrics": dict}`, called by Orchestration Agent before scheduling |
 | 29 | Contract | Correlation ID propagation | Set once at pipeline entry, propagated unchanged through every downstream event |
 | 30 | Contract | Taxonomy store abstraction | `TaxonomyStoreBase` ABC — concrete implementation switchable via `TAXONOMY_STORE` env var. Phase 1: `PostgreSQLTaxonomyStore`. Phase 2: `LightcastTaxonomyStore` |
+| 31 | Architectural | Phased Query Agent architecture | Phase 1: Q&A inside Analytics Agent. Phase 2: standalone Query Agent (9th agent) with persona routing |
+| 32 | Architectural | Demand Analysis absorbed into Analytics | Demand Analysis capabilities merged into Analytics Agent Phase 2; `agents/demand_analysis/` repurposed for Query Agent. Final count: Phase 1 = 8, Phase 2 = 9 |
 
 ### Open — Must Resolve Before Build
 
@@ -453,6 +455,38 @@ Requires `LIGHTCAST_API_KEY`.
 
 **Mock for testing:** `MockTaxonomyStore` — returns deterministic fixture data.
 No database connection required. Used in all unit tests.
+
+---
+
+### #31 — Phased Query Agent Architecture
+
+| Field | Value |
+|---|---|
+| **Type** | Architectural (Fixed) |
+| **Status** | ✅ Resolved |
+
+**Context:** The CFA director requested standalone Query Agent capabilities for workforce intelligence Q&A (gap analysis, candidate-role matching, stakeholder reports). The existing 8-agent architecture handles Q&A as a sub-capability of the Analytics Agent (Week 8). Adding a standalone Query Agent during the 12-week curriculum would require restructuring the event pipeline, redefining agent boundaries, and invalidating weeks of student work.
+
+**Resolution:** Phased approach —
+- **Phase 1 (Weeks 1–12):** Q&A remains inside the Analytics Agent. Enhancements include Comparative Analysis and Trend Narrative output modes, 60 evaluation test cases, and a forward-compatible `persona` field on the query API schema (added Week 6, ignored in Phase 1).
+- **Phase 2 (post-capstone):** Standalone Query Agent (9th agent) with Gap Analysis, Candidate-Role Match, and Stakeholder Reports output modes. Persona-based response routing (`workforce_board_director | employer_partner | cfa_internal | cohort_student`). Requires new upstream data: candidate/cohort profiles.
+
+**Rationale:** Preserves the 8-agent architecture during the curriculum while committing to the director's vision in Phase 2. The `persona` field and `QueryRequest` model provide forward-compatibility without scope creep.
+
+---
+
+### #32 — Demand Analysis Capabilities Absorbed into Analytics Agent
+
+| Field | Value |
+|---|---|
+| **Type** | Architectural (Fixed) |
+| **Status** | ✅ Resolved |
+
+**Context:** ARCHITECTURE_DEEP.md originally defined Agent 8 (Demand Analysis Agent) as a Phase 2 standalone agent for time-series indexing, velocity windows, forecasting, and anomaly detection. With the Query Agent becoming the 9th agent, the system would have 10 agents — adding complexity without clear domain separation.
+
+**Resolution:** Demand Analysis capabilities are absorbed into the Analytics Agent's Phase 2 expansion. The Analytics Agent already handles skill velocity (`skill_velocity` table), trajectory mapping (`trajectory_map` table), and emergence detection (`EmergenceAlert` event) in Phase 1. The Demand Analysis scope (extended velocity windows, forecasting, anomaly detection) is the same analytical domain with the same data sources. The `agents/demand_analysis/` scaffold directory is repurposed for the Query Agent.
+
+**Rationale:** "One agent = one responsibility" (Engineering Rule #1). Demand analysis IS analytics — same data, same aggregate tables, same domain. Keeping it separate violates the single-responsibility principle. The Query Agent has genuinely different responsibility (Q&A with persona routing), different consumers (end users), and different outputs (formatted reports). Final count: Phase 1 = 8 agents, Phase 2 = 9 agents.
 
 ---
 

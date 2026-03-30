@@ -1,8 +1,10 @@
 """Cost Projection Script — Week 4.
 
-Reads from dbo.llm_audit_log (populated by real LLM calls via llm_adapter.complete()),
-separates Pass 1 (pattern matching, free) from Pass 2 (LLM inference, paid),
-groups costs by model tier (sonnet vs haiku), projects at 1k / 10k / 100k
+Reads from dbo.llm_audit_log (populated by real LLM calls via llm_adapter.complete()
+and by taxonomy Step 4 embedding calls via log_extraction_event in taxonomy._embed_texts_azure,
+issue #108: agent_name=taxonomy-resolver, model=text-embedding-3-small),
+separates Pass 1 (pattern matching, free) from Pass 2 (LLM inference + embeddings, paid),
+groups costs by model tier (sonnet vs haiku vs other), projects at 1k / 10k / 100k
 postings, and writes agents/eval/cost_model_week4.md.
 
 Usage (from repo root, venv activated, .env loaded):
@@ -11,10 +13,13 @@ Usage (from repo root, venv activated, .env loaded):
 Pass 1 vs Pass 2 distinction:
     Pass 1 — pattern matching / rule-based extraction. No LLM call, cost = $0.
              Tracked via ExtractionMetadata.pass1_tool_count.
-    Pass 2 — LLM extraction of skill dimensions. Cost tracked in llm_audit_log.
+    Pass 2 — LLM extraction of skill dimensions plus Step 4 embedding API calls. Cost tracked in llm_audit_log.
              Rows where success=TRUE and cost_usd > 0 are Pass 2 calls.
 
     Rows with cost_usd = 0 and success=TRUE are treated as Pass 1 (stub/pattern).
+
+Embedding vs chat: see report section "Embedding vs chat"; embedding rows use tier **other**
+in the model-tier table when the model is not haiku/sonnet.
 """
 
 from __future__ import annotations
@@ -74,6 +79,25 @@ GROUP BY agent_name
 ORDER BY total_cost_usd DESC;
 """
 
+# Issue #108: split taxonomy Step 4 embeddings from chat completions in totals.
+_EMBED_VS_CHAT_QUERY = """
+SELECT
+    SUM(
+        CASE WHEN agent_name = 'taxonomy-resolver' OR model ILIKE '%embedding%' THEN 1 ELSE 0 END
+    ) AS embedding_calls,
+    SUM(
+        CASE WHEN agent_name = 'taxonomy-resolver' OR model ILIKE '%embedding%' THEN cost_usd ELSE 0 END
+    ) AS embedding_cost_usd,
+    SUM(
+        CASE WHEN NOT (agent_name = 'taxonomy-resolver' OR model ILIKE '%embedding%') THEN 1 ELSE 0 END
+    ) AS chat_calls,
+    SUM(
+        CASE WHEN NOT (agent_name = 'taxonomy-resolver' OR model ILIKE '%embedding%') THEN cost_usd ELSE 0 END
+    ) AS chat_cost_usd
+FROM dbo.llm_audit_log
+WHERE success = TRUE;
+"""
+
 
 def run(output_path: Path = _OUTPUT_PATH) -> None:
     engine = get_engine()
@@ -81,6 +105,7 @@ def run(output_path: Path = _OUTPUT_PATH) -> None:
     with engine.connect() as conn:
         tier_rows = conn.execute(text(_QUERY)).fetchall()
         dimension_rows = conn.execute(text(_DIMENSION_QUERY)).fetchall()
+        embed_chat_row = conn.execute(text(_EMBED_VS_CHAT_QUERY)).fetchone()
 
     if not tier_rows:
         log.warning("cost_projection_no_data", message="llm_audit_log is empty — run real extractions first.")
@@ -149,6 +174,27 @@ def run(output_path: Path = _OUTPUT_PATH) -> None:
         lines.append(f"\n**Most expensive dimension:** `{most_expensive.agent_name}` "
                      f"at ${most_expensive.avg_cost_per_call:.6f}/call\n")
 
+    if embed_chat_row is not None:
+        ec = int(embed_chat_row.embedding_calls or 0)
+        cc = int(embed_chat_row.chat_calls or 0)
+        e_cost = float(embed_chat_row.embedding_cost_usd or 0)
+        c_cost = float(embed_chat_row.chat_cost_usd or 0)
+        lines.append("## Embedding vs chat (`llm_audit_log`)\n")
+        lines.append(
+            "Step 4 taxonomy embeddings are logged as `agent_name=taxonomy-resolver` and/or "
+            "models matching `%embedding%` (issue #108). Chat completions are all other successful rows.\n"
+        )
+        lines.append("| Kind | Calls | Total cost (USD) |")
+        lines.append("|---|---|---|")
+        lines.append(f"| Step 4 embeddings | {ec} | ${e_cost:.6f} |")
+        lines.append(f"| Chat completions | {cc} | ${c_cost:.6f} |")
+        lines.append("")
+        lines.append(
+            "*Note:* The **Average Cost Per Record (by Model Tier)** table above includes embedding rows "
+            "under tier **other** when the model name is not haiku/sonnet.\n"
+        )
+        lines.append("")
+
     lines.append("## Cost Optimization Opportunities\n")
     lines.append("- Route lower-complexity dimensions (tools verification, context) to Haiku instead of Sonnet.")
     lines.append("- Cache repeated skill patterns across similar job postings (Pass 1 expansion).")
@@ -178,6 +224,7 @@ python -m agents.eval.cost_projection
 - Average Cost Per Record (by Model Tier)
 - Cost Projections at Scale (1k / 10k / 100k)
 - Most Expensive Extraction Dimension
+- Embedding vs chat (`llm_audit_log`, issue #108)
 - Cost Optimization Opportunities
 """
     output_path.parent.mkdir(parents=True, exist_ok=True)

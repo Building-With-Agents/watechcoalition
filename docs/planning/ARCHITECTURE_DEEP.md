@@ -543,6 +543,8 @@ class JobRecord(BaseModel):
 **File:** `agents/analytics/agent.py` | **Consumes:** `RecordEnriched` | **Emits:** `AnalyticsRefreshed`, `EmergenceAlert`, `DisruptionRefreshed`
 **Exposes:** `POST /analytics/query` (REST) [Contract #18 — reference implementation]
 
+> **Phase 2 note:** In Phase 2, the Analytics Agent absorbs Demand Analysis capabilities (time-series indexing, velocity windows 7d/30d/90d, 30-day demand forecasts, anomaly detection with significance testing, TrajectoryRecord projections). Q&A migrates out to the standalone Query Agent (Agent 9). The `persona` field is added to the query API in Week 6 for forward-compatibility — Phase 1 ignores it; Phase 2 Query Agent uses it for response routing.
+
 **Phase 1 responsibilities:**
 
 **10 aggregate tables** (replacing single `analytics_aggregates`):
@@ -723,7 +725,7 @@ class JobRecord(BaseModel):
 
 ---
 
-### 8. Demand Analysis Agent *(Phase 2 only — scaffold directory, do not implement)*
+### 8. Demand Analysis *(Phase 2 — capabilities absorbed into Analytics Agent expansion)*
 **File:** `agents/demand_analysis/agent.py` | **Consumes:** `RecordEnriched`, `AnalyticsRefreshed` | **Emits:** `DemandSignalsUpdated`, `DemandAnomaly`
 
 **Phase 2 scope (enriched from client spec):**
@@ -747,6 +749,41 @@ class JobRecord(BaseModel):
 | Anomaly precision | ≥ 80% |
 | Trajectory confidence calibration | Within ±10% |
 
+> **Architecture note:** The Demand Analysis capabilities listed above are absorbed into the Analytics Agent in Phase 2. The `agents/demand_analysis/` scaffold directory is repurposed for the Query Agent. This avoids a 10-agent system — demand analysis is analytics-domain work (same data sources, same aggregate tables). See Agent 9 below.
+
+---
+
+### 9. Query Agent *(Phase 2 — standalone workforce intelligence Q&A)*
+**File:** `agents/query/agent.py` | **Consumes:** `AnalyticsRefreshed`, `DisruptionRefreshed` | **Emits:** `QueryResponse`
+
+**Phase 2 scope:**
+- Standalone workforce intelligence Q&A agent — migrates Q&A responsibility out of the Analytics Agent
+- Three new output modes beyond Phase 1 Q&A:
+  - **Gap Analysis:** Compare candidate/cohort skills against market demand (requires candidate profile data — new ingestion source)
+  - **Candidate-Role Match:** Score individual candidates against open roles using job requirements + candidate capabilities
+  - **Stakeholder Reports:** Formatted PDF/DOCX board briefs, not just Streamlit pages
+- **Persona-based response routing:**
+  - `QueryPersona` enum: `workforce_board_director | employer_partner | cfa_internal | cohort_student`
+  - Different output depth, format, and focus per persona
+- **`QueryRequest` Pydantic model:**
+  - `query: str` — natural language question
+  - `persona: QueryPersona` — routing hint for response style
+  - `intent_hint: str | None` — optional intent override
+  - `max_results: int` — result limit
+- Forward-compatibility: `persona` field added to query API in Week 6 (Phase 1). Phase 1 ignores it; Phase 2 uses it for routing.
+
+**Phase 1 → Phase 2 migration:**
+- Phase 1: Q&A is embedded in Analytics Agent (intent classification, evidence citation, Comparative Analysis, Trend Narrative)
+- Phase 2: Q&A migrates to standalone Query Agent. Analytics retains aggregation + disruption + demand analysis (absorbed from Agent 8).
+
+| Metric | Target |
+|--------|--------|
+| Intent classification accuracy | ≥ 90% |
+| Response relevance (human eval) | ≥ 85% |
+| Persona routing accuracy | ≥ 95% |
+| Evidence citation rate | 100% (every answer cites specific data) |
+| Query response time (p50) | < 5s |
+
 ---
 
 ## Event Catalog
@@ -756,18 +793,19 @@ class JobRecord(BaseModel):
 | `IngestBatch` | Ingestion | Normalization, Orchestrator | batch_id, record_count, source |
 | `NormalizationComplete` | Normalization | Work Intelligence, Orchestrator | batch_id, normalized_count, quarantine_count |
 | `SkillsExtracted` | Work Intelligence | Enrichment, Orchestrator | batch_id, per-dimension counts (skills, tools, tasks, responsibilities, context), extraction_cost_usd |
-| `RecordEnriched` | Enrichment | Analytics, Demand Analysis*, Orchestrator | batch_id, enriched_count, temporal_period, borderplex_subregion, duplicate_count |
+| `RecordEnriched` | Enrichment | Analytics, Orchestrator | **Week 5 lite (issue #87):** `batch_id`, `enriched_count`, `spam_rejected_count`, `flagged_for_review_count`. **Week 6+:** adds `temporal_period`, `borderplex_subregion`, `duplicate_count`. |
 | `ProfileComplete` | Work Intelligence | Enrichment | record_id — mirrors client spec naming (alias for per-record SkillsExtracted) |
 | `AnalyticsRefreshed` | Analytics | Visualization, Orchestrator | refresh_id, tables_updated, records_processed |
 | `DisruptionRefreshed` | Analytics | Visualization, Orchestrator | refresh_id, roles_analyzed, new_fingerprints |
 | `EmergenceAlert` | Analytics | Orchestrator | cluster_id, posting_count, representative_titles — new canonical role candidates |
-| `DemandSignalsUpdated` | Demand Analysis* | Analytics, Visualization, Orchestrator | *Phase 2* |
-| `DemandAnomaly` | Demand Analysis* | Orchestrator | *Phase 2* |
+| `DemandSignalsUpdated` | Analytics (Phase 2) | Analytics, Visualization, Orchestrator | *Phase 2* |
+| `DemandAnomaly` | Analytics (Phase 2) | Orchestrator | *Phase 2* |
+| `QueryResponse` | Query Agent (Phase 2) | Visualization, Orchestrator | query_id, persona, intent, response_format, evidence_count |
 | `RenderComplete` | Visualization | Orchestrator | page, render_time_ms |
 | `*Failed` / `*Alert` | Any agent | **Orchestrator only** | error_type, severity, context |
 | `SourceFailure` | Ingestion | Orchestrator | source, error, retry_count |
 
-*Phase 2
+*Phase 2 — Demand Analysis capabilities absorbed into Analytics Agent
 
 ---
 
@@ -938,7 +976,7 @@ AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME=
 # Architectural #19 — Database (PostgreSQL — fixed)
 # POSTGRES MIGRATION: change from sqlserver:// to postgresql://
 DATABASE_URL=                          # Prisma / Next.js connection string
-# POSTGRES MIGRATION: change from mssql+pyodbc:// to postgresql+psycopg2://
+# PostgreSQL connection: postgresql+psycopg2://
 PYTHON_DATABASE_URL=                   # SQLAlchemy connection string (Python agents)
 
 # Tool #17 — Agent tracing (reference: LangSmith)
@@ -986,6 +1024,7 @@ COST_ALERT_THRESHOLD_USD=50.0                  # Alert when cumulative cost exce
 | 10 | **Pipeline Hardening** + Event Contract Enforcement |
 | 11 | **Testing + Security + Documentation** (merged) |
 | 12 | Capstone demo + `v0.1.0-capstone` |
+| Phase 2 | Query Agent (9th agent) — Gap Analysis, Candidate-Role Match, Stakeholder Reports, persona routing |
 
 ---
 

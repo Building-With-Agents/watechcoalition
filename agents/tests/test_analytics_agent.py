@@ -51,4 +51,4 @@ class TestAnalyticsAgent:
         assert "top_skills" in p
         assert "seniority_distribution" in p
         assert "run_id" in p
-        assert p["triggered_by_posting_id"] == enriched_event.payload["posting_id"]
+        assert p["triggered_by_batch_id"] == enriched_event.payload["batch_id"]
