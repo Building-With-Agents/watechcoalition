@@ -25,9 +25,10 @@ from __future__ import annotations
 import json
 import sys
 import uuid
+from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -135,32 +136,22 @@ def _map_to_normalized_job(obj: dict[str, Any], *, seq: int) -> NormalizedJob:
     source = str(obj.get("source") or "fixture_seed")[:50]
 
     description = obj.get("description") or obj.get("raw_text")
-    if isinstance(description, str):
-        description = description.strip() or None
-    else:
-        description = None
+    description = description.strip() or None if isinstance(description, str) else None
 
     requirements = obj.get("requirements")
-    if isinstance(requirements, str):
-        requirements = requirements.strip() or None
-    else:
-        requirements = None
+    requirements = requirements.strip() or None if isinstance(requirements, str) else None
 
     responsibilities = obj.get("responsibilities")
-    if isinstance(responsibilities, str):
-        responsibilities = responsibilities.strip() or None
-    else:
-        responsibilities = None
+    responsibilities = (
+        responsibilities.strip() or None if isinstance(responsibilities, str) else None
+    )
 
     raw_jid = int(posting_id) if isinstance(posting_id, int) else None
     if isinstance(posting_id, str) and posting_id.isdigit():
         raw_jid = int(posting_id)
 
     job_url = obj.get("job_url") or obj.get("url")
-    if isinstance(job_url, str):
-        job_url = job_url[:2083]
-    else:
-        job_url = None
+    job_url = job_url[:2083] if isinstance(job_url, str) else None
 
     ts = _parse_ts(obj.get("timestamp") or obj.get("date_posted"))
 
