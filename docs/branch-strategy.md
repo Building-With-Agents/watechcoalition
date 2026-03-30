@@ -288,7 +288,7 @@ Merge conflicts happen when two people edit the same lines in the same file. The
 
 When `git pull origin development` shows conflicts:
 
-```bash
+```text
 # Git tells you which files have conflicts
 # Open each conflicted file — look for conflict markers:
 
@@ -296,7 +296,7 @@ When `git pull origin development` shows conflicts:
 your version of the code
 =======
 the other version from development
->>>>>>> origin/development
+>>>>>>> other-branch
 ```
 
 **Steps to resolve:**

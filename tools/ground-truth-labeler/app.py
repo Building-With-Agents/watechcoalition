@@ -20,9 +20,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
 
-# Minimal toolbar avoids Streamlit share-modal.js (addEventListener on missing nodes in some setups).
-st.set_option("client.toolbarMode", "minimal")
-
 from jsearch_client import get_api_key, parse_job_sections, search_jobs
 from schema import (
     GENAI_SKILLS,
@@ -35,6 +32,9 @@ from schema import (
     ToolRecord,
 )
 from text_selector import render_selectable_job_text, span_input_bridge
+
+# Minimal toolbar avoids Streamlit share-modal.js (addEventListener on missing nodes in some setups).
+st.set_option("client.toolbarMode", "minimal")
 
 load_dotenv(Path(__file__).parent / ".env")
 

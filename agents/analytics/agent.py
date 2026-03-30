@@ -12,6 +12,9 @@ for every record processed.  In Week 7 the Analytics Agent accumulates data
 across all records before emitting a single AnalyticsRefreshed event at
 the end of a batch run.
 
+``RecordEnriched`` (Week 5 lite, issue #87) includes ``batch_id`` and batch
+counts only; this stub sets ``triggered_by_batch_id`` from that envelope.
+
 Agent ID (canonical): analytics-agent
 Emits:    AnalyticsRefreshed
 Consumes: RecordEnriched
@@ -82,7 +85,7 @@ class AnalyticsAgent(BaseAgent):
             agent_id=self.agent_id,
             payload={
                 "event_type": "AnalyticsRefreshed",
-                "triggered_by_posting_id": event.payload.get("posting_id"),
+                "triggered_by_batch_id": event.payload.get("batch_id"),
                 **self._fixture,
             },
         )

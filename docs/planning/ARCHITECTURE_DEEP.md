@@ -793,7 +793,7 @@ class JobRecord(BaseModel):
 | `IngestBatch` | Ingestion | Normalization, Orchestrator | batch_id, record_count, source |
 | `NormalizationComplete` | Normalization | Work Intelligence, Orchestrator | batch_id, normalized_count, quarantine_count |
 | `SkillsExtracted` | Work Intelligence | Enrichment, Orchestrator | batch_id, per-dimension counts (skills, tools, tasks, responsibilities, context), extraction_cost_usd |
-| `RecordEnriched` | Enrichment | Analytics, Orchestrator | batch_id, enriched_count, temporal_period, borderplex_subregion, duplicate_count |
+| `RecordEnriched` | Enrichment | Analytics, Orchestrator | **Week 5 lite (issue #87):** `batch_id`, `enriched_count`, `spam_rejected_count`, `flagged_for_review_count`. **Week 6+:** adds `temporal_period`, `borderplex_subregion`, `duplicate_count`. |
 | `ProfileComplete` | Work Intelligence | Enrichment | record_id — mirrors client spec naming (alias for per-record SkillsExtracted) |
 | `AnalyticsRefreshed` | Analytics | Visualization, Orchestrator | refresh_id, tables_updated, records_processed |
 | `DisruptionRefreshed` | Analytics | Visualization, Orchestrator | refresh_id, roles_analyzed, new_fingerprints |
