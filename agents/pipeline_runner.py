@@ -38,6 +38,10 @@ Design decisions:
 
 from __future__ import annotations
 
+import os
+
+os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+
 import contextlib
 import json
 import sys
@@ -97,6 +101,35 @@ structlog.configure(
 )
 
 log = structlog.get_logger()
+
+# ---------------------------------------------------------------------------
+# Optional: smoke-call extractors after normalization (needs title + company)
+# ---------------------------------------------------------------------------
+
+
+def _job_record_from_event_payload(payload: dict) -> JobRecord | None:
+    """Build a minimal JobRecord when inline job fields exist (not batch-only events)."""
+    title = payload.get("title")
+    company = payload.get("company")
+    if not isinstance(title, str) or not title.strip():
+        return None
+    if not isinstance(company, str) or not company.strip():
+        return None
+    desc = payload.get("description") if isinstance(payload.get("description"), str) else None
+    if desc is None and isinstance(payload.get("raw_text"), str):
+        desc = payload["raw_text"]
+    req = payload.get("requirements") if isinstance(payload.get("requirements"), str) else None
+    resp = payload.get("responsibilities") if isinstance(payload.get("responsibilities"), str) else None
+    return JobRecord(
+        source=str(payload.get("source") or "pipeline-runner"),
+        external_id=str(payload.get("external_id") or payload.get("batch_id") or "pipeline-stub"),
+        title=title.strip(),
+        company=company.strip(),
+        description=desc,
+        requirements=req,
+        responsibilities=resp,
+    )
+
 
 # ---------------------------------------------------------------------------
 # Pipeline definition
@@ -232,19 +265,19 @@ def run_pipeline(
             event_type=outbound.payload.get("event_type"),
         )
 
-        # Week 4 stubs (Pair B: context): run after normalization, log result count
-        # Stubs accept JobRecord — build a minimal one for pipeline verification.
-        # Week 5+ will load real normalized jobs from DB per-record.
+        # Week 5: optional extractor smoke after normalization (full run is in SkillsExtractionAgent).
         if outbound.agent_id == "normalization-agent":
-            stub_job = JobRecord(
-                source="pipeline-stub",
-                external_id="stub",
-                title="stub",
-                company="stub",
-            )
-            context_signals = extract_context(stub_job)
-            tasks = extract_tasks(stub_job)
-            responsibilities = extract_responsibilities(stub_job)
+            stub_rec = _job_record_from_event_payload(outbound.payload)
+            if stub_rec is None:
+                stub_rec = JobRecord(
+                    source="pipeline-stub",
+                    external_id="stub",
+                    title="stub",
+                    company="stub",
+                )
+            context_signals, _ctx_meta = extract_context(stub_rec)
+            tasks, _tasks_meta = extract_tasks(stub_rec)
+            responsibilities, _resp_meta = extract_responsibilities(stub_rec)
             log.info(
                 "extraction_stubs_result",
                 context_count=len(context_signals),

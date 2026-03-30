@@ -1,20 +1,25 @@
-"""Schema validation unit tests for context, task, and responsibility extraction stubs."""
+"""Unit tests for context (Pass 1), tasks, and responsibilities extractors."""
 
 from __future__ import annotations
+
+from unittest.mock import patch
 
 import pytest
 from pydantic import TypeAdapter
 
-from agents.common.types import JobRecord
-from agents.common.types.extraction_types import (
+from agents.common.types import (
     ContextSignal,
+    JobRecord,
     ResponsibilityRecord,
     SpanRecord,
     TaskRecord,
 )
 from agents.skills_extraction.extractors.context import extract_context
-from agents.skills_extraction.extractors.responsibilities import extract_responsibilities
-from agents.skills_extraction.extractors.tasks import extract_tasks
+from agents.skills_extraction.extractors.responsibilities import (
+    _ResponsibilitiesLLMRoot,
+    extract_responsibilities,
+)
+from agents.skills_extraction.extractors.tasks import _TasksLLMRoot, extract_tasks
 
 
 @pytest.fixture
@@ -26,9 +31,6 @@ def dummy_job() -> JobRecord:
         title="Test Job",
         company="Test Co",
     )
-
-
-# --- ContextSignal schema and extract_context (Pair B) ---
 
 
 def test_span_record_schema() -> None:
@@ -46,7 +48,7 @@ def test_span_record_schema() -> None:
 
 
 def test_context_signal_schema() -> None:
-    """ContextSignal accepts signal_type, value, confidence, optional source_span."""
+    """ContextSignal requires signal_type, value, confidence, source_span."""
     span = SpanRecord(
         text="hybrid",
         field_source="description",
@@ -62,33 +64,89 @@ def test_context_signal_schema() -> None:
     assert sig.signal_type == "remote_policy"
     assert sig.value == "hybrid"
     assert sig.confidence == 0.9
-    assert sig.source_span is not None
     assert sig.source_span.text == "hybrid"
 
-    # Optional source_span (stub can return without span)
-    sig2 = ContextSignal(signal_type="team_size", value="5-10", confidence=0.8, source_span=None)
-    assert sig2.source_span is None
+
+def test_extract_context_empty_when_no_matches(dummy_job: JobRecord) -> None:
+    """extract_context returns schema-valid list when no regex matches."""
+    signals, meta = extract_context(dummy_job)
+    assert meta.get("tokens_used") == 0
+    TypeAdapter(list[ContextSignal]).validate_python(signals)
 
 
-def test_extract_context_returns_empty_and_is_schema_valid(dummy_job: JobRecord) -> None:
-    """extract_context takes a JobRecord, returns [], and result is schema-valid list[ContextSignal]."""
-    result = extract_context(dummy_job)
-    assert result == []
-    TypeAdapter(list[ContextSignal]).validate_python(result)
+def test_extract_context_finds_hybrid() -> None:
+    """Pattern match for remote_policy / hybrid."""
+    job = JobRecord(
+        source="test",
+        external_id="2",
+        title="Engineer",
+        company="Acme",
+        description="We offer a hybrid schedule for this role.",
+    )
+    signals, meta = extract_context(job)
+    assert meta.get("tokens_used") == 0
+    assert any(s.signal_type == "remote_policy" for s in signals)
 
 
-# --- Task and responsibility stubs ---
+@patch("agents.skills_extraction.extractors.tasks.invoke_structured_extraction_llm")
+def test_extract_tasks_returns_empty_on_llm_failure(
+    mock_invoke: object,
+    dummy_job: JobRecord,
+) -> None:
+    """On LLM failure extract_tasks returns [] and marks extraction_failed."""
+    mock_invoke.return_value = (None, {"extraction_failed": True, "error_reason": "test"})
+    tasks, meta = extract_tasks(dummy_job)
+    assert tasks == []
+    assert meta.get("extraction_failed") is True
+    TypeAdapter(list[TaskRecord]).validate_python(tasks)
 
 
-def test_extract_tasks_returns_empty_and_is_schema_valid(dummy_job: JobRecord) -> None:
-    """extract_tasks returns [] and the result is schema-valid list[TaskRecord]."""
-    result = extract_tasks(dummy_job)
-    assert result == []
-    TypeAdapter(list[TaskRecord]).validate_python(result)
+@patch("agents.skills_extraction.extractors.tasks.invoke_structured_extraction_llm")
+def test_extract_tasks_validates_schema_on_success(
+    mock_invoke: object,
+    dummy_job: JobRecord,
+) -> None:
+    """Structured output with empty tasks list is schema-valid."""
+    mock_invoke.return_value = (
+        _TasksLLMRoot(tasks=[]),
+        {
+            "extraction_failed": False,
+            "tokens_used": 10,
+            "cost_usd": 0.0,
+            "model": "test-deployment",
+        },
+    )
+    tasks, meta = extract_tasks(dummy_job)
+    assert meta.get("extraction_failed") is False
+    TypeAdapter(list[TaskRecord]).validate_python(tasks)
 
 
-def test_extract_responsibilities_returns_empty_and_is_schema_valid(dummy_job: JobRecord) -> None:
-    """extract_responsibilities returns [] and the result is schema-valid list[ResponsibilityRecord]."""
-    result = extract_responsibilities(dummy_job)
-    assert result == []
-    TypeAdapter(list[ResponsibilityRecord]).validate_python(result)
+@patch("agents.skills_extraction.extractors.responsibilities.invoke_structured_extraction_llm")
+def test_extract_responsibilities_returns_empty_on_llm_failure(
+    mock_invoke: object,
+    dummy_job: JobRecord,
+) -> None:
+    mock_invoke.return_value = (None, {"extraction_failed": True, "error_reason": "test"})
+    rows, meta = extract_responsibilities(dummy_job)
+    assert rows == []
+    assert meta.get("extraction_failed") is True
+    TypeAdapter(list[ResponsibilityRecord]).validate_python(rows)
+
+
+@patch("agents.skills_extraction.extractors.responsibilities.invoke_structured_extraction_llm")
+def test_extract_responsibilities_validates_schema_on_success(
+    mock_invoke: object,
+    dummy_job: JobRecord,
+) -> None:
+    mock_invoke.return_value = (
+        _ResponsibilitiesLLMRoot(responsibilities=[]),
+        {
+            "extraction_failed": False,
+            "tokens_used": 12,
+            "cost_usd": 0.0,
+            "model": "test-deployment",
+        },
+    )
+    rows, meta = extract_responsibilities(dummy_job)
+    assert meta.get("extraction_failed") is False
+    TypeAdapter(list[ResponsibilityRecord]).validate_python(rows)

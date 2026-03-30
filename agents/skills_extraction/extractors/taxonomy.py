@@ -322,6 +322,68 @@ _EMBED_MAX_RETRIES = 5
 _EMBED_BASE_DELAY = 1.0  # seconds
 _EMBED_INTER_REQUEST_DELAY = float(os.getenv("EMBEDDING_REQUEST_DELAY", "0"))
 
+# #108: prompt text for llm_audit_log prompt_hash only (not sent again)
+_EMBEDDING_AUDIT_PROMPT_MAX_CHARS = 8000
+
+
+def _embedding_audit_prompt(texts: list[str]) -> str:
+    raw = "\n".join(texts)
+    if len(raw) <= _EMBEDDING_AUDIT_PROMPT_MAX_CHARS:
+        return raw
+    return raw[:_EMBEDDING_AUDIT_PROMPT_MAX_CHARS] + "\n...[truncated for audit hash]"
+
+
+def _embedding_usage_input_tokens(data: Any) -> int:
+    """Parse Azure/OpenAI embeddings response usage; owners may extend for other shapes (#108)."""
+    if not isinstance(data, dict):
+        log.debug("embedding_usage_missing", reason="response_not_dict")
+        return 0
+    usage = data.get("usage")
+    if not isinstance(usage, dict):
+        log.debug("embedding_usage_missing", reason="no_usage_dict")
+        return 0
+    pt = usage.get("prompt_tokens")
+    if isinstance(pt, int) and pt >= 0:
+        return pt
+    tt = usage.get("total_tokens")
+    if isinstance(tt, int) and tt >= 0:
+        return tt
+    log.debug("embedding_usage_missing", reason="no_prompt_or_total_tokens")
+    return 0
+
+
+def _embedding_cost_usd(input_tokens: int) -> float:
+    """Rough $/1K input tokens for text-embedding-3-small class; set EMBEDDING_INPUT_USD_PER_1K_TOKENS to override (#108)."""
+    raw = os.getenv("EMBEDDING_INPUT_USD_PER_1K_TOKENS", "0.00002")
+    try:
+        per_1k = float(raw)
+    except (TypeError, ValueError):
+        per_1k = 0.00002
+    return (input_tokens / 1000.0) * per_1k
+
+
+def _log_embedding_audit_event(texts: list[str], data: Any, latency_ms: int) -> None:
+    """Write one dbo.llm_audit_log row per successful Step 4 embedding HTTP response (issue #108).
+
+    taxonomy-resolver owners (Angel/Fabian): tweak model label, add success=False on final failure, or
+    align cost with exact Azure billing — see TODO on _embed_texts_azure retry exit.
+    """
+    from agents.common.llm_adapter import log_extraction_event
+
+    input_tokens = _embedding_usage_input_tokens(data)
+    log_extraction_event(
+        agent_name="taxonomy-resolver",
+        prompt=_embedding_audit_prompt(texts),
+        model="text-embedding-3-small",
+        provider="azure-openai",
+        latency_ms=latency_ms,
+        input_tokens=input_tokens,
+        output_tokens=0,
+        cost_usd=_embedding_cost_usd(input_tokens),
+        success=True,
+        error_reason=None,
+    )
+
 
 def _extract_retry_after_embedding(error_message: str) -> int | None:
     """Extract retry-after seconds from Azure embedding 429 error."""
@@ -357,9 +419,13 @@ def _embed_texts_azure(texts: list[str]) -> list[list[float]] | None:
     headers = {"api-key": api_key, "Content-Type": "application/json"}
     payload: dict[str, Any] = {"input": texts if len(texts) > 1 else texts[0]}
 
+    latency_ms = 0
+    data: Any = None
+
     for attempt in range(1, _EMBED_MAX_RETRIES + 1):
         try:
             with httpx.Client(timeout=60.0) as client:
+                t0 = time.perf_counter()
                 resp = client.post(url, json=payload, headers=headers)
                 if resp.status_code == 429:
                     retry_after = _extract_retry_after_embedding(resp.text)
@@ -372,11 +438,13 @@ def _embed_texts_azure(texts: list[str]) -> list[list[float]] | None:
                     )
                     if attempt == _EMBED_MAX_RETRIES:
                         log.error("embedding_rate_limit_exhausted", attempts=_EMBED_MAX_RETRIES)
+                        # TODO #108: optional log_extraction_event(success=False) for taxonomy-resolver owners
                         return None
                     time.sleep(delay)
                     continue
                 resp.raise_for_status()
                 data = resp.json()
+                latency_ms = int((time.perf_counter() - t0) * 1000)
                 break
         except httpx.HTTPStatusError as exc:
             if exc.response.status_code == 429:
@@ -394,6 +462,9 @@ def _embed_texts_azure(texts: list[str]) -> list[list[float]] | None:
             return None
     else:
         return None
+
+    # #108: one llm_audit_log row per successful embedding API call (batch chunk = one row).
+    _log_embedding_audit_event(texts, data, latency_ms)
 
     items = data.get("data") if isinstance(data, dict) else None
     if not items or not isinstance(items, list):
