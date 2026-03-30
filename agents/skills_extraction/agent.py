@@ -38,6 +38,7 @@ from agents.skills_extraction.extractors.skills import (
 )
 from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
 from agents.skills_extraction.prompts import SKILLS_PROMPT_VERSION
+from agents.skills_extraction.validator import validate_extraction_result
 
 _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
@@ -315,7 +316,12 @@ class SQLAlchemyExtractionStore:
                 row.responsibilities = []
                 row.context = []
                 row.overall_confidence = _average_tool_confidence(result.tools)
-                row.extraction_warnings = list(result.extraction_warnings)
+                validated = validate_extraction_result(
+                    result.skills, [tool.model_dump() for tool in result.tools]
+                )
+                row.extraction_warnings = list(
+                    dict.fromkeys([*list(result.extraction_warnings), *validated])
+                )
                 row.extraction_metadata = result.extraction_metadata
                 row.extraction_failed = result.extraction_status != "success"
 
@@ -379,11 +385,11 @@ class SkillsExtractionAgent(BaseAgent):
         if not work_items:
             return self._legacy_fixture_response(event)
 
-        # Cap work items per run for faster pipeline runs (default 10; set SKILLS_EXTRACTION_MAX_JOBS to override)
+        # Cap work items per run (0 = no limit; set SKILLS_EXTRACTION_MAX_JOBS to override)
         try:
-            max_jobs = int(os.environ.get("SKILLS_EXTRACTION_MAX_JOBS", "10"))
+            max_jobs = int(os.environ.get("SKILLS_EXTRACTION_MAX_JOBS", "0"))
         except (TypeError, ValueError):
-            max_jobs = 10
+            max_jobs = 0
         if max_jobs > 0 and len(work_items) > max_jobs:
             work_items = work_items[:max_jobs]
 
