@@ -18,6 +18,7 @@ import json
 import os
 import time
 from collections.abc import Sequence
+from contextlib import suppress
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
@@ -819,22 +820,16 @@ def _overall_extraction_confidence(result: ExtractionResult) -> float | None:
         scores.append(tool.confidence)
     for row in getattr(result, "tasks", []) or []:
         if isinstance(row, dict) and row.get("confidence") is not None:
-            try:
+            with suppress(TypeError, ValueError):
                 scores.append(float(row["confidence"]))
-            except (TypeError, ValueError):
-                pass
     for row in getattr(result, "responsibilities", []) or []:
         if isinstance(row, dict) and row.get("confidence") is not None:
-            try:
+            with suppress(TypeError, ValueError):
                 scores.append(float(row["confidence"]))
-            except (TypeError, ValueError):
-                pass
     for row in getattr(result, "context", []) or []:
         if isinstance(row, dict) and row.get("confidence") is not None:
-            try:
+            with suppress(TypeError, ValueError):
                 scores.append(float(row["confidence"]))
-            except (TypeError, ValueError):
-                pass
     if not scores:
         return _average_tool_confidence(result.tools)
     return sum(scores) / len(scores)
