@@ -284,7 +284,7 @@ def _page_run_summary_db() -> None:
         )
 
     result_df = pd.DataFrame(rows)
-    st.dataframe(result_df, use_container_width=True, hide_index=True)
+    st.dataframe(result_df, width="stretch", hide_index=True)
 
     ingested_pass = sum(1 for r in rows if r["Ingestion"] == "Pass")
     norm_pass = sum(1 for r in rows if r["Normalization"] == "Pass")
@@ -552,7 +552,7 @@ def _page_batch_insights_db() -> None:
         display_cols.append("experience_level")
 
     available_cols = [c for c in display_cols if c in df.columns]
-    st.dataframe(df[available_cols].head(50), use_container_width=True, hide_index=True)
+    st.dataframe(df[available_cols].head(50), width="stretch", hide_index=True)
 
 
 # ---------------------------------------------------------------------------
@@ -632,7 +632,7 @@ def _page_run_summary_json(entries: list[dict]) -> None:
         rows.append(row)
 
     df = pd.DataFrame(rows)
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df, width="stretch", hide_index=True)
 
     complete_count = sum(1 for r in rows if r["All Stages"] == "Pass")
     total_count = len(rows)
@@ -726,12 +726,12 @@ def _page_record_journey_json(entries: list[dict]) -> None:
             skills = payload.get("skills")
             if skills:
                 st.markdown("**Skills extracted**")
-                st.dataframe(pd.DataFrame(skills), use_container_width=True, hide_index=True)
+                st.dataframe(pd.DataFrame(skills), width="stretch", hide_index=True)
 
             top_skills = payload.get("top_skills")
             if top_skills:
                 st.markdown("**Batch top skills** (from fixture analytics)")
-                st.dataframe(pd.DataFrame(top_skills), use_container_width=True, hide_index=True)
+                st.dataframe(pd.DataFrame(top_skills), width="stretch", hide_index=True)
 
 
 def _page_batch_insights_json(entries: list[dict]) -> None:
@@ -784,7 +784,7 @@ def _page_batch_insights_json(entries: list[dict]) -> None:
                 .rename(columns={"index": "role"})
                 .sort_values("count", ascending=False)
             )
-            st.dataframe(df_roles, use_container_width=True, hide_index=True)
+            st.dataframe(df_roles, width="stretch", hide_index=True)
 
     with col2:
         st.subheader("Locations")
@@ -796,7 +796,7 @@ def _page_batch_insights_json(entries: list[dict]) -> None:
                 .rename(columns={"index": "location"})
                 .sort_values("postings", ascending=False)
             )
-            st.dataframe(df_loc, use_container_width=True, hide_index=True)
+            st.dataframe(df_loc, width="stretch", hide_index=True)
 
     st.markdown("---")
 
@@ -828,7 +828,7 @@ def _page_batch_insights_json(entries: list[dict]) -> None:
                 }
             )
         df_quality = pd.DataFrame(quality_rows).sort_values("Posting ID")
-        st.dataframe(df_quality, use_container_width=True, hide_index=True)
+        st.dataframe(df_quality, width="stretch", hide_index=True)
 
 
 # ---------------------------------------------------------------------------
