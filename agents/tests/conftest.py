@@ -100,6 +100,7 @@ def skills_event() -> EventEnvelope:
         agent_id="skills-extraction-agent",
         payload={
             "event_type": "SkillsExtracted",
+            "batch_id": "test-batch-1",
             "posting_id": 1,
             "title": "Senior Data Engineer",
             "company": "Microsoft",
@@ -119,27 +120,16 @@ def skills_event() -> EventEnvelope:
 
 @pytest.fixture
 def enriched_event() -> EventEnvelope:
-    """Output of EnrichmentAgent — input to AnalyticsAgent."""
+    """Output of EnrichmentAgent — input to AnalyticsAgent (Week 5 lite, issue #87)."""
     return EventEnvelope(
         correlation_id="test-1",
         agent_id="enrichment-agent",
         payload={
             "event_type": "RecordEnriched",
-            "posting_id": 1,
-            "title": "Senior Data Engineer",
-            "company": "Microsoft",
-            "company_id": "co-microsoft-001",
-            "sector_id": "sec-technology",
-            "role_classification": "Data Engineering",
-            "seniority": "senior",
-            "quality_score": 0.91,
-            "spam_score": 0.04,
-            "is_spam": False,
-            "enrichment_status": "success",
-            "skills": [
-                {"name": "Python", "type": "Technical", "confidence": 0.98},
-                {"name": "SQL", "type": "Technical", "confidence": 0.97},
-            ],
+            "batch_id": "test-batch-1",
+            "enriched_count": 3,
+            "spam_rejected_count": 0,
+            "flagged_for_review_count": 1,
         },
     )
 
@@ -152,7 +142,8 @@ def analytics_event() -> EventEnvelope:
         agent_id="analytics-agent",
         payload={
             "event_type": "AnalyticsRefreshed",
-            "triggered_by_posting_id": 1,
+            "triggered_by_batch_id": "test-batch-1",
+            "triggered_by_posting_id": None,
             "run_id": "batch-run-001",
             "total_postings": 10,
             "top_skills": [

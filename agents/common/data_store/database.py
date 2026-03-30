@@ -58,13 +58,19 @@ def session_scope() -> Generator[Session, None, None]:
         session.close()
 
 
-def check_db_connection() -> bool:
-    """Return True if a simple SELECT 1 succeeds against the database."""
+def check_db_connection_detail() -> tuple[bool, str | None]:
+    """Return ``(True, None)`` if SELECT 1 succeeds, else ``(False, error_message)``."""
     try:
         engine = get_engine()
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
-        return True
+        return True, None
     except Exception as exc:
         log.warning("db_connection_check_failed", error=str(exc))
-        return False
+        return False, str(exc)
+
+
+def check_db_connection() -> bool:
+    """Return True if a simple SELECT 1 succeeds against the database."""
+    ok, _ = check_db_connection_detail()
+    return ok

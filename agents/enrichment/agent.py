@@ -1,5 +1,5 @@
 """
-Enrichment Agent — Phase 1 lite (deterministic role + seniority + quality; spam from EI).
+Enrichment Agent — Phase 1 lite (Pair C: classification + quality + spam; Pair D: resolvers in resolvers/).
 
 Loads reference labels from ``technology_areas`` and ``industry_sectors`` when
 ``PYTHON_DATABASE_URL`` is set; otherwise uses

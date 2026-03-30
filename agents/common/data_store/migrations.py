@@ -99,6 +99,13 @@ _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS responsibilities TEXT",
 ]
 
+# Company HQ / location fields for enrichment resolve_location (#110)
+_COMPANIES_LOCATION_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.companies ADD COLUMN IF NOT EXISTS city TEXT",
+    "ALTER TABLE dbo.companies ADD COLUMN IF NOT EXISTS state TEXT",
+    "ALTER TABLE dbo.companies ADD COLUMN IF NOT EXISTS normalized_location TEXT",
+]
+
 # Backfill token columns when llm_audit_log predates full DDL (idempotent)
 _LLM_AUDIT_LOG_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS input_tokens INTEGER",
@@ -138,7 +145,7 @@ def run_migrations(engine: Engine) -> None:
     Base.metadata.create_all(engine)
     log.info("migrations_tables_created")
 
-    # 2. Create extracted_intelligence table
+    # 2. Create extracted_intelligence table (DDL may add indexes idempotently)
     with engine.begin() as conn:
         conn.execute(text(_EXTRACTED_INTELLIGENCE_DDL))
     log.info("migrations_extracted_intelligence_created")
@@ -176,7 +183,7 @@ def run_migrations(engine: Engine) -> None:
         conn.execute(text(_EMPLOYER_PROFILES_DDL))
     log.info("migrations_employer_profiles_created")
 
-    # 5. Add enrichment columns to existing tables.
+    # 5. Add enrichment columns to dbo.job_postings (and related).
     #    Each ALTER runs in its own transaction so a single failure
     #    (e.g. job_postings not yet created) doesn't abort the rest.
     for stmt in _JOB_POSTINGS_ALTER_STATEMENTS:
@@ -197,6 +204,17 @@ def run_migrations(engine: Engine) -> None:
         except Exception as exc:
             log.warning(
                 "migration_normalized_jobs_alter_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
+
+    for stmt in _COMPANIES_LOCATION_ALTER_STATEMENTS:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(stmt))
+        except Exception as exc:
+            log.warning(
+                "migration_companies_location_alter_skipped",
                 statement=stmt,
                 error=str(exc),
             )
