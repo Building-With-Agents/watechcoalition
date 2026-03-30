@@ -64,6 +64,8 @@ load_dotenv(_REPO_ROOT / ".env")
 import structlog  # noqa: E402
 
 from agents.analytics.agent import AnalyticsAgent  # noqa: E402
+from agents.common.data_store.database import get_engine  # noqa: E402
+from agents.common.data_store.migrations import run_migrations  # noqa: E402
 from agents.common.event_envelope import EventEnvelope  # noqa: E402
 from agents.common.types import JobRecord  # noqa: E402
 from agents.demand_analysis.agent import DemandAnalysisAgent  # noqa: E402
@@ -101,6 +103,12 @@ structlog.configure(
 )
 
 log = structlog.get_logger()
+
+# ---------------------------------------------------------------------------
+# Idempotent migrations — ensure agent tables and columns exist before run
+# ---------------------------------------------------------------------------
+
+run_migrations(get_engine())
 
 # ---------------------------------------------------------------------------
 # Pipeline definition
