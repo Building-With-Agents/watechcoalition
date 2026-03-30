@@ -745,8 +745,8 @@
       },
       {
         "skill_id": null,
-        "skill_name": "Competitive analysis",
-        "type": "Technical",
+        "skill_name": "Market analysis",
+        "type": "Domain",
         "confidence": 0.9,
         "required_flag": true,
         "esco_uri": null,
@@ -795,18 +795,124 @@
         "original_end_char": null
       }
     ],
-    "tools": [
+    "tools": [],
+    "tasks": [
       {
-        "tool_id": null,
-        "tool_name": "LLM Ops",
-        "category": "ai_tool",
-        "confidence": 0.9,
-        "is_genai_tool": true,
+        "task_id": null,
+        "task_description": "Define and communicate a bold product strategy that aligns with market trends and customer needs",
+        "category": "other",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.85,
         "source_span": {
-          "text": "Advanced LLM Ops and observability",
-          "field_source": "description",
+          "text": "Define and communicate a bold product strategy that aligns with market trends and customer needs",
+          "field_source": "responsibilities",
           "start_char": 0,
-          "end_char": 34
+          "end_char": 96
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Build and maintain a clear, prioritized roadmap",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "strategic",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Build and maintain a clear, prioritized roadmap",
+          "field_source": "responsibilities",
+          "start_char": 98,
+          "end_char": 145
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Conduct deep competitive and market analysis.",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Conduct deep competitive and market analysis.",
+          "field_source": "responsibilities",
+          "start_char": 146,
+          "end_char": 191
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Partner with Engineering and UX for flawless delivery",
+        "scope": "department",
+        "level": "lead",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Partner with Engineering and UX for flawless delivery",
+          "field_source": "responsibilities",
+          "start_char": 193,
+          "end_char": 246
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Collaborate with Marketing, Sales and Partner organizations",
+        "scope": "organization",
+        "level": "lead",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Collaborate with Marketing, Sales and Partner organizations",
+          "field_source": "responsibilities",
+          "start_char": 247,
+          "end_char": 306
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Act as a product evangelist in key customer conversations",
+        "scope": "individual",
+        "level": "lead",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Act as a product evangelist in key customer conversations",
+          "field_source": "responsibilities",
+          "start_char": 309,
+          "end_char": 366
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "ai_usage",
+        "value": "Techincal proficiency with LLM applications",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Proven technical proficiency with LLM applications",
+          "field_source": "requirements",
+          "start_char": 182,
+          "end_char": 232
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "delivering AI/LLM-powered CX applications",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "delivering AI/LLM-powered CX applications",
+          "field_source": "requirements",
+          "start_char": 139,
+          "end_char": 180
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "Lead the development of several strategic AI/LLM powered product areas, including AI Insights, Agent Assist, and GenAI Studio",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "lead the development of several strategic AI/LLM powered product areas, including AI Insights, Agent Assist, and GenAI Studio",
+          "field_source": "description",
+          "start_char": 121,
+          "end_char": 246
         }
       }
     ],
@@ -2935,6 +3041,396 @@
         "is_genai_tool": false
       }
     ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Analyze academic, financial, operational, and fundraising data to identify trends, risks, and opportunities relevant to external audiences",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Analyze academic, financial, operational, and fundraising data to identify trends, risks, and opportunities relevant to external audiences",
+          "field_source": "description",
+          "start_char": 2013,
+          "end_char": 2151
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Synthesize complex cross-functional data into clear insights that inform real-time fundraising decisions and long-term planning",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "Synthesize complex cross-functional data into clear insights that inform real-time fundraising decisions and long-term planning",
+          "field_source": "description",
+          "start_char": 2155,
+          "end_char": 2282
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Produce polished, externally facing materials including decks, briefings, dashboards, and written narratives used directly with donors, foundations, and boards",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "strategic",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Produce polished, externally facing materials including decks, briefings, dashboards, and written narratives used directly with donors, foundations, and boards",
+          "field_source": "description",
+          "start_char": 2420,
+          "end_char": 2579
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Translate raw metrics into compelling stories that clearly communicate IDEA's impact, growth, and needs",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "Translate raw metrics into compelling stories that clearly communicate IDEA's impact, growth, and needs",
+          "field_source": "description",
+          "start_char": 2583,
+          "end_char": 2686
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Develop visualizations and comparative analyses that contextualize IDEA's performance across regions, time, and peer organizations",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Develop visualizations and comparative analyses that contextualize IDEA's performance across regions, time, and peer organizations",
+          "field_source": "description",
+          "start_char": 2690,
+          "end_char": 2820
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Provide data, analyses, and outcome metrics for competitive grant proposals, renewals, and reports",
+        "category": "support",
+        "frequency": "unspecified",
+        "complexity": "strategic",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "Provide data, analyses, and outcome metrics for competitive grant proposals, renewals, and reports",
+          "field_source": "description",
+          "start_char": 2982,
+          "end_char": 3080
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Design customized metric sets for individual donors and foundations based on their giving priorities and areas of interest",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Design customized metric sets for individual donors and foundations based on their giving priorities and areas of interest",
+          "field_source": "description",
+          "start_char": 3084,
+          "end_char": 3206
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Produce grant reports that clearly communicate outcomes and stewardship of philanthropic support",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Produce grant reports that clearly communicate outcomes and stewardship of philanthropic support.",
+          "field_source": "description",
+          "start_char": 3317,
+          "end_char": 3414
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Conduct strategic analyses to identify opportunities for program expansion, improvement, or new funding strategies",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Conduct strategic analyses to identify opportunities for program expansion, improvement, or new funding strategies",
+          "field_source": "description",
+          "start_char": 3649,
+          "end_char": 3763
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Create an easy-to-use data access system that allows Advancement team members to quickly search for, understand, and apply data in ways that can also be clearly shared with external stakeholders",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Create an easy-to-use data access system that allows Advancement team members to quickly search for, understand, and apply data in ways that can also be clearly shared with external stakeholders",
+          "field_source": "description",
+          "start_char": 3766,
+          "end_char": 3960
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "The Analyst participates in operating routines for both teams to stay aligned on strategy and execution",
+        "category": "operations",
+        "frequency": "unspecified",
+        "complexity": "routine",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "The Analyst participates in operating routines for both teams to stay aligned on strategy and execution",
+          "field_source": "responsibilities",
+          "start_char": 1138,
+          "end_char": 1241
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Independently define, execute, and deliver analyses that support Foundation priorities, including fundraising strategy, donor engagement, and foundation relations",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Independently define, execute, and deliver analyses that support Foundation priorities, including fundraising strategy, donor engagement, and foundation relations",
+          "field_source": "responsibilities",
+          "start_char": 1321,
+          "end_char": 1483
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Apply sound analytical judgment to determine which data points matter most-and which do not-for specific donor and funder contexts",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "Apply sound analytical judgment to determine which data points matter most-and which do not-for specific donor and funder contexts",
+          "field_source": "responsibilities",
+          "start_char": 1751,
+          "end_char": 1881
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Produce polished, externally facing materials including decks, briefings, dashboards, and written narratives used directly with donors, foundations, and boards",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Produce polished, externally facing materials including decks, briefings, dashboards, and written narratives used directly with donors, foundations, and boards",
+          "field_source": "responsibilities",
+          "start_char": 1882,
+          "end_char": 2041
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Translate raw metrics into compelling stories that clearly communicate IDEA's impact, growth, and needs",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Translate raw metrics into compelling stories that clearly communicate IDEA's impact, growth, and needs",
+          "field_source": "responsibilities",
+          "start_char": 2042,
+          "end_char": 2145
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Produce grant reports that clearly communicate outcomes and stewardship of philanthropic support",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Produce grant reports that clearly communicate outcomes and stewardship of philanthropic support",
+          "field_source": "responsibilities",
+          "start_char": 2720,
+          "end_char": 2816
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Work with school leaders and program staff to establish data collection practices and systems that support impact measurement",
+        "category": "other",
+        "frequency": "unspecified",
+        "complexity": "strategic",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "Work with school leaders and program staff to establish data collection practices and systems that support impact measurement",
+          "field_source": "responsibilities",
+          "start_char": 2918,
+          "end_char": 3043
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Conduct strategic analyses to identify opportunities for program expansion, improvement, or new funding strategies",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Conduct strategic analyses to identify opportunities for program expansion, improvement, or new funding strategies",
+          "field_source": "responsibilities",
+          "start_char": 3044,
+          "end_char": 3158
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Extract raw data from multiple sources including student information systems, academic databases, program tracking tools, and donor management platforms",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "routine",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "Extract raw data from multiple sources including student information systems, academic databases, program tracking tools, and donor management platforms",
+          "field_source": "responsibilities",
+          "start_char": 3354,
+          "end_char": 3506
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Conduct in-depth analyses to identify trends, patterns, and insights that demonstrate educational impact and program effectiveness",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Conduct in-depth analyses to identify trends, patterns, and insights that demonstrate educational impact and program effectiveness",
+          "field_source": "responsibilities",
+          "start_char": 3507,
+          "end_char": 3637
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Validate and reconcile data across systems to ensure consistency and accuracy",
+        "category": "testing",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Validate and reconcile data across systems to ensure consistency and accuracy",
+          "field_source": "responsibilities",
+          "start_char": 3760,
+          "end_char": 3837
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Establish clear refresh cadences and quality checks for recurring analyses and reporting products",
+        "category": "testing",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Establish clear refresh cadences and quality checks for recurring analyses and reporting products",
+          "field_source": "responsibilities",
+          "start_char": 3838,
+          "end_char": 3935
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Ensure data in all Foundation-facing materials meet high standards for clarity, accuracy, and external credibility.",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Ensure data in all Foundation-facing materials meet high standards for clarity, accuracy, and external credibility.",
+          "field_source": "description",
+          "start_char": 2863,
+          "end_char": 2978
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Maintain awareness of funder priorities and reporting expectations to ensure relevance and alignment.",
+        "scope": "organization",
+        "level": "senior",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Maintain awareness of funder priorities and reporting expectations to ensure relevance and alignment.",
+          "field_source": "description",
+          "start_char": 3417,
+          "end_char": 3518
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "This role owns the end-to-end development of Foundation-ready insights, narratives, and materials - translating complex academic, operational, and financial data into clear, compelling outputs used directly by fundraisers, foundation partners, and executive leaders",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "This role owns the end-to-end development of Foundation-ready insights, narratives, and materials - translating complex academic, operational, and financial data into clear, compelling outputs used directly by fundraisers, foundation partners, and executive leaders",
+          "field_source": "responsibilities",
+          "start_char": 192,
+          "end_char": 457
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The Analyst is expected to exercise strong independent judgment, proactively identify the analyses and stories that matter most to Foundation priorities, and deliver polished, decision-ready materials with minimal direction or iteration",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "The Analyst is expected to exercise strong independent judgment, proactively identify the analyses and stories that matter most to Foundation priorities, and deliver polished, decision-ready materials with minimal direction or iteration",
+          "field_source": "responsibilities",
+          "start_char": 510,
+          "end_char": 746
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Enterprise Data and Strategy is responsible for development and performance management; the Foundation sets priorities and uses the Analyst's outputs in fundraising, grantmaking, and donor engagement contexts",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Enterprise Data and Strategy is responsible for development and performance management; the Foundation sets priorities and uses the Analyst's outputs in fundraising, grantmaking, and donor engagement contexts",
+          "field_source": "responsibilities",
+          "start_char": 929,
+          "end_char": 1137
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "reporting_structure",
+        "value": "The Analyst reports to the Director of Research and Evaluation on Enterprise Data and Strategy team, with a dotted-line relationship to the Managing Director of Advancement Services. Enterprise Data and Strategy is responsible for development and performance management",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "The Analyst reports to the Director of Research and Evaluation on Enterprise Data and Strategy team, with a dotted-line relationship to the Managing Director of Advancement Services. Enterprise Data and Strategy is responsible for development and performance management",
+          "field_source": "description",
+          "start_char": 881,
+          "end_char": 1150
+        }
+      }
+    ],
     "labeler_notes": {
       "Advanced Data Analysis & Insight Generation": "Core responsibility involving analyzing academic, financial, and operational data to generate actionable insights",
       "Data Storytelling & Narrative Development": "Translating complex data into compelling narratives for fundraisers and stakeholders",
@@ -4765,6 +5261,119 @@
         "is_genai_tool": true
       }
     ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Develop and implement machine learning algorithms to improve personalization and recommendations",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Develop and implement machine learning algorithms to improve personalization and recommendations",
+          "field_source": "description",
+          "start_char": 133,
+          "end_char": 229
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Create scalable, production-ready ML solutions",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "creative",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Create scalable, production-ready ML solutions",
+          "field_source": "description",
+          "start_char": 232,
+          "end_char": 278
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Optimize performance and scalability of machine learning models",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Optimize performance and scalability of machine learning models",
+          "field_source": "description",
+          "start_char": 281,
+          "end_char": 344
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Design and conduct offline experiments and A/B tests",
+        "category": "testing",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Design and conduct offline experiments and A/B tests",
+          "field_source": "description",
+          "start_char": 347,
+          "end_char": 399
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Contribute to the ongoing improvement of ML infrastructure and tooling",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "creative",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Contribute to the ongoing improvement of ML infrastructure and tooling",
+          "field_source": "description",
+          "start_char": 402,
+          "end_char": 472
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Collaborate with cross-functional teams including researchers, engineers, data scientists, and product managers",
+        "scope": "organization",
+        "level": "senior",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Collaborate with cross-functional teams including researchers, engineers, data scientists, and product managers",
+          "field_source": "description",
+          "start_char": 19,
+          "end_char": 130
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Engage in continuous learning and development",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Engage in continuous learning and development",
+          "field_source": "description",
+          "start_char": 475,
+          "end_char": 520
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "ai_usage",
+        "value": "Experience in one or more of the following applied fields: Recommendations, Personalization, Long-term Reward Modeling, Bandits, Transformers, Large-Scale Language Models, LLM evaluation, RLHF reward modeling/alignment",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Experience in one or more of the following applied fields: Recommendations, Personalization, Long-term Reward Modeling, Bandits, Transformers, Large-Scale Language Models, LLM evaluation, RLHF reward modeling/alignment",
+          "field_source": "description",
+          "start_char": 930,
+          "end_char": 1148
+        }
+      }
+    ],
     "labeler_notes": {
       "Machine Learning": "Core ML role; algorithms/personalization overlap merged here (removed separate Algorithms GT label).",
       "Collaboration": "Cross-functional work with researchers, engineers, data scientists, PMs (was Communication).",
@@ -5908,6 +6517,92 @@
         "is_genai_tool": false
       }
     ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Develop and maintain the corporate Information Security Policy",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": "strategic",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Develop and maintain the corporate Information Security Policy",
+          "field_source": "responsibilities",
+          "start_char": 0,
+          "end_char": 62
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Manage the Risk Register",
+        "category": "management",
+        "frequency": "unspecified",
+        "complexity": "strategic",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Manage the Risk Register",
+          "field_source": "responsibilities",
+          "start_char": 95,
+          "end_char": 119
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "track mitigation efforts",
+        "category": "other",
+        "frequency": "unspecified",
+        "complexity": "routine",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "track mitigation efforts",
+          "field_source": "responsibilities",
+          "start_char": 124,
+          "end_char": 148
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Lead annual Compliance Audits",
+        "scope": "organization",
+        "level": "lead",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Lead annual Compliance Audits",
+          "field_source": "responsibilities",
+          "start_char": 64,
+          "end_char": 93
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Provide guidance on Data Privacy requirements to the product and engineering teams",
+        "scope": "organization",
+        "level": "senior",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Provide guidance on Data Privacy requirements to the product and engineering teams",
+          "field_source": "responsibilities",
+          "start_char": 150,
+          "end_char": 232
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "ensuring that our internal controls align with international standards and local regulations",
+        "scope": "organization",
+        "level": "senior",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "ensuring that our internal controls align with international standards and local regulations",
+          "field_source": "description",
+          "start_char": 118,
+          "end_char": 210
+        }
+      }
+    ],
+    "context": [],
     "labeler_notes": {}
   }
 ]
