@@ -1242,6 +1242,104 @@
         "is_genai_tool": false
       }
     ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Schedule and facilitate standups, planning, review, and retrospective events per the team cadence.",
+        "category": "management",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Facilitate agile ceremonies including daily stand-ups, sprint planning, reviews, and retrospectives.",
+          "field_source": "description",
+          "start_char": 888,
+          "end_char": 988
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Log risks and issues, assign owners, and drive mitigations or escalations until closure or acceptance.",
+        "category": "analysis",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Identify, document, and mitigate risks and issues impacting delivery.",
+          "field_source": "description",
+          "start_char": 1081,
+          "end_char": 1150
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Reinforce agreed agile rules of engagement and coach teams toward consistent practice where gaps appear.",
+        "category": "management",
+        "frequency": "weekly",
+        "complexity": "strategic",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Ensure adherence to agile methodologies and best practices across teams.",
+          "field_source": "description",
+          "start_char": 1236,
+          "end_char": 1308
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role runs core agile forums so the team plans work, inspects results, improves process, and stays unblocked between events.",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Facilitate agile ceremonies including daily stand-ups, sprint planning, reviews, and retrospectives.",
+          "field_source": "description",
+          "start_char": 888,
+          "end_char": 988
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role keeps scope, dates, and outputs aligned so delivery matches agreed goals without silent drift.",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Track and manage project scope, schedule, and deliverables to meet goals and timelines.",
+          "field_source": "description",
+          "start_char": 991,
+          "end_char": 1078
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role produces steady visibility through metrics and narrative so stakeholders and leaders can decide and support delivery.",
+        "scope": "department",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Communicate project status, metrics, and updates to stakeholders and leadership.",
+          "field_source": "description",
+          "start_char": 1153,
+          "end_char": 1233
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "remote_policy",
+        "value": "5 days onsite",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Location: Redmond, WA (Onsite, 5 days/week)",
+          "field_source": "description",
+          "start_char": 44,
+          "end_char": 87
+        }
+      }
+    ],
     "labeler_notes": {}
   },
   {
@@ -1552,6 +1650,104 @@
           "end_char": 2753
         },
         "is_genai_tool": false
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "The role aligns scope with business leadership, updates the plan when priorities shift, and keeps senior stakeholders aligned on value and timing.",
+        "category": "management",
+        "frequency": "weekly",
+        "complexity": "strategic",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Works with business leader to define scope of change plan; manages plan, facilitates scope changes, and creates value in the delivery of the change and communications plan that supports the diverse business goals and interests of multiple senior-level stakeholders.",
+          "field_source": "description",
+          "start_char": 1143,
+          "end_char": 1408
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "The role publishes dependency views across projects and raises risks so leadership can act before delivery breaks.",
+        "category": "support",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Creates communication to outline any dependencies across projects and escalates risks.",
+          "field_source": "description",
+          "start_char": 1717,
+          "end_char": 1803
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "The role uses data and structured review to find gaps and show whether improvement efforts are working.",
+        "category": "analysis",
+        "frequency": "monthly",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Strong analytical skills to identify areas for improvement and to analyze data to measure the impact of improvement initiatives.",
+          "field_source": "description",
+          "start_char": 2134,
+          "end_char": 2262
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role leads or backs major initiatives that span many functions, heavy coordination, and tight integration so delivery stays coherent end to end.",
+        "scope": "organization",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Leads large and complex, high-priority projects and/or supports critical programs which usually impact multiple Lines of Business (LOB) and/or functional areas and often require considerable resources and high levels of functional integration.",
+          "field_source": "description",
+          "start_char": 64,
+          "end_char": 307
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role embeds lasting change practice and owns how BGPM is informed and engaged through messaging, channels, and cadence.",
+        "scope": "department",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "This role is responsible for supporting the implementation of sustainable change management practices and creating and managing a communication strategy across Banking Group Portfolio Management (BGPM).",
+          "field_source": "description",
+          "start_char": 712,
+          "end_char": 914
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role shapes and runs the change plan so audiences receive clear communications and training that match rollout timing and risk.",
+        "scope": "department",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Develops and/or leads change management planning, design and implementation, including communications and training.",
+          "field_source": "description",
+          "start_char": 1027,
+          "end_char": 1142
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "remote_policy",
+        "value": "office first, with role based flexibility",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Key has implemented an approach to employee workspaces which prioritizes in-office presence, while providing flexible options in circumstances where roles can be performed effectively in a mobile environment.",
+          "field_source": "description",
+          "start_char": 3754,
+          "end_char": 3962
+        }
       }
     ],
     "labeler_notes": {}
@@ -1879,6 +2075,142 @@
         "is_genai_tool": false
       }
     ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Maintain an integrated plan so scope, timeline, budget, and staffing stay visible and consistent.",
+        "category": "management",
+        "frequency": "weekly",
+        "complexity": "strategic",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Develop project plans, including scope, schedule, budget, and resource allocation.",
+          "field_source": "description",
+          "start_char": 375,
+          "end_char": 457
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Facilitate agile execution so the team ships working increments on a repeatable cadence.",
+        "category": "management",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Implement agile methodology to drive project execution and delivery.",
+          "field_source": "description",
+          "start_char": 458,
+          "end_char": 526
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Run status sessions and publish readouts of progress, decisions, risks, and next steps.",
+        "category": "management",
+        "frequency": "weekly",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Conduct regular project status meetings and provide updates to stakeholders.",
+          "field_source": "description",
+          "start_char": 527,
+          "end_char": 603
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Keep a living risk view with owners and track mitigations to closure or acceptance.",
+        "category": "analysis",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Identify and mitigate project risks to ensure successful project completion.",
+          "field_source": "description",
+          "start_char": 604,
+          "end_char": 680
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role directs the project team from kickoff through close so roles, cadence, and outcomes stay clear.",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Lead and manage the project team throughout the project lifecycle.",
+          "field_source": "description",
+          "start_char": 308,
+          "end_char": 374
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role builds plans with clear scope, dates, cost guardrails, and staffing so execution has a single source of truth.",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Develop project plans, including scope, schedule, budget, and resource allocation.",
+          "field_source": "description",
+          "start_char": 375,
+          "end_char": 457
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role applies agile practice so work moves in iterations, impediments surface early, and delivery stays steady.",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Implement agile methodology to drive project execution and delivery.",
+          "field_source": "description",
+          "start_char": 458,
+          "end_char": 526
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role runs a steady status rhythm and shares progress, decisions, and asks in forms stakeholders can use.",
+        "scope": "department",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Conduct regular project status meetings and provide updates to stakeholders.",
+          "field_source": "description",
+          "start_char": 527,
+          "end_char": 603
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "remote_policy",
+        "value": "5 days onsite",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Location-Washington DC (5 days onsite)",
+          "field_source": "description",
+          "start_char": 1756,
+          "end_char": 1794
+        }
+      },
+      {
+        "signal_type": "ai_usage",
+        "value": "listed_on_skills",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Artificial Intelligence (AI)",
+          "field_source": "requirements",
+          "start_char": 718,
+          "end_char": 746
+        }
+      }
+    ],
     "labeler_notes": {}
   },
   {
@@ -2077,6 +2409,104 @@
           "end_char": 779
         },
         "is_genai_tool": false
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "The role contributes to baselines for scope, schedule, and cost using SDLC knowledge so plans match how build and release actually work.",
+        "category": "management",
+        "frequency": "weekly",
+        "complexity": "strategic",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Provides input to determine project scope, schedule and budget baselines based on an understanding of the system development lifecycle.",
+          "field_source": "description",
+          "start_char": 1242,
+          "end_char": 1377
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "The role builds and runs stakeholder communications so status, decisions, and asks stay visible on a steady rhythm.",
+        "category": "management",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Develops and executes project communication plans.",
+          "field_source": "description",
+          "start_char": 1601,
+          "end_char": 1651
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "The role checks outputs against agreed quality bars and escalates when acceptance criteria or review findings are at risk.",
+        "category": "operations",
+        "frequency": "weekly",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Monitors project deliverables to ensure compliance with quality standards.",
+          "field_source": "description",
+          "start_char": 1453,
+          "end_char": 1527
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role owns planning and delivery packaging so an analytics visualization product suite moves from intent to shipped outcomes on agreed timelines.",
+        "scope": "department",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Senior Project Manager to develop and manage project plans and deliverables to support the development of Analytics Visualization Tool suite. Lead team through sprint planning sessions and daily stand-ups.",
+          "field_source": "description",
+          "start_char": 1004,
+          "end_char": 1209
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role facilitates agile planning and daily coordination so the team commits to realistic scope and surfaces blockers early.",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Lead team through sprint planning sessions and daily stand-ups.",
+          "field_source": "description",
+          "start_char": 1146,
+          "end_char": 1209
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "The role drives risk identification and turns it into owned mitigations so threats to scope, time, and quality are managed before they land.",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Leads activities to identify project risks and develop mitigation plans.",
+          "field_source": "description",
+          "start_char": 1652,
+          "end_char": 1724
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "remote_policy",
+        "value": "unspecified",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "t Manager - Agile",
+          "field_source": "title",
+          "start_char": 13,
+          "end_char": 30
+        }
       }
     ],
     "labeler_notes": {}
