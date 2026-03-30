@@ -967,25 +967,121 @@
         "tool_name": "LangChain",
         "category": "framework",
         "confidence": 0.9,
-        "is_genai_tool": true,
         "source_span": {
           "text": "LangChain",
           "field_source": "requirements",
           "start_char": 0,
           "end_char": 9
-        }
+        },
+        "is_genai_tool": true
       },
       {
         "tool_id": null,
         "tool_name": "Twilio",
         "category": "platform",
         "confidence": 0.75,
-        "is_genai_tool": false,
         "source_span": {
           "text": "Twilio",
           "field_source": "requirements",
           "start_char": 0,
           "end_char": 6
+        },
+        "is_genai_tool": false
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Define and execute Invoca's Voice AI Agent roadmap",
+        "category": "management",
+        "frequency": "as_needed",
+        "complexity": "strategic",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Define and execute Invoca's Voice AI Agent roadmap",
+          "field_source": "responsibilities",
+          "start_char": 0,
+          "end_char": 50
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Partner with engineering and data science teams to integrate agentic AI patterns",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Partner with engineering and data science teams to integrate agentic AI patterns.",
+          "field_source": "responsibilities",
+          "start_char": 52,
+          "end_char": 133
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Drive the definition and evolution of agent behavior and prompting strategy",
+        "scope": "department",
+        "level": "senior",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Drive the definition and evolution of agent behavior and prompting strategy",
+          "field_source": "responsibilities",
+          "start_char": 134,
+          "end_char": 209
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Influence Invoca's approach to AI governance, reliability, and human oversight",
+        "scope": "organization",
+        "level": "lead",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "Influence Invoca's approach to AI governance, reliability, and human oversight",
+          "field_source": "responsibilities",
+          "start_char": 211,
+          "end_char": 289
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Product Development Life Cycle",
+        "scope": "team",
+        "level": "lead",
+        "confidence": 0.8,
+        "source_span": {
+          "text": "Lead full-lifecycle product management from discovery through launch.",
+          "field_source": "responsibilities",
+          "start_char": 290,
+          "end_char": 359
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "quantifiable validation",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Define success metrics and measure product impact through data and experimentation.",
+          "field_source": "responsibilities",
+          "start_char": 361,
+          "end_char": 444
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "ai_usage",
+        "value": "Large language models (LLMs),\" \"Speech synthesis,\" \"ASR,\" \"TTS,\" and \"NLU",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Strong understanding of conversational AI technologies including speech ASR, TTS, NLU, and LLMs.",
+          "field_source": "requirements",
+          "start_char": 302,
+          "end_char": 398
         }
       }
     ],
@@ -2133,6 +2229,173 @@
         "is_genai_tool": false
       }
     ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Manage Scrum Capability Owner",
+        "category": "management",
+        "frequency": "weekly",
+        "complexity": "routine",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "ensure the Scrum Capability Owner has prepared backlogs that are prioritized and\ngroomed",
+          "field_source": "description",
+          "start_char": 249,
+          "end_char": 337
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Impediment & Blocker Support",
+        "category": "support",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "the active sprint has strong support on any impediments",
+          "field_source": "description",
+          "start_char": 379,
+          "end_char": 434
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Process Analysis & Auditing",
+        "category": "analysis",
+        "frequency": "monthly",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Analyze, evaluate, test, and oversee implementation of new and existing processes and procedures.",
+          "field_source": "description",
+          "start_char": 762,
+          "end_char": 859
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Event Facilitation",
+        "category": "management",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Lead and facilitate Continuous Improvement events in our Global Product Team",
+          "field_source": "description",
+          "start_char": 972,
+          "end_char": 1048
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Operational Troubleshooting",
+        "category": "operations",
+        "frequency": "daily",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "nvestigate and troubleshoot any problems that arise with processes, procedures, and operations.",
+          "field_source": "description",
+          "start_char": 1111,
+          "end_char": 1206
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "KPI Review & Performance Improvement",
+        "category": "analysis",
+        "frequency": "unspecified",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Regularly review business KPI's and determine ways to improve their ability to maintain or approve\nthose measures",
+          "field_source": "description",
+          "start_char": 1209,
+          "end_char": 1322
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Agile Mentorship",
+        "category": "support",
+        "frequency": "as_needed",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Highlight best practices, industry standards and Agile principles where guidance is needed",
+          "field_source": "description",
+          "start_char": 1592,
+          "end_char": 1682
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Agile Framework Governance",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "ensure the Scrum Capability Owner has prepared backlogs that are prioritized and\ngroomed, the team has estimated the sprint ahead, the active sprint has strong support on any impediments,\nand the team is able to rely on the scrum framework to guide the cadence of the product model",
+          "field_source": "description",
+          "start_char": 249,
+          "end_char": 530
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Cultural Facilitation",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "A continuous improvement culture will be facilitated by this role.",
+          "field_source": "description",
+          "start_char": 654,
+          "end_char": 720
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Global Process Consistency",
+        "scope": "organization",
+        "level": "lead",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Drive process consistency across the Global Product Team",
+          "field_source": "description",
+          "start_char": 1051,
+          "end_char": 1107
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Risk & Dependency Stewardship",
+        "scope": "department",
+        "level": "lead",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Establish consistent Issues, Risk, and Dependency Management reporting across all findings and\nobservations.",
+          "field_source": "description",
+          "start_char": 1481,
+          "end_char": 1589
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "reporting_structure",
+        "value": "The description explicitly states the role \"works lock step with our Product Management Team\" and ensures the \"Scrum Capability Owner\" has prepared backlogs.",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "This role works lock step with our Product Management Team",
+          "field_source": "description",
+          "start_char": 142,
+          "end_char": 200
+        }
+      }
+    ],
     "labeler_notes": {}
   },
   {
@@ -3159,6 +3422,169 @@
           "end_char": 1733
         },
         "is_genai_tool": false
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Querying & Data Transformation",
+        "category": "analysis",
+        "frequency": "daily",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Advanced SQL skills for querying, transforming, and analyzing structured datasets.",
+          "field_source": "description",
+          "start_char": 1859,
+          "end_char": 1941
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Dashboard & Report Engineering",
+        "category": "design",
+        "frequency": "weekly",
+        "complexity": "creative",
+        "confidence": 0.9,
+        "source_span": {
+          "text": "Experience designing and maintaining analytical dashboards and reports used by business stakeholders and leadership.",
+          "field_source": "description",
+          "start_char": 1943,
+          "end_char": 2059
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "CI/CD & Library Maintenance",
+        "category": "development",
+        "frequency": "as_needed",
+        "complexity": "analytical",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Ability to create and maintain continuous integration and delivery of applications.",
+          "field_source": "description",
+          "start_char": 2950,
+          "end_char": 3033
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Technical Problem Solving",
+        "category": "other",
+        "frequency": "daily",
+        "complexity": "analytical",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Ability to work through new and difficult issues and contribute to libraries as needed.",
+          "field_source": "description",
+          "start_char": 2859,
+          "end_char": 2946
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Deployment Integration",
+        "category": "development",
+        "frequency": "unspecified",
+        "complexity": null,
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Understanding of Data Product Deployment Patterns and how analytics leverage production-ready data assets.",
+          "field_source": "description",
+          "start_char": 2290,
+          "end_char": 2396
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Strategic Client Integration",
+        "scope": "organization",
+        "level": "lead",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "We're looking to hire a Senior Business Intelligence Analyst to join our team. You'll work with our incredible clients in one of two ways:\n• Team Augmentation: You will integrate directly into our client's team and work alongside their existing designers and engineers daily.\n• Design & Build: You will work on a FullStack product team to build and deliver a product to our clients.",
+          "field_source": "description",
+          "start_char": 905,
+          "end_char": 1287
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Data Strategy & Insight Generation",
+        "scope": "department",
+        "level": "senior",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Strong experience analyzing large datasets to monitor program performance, identify trends, and generate actionable insights.",
+          "field_source": "description",
+          "start_char": 1490,
+          "end_char": 1615
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Product Delivery & Ownership",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "You will work on a FullStack product team to build and deliver a product to our clients.",
+          "field_source": "description",
+          "start_char": 1199,
+          "end_char": 1287
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Scalable Analytics Ecosystem Management",
+        "scope": "organization",
+        "level": "lead",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Experience working within modern data ecosystems that emphasize data products, governance, and scalable analytics.\n• Ability to work through new and difficult issues and contribute to libraries as needed.",
+          "field_source": "description",
+          "start_char": 2743,
+          "end_char": 2947
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Data Governance & Compliance",
+        "scope": "organization",
+        "level": "lead",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Strong understanding of data governance, compliance, and secure data access practices.",
+          "field_source": "description",
+          "start_char": 2653,
+          "end_char": 2739
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "remote_policy",
+        "value": "The title explicitly includes \"Remote - USA,\" and the \"What We Offer\" section confirms \"100% remote work.\"",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Senior Business Intelligence Analyst - Remote - USA",
+          "field_source": "title",
+          "start_char": 0,
+          "end_char": 51
+        }
+      },
+      {
+        "signal_type": "growth_stage",
+        "value": "High growth",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "• The ability to work with leading startups and Fortune 500 companies.",
+          "field_source": "description",
+          "start_char": 3711,
+          "end_char": 3781
+        }
       }
     ],
     "labeler_notes": {
@@ -4340,6 +4766,8 @@
   },
   {
     "ground_truth_id": "gt-021",
+    "external_id": "",
+    "source": "JSearch",
     "title": "Full Stack Developer - Entry Level",
     "company": "Tigua Inc.",
     "city": "El Paso",
@@ -4349,6 +4777,8 @@
     "responsibilities": "Develop and maintain .NET backend services and APIs. Build React front-end components and pages. Write SQL queries and work with SQL Server databases. Deploy and monitor applications on Azure. Participate in code reviews and follow team standards. Work with technical leads to implement features and fix defects.",
     "skills": [
       {
+        "skill_id": null,
+        "skill_name": "C#",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -4360,11 +4790,12 @@
           "start_char": 0,
           "end_char": 2
         },
-        "labeler_note": null,
-        "skill_name": "C#",
-        "skill_id": null
+        "span_auto_corrected": false,
+        "original_end_char": null
       },
       {
+        "skill_id": null,
+        "skill_name": "JavaScript",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -4376,11 +4807,12 @@
           "start_char": 0,
           "end_char": 10
         },
-        "labeler_note": null,
-        "skill_name": "JavaScript",
-        "skill_id": null
+        "span_auto_corrected": false,
+        "original_end_char": null
       },
       {
+        "skill_id": null,
+        "skill_name": "SQL",
         "type": "Technical",
         "confidence": 1.0,
         "required_flag": true,
@@ -4392,11 +4824,12 @@
           "start_char": 0,
           "end_char": 3
         },
-        "labeler_note": null,
-        "skill_name": "SQL",
-        "skill_id": null
+        "span_auto_corrected": false,
+        "original_end_char": null
       },
       {
+        "skill_id": null,
+        "skill_name": "Communication",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -4408,11 +4841,12 @@
           "start_char": 0,
           "end_char": 13
         },
-        "labeler_note": "Explicitly listed: 'Strong communication skills'.",
-        "skill_name": "Communication",
-        "skill_id": null
+        "span_auto_corrected": false,
+        "original_end_char": null
       },
       {
+        "skill_id": null,
+        "skill_name": "Teamwork",
         "type": "Soft",
         "confidence": 1.0,
         "required_flag": true,
@@ -4424,13 +4858,13 @@
           "start_char": 0,
           "end_char": 8
         },
-        "labeler_note": "From 'Ability to work with technical leads and accept feedback'. Explicit collaboration requirement; classified as Teamwork rather than Leadership.",
-        "skill_name": "Teamwork",
-        "skill_id": null
+        "span_auto_corrected": false,
+        "original_end_char": null
       }
     ],
     "tools": [
       {
+        "tool_id": null,
         "tool_name": ".NET",
         "category": "framework",
         "confidence": 1.0,
@@ -4443,6 +4877,7 @@
         "is_genai_tool": false
       },
       {
+        "tool_id": null,
         "tool_name": "React",
         "category": "framework",
         "confidence": 1.0,
@@ -4455,6 +4890,7 @@
         "is_genai_tool": false
       },
       {
+        "tool_id": null,
         "tool_name": "SQL Server",
         "category": "database",
         "confidence": 1.0,
@@ -4467,6 +4903,7 @@
         "is_genai_tool": false
       },
       {
+        "tool_id": null,
         "tool_name": "Azure",
         "category": "platform",
         "confidence": 1.0,
@@ -4479,6 +4916,7 @@
         "is_genai_tool": false
       },
       {
+        "tool_id": null,
         "tool_name": "Visual Studio",
         "category": "other",
         "confidence": 1.0,
@@ -4490,7 +4928,133 @@
         },
         "is_genai_tool": false
       }
-    ]
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Backend Development",
+        "category": "development",
+        "frequency": "daily",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Develop and maintain .NET backend services and APIs",
+          "field_source": "responsibilities",
+          "start_char": 0,
+          "end_char": 51
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Frontend Engineering",
+        "category": "development",
+        "frequency": "daily",
+        "complexity": "creative",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Build React front-end components and pages",
+          "field_source": "responsibilities",
+          "start_char": 53,
+          "end_char": 95
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Database Management",
+        "category": "analysis",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Write SQL queries and work with SQL Server databases",
+          "field_source": "responsibilities",
+          "start_char": 96,
+          "end_char": 148
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Cloud Deployment",
+        "category": "operations",
+        "frequency": "as_needed",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Deploy and monitor applications on Azure.",
+          "field_source": "responsibilities",
+          "start_char": 151,
+          "end_char": 192
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Full-Stack Application Maintenance",
+        "scope": "individual",
+        "level": "entry",
+        "confidence": 0.95,
+        "source_span": {
+          "text": "Tigua is looking for an entry-level Full Stack Developer to help build and maintain .NET and React applications for our government and commercial clients.",
+          "field_source": "description",
+          "start_char": 0,
+          "end_char": 154
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Collaborative Feature Implementation",
+        "scope": "team",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "You will work alongside senior developers and leads, contribute to full-stack features, and grow your skills in a supportive environment.",
+          "field_source": "description",
+          "start_char": 155,
+          "end_char": 292
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Quality Assurance & Standards",
+        "scope": "individual",
+        "level": "entry",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Participate in code reviews and follow team standards. Work with technical leads to implement features and fix defects.",
+          "field_source": "responsibilities",
+          "start_char": 193,
+          "end_char": 312
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Cloud Infrastructure Support",
+        "scope": "individual",
+        "level": "entry",
+        "confidence": 0.85,
+        "source_span": {
+          "text": "Deploy and monitor applications on Azure",
+          "field_source": "responsibilities",
+          "start_char": 150,
+          "end_char": 190
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "reporting_structure",
+        "value": "Reporiting line to technical Leads",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Work with technical leads to implement features and fix defects.",
+          "field_source": "responsibilities",
+          "start_char": 247,
+          "end_char": 311
+        }
+      }
+    ],
+    "labeler_notes": {}
   },
   {
     "ground_truth_id": "gt-022",
