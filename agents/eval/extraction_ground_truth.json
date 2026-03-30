@@ -916,7 +916,9 @@
         }
       }
     ],
-    "labeler_notes": {}
+    "labeler_notes": {
+      "_tools_empty": "Posting names no specific software tools — only patterns and concepts (RAG, prompt engineering, agentic design). 0 tools is the accurate label."
+    }
   },
   {
     "ground_truth_id": "gt-006",
@@ -7228,6 +7230,8 @@
       }
     ],
     "context": [],
-    "labeler_notes": {}
+    "labeler_notes": {
+      "_context_empty": "Posting is too sparse to extract context signals — no team size, work arrangement, or environment details mentioned."
+    }
   }
 ]
