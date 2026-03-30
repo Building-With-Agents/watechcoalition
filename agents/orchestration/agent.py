@@ -62,6 +62,7 @@ class OrchestrationAgent(BaseAgent):
             payload={
                 "event_type": "OrchestrationAck",
                 "acknowledged_event_type": event.payload.get("event_type"),
+                "batch_id": event.payload.get("triggered_by_batch_id"),
                 "posting_id": event.payload.get(
                     "posting_id",
                     event.payload.get("triggered_by_posting_id"),

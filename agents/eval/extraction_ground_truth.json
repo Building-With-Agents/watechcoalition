@@ -5667,6 +5667,170 @@
         "is_genai_tool": false
       }
     ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "monitor and protect our organization's networks and systems",
+        "category": "testing",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "monitor and protect our organization's networks and systems",
+          "field_source": "description",
+          "start_char": 42,
+          "end_char": 101
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "identify security threats",
+        "category": "analysis",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "identify security threats",
+          "field_source": "description",
+          "start_char": 119,
+          "end_char": 144
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "analyze security incidents",
+        "category": "testing",
+        "frequency": "as_needed",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "analyze security incidents",
+          "field_source": "description",
+          "start_char": 147,
+          "end_char": 173
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "implement security measures",
+        "category": "testing",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "implement security measures",
+          "field_source": "description",
+          "start_char": 179,
+          "end_char": 206
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Monitor security alerts",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Monitor security alerts",
+          "field_source": "responsibilities",
+          "start_char": 0,
+          "end_char": 23
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "investigate potential threats",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "investigate potential threats",
+          "field_source": "responsibilities",
+          "start_char": 27,
+          "end_char": 56
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Conduct vulnerability assessments",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Conduct vulnerability assessments",
+          "field_source": "responsibilities",
+          "start_char": 58,
+          "end_char": 91
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "penetration tests",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "penetration tests",
+          "field_source": "responsibilities",
+          "start_char": 97,
+          "end_char": 114
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Respond to security incidents and document findings",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Respond to security incidents and document findings",
+          "field_source": "responsibilities",
+          "start_char": 115,
+          "end_char": 166
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Implement and maintain security tools and technologies",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Implement and maintain security tools and technologies",
+          "field_source": "responsibilities",
+          "start_char": 168,
+          "end_char": 222
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Collaborate with IT teams to ensure security best practices",
+        "scope": "team",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Collaborate with IT teams to ensure security best practices",
+          "field_source": "responsibilities",
+          "start_char": 225,
+          "end_char": 284
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "growth_stage",
+        "value": "experience",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "2+ years experience in cybersecurity",
+          "field_source": "requirements",
+          "start_char": 71,
+          "end_char": 107
+        }
+      }
+    ],
     "labeler_notes": {
       "CompTIA Security+": "preferred",
       "CEH": "preferred",
@@ -5919,6 +6083,155 @@
         "is_genai_tool": false
       }
     ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "lead the detection and response efforts for our global enterprise clients",
+        "category": "operations",
+        "frequency": "daily",
+        "complexity": "strategic",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "lead the detection and response efforts for our global enterprise clients",
+          "field_source": "description",
+          "start_char": 33,
+          "end_char": 106
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "building automated workflows",
+        "category": "design",
+        "frequency": "as_needed",
+        "complexity": "strategic",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "building automated workflows",
+          "field_source": "description",
+          "start_char": 291,
+          "end_char": 319
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "building automated workflows",
+        "category": "design",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "building automated workflows",
+          "field_source": "description",
+          "start_char": 291,
+          "end_char": 319
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "fine-tuning LLM-based security co-pilot",
+        "category": "testing",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "fine-tuning our LLM-based security co-pilot",
+          "field_source": "description",
+          "start_char": 324,
+          "end_char": 367
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Monitor and analyze security alerts across diverse environments",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Monitor and analyze security alerts across diverse environments",
+          "field_source": "responsibilities",
+          "start_char": 0,
+          "end_char": 63
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Lead incident response and containment strategies",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Lead incident response and containment strategies",
+          "field_source": "responsibilities",
+          "start_char": 64,
+          "end_char": 113
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Develop and maintain Security Automation playbook",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Develop and maintain Security Automation playbooks",
+          "field_source": "responsibilities",
+          "start_char": 116,
+          "end_char": 166
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Collaborate with engineering to improve detection logic",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Collaborate with engineering to improve detection logic",
+          "field_source": "responsibilities",
+          "start_char": 167,
+          "end_char": 222
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Document all findings in the incident management system",
+        "scope": "individual",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Document all findings in the incident management system",
+          "field_source": "responsibilities",
+          "start_char": 224,
+          "end_char": 279
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "growth_stage",
+        "value": "experience",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "4+ years in a high-volume SOC environment",
+          "field_source": "requirements",
+          "start_char": 0,
+          "end_char": 41
+        }
+      },
+      {
+        "signal_type": "growth_stage",
+        "value": "experience",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Senior SOC Analyst",
+          "field_source": "description",
+          "start_char": 4,
+          "end_char": 22
+        }
+      }
+    ],
     "labeler_notes": {}
   },
   {
@@ -6124,6 +6437,168 @@
         "is_genai_tool": false
       }
     ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "\"design, implementation, and support of the organization’s security infrastructure",
+        "category": "design",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "design, implementation, and support of the organization’s security infrastructure",
+          "field_source": "description",
+          "start_char": 53,
+          "end_char": 134
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "\"ensures that all clinical systems remain compliant with regulatory standards",
+        "category": "operations",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "ensures that all clinical systems remain compliant with regulatory standards",
+          "field_source": "description",
+          "start_char": 146,
+          "end_char": 222
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "manage the lifecycle of our perimeter defense systems",
+        "category": "operations",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "manage the lifecycle of our perimeter defense systems",
+          "field_source": "description",
+          "start_char": 232,
+          "end_char": 285
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "conduct regular risk assessment",
+        "category": "operations",
+        "frequency": "as_needed",
+        "complexity": "strategic",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "conduct regular risk assessment",
+          "field_source": "description",
+          "start_char": 291,
+          "end_char": 322
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Configure and maintain network security hardware and software",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Configure and maintain network security hardware and software",
+          "field_source": "responsibilities",
+          "start_char": 0,
+          "end_char": 61
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Perform regular security audits and vulnerability scans using Nessus",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Perform regular security audits and vulnerability scans using Nessus",
+          "field_source": "responsibilities",
+          "start_char": 62,
+          "end_char": 130
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "\"Implement network segmentation to protect sensitive patient data",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Implement network segmentation to protect sensitive patient data",
+          "field_source": "responsibilities",
+          "start_char": 133,
+          "end_char": 197
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Implement network segmentation to protect sensitive patient data",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Implement network segmentation to protect sensitive patient data",
+          "field_source": "responsibilities",
+          "start_char": 133,
+          "end_char": 197
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Manage secure remote access for staff and third-party vendors",
+        "scope": "team",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Manage secure remote access for staff and third-party vendors",
+          "field_source": "responsibilities",
+          "start_char": 198,
+          "end_char": 259
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Provide technical support for network-related security incidents",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Provide technical support for network-related security incidents",
+          "field_source": "responsibilities",
+          "start_char": 261,
+          "end_char": 325
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "remote_policy",
+        "value": "certification",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "CISSP",
+          "field_source": "requirements",
+          "start_char": 43,
+          "end_char": 48
+        }
+      },
+      {
+        "signal_type": "remote_policy",
+        "value": "certification",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "CISA",
+          "field_source": "requirements",
+          "start_char": 53,
+          "end_char": 57
+        }
+      }
+    ],
     "labeler_notes": {}
   },
   {
@@ -6323,6 +6798,156 @@
           "end_char": 205
         },
         "is_genai_tool": false
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "conduct authorized simulated attacks",
+        "category": "testing",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "conduct authorized simulated attacks",
+          "field_source": "description",
+          "start_char": 85,
+          "end_char": 121
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "identify exploitable vulnerabilities",
+        "category": "testing",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "identify exploitable vulnerabilities",
+          "field_source": "description",
+          "start_char": 177,
+          "end_char": 213
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "clearly document findings",
+        "category": "analysis",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "clearly document findings",
+          "field_source": "description",
+          "start_char": 272,
+          "end_char": 297
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "remediation steps for technical and non-technical stakeholders",
+        "category": "analysis",
+        "frequency": "as_needed",
+        "complexity": "strategic",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "remediation steps for technical and non-technical stakeholders",
+          "field_source": "description",
+          "start_char": 303,
+          "end_char": 365
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "scripting in Python or Bash",
+        "category": "design",
+        "frequency": "as_needed",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "scripting in Python or Bash",
+          "field_source": "requirements",
+          "start_char": 178,
+          "end_char": 205
+        }
+      }
+    ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Execute network and web application penetration tests",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Execute network and web application penetration tests",
+          "field_source": "responsibilities",
+          "start_char": 0,
+          "end_char": 53
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Perform Vulnerability Research on emerging threats",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Perform Vulnerability Research on emerging threats",
+          "field_source": "responsibilities",
+          "start_char": 55,
+          "end_char": 105
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Create comprehensive Remediation Reports for clients",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Create comprehensive Remediation Reports for clients",
+          "field_source": "responsibilities",
+          "start_char": 107,
+          "end_char": 159
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Collaborate with defensive teams (Blue Teams) to improve overall security posture",
+        "scope": "team",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Collaborate with defensive teams (Blue Teams) to improve overall security posture",
+          "field_source": "responsibilities",
+          "start_char": 161,
+          "end_char": 242
+        }
+      }
+    ],
+    "context": [
+      {
+        "signal_type": "growth_stage",
+        "value": "experience",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "2+ years of experience",
+          "field_source": "requirements",
+          "start_char": 0,
+          "end_char": 22
+        }
+      },
+      {
+        "signal_type": "remote_policy",
+        "value": "protocol",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "OWASP Top 1",
+          "field_source": "requirements",
+          "start_char": 153,
+          "end_char": 164
+        }
       }
     ],
     "labeler_notes": {}

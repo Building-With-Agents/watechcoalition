@@ -1,0 +1,1102 @@
+{
+  "version": "1.0.0",
+  "schema_reference": "Prisma model `job_postings`: primary key `job_posting_id` (UUID string), display title `job_title` (VarChar 255). This file uses `job_id` = `job_posting_id`.",
+  "sourcing_note": "All ten records: job_id, job_title, and spans align with prisma/mock-data/job_postings.json job_description text (UTF-8), including curly apostrophes/quotes where present. Omitted context signals when no supporting phrase exists (e.g. numeric team_size). Prisma job_postings.location is not echoed here unless the same wording appears in the description body.",
+  "_field_guide_context": "Context labels use the same shape as agents.common.types.extraction_schemas.ContextSignal. There is no top-level \"text\" field — quoted text and offsets live under source_span (text, field_source, start_char, end_char). Allowed signal_type literals: remote_policy | team_size | reporting_structure | work_methodology | ai_adoption_signal.",
+  "_example_context_signal_for_labeling": {
+    "signal_type": "remote_policy",
+    "value": "hybrid",
+    "confidence": 0.9,
+    "source_span": {
+      "text": "hybrid work schedule",
+      "field_source": "description",
+      "start_char": 0,
+      "end_char": 20
+    }
+  },
+  "_example_task_for_labeling": {
+    "task_description": "Execute manual and automated test cases",
+    "task_category": "core",
+    "seniority_signal": "entry",
+    "confidence": 0.92,
+    "source_span": {
+      "text": "manual and automated testing",
+      "field_source": "description",
+      "start_char": 0,
+      "end_char": 28
+    }
+  },
+  "_example_responsibility_for_labeling": {
+    "responsibility_description": "Own quality assurance for assigned product area",
+    "scope": "team",
+    "requires_ai_competency": false,
+    "confidence": 0.88,
+    "source_span": {
+      "text": "quality assurance",
+      "field_source": "responsibilities",
+      "start_char": 0,
+      "end_char": 17
+    }
+  },
+  "records": [
+    {
+      "job_id": "832bec4d-7e4f-4bc8-b2a5-227644150f16",
+      "job_title": "Junior QA Analyst",
+      "ground_truth": {
+        "tasks": [
+          {
+            "task_description": "Participate in requirement reviews and test planning discussions",
+            "task_category": "supporting",
+            "seniority_signal": "entry",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "Participate in requirement reviews and contribute to test planning discussions",
+              "field_source": "description",
+              "start_char": 1487,
+              "end_char": 1565
+            }
+          },
+          {
+            "task_description": "Document and execute test cases from requirements and user stories",
+            "task_category": "core",
+            "seniority_signal": "entry",
+            "confidence": 0.92,
+            "source_span": {
+              "text": "Document and execute test cases based on functional requirements and user stories",
+              "field_source": "description",
+              "start_char": 1718,
+              "end_char": 1799
+            }
+          },
+          {
+            "task_description": "Execute regression, functional, and exploratory testing",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "Perform regression, functional, and exploratory testing",
+              "field_source": "description",
+              "start_char": 2162,
+              "end_char": 2217
+            }
+          }
+        ],
+        "responsibilities": [
+          {
+            "responsibility_description": "Contribute to enterprise QA within telecommunications programs",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.86,
+            "source_span": {
+              "text": "supporting a QA team within the enterprise-level Telecommunications industry",
+              "field_source": "description",
+              "start_char": 427,
+              "end_char": 503
+            }
+          },
+          {
+            "responsibility_description": "Own defect lifecycle and retesting with issue-tracking tools",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.88,
+            "source_span": {
+              "text": "Log, track, and retest defects using issue tracking tools",
+              "field_source": "description",
+              "start_char": 1952,
+              "end_char": 2009
+            }
+          },
+          {
+            "responsibility_description": "Align with cross-functional partners on quality outcomes",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.87,
+            "source_span": {
+              "text": "Collaborate with developers, QA team members, and project managers to ensure quality deliverables",
+              "field_source": "description",
+              "start_char": 2370,
+              "end_char": 2467
+            }
+          }
+        ],
+        "context": [
+          {
+            "signal_type": "remote_policy",
+            "value": "fully remote",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "fully remote",
+              "field_source": "description",
+              "start_char": 515,
+              "end_char": 527
+            }
+          },
+          {
+            "signal_type": "team_size",
+            "value": "supporting a QA team (headcount not stated)",
+            "confidence": 0.72,
+            "source_span": {
+              "text": "supporting a QA team",
+              "field_source": "description",
+              "start_char": 427,
+              "end_char": 447
+            }
+          },
+          {
+            "signal_type": "work_methodology",
+            "value": "Agile/Scrum",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "Agile/Scrum",
+              "field_source": "description",
+              "start_char": 3328,
+              "end_char": 3339
+            }
+          },
+          {
+            "signal_type": "reporting_structure",
+            "value": "collaboration with developers, QA, and project managers (matrix not explicit)",
+            "confidence": 0.78,
+            "source_span": {
+              "text": "Collaborate with developers, QA team members, and project managers to ensure quality deliverables",
+              "field_source": "description",
+              "start_char": 2370,
+              "end_char": 2467
+            }
+          }
+        ]
+      }
+    },
+    {
+      "job_id": "baaefc52-586f-4fea-9cbb-2e0100e700b5",
+      "job_title": "Junior Salesforce Developer",
+      "ground_truth": {
+        "tasks": [
+          {
+            "task_description": "Design, document, and implement engineering solutions",
+            "task_category": "core",
+            "seniority_signal": "entry",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "Assist in designing, documenting, and implementing engineering solutions",
+              "field_source": "description",
+              "start_char": 505,
+              "end_char": 577
+            }
+          },
+          {
+            "task_description": "Build full-stack Salesforce front-end and Azure back-end features",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.91,
+            "source_span": {
+              "text": "Participate in full stack coding including front-end Salesforce applications",
+              "field_source": "description",
+              "start_char": 581,
+              "end_char": 657
+            }
+          },
+          {
+            "task_description": "Create and execute test plans and leverage test automation",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.89,
+            "source_span": {
+              "text": "Help produce high-quality code by creating and executing test plans",
+              "field_source": "description",
+              "start_char": 743,
+              "end_char": 810
+            }
+          }
+        ],
+        "responsibilities": [
+          {
+            "responsibility_description": "Deliver healthcare data integration and processing services",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.88,
+            "source_span": {
+              "text": "building scalable and efficient healthcare data integration and data processing services",
+              "field_source": "description",
+              "start_char": 93,
+              "end_char": 181
+            }
+          },
+          {
+            "responsibility_description": "Own features spanning Salesforce plugins and Azure cloud services",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.87,
+            "source_span": {
+              "text": "You will work on solutions that deploy front-end services as Salesforce application plugins and back-end services using Microsoft’s Azure public cloud infrastructure.",
+              "field_source": "description",
+              "start_char": 183,
+              "end_char": 349
+            }
+          },
+          {
+            "responsibility_description": "Participate in secure SDLC activities including threat modeling",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.85,
+            "source_span": {
+              "text": "Assist in creating threat models",
+              "field_source": "description",
+              "start_char": 925,
+              "end_char": 957
+            }
+          }
+        ],
+        "context": [
+          {
+            "signal_type": "work_methodology",
+            "value": "Secure by Design development practices",
+            "confidence": 0.88,
+            "source_span": {
+              "text": "Secure by Design development practices",
+              "field_source": "description",
+              "start_char": 883,
+              "end_char": 921
+            }
+          },
+          {
+            "signal_type": "reporting_structure",
+            "value": "member of client Salesforce Applications team (formal manager not stated)",
+            "confidence": 0.74,
+            "source_span": {
+              "text": "As a member of our client’s Salesforce Applications team",
+              "field_source": "description",
+              "start_char": 16,
+              "end_char": 72
+            }
+          }
+        ]
+      }
+    },
+    {
+      "job_id": "57f1f8a6-2ff3-4cdf-9613-2e849612e2b8",
+      "job_title": "Break/Fix Technician - TEKsystems",
+      "ground_truth": {
+        "tasks": [
+          {
+            "task_description": "Perform onsite troubleshooting, repairs, and upgrades on client hardware and software",
+            "task_category": "core",
+            "seniority_signal": "mid",
+            "confidence": 0.91,
+            "source_span": {
+              "text": "Primary Responsibility - Perform onsite troubleshooting, repairs and upgrades for client hardware and software resolution.",
+              "field_source": "description",
+              "start_char": 1026,
+              "end_char": 1148
+            }
+          },
+          {
+            "task_description": "Execute IMACD (install/move/add/change/dispose) service activities",
+            "task_category": "technical",
+            "seniority_signal": "mid",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "Provide Installation, Moves, Additions, Changes, and Dispose Activities upon request",
+              "field_source": "description",
+              "start_char": 1227,
+              "end_char": 1311
+            }
+          },
+          {
+            "task_description": "Troubleshoot and repair failed client hardware and software in the field",
+            "task_category": "technical",
+            "seniority_signal": "mid",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "Perform hands-on and in-depth troubleshooting and associated repairs of failed client hardware and software.",
+              "field_source": "description",
+              "start_char": 1390,
+              "end_char": 1498
+            }
+          }
+        ],
+        "responsibilities": [
+          {
+            "responsibility_description": "Maintain hardware and software for manufacturing and flight-line end users",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.89,
+            "source_span": {
+              "text": "work in a manufacturing/factory environment to troubleshoot hardware (laptops, PCs, peripherals) and software (Windows/Office) for Boeing and Dell end users",
+              "field_source": "description",
+              "start_char": 107,
+              "end_char": 263
+            }
+          },
+          {
+            "responsibility_description": "Support customers through multiple channels including remote assistance",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.86,
+            "source_span": {
+              "text": "Candidate will help customers via phone, in person and remotely",
+              "field_source": "description",
+              "start_char": 481,
+              "end_char": 544
+            }
+          },
+          {
+            "responsibility_description": "Meet customer-service and SLA/SLO success benchmarks",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.84,
+            "source_span": {
+              "text": "Meets all success-measuring benchmarks (customer services, SLO / SLA’s, etc.…)",
+              "field_source": "description",
+              "start_char": 1713,
+              "end_char": 1791
+            }
+          }
+        ],
+        "context": [
+          {
+            "signal_type": "remote_policy",
+            "value": "remote support channel (field role; not fully remote)",
+            "confidence": 0.82,
+            "source_span": {
+              "text": "remotely",
+              "field_source": "description",
+              "start_char": 536,
+              "end_char": 544
+            }
+          },
+          {
+            "signal_type": "team_size",
+            "value": "part of a 24x7 multi-shift team (numeric size not stated)",
+            "confidence": 0.7,
+            "source_span": {
+              "text": "part of a team",
+              "field_source": "description",
+              "start_char": 758,
+              "end_char": 772
+            }
+          },
+          {
+            "signal_type": "work_methodology",
+            "value": "follow established documented processes",
+            "confidence": 0.84,
+            "source_span": {
+              "text": "follow established documented processes",
+              "field_source": "description",
+              "start_char": 307,
+              "end_char": 346
+            }
+          },
+          {
+            "signal_type": "reporting_structure",
+            "value": "SLA/SLO-driven prioritization (people manager not stated)",
+            "confidence": 0.65,
+            "source_span": {
+              "text": "tasks associated to SLA/SLO (Service Level) agreements",
+              "field_source": "description",
+              "start_char": 838,
+              "end_char": 892
+            }
+          }
+        ]
+      }
+    },
+    {
+      "job_id": "bf9d4169-1474-4d8d-9530-315e6594cb56",
+      "job_title": "Data Center Technician",
+      "ground_truth": {
+        "tasks": [
+          {
+            "task_description": "Stage and run startups/shutdowns for racks, drives, and switches per protocols",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.92,
+            "source_span": {
+              "text": "Prepares, stages, sets up, and performs startups and shutdowns (e.g., racks, hard drives, switches) according to specific instructions, checklists, guides, standard protocols, and emails.",
+              "field_source": "description",
+              "start_char": 819,
+              "end_char": 1006
+            }
+          },
+          {
+            "task_description": "Verify grounding, labeling, and cabling after work against NDT and safety standards",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.91,
+            "source_span": {
+              "text": "Performs post-execution quality checks and verifies that grounding, staging, labeling, and cabling are set up properly according to safety protocols, deployment standards, and planned Network Design Tasks (NDTs).",
+              "field_source": "description",
+              "start_char": 1085,
+              "end_char": 1297
+            }
+          },
+          {
+            "task_description": "Diagnose failures and replace faulty hardware components",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "Performs diagnostics and troubleshooting following standard procedures, quickly identifies the cause(s) of issues, and replaces faulty components",
+              "field_source": "description",
+              "start_char": 1376,
+              "end_char": 1521
+            }
+          }
+        ],
+        "responsibilities": [
+          {
+            "responsibility_description": "Support physical data center infrastructure and uptime",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.88,
+            "source_span": {
+              "text": "The Data Center Technician Level 1 is responsible for supporting the physical infrastructure and operational uptime of a data center.",
+              "field_source": "description",
+              "start_char": 71,
+              "end_char": 204
+            }
+          },
+          {
+            "responsibility_description": "Lifecycle hardware work: stage, install, maintain, and decommission",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.87,
+            "source_span": {
+              "text": "This includes staging, installing, maintaining, and decommissioning hardware such as servers, racks, switches, and drives.",
+              "field_source": "description",
+              "start_char": 205,
+              "end_char": 327
+            }
+          },
+          {
+            "responsibility_description": "Execute safe operations, documentation, escalation, and off-hours coverage",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.86,
+            "source_span": {
+              "text": "The technician follows standardized protocols to perform startups, shutdowns, diagnostics, and repairs, ensuring systems meet performance and safety requirements.",
+              "field_source": "description",
+              "start_char": 328,
+              "end_char": 490
+            }
+          }
+        ],
+        "context": [
+          {
+            "signal_type": "work_methodology",
+            "value": "standardized operational protocols",
+            "confidence": 0.88,
+            "source_span": {
+              "text": "standardized protocols",
+              "field_source": "description",
+              "start_char": 351,
+              "end_char": 373
+            }
+          },
+          {
+            "signal_type": "reporting_structure",
+            "value": "escalate to Datacenter Technician Leads",
+            "confidence": 0.84,
+            "source_span": {
+              "text": "escalate incidents to appropriate Datacenter Technician Leads",
+              "field_source": "description",
+              "start_char": 1870,
+              "end_char": 1931
+            }
+          }
+        ]
+      }
+    },
+    {
+      "job_id": "32936201-9cc7-4bc1-ae25-335e84edab51",
+      "job_title": "Workday Financial Apprentice - Packaged Application Development Associate - Northeast - Hartford - NAELFY25",
+      "ground_truth": {
+        "tasks": [
+          {
+            "task_description": "Enroll in Accenture’s year-long apprenticeship program",
+            "task_category": "core",
+            "seniority_signal": "entry",
+            "confidence": 0.88,
+            "source_span": {
+              "text": "joining Accenture’s Apprenticeship Program!",
+              "field_source": "description",
+              "start_char": 82,
+              "end_char": 125
+            }
+          },
+          {
+            "task_description": "Participate in structured on-the-job training",
+            "task_category": "supporting",
+            "seniority_signal": "entry",
+            "confidence": 0.86,
+            "source_span": {
+              "text": "on-the-job training",
+              "field_source": "description",
+              "start_char": 255,
+              "end_char": 274
+            }
+          },
+          {
+            "task_description": "Gain hands-on experience in an innovative workplace",
+            "task_category": "supporting",
+            "seniority_signal": "entry",
+            "confidence": 0.85,
+            "source_span": {
+              "text": "hands-on experience in an innovative workplace",
+              "field_source": "description",
+              "start_char": 326,
+              "end_char": 372
+            }
+          }
+        ],
+        "responsibilities": [
+          {
+            "responsibility_description": "Complete a full-time, salaried apprenticeship in Hartford with earn-and-learn structure",
+            "scope": "organization",
+            "requires_ai_competency": false,
+            "confidence": 0.87,
+            "source_span": {
+              "text": "This is a full-time, year-long salaried position providing a structured, “earn and learn” experience.",
+              "field_source": "description",
+              "start_char": 126,
+              "end_char": 227
+            }
+          },
+          {
+            "responsibility_description": "Evaluate fit across apprentice opportunities in multiple business groups",
+            "scope": "organization",
+            "requires_ai_competency": false,
+            "confidence": 0.82,
+            "source_span": {
+              "text": "There are apprentice positions across our business groups including Technology, Strategy & Consulting, Song and Industry X.",
+              "field_source": "description",
+              "start_char": 406,
+              "end_char": 529
+            }
+          },
+          {
+            "responsibility_description": "Assess interest in on-the-job training and hands-on development",
+            "scope": "individual",
+            "requires_ai_competency": false,
+            "confidence": 0.84,
+            "source_span": {
+              "text": "If you are looking for on-the-job training, enjoy learning new things and are excited about a hands-on experience in an innovative workplace this is an opportunity for you.",
+              "field_source": "description",
+              "start_char": 232,
+              "end_char": 404
+            }
+          }
+        ],
+        "context": []
+      }
+    },
+    {
+      "job_id": "a8b67765-0ca4-4a3c-a5ac-3b99d19af77d",
+      "job_title": "Software Engineer",
+      "ground_truth": {
+        "tasks": [
+          {
+            "task_description": "Build and refine front-end web apps with React, Vue.js, or similar",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.92,
+            "source_span": {
+              "text": "Develop and refine <strong>front-end web applications</strong> using <strong>React, Vue.js, or similar frameworks</strong>.",
+              "field_source": "description",
+              "start_char": 669,
+              "end_char": 792
+            }
+          },
+          {
+            "task_description": "Implement ML models for health applications",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.91,
+            "source_span": {
+              "text": "Assist in implementing <strong>machine learning models</strong> for real-world health applications.",
+              "field_source": "description",
+              "start_char": 871,
+              "end_char": 970
+            }
+          },
+          {
+            "task_description": "Prepare datasets to train and test AI models",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "Work with datasets to preprocess, train, and test AI models.",
+              "field_source": "description",
+              "start_char": 1049,
+              "end_char": 1109
+            }
+          }
+        ],
+        "responsibilities": [
+          {
+            "responsibility_description": "Contribute as a software engineer focused on front-end, ML, and AI for health tech",
+            "scope": "team",
+            "requires_ai_competency": true,
+            "confidence": 0.9,
+            "source_span": {
+              "text": "Hobbes Health is seeking a <strong>highly motivated Software Engineer</strong> with a passion for <strong>front-end development, machine learning (ML), and artificial intelligence (AI)</strong> to join our team.",
+              "field_source": "description",
+              "start_char": 3,
+              "end_char": 214
+            }
+          },
+          {
+            "responsibility_description": "Deliver user-facing interfaces and AI-driven product capabilities",
+            "scope": "team",
+            "requires_ai_competency": true,
+            "confidence": 0.89,
+            "source_span": {
+              "text": "developing user-friendly interfaces, implementing AI-driven solutions, and contributing to the next generation of health technology.",
+              "field_source": "description",
+              "start_char": 261,
+              "end_char": 393
+            }
+          },
+          {
+            "responsibility_description": "Integrate AI features with backend systems",
+            "scope": "team",
+            "requires_ai_competency": true,
+            "confidence": 0.88,
+            "source_span": {
+              "text": "Collaborate with back-end developers to integrate AI-driven features into applications.",
+              "field_source": "description",
+              "start_char": 1188,
+              "end_char": 1275
+            }
+          }
+        ],
+        "context": [
+          {
+            "signal_type": "ai_adoption_signal",
+            "value": "machine learning and artificial intelligence in role scope",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "machine learning (ML), and artificial intelligence (AI)",
+              "field_source": "description",
+              "start_char": 132,
+              "end_char": 187
+            }
+          },
+          {
+            "signal_type": "ai_adoption_signal",
+            "value": "AI-driven product work",
+            "confidence": 0.88,
+            "source_span": {
+              "text": "AI-driven solutions",
+              "field_source": "description",
+              "start_char": 311,
+              "end_char": 330
+            }
+          }
+        ]
+      }
+    },
+    {
+      "job_id": "de51f4f7-d3af-4ecf-94b1-443d4d3401aa",
+      "job_title": "College Intern - Waterfront Project Management Systems/Data Analyst",
+      "ground_truth": {
+        "tasks": [
+          {
+            "task_description": "Schedule, attend, and document meetings",
+            "task_category": "supporting",
+            "seniority_signal": "entry",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "Schedule, attend and document meetings",
+              "field_source": "description",
+              "start_char": 245,
+              "end_char": 283
+            }
+          },
+          {
+            "task_description": "Review existing reports for accuracy and discrepancies",
+            "task_category": "core",
+            "seniority_signal": "entry",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "Analyze & review existing reports for accuracy & potential discrepancies",
+              "field_source": "description",
+              "start_char": 286,
+              "end_char": 358
+            }
+          },
+          {
+            "task_description": "Support report and system improvement projects",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.89,
+            "source_span": {
+              "text": "Participate in report/system improvement or implementation projects",
+              "field_source": "description",
+              "start_char": 361,
+              "end_char": 428
+            }
+          }
+        ],
+        "responsibilities": [
+          {
+            "responsibility_description": "Part-time school-year internship supporting Port of Seattle WPM systems and data analysis",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.88,
+            "source_span": {
+              "text": "This is a part-time school year internship position.",
+              "field_source": "description",
+              "start_char": 0,
+              "end_char": 52
+            }
+          },
+          {
+            "responsibility_description": "Assist the Waterfront Project Management team with systems and analytics needs",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.87,
+            "source_span": {
+              "text": "You will assist the Waterfront Project Management team at the Port of Seattle with system and data analysis needs.",
+              "field_source": "description",
+              "start_char": 53,
+              "end_char": 167
+            }
+          },
+          {
+            "responsibility_description": "Report to WPM Systems/Data Analyst; duties span tooling (Alteryx, Tableau, SQL, etc.)",
+            "scope": "individual",
+            "requires_ai_competency": false,
+            "confidence": 0.85,
+            "source_span": {
+              "text": "This role reports to the WPM Systems/Data Analyst and duties may include:",
+              "field_source": "description",
+              "start_char": 168,
+              "end_char": 241
+            }
+          }
+        ],
+        "context": [
+          {
+            "signal_type": "reporting_structure",
+            "value": "reports to WPM Systems/Data Analyst",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "reports to the WPM Systems/Data Analyst",
+              "field_source": "description",
+              "start_char": 178,
+              "end_char": 217
+            }
+          }
+        ]
+      }
+    },
+    {
+      "job_id": "fd366a7d-ec0c-4a0c-9159-4550379aa21a",
+      "job_title": "Data Center Project Manager/Coordinator",
+      "ground_truth": {
+        "tasks": [
+          {
+            "task_description": "Manage awarded projects and direct the technician team day-to-day",
+            "task_category": "management",
+            "seniority_signal": "mid",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "managing \nawarded projects, providing daily direction to the team",
+              "field_source": "description",
+              "start_char": 156,
+              "end_char": 221
+            }
+          },
+          {
+            "task_description": "Track hours and drive on-time, budget-compliant delivery",
+            "task_category": "management",
+            "seniority_signal": "mid",
+            "confidence": 0.89,
+            "source_span": {
+              "text": "tracking work hours, ensuring timely \nand budget-compliant project completion",
+              "field_source": "description",
+              "start_char": 223,
+              "end_char": 300
+            }
+          },
+          {
+            "task_description": "Update client status trackers",
+            "task_category": "core",
+            "seniority_signal": "mid",
+            "confidence": 0.88,
+            "source_span": {
+              "text": "updating client status trackers",
+              "field_source": "description",
+              "start_char": 384,
+              "end_char": 415
+            }
+          }
+        ],
+        "responsibilities": [
+          {
+            "responsibility_description": "Lead coordination for Quincy data center technician team engagement",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.86,
+            "source_span": {
+              "text": "We are seeking a dedicated and organized individual to join our team of \ndata center technicians in Quincy, WA.",
+              "field_source": "description",
+              "start_char": 0,
+              "end_char": 111
+            }
+          },
+          {
+            "responsibility_description": "Own delivery: timelines, budgets, headcount, onsite client contact, and admin duties",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.9,
+            "source_span": {
+              "text": "The ideal candidate will be responsible for managing \nawarded projects, providing daily direction to the team, tracking work hours, ensuring timely \nand budget-compliant project completion, addressing team challenges, managing headcount \nfor multiple concurrent projects, updating client status trackers, serving as the onsite point of \ncontact, and handling various administrative duties.",
+              "field_source": "description",
+              "start_char": 112,
+              "end_char": 501
+            }
+          },
+          {
+            "responsibility_description": "Manage staffing and problem-solving across concurrent projects",
+            "scope": "department",
+            "requires_ai_competency": false,
+            "confidence": 0.87,
+            "source_span": {
+              "text": "addressing team challenges, managing headcount \nfor multiple concurrent projects",
+              "field_source": "description",
+              "start_char": 302,
+              "end_char": 382
+            }
+          }
+        ],
+        "context": [
+          {
+            "signal_type": "remote_policy",
+            "value": "on-site client point of contact",
+            "confidence": 0.82,
+            "source_span": {
+              "text": "serving as the onsite point of \ncontact",
+              "field_source": "description",
+              "start_char": 417,
+              "end_char": 456
+            }
+          }
+        ]
+      }
+    },
+    {
+      "job_id": "2e2aab90-fc6b-452f-91fc-4c7dd4cfd7af",
+      "job_title": "Junior/Entry Level Software Developer",
+      "ground_truth": {
+        "tasks": [
+          {
+            "task_description": "Demonstrate Java proficiency and SDLC understanding",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.86,
+            "source_span": {
+              "text": "Experience in programming language Java and understanding of the software development life cycle",
+              "field_source": "description",
+              "start_char": 1978,
+              "end_char": 2074
+            }
+          },
+          {
+            "task_description": "Bring statistics, Gen AI, LLM, Python, and visualization skills for data roles",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.87,
+            "source_span": {
+              "text": "Knowledge of Statistics, Gen AI, LLM, Python, Computer Vision, data visualization tools",
+              "field_source": "description",
+              "start_char": 2075,
+              "end_char": 2162
+            }
+          },
+          {
+            "task_description": "Apply Spring Boot, microservices, containers, CI, and REST APIs for full-stack roles",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.86,
+            "source_span": {
+              "text": "Spring boot, Microservices, Docker, Jenkins, Github, Kubernates and REST API's experience",
+              "field_source": "description",
+              "start_char": 2722,
+              "end_char": 2811
+            }
+          }
+        ],
+        "responsibilities": [
+          {
+            "responsibility_description": "Train and place candidates with tech clients via skills and interview readiness",
+            "scope": "organization",
+            "requires_ai_competency": false,
+            "confidence": 0.82,
+            "source_span": {
+              "text": "Since 2010 Synergisticit has helped Jobseekers get employed in the tech Job market by providing candidates the requisite skills, experience and technical competence to outperform at interviews and at clients.",
+              "field_source": "description",
+              "start_char": 0,
+              "end_char": 208
+            }
+          },
+          {
+            "responsibility_description": "Recruit for multiple entry-level technical tracks including ML and full-stack",
+            "scope": "organization",
+            "requires_ai_competency": false,
+            "confidence": 0.84,
+            "source_span": {
+              "text": "Currently, We are looking for entry-level software programmers, Java Full stack developers, Python/Java developers, Data analysts/ Data Scientists, Machine Learning engineers for full time positions with clients.",
+              "field_source": "description",
+              "start_char": 1080,
+              "end_char": 1292
+            }
+          },
+          {
+            "responsibility_description": "Support visa and immigration filings for eligible candidates",
+            "scope": "organization",
+            "requires_ai_competency": false,
+            "confidence": 0.8,
+            "source_span": {
+              "text": "We assist in filing for STEM extension and also for H1b and Green card filing to Candidates",
+              "field_source": "description",
+              "start_char": 1518,
+              "end_char": 1609
+            }
+          }
+        ],
+        "context": [
+          {
+            "signal_type": "ai_adoption_signal",
+            "value": "machine learning hiring track",
+            "confidence": 0.85,
+            "source_span": {
+              "text": "Machine Learning",
+              "field_source": "description",
+              "start_char": 1228,
+              "end_char": 1244
+            }
+          },
+          {
+            "signal_type": "ai_adoption_signal",
+            "value": "LLM in required data-science skills",
+            "confidence": 0.84,
+            "source_span": {
+              "text": "LLM",
+              "field_source": "description",
+              "start_char": 2108,
+              "end_char": 2111
+            }
+          }
+        ]
+      }
+    },
+    {
+      "job_id": "e25b095c-7325-44d7-8a2e-58d95d3322d1",
+      "job_title": "Microsoft Data Center Technician",
+      "ground_truth": {
+        "tasks": [
+          {
+            "task_description": "Install, route, and terminate network and power cabling in the data center",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.91,
+            "source_span": {
+              "text": "Install, route, and terminate network and power cables (fiber optic, copper, etc.) within the data center.",
+              "field_source": "description",
+              "start_char": 1177,
+              "end_char": 1283
+            }
+          },
+          {
+            "task_description": "Build and install racks with servers, switches, and PDUs",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.9,
+            "source_span": {
+              "text": "Build and install server racks, including mounting servers, network switches, and power distribution units (PDUs).",
+              "field_source": "description",
+              "start_char": 2207,
+              "end_char": 2321
+            }
+          },
+          {
+            "task_description": "Monitor temperature and humidity for equipment health",
+            "task_category": "technical",
+            "seniority_signal": "entry",
+            "confidence": 0.89,
+            "source_span": {
+              "text": "Monitor environmental conditions such as temperature and humidity to ensure optimal equipment performance.",
+              "field_source": "description",
+              "start_char": 3213,
+              "end_char": 3319
+            }
+          }
+        ],
+        "responsibilities": [
+          {
+            "responsibility_description": "Deliver cabling, rack build, and efficiency work in an expanding technician team",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.88,
+            "source_span": {
+              "text": "We are seeking highly motivated and detail-oriented Data Center Technicians to join our rapidly expanding team. This role will be responsible for running network and power cables, building and installing server racks, and maintaining overall data center efficiency.",
+              "field_source": "description",
+              "start_char": 79,
+              "end_char": 344
+            }
+          },
+          {
+            "responsibility_description": "Meet hands-on data center and cabling best-practice expectations",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.87,
+            "source_span": {
+              "text": "The ideal candidate will have hands-on experience in a data center environment and a strong understanding of best practices for cabling and server deployment.",
+              "field_source": "description",
+              "start_char": 345,
+              "end_char": 503
+            }
+          },
+          {
+            "responsibility_description": "Grow technical skills while supporting critical infrastructure operations",
+            "scope": "team",
+            "requires_ai_competency": false,
+            "confidence": 0.83,
+            "source_span": {
+              "text": "This role is perfect for someone looking to develop their technical skills while contributing to the infrastructure that powers cutting-edge IT operations.",
+              "field_source": "description",
+              "start_char": 9365,
+              "end_char": 9520
+            }
+          }
+        ],
+        "context": [
+          {
+            "signal_type": "remote_policy",
+            "value": "in-person contract in Quincy, WA",
+            "confidence": 0.92,
+            "source_span": {
+              "text": "This is an in-person, 4-week contract in Quincy, WA, with potential for extension based on performance.",
+              "field_source": "description",
+              "start_char": 584,
+              "end_char": 687
+            }
+          },
+          {
+            "signal_type": "work_methodology",
+            "value": "cable management per industry standards",
+            "confidence": 0.84,
+            "source_span": {
+              "text": "according to industry standards to ensure proper cable management.",
+              "field_source": "description",
+              "start_char": 1492,
+              "end_char": 1558
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

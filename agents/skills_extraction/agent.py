@@ -44,6 +44,7 @@ from agents.skills_extraction.extractors.skills import (
 )
 from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
 from agents.skills_extraction.prompts import SKILLS_PROMPT_VERSION
+from agents.skills_extraction.validator import validate_extraction_result
 
 _FIXTURE_PATH = (
     Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
@@ -292,8 +293,13 @@ class SQLAlchemyExtractionStore:
                 row.tasks = list(getattr(result, "tasks", []) or [])
                 row.responsibilities = list(getattr(result, "responsibilities", []) or [])
                 row.context = list(getattr(result, "context", []) or [])
+                validated = validate_extraction_result(
+                    result.skills, [tool.model_dump() for tool in result.tools]
+                )
+                row.extraction_warnings = list(
+                    dict.fromkeys([*list(result.extraction_warnings), *validated])
+                )
                 row.overall_confidence = _overall_extraction_confidence(result)
-                row.extraction_warnings = list(result.extraction_warnings)
                 # Degraded = partial LLM failure (e.g. tasks) but skills OK — not a hard failure.
                 row.extraction_failed = result.extraction_status == "failed"
                 em = result.extraction_metadata

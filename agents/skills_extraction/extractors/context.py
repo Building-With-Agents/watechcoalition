@@ -14,8 +14,8 @@ from typing import Any, cast
 
 import structlog
 
-from agents.common.types.extraction_schemas import ContextSignalType
 from agents.common.types import ContextSignal, JobRecord, SpanRecord
+from agents.common.types.extraction_schemas import ContextSignalType
 
 log = structlog.get_logger()
 

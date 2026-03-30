@@ -8,7 +8,7 @@ Source of truth: `job_intelligence_engine_architecture.docx` — see `docs/plann
 
 ## Project Summary
 
-**Job Intelligence Engine** — an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings for the watechcoalition platform. **SQLAlchemy is the single database authority.** Prisma/MSSQL is being phased out — the Next.js API is currently broken from the SQL Server → PostgreSQL switch (expected). All database tables are now agent-managed via SQLAlchemy.
+**Job Intelligence Engine** — an eight-agent (Phase 1) / nine-agent (Phase 2) Python pipeline that ingests, normalizes, enriches, and analyzes external job postings for the watechcoalition platform. **SQLAlchemy is the single database authority.** Prisma/MSSQL is being phased out — the Next.js API is currently broken from the SQL Server → PostgreSQL switch (expected). All database tables are now agent-managed via SQLAlchemy.
 
 The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **separate Python layer** that lives in `agents/` and runs alongside it.
 
@@ -89,7 +89,7 @@ The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **s
     │   ├── saga/              ← Phase 2 only — scaffold, do not implement
     │   ├── admin_api/         ← Phase 2 only — scaffold, do not implement
     │   └── tests/
-    ├── demand_analysis/       ← Phase 2 only — scaffold directory, do not implement
+    ├── demand_analysis/       ← Phase 2 — demand analysis capabilities absorbed into Analytics; scaffold reserved for Query Agent
     │   ├── agent.py
     │   ├── time_series/
     │   ├── forecasting/
@@ -114,7 +114,7 @@ The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **s
     │   ├── normalized/        ← normalized_jobs output
     │   ├── enriched/          ← enriched records pre-promotion
     │   ├── analytics/         ← computed aggregates
-    │   ├── demand_signals/    ← Phase 2
+    │   ├── demand_signals/    ← Phase 2 (Analytics Agent expansion)
     │   ├── rendered/          ← Visualization artifact cache
     │   └── dead_letter/       ← quarantined records (retry-exhausted)
     ├── eval/                  ← 30–50 hand-labeled JSON records (Week 4)
@@ -127,7 +127,7 @@ The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **s
 
 ---
 
-## Architecture — Eight Agents, One Pipeline
+## Architecture — Eight Agents (Phase 1), Nine Agents (Phase 2)
 
 ```
 Sources (JSearch API via httpx / Web scraping via Crawl4AI)
@@ -139,13 +139,16 @@ Sources (JSearch API via httpx / Web scraping via Crawl4AI)
 [Skills Extraction Agent] → SkillsExtracted
     ↓
 [Enrichment Agent]        → RecordEnriched
-    ↓              ↘
-[Analytics Agent]    [Demand Analysis Agent]  ← Phase 2 only
     ↓
+[Analytics Agent]         → AnalyticsRefreshed
+    ↓                        (Phase 2: absorbs demand analysis capabilities)
 [Visualization Agent]     → RenderComplete
 
 [Orchestration Agent]     ← sole consumer of ALL *Failed/*Alert events
                           ← schedules, monitors, retries all agents above
+
+[Query Agent]             ← Phase 2 (9th agent) — standalone workforce Q&A
+                          ← Gap Analysis, Candidate-Role Match, Stakeholder Reports
 ```
 
 ---
@@ -312,7 +315,7 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 | Analytics | `agents/analytics/agent.py` | 1 | `AnalyticsRefreshed` | `RecordEnriched` |
 | Visualization | `agents/visualization/agent.py` | 1 | `RenderComplete` | `AnalyticsRefreshed` |
 | Orchestration | `agents/orchestration/agent.py` | 1 | trigger/retry signals | ALL events incl. `*Failed`/`*Alert` |
-| Demand Analysis | `agents/demand_analysis/agent.py` | 2 | `DemandSignalsUpdated` | `RecordEnriched` |
+| Query Agent | `agents/query/agent.py` | 2 | `QueryResponse` | `AnalyticsRefreshed` |
 
 ---
 
@@ -382,6 +385,21 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 
 - Audit log: 100% completeness required — every trigger, retry, and alert creation must be recorded
 
+### Query Agent (Phase 2 — 9th agent)
+- Standalone workforce intelligence Q&A agent with persona-based response routing
+- Three new output modes beyond Phase 1 Q&A: Gap Analysis, Candidate-Role Match, Stakeholder Reports
+- `QueryPersona` enum: `workforce_board_director | employer_partner | cfa_internal | cohort_student`
+- `QueryRequest` model: `query`, `persona`, `intent_hint` (optional), `max_results`
+- Requires upstream data not in Phase 1: candidate/cohort profiles (new ingestion source)
+- Forward-compatibility: `persona` field added to query API schema in Week 6 (Phase 1 ignores it; Phase 2 uses it for routing)
+- Phase 1 Q&A (inside Analytics Agent) handles: intent classification, evidence citation, Comparative Analysis, Trend Narrative
+- Phase 2 Query Agent handles: Gap Analysis, Candidate-Role Match, Stakeholder Reports, persona routing, formatted document generation (PDF/DOCX)
+
+### Analytics Agent — Phase 2 Expansion
+- Absorbs Demand Analysis Agent capabilities: time-series indexing, velocity windows (7d/30d/90d), 30-day demand forecasts, anomaly detection with significance testing, TrajectoryRecord projections
+- Emits `DemandSignalsUpdated` and `DemandAnomaly` events (previously attributed to standalone Demand Analysis Agent)
+- Q&A migrates out to standalone Query Agent in Phase 2; Analytics retains aggregation + disruption + demand analysis
+
 ---
 
 ## Evaluation Targets (non-negotiable — check against these)
@@ -410,6 +428,12 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 | Orchestration | Mean time to recover (auto) | < 5 min |
 | Orchestration | Audit log completeness | 100% |
 | System | Batch throughput | 1,000 jobs < 5 minutes |
+| Query Agent (Phase 2) | Intent classification accuracy | ≥ 90% |
+| Query Agent (Phase 2) | Response relevance (human eval) | ≥ 85% |
+| Query Agent (Phase 2) | Persona routing accuracy | ≥ 95% |
+| Analytics (Phase 2) | Forecast MAPE (30-day) | < 15% |
+| Analytics (Phase 2) | Trend accuracy | ≥ 85% |
+| Analytics (Phase 2) | Anomaly precision | ≥ 80% |
 
 ---
 
@@ -439,6 +463,7 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 | 10 | Testing + security review + load testing | Integration test suite, security checklist, 1k-job load test, Dockerfile |
 | 11 | Documentation | ARCHITECTURE.md, EVENT_CATALOG.md, RUNBOOK.md, CONFIGURATION.md, DEMO_SCRIPT.md |
 | 12 | Capstone demo + release | Live demo to stakeholders, `v0.1.0-capstone` tag, handoff package, retrospective |
+| Phase 2 | Query Agent (9th agent) | Standalone Q&A: Gap Analysis, Candidate-Role Match, Stakeholder Reports, persona routing |
 
 ---
 
@@ -512,7 +537,7 @@ python -m pytest agents/tests/ -v
 - Do NOT use Prisma from Python — SQLAlchemy only
 - Do NOT write to `job_postings` without a resolved `company_id`
 - Do NOT store credentials in code or logs
-- Do NOT implement Phase 2 items (circuit-breaking, saga, admin API, demand analysis, full enrichment, external bus)
+- Do NOT implement Phase 2 items (circuit-breaking, saga, admin API, demand analysis (now Analytics Phase 2), Query Agent, full enrichment, external bus)
 - Do NOT skip writing tests alongside implementation
 - Do NOT modify the Next.js app or `prisma/schema.prisma` unless explicitly instructed
 - Do NOT serve a blank dashboard page — always serve stale data with a staleness banner
