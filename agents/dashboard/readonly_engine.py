@@ -19,6 +19,8 @@ from sqlalchemy.engine import Engine
 log = structlog.get_logger()
 
 _dashboard_engine: Engine | None = None
+# Avoid spamming logs on every Streamlit rerun when Postgres is down (dev / offline).
+_dashboard_connection_failure_logged: bool = False
 
 
 def get_dashboard_engine() -> Engine:
@@ -42,11 +44,17 @@ def get_dashboard_engine() -> Engine:
 
 def check_dashboard_db_connection() -> bool:
     """Return True if SELECT 1 succeeds on the dashboard engine."""
+    global _dashboard_connection_failure_logged
     try:
         engine = get_dashboard_engine()
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
+        _dashboard_connection_failure_logged = False
         return True
     except Exception as exc:
-        log.warning("dashboard_db_connection_check_failed", error=str(exc))
+        if not _dashboard_connection_failure_logged:
+            log.warning("dashboard_db_connection_check_failed", error=str(exc))
+            _dashboard_connection_failure_logged = True
+        else:
+            log.debug("dashboard_db_connection_check_failed", error=str(exc))
         return False
