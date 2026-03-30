@@ -25,6 +25,7 @@ _RESTRICTED_EVENT_SUFFIXES = ("Failed", "Alert")
 ORCHESTRATION_ONLY_CONTROL_EVENTS = frozenset({
     "SourceFailure",
     "DemandAnomaly",
+    "EnrichmentDegraded",
 })
 
 

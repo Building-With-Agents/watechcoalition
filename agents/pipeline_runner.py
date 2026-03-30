@@ -65,9 +65,12 @@ import structlog  # noqa: E402
 
 from agents.analytics.agent import AnalyticsAgent  # noqa: E402
 from agents.common.event_envelope import EventEnvelope  # noqa: E402
+from agents.common.message_bus import InProcessEventBus  # noqa: E402
+from agents.common.message_bus.contracts import ORCHESTRATOR_AGENT_ID  # noqa: E402
 from agents.common.types import JobRecord  # noqa: E402
 from agents.demand_analysis.agent import DemandAnalysisAgent  # noqa: E402
 from agents.enrichment.agent import EnrichmentAgent  # noqa: E402
+from agents.enrichment.agent import register_alert_bus as register_enrichment_alert_bus  # noqa: E402
 from agents.ingestion.agent import IngestionAgent  # noqa: E402
 from agents.normalization.agent import NormalizationAgent  # noqa: E402
 from agents.orchestration.agent import OrchestrationAgent  # noqa: E402
@@ -102,25 +105,71 @@ structlog.configure(
 
 log = structlog.get_logger()
 
+
+def _on_enrichment_degraded_alert(event: EventEnvelope) -> None:
+    """Orchestration-side receipt for EnrichmentDegraded (bus subscriber).
+
+    Week 6: persist to orchestration_audit_log / alerts. Phase 1: structured log only.
+    """
+    log.warning(
+        "orchestration_EnrichmentDegraded_received",
+        correlation_id=event.correlation_id,
+        normalized_job_id=event.payload.get("normalized_job_id"),
+        posting_id=event.payload.get("posting_id"),
+        reason=event.payload.get("reason"),
+        classifier=event.payload.get("classifier"),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Optional: smoke-call extractors after normalization (needs title + company)
+# ---------------------------------------------------------------------------
+
+
+def _job_record_from_event_payload(payload: dict) -> JobRecord | None:
+    """Build a minimal JobRecord when inline job fields exist (not batch-only events)."""
+    title = payload.get("title")
+    company = payload.get("company")
+    if not isinstance(title, str) or not title.strip():
+        return None
+    if not isinstance(company, str) or not company.strip():
+        return None
+    desc = payload.get("description") if isinstance(payload.get("description"), str) else None
+    if desc is None and isinstance(payload.get("raw_text"), str):
+        desc = payload["raw_text"]
+    req = payload.get("requirements") if isinstance(payload.get("requirements"), str) else None
+    resp = payload.get("responsibilities") if isinstance(payload.get("responsibilities"), str) else None
+    return JobRecord(
+        source=str(payload.get("source") or "pipeline-runner"),
+        external_id=str(payload.get("external_id") or payload.get("batch_id") or "pipeline-stub"),
+        title=title.strip(),
+        company=company.strip(),
+        description=desc,
+        requirements=req,
+        responsibilities=resp,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Pipeline definition
 # ---------------------------------------------------------------------------
 
 PIPELINE: list[tuple[Any, bool]] = [
-    (IngestionAgent(),          False),
-    (NormalizationAgent(),      False),
-    (SkillsExtractionAgent(),   False),
-    (EnrichmentAgent(),         False),
-    (AnalyticsAgent(),          False),
-    (VisualizationAgent(),      False),
-    (OrchestrationAgent(),      False),
-    (DemandAnalysisAgent(),     True),
+    (IngestionAgent(), False),
+    (NormalizationAgent(), False),
+    (SkillsExtractionAgent(), False),
+    (EnrichmentAgent(), False),
+    (AnalyticsAgent(), False),
+    (VisualizationAgent(), False),
+    (OrchestrationAgent(), False),
+    (DemandAnalysisAgent(), True),
 ]
 
 
 # ---------------------------------------------------------------------------
 # Health checks
 # ---------------------------------------------------------------------------
+
 
 def run_health_checks(pipeline: list[tuple[Any, bool]]) -> bool:
     """Run health_check() on every agent.
@@ -164,6 +213,7 @@ def run_health_checks(pipeline: list[tuple[Any, bool]]) -> bool:
 # Pipeline execution
 # ---------------------------------------------------------------------------
 
+
 def run_pipeline(
     pipeline: list[tuple[Any, bool]],
     correlation_id: str,
@@ -187,7 +237,6 @@ def run_pipeline(
     )
 
     for agent, is_phase2 in pipeline:
-
         # Phase 2 stub
         if is_phase2:
             with contextlib.suppress(Exception):
@@ -236,19 +285,19 @@ def run_pipeline(
             event_type=outbound.payload.get("event_type"),
         )
 
-        # Week 4 stubs (Pair B: context): run after normalization, log result count
-        # Stubs accept JobRecord — build a minimal one for pipeline verification.
-        # Week 5+ will load real normalized jobs from DB per-record.
+        # Week 5: optional extractor smoke after normalization (full run is in SkillsExtractionAgent).
         if outbound.agent_id == "normalization-agent":
-            stub_job = JobRecord(
-                source="pipeline-stub",
-                external_id="stub",
-                title="stub",
-                company="stub",
-            )
-            context_signals = extract_context(stub_job)
-            tasks = extract_tasks(stub_job)
-            responsibilities = extract_responsibilities(stub_job)
+            stub_rec = _job_record_from_event_payload(outbound.payload)
+            if stub_rec is None:
+                stub_rec = JobRecord(
+                    source="pipeline-stub",
+                    external_id="stub",
+                    title="stub",
+                    company="stub",
+                )
+            context_signals, _ctx_meta = extract_context(stub_rec)
+            tasks, _tasks_meta = extract_tasks(stub_rec)
+            responsibilities, _resp_meta = extract_responsibilities(stub_rec)
             log.info(
                 "extraction_stubs_result",
                 context_count=len(context_signals),
@@ -257,14 +306,16 @@ def run_pipeline(
                 correlation_id=outbound.correlation_id,
             )
 
-        run_entries.append({
-            "agent_id": outbound.agent_id,
-            "event_id": outbound.event_id,
-            "correlation_id": outbound.correlation_id,
-            "timestamp": outbound.timestamp.isoformat(),
-            "schema_version": outbound.schema_version,
-            "payload": outbound.payload,
-        })
+        run_entries.append(
+            {
+                "agent_id": outbound.agent_id,
+                "event_id": outbound.event_id,
+                "correlation_id": outbound.correlation_id,
+                "timestamp": outbound.timestamp.isoformat(),
+                "schema_version": outbound.schema_version,
+                "payload": outbound.payload,
+            }
+        )
 
         current_event = outbound
 
@@ -275,6 +326,7 @@ def run_pipeline(
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     """Send a batch trigger through the pipeline."""
     run_start = datetime.now(timezone.utc)
@@ -283,48 +335,58 @@ def main() -> None:
 
     log.info("pipeline_start", run_id=run_id, run_start=run_start.isoformat())
 
-    # Health checks
-    if not run_health_checks(PIPELINE):
-        log.error("pipeline_aborted", reason="Phase 1 agent health check failed")
-        sys.exit(1)
-
-    log.info("health_checks_passed", note="all Phase 1 agents healthy — starting run")
-
-    # Batch trigger with region_config (backward-compat: old keys also accepted)
-    trigger_payload = {
-        "region_config": {
-            "region_id": "borderplex-default",
-            "display_name": "Borderplex Region",
-            "query_location": "El Paso Texas",
-            "radius_miles": 50,
-            "states": ["TX", "NM"],
-            "countries": ["US"],
-            "sources": ["jsearch", "crawl4ai"],
-            "role_categories": ["Software Engineering"],
-            "keywords": ["software engineer"],
-        },
-    }
-
-    entries = run_pipeline(PIPELINE, correlation_id, trigger_payload)
-
-    # Write run log
-    _OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    _RUN_LOG_PATH.write_text(
-        json.dumps(entries, indent=2, default=str),
-        encoding="utf-8",
+    alert_bus = InProcessEventBus()
+    alert_bus.subscribe(
+        "EnrichmentDegraded",
+        _on_enrichment_degraded_alert,
+        subscriber_id=ORCHESTRATOR_AGENT_ID,
     )
+    register_enrichment_alert_bus(alert_bus)
+    try:
+        # Health checks
+        if not run_health_checks(PIPELINE):
+            log.error("pipeline_aborted", reason="Phase 1 agent health check failed")
+            sys.exit(1)
 
-    run_end = datetime.now(timezone.utc)
-    duration_s = round((run_end - run_start).total_seconds(), 3)
+        log.info("health_checks_passed", note="all Phase 1 agents healthy — starting run")
 
-    log.info(
-        "pipeline_complete",
-        run_id=run_id,
-        total_entries=len(entries),
-        expected_entries=len(PIPELINE),
-        run_log=str(_RUN_LOG_PATH),
-        duration_seconds=duration_s,
-    )
+        # Batch trigger with region_config (backward-compat: old keys also accepted)
+        trigger_payload = {
+            "region_config": {
+                "region_id": "borderplex-default",
+                "display_name": "Borderplex Region",
+                "query_location": "El Paso Texas",
+                "radius_miles": 50,
+                "states": ["TX", "NM"],
+                "countries": ["US"],
+                "sources": ["jsearch", "crawl4ai"],
+                "role_categories": ["Software Engineering"],
+                "keywords": ["software engineer"],
+            },
+        }
+
+        entries = run_pipeline(PIPELINE, correlation_id, trigger_payload)
+
+        # Write run log
+        _OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        _RUN_LOG_PATH.write_text(
+            json.dumps(entries, indent=2, default=str),
+            encoding="utf-8",
+        )
+
+        run_end = datetime.now(timezone.utc)
+        duration_s = round((run_end - run_start).total_seconds(), 3)
+
+        log.info(
+            "pipeline_complete",
+            run_id=run_id,
+            total_entries=len(entries),
+            expected_entries=len(PIPELINE),
+            run_log=str(_RUN_LOG_PATH),
+            duration_seconds=duration_s,
+        )
+    finally:
+        register_enrichment_alert_bus(None)
 
 
 if __name__ == "__main__":

@@ -289,20 +289,26 @@ Merge conflicts happen when two people edit the same lines in the same file. The
 When `git pull origin development` shows conflicts:
 
 ```text
-# Git tells you which files have conflicts
-# Open each conflicted file — look for conflict markers:
+# Git tells you which files have conflicts.
+# Open each conflicted file and look for conflict markers.
 
-<<<<<<< HEAD
-your version of the code
-=======
-the other version from development
->>>>>>> other-branch
+# In each file, Git inserts three sections: "ours" (your branch), a separator
+# line, and "theirs" (incoming). Example shape:
+
+#   <<<<<<< HEAD
+#   your version of the code
+#   =======
+#   the other version from development
+#   >>>>>>> other-branch
+
+# Remove the marker lines (<<<<<<<, =======, >>>>>>>) and keep the code you want
+# (yours, theirs, or a combination).
 ```
 
 **Steps to resolve:**
-1. Open the file and find the `<<<<<<<` markers.
+1. Open the file and find Git’s conflict sections (ours / separator / theirs).
 2. Decide which version to keep (yours, theirs, or a combination).
-3. Delete the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`).
+3. Delete the conflict marker lines so only the intended code remains.
 4. Save the file.
 5. Stage and commit:
    ```bash
