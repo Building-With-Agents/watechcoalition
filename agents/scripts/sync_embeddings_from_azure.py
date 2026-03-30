@@ -20,7 +20,7 @@ Prerequisites:
     - Local PostgreSQL running with dbo.skills table (run migrations first)
     - Azure PostgreSQL has embeddings (admin ran seed_esco_embeddings.py)
     - PYTHON_DATABASE_URL in .env points to your LOCAL database
-    - AZURE_DATABASE_URL in .env points to the shared Azure database
+    - AZURE_DATABASE_URL or AZURE_POSTGRES_DATABASE_URL in .env for the Azure read source
       (or pass --azure-url)
 
 What it does:
@@ -55,19 +55,17 @@ from agents.common.data_store.database import session_scope  # noqa: E402
 
 log = structlog.get_logger()
 
-# Default Azure connection — override with --azure-url or AZURE_DATABASE_URL env var
-_DEFAULT_AZURE_URL = (
-    "postgresql+psycopg2://azadmin:Jx9gfIHmmiXq4yyR9bdUTVU%40k"
-    "@pg-jobintel-cfa-dev.postgres.database.azure.com:5432"
-    "/talent_finder?sslmode=require"
-)
-
-
 def _get_azure_url(cli_override: str | None = None) -> str:
-    """Resolve Azure DB URL from CLI arg > env var > default."""
+    """Resolve Azure DB URL from CLI arg > AZURE_DATABASE_URL > AZURE_POSTGRES_DATABASE_URL."""
     if cli_override:
         return cli_override
-    return os.getenv("AZURE_DATABASE_URL", _DEFAULT_AZURE_URL)
+    url = os.getenv("AZURE_DATABASE_URL") or os.getenv("AZURE_POSTGRES_DATABASE_URL")
+    if not url:
+        raise SystemExit(
+            "Missing Azure PostgreSQL URL. Set AZURE_DATABASE_URL (or AZURE_POSTGRES_DATABASE_URL) "
+            "in .env, or pass --azure-url. See .env.example (Option B / convenience alias)."
+        )
+    return url
 
 
 def status_local() -> dict[str, int]:
@@ -182,7 +180,7 @@ def main() -> None:
         "--azure-url",
         type=str,
         default=None,
-        help="Override Azure PostgreSQL URL (default: AZURE_DATABASE_URL env var)",
+        help="Azure PostgreSQL URL (overrides AZURE_DATABASE_URL / AZURE_POSTGRES_DATABASE_URL)",
     )
     args = parser.parse_args()
 
