@@ -9,6 +9,10 @@ columns are left unchanged.
 ``overall_confidence``, and merged ``field_confidence`` only; does **not** change
 ``is_spam`` or ``spam_score`` so prior values are preserved.
 
+Successful clean / flagged / uncertain promotions then run best-effort fuzzy
+dedup in the same session. Dedup failures log and return without rolling back
+the enrichment update.
+
 Requires non-null ``company_id`` on the target row; otherwise skips with a log line.
 """
 
@@ -21,8 +25,9 @@ import structlog
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from agents.enrichment.dedup.types import FuzzyDedupResult
 from agents.enrichment.classifiers.spam_preview import apply_spam_tiers
+from agents.enrichment.dedup import run_fuzzy_dedup
+from agents.enrichment.dedup.types import FuzzyDedupResult
 
 log = structlog.get_logger()
 
@@ -196,6 +201,25 @@ def apply_fuzzy_dedup_result(
     return True
 
 
+def _apply_fuzzy_dedup_after_promotion(
+    session: Session,
+    *,
+    normalized_job_id: int,
+    job_posting_id: str,
+) -> None:
+    """Best-effort fuzzy dedup: never roll back enrichment promotion on failure."""
+    try:
+        result = run_fuzzy_dedup(session, job_posting_id)
+        apply_fuzzy_dedup_result(session, job_posting_id, result)
+    except Exception as exc:
+        log.warning(
+            "fuzzy_dedup_after_promotion_failed",
+            normalized_job_id=normalized_job_id,
+            job_posting_id=job_posting_id,
+            error=str(exc),
+        )
+
+
 def apply_enrichment_to_job_postings(
     session: Session,
     normalized_job_id: int,
@@ -276,42 +300,44 @@ def apply_enrichment_to_job_postings(
             normalized_job_id=normalized_job_id,
             job_posting_id=job_posting_id,
         )
-        return True
+    else:
+        try:
+            spam_f = float(spam_score)
+        except (TypeError, ValueError):
+            session.execute(_UPDATE_UNCERTAIN_SQL, params_base)
+            log.info(
+                "enrichment_promotion_applied_uncertain_spam_invalid_score",
+                normalized_job_id=normalized_job_id,
+                job_posting_id=job_posting_id,
+            )
+        else:
+            params = {**params_base, "spam_score": spam_f}
 
-    try:
-        spam_f = float(spam_score)
-    except (TypeError, ValueError):
-        session.execute(_UPDATE_UNCERTAIN_SQL, params_base)
-        log.info(
-            "enrichment_promotion_applied_uncertain_spam_invalid_score",
-            normalized_job_id=normalized_job_id,
-            job_posting_id=job_posting_id,
-        )
-        return True
+            if tier == "flagged":
+                session.execute(_UPDATE_FLAGGED_SQL, params)
+                log.info(
+                    "enrichment_promotion_applied_flagged",
+                    normalized_job_id=normalized_job_id,
+                    job_posting_id=job_posting_id,
+                )
+            elif tier == "clean":
+                session.execute(_UPDATE_CLEAN_SQL, params)
+                log.info(
+                    "enrichment_promotion_applied_clean",
+                    normalized_job_id=normalized_job_id,
+                    job_posting_id=job_posting_id,
+                )
+            else:
+                log.warning(
+                    "enrichment_promotion_unhandled_tier",
+                    normalized_job_id=normalized_job_id,
+                    tier=tier or raw_tier,
+                )
+                return False
 
-    params = {**params_base, "spam_score": spam_f}
-
-    if tier == "flagged":
-        session.execute(_UPDATE_FLAGGED_SQL, params)
-        log.info(
-            "enrichment_promotion_applied_flagged",
-            normalized_job_id=normalized_job_id,
-            job_posting_id=job_posting_id,
-        )
-        return True
-
-    if tier == "clean":
-        session.execute(_UPDATE_CLEAN_SQL, params)
-        log.info(
-            "enrichment_promotion_applied_clean",
-            normalized_job_id=normalized_job_id,
-            job_posting_id=job_posting_id,
-        )
-        return True
-
-    log.warning(
-        "enrichment_promotion_unhandled_tier",
+    _apply_fuzzy_dedup_after_promotion(
+        session,
         normalized_job_id=normalized_job_id,
-        tier=tier or raw_tier,
+        job_posting_id=str(job_posting_id),
     )
-    return False
+    return True
