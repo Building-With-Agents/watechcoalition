@@ -71,6 +71,8 @@ from agents.common.types import JobRecord  # noqa: E402
 from agents.demand_analysis.agent import DemandAnalysisAgent  # noqa: E402
 from agents.enrichment.agent import EnrichmentAgent  # noqa: E402
 from agents.enrichment.agent import register_alert_bus as register_enrichment_alert_bus  # noqa: E402
+from agents.common.llm_adapter import register_tracer  # noqa: E402
+from agents.common.observability import LangfuseTracer  # noqa: E402
 from agents.ingestion.agent import IngestionAgent  # noqa: E402
 from agents.normalization.agent import NormalizationAgent  # noqa: E402
 from agents.orchestration.agent import OrchestrationAgent  # noqa: E402
@@ -342,6 +344,13 @@ def main() -> None:
         subscriber_id=ORCHESTRATOR_AGENT_ID,
     )
     register_enrichment_alert_bus(alert_bus)
+
+    # Langfuse tracing (optional — activate only when API key is present)
+    if os.getenv("LANGFUSE_SECRET_KEY"):
+        _tracer = LangfuseTracer(agent_id="pipeline-runner")
+        register_tracer(_tracer)
+        log.info("langfuse_tracer_registered", agent_id="pipeline-runner")
+
     try:
         # Health checks
         if not run_health_checks(PIPELINE):
