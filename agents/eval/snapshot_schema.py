@@ -8,26 +8,50 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-SNAPSHOT_SCHEMA_VERSION = "1.0"
+SNAPSHOT_SCHEMA_VERSION = "1.2"
 
 
 class AggregateMetrics(BaseModel):
-    """Micro-averaged P/R: matched/pred, matched/true (same as legacy extraction_eval)."""
+    """Micro-averaged P/R/F1: matched/pred, matched/true (same micro definition as v1.0 skills/tools)."""
 
     total_gt_skills: int
     total_pred_skills: int
     matched_skills: int
     precision_skills: float
     recall_skills: float
+    f1_skills: float = 0.0
     total_gt_tools: int
     total_pred_tools: int
     matched_tools: int
     precision_tools: float
     recall_tools: float
+    f1_tools: float = 0.0
+    total_gt_tasks: int = 0
+    total_pred_tasks: int = 0
+    matched_tasks: int = 0
+    precision_tasks: float = 0.0
+    recall_tasks: float = 0.0
+    f1_tasks: float = 0.0
+    total_gt_responsibilities: int = 0
+    total_pred_responsibilities: int = 0
+    matched_responsibilities: int = 0
+    precision_responsibilities: float = 0.0
+    recall_responsibilities: float = 0.0
+    f1_responsibilities: float = 0.0
+    total_gt_context: int = 0
+    total_pred_context: int = 0
+    matched_context: int = 0
+    precision_context: float = 0.0
+    recall_context: float = 0.0
+    f1_context: float = 0.0
     total_tokens_used: int | None = None
     total_cost_usd: float | None = None
     total_latency_ms: int | None = None
     llm_applicable: bool = False
+    # Skills-only taxonomy stats over predicted SkillRecords (pipeline); None if N/A (e.g. stub).
+    skills_pred_record_count: int | None = None
+    skills_esco_coverage: float | None = None
+    skills_genai_extension_rate: float | None = None
 
 
 class PerJobSnapshot(BaseModel):
@@ -45,8 +69,34 @@ class PerJobSnapshot(BaseModel):
     false_positive_tools: list[str] = Field(default_factory=list)
     precision_skills: float = 0.0
     recall_skills: float = 0.0
+    f1_skills: float = 0.0
     precision_tools: float = 0.0
     recall_tools: float = 0.0
+    f1_tools: float = 0.0
+    gt_tasks: list[str] = Field(default_factory=list)
+    pred_tasks: list[str] = Field(default_factory=list)
+    matched_tasks: list[str] = Field(default_factory=list)
+    missed_tasks: list[str] = Field(default_factory=list)
+    false_positive_tasks: list[str] = Field(default_factory=list)
+    precision_tasks: float = 0.0
+    recall_tasks: float = 0.0
+    f1_tasks: float = 0.0
+    gt_responsibilities: list[str] = Field(default_factory=list)
+    pred_responsibilities: list[str] = Field(default_factory=list)
+    matched_responsibilities: list[str] = Field(default_factory=list)
+    missed_responsibilities: list[str] = Field(default_factory=list)
+    false_positive_responsibilities: list[str] = Field(default_factory=list)
+    precision_responsibilities: float = 0.0
+    recall_responsibilities: float = 0.0
+    f1_responsibilities: float = 0.0
+    gt_context: list[str] = Field(default_factory=list)
+    pred_context: list[str] = Field(default_factory=list)
+    matched_context: list[str] = Field(default_factory=list)
+    missed_context: list[str] = Field(default_factory=list)
+    false_positive_context: list[str] = Field(default_factory=list)
+    precision_context: float = 0.0
+    recall_context: float = 0.0
+    f1_context: float = 0.0
     tokens_used: int | None = None
     cost_usd: float | None = None
     latency_ms: int | None = None
@@ -60,9 +110,7 @@ class PromptExemplar(BaseModel):
     skills_prompt_version: str
     system_prompt: str
     user_prompt: str
-    note: str = (
-        "User sections vary per job (Pass-1 tool list). This exemplar uses the first job only."
-    )
+    note: str = "User sections vary per job (Pass-1 tool list). This exemplar uses the first job only."
 
 
 class ExtractionEvalSnapshot(BaseModel):
