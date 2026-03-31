@@ -6,8 +6,9 @@ no ``UPDATE`` — the row may already exist from upstream ingestion; enrichment
 columns are left unchanged.
 
 **Uncertain / degraded** (no numeric ``spam_score``): updates ``quality_score``,
-``overall_confidence``, merged ``field_confidence``, and ``temporal_period``; does
-**not** change ``is_spam`` or ``spam_score`` so prior values are preserved.
+``overall_confidence``, merged ``field_confidence``, ``temporal_period``, and
+``borderplex_subregion``; does **not** change ``is_spam`` or ``spam_score`` so prior
+values are preserved.
 
 Requires non-null ``company_id`` on the target row; otherwise skips with a log line.
 """
@@ -21,6 +22,7 @@ import structlog
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from agents.enrichment.classifiers.borderplex_subregion import classify_borderplex_subregion
 from agents.enrichment.classifiers.spam_preview import apply_spam_tiers
 from agents.enrichment.classifiers.temporal_period import classify_temporal_period
 
@@ -30,7 +32,12 @@ _RESOLVE_JOB_POSTING_SQL = text(
     """
     SELECT jp.job_posting_id::text AS job_posting_id,
            jp.company_id::text AS company_id,
-           nj.date_posted AS date_posted
+           nj.date_posted AS date_posted,
+           nj.city AS city,
+           nj.state_province AS state_province,
+           nj.country AS country,
+           nj.is_remote AS is_remote,
+           nj.work_arrangement AS work_arrangement
     FROM dbo.job_postings jp
     INNER JOIN dbo.normalized_jobs nj
         ON jp.source IS NOT NULL
@@ -48,7 +55,8 @@ _UPDATE_UNCERTAIN_SQL = text(
         quality_score = :quality_score,
         overall_confidence = :overall_confidence,
         field_confidence = CAST(:field_confidence AS jsonb),
-        temporal_period = :temporal_period
+        temporal_period = :temporal_period,
+        borderplex_subregion = :borderplex_subregion
     WHERE job_posting_id::text = :job_posting_id
     """
 )
@@ -60,6 +68,7 @@ _UPDATE_CLEAN_SQL = text(
         overall_confidence = :overall_confidence,
         field_confidence = CAST(:field_confidence AS jsonb),
         temporal_period = :temporal_period,
+        borderplex_subregion = :borderplex_subregion,
         is_spam = FALSE,
         spam_score = :spam_score
     WHERE job_posting_id::text = :job_posting_id
@@ -73,6 +82,7 @@ _UPDATE_FLAGGED_SQL = text(
         overall_confidence = :overall_confidence,
         field_confidence = CAST(:field_confidence AS jsonb),
         temporal_period = :temporal_period,
+        borderplex_subregion = :borderplex_subregion,
         is_spam = NULL,
         spam_score = :spam_score
     WHERE job_posting_id::text = :job_posting_id
@@ -81,7 +91,7 @@ _UPDATE_FLAGGED_SQL = text(
 
 
 def resolve_job_posting_row(session: Session, normalized_job_id: int) -> dict[str, Any] | None:
-    """Return ``job_posting_id``, ``company_id`` text, and ``date_posted``, or None if not found."""
+    """Return resolved posting row keys including geo fields for Borderplex tagging, or None."""
     row = session.execute(_RESOLVE_JOB_POSTING_SQL, {"nj_id": normalized_job_id}).mappings().first()
     return dict(row) if row else None
 
@@ -181,6 +191,17 @@ def apply_enrichment_to_job_postings(
     fc_json = json.dumps(fc_merged)
     oc = _overall_confidence_for_storage(record_enriched_payload)
     temporal_period = classify_temporal_period(resolved.get("date_posted"))
+    borderplex_subregion = classify_borderplex_subregion(
+        city=resolved.get("city") if isinstance(resolved.get("city"), str) else None,
+        state_province=resolved.get("state_province")
+        if isinstance(resolved.get("state_province"), str)
+        else None,
+        country=resolved.get("country") if isinstance(resolved.get("country"), str) else None,
+        is_remote=resolved.get("is_remote") if isinstance(resolved.get("is_remote"), bool) else None,
+        work_arrangement=resolved.get("work_arrangement")
+        if isinstance(resolved.get("work_arrangement"), str)
+        else None,
+    )
 
     params_base: dict[str, Any] = {
         "job_posting_id": str(job_posting_id),
@@ -188,6 +209,7 @@ def apply_enrichment_to_job_postings(
         "overall_confidence": oc,
         "field_confidence": fc_json,
         "temporal_period": temporal_period,
+        "borderplex_subregion": borderplex_subregion,
     }
 
     if tier == "uncertain" or spam_score is None:

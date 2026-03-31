@@ -200,6 +200,11 @@ def seed_enrichment_e2e(engine: Engine) -> EnrichmentE2ESeed:
             title="E2E Title",
             company="E2E Co",
             description="E2E description body for enrichment promotion test.",
+            city="El Paso",
+            state_province="Texas",
+            country="US",
+            is_remote=False,
+            work_arrangement="on-site",
             date_posted=datetime(2023, 6, 15, 12, 0, 0, tzinfo=timezone.utc),
             normalization_status="success",
         )

@@ -45,7 +45,8 @@ def _fetch_enrichment_columns(engine: Engine, job_posting_id: str) -> dict:
             conn.execute(
                 text(
                     """
-                    SELECT quality_score, is_spam, spam_score, field_confidence, temporal_period
+                    SELECT quality_score, is_spam, spam_score, field_confidence, temporal_period,
+                           borderplex_subregion
                     FROM dbo.job_postings
                     WHERE job_posting_id::text = :jpid
                     """
@@ -103,6 +104,7 @@ def test_enrichment_promotion_clean_tier(e2e_engine: Engine) -> None:
         assert abs(float(row["spam_score"]) - 0.25) < 1e-5
         assert row.get("field_confidence") is not None
         assert row.get("temporal_period") == "post_gpt4"
+        assert row.get("borderplex_subregion") == "el_paso"
     finally:
         teardown_enrichment_e2e(e2e_engine, seed)
 
