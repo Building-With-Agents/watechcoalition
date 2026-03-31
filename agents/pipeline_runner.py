@@ -396,6 +396,10 @@ def main() -> None:
         )
     finally:
         register_enrichment_alert_bus(None)
+        # Flush and shut down Langfuse tracer so all traces are sent
+        if _tracer is not None and hasattr(_tracer, "shutdown"):
+            _tracer.shutdown()
+            register_tracer(None)
 
 
 if __name__ == "__main__":

@@ -38,6 +38,11 @@ _alert_bus: Any = None
 # Optional Langfuse tracer; set via register_tracer() so every LLM call can be traced
 _tracer: LangfuseTracer | None = None
 
+
+def get_tracer() -> LangfuseTracer | None:
+    """Return the currently registered tracer (None if not set)."""
+    return _tracer
+
 # ---------------------------------------------------------------------------
 # Pricing (per token) — configurable via env vars
 # ---------------------------------------------------------------------------
@@ -191,7 +196,7 @@ def complete(
     correlation_id = correlation_id or str(uuid.uuid4())
     span_metadata = {"agent_name": agent_name, "model": model, "model_tier": model_tier}
     span_ctx = (
-        _tracer.start_span("llm_call", correlation_id=correlation_id, metadata=span_metadata)
+        _tracer.start_span(agent_name, correlation_id=correlation_id, input=prompt, metadata=span_metadata)
         if _tracer
         else nullcontext()
     )
@@ -249,6 +254,7 @@ def complete(
                                     "input_tokens": input_tokens,
                                     "output_tokens": output_tokens,
                                     "cost_usd": round(cost_usd, 6),
+                                    "output": content[:4000],
                                 },
                             )
                         except Exception:
