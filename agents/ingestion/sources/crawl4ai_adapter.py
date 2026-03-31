@@ -73,7 +73,7 @@ class Crawl4AIAdapter(SourceAdapter):
 
     def __init__(self, target_urls: list[str] | None = None) -> None:
         # Allow override for testing; default uses fixed El Paso portal.
-        self._target_urls = target_urls or [TEST_URL]
+        self._target_urls = target_urls or [EL_PASO_CAREERS_URL]
 
     @property
     def source_name(self) -> str:
