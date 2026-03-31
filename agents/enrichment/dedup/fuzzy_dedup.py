@@ -22,7 +22,9 @@ def run_fuzzy_dedup(
 
     **Phase 0:** Returns a safe default (not duplicate) and logs once. Replace the body
     with: load row, compose dedup text, embed, query candidates, cosine vs threshold,
-    survivor selection, then UPDATE ``is_duplicate`` / ``duplicate_cluster_id``.
+    and survivor selection that returns a fully-populated ``FuzzyDedupResult``.
+    Persistence lives in ``job_postings_promotion.apply_fuzzy_dedup_result`` so the
+    promotion path remains the single owner of ``dbo.job_postings`` writes.
 
     Parameters
     ----------
@@ -51,6 +53,7 @@ def run_fuzzy_dedup(
     return FuzzyDedupResult(
         is_duplicate=False,
         duplicate_cluster_id=None,
+        matched_job_posting_id=None,
         survivor_job_posting_id=None,
         stub=True,
     )

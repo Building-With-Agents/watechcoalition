@@ -17,6 +17,13 @@ class FuzzyDedupResult(BaseModel):
         default=None,
         description="Cluster id (UUID string) shared by near-duplicate rows; null if not a duplicate.",
     )
+    matched_job_posting_id: str | None = Field(
+        default=None,
+        description=(
+            "Existing non-duplicate posting matched during candidate lookup; used by persistence "
+            "to update the prior survivor when clusters change."
+        ),
+    )
     survivor_job_posting_id: str | None = Field(
         default=None,
         description="job_posting_id of the survivor row when is_duplicate is True.",

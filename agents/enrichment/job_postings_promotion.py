@@ -21,6 +21,7 @@ import structlog
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from agents.enrichment.dedup.types import FuzzyDedupResult
 from agents.enrichment.classifiers.spam_preview import apply_spam_tiers
 
 log = structlog.get_logger()
@@ -74,6 +75,15 @@ _UPDATE_FLAGGED_SQL = text(
     """
 )
 
+_UPDATE_FUZZY_DEDUP_SQL = text(
+    """
+    UPDATE dbo.job_postings SET
+        is_duplicate = :is_duplicate,
+        duplicate_cluster_id = :duplicate_cluster_id
+    WHERE job_posting_id::text = :job_posting_id
+    """
+)
+
 
 def resolve_job_posting_row(session: Session, normalized_job_id: int) -> dict[str, Any] | None:
     """Return ``job_posting_id`` and ``company_id`` text, or None if not found."""
@@ -108,6 +118,82 @@ def _overall_confidence_for_storage(payload: dict[str, Any]) -> float | None:
         except (TypeError, ValueError):
             pass
     return None
+
+
+def apply_fuzzy_dedup_result(
+    session: Session,
+    job_posting_id: str,
+    result: FuzzyDedupResult,
+) -> bool:
+    """
+    Persist fuzzy-dedup state for the current row and any matched survivor row.
+
+    ``run_fuzzy_dedup`` stays read/decision-only; this helper is the single
+    ``dbo.job_postings`` write path for ``is_duplicate`` and
+    ``duplicate_cluster_id``.
+    """
+    if result.stub:
+        log.info("fuzzy_dedup_persistence_skipped_stub", job_posting_id=job_posting_id)
+        return False
+
+    cluster_id = result.duplicate_cluster_id
+    matched_id = result.matched_job_posting_id
+    survivor_id = result.survivor_job_posting_id
+
+    if cluster_id is None:
+        if result.is_duplicate:
+            raise ValueError("duplicate fuzzy dedup results must include duplicate_cluster_id")
+        if matched_id or survivor_id:
+            raise ValueError("non-duplicate fuzzy dedup results may not include cluster or survivor metadata")
+        session.execute(
+            _UPDATE_FUZZY_DEDUP_SQL,
+            {
+                "job_posting_id": job_posting_id,
+                "is_duplicate": False,
+                "duplicate_cluster_id": None,
+            },
+        )
+        log.info("fuzzy_dedup_persisted_unique", job_posting_id=job_posting_id)
+        return True
+
+    effective_survivor_id = survivor_id or (job_posting_id if not result.is_duplicate else None)
+    if effective_survivor_id is None:
+        raise ValueError("duplicate fuzzy dedup results must include survivor_job_posting_id")
+    if result.is_duplicate and effective_survivor_id == job_posting_id:
+        raise ValueError("duplicate fuzzy dedup results cannot mark the current row as survivor")
+    if not result.is_duplicate and effective_survivor_id != job_posting_id:
+        raise ValueError("non-duplicate clustered results must keep the current row as survivor")
+
+    session.execute(
+        _UPDATE_FUZZY_DEDUP_SQL,
+        {
+            "job_posting_id": job_posting_id,
+            "is_duplicate": result.is_duplicate,
+            "duplicate_cluster_id": cluster_id,
+        },
+    )
+
+    peer_ids = {peer_id for peer_id in (matched_id, effective_survivor_id) if peer_id and peer_id != job_posting_id}
+    for peer_id in sorted(peer_ids):
+        session.execute(
+            _UPDATE_FUZZY_DEDUP_SQL,
+            {
+                "job_posting_id": peer_id,
+                "is_duplicate": peer_id != effective_survivor_id,
+                "duplicate_cluster_id": cluster_id,
+            },
+        )
+
+    log.info(
+        "fuzzy_dedup_persisted_cluster",
+        job_posting_id=job_posting_id,
+        duplicate_cluster_id=cluster_id,
+        is_duplicate=result.is_duplicate,
+        survivor_job_posting_id=effective_survivor_id,
+        matched_job_posting_id=matched_id,
+        updated_peer_count=len(peer_ids),
+    )
+    return True
 
 
 def apply_enrichment_to_job_postings(
