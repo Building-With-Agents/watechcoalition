@@ -17,6 +17,11 @@ When the inbound ``SkillsExtracted``-shaped payload includes ``normalized_job_id
 ``score_spam_preview`` (Decision #8). Otherwise ``spam_score`` / ``is_spam``
 come from the walking-skeleton fixture keyed by ``posting_id``.
 
+When the normalized job resolves to a ``job_postings`` row, the emitted
+``RecordEnriched`` payload also includes ``temporal_period`` and
+``borderplex_subregion`` derived from normalized-job context so the live
+event output matches the promotion/write path.
+
 With ``normalized_job_id`` and a resolvable ``job_postings`` row (join on
 ``source``/``external_id``), Phase 1 enrichment columns are persisted via
 :mod:`agents.enrichment.job_postings_promotion`. **Rejected** spam tier skips
@@ -60,7 +65,11 @@ from agents.enrichment.classifiers.spam_preview import (
     SpamPreviewResult,
     score_spam_preview,
 )
-from agents.enrichment.job_postings_promotion import apply_enrichment_to_job_postings
+from agents.enrichment.job_postings_promotion import (
+    apply_enrichment_to_job_postings,
+    derive_enrichment_output_fields,
+    resolve_job_posting_row,
+)
 from agents.scripts.jsearch_enrichment_preview_lib import build_extraction_dict
 
 log = structlog.get_logger()
@@ -294,6 +303,8 @@ class EnrichmentAgent(BaseAgent):
         """
         Emit RecordEnriched with deterministic role_classification and seniority.
         Other enrichment fields come from the walking-skeleton fixture when present.
+        When normalized-job context is available, include ``temporal_period`` and
+        ``borderplex_subregion`` in the emitted payload.
 
         Spam: if ``normalized_job_id`` is set and DB is configured, scores from
         latest ``extracted_intelligence`` via ``score_spam_preview``; else fixture
@@ -325,11 +336,13 @@ class EnrichmentAgent(BaseAgent):
         desc_str = description if isinstance(description, str) else None
 
         ei_row: dict[str, Any] | None = None
+        resolved_job_posting: dict[str, Any] | None = None
         ei_fetch_error = False
         if nj_id is not None and _db_url_configured():
             try:
                 with session_scope() as session:
                     ei_row = session.execute(_LATEST_EI_BY_NJ_ID_SQL, {"nj_id": nj_id}).mappings().first()
+                    resolved_job_posting = resolve_job_posting_row(session, nj_id)
             except Exception as exc:
                 log.warning("enrichment_ei_load_failed", normalized_job_id=nj_id, error=str(exc))
                 ei_fetch_error = True
@@ -411,6 +424,8 @@ class EnrichmentAgent(BaseAgent):
             payload_spam_score = fx.get("spam_score")
             payload_is_spam = fx.get("is_spam")
 
+        derived_output_fields = derive_enrichment_output_fields(resolved_job_posting)
+
         base_payload: dict[str, Any] = {
             "event_type": "RecordEnriched",
             "posting_id": posting_id,
@@ -426,6 +441,7 @@ class EnrichmentAgent(BaseAgent):
             "is_spam": payload_is_spam,
             "enrichment_status": fx.get("enrichment_status", "success"),
             "skills": event.payload.get("skills", []),
+            **derived_output_fields,
         }
         if nj_id is not None:
             base_payload["normalized_job_id"] = nj_id

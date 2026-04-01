@@ -9,7 +9,8 @@ From repo root with venv activated:
 ```bash
 pip install -r agents/requirements.txt
 python agents/pipeline_runner.py
-streamlit run agents/dashboard/streamlit_app.py
+streamlit run agents/dashboard/app.py
+# (alias) streamlit run agents/dashboard/streamlit_app.py
 ```
 
 ## Azure PostgreSQL (shared DB)
