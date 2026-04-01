@@ -89,6 +89,27 @@ _UPDATE_FUZZY_DEDUP_SQL = text(
     """
 )
 
+_LOAD_FUZZY_DEDUP_STATE_SQL = text(
+    """
+    SELECT
+        jp.is_duplicate AS is_duplicate,
+        jp.duplicate_cluster_id AS duplicate_cluster_id
+    FROM dbo.job_postings jp
+    WHERE jp.job_posting_id::text = :job_posting_id
+    LIMIT 1
+    """
+)
+
+_LIST_CLUSTER_MEMBER_IDS_SQL = text(
+    """
+    SELECT jp.job_posting_id::text AS job_posting_id
+    FROM dbo.job_postings jp
+    WHERE jp.duplicate_cluster_id = :duplicate_cluster_id
+        AND jp.job_posting_id::text <> :job_posting_id
+    ORDER BY jp.job_posting_id::text
+    """
+)
+
 
 def resolve_job_posting_row(session: Session, normalized_job_id: int) -> dict[str, Any] | None:
     """Return ``job_posting_id`` and ``company_id`` text, or None if not found."""
@@ -125,6 +146,25 @@ def _overall_confidence_for_storage(payload: dict[str, Any]) -> float | None:
     return None
 
 
+def _load_existing_fuzzy_dedup_state(session: Session, job_posting_id: str) -> dict[str, Any]:
+    row = session.execute(
+        _LOAD_FUZZY_DEDUP_STATE_SQL,
+        {"job_posting_id": job_posting_id},
+    ).mappings().first()
+    return dict(row) if row else {}
+
+
+def _cluster_member_ids(session: Session, cluster_id: str, *, exclude_job_posting_id: str) -> list[str]:
+    rows = session.execute(
+        _LIST_CLUSTER_MEMBER_IDS_SQL,
+        {
+            "duplicate_cluster_id": cluster_id,
+            "job_posting_id": exclude_job_posting_id,
+        },
+    ).mappings().all()
+    return [str(row["job_posting_id"]) for row in rows]
+
+
 def apply_fuzzy_dedup_result(
     session: Session,
     job_posting_id: str,
@@ -146,6 +186,10 @@ def apply_fuzzy_dedup_result(
     survivor_id = result.survivor_job_posting_id
 
     if cluster_id is None:
+        existing = _load_existing_fuzzy_dedup_state(session, job_posting_id)
+        prior_cluster_id = existing.get("duplicate_cluster_id")
+        prior_cluster = str(prior_cluster_id).strip() if prior_cluster_id else None
+        prior_was_survivor = existing.get("is_duplicate") is False and prior_cluster is not None
         if result.is_duplicate:
             raise ValueError("duplicate fuzzy dedup results must include duplicate_cluster_id")
         if matched_id or survivor_id:
@@ -158,7 +202,29 @@ def apply_fuzzy_dedup_result(
                 "duplicate_cluster_id": None,
             },
         )
-        log.info("fuzzy_dedup_persisted_unique", job_posting_id=job_posting_id)
+        cleared_peer_count = 0
+        if prior_was_survivor:
+            peer_ids = _cluster_member_ids(
+                session,
+                prior_cluster,
+                exclude_job_posting_id=job_posting_id,
+            )
+            for peer_id in peer_ids:
+                session.execute(
+                    _UPDATE_FUZZY_DEDUP_SQL,
+                    {
+                        "job_posting_id": peer_id,
+                        "is_duplicate": False,
+                        "duplicate_cluster_id": None,
+                    },
+                )
+            cleared_peer_count = len(peer_ids)
+        log.info(
+            "fuzzy_dedup_persisted_unique",
+            job_posting_id=job_posting_id,
+            cleared_prior_cluster=prior_was_survivor,
+            cleared_peer_count=cleared_peer_count,
+        )
         return True
 
     effective_survivor_id = survivor_id or (job_posting_id if not result.is_duplicate else None)

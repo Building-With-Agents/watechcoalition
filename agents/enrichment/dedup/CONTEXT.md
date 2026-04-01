@@ -30,6 +30,7 @@ Near-duplicate job postings via embedding cosine similarity, same-`company_id` c
 
 - Same dedup text → same hash → **reuse** stored embedding (no second Azure call).
 - Edited description/requirements → new hash → re-embed → cluster membership may change.
+- If a prior **survivor** reruns as unique, persistence clears that row's prior cluster membership to avoid leaving orphaned duplicate-only clusters.
 
 ## Integration (wired)
 

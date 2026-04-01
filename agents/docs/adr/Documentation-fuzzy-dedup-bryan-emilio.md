@@ -25,7 +25,7 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 | **Scope**              | Same company + half-open window `[anchor − 30d, anchor)`                                              | Avoids cross-employer merges; time box limits “repost” style dupes.                       |
 | **Candidates**         | Survivors only (`is_duplicate IS NOT TRUE`, cached embedding)                                         | Star-shaped clustering; no transitive closure through dup rows.                           |
 | **Survivor**           | Field **completeness** score, then **newer `publish_date`**                                           | Keeps richer / fresher row as canonical.                                                  |
-| **Failure / no match** | Treat as **unique**; persist `is_duplicate = false`, `duplicate_cluster_id = null` for **that** row   | Safe default when embed fails or similarity is low; does **not** bulk-reset all postings. |
+| **Failure / no match** | Treat as **unique**; persist `is_duplicate = false`, `duplicate_cluster_id = null` for **that** row   | Safe default when embed fails or similarity is low; if that row was the prior survivor, clear only that old cluster to avoid orphaned duplicate-only state. |
 | **Promotion**          | Dedup runs **after** successful enrichment `UPDATE`; errors **logged**, promotion **not** rolled back | Availability over strict dedup consistency.                                               |
 
 
@@ -74,4 +74,3 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 
 - `docs/planning/ARCHITECTURE_DEEP.md` — enrichment / dedup
 - `agents/scripts/dedup_metrics_report.py` — optional HTML metrics from DB
-

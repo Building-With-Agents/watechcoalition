@@ -18,8 +18,29 @@ MATCHED_ID = "00000000-0000-0000-0000-000000000002"
 CLUSTER_ID = "00000000-0000-0000-0000-0000000000aa"
 
 
+def _mapping_first(row: dict | None) -> MagicMock:
+    m = MagicMock()
+    m.mappings.return_value.first.return_value = row
+    return m
+
+
+def _mapping_all(rows: list[dict]) -> MagicMock:
+    m = MagicMock()
+    m.mappings.return_value.all.return_value = rows
+    return m
+
+
 def _execute_params(session: MagicMock) -> list[dict]:
     return [call.args[1] for call in session.execute.call_args_list]
+
+
+def _update_execute_params(session: MagicMock) -> list[dict]:
+    out: list[dict] = []
+    for call in session.execute.call_args_list:
+        params = call.args[1]
+        if isinstance(params, dict) and "is_duplicate" in params:
+            out.append(params)
+    return out
 
 
 def _execute_sql(session: MagicMock) -> list[str]:
@@ -41,6 +62,10 @@ def _promotion_payload(**overrides: object) -> dict[str, object]:
 
 def test_apply_fuzzy_dedup_result_clears_current_row_for_unique_posting() -> None:
     session = MagicMock()
+    session.execute.side_effect = [
+        _mapping_first({"is_duplicate": False, "duplicate_cluster_id": None}),
+        MagicMock(),
+    ]
     result = FuzzyDedupResult(
         is_duplicate=False,
         duplicate_cluster_id=None,
@@ -52,8 +77,8 @@ def test_apply_fuzzy_dedup_result_clears_current_row_for_unique_posting() -> Non
     applied = apply_fuzzy_dedup_result(session, CURRENT_ID, result)
 
     assert applied is True
-    assert session.execute.call_count == 1
-    assert _execute_params(session) == [
+    assert session.execute.call_count == 2
+    assert _update_execute_params(session) == [
         {
             "job_posting_id": CURRENT_ID,
             "is_duplicate": False,
@@ -61,6 +86,46 @@ def test_apply_fuzzy_dedup_result_clears_current_row_for_unique_posting() -> Non
         }
     ]
     assert "duplicate_cluster_id" in _execute_sql(session)[0]
+
+
+def test_apply_fuzzy_dedup_result_clears_old_cluster_when_prior_survivor_becomes_unique() -> None:
+    session = MagicMock()
+    peer_id = "00000000-0000-0000-0000-000000000003"
+    session.execute.side_effect = [
+        _mapping_first({"is_duplicate": False, "duplicate_cluster_id": CLUSTER_ID}),
+        MagicMock(),
+        _mapping_all([{"job_posting_id": MATCHED_ID}, {"job_posting_id": peer_id}]),
+        MagicMock(),
+        MagicMock(),
+    ]
+    result = FuzzyDedupResult(
+        is_duplicate=False,
+        duplicate_cluster_id=None,
+        matched_job_posting_id=None,
+        survivor_job_posting_id=None,
+        stub=False,
+    )
+
+    applied = apply_fuzzy_dedup_result(session, CURRENT_ID, result)
+
+    assert applied is True
+    assert _update_execute_params(session) == [
+        {
+            "job_posting_id": CURRENT_ID,
+            "is_duplicate": False,
+            "duplicate_cluster_id": None,
+        },
+        {
+            "job_posting_id": MATCHED_ID,
+            "is_duplicate": False,
+            "duplicate_cluster_id": None,
+        },
+        {
+            "job_posting_id": peer_id,
+            "is_duplicate": False,
+            "duplicate_cluster_id": None,
+        },
+    ]
 
 
 def test_apply_fuzzy_dedup_result_marks_current_row_duplicate_and_keeps_survivor() -> None:
@@ -76,7 +141,7 @@ def test_apply_fuzzy_dedup_result_marks_current_row_duplicate_and_keeps_survivor
     applied = apply_fuzzy_dedup_result(session, CURRENT_ID, result)
 
     assert applied is True
-    assert _execute_params(session) == [
+    assert _update_execute_params(session) == [
         {
             "job_posting_id": CURRENT_ID,
             "is_duplicate": True,
@@ -103,7 +168,7 @@ def test_apply_fuzzy_dedup_result_flips_prior_survivor_when_current_row_wins() -
     applied = apply_fuzzy_dedup_result(session, CURRENT_ID, result)
 
     assert applied is True
-    assert _execute_params(session) == [
+    assert _update_execute_params(session) == [
         {
             "job_posting_id": CURRENT_ID,
             "is_duplicate": False,
