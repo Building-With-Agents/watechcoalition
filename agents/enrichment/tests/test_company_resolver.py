@@ -119,9 +119,7 @@ def test_create_placeholder_company_returns_id_and_adds_flushes() -> None:
 
 @patch("agents.enrichment.resolvers.company_resolver.find_best_fuzzy_match")
 @patch("agents.enrichment.resolvers.company_resolver.lookup_company_exact")
-def test_resolve_company_exact_match_returns_high_confidence(
-    mock_lookup: MagicMock, mock_fuzzy: MagicMock
-) -> None:
+def test_resolve_company_exact_match_returns_high_confidence(mock_lookup: MagicMock, mock_fuzzy: MagicMock) -> None:
     mock_lookup.return_value = _UUID_EXACT
     session = MagicMock()
 
@@ -168,9 +166,7 @@ def test_resolve_company_unknown_creates_placeholder(
     cid, conf = resolve_company("Totally New Startup LLC", session)
 
     assert (cid, conf) == (_UUID_PLACEHOLDER, 0.40)
-    mock_placeholder.assert_called_once_with(
-        "Totally New Startup LLC", "totally new startup", session
-    )
+    mock_placeholder.assert_called_once_with("Totally New Startup LLC", "totally new startup", session)
 
 
 @patch("agents.enrichment.resolvers.company_resolver.create_placeholder_company")

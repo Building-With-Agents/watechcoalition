@@ -17,9 +17,7 @@ class InProcessEventBus(EventBusBase):
     """Synchronous in-memory pub/sub bus with minimal instrumentation counters."""
 
     def __init__(self) -> None:
-        self._subscribers: dict[str, list[tuple[Subscription, EventHandler]]] = (
-            defaultdict(list)
-        )
+        self._subscribers: dict[str, list[tuple[Subscription, EventHandler]]] = defaultdict(list)
         self._published_events = 0
         self._delivered_events = 0
         self._handler_failures = 0
@@ -57,7 +55,5 @@ class InProcessEventBus(EventBusBase):
         """Register a handler under one validated event type."""
         subscription = self.validate_subscription(event_type, subscriber_id)
         validated_handler = self.validate_subscription_handler(handler)
-        self._subscribers[subscription.event_type].append(
-            (subscription, validated_handler)
-        )
+        self._subscribers[subscription.event_type].append((subscription, validated_handler))
         return subscription

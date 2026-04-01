@@ -8,11 +8,21 @@ from pathlib import Path
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
+from agents.common.types import ContextSignal
+from agents.common.types.extraction_types import SpanRecord
 from agents.eval.extraction_eval_core import (
+    EVAL_DIMENSIONS,
+    canonical_context_label,
+    canonicalize_context_signal_type_for_eval,
     compute_metrics,
     extract_from_text_testing,
+    f1_from_precision_recall,
+    ground_truth_context_labels,
+    ground_truth_responsibility_labels,
+    ground_truth_task_labels,
     normalize_tool_label_for_eval,
     now_mountain_iso,
+    prediction_context_labels_from_signals,
     run_eval_dataset,
 )
 from agents.eval.snapshot_schema import (
@@ -28,21 +38,103 @@ from agents.eval.snapshot_schema import (
 def test_compute_metrics_basic() -> None:
     pred = {"python", "java"}
     true = {"python", "sql"}
-    p, r = compute_metrics(pred, true)
+    p, r, f1 = compute_metrics(pred, true)
     assert p == 0.5
     assert r == 0.5
+    assert f1 == 0.5
 
 
 def test_compute_metrics_empty_pred() -> None:
-    p, r = compute_metrics(set(), {"a"})
+    p, r, f1 = compute_metrics(set(), {"a"})
     assert p == 0.0
     assert r == 0.0
+    assert f1 == 0.0
+
+
+def test_compute_metrics_perfect_overlap_f1_one() -> None:
+    pred = {"a", "b"}
+    true = {"a", "b"}
+    p, r, f1 = compute_metrics(pred, true)
+    assert p == 1.0
+    assert r == 1.0
+    assert f1 == 1.0
+
+
+def test_f1_from_precision_recall_edge_cases() -> None:
+    assert f1_from_precision_recall(0.0, 0.0) == 0.0
+    assert f1_from_precision_recall(0.5, 0.5) == 0.5
+
+
+def test_ground_truth_task_labels_from_task_description() -> None:
+    job = {
+        "tasks": [
+            {"task_description": "Ship the roadmap"},
+            {"task_description": ""},
+            {"not_task": "x"},
+        ]
+    }
+    assert ground_truth_task_labels(job) == {"ship the roadmap"}
+
+
+def test_ground_truth_responsibility_labels_from_labeled_responsibilities() -> None:
+    job = {
+        "labeled_responsibilities": [
+            {"responsibility_description": "Own the data platform"},
+            {"responsibility_description": None},
+        ]
+    }
+    assert ground_truth_responsibility_labels(job) == {"own the data platform"}
+
+
+def test_eval_dimensions_taxonomy_coverage_only_on_skills() -> None:
+    by_key = {d.key: d.taxonomy_coverage for d in EVAL_DIMENSIONS}
+    assert by_key["skills"] is True
+    assert by_key["tools"] is False
+    assert by_key["tasks"] is False
+    assert by_key["responsibilities"] is False
+    assert by_key["context"] is False
+
+
+def test_canonicalize_context_signal_type_ai_usage_alias() -> None:
+    assert canonicalize_context_signal_type_for_eval("ai_usage") == "ai_adoption_signal"
+    assert canonicalize_context_signal_type_for_eval("growth_stage") == "growth_stage"
+
+
+def test_canonical_context_label_uses_alias_and_value() -> None:
+    assert canonical_context_label("ai_usage", "Foo  bar") == "ai_adoption_signal|foo bar"
+
+
+def test_prediction_context_labels_from_signals() -> None:
+    span = SpanRecord(text="remote", field_source="description", start_char=0, end_char=6)
+    sig = ContextSignal(
+        signal_type="remote_policy",
+        value="Remote",
+        confidence=0.9,
+        source_span=span,
+    )
+    assert prediction_context_labels_from_signals([sig]) == {"remote_policy|remote"}
+
+
+def test_ground_truth_context_labels_canonicalizes_signal_type() -> None:
+    job = {
+        "context": [
+            {"signal_type": "ai_usage", "value": "x"},
+            {"signal_type": "growth_stage", "value": "startup"},
+        ]
+    }
+    assert ground_truth_context_labels(job) == {
+        "ai_adoption_signal|x",
+        "growth_stage|startup",
+    }
 
 
 def test_stub_extractor_keyword() -> None:
     out = extract_from_text_testing("We need Python and AWS docker experience")
     assert "Python" in out["skills"]
     assert "AWS" in out["tools"]
+    assert out["tasks"] == []
+    assert out["responsibilities"] == []
+    assert out["context"] == []
 
 
 def test_normalize_tool_label_for_eval_collapses_known_variants() -> None:
@@ -74,6 +166,58 @@ def test_run_eval_dataset_stub_tiny() -> None:
     assert result.snapshot.extractor_mode == "stub"
     assert result.snapshot.aggregates.llm_applicable is False
     assert result.snapshot.aggregates.matched_skills >= 0
+
+
+def test_run_eval_dataset_stub_five_dimensions_gt_and_aggregates() -> None:
+    """Stub has no preds for tasks/responsibilities/context; GT still drives counts and P/R/F1."""
+    data = [
+        {
+            "ground_truth_id": "multi",
+            "title": "Engineer",
+            "description": "Python aws",
+            "requirements": "",
+            "responsibilities": "",
+            "skills": [{"skill_name": "Python"}],
+            "tools": [{"tool_name": "AWS"}],
+            "tasks": [{"task_description": "Build APIs"}],
+            "labeled_responsibilities": [{"responsibility_description": "Own reliability"}],
+            "context": [{"signal_type": "ai_usage", "value": "Uses LLMs"}],
+        }
+    ]
+    result = run_eval_dataset(
+        data,
+        mode="stub",
+        ground_truth_path="/tmp/gt.json",
+        run_label="multi-dim",
+        write_artifacts=False,
+    )
+    ag = result.snapshot.aggregates
+    pj = result.snapshot.per_job[0]
+
+    assert ag.total_gt_tasks == 1
+    assert ag.total_pred_tasks == 0
+    assert ag.matched_tasks == 0
+    assert ag.precision_tasks == 0.0
+    assert ag.recall_tasks == 0.0
+    assert ag.f1_tasks == 0.0
+
+    assert ag.total_gt_responsibilities == 1
+    assert ag.total_pred_responsibilities == 0
+    assert ag.f1_responsibilities == 0.0
+
+    assert ag.total_gt_context == 1
+    assert ag.total_pred_context == 0
+    assert ag.f1_context == 0.0
+
+    assert pj.gt_tasks == ["build apis"]
+    assert pj.pred_tasks == []
+    assert pj.gt_responsibilities == ["own reliability"]
+    assert pj.pred_responsibilities == []
+    assert pj.gt_context == ["ai_adoption_signal|uses llms"]
+    assert pj.pred_context == []
+
+    assert ag.skills_esco_coverage is None
+    assert ag.skills_pred_record_count is None
 
 
 def test_snapshot_round_trip(tmp_path: Path) -> None:

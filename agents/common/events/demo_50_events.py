@@ -33,9 +33,7 @@ def main() -> None:
     # Part 1: 50 "success" events (IngestBatch only — happy path)
     # -------------------------------------------------------------------------
     print("\n--- Part 1: 50 SUCCESS events (IngestBatch only) ---\n")
-    success_events = list(
-        generate_synthetic_ingest_batches(count=50, seed=100, typed=False)
-    )
+    success_events = list(generate_synthetic_ingest_batches(count=50, seed=100, typed=False))
     for e in success_events:
         assert_valid_ingest_batch_envelope(e)
 
@@ -54,12 +52,8 @@ def main() -> None:
     print("\n--- Part 2: 50 events WITH BOTH ERROR TYPES ---\n")
     # Mix: 20 IngestBatch, 15 SourceFailure, 15 NormalizationFailed = 50
     ingest = list(generate_synthetic_ingest_batches(count=20, seed=200, typed=False))
-    source_fail = list(
-        generate_synthetic_source_failures(count=15, seed=200, typed=False)
-    )
-    norm_fail = list(
-        generate_synthetic_normalization_failed(count=15, seed=200, typed=False)
-    )
+    source_fail = list(generate_synthetic_source_failures(count=15, seed=200, typed=False))
+    norm_fail = list(generate_synthetic_normalization_failed(count=15, seed=200, typed=False))
     mixed_events: list[EventEnvelope] = [*ingest, *source_fail, *norm_fail]
 
     print(f"  Total: {len(mixed_events)} events")

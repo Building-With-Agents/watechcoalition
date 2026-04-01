@@ -134,9 +134,7 @@ def _parse_ld_json_jobposting(html: str) -> dict[str, Any] | None:
             if not isinstance(item, dict):
                 continue
             types = item.get("@type")
-            ok = types == "JobPosting" or (
-                isinstance(types, list) and "JobPosting" in types
-            )
+            ok = types == "JobPosting" or (isinstance(types, list) and "JobPosting" in types)
             if ok:
                 return item
     return None
@@ -193,9 +191,7 @@ def _normalize_employment_type(raw: str | None) -> str | None:
 def _parse_detail_fields_from_ld(ld: dict[str, Any]) -> dict[str, Any]:
     """Map schema.org JobPosting JSON-LD to our detail field dict."""
     desc = ld.get("description")
-    description = (
-        _strip_html_tags(desc) if isinstance(desc, str) else ""
-    )
+    description = _strip_html_tags(desc) if isinstance(desc, str) else ""
 
     org = ld.get("hiringOrganization")
     company = ""
@@ -261,11 +257,7 @@ def _parse_detail_fields_fallback(html: str) -> dict[str, Any]:
 def _parse_detail_html(html: str) -> dict[str, Any]:
     """Extract detail fields from a job posting HTML page."""
     ld = _parse_ld_json_jobposting(html)
-    base = (
-        _parse_detail_fields_from_ld(ld)
-        if ld
-        else _parse_detail_fields_fallback(html)
-    )
+    base = _parse_detail_fields_from_ld(ld) if ld else _parse_detail_fields_fallback(html)
 
     if not base.get("description"):
         fb = _parse_detail_fields_fallback(html)
@@ -341,9 +333,7 @@ class Crawl4AIIndeedAdapter(SourceAdapter):
             seen.add(jk)
             job_url = f"{INDEED_BASE}/viewjob?jk={jk}"
             title = _title_near_jk(html, jk) or f"Job {jk[:8]}"
-            jobs.append(
-                {"external_id": jk, "title": title, "job_url": job_url}
-            )
+            jobs.append({"external_id": jk, "title": title, "job_url": job_url})
         return jobs
 
     def _to_raw_job_record(
@@ -385,9 +375,7 @@ class Crawl4AIIndeedAdapter(SourceAdapter):
                 company = _normalize_str(str(detail["company"])) or company
 
         region_id = _normalize_str(region.region_id)
-        raw_hash = hashlib.sha256(
-            f"crawl4ai_indeed|{external_id}|{title}|{job_url}".encode()
-        ).hexdigest()
+        raw_hash = hashlib.sha256(f"crawl4ai_indeed|{external_id}|{title}|{job_url}".encode()).hexdigest()
         payload: dict[str, Any] = {
             "external_id": external_id,
             "title": title,
@@ -439,9 +427,7 @@ class Crawl4AIIndeedAdapter(SourceAdapter):
         async with AsyncWebCrawler(config=BrowserConfig(headless=True)) as crawler:
             result = await crawler.arun(url, config=cfg)
 
-            html = getattr(result, "html", None) or getattr(
-                result, "cleaned_html", None
-            )
+            html = getattr(result, "html", None) or getattr(result, "cleaned_html", None)
             html_str = str(html) if html is not None else ""
 
             if _is_crawl_blocked(html_str, bool(getattr(result, "success", False))):
@@ -488,13 +474,9 @@ class Crawl4AIIndeedAdapter(SourceAdapter):
                             error=str(e),
                         )
                         return None
-                    dhtml = getattr(dr, "html", None) or getattr(
-                        dr, "cleaned_html", None
-                    )
+                    dhtml = getattr(dr, "html", None) or getattr(dr, "cleaned_html", None)
                     dhtml_str = str(dhtml) if dhtml is not None else ""
-                    if _is_crawl_blocked(
-                        dhtml_str, bool(getattr(dr, "success", False))
-                    ):
+                    if _is_crawl_blocked(dhtml_str, bool(getattr(dr, "success", False))):
                         log.warning(
                             "indeed_detail_blocked_or_empty",
                             job_url=job_url,
@@ -504,37 +486,25 @@ class Crawl4AIIndeedAdapter(SourceAdapter):
                         return None
                     return _parse_detail_html(dhtml_str)
 
-            detail_results = await asyncio.gather(
-                *[_fetch_one_detail(str(c["job_url"])) for c in cards]
-            )
+            detail_results = await asyncio.gather(*[_fetch_one_detail(str(c["job_url"])) for c in cards])
 
             records: list[RawJobRecord] = []
             for i, card in enumerate(cards):
-                detail = (
-                    detail_results[i] if i < len(detail_results) else None
-                )
-                records.append(
-                    self._to_raw_job_record(card, region, detail, i)
-                )
+                detail = detail_results[i] if i < len(detail_results) else None
+                records.append(self._to_raw_job_record(card, region, detail, i))
             return records
 
     async def health_check(self) -> dict:
         """Probe Indeed jobs listing; blocked HTML is reported as error, not raised."""
         from crawl4ai import AsyncWebCrawler, BrowserConfig
 
-        probe_url = (
-            self._target_urls[0]
-            if self._target_urls
-            else f"{INDEED_JOBS_URL}?q=software%20engineer&l=Remote"
-        )
+        probe_url = self._target_urls[0] if self._target_urls else f"{INDEED_JOBS_URL}?q=software%20engineer&l=Remote"
         cfg = _indeed_crawl_config()
         try:
             async with AsyncWebCrawler(config=BrowserConfig(headless=True)) as crawler:
                 result = await crawler.arun(probe_url, config=cfg)
             success = bool(getattr(result, "success", False))
-            html = getattr(result, "html", None) or getattr(
-                result, "cleaned_html", None
-            )
+            html = getattr(result, "html", None) or getattr(result, "cleaned_html", None)
             html_str = str(html) if html else ""
             blocked = _is_crawl_blocked(html_str, success)
             ok = success and not blocked and len(html_str.strip()) >= _MIN_HTML_LEN

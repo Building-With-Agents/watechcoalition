@@ -49,6 +49,7 @@ def _skill_confidence_threshold() -> float:
 def _invoke_client(prompt: str) -> tuple[str, dict[str, Any]]:
     """Call the LLM client. Isolated for testing."""
     from agents.common.llm_client import invoke_skills_llm
+
     return invoke_skills_llm(prompt)
 
 
@@ -78,6 +79,7 @@ def _skill_dict_to_record(raw: dict[str, Any]) -> SkillRecord | None:
     so the skill is kept instead of dropped (avoids skills_extraction_skip_invalid_skill).
     """
     from pydantic import ValidationError
+
     try:
         span = raw.get("source_span")
         if not isinstance(span, dict):

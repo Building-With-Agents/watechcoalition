@@ -16,16 +16,18 @@ from agents.common.events.typed_events import IngestBatchEvent
 from agents.ingestion.events import ingest_batch_payload
 
 # Keys required in an IngestBatch payload (must match ingest_batch_payload()).
-INGEST_BATCH_PAYLOAD_KEYS = frozenset({
-    "event_type",
-    "batch_id",
-    "source",
-    "region_id",
-    "total_fetched",
-    "staged_count",
-    "dedup_count",
-    "error_count",
-})
+INGEST_BATCH_PAYLOAD_KEYS = frozenset(
+    {
+        "event_type",
+        "batch_id",
+        "source",
+        "region_id",
+        "total_fetched",
+        "staged_count",
+        "dedup_count",
+        "error_count",
+    }
+)
 
 # Types expected for each payload key (str or int).
 INGEST_BATCH_PAYLOAD_STR_KEYS = frozenset({"event_type", "batch_id", "source", "region_id"})
@@ -116,18 +118,12 @@ def assert_valid_ingest_batch_envelope(event: EventEnvelope) -> None:
         raise ValueError(f"Payload missing required keys: {sorted(missing)}")
 
     if payload.get("event_type") != "IngestBatch":
-        raise ValueError(
-            f"Payload event_type must be 'IngestBatch', got {payload.get('event_type')!r}"
-        )
+        raise ValueError(f"Payload event_type must be 'IngestBatch', got {payload.get('event_type')!r}")
 
     for key in INGEST_BATCH_PAYLOAD_STR_KEYS:
         if not isinstance(payload[key], str):
-            raise ValueError(
-                f"Payload key {key!r} must be str, got {type(payload[key]).__name__}"
-            )
+            raise ValueError(f"Payload key {key!r} must be str, got {type(payload[key]).__name__}")
 
     for key in INGEST_BATCH_PAYLOAD_INT_KEYS:
         if not isinstance(payload[key], int):
-            raise ValueError(
-                f"Payload key {key!r} must be int, got {type(payload[key]).__name__}"
-            )
+            raise ValueError(f"Payload key {key!r} must be int, got {type(payload[key]).__name__}")

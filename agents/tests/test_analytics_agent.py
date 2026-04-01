@@ -30,9 +30,7 @@ class TestAnalyticsAgent:
             result = agent.health_check()
         assert result["status"] == "down"
 
-    def test_process_emits_analytics_refreshed(
-        self, enriched_event: EventEnvelope
-    ) -> None:
+    def test_process_emits_analytics_refreshed(self, enriched_event: EventEnvelope) -> None:
         """Output event_type is AnalyticsRefreshed."""
         agent = AnalyticsAgent()
         agent.health_check()  # pre-load fixture
@@ -40,9 +38,7 @@ class TestAnalyticsAgent:
         assert out.payload["event_type"] == "AnalyticsRefreshed"
         assert out.agent_id == "analytics-agent"
 
-    def test_process_includes_batch_data(
-        self, enriched_event: EventEnvelope
-    ) -> None:
+    def test_process_includes_batch_data(self, enriched_event: EventEnvelope) -> None:
         """Output payload contains the batch-level fixture keys."""
         agent = AnalyticsAgent()
         agent.health_check()  # pre-load fixture

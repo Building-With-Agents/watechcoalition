@@ -105,9 +105,7 @@ def test_resolve_location_match_on_city_state_composite() -> None:
     r1 = MagicMock()
     r1.scalar_one_or_none.return_value = None
     r2 = MagicMock()
-    r2.__iter__ = lambda self: iter(
-        (("aaaaaaaa-bbbb-cccc-dddd-eeeeeeee0001", "Seattle", "WA"),)
-    )
+    r2.__iter__ = lambda self: iter((("aaaaaaaa-bbbb-cccc-dddd-eeeeeeee0001", "Seattle", "WA"),))
     session.execute.side_effect = [r1, r2]
 
     loc_id, conf, raw_keep, borderplex = resolve_location("Seattle, WA", session)

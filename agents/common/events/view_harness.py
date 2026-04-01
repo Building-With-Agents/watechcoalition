@@ -28,20 +28,14 @@ def _envelope_to_dict(event: EventEnvelope) -> dict:
         "event_id": e.event_id,
         "correlation_id": e.correlation_id,
         "agent_id": e.agent_id,
-        "timestamp": (
-            e.timestamp.isoformat()
-            if isinstance(e.timestamp, datetime)
-            else str(e.timestamp)
-        ),
+        "timestamp": (e.timestamp.isoformat() if isinstance(e.timestamp, datetime) else str(e.timestamp)),
         "schema_version": e.schema_version,
         "payload": e.payload,
     }
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="View and validate harness-generated IngestBatch events."
-    )
+    parser = argparse.ArgumentParser(description="View and validate harness-generated IngestBatch events.")
     parser.add_argument(
         "--count",
         type=int,
@@ -104,16 +98,10 @@ def main() -> None:
         print(f"  payload:   {last.payload}\n")
 
     ids = [e.event_id for e in events]
-    print(
-        f"Uniqueness: {'OK (all event_ids unique)' if len(set(ids)) == len(ids) else 'FAIL'}"
-    )
+    print(f"Uniqueness: {'OK (all event_ids unique)' if len(set(ids)) == len(ids) else 'FAIL'}")
     run2 = next(generate_synthetic_ingest_batches(count=args.count, seed=args.seed))
-    det_ok = (
-        run2.event_id == events[0].event_id and run2.payload == events[0].payload
-    )
-    print(
-        f"Determinism: {'OK (same seed => same first event)' if det_ok else 'FAIL'}"
-    )
+    det_ok = run2.event_id == events[0].event_id and run2.payload == events[0].payload
+    print(f"Determinism: {'OK (same seed => same first event)' if det_ok else 'FAIL'}")
     print("=" * 60)
 
 

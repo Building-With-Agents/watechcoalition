@@ -171,8 +171,10 @@ def run(output_path: Path = _OUTPUT_PATH) -> None:
         for r in dimension_rows:
             lines.append(f"| {r.agent_name} | {r.call_count} | ${r.total_cost_usd:.6f} | ${r.avg_cost_per_call:.6f} |")
         most_expensive = dimension_rows[0]
-        lines.append(f"\n**Most expensive dimension:** `{most_expensive.agent_name}` "
-                     f"at ${most_expensive.avg_cost_per_call:.6f}/call\n")
+        lines.append(
+            f"\n**Most expensive dimension:** `{most_expensive.agent_name}` "
+            f"at ${most_expensive.avg_cost_per_call:.6f}/call\n"
+        )
 
     if embed_chat_row is not None:
         ec = int(embed_chat_row.embedding_calls or 0)

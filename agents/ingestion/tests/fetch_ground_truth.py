@@ -76,9 +76,7 @@ def _map_job_to_raw_record(job: dict) -> RawJobRecord | None:
     if not external_id or not title or not company:
         return None
 
-    date_posted = _parse_date_posted(
-        job.get("job_posted_at_timestamp") or job.get("job_posted_at_datetime_utc")
-    )
+    date_posted = _parse_date_posted(job.get("job_posted_at_timestamp") or job.get("job_posted_at_datetime_utc"))
     raw_payload_hash = _compute_raw_payload_hash(SOURCE, external_id, title, company, date_posted)
 
     # Salary

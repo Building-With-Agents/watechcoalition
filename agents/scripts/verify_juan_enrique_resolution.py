@@ -13,6 +13,7 @@ Local DB: start Docker, then from repo root::
 Set ``PYTHON_DATABASE_URL`` in ``.env`` to match ``POSTGRES_PORT`` in ``.env.docker``
 (default host port is 5432 per ``docker-compose.yml``, not 5433).
 """
+
 # ruff: noqa: T201
 from __future__ import annotations
 
@@ -40,9 +41,7 @@ def _print_preflight_hints(db_err: str | None) -> None:
     el = db_err.lower()
     url = os.getenv("PYTHON_DATABASE_URL") or ""
     if "password authentication failed" in el:
-        print(
-            "  Hint: the password in PYTHON_DATABASE_URL must match POSTGRES_PASSWORD in .env.docker."
-        )
+        print("  Hint: the password in PYTHON_DATABASE_URL must match POSTGRES_PASSWORD in .env.docker.")
     if "connection refused" in el and ":5433" in url:
         print(
             "  Hint: URL uses port 5433; docker-compose defaults to host port 5432 "
@@ -133,7 +132,7 @@ def main() -> int:
         if ok:
             norm_pass += 1
         status = "PASS" if ok else "WARN"
-        print(f"  {status}: \"{raw}\" -> \"{result}\"")
+        print(f'  {status}: "{raw}" -> "{result}"')
 
     if norm_pass >= 3:
         print(f"  PASS: normalization working ({norm_pass}/{len(test_names)})")
@@ -176,16 +175,12 @@ def main() -> int:
         try:
             with session_scope() as session:
                 # Find any existing company to test exact match
-                row = session.execute(
-                    sa_text("SELECT company_name FROM dbo.companies LIMIT 1")
-                ).fetchone()
+                row = session.execute(sa_text("SELECT company_name FROM dbo.companies LIMIT 1")).fetchone()
 
                 if row:
                     known_name = row[0]
                     company_id, confidence = resolve_company(known_name, session)
-                    print(
-                        f"  Known company \"{known_name}\" -> id={company_id}, confidence={confidence:.2f}"
-                    )
+                    print(f'  Known company "{known_name}" -> id={company_id}, confidence={confidence:.2f}')
                     if company_id and confidence > 0.5:
                         print("  PASS: known company resolved")
                         passed += 1
@@ -212,25 +207,19 @@ def main() -> int:
             fake_name = f"VerifyTest_{uuid.uuid4().hex[:8]} Corp"
             with session_scope() as session:
                 company_id, confidence = resolve_company(fake_name, session)
-                print(
-                    f"  Unknown company \"{fake_name}\" -> id={company_id}, confidence={confidence:.2f}"
-                )
+                print(f'  Unknown company "{fake_name}" -> id={company_id}, confidence={confidence:.2f}')
 
                 if company_id is None:
-                    print(
-                        "  FAIL: company_id is None -- placeholder was NOT created. This is the #1 non-negotiable."
-                    )
+                    print("  FAIL: company_id is None -- placeholder was NOT created. This is the #1 non-negotiable.")
                     failed += 1
                 else:
                     # Verify placeholder exists in companies table
                     check = session.execute(
-                        sa_text(
-                            "SELECT company_name FROM dbo.companies WHERE company_id = :cid"
-                        ),
+                        sa_text("SELECT company_name FROM dbo.companies WHERE company_id = :cid"),
                         {"cid": company_id},
                     ).fetchone()
                     if check:
-                        print(f"  Placeholder row: name=\"{check[0]}\"")
+                        print(f'  Placeholder row: name="{check[0]}"')
                         print("  PASS: placeholder created -- company_id is never null")
                         passed += 1
                     else:
@@ -256,12 +245,10 @@ def main() -> int:
         session = _offline_location_session_mock() if not db_ok else None
         if session is None:
             with session_scope() as real_session:
-                loc_id, confidence, raw_text, borderplex = resolve_location(
-                    "El Paso, TX", real_session
-                )
+                loc_id, confidence, raw_text, borderplex = resolve_location("El Paso, TX", real_session)
         else:
             loc_id, confidence, raw_text, borderplex = resolve_location("El Paso, TX", session)
-        print(f"  \"El Paso, TX\" -> loc_id={loc_id}, confidence={confidence:.2f}, borderplex={borderplex}")
+        print(f'  "El Paso, TX" -> loc_id={loc_id}, confidence={confidence:.2f}, borderplex={borderplex}')
         print("  PASS: resolve_location runs without error")
         passed += 1
     except Exception as e:
@@ -318,6 +305,11 @@ def main() -> int:
             enriched_count=8,
             spam_rejected_count=1,
             flagged_for_review_count=2,
+            temporal_period_distribution={"unknown": 8},
+            borderplex_subregion_distribution={"unknown": 8},
+            duplicate_count=0,
+            soc_classified_count=0,
+            naics_classified_count=0,
         )
         print(f"  agent_id: {event.agent_id}")
         print(f"  payload keys: {list(event.payload.keys())}")
@@ -347,9 +339,7 @@ def main() -> int:
                     print("  PASS: no null company_id in job_postings")
                     passed += 1
                 else:
-                    print(
-                        f"  FAIL: {null_count} rows have null company_id -- this is a non-negotiable"
-                    )
+                    print(f"  FAIL: {null_count} rows have null company_id -- this is a non-negotiable")
                     failed += 1
         except Exception as e:
             print(f"  FAIL: null company_id check error -- {e}")
@@ -358,9 +348,9 @@ def main() -> int:
     # ------------------------------------------------------------------
     # Summary
     # ------------------------------------------------------------------
-    print(f"\n{'='*40}")
+    print(f"\n{'=' * 40}")
     print(f"Juan + Enrique verification: {passed} passed, {failed} failed")
-    print(f"{'='*40}\n")
+    print(f"{'=' * 40}\n")
     return 1 if failed > 0 else 0
 
 

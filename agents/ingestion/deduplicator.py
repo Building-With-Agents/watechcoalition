@@ -32,6 +32,7 @@ _SOURCE_PRIORITY = {"jsearch": 0, "crawl4ai": 1, "web_scrape": 2}
 @dataclass
 class DedupResult:
     """Result of deduplication."""
+
     new_records: list[dict] = field(default_factory=list)
     duplicates_skipped: int = 0
     source_priority_resolved: int = 0
@@ -49,12 +50,14 @@ def compute_fingerprint(record: dict) -> str:
     Fields used: external_id, title, company, date_posted.
     Excludes ``source`` so the same job from different sources matches.
     """
-    return _hash_parts([
-        str(record.get("external_id", "")),
-        str(record.get("title", "")),
-        str(record.get("company", "")),
-        str(record.get("date_posted", "")),
-    ])
+    return _hash_parts(
+        [
+            str(record.get("external_id", "")),
+            str(record.get("title", "")),
+            str(record.get("company", "")),
+            str(record.get("date_posted", "")),
+        ]
+    )
 
 
 def compute_storage_hash(record: dict) -> str:
@@ -63,13 +66,15 @@ def compute_storage_hash(record: dict) -> str:
     Includes ``source`` so records from different sources are distinct in the DB.
     Used for cross-batch dedup against existing rows.
     """
-    return _hash_parts([
-        str(record.get("source", "")),
-        str(record.get("external_id", "")),
-        str(record.get("title", "")),
-        str(record.get("company", "")),
-        str(record.get("date_posted", "")),
-    ])
+    return _hash_parts(
+        [
+            str(record.get("source", "")),
+            str(record.get("external_id", "")),
+            str(record.get("title", "")),
+            str(record.get("company", "")),
+            str(record.get("date_posted", "")),
+        ]
+    )
 
 
 def deduplicate_batch(records: list[dict], session: Session) -> DedupResult:
@@ -114,9 +119,7 @@ def deduplicate_batch(records: list[dict], session: Session) -> DedupResult:
     existing_hashes: set[str] = set()
 
     if storage_hashes:
-        stmt = select(RawIngestedJob.raw_payload_hash).where(
-            RawIngestedJob.raw_payload_hash.in_(storage_hashes)
-        )
+        stmt = select(RawIngestedJob.raw_payload_hash).where(RawIngestedJob.raw_payload_hash.in_(storage_hashes))
         rows = session.execute(stmt).scalars().all()
         existing_hashes = set(rows)
 

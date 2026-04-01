@@ -39,11 +39,7 @@ def generate_synthetic_normalization_complete(
     """
     correlation_id = f"harness-norm-{seed}"
     for i in range(count):
-        event_id = str(
-            uuid.uuid5(
-                uuid.NAMESPACE_DNS, f"harness-NormalizationComplete-{seed}-{i}"
-            )
-        )
+        event_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"harness-NormalizationComplete-{seed}-{i}"))
         timestamp = _BASE_TS + timedelta(seconds=i)
         batch_id = f"harness-norm-batch-{seed}-{i}"
         normalized_count = (seed + i) % 50 + 1
@@ -85,9 +81,7 @@ def generate_synthetic_source_failures(
     correlation_id = f"harness-fail-{seed}"
     sources = ("jsearch", "crawl4ai", "harness")
     for i in range(count):
-        event_id = str(
-            uuid.uuid5(uuid.NAMESPACE_DNS, f"harness-SourceFailure-{seed}-{i}")
-        )
+        event_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"harness-SourceFailure-{seed}-{i}"))
         timestamp = _BASE_TS + timedelta(seconds=i)
         run_id = f"harness-run-{seed}-{i}"
         source = sources[i % len(sources)]
@@ -129,11 +123,7 @@ def generate_synthetic_normalization_failed(
     """
     correlation_id = f"harness-normfail-{seed}"
     for i in range(count):
-        event_id = str(
-            uuid.uuid5(
-                uuid.NAMESPACE_DNS, f"harness-NormalizationFailed-{seed}-{i}"
-            )
-        )
+        event_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"harness-NormalizationFailed-{seed}-{i}"))
         timestamp = _BASE_TS + timedelta(seconds=i)
         batch_id = f"harness-normfail-batch-{seed}-{i}"
         error = f"normalization failed (seed={seed}, i={i})"

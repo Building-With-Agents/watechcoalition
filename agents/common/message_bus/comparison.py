@@ -142,10 +142,7 @@ def run_transport_comparison(
         started_at = publish_started_at.get(event.event_id)
         if started_at is None:
             return
-        if (
-            resolved.latency_sample_size is not None
-            and len(latency_ms) >= resolved.latency_sample_size
-        ):
+        if resolved.latency_sample_size is not None and len(latency_ms) >= resolved.latency_sample_size:
             return
         latency_ms.append((clock() - started_at) * 1000)
 
@@ -202,15 +199,10 @@ def run_transport_comparison(
 
     producer_crash_delivered: int | None = None
     producer_crash_events_lost: int | None = None
-    if (
-        resolved.producer_crash_at is not None
-        and replay_bus_factory is not None
-    ):
-        producer_crash_delivered, producer_crash_events_lost = (
-            _measure_producer_crash_delivered_lost(
-                replay_bus_factory,
-                scenario=resolved,
-            )
+    if resolved.producer_crash_at is not None and replay_bus_factory is not None:
+        producer_crash_delivered, producer_crash_events_lost = _measure_producer_crash_delivered_lost(
+            replay_bus_factory,
+            scenario=resolved,
         )
 
     producer_crash = (
@@ -263,18 +255,10 @@ def run_transport_comparison(
         producer_crash_delivered_before_crash=(
             producer_crash.delivered_before_crash if producer_crash is not None else None
         ),
-        producer_crash_loss_count=(
-            producer_crash.loss_count if producer_crash is not None else None
-        ),
-        producer_resume_recovered_count=(
-            producer_crash.recovered_count if producer_crash is not None else None
-        ),
-        producer_resume_final_loss_count=(
-            producer_crash.final_loss_count if producer_crash is not None else None
-        ),
-        producer_resume_complete=(
-            producer_crash.recovery_complete if producer_crash is not None else None
-        ),
+        producer_crash_loss_count=(producer_crash.loss_count if producer_crash is not None else None),
+        producer_resume_recovered_count=(producer_crash.recovered_count if producer_crash is not None else None),
+        producer_resume_final_loss_count=(producer_crash.final_loss_count if producer_crash is not None else None),
+        producer_resume_complete=(producer_crash.recovery_complete if producer_crash is not None else None),
         published_events=counters["published_events"],
         delivered_events=counters["delivered_events"],
         handler_failures=counters["handler_failures"],
@@ -333,9 +317,7 @@ def drain_bus(
         if consumed == 0:
             return DrainStats(drained_events=total_drained, iterations=iteration)
 
-    raise RuntimeError(
-        f"bus did not drain within iteration_limit={iteration_limit}"
-    )
+    raise RuntimeError(f"bus did not drain within iteration_limit={iteration_limit}")
 
 
 def has_consumer(bus: EventBusBase) -> bool:
@@ -413,14 +395,8 @@ def measure_crash_replay(
     )
 
     combined_ids = first_run_processed_ids + replay_processed_ids
-    replay_completeness_pct = (
-        len(set(combined_ids).intersection(published_ids)) / len(published_ids)
-    ) * 100
-    replay_complete = (
-        crashed
-        and len(combined_ids) == len(published_ids)
-        and set(combined_ids) == set(published_ids)
-    )
+    replay_completeness_pct = (len(set(combined_ids).intersection(published_ids)) / len(published_ids)) * 100
+    replay_complete = crashed and len(combined_ids) == len(published_ids) and set(combined_ids) == set(published_ids)
     replay_count = len(replay_processed_ids)
     return replay_complete, replay_completeness_pct, replay_count
 
@@ -666,9 +642,7 @@ def format_results_markdown_table(
     ]
 
     for row in results_to_rows(results):
-        lines.append(
-            "| " + " | ".join(_format_cell(row[header]) for header in headers) + " |"
-        )
+        lines.append("| " + " | ".join(_format_cell(row[header]) for header in headers) + " |")
 
     return "\n".join(lines)
 

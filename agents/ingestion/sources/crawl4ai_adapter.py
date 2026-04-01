@@ -102,9 +102,7 @@ class Crawl4AIAdapter(SourceAdapter):
                 continue
             seen_ids.add(job_id)
             job_url = _normalize_url(path, base_url)
-            title = _normalize_str(
-                slug.replace("-", " ").title() if slug else f"Job {job_id}"
-            )
+            title = _normalize_str(slug.replace("-", " ").title() if slug else f"Job {job_id}")
             jobs.append({"external_id": job_id.strip(), "title": title, "job_url": job_url})
         return jobs
 
@@ -122,9 +120,7 @@ class Crawl4AIAdapter(SourceAdapter):
         job_url = _normalize_url(str(card.get("job_url", "")), EL_PASO_PORTAL_BASE)
         company = _normalize_str("City of El Paso")  # Portal employer
         region_id = _normalize_str(region.region_id)
-        raw_hash = hashlib.sha256(
-            f"crawl4ai|{external_id}|{title}|{job_url}".encode()
-        ).hexdigest()
+        raw_hash = hashlib.sha256(f"crawl4ai|{external_id}|{title}|{job_url}".encode()).hexdigest()
         payload = {"external_id": external_id, "title": title, "job_url": job_url}
         return RawJobRecord(
             external_id=external_id,
@@ -200,7 +196,7 @@ class Crawl4AIAdapter(SourceAdapter):
             try:
                 with open("debug_elpaso_page.html", "w", encoding="utf-8") as f:
                     f.write(html)
-            except OSError :
+            except OSError:
                 # print(f"[DEBUG fetch] could not save HTML: {e}")
                 pass
 
@@ -209,9 +205,7 @@ class Crawl4AIAdapter(SourceAdapter):
                 # _debug_save_html()
                 return []
             # _debug_save_html()
-            raise Crawl4AIAdapterError(
-                "Large page with zero job links; possible parser breakage"
-            )
+            raise Crawl4AIAdapterError("Large page with zero job links; possible parser breakage")
         records: list[RawJobRecord] = []
         for i, card in enumerate(cards):
             records.append(self._to_raw_job_record(card, region, i))
@@ -234,6 +228,7 @@ class Crawl4AIAdapter(SourceAdapter):
                 short message describing the failure.
         """
         from crawl4ai import AsyncWebCrawler, BrowserConfig, CacheMode, CrawlerRunConfig
+
         target = self._target_urls[0] if self._target_urls else EL_PASO_PORTAL_BASE
         try:
             async with AsyncWebCrawler(config=BrowserConfig(headless=True)) as crawler:
@@ -245,9 +240,7 @@ class Crawl4AIAdapter(SourceAdapter):
             html = getattr(result, "html", None) or getattr(result, "cleaned_html", None)
             html_str = str(html) if html else ""
             extractable = bool(
-                success
-                and html_str
-                and (_JOB_LINK_RE.search(html_str) or _NO_OPENINGS_RE.search(html_str))
+                success and html_str and (_JOB_LINK_RE.search(html_str) or _NO_OPENINGS_RE.search(html_str))
             )
             if success:
                 status = "operational" if extractable else "reachable_but_unextractable"

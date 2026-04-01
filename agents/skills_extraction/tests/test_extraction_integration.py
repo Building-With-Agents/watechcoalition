@@ -37,8 +37,7 @@ def sample_job() -> JobRecord:
         title="Senior Python Engineer",
         company="Acme Corp",
         description=(
-            "Build APIs with FastAPI and PostgreSQL. "
-            "Strong Python experience required for our cloud data platform."
+            "Build APIs with FastAPI and PostgreSQL. Strong Python experience required for our cloud data platform."
         ),
     )
 
@@ -163,8 +162,11 @@ def test_extraction_tools_then_skills_output_shape(
 def test_extract_context_returns_empty_list() -> None:
     """extract_context stub returns an empty list of ContextSignal."""
     job = JobRecord(
-        source="test", external_id="test-1", title="Test Job",
-        company="Test Corp", description="Build things.",
+        source="test",
+        external_id="test-1",
+        title="Test Job",
+        company="Test Corp",
+        description="Build things.",
     )
     result = extract_context(job)
     assert isinstance(result, list)
@@ -174,8 +176,11 @@ def test_extract_context_returns_empty_list() -> None:
 def test_extract_tasks_returns_empty_list() -> None:
     """extract_tasks stub returns an empty list of TaskRecord."""
     job = JobRecord(
-        source="test", external_id="test-1", title="Test Job",
-        company="Test Corp", description="Build things.",
+        source="test",
+        external_id="test-1",
+        title="Test Job",
+        company="Test Corp",
+        description="Build things.",
     )
     result = extract_tasks(job)
     assert isinstance(result, list)
@@ -185,8 +190,11 @@ def test_extract_tasks_returns_empty_list() -> None:
 def test_extract_responsibilities_returns_empty_list() -> None:
     """extract_responsibilities stub returns an empty list of ResponsibilityRecord."""
     job = JobRecord(
-        source="test", external_id="test-1", title="Test Job",
-        company="Test Corp", description="Build things.",
+        source="test",
+        external_id="test-1",
+        title="Test Job",
+        company="Test Corp",
+        description="Build things.",
     )
     result = extract_responsibilities(job)
     assert isinstance(result, list)

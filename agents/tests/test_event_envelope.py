@@ -15,21 +15,15 @@ class TestEventEnvelope:
 
     def test_event_id_auto_generated(self) -> None:
         """Each instantiation produces a valid UUID4 string."""
-        env = EventEnvelope(
-            correlation_id="c-1", agent_id="test-agent", payload={"k": "v"}
-        )
+        env = EventEnvelope(correlation_id="c-1", agent_id="test-agent", payload={"k": "v"})
         # Should be parseable as a UUID.
         parsed = uuid.UUID(env.event_id)
         assert parsed.version == 4
 
     def test_event_id_unique_across_instances(self) -> None:
         """Two envelopes created independently have different event_ids."""
-        a = EventEnvelope(
-            correlation_id="c-1", agent_id="test-agent", payload={}
-        )
-        b = EventEnvelope(
-            correlation_id="c-1", agent_id="test-agent", payload={}
-        )
+        a = EventEnvelope(correlation_id="c-1", agent_id="test-agent", payload={})
+        b = EventEnvelope(correlation_id="c-1", agent_id="test-agent", payload={})
         assert a.event_id != b.event_id
 
     def test_correlation_id_required(self) -> None:
@@ -39,9 +33,7 @@ class TestEventEnvelope:
 
     def test_defaults(self) -> None:
         """Timestamp is auto-set and schema_version defaults to '1.0'."""
-        env = EventEnvelope(
-            correlation_id="c-1", agent_id="test-agent", payload={}
-        )
+        env = EventEnvelope(correlation_id="c-1", agent_id="test-agent", payload={})
         assert env.timestamp is not None
         assert env.schema_version == "1.0"
 
@@ -52,9 +44,7 @@ class TestEventEnvelope:
             "nullable": None,
             "flag": True,
         }
-        env = EventEnvelope(
-            correlation_id="c-1", agent_id="test-agent", payload=payload
-        )
+        env = EventEnvelope(correlation_id="c-1", agent_id="test-agent", payload=payload)
         assert env.payload["nested"]["a"] == [1, 2, 3]
         assert env.payload["nullable"] is None
 
