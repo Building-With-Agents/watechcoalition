@@ -12,6 +12,8 @@
 - **O\*NET crosswalk:** title-keyword heuristics return ranked `SOCMatch` entries; when SOC is missing on the posting, the facade can resolve occupation via crosswalk + `get_occupation_details`.
 - **Census:** empty `region` string returns `None`; non-empty unknown labels fall back to a generic Borderplex aggregate profile.
 - **Sync pipeline:** `EnrichmentAgent.process` is synchronous; adapters are async and are invoked via `asyncio.run` in `run_coroutine` when no event loop is running. Nested loop contexts will raise `RuntimeError` (logged, enrichment continues without external payloads).
+- **SOC normalization:** O*NET-style SOC strings may include a decimal suffix (e.g. `15-1252.00`). BLS and O*NET mock adapters strip the suffix to the major group form (`15-1252`) before lookup; see `.cursor/rules/integration-schema.mdc`.
+- **RecordEnriched batch schema:** batch aggregate events use `record_enriched_schema_version` **v3** with a nested `dedup` block (Pair D integration), not v2.
 
 ## Recommendation
 

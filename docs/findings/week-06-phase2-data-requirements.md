@@ -21,6 +21,10 @@
 | `tool_vendor` on `ToolRecord` | Low | Additive; helps Phase 2 vendor-specific analytics. |
 | New tables for candidates / cohorts | High | Requires product, consent, retention policy, and access control — defer to Phase 2 program.
 
+## Action before live candidate or cohort ingestion
+
+Open a **product or compliance ticket** for consent, retention, and access control before any live ingestion of candidate or cohort profile data. Replace placeholder **TICKET-???** here with the real ID once filed.
+
 ## Privacy / consent implications
 
 - **Candidate profiles** are personal data: need purpose limitation (workforce development), retention limits, access roles (instructors vs employers), and opt-in for sharing beyond CFA.

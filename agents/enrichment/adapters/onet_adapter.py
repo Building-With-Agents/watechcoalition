@@ -68,6 +68,11 @@ _ONET_BY_SOC: dict[str, OccupationProfile] = {
 
 
 def _normalize_soc(soc_code: str) -> str:
+    """Strip O*NET-style SOC decimals before lookup (e.g. ``15-1252.00`` → ``15-1252``).
+
+    Canonical convention: `.cursor/rules/integration-schema.mdc` § SOC / O*NET normalization.
+    Matches BLS adapter normalization in `bls_adapter._normalize_soc`.
+    """
     s = (soc_code or "").strip()
     if not s:
         return ""

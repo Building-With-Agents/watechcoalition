@@ -264,6 +264,10 @@ class EnrichedJobProfile(BaseModel):
     duplicate_cluster_id: Optional[str]
 ```
 
+**Nestor + Fatima (locked names):** `soc_code`, `naics_code`, and nested employer enrichment (pair canonical name **`employer`** / typed **`EmployerProfile`**). Full registry and SOC lookup normalization cross-refs: `.cursor/rules/integration-schema.mdc`.
+
+**Implementation today:** `agents/enrichment/schemas.py` uses `job_record: dict[...]`, `employer_profile: dict[str, Any] | None`, plus `soc_code` / `naics_code` — see integration rule for the **`employer` vs `employer_profile`** TODO.
+
 ### Analytics Schemas
 
 ```python
@@ -492,15 +496,16 @@ class JobRecord(BaseModel):
   - `sector`: industry sector string
   - `is_known_employer`: boolean (matched against known employer list)
 
-**New: Temporal period classification:**
-- Classify `date_posted` into temporal periods for longitudinal analysis:
+**New: Temporal period classification (locked literals — Angel + Fabian):**
+- Persist on `job_postings` as `temporal_period`. Allowed values only:
   - `pre_chatgpt`: before Nov 2022
   - `early_genai`: Dec 2022 – Mar 2023
   - `post_gpt4`: Apr 2023 – May 2024
   - `agentic_era`: Jun 2024 – present
 
-**New: Borderplex subregion tagging:**
-- Tag location into Borderplex subregions: `el_paso` | `las_cruces` | `ciudad_juarez` | `regional`
+**New: Borderplex subregion tagging (locked literals — Angel + Fabian):**
+- Persist on `job_postings` as `borderplex_subregion`. Allowed values: `el_paso` | `las_cruces` | `ciudad_juarez` | `regional`.
+- Batch `RecordEnriched` `temporal_period_distribution` / `borderplex_subregion_distribution` may still use an **`unknown`** bucket when the value is missing; see `EnrichmentAgent` `_distribution_bucket`.
 
 **New: Fuzzy deduplication:**
 - Embedding-based near-duplicate detection
@@ -511,6 +516,8 @@ class JobRecord(BaseModel):
 - BLS adapter: labor statistics lookups
 - ONET adapter: occupation/skill crosswalk
 - Census adapter: regional demographics
+- **SOC normalization:** O*NET-style codes may include a decimal suffix (e.g. `15-1252.00`). BLS and O*NET adapters strip to major SOC (e.g. `15-1252`) before lookup. Documented in `.cursor/rules/integration-schema.mdc`.
+- **Phase 1 sync bridge:** `ExternalEnrichmentFacade` is async; enrichment calls it via `run_coroutine` / `asyncio.run` per posting where no loop is running. Phase 2 should optimize (shared loop, batching, or async agent entrypoint). See integration-schema rule.
 
 **Output:** `EnrichedJobProfile` wrapping JobRecord + all enrichment fields
 

@@ -122,7 +122,7 @@ def skills_event() -> EventEnvelope:
 
 @pytest.fixture
 def enriched_event() -> EventEnvelope:
-    """Output of EnrichmentAgent — input to AnalyticsAgent (Week 5 lite, issue #87)."""
+    """Output of EnrichmentAgent batch path — input to AnalyticsAgent (RecordEnriched schema v3)."""
     return EventEnvelope(
         correlation_id="test-1",
         agent_id="enrichment-agent",

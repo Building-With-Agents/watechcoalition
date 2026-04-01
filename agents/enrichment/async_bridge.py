@@ -1,7 +1,9 @@
 """Run async adapter coroutines from synchronous EnrichmentAgent code.
 
 ``asyncio.run`` must not be used when an event loop is already running; Phase 1 pipeline
-invokes ``process`` from sync contexts only. Phase 2 may move the agent to async execution.
+invokes ``process`` from sync contexts only. Phase 2 should reduce per-record loop overhead
+(e.g. shared event loop, batched adapter calls, or an async agent entrypoint). See
+``.cursor/rules/integration-schema.mdc`` § Phase 1 async bridge.
 """
 
 from __future__ import annotations

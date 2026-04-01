@@ -3,6 +3,9 @@
 ``EnrichedJobProfile`` aggregates job context with optional BLS / O*NET / Census payloads.
 ``job_record`` is a ``dict`` for pipeline compatibility (same shape as a serialized
 :class:`~agents.common.types.job_record.JobRecord` plus extraction fields where present).
+
+Cross-pair field names (``soc_code``, ``naics_code``, canonical ``employer`` vs
+``employer_profile``): ``.cursor/rules/integration-schema.mdc`` § Nestor + Fatima.
 """
 
 from __future__ import annotations
@@ -15,7 +18,11 @@ from agents.enrichment.adapters.models import OccupationProfile, RegionalProfile
 
 
 class EnrichedJobProfile(BaseModel):
-    """Enriched view of a job with optional external reference data."""
+    """Enriched view of a job with optional external reference data.
+
+    Nestor + Fatima lock ``soc_code`` / ``naics_code``; nested employer data lives in
+    ``employer_profile`` (dict) until renamed to pair-canonical ``employer``.
+    """
 
     job_record: dict[str, Any] = Field(
         ...,

@@ -27,7 +27,10 @@ _OEWS_KNOWN: dict[str, tuple[float, float, float]] = {
 
 
 def _normalize_soc(soc_code: str) -> str:
-    """Strip O*NET-style decimals (e.g. 15-1252.00 -> 15-1252)."""
+    """Strip O*NET-style decimals (e.g. 15-1252.00 -> 15-1252).
+
+    Canonical convention: `.cursor/rules/integration-schema.mdc` § SOC / O*NET normalization.
+    """
     s = (soc_code or "").strip()
     if not s:
         return ""

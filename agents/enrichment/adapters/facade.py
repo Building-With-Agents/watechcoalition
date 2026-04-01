@@ -1,4 +1,8 @@
-"""Facade over BLS / O*NET / Census adapters — single injection point for EnrichmentAgent."""
+"""Facade over BLS / O*NET / Census adapters — single injection point for EnrichmentAgent.
+
+Phase 1 calls async adapters from sync code via ``run_coroutine`` (new event loop per call
+when needed). Phase 2 should optimize throughput; see integration-schema Cursor rule.
+"""
 
 from __future__ import annotations
 
