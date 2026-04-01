@@ -147,11 +147,13 @@ def write_last_run_start() -> datetime:
     last_expected = _parse_iso(last_5[-1]["expected_fire_at"]) if last_5 else None
     expected = now if last_expected is None else last_expected + timedelta(minutes=interval_min)
     drift_sec = round((now - expected).total_seconds(), 3)
-    last_5.append({
-        "expected_fire_at": expected.isoformat(),
-        "actual_fire_at": now.isoformat(),
-        "drift_seconds": drift_sec,
-    })
+    last_5.append(
+        {
+            "expected_fire_at": expected.isoformat(),
+            "actual_fire_at": now.isoformat(),
+            "drift_seconds": drift_sec,
+        }
+    )
     section["last_5_runs"] = last_5[-_MAX_DRIFT_RUNS:]
 
     path.parent.mkdir(parents=True, exist_ok=True)

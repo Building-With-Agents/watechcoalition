@@ -16,25 +16,67 @@ class TestComputeFingerprint:
 
     def test_deterministic(self) -> None:
         """Same input always produces same fingerprint."""
-        record = {"source": "jsearch", "external_id": "123", "title": "Engineer", "company": "Acme", "date_posted": "2026-01-01"}
+        record = {
+            "source": "jsearch",
+            "external_id": "123",
+            "title": "Engineer",
+            "company": "Acme",
+            "date_posted": "2026-01-01",
+        }
         assert compute_fingerprint(record) == compute_fingerprint(record)
 
     def test_case_insensitive(self) -> None:
         """Fingerprint is case-insensitive."""
-        r1 = {"source": "jsearch", "external_id": "123", "title": "Engineer", "company": "Acme", "date_posted": "2026-01-01"}
-        r2 = {"source": "JSEARCH", "external_id": "123", "title": "ENGINEER", "company": "ACME", "date_posted": "2026-01-01"}
+        r1 = {
+            "source": "jsearch",
+            "external_id": "123",
+            "title": "Engineer",
+            "company": "Acme",
+            "date_posted": "2026-01-01",
+        }
+        r2 = {
+            "source": "JSEARCH",
+            "external_id": "123",
+            "title": "ENGINEER",
+            "company": "ACME",
+            "date_posted": "2026-01-01",
+        }
         assert compute_fingerprint(r1) == compute_fingerprint(r2)
 
     def test_whitespace_normalized(self) -> None:
         """Leading/trailing whitespace is stripped."""
-        r1 = {"source": "jsearch", "external_id": "123", "title": "Engineer", "company": "Acme", "date_posted": "2026-01-01"}
-        r2 = {"source": " jsearch ", "external_id": " 123 ", "title": " Engineer ", "company": " Acme ", "date_posted": " 2026-01-01 "}
+        r1 = {
+            "source": "jsearch",
+            "external_id": "123",
+            "title": "Engineer",
+            "company": "Acme",
+            "date_posted": "2026-01-01",
+        }
+        r2 = {
+            "source": " jsearch ",
+            "external_id": " 123 ",
+            "title": " Engineer ",
+            "company": " Acme ",
+            "date_posted": " 2026-01-01 ",
+        }
         assert compute_fingerprint(r1) == compute_fingerprint(r2)
 
     def test_different_inputs_diverge(self) -> None:
         """Different records produce different fingerprints."""
-        r1 = {"source": "jsearch", "external_id": "123", "title": "Engineer", "company": "Acme", "date_posted": "2026-01-01"}
-        r2 = {"source": "jsearch", "external_id": "456", "title": "Manager", "company": "Acme", "date_posted": "2026-01-01"}
+        r1 = {
+            "source": "jsearch",
+            "external_id": "123",
+            "title": "Engineer",
+            "company": "Acme",
+            "date_posted": "2026-01-01",
+        }
+        r2 = {
+            "source": "jsearch",
+            "external_id": "456",
+            "title": "Manager",
+            "company": "Acme",
+            "date_posted": "2026-01-01",
+        }
         assert compute_fingerprint(r1) != compute_fingerprint(r2)
 
 

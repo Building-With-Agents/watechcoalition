@@ -884,10 +884,7 @@ def _has_context(
     window_end = min(len(text), match.end() + CONTEXT_WINDOW)
     context_window = text[window_start:window_end]
 
-    if any(
-        re.search(pattern, context_window, flags=re.IGNORECASE)
-        for pattern in definition.context_patterns
-    ):
+    if any(re.search(pattern, context_window, flags=re.IGNORECASE) for pattern in definition.context_patterns):
         return True
 
     return any(keyword in context_window.casefold() for keyword in definition.context_keywords)

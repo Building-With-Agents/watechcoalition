@@ -37,9 +37,5 @@ def resolve_sector(role_classification: str | None, session: Any) -> str | None:
         return None
 
     sector_name = _normalize_sector_token(ROLE_TO_SECTOR[role_classification])
-    stmt = (
-        select(IndustrySector.industry_sector_id)
-        .where(IndustrySector.sector_title == sector_name)
-        .limit(1)
-    )
+    stmt = select(IndustrySector.industry_sector_id).where(IndustrySector.sector_title == sector_name).limit(1)
     return session.execute(stmt).scalar_one_or_none()

@@ -18,6 +18,7 @@ from agents.common.event_envelope import EventEnvelope
 # Raw posting (input to pipeline runner / Ingestion Agent)
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def sample_raw_posting() -> dict:
     """A single raw posting matching the fallback_scrape_sample.json shape."""
@@ -49,6 +50,7 @@ def sample_event(sample_raw_posting: dict) -> EventEnvelope:
 # ---------------------------------------------------------------------------
 # Stage-specific events (each is the output of the named agent)
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def ingest_event() -> EventEnvelope:
@@ -126,10 +128,16 @@ def enriched_event() -> EventEnvelope:
         agent_id="enrichment-agent",
         payload={
             "event_type": "RecordEnriched",
+            "record_enriched_schema_version": 2,
             "batch_id": "test-batch-1",
             "enriched_count": 3,
             "spam_rejected_count": 0,
             "flagged_for_review_count": 1,
+            "temporal_period_distribution": {"unknown": 3},
+            "borderplex_subregion_distribution": {"unknown": 3},
+            "duplicate_count": 0,
+            "soc_classified_count": 0,
+            "naics_classified_count": 0,
         },
     )
 

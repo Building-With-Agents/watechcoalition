@@ -22,10 +22,12 @@ ORCHESTRATOR_AGENT_ID = "orchestration-agent"
 
 _EVENT_TYPE_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9._-]{0,127}$")
 _RESTRICTED_EVENT_SUFFIXES = ("Failed", "Alert")
-ORCHESTRATION_ONLY_CONTROL_EVENTS = frozenset({
-    "SourceFailure",
-    "DemandAnomaly",
-})
+ORCHESTRATION_ONLY_CONTROL_EVENTS = frozenset(
+    {
+        "SourceFailure",
+        "DemandAnomaly",
+    }
+)
 
 
 class MessageBusContractError(ValueError):
@@ -65,14 +67,11 @@ def normalize_event_type(event_type: str) -> str:
         raise InvalidEventTypeError("event_type must be non-empty")
 
     if len(normalized) > MAX_EVENT_TYPE_LENGTH:
-        raise InvalidEventTypeError(
-            f"event_type exceeds max length ({MAX_EVENT_TYPE_LENGTH})"
-        )
+        raise InvalidEventTypeError(f"event_type exceeds max length ({MAX_EVENT_TYPE_LENGTH})")
 
     if not _EVENT_TYPE_PATTERN.fullmatch(normalized):
         raise InvalidEventTypeError(
-            "event_type must start with a letter and contain only letters, "
-            "digits, '.', '_' or '-'"
+            "event_type must start with a letter and contain only letters, digits, '.', '_' or '-'"
         )
 
     return normalized
@@ -112,10 +111,7 @@ def validate_handler(handler: object) -> EventHandler:
 def is_restricted_control_event(event_type: str) -> bool:
     """True when only orchestration should subscribe to this event type."""
     normalized = normalize_event_type(event_type)
-    return (
-        normalized.endswith(_RESTRICTED_EVENT_SUFFIXES)
-        or normalized in ORCHESTRATION_ONLY_CONTROL_EVENTS
-    )
+    return normalized.endswith(_RESTRICTED_EVENT_SUFFIXES) or normalized in ORCHESTRATION_ONLY_CONTROL_EVENTS
 
 
 def enforce_subscription_policy(event_type: str, subscriber_id: str) -> Subscription:
@@ -123,13 +119,9 @@ def enforce_subscription_policy(event_type: str, subscriber_id: str) -> Subscrip
     normalized_event_type = normalize_event_type(event_type)
     normalized_subscriber_id = validate_subscriber_id(subscriber_id)
 
-    if (
-        is_restricted_control_event(normalized_event_type)
-        and normalized_subscriber_id != ORCHESTRATOR_AGENT_ID
-    ):
+    if is_restricted_control_event(normalized_event_type) and normalized_subscriber_id != ORCHESTRATOR_AGENT_ID:
         raise RestrictedSubscriptionError(
-            f"only '{ORCHESTRATOR_AGENT_ID}' may subscribe to "
-            f"'{normalized_event_type}' events"
+            f"only '{ORCHESTRATOR_AGENT_ID}' may subscribe to '{normalized_event_type}' events"
         )
 
     return Subscription(

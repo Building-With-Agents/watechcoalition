@@ -42,9 +42,7 @@ class Crawl4AIIndeedMapper(MapperBase):
             state_province=raw.state,
             country=raw.country,
             is_remote=raw.is_remote,
-            date_posted=normalize_date(
-                raw.date_posted.isoformat() if raw.date_posted else None
-            ),
+            date_posted=normalize_date(raw.date_posted.isoformat() if raw.date_posted else None),
             salary_raw=raw.salary_raw,
             salary_min=salary_data.get("salary_min"),
             salary_max=salary_data.get("salary_max"),

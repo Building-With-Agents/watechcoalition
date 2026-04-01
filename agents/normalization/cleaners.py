@@ -45,12 +45,25 @@ _SALARY_RANGE_RE = re.compile(
     re.IGNORECASE,
 )
 _PERIOD_MAP = {
-    "year": "annual", "yr": "annual", "annual": "annual", "annually": "annual",
-    "per year": "annual", "/year": "annual", "/yr": "annual",
-    "hour": "hourly", "hr": "hourly", "hourly": "hourly",
-    "per hour": "hourly", "/hour": "hourly", "/hr": "hourly",
-    "month": "monthly", "mo": "monthly", "monthly": "monthly",
-    "per month": "monthly", "/month": "monthly", "/mo": "monthly",
+    "year": "annual",
+    "yr": "annual",
+    "annual": "annual",
+    "annually": "annual",
+    "per year": "annual",
+    "/year": "annual",
+    "/yr": "annual",
+    "hour": "hourly",
+    "hr": "hourly",
+    "hourly": "hourly",
+    "per hour": "hourly",
+    "/hour": "hourly",
+    "/hr": "hourly",
+    "month": "monthly",
+    "mo": "monthly",
+    "monthly": "monthly",
+    "per month": "monthly",
+    "/month": "monthly",
+    "/mo": "monthly",
 }
 
 
@@ -105,8 +118,8 @@ def parse_salary(raw: str | None) -> dict:
         max_val = _parse_number(max_str)
 
         # Handle "k" suffix
-        raw_after_min = raw[range_match.start(1):range_match.end(1) + 1].lower()
-        raw_after_max = raw[range_match.start(2):range_match.end(2) + 1].lower()
+        raw_after_min = raw[range_match.start(1) : range_match.end(1) + 1].lower()
+        raw_after_max = raw[range_match.start(2) : range_match.end(2) + 1].lower()
         if min_val and ("k" in raw_after_min or (min_val < 1000 and result.get("salary_period") == "annual")):
             min_val *= 1000
         if max_val and ("k" in raw_after_max or (max_val < 1000 and result.get("salary_period") == "annual")):
@@ -128,7 +141,7 @@ def parse_salary(raw: str | None) -> dict:
         if val:
             # Check for k suffix
             idx = raw.find(nums[0])
-            after = raw[idx + len(nums[0]):idx + len(nums[0]) + 2].lower() if idx >= 0 else ""
+            after = raw[idx + len(nums[0]) : idx + len(nums[0]) + 2].lower() if idx >= 0 else ""
             if "k" in after:
                 val *= 1000
             result["salary_min"] = val
@@ -179,13 +192,22 @@ def normalize_date(raw: str | None) -> datetime | None:
 # ---------------------------------------------------------------------------
 
 _EMPLOYMENT_TYPE_MAP = {
-    "full-time": "full_time", "full_time": "full_time", "fulltime": "full_time",
-    "ft": "full_time", "permanent": "full_time",
-    "part-time": "part_time", "part_time": "part_time", "parttime": "part_time",
+    "full-time": "full_time",
+    "full_time": "full_time",
+    "fulltime": "full_time",
+    "ft": "full_time",
+    "permanent": "full_time",
+    "part-time": "part_time",
+    "part_time": "part_time",
+    "parttime": "part_time",
     "pt": "part_time",
-    "contract": "contract", "contractor": "contract", "freelance": "contract",
-    "temporary": "temporary", "temp": "temporary",
-    "internship": "internship", "intern": "internship",
+    "contract": "contract",
+    "contractor": "contract",
+    "freelance": "contract",
+    "temporary": "temporary",
+    "temp": "temporary",
+    "internship": "internship",
+    "intern": "internship",
     # Federal (USAJOBS-style) appointment types
     "term": "temporary",
     "seasonal": "temporary",
@@ -204,6 +226,7 @@ def normalize_employment_type(raw: str | None) -> str:
 # ---------------------------------------------------------------------------
 # Location normalization
 # ---------------------------------------------------------------------------
+
 
 def normalize_location(raw: str | None) -> str:
     """Clean and standardize location strings."""

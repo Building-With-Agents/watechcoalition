@@ -40,9 +40,7 @@ from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
 from agents.skills_extraction.prompts import SKILLS_PROMPT_VERSION
 from agents.skills_extraction.validator import validate_extraction_result
 
-_FIXTURE_PATH = (
-    Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
-)
+_FIXTURE_PATH = Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
 EXTRACTION_PASS1_LABEL = "pattern-tools-v1"
 EXTRACTION_VERSION = f"week4-hybrid-{SKILLS_PROMPT_VERSION}"
 FIXTURE_EXTRACTION_MODEL = "fixture-week2-skills"
@@ -60,11 +58,7 @@ def _llm_deployment_name() -> str:
 
 def _persisted_extraction_model_llm() -> str:
     """Stable label: Pass 1 strategy + Pass 2 deployment + prompt version."""
-    return (
-        f"pass1={EXTRACTION_PASS1_LABEL};"
-        f"pass2={_llm_deployment_name()};"
-        f"prompt={SKILLS_PROMPT_VERSION}"
-    )
+    return f"pass1={EXTRACTION_PASS1_LABEL};pass2={_llm_deployment_name()};prompt={SKILLS_PROMPT_VERSION}"
 
 
 def _metadata_from_pass2(
@@ -149,11 +143,7 @@ class EventOrDatabaseWorkItemLoader:
         payload = event.payload
         batch_id = _string_value(payload.get("batch_id"))
 
-        inline_records = (
-            payload.get("normalized_jobs")
-            or payload.get("jobs")
-            or payload.get("job_records")
-        )
+        inline_records = payload.get("normalized_jobs") or payload.get("jobs") or payload.get("job_records")
         if isinstance(inline_records, list):
             items = [
                 item
@@ -243,10 +233,7 @@ class EventOrDatabaseWorkItemLoader:
             normalized_job_id = _int_value(mapping.get("id"))
 
         external_id = str(
-            mapping.get("external_id")
-            or posting_id
-            or normalized_job_id
-            or title.casefold().replace(" ", "-")
+            mapping.get("external_id") or posting_id or normalized_job_id or title.casefold().replace(" ", "-")
         )
         description = _string_value(mapping.get("description")) or _string_value(mapping.get("raw_text"))
         requirements = _string_value(mapping.get("requirements"))
@@ -296,10 +283,14 @@ class SQLAlchemyExtractionStore:
                     .order_by(ExtractedIntelligence.id)
                     .all()
                 )
-                row = existing_rows[0] if existing_rows else ExtractedIntelligence(
-                    normalized_job_id=normalized_job_id,
-                    extraction_version=EXTRACTION_VERSION,
-                    extraction_model=FIXTURE_EXTRACTION_MODEL,
+                row = (
+                    existing_rows[0]
+                    if existing_rows
+                    else ExtractedIntelligence(
+                        normalized_job_id=normalized_job_id,
+                        extraction_version=EXTRACTION_VERSION,
+                        extraction_model=FIXTURE_EXTRACTION_MODEL,
+                    )
                 )
                 if not existing_rows:
                     session.add(row)
@@ -316,12 +307,8 @@ class SQLAlchemyExtractionStore:
                 row.responsibilities = []
                 row.context = []
                 row.overall_confidence = _average_tool_confidence(result.tools)
-                validated = validate_extraction_result(
-                    result.skills, [tool.model_dump() for tool in result.tools]
-                )
-                row.extraction_warnings = list(
-                    dict.fromkeys([*list(result.extraction_warnings), *validated])
-                )
+                validated = validate_extraction_result(result.skills, [tool.model_dump() for tool in result.tools])
+                row.extraction_warnings = list(dict.fromkeys([*list(result.extraction_warnings), *validated]))
                 row.extraction_metadata = result.extraction_metadata
                 row.extraction_failed = result.extraction_status != "success"
 
@@ -413,6 +400,7 @@ class SkillsExtractionAgent(BaseAgent):
         taxonomy_map: dict[str, Any] = {}
         if all_labels:
             import structlog as _structlog
+
             _log = _structlog.get_logger()
             _log.info(
                 "taxonomy_batch_resolve",
@@ -439,22 +427,19 @@ class SkillsExtractionAgent(BaseAgent):
             payload=self._build_payload(event, results),
         )
 
-    def _extract_work_item_no_taxonomy(
-        self, item: ExtractionWorkItem
-    ) -> tuple[list[ToolRecord], list, dict, bool]:
+    def _extract_work_item_no_taxonomy(self, item: ExtractionWorkItem) -> tuple[list[ToolRecord], list, dict, bool]:
         """Run Pass 1 (tools) + Pass 2 (skills without taxonomy). Returns (tools, skills, meta, used_llm)."""
         tools = extract_tools(item.job_record)
         job = item.job_record
         has_normalized_text = bool(
-            (job.description or "").strip()
-            or (job.requirements or "").strip()
-            or (job.responsibilities or "").strip()
+            (job.description or "").strip() or (job.requirements or "").strip() or (job.responsibilities or "").strip()
         )
         if has_normalized_text:
             skills_list, meta = extract_skills_no_taxonomy(job, pass1_tools=tools)
             return tools, skills_list, meta, True
 
         import structlog as _sl
+
         _sl.get_logger().warning(
             "skills_extraction_no_text",
             job_id=item.job_id,
@@ -501,6 +486,7 @@ class SkillsExtractionAgent(BaseAgent):
             )
         # No fixture fallback — fail explicitly so data issues surface
         import structlog as _sl
+
         _sl.get_logger().error(
             "skills_extraction_no_metadata",
             job_id=item.job_id,
@@ -523,9 +509,7 @@ class SkillsExtractionAgent(BaseAgent):
         tools = extract_tools(item.job_record)
         job = item.job_record
         has_normalized_text = bool(
-            (job.description or "").strip()
-            or (job.requirements or "").strip()
-            or (job.responsibilities or "").strip()
+            (job.description or "").strip() or (job.requirements or "").strip() or (job.responsibilities or "").strip()
         )
         if has_normalized_text:
             skills_list, meta = extract_skills(job, pass1_tools=tools)
@@ -576,12 +560,8 @@ class SkillsExtractionAgent(BaseAgent):
         )
         taxonomy_coverage = (skills_with_taxonomy / total_skills) if total_skills else 0.0
         total_cost = sum(getattr(result, "extraction_cost_usd", 0.0) or 0.0 for result in results)
-        any_llm_called = any(
-            (getattr(r, "extraction_tokens_used", 0) or 0) > 0 for r in results
-        )
-        any_alert = any(
-            getattr(r, "alert_skills_extraction", False) for r in results
-        )
+        any_llm_called = any((getattr(r, "extraction_tokens_used", 0) or 0) > 0 for r in results)
+        any_alert = any(getattr(r, "alert_skills_extraction", False) for r in results)
         payload: dict[str, Any] = {
             "event_type": "SkillsExtracted",
             "batch_id": event.payload.get("batch_id"),
@@ -653,7 +633,9 @@ class SkillsExtractionAgent(BaseAgent):
                     "seniority": fixture_payload.get("seniority"),
                     "extraction_status": fixture_payload.get("extraction_status", "success"),
                 }
-            ] if posting_id is not None else [],
+            ]
+            if posting_id is not None
+            else [],
             "llm_provider": "stub",
             "llm_model": "stub",
             "llm_call_logged": False,

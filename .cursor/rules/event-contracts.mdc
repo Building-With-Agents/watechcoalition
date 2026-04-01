@@ -50,7 +50,7 @@ Each event's `payload` dict should include:
 - **`IngestBatch`**: `batch_id`, `record_count`, `source`, `dedup_count`, `run_id`
 - **`NormalizationComplete`**: `batch_id`, `record_count`, `quarantine_count`
 - **`SkillsExtracted`**: `batch_id`, `record_count`, `skills_count`, `avg_confidence`
-- **`RecordEnriched`**: `batch_id`, `enriched_count`, `spam_rejected_count`, `flagged_for_review_count` — **one event per batch**; produced by **Enrichment (Pair D)** only, after Pair C spam/quality/classification and Pair D resolution/confidence (issue #87). No per-record emission.
+- **`RecordEnriched`**: `record_enriched_schema_version`, `batch_id`, `enriched_count`, `spam_rejected_count`, `flagged_for_review_count`, `temporal_period_distribution`, `borderplex_subregion_distribution`, `duplicate_count`, `soc_classified_count`, `naics_classified_count` — **one event per batch**; produced by **Enrichment (Pair D)** only, after Pair C spam/quality/classification and Pair D resolution/confidence (issue #87). No per-record emission.
 - **`AnalyticsRefreshed`**: `aggregate_types`, `record_count`, `refresh_duration_ms`
 - **`RenderComplete`**: `pages_rendered`, `exports_generated`
 - **`*Failed`**: `error_type`, `error_message`, `retry_count`, `max_retries`

@@ -106,7 +106,7 @@ def test_extract_skills_includes_pass1_tools_in_prompt_context(
     assert "Excellent communication skills" in call_args
     assert 'SKIP generic "Communication"' in call_args
     assert 'do NOT invent "Scrum Facilitation"' in call_args
-    assert 'do NOT suppress these because they are hard skills' in call_args
+    assert "do NOT suppress these because they are hard skills" in call_args
 
 
 # ---------------------------------------------------------------------------

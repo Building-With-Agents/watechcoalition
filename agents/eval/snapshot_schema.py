@@ -60,9 +60,7 @@ class PromptExemplar(BaseModel):
     skills_prompt_version: str
     system_prompt: str
     user_prompt: str
-    note: str = (
-        "User sections vary per job (Pass-1 tool list). This exemplar uses the first job only."
-    )
+    note: str = "User sections vary per job (Pass-1 tool list). This exemplar uses the first job only."
 
 
 class ExtractionEvalSnapshot(BaseModel):

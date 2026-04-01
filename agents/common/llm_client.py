@@ -15,6 +15,7 @@ from typing import Any
 
 try:
     from dotenv import load_dotenv
+
     _repo_root = Path(__file__).resolve().parent.parent.parent
     load_dotenv(_repo_root / ".env")
 except ImportError:
@@ -60,8 +61,7 @@ def _get_llm() -> Any:
         from langchain_openai import AzureChatOpenAI
     except ImportError as e:
         raise ImportError(
-            "langchain-openai is required for Pass 2 skills extraction. "
-            "Install with: pip install langchain-openai"
+            "langchain-openai is required for Pass 2 skills extraction. Install with: pip install langchain-openai"
         ) from e
 
     deployment = (
@@ -116,9 +116,7 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
             usage = msg.response_metadata.get("token_usage") or msg.response_metadata.get("usage")
             if isinstance(usage, dict):
                 tokens_used = int(
-                    usage.get("total_tokens")
-                    or (usage.get("input_tokens", 0) + usage.get("output_tokens", 0))
-                    or 0
+                    usage.get("total_tokens") or (usage.get("input_tokens", 0) + usage.get("output_tokens", 0)) or 0
                 )
                 input_tokens = int(usage.get("input_tokens", 0))
                 output_tokens = int(usage.get("output_tokens", 0))
@@ -166,6 +164,7 @@ def invoke_skills_llm(prompt: str) -> tuple[str, dict[str, Any]]:
         retry_after: int | None = None
         try:
             from openai import RateLimitError
+
             is_rate_limit = isinstance(e, RateLimitError)
         except ImportError:
             pass

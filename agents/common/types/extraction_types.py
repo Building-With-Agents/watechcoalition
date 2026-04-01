@@ -93,9 +93,7 @@ class ResponsibilityRecord(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     responsibility_id: str | None = None
-    responsibility_description: str = Field(
-        validation_alias=AliasChoices("responsibility_description", "description")
-    )
+    responsibility_description: str = Field(validation_alias=AliasChoices("responsibility_description", "description"))
     scope: str | None = None  # individual | team | department | organization
     level: str
     confidence: float = Field(ge=0.0, le=1.0)

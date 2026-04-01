@@ -168,25 +168,17 @@ if layout == "GT + two runs":
         if loaded2 is not None:
             st.session_state["eval_snap2"] = loaded2
 
-snap2: ExtractionEvalSnapshot | None = (
-    st.session_state.get("eval_snap2") if layout == "GT + two runs" else None
-)
+snap2: ExtractionEvalSnapshot | None = st.session_state.get("eval_snap2") if layout == "GT + two runs" else None
 
 if snap1 is None:
     st.info("Configure **Run 1** (load a snapshot or click **Run eval**).")
     st.stop()
 
 if snap1.schema_version != SNAPSHOT_SCHEMA_VERSION:
-    st.warning(
-        f"Run 1 snapshot schema is `{snap1.schema_version}`; "
-        f"app expects `{SNAPSHOT_SCHEMA_VERSION}`."
-    )
+    st.warning(f"Run 1 snapshot schema is `{snap1.schema_version}`; app expects `{SNAPSHOT_SCHEMA_VERSION}`.")
 
 if snap2 and snap2.schema_version != SNAPSHOT_SCHEMA_VERSION:
-    st.warning(
-        f"Run 2 snapshot schema is `{snap2.schema_version}`; "
-        f"app expects `{SNAPSHOT_SCHEMA_VERSION}`."
-    )
+    st.warning(f"Run 2 snapshot schema is `{snap2.schema_version}`; app expects `{SNAPSHOT_SCHEMA_VERSION}`.")
 
 st.divider()
 st.subheader("Aggregate metrics")

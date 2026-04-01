@@ -249,8 +249,7 @@ def run_eval_dataset(
             pred = extract_from_text_testing(text)
             pred_skills = normalize_list([str(x) for x in pred.get("skills", [])])
             pred_tools = {
-                normalize_tool_label_for_eval(t)
-                for t in normalize_list([str(x) for x in pred.get("tools", [])])
+                normalize_tool_label_for_eval(t) for t in normalize_list([str(x) for x in pred.get("tools", [])])
             }
             pj = PerJobSnapshot(
                 job_key=_job_key(job, idx),
@@ -341,13 +340,9 @@ def run_eval_dataset(
         console_lines.append(f"Skills P/R: {p_s:.2f} / {r_s:.2f}")
         console_lines.append(f"Tools  P/R: {p_t:.2f} / {r_t:.2f}")
 
-    precision_skills = (
-        total_matched_skills / total_pred_skills if total_pred_skills > 0 else 0.0
-    )
+    precision_skills = total_matched_skills / total_pred_skills if total_pred_skills > 0 else 0.0
     recall_skills = total_matched_skills / total_true_skills if total_true_skills > 0 else 0.0
-    precision_tools = (
-        total_matched_tools / total_pred_tools if total_pred_tools > 0 else 0.0
-    )
+    precision_tools = total_matched_tools / total_pred_tools if total_pred_tools > 0 else 0.0
     recall_tools = total_matched_tools / total_true_tools if total_true_tools > 0 else 0.0
 
     console_lines.append("\n=== FINAL METRICS ===")
@@ -476,9 +471,7 @@ def format_prompt_backlog_markdown(snapshot: ExtractionEvalSnapshot, mode: str) 
 
     pe = snapshot.prompt_exemplar
     if pe and mode == "stub":
-        lines.append(
-            "_Stub mode: prompt below is a template for the first ground-truth job with no Pass-1 tools._"
-        )
+        lines.append("_Stub mode: prompt below is a template for the first ground-truth job with no Pass-1 tools._")
         lines.append("")
 
     if pe:

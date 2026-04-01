@@ -67,7 +67,6 @@ def session(engine: Engine) -> Iterator[Session]:
         yield session
 
 
-
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_insert_raw_ingested_job(session: Session) -> None:
     """
@@ -88,22 +87,13 @@ def test_insert_raw_ingested_job(session: Session) -> None:
     session.add(job)
     session.commit()
 
-    fetched = (
-        session.execute(
-            select(RawIngestedJob).where(RawIngestedJob.raw_payload_hash == "hash-1")
-        )
-        .scalars()
-        .one()
-    )
+    fetched = session.execute(select(RawIngestedJob).where(RawIngestedJob.raw_payload_hash == "hash-1")).scalars().one()
     assert fetched.source == "test_source"
     assert fetched.external_id == "ext-1"
     assert fetched.raw_payload["foo"] == "bar"
 
-    session.execute(
-        delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id)
-    )
+    session.execute(delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id))
     session.commit()
-
 
 
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
@@ -131,20 +121,11 @@ def test_insert_normalized_job(session: Session) -> None:
     session.add(job)
     session.commit()
 
-    fetched = (
-        session.execute(
-            select(NormalizedJob).where(NormalizedJob.external_id == "ext-2")
-        )
-        .scalars()
-        .one()
-    )
+    fetched = session.execute(select(NormalizedJob).where(NormalizedJob.external_id == "ext-2")).scalars().one()
     assert fetched.normalization_status == "success"
 
-    session.execute(
-        delete(NormalizedJob).where(NormalizedJob.ingestion_run_id == ingestion_run_id)
-    )
+    session.execute(delete(NormalizedJob).where(NormalizedJob.ingestion_run_id == ingestion_run_id))
     session.commit()
-
 
 
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
@@ -179,7 +160,6 @@ def test_insert_job_ingestion_run(session: Session) -> None:
 
     session.execute(delete(JobIngestionRun).where(JobIngestionRun.id == run_pk))
     session.commit()
-
 
 
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
@@ -219,11 +199,8 @@ def test_raw_payload_hash_unique(session: Session) -> None:
         session.commit()
 
     session.rollback()
-    session.execute(
-        delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id)
-    )
+    session.execute(delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id))
     session.commit()
-
 
 
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
@@ -252,15 +229,9 @@ def test_unicode_fields(session: Session) -> None:
     session.commit()
 
     fetched = (
-        session.execute(
-            select(RawIngestedJob).where(RawIngestedJob.raw_payload_hash == "hash-unicode")
-        )
-        .scalars()
-        .one()
+        session.execute(select(RawIngestedJob).where(RawIngestedJob.raw_payload_hash == "hash-unicode")).scalars().one()
     )
     assert fetched.raw_payload == meta
 
-    session.execute(
-        delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id)
-    )
+    session.execute(delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id))
     session.commit()

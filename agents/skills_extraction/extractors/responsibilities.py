@@ -8,6 +8,7 @@ Week 5 implementation (Fatima + Nestor):
 - Schema: responsibility_description, scope, level, source_span
 Reference: ARCHITECTURE_DEEP.md § 6-Dimension Extraction Model.
 """
+
 from __future__ import annotations
 
 from agents.common.types import JobRecord

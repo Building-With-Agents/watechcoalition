@@ -41,12 +41,8 @@ def test_full_pipeline_redis_run_and_report() -> None:
     assert result.returncode in (0, 1), (
         f"Script should exit 0 or 1; got {result.returncode}. stdout: {result.stdout} stderr: {result.stderr}"
     )
-    assert JSON_REPORT.exists(), (
-        f"Expected {JSON_REPORT} to exist. stdout: {result.stdout} stderr: {result.stderr}"
-    )
-    assert HTML_REPORT.exists(), (
-        f"Expected {HTML_REPORT} to exist. stdout: {result.stdout} stderr: {result.stderr}"
-    )
+    assert JSON_REPORT.exists(), f"Expected {JSON_REPORT} to exist. stdout: {result.stdout} stderr: {result.stderr}"
+    assert HTML_REPORT.exists(), f"Expected {HTML_REPORT} to exist. stdout: {result.stdout} stderr: {result.stderr}"
 
     with open(JSON_REPORT, encoding="utf-8") as f:
         data = json.load(f)

@@ -53,7 +53,6 @@ def truncate_agent_tables(engine: Engine) -> Iterator[None]:
     yield
 
 
-
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_database_connection(engine: Engine) -> None:
     """
@@ -63,7 +62,6 @@ def test_database_connection(engine: Engine) -> None:
         result = conn.execute(text("SELECT 1"))
         value = result.scalar_one()
     assert value == 1
-
 
 
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
@@ -86,7 +84,6 @@ def test_all_tables_exist(engine: Engine) -> None:
     assert not missing, f"Missing expected tables: {missing}"
 
 
-
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_migration_is_idempotent(engine: Engine) -> None:
     """
@@ -101,7 +98,6 @@ def test_migration_is_idempotent(engine: Engine) -> None:
     assert "raw_ingested_jobs" in inspector.get_table_names(schema="dbo")
     assert "normalized_jobs" in inspector.get_table_names(schema="dbo")
     assert "job_ingestion_runs" in inspector.get_table_names(schema="dbo")
-
 
 
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
@@ -130,4 +126,3 @@ def test_job_postings_has_phase1_columns(engine: Engine) -> None:
 
     for col in expected_columns:
         assert col in column_names, f"job_postings missing expected column: {col}"
-

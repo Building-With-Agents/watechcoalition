@@ -28,6 +28,7 @@ class ContextSignal(BaseModel):
     source_span : SpanRecord | None
         Links back to the source text when available (Pass 1 pattern match).
     """
+
     signal_type: str
     value: str
     confidence: float

@@ -83,8 +83,9 @@ class TestScheduleFromEnvironment:
         mock_scheduler = MagicMock()
         mock_scheduler_class.return_value = mock_scheduler
         # Make sleep raise so main() exits (it catches KeyboardInterrupt and returns)
-        with patch.dict(os.environ, {"INGESTION_CRON_EXPRESSION": "", "INGESTION_INTERVAL_MINUTES": "7"}), patch(
-            "agents.orchestration.scheduler.time.sleep", side_effect=KeyboardInterrupt
+        with (
+            patch.dict(os.environ, {"INGESTION_CRON_EXPRESSION": "", "INGESTION_INTERVAL_MINUTES": "7"}),
+            patch("agents.orchestration.scheduler.time.sleep", side_effect=KeyboardInterrupt),
         ):
             main()
 
@@ -105,10 +106,13 @@ class TestScheduleFromEnvironment:
 
         mock_scheduler = MagicMock()
         mock_scheduler_class.return_value = mock_scheduler
-        with patch.dict(
-            os.environ,
-            {"INGESTION_CRON_EXPRESSION": "*/3 * * * *", "INGESTION_INTERVAL_MINUTES": "2"},
-        ), patch("agents.orchestration.scheduler.time.sleep", side_effect=KeyboardInterrupt):
+        with (
+            patch.dict(
+                os.environ,
+                {"INGESTION_CRON_EXPRESSION": "*/3 * * * *", "INGESTION_INTERVAL_MINUTES": "2"},
+            ),
+            patch("agents.orchestration.scheduler.time.sleep", side_effect=KeyboardInterrupt),
+        ):
             main()
 
         mock_scheduler.add_job.assert_called_once()

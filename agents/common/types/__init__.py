@@ -11,6 +11,7 @@ from agents.common.types.extraction_types import (
     ToolRecord,
 )
 from agents.common.types.job_record import JobRecord
+from agents.common.types.query_request import QueryPersona, QueryRequest
 from agents.common.types.raw_job_record import RawJobRecord
 from agents.common.types.region_config import RegionConfig
 
@@ -18,6 +19,8 @@ __all__ = [
     "ContextSignal",
     "ExtractionMetadata",
     "JobRecord",
+    "QueryPersona",
+    "QueryRequest",
     "RawJobRecord",
     "RegionConfig",
     "ResponsibilityRecord",

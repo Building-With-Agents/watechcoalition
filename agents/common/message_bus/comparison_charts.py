@@ -118,9 +118,13 @@ def generate_charts(csv_path: Path | None = None) -> list[Path]:
         fig, ax = plt.subplots(figsize=(8, 4))
         xi = range(len(labels))
         w = 0.25
-        bars_p50 = ax.bar([i - w for i in xi], [v if v is not None else 0 for v in p50], width=w, label="p50", color="#2ecc71")
+        bars_p50 = ax.bar(
+            [i - w for i in xi], [v if v is not None else 0 for v in p50], width=w, label="p50", color="#2ecc71"
+        )
         bars_p95 = ax.bar(xi, [v if v is not None else 0 for v in p95], width=w, label="p95", color="#3498db")
-        bars_p99 = ax.bar([i + w for i in xi], [v if v is not None else 0 for v in p99], width=w, label="p99", color="#9b59b6")
+        bars_p99 = ax.bar(
+            [i + w for i in xi], [v if v is not None else 0 for v in p99], width=w, label="p99", color="#9b59b6"
+        )
         for bar, v in zip(bars_p50, p50, strict=False):
             _bar_label(ax, bar, v, fmt=".2f")
         for bar, v in zip(bars_p95, p95, strict=False):
@@ -148,8 +152,20 @@ def generate_charts(csv_path: Path | None = None) -> list[Path]:
     xi = range(len(labels))
     w = 0.35
     off = 0.2
-    bars_qd = ax.bar([i - off for i in xi], [x if x is not None else 0 for x in queue_depths], width=w, label="Queue depth (peak)", color="#3498db")
-    bars_mif = ax.bar([i + off for i in xi], [x if x is not None else 0 for x in max_in_flight_list], width=w, label="In flight (peak)", color="#9b59b6")
+    bars_qd = ax.bar(
+        [i - off for i in xi],
+        [x if x is not None else 0 for x in queue_depths],
+        width=w,
+        label="Queue depth (peak)",
+        color="#3498db",
+    )
+    bars_mif = ax.bar(
+        [i + off for i in xi],
+        [x if x is not None else 0 for x in max_in_flight_list],
+        width=w,
+        label="In flight (peak)",
+        color="#9b59b6",
+    )
     ax.set_xticks(list(xi))
     ax.set_xticklabels(labels, fontsize=8)
     ax.set_ylabel("Count")

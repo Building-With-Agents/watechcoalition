@@ -9,6 +9,22 @@ from unittest.mock import MagicMock, patch
 from agents.common.event_envelope import EventEnvelope
 from agents.enrichment.agent import EnrichmentAgent
 
+_RECORD_ENRICHED_KEYS = frozenset(
+    {
+        "event_type",
+        "record_enriched_schema_version",
+        "batch_id",
+        "enriched_count",
+        "spam_rejected_count",
+        "flagged_for_review_count",
+        "temporal_period_distribution",
+        "borderplex_subregion_distribution",
+        "duplicate_count",
+        "soc_classified_count",
+        "naics_classified_count",
+    }
+)
+
 
 class TestEnrichmentAgent:
     """Verify agent_id, health_check, and process behaviour."""
@@ -31,10 +47,8 @@ class TestEnrichmentAgent:
             result = agent.health_check()
         assert result["status"] == "down"
 
-    def test_process_emits_record_enriched(
-        self, skills_event: EventEnvelope
-    ) -> None:
-        """Output event_type is RecordEnriched with Week 5 lite keys only."""
+    def test_process_emits_record_enriched(self, skills_event: EventEnvelope) -> None:
+        """Output event_type is RecordEnriched with Week 5 counts + Week 6 metrics."""
         agent = EnrichmentAgent()
         with (
             patch.object(EnrichmentAgent, "enrich_record", return_value={"ok": True}),
@@ -43,17 +57,9 @@ class TestEnrichmentAgent:
             out = agent.process(skills_event)
         assert out.payload["event_type"] == "RecordEnriched"
         assert out.agent_id == "enrichment-agent"
-        assert set(out.payload.keys()) == {
-            "event_type",
-            "batch_id",
-            "enriched_count",
-            "spam_rejected_count",
-            "flagged_for_review_count",
-        }
+        assert set(out.payload.keys()) == _RECORD_ENRICHED_KEYS
 
-    def test_process_passes_skills_into_enrich_record(
-        self, skills_event: EventEnvelope
-    ) -> None:
+    def test_process_passes_skills_into_enrich_record(self, skills_event: EventEnvelope) -> None:
         """Skills from the upstream event are passed on the posting dict to enrich_record."""
         captured: dict = {}
 
@@ -116,9 +122,7 @@ class TestEnrichmentAgent:
         assert "spam_rejected_count" in out.payload
         assert "flagged_for_review_count" in out.payload
 
-    def test_graceful_degradation_when_enrich_record_raises(
-        self, skills_event: EventEnvelope
-    ) -> None:
+    def test_graceful_degradation_when_enrich_record_raises(self, skills_event: EventEnvelope) -> None:
         payload = {**skills_event.payload, "is_spam": False}
         event = EventEnvelope(
             correlation_id=skills_event.correlation_id,
@@ -188,9 +192,7 @@ class TestEnrichmentAgent:
         assert out.payload["flagged_for_review_count"] == 2
         assert out.payload["enriched_count"] == 2
 
-    def test_spam_score_thresholds_precedence_over_absent_is_spam(
-        self, skills_event: EventEnvelope
-    ) -> None:
+    def test_spam_score_thresholds_precedence_over_absent_is_spam(self, skills_event: EventEnvelope) -> None:
         payload = {
             **skills_event.payload,
             "records": [
@@ -208,9 +210,7 @@ class TestEnrichmentAgent:
         mock_enrich.assert_not_called()
         assert out.payload["spam_rejected_count"] == 1
 
-    def test_enrich_record_receives_merged_job_columns_from_batch_payload(
-        self, skills_event: EventEnvelope
-    ) -> None:
+    def test_enrich_record_receives_merged_job_columns_from_batch_payload(self, skills_event: EventEnvelope) -> None:
         """Optional job_postings columns on the batch payload merge into each row."""
         captured: list[dict[str, Any]] = []
 
@@ -249,13 +249,7 @@ class TestEnrichmentAgent:
         ):
             out = agent.process(event)
 
-        assert set(out.payload.keys()) == {
-            "event_type",
-            "batch_id",
-            "enriched_count",
-            "spam_rejected_count",
-            "flagged_for_review_count",
-        }
+        assert set(out.payload.keys()) == _RECORD_ENRICHED_KEYS
         assert out.payload["enriched_count"] == 1
         assert len(captured) == 1
         rec = captured[0]
@@ -265,9 +259,7 @@ class TestEnrichmentAgent:
         assert rec["borderplex_subregion"] == "el_paso"
         assert rec["is_duplicate"] is False
 
-    def test_enrich_record_return_can_include_job_postings_shape(
-        self, skills_event: EventEnvelope
-    ) -> None:
+    def test_enrich_record_return_can_include_job_postings_shape(self, skills_event: EventEnvelope) -> None:
         """enrich_record output may carry PR #97-style fields (city/state/country, UUID)."""
         company_uuid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
         mock_enriched = {
@@ -301,9 +293,7 @@ class TestEnrichmentAgent:
         assert out.payload["enriched_count"] == 1
         assert out.payload["event_type"] == "RecordEnriched"
 
-    def test_process_uses_session_scope_when_db_available(
-        self, skills_event: EventEnvelope
-    ) -> None:
+    def test_process_uses_session_scope_when_db_available(self, skills_event: EventEnvelope) -> None:
         """When check_db_connection is true, enrich_record receives the scoped Session."""
         payload = {**skills_event.payload, "is_spam": False}
         event = EventEnvelope(
@@ -328,9 +318,7 @@ class TestEnrichmentAgent:
         mock_enrich.assert_called_once()
         assert mock_enrich.call_args.kwargs.get("session") is mock_session
 
-    def test_process_passes_none_session_when_db_unavailable(
-        self, skills_event: EventEnvelope
-    ) -> None:
+    def test_process_passes_none_session_when_db_unavailable(self, skills_event: EventEnvelope) -> None:
         payload = {**skills_event.payload, "is_spam": False}
         event = EventEnvelope(
             correlation_id=skills_event.correlation_id,
@@ -350,9 +338,65 @@ class TestEnrichmentAgent:
         mock_enrich.assert_called_once()
         assert mock_enrich.call_args.kwargs.get("session") is None
 
-    def test_process_falls_back_when_session_scope_raises(
-        self, skills_event: EventEnvelope
-    ) -> None:
+    def test_record_enriched_week6_aggregates_distributions(self, skills_event: EventEnvelope) -> None:
+        """Week 6: temporal/borderplex distributions and classification counts on enriched rows."""
+        payload = {
+            **skills_event.payload,
+            "batch_id": "batch-week6",
+            "records": [
+                {
+                    "posting_id": 1,
+                    "title": "Dev",
+                    "company": "A",
+                    "skills": [],
+                    "is_spam": False,
+                },
+                {
+                    "posting_id": 2,
+                    "title": "Analyst",
+                    "company": "B",
+                    "skills": [],
+                    "is_spam": False,
+                },
+            ],
+        }
+        event = EventEnvelope(
+            correlation_id=skills_event.correlation_id,
+            agent_id=skills_event.agent_id,
+            payload=payload,
+        )
+
+        n = 0
+
+        def enrich_side_effect(posting: dict, session: object) -> dict:
+            nonlocal n
+            n += 1
+            row: dict = {"ok": True, "borderplex_subregion": "el_paso" if n == 1 else "unknown"}
+            if n == 1:
+                row["temporal_period"] = "agentic_era"
+                row["soc_code"] = "15-1252"
+                row["naics_code"] = "541511"
+                row["is_duplicate"] = False
+            else:
+                row["temporal_period"] = "agentic_era"
+                row["is_duplicate"] = True
+            return row
+
+        agent = EnrichmentAgent()
+        with (
+            patch.object(EnrichmentAgent, "enrich_record", side_effect=enrich_side_effect),
+            patch("agents.enrichment.agent.resolve_sector", return_value=None),
+        ):
+            out = agent.process(event)
+
+        assert out.payload["enriched_count"] == 2
+        assert out.payload["duplicate_count"] == 1
+        assert out.payload["soc_classified_count"] == 1
+        assert out.payload["naics_classified_count"] == 1
+        assert out.payload["temporal_period_distribution"] == {"agentic_era": 2}
+        assert out.payload["borderplex_subregion_distribution"] == {"el_paso": 1, "unknown": 1}
+
+    def test_process_falls_back_when_session_scope_raises(self, skills_event: EventEnvelope) -> None:
         payload = {**skills_event.payload, "is_spam": False}
         event = EventEnvelope(
             correlation_id=skills_event.correlation_id,

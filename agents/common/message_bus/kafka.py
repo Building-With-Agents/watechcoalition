@@ -36,8 +36,7 @@ class KafkaHandlerExecutionError(KafkaEventBusError):
         cause: Exception,
     ) -> None:
         super().__init__(
-            f"handler '{subscriber_id}' failed for {topic}[{partition}]@{offset} "
-            f"event_type='{event_type}': {cause}"
+            f"handler '{subscriber_id}' failed for {topic}[{partition}]@{offset} event_type='{event_type}': {cause}"
         )
         self.topic = topic
         self.partition = partition
@@ -95,9 +94,7 @@ class KafkaEventBus(EventBusBase):
         self._consumer = consumer
         self._topic = topic
 
-        self._subscribers: dict[str, list[tuple[Subscription, EventHandler]]] = (
-            defaultdict(list)
-        )
+        self._subscribers: dict[str, list[tuple[Subscription, EventHandler]]] = defaultdict(list)
         self._published_events = 0
         self._delivered_events = 0
         self._handler_failures = 0
@@ -207,9 +204,7 @@ class KafkaEventBus(EventBusBase):
         """Register a handler for one validated event type."""
         subscription = self.validate_subscription(event_type, subscriber_id)
         validated_handler = self.validate_subscription_handler(handler)
-        self._subscribers[subscription.event_type].append(
-            (subscription, validated_handler)
-        )
+        self._subscribers[subscription.event_type].append((subscription, validated_handler))
         return subscription
 
     def consume_available(
@@ -223,9 +218,7 @@ class KafkaEventBus(EventBusBase):
         if max_events <= 0:
             return 0
 
-        records = tuple(
-            self._consumer.poll(timeout_ms=timeout_ms, max_records=max_events)
-        )
+        records = tuple(self._consumer.poll(timeout_ms=timeout_ms, max_records=max_events))
         if not records:
             return 0
 
@@ -359,9 +352,7 @@ class _KafkaPythonConsumerAdapter:
         from kafka.structs import OffsetAndMetadata, TopicPartition
 
         topic_partition = TopicPartition(message.topic, message.partition)
-        self._consumer.commit(
-            offsets={topic_partition: OffsetAndMetadata(message.offset + 1, "")}
-        )
+        self._consumer.commit(offsets={topic_partition: OffsetAndMetadata(message.offset + 1, "")})
 
     def seek(self, message: KafkaMessage) -> None:
         from kafka.structs import TopicPartition

@@ -2,7 +2,7 @@
 Skills enrichment — Pair D (Week 5): company / location / sector resolution and confidence.
 
 Consumes ``SkillsExtracted`` (after Pair C spam / quality / classification on each record).
-Emits exactly one ``RecordEnriched`` per batch invocation (Week 5 lite payload, issue #87).
+Emits exactly one ``RecordEnriched`` per batch invocation (Week 5 counts + Week 6 distributions).
 
 When ``check_db_connection()`` is true, ``process()`` opens one ``session_scope()`` for the
 whole batch so ``resolve_company`` / ``resolve_location`` use the real dbo session (#95).
@@ -20,6 +20,7 @@ below 0.7 → proceed. When ``is_spam`` is set explicitly by upstream, it overri
 from __future__ import annotations
 
 import json
+from collections import defaultdict
 from pathlib import Path
 from typing import Any, Literal
 
@@ -28,6 +29,8 @@ import structlog
 from agents.common.base_agent import BaseAgent
 from agents.common.data_store import check_db_connection, session_scope
 from agents.common.event_envelope import EventEnvelope
+from agents.enrichment.adapters.facade import ExternalEnrichmentFacade
+from agents.enrichment.async_bridge import run_coroutine
 from agents.enrichment.resolvers.company_resolver import resolve_company
 from agents.enrichment.resolvers.confidence import (
     compute_field_confidence,
@@ -39,9 +42,7 @@ from agents.enrichment.resolvers.sector_resolver import resolve_sector
 
 log = structlog.get_logger()
 
-_FIXTURE_PATH = (
-    Path(__file__).parent.parent / "data" / "fixtures" / "fixture_enriched.json"
-)
+_FIXTURE_PATH = Path(__file__).parent.parent / "data" / "fixtures" / "fixture_enriched.json"
 
 SpamBucket = Literal["rejected", "flagged", "proceed"]
 
@@ -77,14 +78,23 @@ def _spam_bucket(record: dict[str, Any]) -> SpamBucket:
     return "proceed"
 
 
-_EXTRA_POSTING_KEYS = frozenset({
-    "soc_code",
-    "naics_code",
-    "temporal_period",
-    "borderplex_subregion",
-    "is_duplicate",
-    "duplicate_cluster_id",
-})
+def _distribution_bucket(value: Any) -> str:
+    if value is None:
+        return "unknown"
+    s = str(value).strip()
+    return s if s else "unknown"
+
+
+_EXTRA_POSTING_KEYS = frozenset(
+    {
+        "soc_code",
+        "naics_code",
+        "temporal_period",
+        "borderplex_subregion",
+        "is_duplicate",
+        "duplicate_cluster_id",
+    }
+)
 
 
 def _posting_for_enrichment(
@@ -92,6 +102,7 @@ def _posting_for_enrichment(
     batch_payload: dict[str, Any],
 ) -> dict[str, Any]:
     """Build the posting dict passed to ``enrich_record`` (record fields + batch fallbacks)."""
+
     def pick(key: str, default: Any = None) -> Any:
         if key in record and record[key] is not None:
             return record[key]
@@ -131,8 +142,9 @@ class EnrichmentAgent(BaseAgent):
     def agent_id(self) -> str:
         return "enrichment-agent"
 
-    def __init__(self) -> None:
+    def __init__(self, external_facade: ExternalEnrichmentFacade | None = None) -> None:
         self._fixture: dict[int, dict] = {}
+        self._external_facade = external_facade or ExternalEnrichmentFacade()
 
     def health_check(self) -> dict:
         """Return ok status if the fixture file is present and loadable."""
@@ -157,9 +169,15 @@ class EnrichmentAgent(BaseAgent):
         enriched_count = 0
         spam_rejected_count = 0
         flagged_for_review_count = 0
+        temporal_period_distribution: dict[str, int] = defaultdict(int)
+        borderplex_subregion_distribution: dict[str, int] = defaultdict(int)
+        duplicate_count = 0
+        soc_classified_count = 0
+        naics_classified_count = 0
 
         def run_batch(session: Any) -> None:
             nonlocal enriched_count, spam_rejected_count, flagged_for_review_count
+            nonlocal duplicate_count, soc_classified_count, naics_classified_count
             for row in rows:
                 bucket = _spam_bucket(row)
                 if bucket == "rejected":
@@ -172,11 +190,22 @@ class EnrichmentAgent(BaseAgent):
                 posting = _posting_for_enrichment(row, payload)
                 try:
                     enriched = self.enrich_record(posting, session=session)
-                    sector_id = resolve_sector(
-                        posting.get("role_classification"), session=session
-                    )
+                    sector_id = resolve_sector(posting.get("role_classification"), session=session)
                     enriched["sector_id"] = sector_id
                     enriched_count += 1
+
+                    tp = _distribution_bucket(enriched.get("temporal_period", posting.get("temporal_period")))
+                    temporal_period_distribution[tp] += 1
+                    bp = _distribution_bucket(enriched.get("borderplex_subregion"))
+                    borderplex_subregion_distribution[bp] += 1
+                    if enriched.get("is_duplicate") is True:
+                        duplicate_count += 1
+                    soc_raw = enriched.get("soc_code") or posting.get("soc_code")
+                    if soc_raw is not None and str(soc_raw).strip():
+                        soc_classified_count += 1
+                    naics_raw = enriched.get("naics_code") or posting.get("naics_code")
+                    if naics_raw is not None and str(naics_raw).strip():
+                        naics_classified_count += 1
                 except Exception:
                     log.warning("enrichment_process_degraded", agent=self.agent_id)
 
@@ -200,6 +229,11 @@ class EnrichmentAgent(BaseAgent):
             enriched_count=enriched_count,
             spam_rejected_count=spam_rejected_count,
             flagged_for_review_count=flagged_for_review_count,
+            temporal_period_distribution=dict(temporal_period_distribution),
+            borderplex_subregion_distribution=dict(borderplex_subregion_distribution),
+            duplicate_count=duplicate_count,
+            soc_classified_count=soc_classified_count,
+            naics_classified_count=naics_classified_count,
         )
 
     def enrich_record(self, posting: dict[str, Any], session: Any) -> dict[str, Any]:
@@ -210,11 +244,9 @@ class EnrichmentAgent(BaseAgent):
         ``enrichment_status: degraded`` so the batch can continue.
         """
         try:
-            company_id, company_confidence = resolve_company(
-                posting.get("company") or "", session
-            )
-            location_id, location_confidence, raw_location_text, borderplex_subregion = (
-                resolve_location(posting.get("location", ""), session)
+            company_id, company_confidence = resolve_company(posting.get("company") or "", session)
+            location_id, location_confidence, raw_location_text, borderplex_subregion = resolve_location(
+                posting.get("location", ""), session
             )
             field_confidence = compute_field_confidence(
                 company_confidence,
@@ -228,7 +260,7 @@ class EnrichmentAgent(BaseAgent):
                 quality_score=posting.get("quality_score"),
                 taxonomy_coverage=posting.get("taxonomy_coverage"),
             )
-            return {
+            merged: dict[str, Any] = {
                 **posting,
                 "company_id": company_id,
                 "location_id": location_id,
@@ -237,6 +269,20 @@ class EnrichmentAgent(BaseAgent):
                 "field_confidence": field_confidence,
                 "overall_confidence": overall_confidence,
             }
+            try:
+                ext = run_coroutine(self._external_facade.fetch_for_posting(merged))
+                merged.update(ext)
+            except RuntimeError as re_exc:
+                log.warning(
+                    "enrichment_external_adapters_skipped",
+                    reason=str(re_exc),
+                )
+            except Exception as ext_exc:  # noqa: BLE001
+                log.warning(
+                    "enrichment_external_adapters_failed",
+                    error=str(ext_exc),
+                )
+            return merged
         except Exception:
             log.warning(
                 "enrich_record_degraded",

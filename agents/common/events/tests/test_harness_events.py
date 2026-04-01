@@ -53,8 +53,16 @@ class TestHarnessPayloadShape:
 
     def test_payload_has_ingest_batch_keys(self) -> None:
         events = list(generate_synthetic_ingest_batches(count=10, seed=42))
-        required = {"event_type", "batch_id", "source", "region_id",
-                    "total_fetched", "staged_count", "dedup_count", "error_count"}
+        required = {
+            "event_type",
+            "batch_id",
+            "source",
+            "region_id",
+            "total_fetched",
+            "staged_count",
+            "dedup_count",
+            "error_count",
+        }
         for event in events:
             assert set(event.payload) >= required
             assert event.payload["event_type"] == "IngestBatch"

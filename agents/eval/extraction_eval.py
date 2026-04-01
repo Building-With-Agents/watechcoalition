@@ -108,11 +108,7 @@ def normalize_list(items: Any) -> set[str]:
 def compute_metrics(pred: set[str], true: set[str]) -> tuple[float, float, float]:
     precision = 0.0 if len(pred) == 0 else len(pred & true) / len(pred)
     recall = 0.0 if len(true) == 0 else len(pred & true) / len(true)
-    f1 = (
-        (2 * precision * recall / (precision + recall))
-        if (precision + recall) > 0
-        else 0.0
-    )
+    f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
     return precision, recall, f1
 
 
@@ -140,17 +136,11 @@ def fuzzy_match_count(pred: set[str], true: set[str], threshold: int) -> int:
     return matches
 
 
-def compute_fuzzy_metrics(
-    pred: set[str], true: set[str], threshold: int
-) -> tuple[float, float, float]:
+def compute_fuzzy_metrics(pred: set[str], true: set[str], threshold: int) -> tuple[float, float, float]:
     m = fuzzy_match_count(pred, true, threshold)
     precision = 0.0 if len(pred) == 0 else m / len(pred)
     recall = 0.0 if len(true) == 0 else m / len(true)
-    f1 = (
-        (2 * precision * recall / (precision + recall))
-        if (precision + recall) > 0
-        else 0.0
-    )
+    f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
     return precision, recall, f1
 
 
@@ -323,22 +313,14 @@ def run_eval(ground_truth_path: str | Path) -> None:
     _log(f"Tools Recall:    {recall_tools:.2f}")
     _log(f"Tools F1:        {f1_tools:.2f}")
 
-    _log(
-        f"\n=== FINAL METRICS (fuzzy — token_set_ratio >= {fuzzy_threshold}, greedy 1:1) ==="
-    )
+    _log(f"\n=== FINAL METRICS (fuzzy — token_set_ratio >= {fuzzy_threshold}, greedy 1:1) ===")
     _log(f"Total GT Skills: {total_true_skills}")
     _log(f"Total Pred Skills: {total_pred_skills}")
     _log(f"Fuzzy-matched Skills: {total_fuzzy_matched_skills}")
 
-    fp_s = (
-        total_fuzzy_matched_skills / total_pred_skills if total_pred_skills > 0 else 0.0
-    )
-    fr_s = (
-        total_fuzzy_matched_skills / total_true_skills if total_true_skills > 0 else 0.0
-    )
-    ff_s = (
-        (2 * fp_s * fr_s / (fp_s + fr_s)) if (fp_s + fr_s) > 0 else 0.0
-    )
+    fp_s = total_fuzzy_matched_skills / total_pred_skills if total_pred_skills > 0 else 0.0
+    fr_s = total_fuzzy_matched_skills / total_true_skills if total_true_skills > 0 else 0.0
+    ff_s = (2 * fp_s * fr_s / (fp_s + fr_s)) if (fp_s + fr_s) > 0 else 0.0
     _log(f"Skills Precision: {fp_s:.2f}")
     _log(f"Skills Recall:    {fr_s:.2f}")
     _log(f"Skills F1:        {ff_s:.2f}")
@@ -348,15 +330,9 @@ def run_eval(ground_truth_path: str | Path) -> None:
     _log(f"Total Pred Tools: {total_pred_tools}")
     _log(f"Fuzzy-matched Tools: {total_fuzzy_matched_tools}")
 
-    fp_t = (
-        total_fuzzy_matched_tools / total_pred_tools if total_pred_tools > 0 else 0.0
-    )
-    fr_t = (
-        total_fuzzy_matched_tools / total_true_tools if total_true_tools > 0 else 0.0
-    )
-    ff_t = (
-        (2 * fp_t * fr_t / (fp_t + fr_t)) if (fp_t + fr_t) > 0 else 0.0
-    )
+    fp_t = total_fuzzy_matched_tools / total_pred_tools if total_pred_tools > 0 else 0.0
+    fr_t = total_fuzzy_matched_tools / total_true_tools if total_true_tools > 0 else 0.0
+    ff_t = (2 * fp_t * fr_t / (fp_t + fr_t)) if (fp_t + fr_t) > 0 else 0.0
     _log(f"Tools Precision: {fp_t:.2f}")
     _log(f"Tools Recall:    {fr_t:.2f}")
     _log(f"Tools F1:        {ff_t:.2f}")
