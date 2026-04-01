@@ -173,9 +173,9 @@ def apply_fuzzy_dedup_result(
     """
     Persist fuzzy-dedup state for the current row and any matched survivor row.
 
-    ``run_fuzzy_dedup`` stays read/decision-only; this helper is the single
-    ``dbo.job_postings`` write path for ``is_duplicate`` and
-    ``duplicate_cluster_id``.
+    ``run_fuzzy_dedup`` may write ``dedup_text_hash`` / ``dedup_embedding`` (cache
+    for the anchor and lazily backfilled survivors). This helper is the **only**
+    path that updates ``is_duplicate`` and ``duplicate_cluster_id``.
     """
     if result.stub:
         log.info("fuzzy_dedup_persistence_skipped_stub", job_posting_id=job_posting_id)

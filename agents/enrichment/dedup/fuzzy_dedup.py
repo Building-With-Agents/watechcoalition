@@ -185,7 +185,7 @@ def _hydrate_survivor_vectors(session: Session, *, job_posting_id: str, survivor
         return ready, cache_hits, 0
 
     embedded_count = 0
-    for (sd, text_hash, _dedup_plain), raw_vec in zip(pending, vectors):
+    for (sd, text_hash, _dedup_plain), raw_vec in zip(pending, vectors, strict=True):
         svec = parse_stored_embedding(raw_vec)
         if svec is None or svec.size == 0:
             continue
