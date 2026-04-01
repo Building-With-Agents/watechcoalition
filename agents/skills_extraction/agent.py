@@ -1,15 +1,15 @@
 """
-Skills Extraction Agent — Week 4 hybrid extraction.
+Skills Extraction Agent (Work Intelligence Agent) — Week 5 six-dimension extraction.
 
-Pass 1 (tools): deterministic pattern matching (`extract_tools`).
-Pass 2 (skills): LLM extraction + 6-step taxonomy linking (`extract_skills`) when
-title/description/requirements/responsibilities text is present; otherwise the
-Week 2 posting_id fixture can supply skills for skeleton tests.
+Pass 1: ``extract_context`` (regex, zero LLM tokens), ``extract_tools`` (pattern catalog).
+Pass 2: ``extract_tasks`` (Haiku-tier deployment), ``extract_responsibilities`` (Sonnet-tier
+deployment), ``extract_skills`` (skills deployment). Pass 1 context signals are injected
+into task and responsibility prompts.
 
-Input resolution order:
+Input modes (in order):
 1. Inline normalized records on the event payload
-2. Batch load from dbo.normalized_jobs by batch_id / ingestion_run_id
-3. Legacy posting_id fixture fallback (walking skeleton / tests)
+2. Batch load from ``dbo.normalized_jobs`` by ``batch_id`` / ``ingestion_run_id``
+3. Legacy ``posting_id`` fixture fallback for walking-skeleton tests
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ import json
 import os
 import time
 from collections.abc import Sequence
+from contextlib import suppress
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
@@ -31,7 +32,12 @@ from agents.common.data_store import check_db_connection, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types import ExtractionMetadata, JobRecord, ToolRecord
-from agents.skills_extraction.extractors import extract_skills, extract_tools
+from agents.skills_extraction.extractors import (
+    extract_context,
+    extract_responsibilities,
+    extract_tasks,
+    extract_tools,
+)
 from agents.skills_extraction.extractors.skills import (
     apply_taxonomy_to_skills,
     extract_skills_no_taxonomy,
@@ -40,9 +46,11 @@ from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
 from agents.skills_extraction.prompts import SKILLS_PROMPT_VERSION
 from agents.skills_extraction.validator import validate_extraction_result
 
-_FIXTURE_PATH = Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
-EXTRACTION_PASS1_LABEL = "pattern-tools-v1"
-EXTRACTION_VERSION = f"week4-hybrid-{SKILLS_PROMPT_VERSION}"
+_FIXTURE_PATH = (
+    Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
+)
+EXTRACTION_PASS1_LABEL = "pattern-context-tools-v1"
+EXTRACTION_VERSION = f"week5-six-dim-{SKILLS_PROMPT_VERSION}"
 FIXTURE_EXTRACTION_MODEL = "fixture-week2-skills"
 
 
@@ -58,38 +66,11 @@ def _llm_deployment_name() -> str:
 
 def _persisted_extraction_model_llm() -> str:
     """Stable label: Pass 1 strategy + Pass 2 deployment + prompt version."""
-    return f"pass1={EXTRACTION_PASS1_LABEL};pass2={_llm_deployment_name()};prompt={SKILLS_PROMPT_VERSION}"
-
-
-def _metadata_from_pass2(
-    meta: dict[str, Any],
-    tools: list[ToolRecord],
-    *,
-    extraction_version: str,
-) -> dict[str, Any]:
-    """Build JSON for ExtractedIntelligence.extraction_metadata (Pass 2 path)."""
-    tier = os.getenv("EXTRACTION_MODEL_TIER", "").strip().lower()
-    if tier not in ("sonnet", "haiku"):
-        tier = "sonnet"
-    warnings = list(meta.get("extraction_warnings") or [])
-    err = meta.get("error_reason")
-    if err:
-        es = str(err)
-        if es and es not in warnings:
-            warnings.append(es)
-    blob = ExtractionMetadata(
-        extraction_version=extraction_version,
-        model_used=str(meta.get("model") or ""),
-        model_tier=tier,
-        tokens_used=int(meta.get("tokens_used") or 0),
-        cost_usd=float(meta.get("cost_usd") or 0.0),
-        extraction_duration_ms=int(meta.get("latency_ms") or 0),
-        pass1_tool_count=len(tools),
-        pass2_llm_dimensions=["skills"],
-        pass2_llm_calls=1,
-        extraction_warnings=warnings,
+    return (
+        f"pass1={EXTRACTION_PASS1_LABEL};"
+        f"pass2={_llm_deployment_name()};"
+        f"prompt={SKILLS_PROMPT_VERSION}"
     )
-    return blob.model_dump()
 
 
 @dataclass(frozen=True)
@@ -106,13 +87,16 @@ class ExtractionWorkItem:
 
 @dataclass(frozen=True)
 class ExtractionResult:
-    """One extraction result emitted by the agent (Pass 1 + optional Pass 2 or fixture)."""
+    """One extraction result emitted by the Work Intelligence / skills extraction agent."""
 
     work_item: ExtractionWorkItem
     skills: list[dict[str, Any]]
     tools: list[ToolRecord]
     seniority: str | None
     extraction_status: str
+    tasks: list[dict[str, Any]] = field(default_factory=list)
+    responsibilities: list[dict[str, Any]] = field(default_factory=list)
+    context: list[dict[str, Any]] = field(default_factory=list)
     extraction_tokens_used: int = 0
     extraction_cost_usd: float = 0.0
     alert_skills_extraction: bool = False
@@ -143,7 +127,11 @@ class EventOrDatabaseWorkItemLoader:
         payload = event.payload
         batch_id = _string_value(payload.get("batch_id"))
 
-        inline_records = payload.get("normalized_jobs") or payload.get("jobs") or payload.get("job_records")
+        inline_records = (
+            payload.get("normalized_jobs")
+            or payload.get("jobs")
+            or payload.get("job_records")
+        )
         if isinstance(inline_records, list):
             items = [
                 item
@@ -233,7 +221,10 @@ class EventOrDatabaseWorkItemLoader:
             normalized_job_id = _int_value(mapping.get("id"))
 
         external_id = str(
-            mapping.get("external_id") or posting_id or normalized_job_id or title.casefold().replace(" ", "-")
+            mapping.get("external_id")
+            or posting_id
+            or normalized_job_id
+            or title.casefold().replace(" ", "-")
         )
         description = _string_value(mapping.get("description")) or _string_value(mapping.get("raw_text"))
         requirements = _string_value(mapping.get("requirements"))
@@ -283,14 +274,10 @@ class SQLAlchemyExtractionStore:
                     .order_by(ExtractedIntelligence.id)
                     .all()
                 )
-                row = (
-                    existing_rows[0]
-                    if existing_rows
-                    else ExtractedIntelligence(
-                        normalized_job_id=normalized_job_id,
-                        extraction_version=EXTRACTION_VERSION,
-                        extraction_model=FIXTURE_EXTRACTION_MODEL,
-                    )
+                row = existing_rows[0] if existing_rows else ExtractedIntelligence(
+                    normalized_job_id=normalized_job_id,
+                    extraction_version=EXTRACTION_VERSION,
+                    extraction_model=FIXTURE_EXTRACTION_MODEL,
                 )
                 if not existing_rows:
                     session.add(row)
@@ -303,24 +290,31 @@ class SQLAlchemyExtractionStore:
                 row.extraction_cost_usd = getattr(result, "extraction_cost_usd", 0.0) or 0.0
                 row.skills = result.skills
                 row.tools = [tool.model_dump() for tool in result.tools]
-                row.tasks = []
-                row.responsibilities = []
-                row.context = []
-                row.overall_confidence = _average_tool_confidence(result.tools)
-                validated = validate_extraction_result(result.skills, [tool.model_dump() for tool in result.tools])
-                row.extraction_warnings = list(dict.fromkeys([*list(result.extraction_warnings), *validated]))
-                row.extraction_metadata = result.extraction_metadata
-                row.extraction_failed = result.extraction_status != "success"
+                row.tasks = list(getattr(result, "tasks", []) or [])
+                row.responsibilities = list(getattr(result, "responsibilities", []) or [])
+                row.context = list(getattr(result, "context", []) or [])
+                validated = validate_extraction_result(
+                    result.skills, [tool.model_dump() for tool in result.tools]
+                )
+                row.extraction_warnings = list(
+                    dict.fromkeys([*list(result.extraction_warnings), *validated])
+                )
+                row.overall_confidence = _overall_extraction_confidence(result)
+                # Degraded = partial LLM failure (e.g. tasks) but skills OK — not a hard failure.
+                row.extraction_failed = result.extraction_status == "failed"
+                em = result.extraction_metadata
+                row.extraction_metadata = em if isinstance(em, dict) else None
 
 
 class SkillsExtractionAgent(BaseAgent):
     """
-    Skills Extraction Agent — Week 4 hybrid (Pass 1 + Pass 2 LLM + taxonomy).
+    Skills Extraction Agent — Week 5 six-dimension (context, tools, tasks,
+    responsibilities, skills).
 
-    Normalized text present: runs `extract_tools` then `extract_skills`, persists
-    to dbo.extracted_intelligence when `normalized_job_id` is set, emits
-    `SkillsExtracted`.
-    No normalized text: falls back to Week 2 fixture by `posting_id` when available.
+    Normalized text present: Pass 1 context + tools, then Pass 2 LLM dimensions;
+    persists to dbo.extracted_intelligence when ``normalized_job_id`` is set;
+    emits ``SkillsExtracted``.
+    No normalized text: falls back to Week 2 fixture by ``posting_id`` when available.
     """
 
     @property
@@ -372,11 +366,11 @@ class SkillsExtractionAgent(BaseAgent):
         if not work_items:
             return self._legacy_fixture_response(event)
 
-        # Cap work items per run for faster pipeline runs (default 10; set SKILLS_EXTRACTION_MAX_JOBS to override)
+        # Cap work items per run (0 = no limit; set SKILLS_EXTRACTION_MAX_JOBS to override)
         try:
-            max_jobs = int(os.environ.get("SKILLS_EXTRACTION_MAX_JOBS", "10"))
+            max_jobs = int(os.environ.get("SKILLS_EXTRACTION_MAX_JOBS", "0"))
         except (TypeError, ValueError):
-            max_jobs = 10
+            max_jobs = 0
         if max_jobs > 0 and len(work_items) > max_jobs:
             work_items = work_items[:max_jobs]
 
@@ -400,7 +394,6 @@ class SkillsExtractionAgent(BaseAgent):
         taxonomy_map: dict[str, Any] = {}
         if all_labels:
             import structlog as _structlog
-
             _log = _structlog.get_logger()
             _log.info(
                 "taxonomy_batch_resolve",
@@ -427,35 +420,134 @@ class SkillsExtractionAgent(BaseAgent):
             payload=self._build_payload(event, results),
         )
 
-    def _extract_work_item_no_taxonomy(self, item: ExtractionWorkItem) -> tuple[list[ToolRecord], list, dict, bool]:
-        """Run Pass 1 (tools) + Pass 2 (skills without taxonomy). Returns (tools, skills, meta, used_llm)."""
-        tools = extract_tools(item.job_record)
+    def _extract_work_item_no_taxonomy(
+        self, item: ExtractionWorkItem
+    ) -> tuple[list[ToolRecord], list, dict, bool]:
+        """Pass 1: context + tools. Pass 2: tasks, responsibilities, skills (taxonomy deferred).
+
+        Returns ``(tools, skills_list, combined_meta, used_llm)``. ``combined_meta`` carries
+        serialized dimension payloads and per-dimension metadata for ``_build_extraction_result``.
+        """
         job = item.job_record
+        tools = extract_tools(job)
+        context_signals, ctx_meta = extract_context(job)
+
         has_normalized_text = bool(
-            (job.description or "").strip() or (job.requirements or "").strip() or (job.responsibilities or "").strip()
+            (job.description or "").strip()
+            or (job.requirements or "").strip()
+            or (job.responsibilities or "").strip()
         )
-        if has_normalized_text:
-            skills_list, meta = extract_skills_no_taxonomy(job, pass1_tools=tools)
-            return tools, skills_list, meta, True
 
-        import structlog as _sl
+        if not has_normalized_text:
+            import structlog as _sl
 
-        _sl.get_logger().warning(
-            "skills_extraction_no_text",
-            job_id=item.job_id,
-            title=item.title,
-            company=item.company,
-            reason="No description/requirements/responsibilities text — cannot extract skills",
+            _sl.get_logger().warning(
+                "skills_extraction_no_text",
+                job_id=item.job_id,
+                title=item.title,
+                company=item.company,
+                reason="No description/requirements/responsibilities text — cannot extract skills",
+            )
+            warn = _coerce_pass2_warnings(ctx_meta)
+            meta: dict[str, Any] = {
+                "success": False,
+                "extraction_failed": True,
+                "extraction_status": "failed",
+                "error_reason": "no_normalized_text",
+                "tokens_used": int(ctx_meta.get("tokens_used") or 0),
+                "cost_usd": float(ctx_meta.get("cost_usd") or 0.0),
+                "latency_ms": int(ctx_meta.get("latency_ms") or 0),
+                "extraction_warnings": list(warn)
+                + ["No normalized text available for extraction"],
+                "alert_skills_extraction": False,
+                "provider": ctx_meta.get("provider", "pattern-matching"),
+                "model": ctx_meta.get("model", "none"),
+                "context_signals": context_signals,
+                "tasks": [],
+                "responsibilities": [],
+                "dimension_metas": {
+                    "pass1_context": ctx_meta.get("extraction_metadata", {}),
+                },
+                "pass2_llm_calls": 0,
+                "pass2_llm_dimensions": [],
+            }
+            return tools, [], meta, False
+
+        tasks, tasks_meta = extract_tasks(job, pass1_context=context_signals)
+        responsibilities, resp_meta = extract_responsibilities(
+            job, pass1_context=context_signals
         )
-        meta = {
-            "success": False,
-            "extraction_failed": True,
-            "error_reason": "no_normalized_text",
-            "tokens_used": 0,
-            "cost_usd": 0.0,
-            "extraction_warnings": ["No normalized text available for extraction"],
+        skills_list, skills_meta = extract_skills_no_taxonomy(job, pass1_tools=tools)
+
+        total_tokens = (
+            int(ctx_meta.get("tokens_used") or 0)
+            + int(tasks_meta.get("tokens_used") or 0)
+            + int(resp_meta.get("tokens_used") or 0)
+            + int(skills_meta.get("tokens_used") or 0)
+        )
+        total_cost = (
+            float(ctx_meta.get("cost_usd") or 0.0)
+            + float(tasks_meta.get("cost_usd") or 0.0)
+            + float(resp_meta.get("cost_usd") or 0.0)
+            + float(skills_meta.get("cost_usd") or 0.0)
+        )
+        total_latency = (
+            int(ctx_meta.get("latency_ms") or 0)
+            + int(tasks_meta.get("latency_ms") or 0)
+            + int(resp_meta.get("latency_ms") or 0)
+            + int(skills_meta.get("latency_ms") or 0)
+        )
+
+        skills_failed = bool(skills_meta.get("extraction_failed"))
+        tasks_failed = bool(tasks_meta.get("extraction_failed"))
+        resp_failed = bool(resp_meta.get("extraction_failed"))
+
+        if skills_failed:
+            extraction_status = "failed"
+        elif tasks_failed or resp_failed:
+            extraction_status = "degraded"
+        else:
+            extraction_status = "success"
+
+        warn = _coerce_pass2_warnings(ctx_meta, tasks_meta, resp_meta, skills_meta)
+
+        combined_meta: dict[str, Any] = {
+            "success": extraction_status == "success",
+            "extraction_failed": skills_failed,
+            "extraction_status": extraction_status,
+            "error_reason": skills_meta.get("error_reason"),
+            "tokens_used": total_tokens,
+            "cost_usd": total_cost,
+            "latency_ms": total_latency,
+            "extraction_warnings": list(warn),
+            "alert_skills_extraction": bool(skills_meta.get("alert_skills_extraction")),
+            "provider": skills_meta.get("provider", "azure-openai"),
+            "model": skills_meta.get("model") or _llm_deployment_name(),
+            "context_signals": context_signals,
+            "tasks": tasks,
+            "responsibilities": responsibilities,
+            "dimension_metas": {
+                "pass1_context": ctx_meta.get("extraction_metadata", {}),
+                "tasks": tasks_meta.get("extraction_metadata", {}),
+                "responsibilities": resp_meta.get("extraction_metadata", {}),
+                "skills": {
+                    k: skills_meta.get(k)
+                    for k in (
+                        "model",
+                        "tokens_used",
+                        "cost_usd",
+                        "latency_ms",
+                        "success",
+                        "extraction_failed",
+                        "error_reason",
+                    )
+                    if k in skills_meta
+                },
+            },
+            "pass2_llm_calls": 3,
+            "pass2_llm_dimensions": ["tasks", "responsibilities", "skills"],
         }
-        return tools, [], meta, False
+        return tools, skills_list, combined_meta, True
 
     def _build_extraction_result(
         self,
@@ -464,16 +556,27 @@ class SkillsExtractionAgent(BaseAgent):
         skills_list: list,
         meta: dict,
     ) -> ExtractionResult:
-        """Build ExtractionResult from tools + taxonomy-resolved skills."""
+        """Build ExtractionResult from tools + taxonomy-resolved skills and Week 5 dimensions."""
         if meta and ("success" in meta or "extraction_failed" in meta):
             skills_payload = [s.model_dump() for s in skills_list]
-            status = "success" if not meta.get("extraction_failed") else "failed"
+            status = meta.get("extraction_status")
+            if status not in ("success", "degraded", "failed"):
+                status = "success" if not meta.get("extraction_failed") else "failed"
+            tasks_raw = meta.get("tasks") or []
+            resp_raw = meta.get("responsibilities") or []
+            ctx_raw = meta.get("context_signals") or []
+            tasks_payload = [t.model_dump() for t in tasks_raw]
+            resp_payload = [r.model_dump() for r in resp_raw]
+            context_payload = [c.model_dump() for c in ctx_raw]
             warn = tuple(str(w) for w in (meta.get("extraction_warnings") or []))
             meta_blob = _metadata_from_pass2(meta, tools, extraction_version=EXTRACTION_VERSION)
             return ExtractionResult(
                 work_item=item,
                 skills=skills_payload,
                 tools=tools,
+                tasks=tasks_payload,
+                responsibilities=resp_payload,
+                context=context_payload,
                 seniority=None,
                 extraction_status=status,
                 extraction_tokens_used=meta.get("tokens_used", 0) or 0,
@@ -486,7 +589,6 @@ class SkillsExtractionAgent(BaseAgent):
             )
         # No fixture fallback — fail explicitly so data issues surface
         import structlog as _sl
-
         _sl.get_logger().error(
             "skills_extraction_no_metadata",
             job_id=item.job_id,
@@ -504,45 +606,6 @@ class SkillsExtractionAgent(BaseAgent):
             persisted_extraction_model="none",
         )
 
-    def _extract_work_item(self, item: ExtractionWorkItem) -> ExtractionResult:
-        """Run Pass 1 (tools) then Pass 2 (skills) with inline taxonomy. Kept for backward compat."""
-        tools = extract_tools(item.job_record)
-        job = item.job_record
-        has_normalized_text = bool(
-            (job.description or "").strip() or (job.requirements or "").strip() or (job.responsibilities or "").strip()
-        )
-        if has_normalized_text:
-            skills_list, meta = extract_skills(job, pass1_tools=tools)
-            skills_payload = [s.model_dump() for s in skills_list]
-            status = "success" if not meta.get("extraction_failed") else "failed"
-            warn = tuple(str(w) for w in (meta.get("extraction_warnings") or []))
-            meta_blob = _metadata_from_pass2(meta, tools, extraction_version=EXTRACTION_VERSION)
-            return ExtractionResult(
-                work_item=item,
-                skills=skills_payload,
-                tools=tools,
-                seniority=None,
-                extraction_status=status,
-                extraction_tokens_used=meta.get("tokens_used", 0) or 0,
-                extraction_cost_usd=meta.get("cost_usd", 0.0) or 0.0,
-                alert_skills_extraction=meta.get("alert_skills_extraction", False),
-                extraction_warnings=warn,
-                extraction_metadata=meta_blob,
-                persisted_extraction_version=EXTRACTION_VERSION,
-                persisted_extraction_model=_persisted_extraction_model_llm(),
-            )
-        # No fixture fallback — fail explicitly
-        return ExtractionResult(
-            work_item=item,
-            skills=[],
-            tools=tools,
-            seniority=None,
-            extraction_status="failed",
-            extraction_warnings=("No normalized text available for extraction",),
-            persisted_extraction_version=EXTRACTION_VERSION,
-            persisted_extraction_model="none",
-        )
-
     def _build_payload(
         self,
         event: EventEnvelope,
@@ -551,6 +614,9 @@ class SkillsExtractionAgent(BaseAgent):
         """Build a batch-aligned SkillsExtracted payload with single-record compatibility."""
         summaries = [_result_summary(result) for result in results]
         job_ids = [summary["job_id"] for summary in summaries if summary["job_id"] is not None]
+        total_tasks = sum(len(getattr(result, "tasks", []) or []) for result in results)
+        total_resp = sum(len(getattr(result, "responsibilities", []) or []) for result in results)
+        total_ctx = sum(len(getattr(result, "context", []) or []) for result in results)
         total_skills = sum(len(result.skills) for result in results)
         skills_with_taxonomy = sum(
             1
@@ -560,20 +626,25 @@ class SkillsExtractionAgent(BaseAgent):
         )
         taxonomy_coverage = (skills_with_taxonomy / total_skills) if total_skills else 0.0
         total_cost = sum(getattr(result, "extraction_cost_usd", 0.0) or 0.0 for result in results)
-        any_llm_called = any((getattr(r, "extraction_tokens_used", 0) or 0) > 0 for r in results)
-        any_alert = any(getattr(r, "alert_skills_extraction", False) for r in results)
+        any_llm_called = any(
+            (getattr(r, "extraction_tokens_used", 0) or 0) > 0 for r in results
+        )
+        any_alert = any(
+            getattr(r, "alert_skills_extraction", False) for r in results
+        )
         payload: dict[str, Any] = {
             "event_type": "SkillsExtracted",
             "batch_id": event.payload.get("batch_id"),
             "job_ids": job_ids,
             "skills_count": total_skills,
             "tools_count": sum(len(result.tools) for result in results),
-            "tasks_count": 0,
-            "responsibilities_count": 0,
-            "context_count": 0,
+            "tasks_count": total_tasks,
+            "responsibilities_count": total_resp,
+            "context_signals_count": total_ctx,
+            "context_count": total_ctx,
             "taxonomy_coverage": round(taxonomy_coverage, 4),
             "extraction_cost_usd": round(total_cost, 6),
-            "failed_count": sum(1 for result in results if result.extraction_status != "success"),
+            "failed_count": sum(1 for result in results if result.extraction_status == "failed"),
             "records": summaries,
             "llm_provider": "azure-openai" if any_llm_called else "stub",
             "llm_model": _llm_deployment_name() if any_llm_called else "stub",
@@ -590,6 +661,12 @@ class SkillsExtractionAgent(BaseAgent):
                     "company": result.work_item.company,
                     "skills": result.skills,
                     "tools": [tool.model_dump() for tool in result.tools],
+                    "tasks": list(getattr(result, "tasks", []) or []),
+                    "responsibilities": list(getattr(result, "responsibilities", []) or []),
+                    "context": list(getattr(result, "context", []) or []),
+                    "tasks_count": len(getattr(result, "tasks", []) or []),
+                    "responsibilities_count": len(getattr(result, "responsibilities", []) or []),
+                    "context_signals_count": len(getattr(result, "context", []) or []),
                     "seniority": result.seniority,
                     "extraction_status": result.extraction_status,
                 }
@@ -610,6 +687,7 @@ class SkillsExtractionAgent(BaseAgent):
             "tools_count": 0,
             "tasks_count": 0,
             "responsibilities_count": 0,
+            "context_signals_count": 0,
             "context_count": 0,
             "taxonomy_coverage": 0.0,
             "extraction_cost_usd": 0.0,
@@ -630,12 +708,16 @@ class SkillsExtractionAgent(BaseAgent):
                     "company": fixture_payload.get("company"),
                     "skills": skills,
                     "tools": [],
+                    "tasks": [],
+                    "responsibilities": [],
+                    "context": [],
+                    "tasks_count": 0,
+                    "responsibilities_count": 0,
+                    "context_signals_count": 0,
                     "seniority": fixture_payload.get("seniority"),
                     "extraction_status": fixture_payload.get("extraction_status", "success"),
                 }
-            ]
-            if posting_id is not None
-            else [],
+            ] if posting_id is not None else [],
             "llm_provider": "stub",
             "llm_model": "stub",
             "llm_call_logged": False,
@@ -661,8 +743,56 @@ class SkillsExtractionAgent(BaseAgent):
         return True
 
 
+def _metadata_from_pass2(
+    meta: dict[str, Any],
+    tools: list[ToolRecord],
+    *,
+    extraction_version: str,
+) -> dict[str, Any]:
+    """Flatten Pass 1/2 dimension metadata for ``extracted_intelligence.extraction_metadata`` JSON."""
+    dim = meta.get("dimension_metas") or {}
+    raw_warnings = [str(w) for w in (meta.get("extraction_warnings") or [])]
+    em = ExtractionMetadata(
+        extraction_version=extraction_version,
+        model_used=str(meta.get("model") or ""),
+        model_tier=os.environ.get("EXTRACTION_MODEL_TIER", "mixed"),
+        tokens_used=int(meta.get("tokens_used") or 0),
+        cost_usd=float(meta.get("cost_usd") or 0.0),
+        extraction_duration_ms=int(meta.get("latency_ms") or 0),
+        pass1_tool_count=len(tools),
+        pass2_llm_dimensions=list(meta.get("pass2_llm_dimensions") or []),
+        pass2_llm_calls=int(meta.get("pass2_llm_calls") or 0),
+        extraction_warnings=raw_warnings,
+    )
+    out: dict[str, Any] = em.model_dump()
+    out["pass1_context"] = dim.get("pass1_context", {})
+    out["tasks"] = dim.get("tasks", {})
+    out["responsibilities"] = dim.get("responsibilities", {})
+    out["skills"] = dim.get("skills", {})
+    return out
+
+
+def _coerce_pass2_warnings(*metas: dict[str, Any]) -> tuple[str, ...]:
+    """Deduplicate warnings and error_reason strings from Pass 2 extractor metas."""
+    out: list[str] = []
+    for m in metas:
+        for w in m.get("extraction_warnings") or []:
+            s = str(w)
+            if s and s not in out:
+                out.append(s)
+        err = m.get("error_reason")
+        if err:
+            es = str(err)
+            if es and es not in out:
+                out.append(es)
+    return tuple(out)
+
+
 def _result_summary(result: ExtractionResult) -> dict[str, Any]:
     """Serialize one extraction result for the batch payload."""
+    tasks = list(getattr(result, "tasks", []) or [])
+    resp = list(getattr(result, "responsibilities", []) or [])
+    ctx = list(getattr(result, "context", []) or [])
     return {
         "job_id": result.work_item.job_id,
         "posting_id": result.work_item.posting_id,
@@ -671,6 +801,12 @@ def _result_summary(result: ExtractionResult) -> dict[str, Any]:
         "company": result.work_item.company,
         "skills": result.skills,
         "tools": [tool.model_dump() for tool in result.tools],
+        "tasks": tasks,
+        "responsibilities": resp,
+        "context": ctx,
+        "tasks_count": len(tasks),
+        "responsibilities_count": len(resp),
+        "context_signals_count": len(ctx),
         "seniority": result.seniority,
         "extraction_status": result.extraction_status,
     }
@@ -681,6 +817,28 @@ def _average_tool_confidence(tools: Sequence[ToolRecord]) -> float | None:
     if not tools:
         return None
     return sum(tool.confidence for tool in tools) / len(tools)
+
+
+def _overall_extraction_confidence(result: ExtractionResult) -> float | None:
+    """Blend tool and JSONB dimension confidences for a single scalar score."""
+    scores: list[float] = []
+    for tool in result.tools:
+        scores.append(tool.confidence)
+    for row in getattr(result, "tasks", []) or []:
+        if isinstance(row, dict) and row.get("confidence") is not None:
+            with suppress(TypeError, ValueError):
+                scores.append(float(row["confidence"]))
+    for row in getattr(result, "responsibilities", []) or []:
+        if isinstance(row, dict) and row.get("confidence") is not None:
+            with suppress(TypeError, ValueError):
+                scores.append(float(row["confidence"]))
+    for row in getattr(result, "context", []) or []:
+        if isinstance(row, dict) and row.get("confidence") is not None:
+            with suppress(TypeError, ValueError):
+                scores.append(float(row["confidence"]))
+    if not scores:
+        return _average_tool_confidence(result.tools)
+    return sum(scores) / len(scores)
 
 
 def _int_value(value: Any) -> int | None:
@@ -698,3 +856,7 @@ def _string_value(value: Any) -> str | None:
         return None
     value = value.strip()
     return value or None
+
+
+# Architecture docs name; implementation class is SkillsExtractionAgent.
+WorkIntelligenceAgent = SkillsExtractionAgent

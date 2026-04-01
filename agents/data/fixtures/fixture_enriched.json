@@ -97,7 +97,7 @@
     "company_id": "co-nvidia-001",
     "sector_id": "sec-technology",
     "role_classification": "Machine Learning",
-    "seniority": "senior",
+    "seniority": "mid",
     "quality_score": 0.94,
     "spam_score": 0.02,
     "is_spam": false,

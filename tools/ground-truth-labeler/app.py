@@ -36,7 +36,11 @@ from text_selector import render_selectable_job_text, span_input_bridge
 # Minimal toolbar avoids Streamlit share-modal.js (addEventListener on missing nodes in some setups).
 st.set_option("client.toolbarMode", "minimal")
 
-load_dotenv(Path(__file__).parent / ".env")
+# Same as agents scripts: repo-root `.env` (not `.env.example`). Tool-local `.env` is optional second pass.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_LABELER_DIR = Path(__file__).resolve().parent
+load_dotenv(_REPO_ROOT / ".env")
+load_dotenv(_LABELER_DIR / ".env")
 
 # ---------------------------------------------------------------------------
 # Constants

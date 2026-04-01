@@ -26,25 +26,25 @@
 </head>
 <body>
   <h1>Full pipeline Redis — Run report</h1>
-  <p>Correlation ID: <code>redis-pipe-0b19b058</code></p>
-  <p class="e2e">End-to-end latency: <strong>342099.25 ms</strong> | Overall: <strong class="ok">Success</strong></p>
+  <p>Correlation ID: <code>redis-pipe-50c9d1c0</code></p>
+  <p class="e2e">End-to-end latency: <strong>74680.48 ms</strong> | Overall: <strong class="ok">Success</strong></p>
   
 
   <h2>Timeline (locate the failing stage)</h2>
   <div class="timeline" role="list">
-<div class="step ok"><span class="step-name">ingestion</span><span class="step-ms">82499.91 ms</span><span class="step-status">OK</span></div>
+<div class="step ok"><span class="step-name">ingestion</span><span class="step-ms">74410.22 ms</span><span class="step-status">OK</span></div>
     <div class="arrow" aria-hidden="true">→</div>
-    <div class="step ok"><span class="step-name">normalization</span><span class="step-ms">975.25 ms</span><span class="step-status">OK</span></div>
+    <div class="step ok"><span class="step-name">normalization</span><span class="step-ms">48.65 ms</span><span class="step-status">OK</span></div>
     <div class="arrow" aria-hidden="true">→</div>
-    <div class="step ok"><span class="step-name">skills</span><span class="step-ms">258372.0 ms</span><span class="step-status">OK</span></div>
+    <div class="step ok"><span class="step-name">skills</span><span class="step-ms">6.94 ms</span><span class="step-status">OK</span></div>
     <div class="arrow" aria-hidden="true">→</div>
-    <div class="step ok"><span class="step-name">enrichment</span><span class="step-ms">0.69 ms</span><span class="step-status">OK</span></div>
+    <div class="step ok"><span class="step-name">enrichment</span><span class="step-ms">0.43 ms</span><span class="step-status">OK</span></div>
     <div class="arrow" aria-hidden="true">→</div>
-    <div class="step ok"><span class="step-name">analytics</span><span class="step-ms">0.4 ms</span><span class="step-status">OK</span></div>
+    <div class="step ok"><span class="step-name">analytics</span><span class="step-ms">0.26 ms</span><span class="step-status">OK</span></div>
     <div class="arrow" aria-hidden="true">→</div>
     <div class="step ok"><span class="step-name">visualization</span><span class="step-ms">0.04 ms</span><span class="step-status">OK</span></div>
     <div class="arrow" aria-hidden="true">→</div>
-    <div class="step ok"><span class="step-name">orchestration</span><span class="step-ms">0.04 ms</span><span class="step-status">OK</span></div>
+    <div class="step ok"><span class="step-name">orchestration</span><span class="step-ms">0.05 ms</span><span class="step-status">OK</span></div>
   </div>
 
   <h2>Per-stage details</h2>
@@ -55,35 +55,35 @@
     <tr class="">
       <td>ingestion</td>
       <td>PipelineTrigger → IngestBatch</td>
-      <td>82499.91 ms</td>
+      <td>74410.22 ms</td>
       <td>OK</td>
       <td></td>
     </tr>
     <tr class="">
       <td>normalization</td>
       <td>IngestBatch → NormalizationComplete</td>
-      <td>975.25 ms</td>
+      <td>48.65 ms</td>
       <td>OK</td>
       <td></td>
     </tr>
     <tr class="">
       <td>skills</td>
       <td>NormalizationComplete → SkillsExtracted</td>
-      <td>258372.0 ms</td>
+      <td>6.94 ms</td>
       <td>OK</td>
       <td></td>
     </tr>
     <tr class="">
       <td>enrichment</td>
       <td>SkillsExtracted → RecordEnriched</td>
-      <td>0.69 ms</td>
+      <td>0.43 ms</td>
       <td>OK</td>
       <td></td>
     </tr>
     <tr class="">
       <td>analytics</td>
       <td>RecordEnriched → AnalyticsRefreshed</td>
-      <td>0.4 ms</td>
+      <td>0.26 ms</td>
       <td>OK</td>
       <td></td>
     </tr>
@@ -97,7 +97,7 @@
     <tr class="">
       <td>orchestration</td>
       <td>RenderComplete → OrchestrationAck</td>
-      <td>0.04 ms</td>
+      <td>0.05 ms</td>
       <td>OK</td>
       <td></td>
     </tr>

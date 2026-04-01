@@ -159,7 +159,7 @@ def normalize_records(state: NormalizationState) -> NormalizationState:
                     state=raw_dict.get("state"),
                     country=raw_dict.get("country"),
                     is_remote=raw_dict.get("is_remote"),
-                    date_posted=None,  # Will be parsed by mapper
+                    date_posted=raw_dict.get("date_posted"),
                     job_url=raw_dict.get("job_url"),
                     source_url=raw_dict.get("source_url") or "",
                     employment_type=raw_dict.get("employment_type"),

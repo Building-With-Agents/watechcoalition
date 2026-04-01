@@ -44,12 +44,14 @@ except ImportError:
 
 from agents.analytics.agent import AnalyticsAgent
 from agents.common.event_envelope import EventEnvelope
+from agents.common.llm_adapter import register_alert_bus as register_llm_alert_bus
 from agents.common.message_bus.redis_streams import (
     RedisDependencyError,
     RedisStreamsError,
     RedisStreamsEventBus,
 )
 from agents.enrichment.agent import EnrichmentAgent
+from agents.enrichment.agent import register_alert_bus as register_enrichment_alert_bus
 from agents.ingestion.agent import IngestionAgent
 from agents.normalization.agent import NormalizationAgent
 from agents.orchestration.agent import OrchestrationAgent
@@ -126,6 +128,10 @@ def _run(
         buses.append(bus)
         bus_by_name[stage_name] = bus
 
+    orchestration_bus = bus_by_name["orchestration"]
+    register_llm_alert_bus(orchestration_bus)
+    register_enrichment_alert_bus(orchestration_bus)
+
     def make_handler(
         stage_name: str,
         agent: Any,
@@ -182,6 +188,18 @@ def _run(
             subscriber_id=f"{stage_name}-handler",
         )
 
+    orchestration_handler = make_handler("orchestration", OrchestrationAgent(), None)
+    orchestration_bus.subscribe(
+        "SkillsExtractionAlert",
+        orchestration_handler,
+        subscriber_id="orchestration-agent",
+    )
+    orchestration_bus.subscribe(
+        "EnrichmentDegraded",
+        orchestration_handler,
+        subscriber_id="orchestration-agent",
+    )
+
     trigger = EventEnvelope(
         correlation_id=correlation_id,
         agent_id="pipeline-runner",
@@ -190,7 +208,7 @@ def _run(
     buses[0].publish(trigger)
 
     for bus in buses:
-        bus.consume_available(max_events=1)
+        bus.consume_available(max_events=32)
 
     run_end = time.perf_counter()
     e2e_ms = round((run_end - run_start) * 1000, 2)
