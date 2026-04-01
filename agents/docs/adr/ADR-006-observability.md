@@ -1,11 +1,13 @@
 # ADR-006 — Observability & Tracing
 
-| | |
-|---|---|
-| **Owner** | Enrique |
-| **Experiment** | EXP-006 |
-| **Status** | Accepted |
-| **Date** | Week 3 |
+
+|                |          |
+| -------------- | -------- |
+| **Owner**      | Enrique  |
+| **Experiment** | EXP-006  |
+| **Status**     | Accepted |
+| **Date**       | Week 3   |
+
 
 ## Decision
 
@@ -14,6 +16,7 @@ Use structlog as the always-on baseline, with Langfuse as the optional trace pla
 ## What I Tested
 
 Four candidates via a TracerBase ABC:
+
 - structlog — already installed, zero setup
 - LangSmith — LangChain hosted tracing
 - Langfuse — hosted or self-hosted, framework-independent
@@ -21,12 +24,14 @@ Four candidates via a TracerBase ABC:
 
 ## What I Found
 
+
 | Candidate     | Full trace UI | Setup time | Framework-independent |
-|---------------|---------------|------------|-----------------------|
-| structlog     |       No.     |    0 min.  |         Yes.          |
-| LangSmith     |       Yes     |   ~10 min. |        Partial.       |
-| Langfuse      |       Yes     |   ~15 min  |         Yes           |
-| OpenTelemetry | Yes (Jaeger)  |   ~40 min  |         Yes           |
+| ------------- | ------------- | ---------- | --------------------- |
+| structlog     | No.           | 0 min.     | Yes.                  |
+| LangSmith     | Yes           | ~10 min.   | Partial.              |
+| Langfuse      | Yes           | ~15 min    | Yes                   |
+| OpenTelemetry | Yes (Jaeger)  | ~40 min    | Yes                   |
+
 
 All four surfaced errors in under 1 second (target: 30s).
 
@@ -50,3 +55,4 @@ TracerBase makes this swappable with zero agent code changes.
 - Langfuse setup: ~15 minutes (cloud)
 - OTel setup: ~40 minutes (Jaeger + collector)
 - TracerBase abstraction: zero agent code changes required to swap tracer
+
