@@ -167,6 +167,48 @@ class TestEnrichmentAgent:
         assert out.payload["event_type"] == "RecordEnriched"
         assert out.payload["temporal_period"] == "post_gpt4"
 
+    def test_process_emits_temporal_period_for_exact_boundary_date(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        out = self._process_with_normalized_job_context(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": datetime(2024, 6, 1, 0, 0, tzinfo=timezone.utc),
+                "city": "Austin",
+                "state_province": "Texas",
+                "country": "United States",
+                "is_remote": False,
+                "work_arrangement": "on-site",
+            },
+        )
+
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert out.payload["temporal_period"] == "agentic_era"
+
+    def test_process_emits_temporal_period_none_when_date_missing(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        out = self._process_with_normalized_job_context(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": None,
+                "city": "Austin",
+                "state_province": "Texas",
+                "country": "United States",
+                "is_remote": False,
+                "work_arrangement": "on-site",
+            },
+        )
+
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert out.payload["temporal_period"] is None
+
     def test_process_emits_borderplex_subregion_on_payload(
         self,
         monkeypatch: pytest.MonkeyPatch,
@@ -187,6 +229,48 @@ class TestEnrichmentAgent:
 
         assert out.payload["event_type"] == "RecordEnriched"
         assert out.payload["borderplex_subregion"] == "el_paso"
+
+    def test_process_emits_borderplex_subregion_for_las_cruces(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        out = self._process_with_normalized_job_context(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": datetime(2023, 6, 15, 12, 0, tzinfo=timezone.utc),
+                "city": "Las Cruces",
+                "state_province": "New Mexico",
+                "country": "United States",
+                "is_remote": False,
+                "work_arrangement": "on-site",
+            },
+        )
+
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert out.payload["borderplex_subregion"] == "las_cruces"
+
+    def test_process_emits_borderplex_subregion_regional_for_remote_job(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        out = self._process_with_normalized_job_context(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": datetime(2023, 6, 15, 12, 0, tzinfo=timezone.utc),
+                "city": None,
+                "state_province": "Texas",
+                "country": "United States",
+                "is_remote": True,
+                "work_arrangement": "Remote",
+            },
+        )
+
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert out.payload["borderplex_subregion"] == "regional"
 
     def test_process_emits_temporal_period_and_borderplex_subregion_together(
         self,
