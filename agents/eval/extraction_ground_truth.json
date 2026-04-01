@@ -120,80 +120,301 @@
         "tool_name": "Tableau",
         "category": "platform",
         "confidence": 0.9,
-        "is_genai_tool": false,
         "source_span": {
           "text": "Tableau",
           "field_source": "requirements",
           "start_char": 592,
           "end_char": 599
-        }
+        },
+        "is_genai_tool": false
       },
       {
         "tool_id": null,
         "tool_name": "Looker",
         "category": "platform",
         "confidence": 0.9,
-        "is_genai_tool": false,
         "source_span": {
           "text": "Looker",
           "field_source": "requirements",
           "start_char": 601,
           "end_char": 607
-        }
+        },
+        "is_genai_tool": false
       },
       {
         "tool_id": null,
         "tool_name": "Power BI",
         "category": "platform",
         "confidence": 0.9,
-        "is_genai_tool": false,
         "source_span": {
           "text": "Power BI",
           "field_source": "requirements",
           "start_char": 609,
           "end_char": 617
-        }
+        },
+        "is_genai_tool": false
       },
       {
         "tool_id": null,
         "tool_name": "Snowflake",
         "category": "database",
         "confidence": 0.85,
-        "is_genai_tool": false,
         "source_span": {
           "text": "Snowflake",
           "field_source": "description",
           "start_char": 0,
           "end_char": 9
-        }
+        },
+        "is_genai_tool": false
       },
       {
         "tool_id": null,
         "tool_name": "DBT",
         "category": "devops",
         "confidence": 0.8,
-        "is_genai_tool": false,
         "source_span": {
           "text": "DBT",
           "field_source": "description",
           "start_char": 0,
           "end_char": 3
-        }
+        },
+        "is_genai_tool": false
       },
       {
         "tool_id": null,
         "tool_name": "Python",
         "category": "language",
         "confidence": 0.75,
-        "is_genai_tool": false,
         "source_span": {
           "text": "Python",
           "field_source": "description",
           "start_char": 0,
           "end_char": 6
+        },
+        "is_genai_tool": false
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": null,
+        "task_description": "Product Strategy",
+        "category": "management",
+        "frequency": "quarterly",
+        "complexity": "strategic",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Engage directly with strategic customers and design partners to understand their needs, validate roadmaps, and co-develop new features.",
+          "field_source": "responsibilities",
+          "start_char": 134,
+          "end_char": 269
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Customer Discovery",
+        "category": "management",
+        "frequency": "weekly",
+        "complexity": "creative",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Engage directly with strategic customers and design partners to understand their needs, validate roadmaps, and co-develop new features.",
+          "field_source": "responsibilities",
+          "start_char": 134,
+          "end_char": 269
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Technical Writing",
+        "category": "development",
+        "frequency": "daily",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Define, measure, and communicate product success using metrics that correlate with customer value and SaaS business metrics.",
+          "field_source": "responsibilities",
+          "start_char": 270,
+          "end_char": 394
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Data Analysis",
+        "category": "analysis",
+        "frequency": "daily",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "SQL Proficiency: You have solid SQL fundamentals and are comfortable writing queries (like joins and aggregations) to explore data and conduct analysis.",
+          "field_source": "requirements",
+          "start_char": 758,
+          "end_char": 910
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Visualization",
+        "category": "design",
+        "frequency": "weekly",
+        "complexity": "creative",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Partner with UX, Data Science, and Sales Engineering to create impactful data visualizations and product demos.",
+          "field_source": "responsibilities",
+          "start_char": 395,
+          "end_char": 506
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "KPI Tracking",
+        "category": "analysis",
+        "frequency": "monthly",
+        "complexity": "analytical",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Define, measure, and communicate product success using metrics that correlate with customer value and SaaS business metrics.",
+          "field_source": "responsibilities",
+          "start_char": 270,
+          "end_char": 394
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Roadmap Execution",
+        "category": "management",
+        "frequency": "daily",
+        "complexity": "routine",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Prioritization & Planning: A demonstrated ability to manage a backlog, make trade-offs, and align teams on a clear set of priorities",
+          "field_source": "requirements",
+          "start_char": 624,
+          "end_char": 756
+        }
+      },
+      {
+        "task_id": null,
+        "task_description": "Stakeholder Alignment",
+        "category": "management",
+        "frequency": "as_needed",
+        "complexity": "creative",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Communication & Stakeholder Management: Excellent communication and data storytelling skills. You can build consensus and manage expectations with diverse audiences (from engineering to sales to external clients).",
+          "field_source": "requirements",
+          "start_char": 410,
+          "end_char": 623
         }
       }
     ],
+    "labeled_responsibilities": [
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Strategic Product Ownership",
+        "scope": "organization",
+        "level": "lead",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Own the product vision and strategic roadmap for our external, customer-facing AI/ML models, data products, and analytics features.",
+          "field_source": "responsibilities",
+          "start_char": 2,
+          "end_char": 133
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Customer Discovery & Co-Development",
+        "scope": "department",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Engage directly with strategic customers and design partners to understand their needs, validate roadmaps, and co-develop new features.",
+          "field_source": "responsibilities",
+          "start_char": 134,
+          "end_char": 269
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Technical Requirement Definition",
+        "scope": "team",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Define clear, testable requirements (epics and user stories) based on customer feedback, market analysis, and strategic priorities.",
+          "field_source": "responsibilities",
+          "start_char": 507,
+          "end_char": 638
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Data Analysis & SQL Exploration",
+        "scope": "individual",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "SQL Proficiency: You have solid SQL fundamentals and are comfortable writing queries (like joins and aggregations) to explore data and conduct analysis.",
+          "field_source": "requirements",
+          "start_char": 758,
+          "end_char": 910
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Cross-Functional Visualization",
+        "scope": "team",
+        "level": "mid",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Partner with UX, Data Science, and Sales Engineering to create impactful data visualizations and product demos.",
+          "field_source": "responsibilities",
+          "start_char": 395,
+          "end_char": 506
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Business Value & ROI Metrics",
+        "scope": "department",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Define, measure, and communicate product success using metrics that correlate with customer value and SaaS business metrics.",
+          "field_source": "responsibilities",
+          "start_char": 270,
+          "end_char": 394
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "Stakeholder Consensus Building",
+        "scope": "organization",
+        "level": "lead",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Communication & Stakeholder Management: Excellent communication and data storytelling skills. You can build consensus and manage expectations with diverse audiences (from engineering to sales to external clients).",
+          "field_source": "requirements",
+          "start_char": 410,
+          "end_char": 623
+        }
+      },
+      {
+        "responsibility_id": null,
+        "responsibility_description": "AI/ML Technical Alignment",
+        "scope": "team",
+        "level": "senior",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Work closely with data scientists to define requirements for AI/ML-driven features.",
+          "field_source": "responsibilities",
+          "start_char": 639,
+          "end_char": 722
+        }
+      }
+    ],
+    "context": [],
     "labeler_notes": {}
   },
   {
@@ -317,15 +538,18 @@
         "tool_name": "ChatGPT",
         "category": "ai_tool",
         "confidence": 0.8,
-        "is_genai_tool": true,
         "source_span": {
           "text": "ChatGPT Apps",
           "field_source": "responsibilities",
           "start_char": 0,
           "end_char": 12
-        }
+        },
+        "is_genai_tool": true
       }
     ],
+    "tasks": [],
+    "labeled_responsibilities": [],
+    "context": [],
     "labeler_notes": {}
   },
   {
@@ -483,15 +707,18 @@
         "tool_name": "SQL",
         "category": "other",
         "confidence": 0.9,
-        "is_genai_tool": false,
         "source_span": {
           "text": "SQL fluency",
           "field_source": "requirements",
           "start_char": 258,
           "end_char": 269
-        }
+        },
+        "is_genai_tool": false
       }
     ],
+    "tasks": [],
+    "labeled_responsibilities": [],
+    "context": [],
     "labeler_notes": {}
   },
   {
@@ -632,18 +859,21 @@
         "tool_name": "Claude",
         "category": "ai_tool",
         "confidence": 0.85,
-        "is_genai_tool": true,
-        "source_span": null
+        "source_span": null,
+        "is_genai_tool": true
       },
       {
         "tool_id": null,
         "tool_name": "Cursor",
         "category": "ai_tool",
         "confidence": 0.85,
-        "is_genai_tool": true,
-        "source_span": null
+        "source_span": null,
+        "is_genai_tool": true
       }
     ],
+    "tasks": [],
+    "labeled_responsibilities": [],
+    "context": [],
     "labeler_notes": {}
   },
   {
