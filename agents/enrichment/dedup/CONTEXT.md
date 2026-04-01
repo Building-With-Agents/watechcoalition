@@ -22,7 +22,7 @@ Near-duplicate job postings via embedding cosine similarity, same-`company_id` c
 
 1. **Dedup text:** `title | company_name | first 500 chars` of `normalized_jobs.requirements` if present, else `job_description` (see [`text.py`](text.py)).
 2. **Window:** half-open **`[anchor - 30d, anchor)`** on `publish_date` (UTC-aware).
-3. **Candidates:** same `company_id`, **`is_duplicate IS NOT TRUE`**, `dedup_embedding IS NOT NULL`, excluding self.
+3. **Candidates:** same `company_id`, **`is_duplicate IS NOT TRUE`**, excluding self. Reuse cached survivor embeddings when present; lazily embed/backfill in-window survivors missing cache so cold-start reposts are still comparable.
 4. **Similarity:** cosine in Python (`vectors.py`); compare current vector to each survivor; take **best** match (star clustering — no transitive chaining through duplicates).
 5. **Survivor arbitration:** [`completeness.py`](completeness.py) (salary, location, description length); **recency** tie-break. Reuse matched survivor’s `duplicate_cluster_id` if set; else new **UUID4** cluster id.
 

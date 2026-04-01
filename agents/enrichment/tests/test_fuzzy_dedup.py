@@ -22,6 +22,41 @@ def _emb_json(t: float) -> str:
     return json.dumps(_unit_vec_xy(t))
 
 
+def _survivor_row(
+    *,
+    job_posting_id: str,
+    publish_date: datetime,
+    similarity: float,
+    duplicate_cluster_id: str | None = None,
+    salary_range: str | None = None,
+    location: str | None = None,
+    job_description: str = "",
+    job_title: str = "Engineer",
+    company_name: str = "Acme",
+    requirements: str | None = None,
+) -> dict:
+    from agents.enrichment.dedup.text import build_dedup_text, dedup_text_hash
+
+    dedup_plain = build_dedup_text(job_title, company_name, requirements or job_description)
+    return {
+        "job_posting_id": job_posting_id,
+        "duplicate_cluster_id": duplicate_cluster_id,
+        "dedup_text_hash": dedup_text_hash(dedup_plain),
+        "dedup_embedding_text": _emb_json(similarity),
+        "salary_range": salary_range,
+        "location": location,
+        "zip": None,
+        "county": None,
+        "job_description": job_description,
+        "publish_date": publish_date,
+        "job_title": job_title,
+        "source": "jsearch",
+        "external_id": f"ext-{job_posting_id[-4:]}",
+        "company_name": company_name,
+        "requirements": requirements,
+    }
+
+
 def _exec_first(row: dict | None) -> MagicMock:
     m = MagicMock()
     m.mappings.return_value.first.return_value = row
@@ -152,17 +187,15 @@ def test_threshold_below_returns_unique(mock_embed: MagicMock) -> None:
     mock_embed.return_value = [_unit_vec_xy(1.0)]
     anchor = cur["publish_date"]
     assert isinstance(anchor, datetime)
-    survivor = {
-        "job_posting_id": "00000000-0000-0000-0000-000000000002",
-        "duplicate_cluster_id": None,
-        "dedup_embedding_text": _emb_json(0.5),
-        "salary_range": None,
-        "location": None,
-        "zip": None,
-        "county": None,
-        "job_description": "",
-        "publish_date": anchor - timedelta(days=5),
-    }
+    survivor = _survivor_row(
+        job_posting_id="00000000-0000-0000-0000-000000000002",
+        duplicate_cluster_id=None,
+        similarity=0.5,
+        salary_range=None,
+        location=None,
+        job_description="threshold below survivor",
+        publish_date=anchor - timedelta(days=5),
+    )
 
     session.execute.side_effect = [
         _exec_first(cur),
@@ -185,17 +218,15 @@ def test_threshold_above_marks_duplicate_when_survivor_wins(mock_embed: MagicMoc
     anchor = cur["publish_date"]
     assert isinstance(anchor, datetime)
     cluster = "00000000-0000-0000-0000-00000000aa11"
-    survivor = {
-        "job_posting_id": "00000000-0000-0000-0000-000000000002",
-        "duplicate_cluster_id": cluster,
-        "dedup_embedding_text": _emb_json(1.0),
-        "salary_range": "100k-120k",
-        "location": "TX",
-        "zip": None,
-        "county": None,
-        "job_description": "x" * 500,
-        "publish_date": anchor - timedelta(days=5),
-    }
+    survivor = _survivor_row(
+        job_posting_id="00000000-0000-0000-0000-000000000002",
+        duplicate_cluster_id=cluster,
+        similarity=1.0,
+        salary_range="100k-120k",
+        location="TX",
+        job_description="x" * 500,
+        publish_date=anchor - timedelta(days=5),
+    )
 
     session.execute.side_effect = [
         _exec_first(cur),
@@ -213,23 +244,65 @@ def test_threshold_above_marks_duplicate_when_survivor_wins(mock_embed: MagicMoc
 
 
 @patch("agents.enrichment.dedup.fuzzy_dedup._embed_texts_azure")
+def test_cold_start_survivor_without_cached_embedding_is_backfilled_and_compared(mock_embed: MagicMock) -> None:
+    from agents.enrichment.dedup.text import build_dedup_text, dedup_text_hash, row_requirements_fallback
+
+    session = MagicMock()
+    cur = _base_current_row(requirements="alpha beta", dedup_emb=_emb_json(1.0))
+    cur_plain = build_dedup_text(cur["job_title"], cur["company_name"], row_requirements_fallback(cur))
+    cur["dedup_text_hash"] = dedup_text_hash(cur_plain)
+    anchor = cur["publish_date"]
+    assert isinstance(anchor, datetime)
+    survivor = {
+        "job_posting_id": "00000000-0000-0000-0000-000000000002",
+        "duplicate_cluster_id": None,
+        "dedup_text_hash": None,
+        "dedup_embedding_text": None,
+        "salary_range": "100k-120k",
+        "location": "TX",
+        "zip": None,
+        "county": None,
+        "job_description": "alpha beta",
+        "publish_date": anchor - timedelta(days=2),
+        "job_title": "Engineer",
+        "source": "jsearch",
+        "external_id": "ext-2",
+        "company_name": "Acme",
+        "requirements": "alpha beta",
+    }
+    mock_embed.return_value = [_unit_vec_xy(1.0)]
+
+    session.execute.side_effect = [
+        _exec_first(cur),
+        _exec_all([survivor]),
+        MagicMock(),
+    ]
+
+    out = run_fuzzy_dedup(session, cur["job_posting_id"], threshold=0.99)
+
+    assert out.stub is False
+    assert out.is_duplicate is True
+    assert out.matched_job_posting_id == survivor["job_posting_id"]
+    mock_embed.assert_called_once()
+    assert session.execute.call_count == 3
+
+
+@patch("agents.enrichment.dedup.fuzzy_dedup._embed_texts_azure")
 def test_current_wins_completeness_flips_contract(mock_embed: MagicMock) -> None:
     session = MagicMock()
     cur = _base_current_row(dedup_hash=None, dedup_emb=None, salary="90k-100k")
     mock_embed.return_value = [_unit_vec_xy(1.0)]
     anchor = cur["publish_date"]
     assert isinstance(anchor, datetime)
-    survivor = {
-        "job_posting_id": "00000000-0000-0000-0000-000000000002",
-        "duplicate_cluster_id": None,
-        "dedup_embedding_text": _emb_json(1.0),
-        "salary_range": None,
-        "location": None,
-        "zip": None,
-        "county": None,
-        "job_description": "",
-        "publish_date": anchor - timedelta(days=5),
-    }
+    survivor = _survivor_row(
+        job_posting_id="00000000-0000-0000-0000-000000000002",
+        duplicate_cluster_id=None,
+        similarity=1.0,
+        salary_range=None,
+        location=None,
+        job_description="current wins survivor body",
+        publish_date=anchor - timedelta(days=5),
+    )
 
     session.execute.side_effect = [
         _exec_first(cur),

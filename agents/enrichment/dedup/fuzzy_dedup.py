@@ -58,20 +58,31 @@ _LIST_SURVIVORS_SQL = text(
     SELECT
         jp.job_posting_id::text AS job_posting_id,
         jp.duplicate_cluster_id AS duplicate_cluster_id,
+        jp.dedup_text_hash AS dedup_text_hash,
         jp.dedup_embedding::text AS dedup_embedding_text,
         jp.salary_range AS salary_range,
         jp.location AS location,
         jp.zip AS zip,
         jp.county AS county,
         jp.job_description AS job_description,
-        jp.publish_date AS publish_date
+        jp.publish_date AS publish_date,
+        jp.job_title AS job_title,
+        jp.source AS source,
+        jp.external_id AS external_id,
+        c.company_name AS company_name,
+        nj.requirements AS requirements
     FROM dbo.job_postings jp
+    LEFT JOIN dbo.companies c ON c.company_id::text = jp.company_id::text
+    LEFT JOIN dbo.normalized_jobs nj
+        ON jp.source IS NOT NULL
+        AND jp.external_id IS NOT NULL
+        AND nj.source = jp.source
+        AND nj.external_id = jp.external_id
     WHERE jp.company_id::text = :company_id
         AND (jp.is_duplicate IS NOT TRUE)
         AND jp.publish_date >= :window_start
         AND jp.publish_date < :anchor
         AND jp.job_posting_id::text <> :job_posting_id
-        AND jp.dedup_embedding IS NOT NULL
     """
 )
 
@@ -111,6 +122,84 @@ def _current_row_dict(row: dict[str, Any]) -> dict[str, Any]:
         "job_description": row.get("job_description"),
         "publish_date": row.get("publish_date"),
     }
+
+
+def _row_dedup_plain(row: dict[str, Any]) -> str:
+    return build_dedup_text(
+        row.get("job_title"),
+        row.get("company_name"),
+        row_requirements_fallback(row),
+    )
+
+
+def _usable_cached_vector(row: dict[str, Any], *, text_hash: str) -> Any:
+    vec = parse_stored_embedding(row.get("dedup_embedding_text"))
+    if row.get("dedup_text_hash") == text_hash and vec is not None and vec.size > 0:
+        return vec
+    return None
+
+
+def _persist_dedup_cache(session: Session, *, job_posting_id: str, text_hash: str, vector: Any) -> None:
+    session.execute(
+        _UPDATE_DEDUP_CACHE_SQL,
+        {
+            "job_posting_id": job_posting_id,
+            "dedup_text_hash": text_hash,
+            "dedup_embedding": vector_to_pg_cast_param([float(x) for x in vector.tolist()]),
+        },
+    )
+
+
+def _hydrate_survivor_vectors(session: Session, *, job_posting_id: str, survivors: list[Any]) -> tuple[list[dict[str, Any]], int, int]:
+    ready: list[dict[str, Any]] = []
+    pending: list[tuple[dict[str, Any], str, str]] = []
+    cache_hits = 0
+
+    for srow in survivors:
+        sd = dict(srow)
+        dedup_plain = _row_dedup_plain(sd)
+        if not dedup_plain.strip():
+            continue
+        text_hash = dedup_text_hash(dedup_plain)
+        svec = _usable_cached_vector(sd, text_hash=text_hash)
+        if svec is not None:
+            sd["_vector"] = svec
+            ready.append(sd)
+            cache_hits += 1
+            continue
+        pending.append((sd, text_hash, dedup_plain))
+
+    if not pending:
+        return ready, cache_hits, 0
+
+    vectors = _embed_texts_azure(
+        [dedup_plain for _, _, dedup_plain in pending],
+        audit_agent_name=_DEDUP_AUDIT_AGENT,
+    )
+    if not vectors or len(vectors) != len(pending):
+        log.warning(
+            "fuzzy_dedup_survivor_embedding_failed",
+            job_posting_id=job_posting_id,
+            pending_candidates=len(pending),
+        )
+        return ready, cache_hits, 0
+
+    embedded_count = 0
+    for (sd, text_hash, _dedup_plain), raw_vec in zip(pending, vectors):
+        svec = parse_stored_embedding(raw_vec)
+        if svec is None or svec.size == 0:
+            continue
+        _persist_dedup_cache(
+            session,
+            job_posting_id=str(sd["job_posting_id"]),
+            text_hash=text_hash,
+            vector=svec,
+        )
+        sd["_vector"] = svec
+        ready.append(sd)
+        embedded_count += 1
+
+    return ready, cache_hits, embedded_count
 
 
 def run_fuzzy_dedup(
@@ -153,26 +242,14 @@ def run_fuzzy_dedup(
     anchor = _ensure_utc(anchor_raw)
     window_start = anchor - timedelta(days=DEDUP_ROLLING_WINDOW_DAYS)
 
-    body_source = row_requirements_fallback(current)
-    dedup_plain = build_dedup_text(
-        current.get("job_title"),
-        current.get("company_name"),
-        body_source,
-    )
+    dedup_plain = _row_dedup_plain(current)
     if not dedup_plain.strip():
         log.info("fuzzy_dedup_empty_dedup_text", job_posting_id=jid)
         return _unique_result()
 
     text_hash = dedup_text_hash(dedup_plain)
-    stored_hash = current.get("dedup_text_hash")
-    stored_emb_text = current.get("dedup_embedding_text")
-    current_vec = parse_stored_embedding(stored_emb_text)
-
-    used_cache = (
-        stored_hash == text_hash
-        and current_vec is not None
-        and current_vec.size > 0
-    )
+    current_vec = _usable_cached_vector(current, text_hash=text_hash)
+    used_cache = current_vec is not None
 
     if not used_cache:
         vectors = _embed_texts_azure([dedup_plain], audit_agent_name=_DEDUP_AUDIT_AGENT)
@@ -185,13 +262,11 @@ def run_fuzzy_dedup(
             log.warning("fuzzy_dedup_embedding_parse_failed", job_posting_id=jid)
             return _unique_result()
         try:
-            session.execute(
-                _UPDATE_DEDUP_CACHE_SQL,
-                {
-                    "job_posting_id": jid,
-                    "dedup_text_hash": text_hash,
-                    "dedup_embedding": vector_to_pg_cast_param([float(x) for x in current_vec.tolist()]),
-                },
+            _persist_dedup_cache(
+                session,
+                job_posting_id=jid,
+                text_hash=text_hash,
+                vector=current_vec,
             )
         except Exception as exc:
             log.warning(
@@ -210,13 +285,17 @@ def run_fuzzy_dedup(
             "job_posting_id": jid,
         },
     ).mappings().all()
+    hydrated_survivors, survivor_cache_hits, survivor_embedded_count = _hydrate_survivor_vectors(
+        session,
+        job_posting_id=jid,
+        survivors=survivors,
+    )
 
     best_sim = -1.0
     best_row: dict[str, Any] | None = None
-    for srow in survivors:
-        sd = dict(srow)
-        svec = parse_stored_embedding(sd.get("dedup_embedding_text"))
-        if svec is None or svec.size == 0:
+    for sd in hydrated_survivors:
+        svec = sd.get("_vector")
+        if svec is None:
             continue
         sim = cosine_similarity(current_vec, svec)
         if sim > best_sim:
@@ -226,10 +305,13 @@ def run_fuzzy_dedup(
     log.info(
         "fuzzy_dedup_candidates_evaluated",
         job_posting_id=jid,
-        candidates_compared=len(survivors),
+        candidates_considered=len(survivors),
+        candidates_compared=len(hydrated_survivors),
         best_similarity=round(best_sim, 6) if best_row else None,
         threshold=effective_threshold,
         used_embedding_cache=used_cache,
+        survivor_embedding_cache_hits=survivor_cache_hits,
+        survivor_embeddings_backfilled=survivor_embedded_count,
     )
 
     if best_row is None or best_sim < effective_threshold:
