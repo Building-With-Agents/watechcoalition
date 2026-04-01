@@ -125,6 +125,38 @@ def _overall_confidence_for_storage(payload: dict[str, Any]) -> float | None:
     return None
 
 
+def derive_enrichment_output_fields(resolved_job_posting: dict[str, Any] | None) -> dict[str, Any]:
+    """Derive non-score enrichment output fields from resolved normalized-job context."""
+    if not resolved_job_posting:
+        return {
+            "temporal_period": None,
+            "borderplex_subregion": None,
+        }
+
+    temporal_period = classify_temporal_period(resolved_job_posting.get("date_posted"))
+    borderplex_subregion = classify_borderplex_subregion(
+        city=resolved_job_posting.get("city")
+        if isinstance(resolved_job_posting.get("city"), str)
+        else None,
+        state_province=resolved_job_posting.get("state_province")
+        if isinstance(resolved_job_posting.get("state_province"), str)
+        else None,
+        country=resolved_job_posting.get("country")
+        if isinstance(resolved_job_posting.get("country"), str)
+        else None,
+        is_remote=resolved_job_posting.get("is_remote")
+        if isinstance(resolved_job_posting.get("is_remote"), bool)
+        else None,
+        work_arrangement=resolved_job_posting.get("work_arrangement")
+        if isinstance(resolved_job_posting.get("work_arrangement"), str)
+        else None,
+    )
+    return {
+        "temporal_period": temporal_period,
+        "borderplex_subregion": borderplex_subregion,
+    }
+
+
 def apply_enrichment_to_job_postings(
     session: Session,
     normalized_job_id: int,
@@ -190,26 +222,14 @@ def apply_enrichment_to_job_postings(
     fc_merged = merge_field_confidence_for_storage(record_enriched_payload)
     fc_json = json.dumps(fc_merged)
     oc = _overall_confidence_for_storage(record_enriched_payload)
-    temporal_period = classify_temporal_period(resolved.get("date_posted"))
-    borderplex_subregion = classify_borderplex_subregion(
-        city=resolved.get("city") if isinstance(resolved.get("city"), str) else None,
-        state_province=resolved.get("state_province")
-        if isinstance(resolved.get("state_province"), str)
-        else None,
-        country=resolved.get("country") if isinstance(resolved.get("country"), str) else None,
-        is_remote=resolved.get("is_remote") if isinstance(resolved.get("is_remote"), bool) else None,
-        work_arrangement=resolved.get("work_arrangement")
-        if isinstance(resolved.get("work_arrangement"), str)
-        else None,
-    )
+    derived_output_fields = derive_enrichment_output_fields(resolved)
 
     params_base: dict[str, Any] = {
         "job_posting_id": str(job_posting_id),
         "quality_score": qs_f,
         "overall_confidence": oc,
         "field_confidence": fc_json,
-        "temporal_period": temporal_period,
-        "borderplex_subregion": borderplex_subregion,
+        **derived_output_fields,
     }
 
     if tier == "uncertain" or spam_score is None:
