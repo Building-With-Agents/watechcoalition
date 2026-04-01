@@ -12,11 +12,17 @@ from unittest.mock import patch
 import pytest
 from sqlalchemy import delete
 
-from agents.common.data_store.database import session_scope
+from agents.common.data_store.database import check_db_connection, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types import JobRecord
 from agents.skills_extraction.agent import ExtractionWorkItem, SkillsExtractionAgent
+
+
+def _integration_db_available() -> bool:
+    if not os.getenv("PYTHON_DATABASE_URL"):
+        return False
+    return check_db_connection()
 
 
 @contextmanager
@@ -107,9 +113,7 @@ class TestSkillsExtractionAgent:
             result = agent.health_check()
         assert result["status"] == "down"
 
-    def test_process_emits_skills_extracted(
-        self, normalization_event: EventEnvelope
-    ) -> None:
+    def test_process_emits_skills_extracted(self, normalization_event: EventEnvelope) -> None:
         """Output event_type is SkillsExtracted."""
         agent = SkillsExtractionAgent()
         agent.health_check()  # pre-load fixture
@@ -125,9 +129,7 @@ class TestSkillsExtractionAgent:
         assert out.payload.get("context_signals_count") == 0
         assert out.agent_id == "skills-extraction-agent"
 
-    def test_process_returns_fixture_skills(
-        self, normalization_event: EventEnvelope
-    ) -> None:
+    def test_process_returns_fixture_skills(self, normalization_event: EventEnvelope) -> None:
         """Output contains a non-empty skills list with expected keys."""
         from agents.common.types import SkillRecord, SpanRecord, TaxonomyResult
 
@@ -137,9 +139,7 @@ class TestSkillsExtractionAgent:
             skill_name="Python",
             type="Technical",
             confidence=0.9,
-            source_span=SpanRecord(
-                text="Python", field_source="description", start_char=0, end_char=6
-            ),
+            source_span=SpanRecord(text="Python", field_source="description", start_char=0, end_char=6),
         )
         mock_taxonomy = TaxonomyResult(original_label="Python", esco_uri=None, resolution_step=6)
         with (
@@ -196,7 +196,7 @@ class TestSkillsExtractionAgent:
         ]
         assert out.payload["skills"] == []
 
-    @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
+    @pytest.mark.skipif(not _integration_db_available(), reason="requires reachable PostgreSQL")
     def test_process_emits_batch_payload_for_inline_job_list(self) -> None:
         """Batch payloads should produce aggregate metrics and per-record summaries."""
         # ExtractionStore persists to extracted_intelligence with FK to normalized_jobs.
@@ -204,11 +204,7 @@ class TestSkillsExtractionAgent:
         # parent rows for the inline normalized_job_id values used below.
         run_id = "pytest-batch-inline-2"
         with session_scope() as session:
-            session.execute(
-                delete(ExtractedIntelligence).where(
-                    ExtractedIntelligence.normalized_job_id.in_((11, 12))
-                )
-            )
+            session.execute(delete(ExtractedIntelligence).where(ExtractedIntelligence.normalized_job_id.in_((11, 12))))
             session.execute(delete(NormalizedJob).where(NormalizedJob.id.in_((11, 12))))
             session.add_all(
                 [
@@ -350,9 +346,7 @@ class TestSkillsExtractionAgent:
             skill_name="Python",
             type="Technical",
             confidence=0.9,
-            source_span=SpanRecord(
-                text="Python", field_source="description", start_char=0, end_char=6
-            ),
+            source_span=SpanRecord(text="Python", field_source="description", start_char=0, end_char=6),
         )
         mock_taxonomy = TaxonomyResult(
             original_label="Python",

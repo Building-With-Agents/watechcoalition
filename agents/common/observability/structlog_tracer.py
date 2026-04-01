@@ -39,7 +39,9 @@ class StructlogTracer(TracerBase):
             span_log.info("span_finished", duration_seconds=round(elapsed, 4))
         except Exception as exc:
             elapsed = time.perf_counter() - start
-            span_log.error("span_error", duration_seconds=round(elapsed, 4), error=str(exc), error_type=type(exc).__name__)
+            span_log.error(
+                "span_error", duration_seconds=round(elapsed, 4), error=str(exc), error_type=type(exc).__name__
+            )
             raise
 
     def log_event(self, event_name: str, payload: dict[str, Any], *, level: str = "info") -> None:

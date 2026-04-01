@@ -37,6 +37,7 @@ if str(REPO_ROOT) not in sys.path:
 
 try:
     from dotenv import load_dotenv
+
     load_dotenv(REPO_ROOT / ".env")
 except ImportError:
     pass
@@ -244,12 +245,14 @@ def _write_html(result: dict[str, Any], path: Path) -> None:
     for i, name in enumerate(stage_names):
         rec = next((s for s in stages if s.get("stage") == name), None)
         if rec is None:
-            timeline_steps.append(f'<div class="step skipped"><span class="step-name">{name}</span><span class="step-ms">—</span><span class="step-status">skipped</span></div>')
+            timeline_steps.append(
+                f'<div class="step skipped"><span class="step-name">{name}</span><span class="step-ms">—</span><span class="step-status">skipped</span></div>'
+            )
         else:
             status_class = "ok" if rec.get("success") else "error"
             ms = rec.get("latency_ms")
             timeline_steps.append(
-                f'<div class="step {status_class}"><span class="step-name">{name}</span><span class="step-ms">{ms} ms</span><span class="step-status">{ "OK" if rec.get("success") else "ERROR" }</span></div>'
+                f'<div class="step {status_class}"><span class="step-name">{name}</span><span class="step-ms">{ms} ms</span><span class="step-status">{"OK" if rec.get("success") else "ERROR"}</span></div>'
             )
         if i < len(stage_names) - 1:
             timeline_steps.append('<div class="arrow" aria-hidden="true">→</div>')
@@ -265,7 +268,7 @@ def _write_html(result: dict[str, Any], path: Path) -> None:
                 err_cell += f'<pre class="tb">{s["traceback"]}</pre>'
         rows.append(
             f"""
-    <tr class="{'error' if not s.get('success') else ''}">
+    <tr class="{"error" if not s.get("success") else ""}">
       <td>{s.get("stage", "")}</td>
       <td>{s.get("event_type_in", "")} → {s.get("event_type_out") or "—"}</td>
       <td>{s.get("latency_ms") if s.get("latency_ms") is not None else "—"} ms</td>
@@ -279,7 +282,11 @@ def _write_html(result: dict[str, Any], path: Path) -> None:
         counters_rows.append(
             f"    <tr><td><code>{stream_name}</code></td><td>{c.get('published_events', '—')}</td><td>{c.get('delivered_events', '—')}</td><td>{c.get('in_flight', '—')}</td><td>{c.get('max_in_flight_seen', '—')}</td></tr>"
         )
-    counters_body = "\n".join(counters_rows) if counters_rows else "    <tr><td colspan=\"5\">No counters (run failed before publish).</td></tr>"
+    counters_body = (
+        "\n".join(counters_rows)
+        if counters_rows
+        else '    <tr><td colspan="5">No counters (run failed before publish).</td></tr>'
+    )
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -310,8 +317,8 @@ def _write_html(result: dict[str, Any], path: Path) -> None:
 <body>
   <h1>Full pipeline Redis — Run report</h1>
   <p>Correlation ID: <code>{result.get("correlation_id", "")}</code></p>
-  <p class="e2e">End-to-end latency: <strong>{e2e} ms</strong> | Overall: <strong class="{'ok' if success else 'error'}">{'Success' if success else 'Failure'}</strong></p>
-  {f'<p class="error">Redis error: {err}</p>' if err else ''}
+  <p class="e2e">End-to-end latency: <strong>{e2e} ms</strong> | Overall: <strong class="{"ok" if success else "error"}">{"Success" if success else "Failure"}</strong></p>
+  {f'<p class="error">Redis error: {err}</p>' if err else ""}
 
   <h2>Timeline (locate the failing stage)</h2>
   <div class="timeline" role="list">
@@ -342,7 +349,9 @@ def _write_html(result: dict[str, Any], path: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run full pipeline with Redis Streams and emit metrics")
     parser.add_argument("--redis-url", default=os.getenv("REDIS_URL"), help="Redis URL (default: REDIS_URL)")
-    parser.add_argument("--output-dir", type=Path, default=REPO_ROOT / "agents" / "eval", help="Output directory for JSON/HTML")
+    parser.add_argument(
+        "--output-dir", type=Path, default=REPO_ROOT / "agents" / "eval", help="Output directory for JSON/HTML"
+    )
     args = parser.parse_args()
 
     redis_url = args.redis_url

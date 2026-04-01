@@ -37,8 +37,7 @@ try:
     from langgraph.graph import END, START, StateGraph  # noqa: E402
 except ImportError as e:
     raise ImportError(
-        "LangGraph is required for EXP-007 LangGraph runner. "
-        "Install with: pip install langgraph>=0.2"
+        "LangGraph is required for EXP-007 LangGraph runner. Install with: pip install langgraph>=0.2"
     ) from e
 
 # Agent instances (stub implementations; same as pipeline_runner.py)

@@ -118,15 +118,11 @@ def run_with_errors() -> None:
     print("\n--- Scenario B: Stream with errors ---\n")
     bus = SimpleInMemoryBus()
     # Interleave: 10 IngestBatch, 3 SourceFailure, 7 IngestBatch, 2 SourceFailure
-    for i, event in enumerate(
-        generate_synthetic_ingest_batches(count=17, seed=100, typed=False)
-    ):
+    for i, event in enumerate(generate_synthetic_ingest_batches(count=17, seed=100, typed=False)):
         bus.publish(event)
         if i in (3, 6, 9):
             # Inject a failure after every 3rd success
-            fail = next(
-                generate_synthetic_source_failures(count=1, seed=100 + i, typed=False)
-            )
+            fail = next(generate_synthetic_source_failures(count=1, seed=100 + i, typed=False))
             bus.publish(fail)
     print(f"  Published {bus.size()} events (17 IngestBatch + 3 SourceFailure interleaved).")
     success, src_fail, other = consume_until_empty(bus)

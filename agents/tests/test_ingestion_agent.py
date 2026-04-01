@@ -27,9 +27,7 @@ class TestIngestionAgent:
     @patch("agents.ingestion.agent.session_scope")
     @patch("agents.ingestion.agent.check_db_connection", return_value=True)
     @patch("agents.ingestion.agent.deduplicate_batch")
-    def test_process_emits_ingest_batch(
-        self, mock_dedup, mock_db, mock_session
-    ) -> None:
+    def test_process_emits_ingest_batch(self, mock_dedup, mock_db, mock_session) -> None:
         """Output event_type is IngestBatch."""
         from agents.ingestion.deduplicator import DedupResult
 
@@ -49,9 +47,7 @@ class TestIngestionAgent:
     @patch("agents.ingestion.agent.session_scope")
     @patch("agents.ingestion.agent.check_db_connection", return_value=True)
     @patch("agents.ingestion.agent.deduplicate_batch")
-    def test_process_preserves_correlation_id(
-        self, mock_dedup, mock_db, mock_session
-    ) -> None:
+    def test_process_preserves_correlation_id(self, mock_dedup, mock_db, mock_session) -> None:
         """Correlation ID passes through unchanged."""
         from agents.ingestion.deduplicator import DedupResult
 

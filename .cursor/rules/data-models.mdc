@@ -10,6 +10,8 @@ globs:
 
 # Data Models & Database Reference
 
+**Cross-pair column names, `RecordEnriched` shapes, fuzzy dedup + audit tables:** `.cursor/rules/integration-schema.mdc`.
+
 ## Canonical JobRecord (Pydantic)
 
 This is the pipeline's core data model. Defined in `agents/normalization/schema/`.

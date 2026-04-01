@@ -33,6 +33,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 class Base(DeclarativeBase):
     """Shared declarative base for all agent models."""
+
     pass
 
 
@@ -95,11 +96,10 @@ class RawIngestedJob(Base):
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     date_ingested: Mapped[datetime] = mapped_column(
         "ingestion_timestamp",
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
     )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
 class JobIngestionRun(Base):
@@ -115,12 +115,8 @@ class JobIngestionRun(Base):
     run_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     region_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
     source: Mapped[str] = mapped_column(String(50), nullable=False)
-    started_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
-    completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     status: Mapped[str] = mapped_column(String(50), default="running")
     total_fetched: Mapped[int] = mapped_column(Integer, default=0)
     staged_count: Mapped[int] = mapped_column(Integer, default=0)
@@ -175,9 +171,7 @@ class NormalizedJob(Base):
     mapper_used: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     # Date
-    date_posted: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    date_posted: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Salary
     salary_raw: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -189,9 +183,7 @@ class NormalizedJob(Base):
     # Quality
     normalization_status: Mapped[str] = mapped_column(String(50), default="success")
     normalization_errors: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
 class NormalizationQuarantine(Base):
@@ -241,9 +233,7 @@ class ExtractedIntelligence(Base):
         nullable=False,
     )
     extraction_version: Mapped[str] = mapped_column(Text, nullable=False)
-    extracted_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    extracted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     extraction_model: Mapped[str] = mapped_column(Text, nullable=False)
     extraction_tokens_used: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     extraction_cost_usd: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
@@ -297,9 +287,7 @@ class LLMAuditLog(Base):
     cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
     success: Mapped[bool] = mapped_column(Boolean, nullable=False)
     error_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
 # ---------------------------------------------------------------------------
@@ -325,9 +313,7 @@ class EmployerProfile(Base):
     ai_maturity_signal: Mapped[str | None] = mapped_column(Text, nullable=True)
     sector: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_known_employer: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
 # ===========================================================================
@@ -368,12 +354,8 @@ class Company(Base):
     estimated_annual_hires: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_approved: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     createdby: Mapped[str | None] = mapped_column(Text, nullable=True)
-    createdat: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
-    updatedat: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    createdat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updatedat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     contact_name: Mapped[str | None] = mapped_column(Text, nullable=True)
     engagementtype: Mapped[str | None] = mapped_column(String(1000), default="Lead")
 
@@ -386,12 +368,8 @@ class IndustrySector(Base):
 
     industry_sector_id: Mapped[str] = mapped_column(Text, primary_key=True)
     sector_title: Mapped[str] = mapped_column(Text, nullable=False)
-    createdat: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
-    updatedat: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    createdat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updatedat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
 class TechnologyArea(Base):
@@ -402,12 +380,8 @@ class TechnologyArea(Base):
 
     id: Mapped[str] = mapped_column(Text, primary_key=True)
     title: Mapped[str] = mapped_column(Text, nullable=False)
-    createdat: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
-    updatedat: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    createdat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updatedat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
 class Skill(Base):
@@ -426,12 +400,8 @@ class Skill(Base):
     skill_name: Mapped[str] = mapped_column(Text, nullable=False)
     skill_info_url: Mapped[str] = mapped_column(Text, nullable=False, default="")
     skill_type: Mapped[str | None] = mapped_column(Text, nullable=True)
-    createdat: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
-    updatedat: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    createdat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updatedat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
 class SOCC(Base):
@@ -448,9 +418,5 @@ class SOCC(Base):
     title: Mapped[str] = mapped_column(String(1000), nullable=False)
     description: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     version: Mapped[str] = mapped_column(Text, nullable=False)
-    createdat: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
-    updatedat: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    createdat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updatedat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

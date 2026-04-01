@@ -16,9 +16,7 @@ except ImportError:  # pragma: no cover
     _harness_generator = None
 
 
-def fixture_synthetic_ingest_batches(
-    *, count: int = 1000, seed: int = 42
-) -> Iterable[EventEnvelope]:
+def fixture_synthetic_ingest_batches(*, count: int = 1000, seed: int = 42) -> Iterable[EventEnvelope]:
     """Deterministic fallback stream until Emilio's shared harness lands."""
     rng = random.Random(seed)
 
@@ -46,9 +44,7 @@ def fixture_synthetic_ingest_batches(
         )
 
 
-def generate_ingest_batches(
-    *, count: int = 1000, seed: int = 42
-) -> Iterable[EventEnvelope]:
+def generate_ingest_batches(*, count: int = 1000, seed: int = 42) -> Iterable[EventEnvelope]:
     """Shared stream source for all Week 3 transport parity tests."""
     if _harness_generator is not None:
         yield from _harness_generator(count=count, seed=seed)

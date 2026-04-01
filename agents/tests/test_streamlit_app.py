@@ -10,6 +10,7 @@ from unittest.mock import MagicMock, patch
 # Helpers: build sample JSON entries matching pipeline_run.json shape
 # ---------------------------------------------------------------------------
 
+
 def _make_entry(agent_id: str, correlation_id: str = "1", **payload_extra: object) -> dict:
     """Build a minimal pipeline_run.json entry."""
     return {
@@ -39,6 +40,7 @@ def _full_pipeline_entries(correlation_id: str = "1") -> list[dict]:
 # ---------------------------------------------------------------------------
 # Tests: _build_record_map
 # ---------------------------------------------------------------------------
+
 
 class TestBuildRecordMap:
     """Grouping entries by correlation_id."""
@@ -76,6 +78,7 @@ class TestBuildRecordMap:
 # Tests: _sort_key
 # ---------------------------------------------------------------------------
 
+
 class TestSortKey:
     """Numeric sort key for correlation IDs."""
 
@@ -99,6 +102,7 @@ class TestSortKey:
 # ---------------------------------------------------------------------------
 # Tests: _load_run_log (JSON fallback)
 # ---------------------------------------------------------------------------
+
 
 class TestLoadRunLog:
     """JSON file loading with caching."""
@@ -131,6 +135,7 @@ class TestLoadRunLog:
 # ---------------------------------------------------------------------------
 # Tests: _db_available
 # ---------------------------------------------------------------------------
+
 
 class TestDbAvailable:
     """Database availability detection."""
@@ -173,6 +178,7 @@ class TestDbAvailable:
 # Tests: agent order constants
 # ---------------------------------------------------------------------------
 
+
 class TestAgentOrder:
     """Agent ordering constants are consistent."""
 
@@ -201,6 +207,7 @@ class TestAgentOrder:
 # ---------------------------------------------------------------------------
 # Tests: JSON fallback page logic (data transformation, not Streamlit rendering)
 # ---------------------------------------------------------------------------
+
 
 class TestJsonFallbackLogic:
     """Data transformations used by JSON fallback pages."""

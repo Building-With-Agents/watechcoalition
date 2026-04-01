@@ -264,6 +264,10 @@ class EnrichedJobProfile(BaseModel):
     duplicate_cluster_id: Optional[str]
 ```
 
+**Nestor + Fatima (locked names):** `soc_code`, `naics_code`, and nested employer enrichment (pair canonical name **`employer`** / typed **`EmployerProfile`**). Full registry and SOC lookup normalization cross-refs: `.cursor/rules/integration-schema.mdc`.
+
+**Implementation today:** `agents/enrichment/schemas.py` uses `job_record: dict[...]`, `employer_profile: dict[str, Any] | None`, plus `soc_code` / `naics_code` — see integration rule for the **`employer` vs `employer_profile`** TODO.
+
 ### Analytics Schemas
 
 ```python
@@ -492,15 +496,16 @@ class JobRecord(BaseModel):
   - `sector`: industry sector string
   - `is_known_employer`: boolean (matched against known employer list)
 
-**New: Temporal period classification:**
-- Classify `date_posted` into temporal periods for longitudinal analysis:
+**New: Temporal period classification (locked literals — Angel + Fabian):**
+- Persist on `job_postings` as `temporal_period`. Allowed values only:
   - `pre_chatgpt`: before Nov 2022
   - `early_genai`: Dec 2022 – Mar 2023
   - `post_gpt4`: Apr 2023 – May 2024
   - `agentic_era`: Jun 2024 – present
 
-**New: Borderplex subregion tagging:**
-- Tag location into Borderplex subregions: `el_paso` | `las_cruces` | `ciudad_juarez` | `regional`
+**New: Borderplex subregion tagging (locked literals — Angel + Fabian):**
+- Persist on `job_postings` as `borderplex_subregion`. Allowed values: `el_paso` | `las_cruces` | `ciudad_juarez` | `regional`.
+- Batch `RecordEnriched` `temporal_period_distribution` / `borderplex_subregion_distribution` may still use an **`unknown`** bucket when the value is missing; see `EnrichmentAgent` `_distribution_bucket`.
 
 **New: Fuzzy deduplication:**
 - Embedding-based near-duplicate detection
@@ -511,8 +516,21 @@ class JobRecord(BaseModel):
 - BLS adapter: labor statistics lookups
 - ONET adapter: occupation/skill crosswalk
 - Census adapter: regional demographics
+- **SOC normalization:** O*NET-style codes may include a decimal suffix (e.g. `15-1252.00`). BLS and O*NET adapters strip to major SOC (e.g. `15-1252`) before lookup. Documented in `.cursor/rules/integration-schema.mdc`.
+- **Phase 1 sync bridge:** `ExternalEnrichmentFacade` is async; enrichment calls it via `run_coroutine` / `asyncio.run` per posting where no loop is running. Phase 2 should optimize (shared loop, batching, or async agent entrypoint). See integration-schema rule.
 
 **Output:** `EnrichedJobProfile` wrapping JobRecord + all enrichment fields
+
+#### `RecordEnriched` event shapes (Pair D — integration)
+
+Canonical key sets and cross-pair DB field registry: **`.cursor/rules/integration-schema.mdc`** and `agents/enrichment/resolvers/record_enriched_contract.py`.
+
+| Shape | Trigger | Contents |
+|-------|---------|----------|
+| **Batch aggregate** | `SkillsExtracted` payload contains a non-empty `records` array | One envelope per batch: `record_enriched_schema_version` (v3+), counts, Week 6 distributions (`temporal_period`, `borderplex`, SOC/NAICS, duplicate), nested **`dedup`** (env thresholds + rollup counts for fuzzy-dedup signals on enriched rows). Built by `build_record_enriched_event()`. |
+| **Single-record** | Flat `SkillsExtracted` payload (no batch `records`) | Per-posting `RecordEnriched`-shaped dict: role, seniority, quality, spam preview fields, optional `normalized_job_id`; **no** `record_enriched_schema_version` until explicitly versioned. |
+
+Fuzzy dedup touchpoints: Pair Emilio registry (`duplicate_cluster_id`, `dedup_*`, `FuzzyDedupResult`, `DEDUP_*` env); Enrichment rolls optional signals into batch `dedup` for observability.
 
 #### Phase 2 — Extended (do not implement in Phase 1)
 - Full BLS/ONET/Census integration (replace stubs with live API calls)
@@ -793,7 +811,7 @@ class JobRecord(BaseModel):
 | `IngestBatch` | Ingestion | Normalization, Orchestrator | batch_id, record_count, source |
 | `NormalizationComplete` | Normalization | Work Intelligence, Orchestrator | batch_id, normalized_count, quarantine_count |
 | `SkillsExtracted` | Work Intelligence | Enrichment, Orchestrator | batch_id, per-dimension counts (skills, tools, tasks, responsibilities, context), extraction_cost_usd |
-| `RecordEnriched` | Enrichment | Analytics, Orchestrator | **Week 5 lite (issue #87):** `batch_id`, `enriched_count`, `spam_rejected_count`, `flagged_for_review_count`. **Week 6+:** adds `temporal_period`, `borderplex_subregion`, `duplicate_count`. |
+| `RecordEnriched` | Enrichment | Analytics, Orchestrator | **Batch path:** `record_enriched_schema_version` **v3+**, `batch_id`, batch counts, Week 6 distributions, nested **`dedup`** (thresholds + fuzzy-dedup rollups). **Single-record path:** flat per-posting payload (no batch `dedup`). See `.cursor/rules/integration-schema.mdc` and `record_enriched_contract.py`. |
 | `ProfileComplete` | Work Intelligence | Enrichment | record_id — mirrors client spec naming (alias for per-record SkillsExtracted) |
 | `AnalyticsRefreshed` | Analytics | Visualization, Orchestrator | refresh_id, tables_updated, records_processed |
 | `DisruptionRefreshed` | Analytics | Visualization, Orchestrator | refresh_id, roles_analyzed, new_fingerprints |

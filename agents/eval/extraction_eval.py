@@ -134,9 +134,7 @@ def fuzzy_match_count(pred: set[str], true: set[str], threshold: int) -> int:
     return matches
 
 
-def compute_fuzzy_metrics(
-    pred: set[str], true: set[str], threshold: int
-) -> tuple[float, float, float]:
+def compute_fuzzy_metrics(pred: set[str], true: set[str], threshold: int) -> tuple[float, float, float]:
     m = fuzzy_match_count(pred, true, threshold)
     precision = 0.0 if len(pred) == 0 else m / len(pred)
     recall = 0.0 if len(true) == 0 else m / len(true)
@@ -312,9 +310,7 @@ def run_eval(ground_truth_path: str | Path) -> None:
     _log(f"Tools Recall:    {recall_tools:.2f}")
     _log(f"Tools F1:        {f1_tools:.2f}")
 
-    _log(
-        f"\n=== FINAL METRICS (fuzzy — token_set_ratio >= {fuzzy_threshold}, greedy 1:1) ==="
-    )
+    _log(f"\n=== FINAL METRICS (fuzzy — token_set_ratio >= {fuzzy_threshold}, greedy 1:1) ===")
     _log(f"Total GT Skills: {total_true_skills}")
     _log(f"Total Pred Skills: {total_pred_skills}")
     _log(f"Fuzzy-matched Skills: {total_fuzzy_matched_skills}")

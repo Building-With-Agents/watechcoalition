@@ -101,9 +101,7 @@ def benchmark_insert_throughput(num_rows: int = 1000) -> float:
 
     # Cleanup benchmark rows for this run.
     with SessionLocal() as session:
-        session.execute(
-            delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id)
-        )
+        session.execute(delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id))
         session.commit()
 
     return rows_per_sec
@@ -140,9 +138,7 @@ def benchmark_dedup_latency(num_rows: int = 1000) -> tuple[float, float]:
         with SessionLocal() as session:
             hashes = (
                 session.execute(
-                    select(RawIngestedJob.raw_payload_hash).where(
-                        RawIngestedJob.ingestion_run_id == ingestion_run_id
-                    )
+                    select(RawIngestedJob.raw_payload_hash).where(RawIngestedJob.ingestion_run_id == ingestion_run_id)
                 )
                 .scalars()
                 .all()
@@ -151,9 +147,7 @@ def benchmark_dedup_latency(num_rows: int = 1000) -> tuple[float, float]:
             for h in hashes:
                 start = time.perf_counter()
                 _ = (
-                    session.execute(
-                        select(RawIngestedJob.id).where(RawIngestedJob.raw_payload_hash == h)
-                    )
+                    session.execute(select(RawIngestedJob.id).where(RawIngestedJob.raw_payload_hash == h))
                     .scalars()
                     .first()
                 )
@@ -161,9 +155,7 @@ def benchmark_dedup_latency(num_rows: int = 1000) -> tuple[float, float]:
                 latencies_ms.append(elapsed_ms)
     finally:
         with SessionLocal() as session:
-            session.execute(
-                delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id)
-            )
+            session.execute(delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id))
             session.commit()
 
     if not latencies_ms:
@@ -227,19 +219,13 @@ def benchmark_unicode_roundtrip() -> str:
     try:
         with SessionLocal() as session:
             rows = (
-                session.execute(
-                    select(RawIngestedJob).where(
-                        RawIngestedJob.ingestion_run_id == ingestion_run_id
-                    )
-                )
+                session.execute(select(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id))
                 .scalars()
                 .all()
             )
     finally:
         with SessionLocal() as session:
-            session.execute(
-                delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id)
-            )
+            session.execute(delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id))
             session.commit()
 
     status = "pass"
@@ -328,9 +314,7 @@ def benchmark_concurrent_access(num_threads: int = 5, per_thread: int = 100) -> 
         with SessionLocal() as session:
             hashes = (
                 session.execute(
-                    select(RawIngestedJob.raw_payload_hash).where(
-                        RawIngestedJob.ingestion_run_id == ingestion_run_id
-                    )
+                    select(RawIngestedJob.raw_payload_hash).where(RawIngestedJob.ingestion_run_id == ingestion_run_id)
                 )
                 .scalars()
                 .all()
@@ -339,9 +323,7 @@ def benchmark_concurrent_access(num_threads: int = 5, per_thread: int = 100) -> 
                 status = "fail"
     finally:
         with SessionLocal() as session:
-            session.execute(
-                delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id)
-            )
+            session.execute(delete(RawIngestedJob).where(RawIngestedJob.ingestion_run_id == ingestion_run_id))
             session.commit()
 
     log.info(
@@ -392,4 +374,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

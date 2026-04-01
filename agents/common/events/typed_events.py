@@ -23,9 +23,7 @@ class IngestBatchEvent(BaseModel):
     @classmethod
     def check_event_type(cls, v: EventEnvelope) -> EventEnvelope:
         if v.payload.get("event_type") != "IngestBatch":
-            raise ValueError(
-                f"Expected payload event_type 'IngestBatch', got {v.payload.get('event_type')!r}"
-            )
+            raise ValueError(f"Expected payload event_type 'IngestBatch', got {v.payload.get('event_type')!r}")
         return v
 
     @property
@@ -76,9 +74,7 @@ class SourceFailureEvent(BaseModel):
     @classmethod
     def check_event_type(cls, v: EventEnvelope) -> EventEnvelope:
         if v.payload.get("event_type") != "SourceFailure":
-            raise ValueError(
-                f"Expected payload event_type 'SourceFailure', got {v.payload.get('event_type')!r}"
-            )
+            raise ValueError(f"Expected payload event_type 'SourceFailure', got {v.payload.get('event_type')!r}")
         return v
 
     @property
@@ -98,9 +94,7 @@ class NormalizationFailedEvent(BaseModel):
     @classmethod
     def check_event_type(cls, v: EventEnvelope) -> EventEnvelope:
         if v.payload.get("event_type") != "NormalizationFailed":
-            raise ValueError(
-                f"Expected payload event_type 'NormalizationFailed', got {v.payload.get('event_type')!r}"
-            )
+            raise ValueError(f"Expected payload event_type 'NormalizationFailed', got {v.payload.get('event_type')!r}")
         return v
 
     @property

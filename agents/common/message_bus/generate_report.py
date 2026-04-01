@@ -19,9 +19,7 @@ from agents.common.message_bus.run_comparison import _parse_bootstrap_servers
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Run transport comparison and generate HTML report with graphs."
-    )
+    parser = argparse.ArgumentParser(description="Run transport comparison and generate HTML report with graphs.")
     parser.add_argument("--count", type=int, default=1000, help="Number of harness events.")
     parser.add_argument("--seed", type=int, default=42, help="Harness seed.")
     parser.add_argument("--crash-at", type=int, default=500, help="Crash index for replay.")
@@ -81,53 +79,40 @@ def build_html_report(
     latency_p99 = [r["latency_p99_ms"] if r["latency_p99_ms"] is not None else 0 for r in rows]
 
     # Replay / correctness
-    replay_pct = [
-        r["replay_completeness_pct"] if r["replay_completeness_pct"] is not None else None
-        for r in rows
-    ]
-    producer_loss = [
-        r["producer_crash_loss_count"] if r["producer_crash_loss_count"] is not None else 0
-        for r in rows
-    ]
+    replay_pct = [r["replay_completeness_pct"] if r["replay_completeness_pct"] is not None else None for r in rows]
+    producer_loss = [r["producer_crash_loss_count"] if r["producer_crash_loss_count"] is not None else 0 for r in rows]
     producer_recovered = [
-        (
-            r["producer_resume_recovered_count"]
-            if r["producer_resume_recovered_count"] is not None
-            else 0
-        )
-        for r in rows
+        (r["producer_resume_recovered_count"] if r["producer_resume_recovered_count"] is not None else 0) for r in rows
     ]
     producer_final_loss = [
-        (
-            r["producer_resume_final_loss_count"]
-            if r["producer_resume_final_loss_count"] is not None
-            else 0
-        )
+        (r["producer_resume_final_loss_count"] if r["producer_resume_final_loss_count"] is not None else 0)
         for r in rows
     ]
     correctness = [r["correctness_passed"] for r in rows]
 
-    data_js = json.dumps({
-        "labels": labels,
-        "throughput_publish": throughput_publish,
-        "throughput_e2e": throughput_e2e,
-        "latency_p50": latency_p50,
-        "latency_p95": latency_p95,
-        "latency_p99": latency_p99,
-        "replay_pct": replay_pct,
-        "producer_loss": producer_loss,
-        "producer_recovered": producer_recovered,
-        "producer_final_loss": producer_final_loss,
-        "correctness": correctness,
-        "rows": rows,
-        "scenario": {
-            "name": scenario.name,
-            "event_count": scenario.event_count,
-            "seed": scenario.seed,
-            "crash_at": scenario.crash_at,
-            "replay_enabled": scenario.include_crash_replay,
-        },
-    })
+    data_js = json.dumps(
+        {
+            "labels": labels,
+            "throughput_publish": throughput_publish,
+            "throughput_e2e": throughput_e2e,
+            "latency_p50": latency_p50,
+            "latency_p95": latency_p95,
+            "latency_p99": latency_p99,
+            "replay_pct": replay_pct,
+            "producer_loss": producer_loss,
+            "producer_recovered": producer_recovered,
+            "producer_final_loss": producer_final_loss,
+            "correctness": correctness,
+            "rows": rows,
+            "scenario": {
+                "name": scenario.name,
+                "event_count": scenario.event_count,
+                "seed": scenario.seed,
+                "crash_at": scenario.crash_at,
+                "replay_enabled": scenario.include_crash_replay,
+            },
+        }
+    )
 
     return _HTML_TEMPLATE.replace("__DATA__", data_js)
 

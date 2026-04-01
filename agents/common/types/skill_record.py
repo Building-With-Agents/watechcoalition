@@ -13,7 +13,7 @@ class SkillRecord(BaseModel):
     """A single extracted skill from a job posting."""
 
     name: str
-    skill_type: str = "raw"       # "raw" | "linked" | "genai_extension"
+    skill_type: str = "raw"  # "raw" | "linked" | "genai_extension"
     confidence: float = 0.0
     source_span: str | None = None
     esco_uri: str | None = None

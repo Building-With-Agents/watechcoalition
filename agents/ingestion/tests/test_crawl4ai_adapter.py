@@ -101,9 +101,7 @@ class TestCrawl4AIAdapterFetch:
         assert "unreachable" in str(exc_info.value).lower()
         assert "timeout" in str(exc_info.value).lower()
 
-    def test_fetch_returns_empty_list_when_page_has_no_openings_signal(
-        self, mock_crawler_cls: MagicMock
-    ) -> None:
+    def test_fetch_returns_empty_list_when_page_has_no_openings_signal(self, mock_crawler_cls: MagicMock) -> None:
         """Zero job links with explicit no-openings signal returns []."""
         html = "x" * 400 + " 0 jobs found " + "y" * 200
         mock_result = _make_mock_result(success=True, html=html)
@@ -193,9 +191,7 @@ class TestCrawl4AIAdapterHealthCheck:
         self, mock_crawler_cls: MagicMock
     ) -> None:
         """health_check() returns full structured dict: initialized, target_configured, reachable, extractable_structure, status, source, error."""
-        mock_result = _make_mock_result(
-            success=True, html='<a href="/careers/elpaso/jobs/123/test">Job</a>'
-        )
+        mock_result = _make_mock_result(success=True, html='<a href="/careers/elpaso/jobs/123/test">Job</a>')
         mock_crawler = AsyncMock()
         mock_crawler.arun = AsyncMock(return_value=mock_result)
         mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
@@ -220,9 +216,7 @@ class TestCrawl4AIAdapterHealthCheck:
         assert result["status"] == "operational"
         assert result["error"] is None
 
-    def test_health_check_extractable_structure_true_when_job_links_present(
-        self, mock_crawler_cls: MagicMock
-    ) -> None:
+    def test_health_check_extractable_structure_true_when_job_links_present(self, mock_crawler_cls: MagicMock) -> None:
         """extractable_structure is True when HTML contains expected job-link pattern."""
         mock_result = _make_mock_result(
             success=True, html='<body> <a href="/careers/elpaso/jobs/99/engineer">Link</a> </body>'
@@ -238,9 +232,7 @@ class TestCrawl4AIAdapterHealthCheck:
         assert result["reachable"] is True
         assert result["extractable_structure"] is True
 
-    def test_health_check_extractable_structure_true_when_no_openings_signal(
-        self, mock_crawler_cls: MagicMock
-    ) -> None:
+    def test_health_check_extractable_structure_true_when_no_openings_signal(self, mock_crawler_cls: MagicMock) -> None:
         """extractable_structure is True when HTML contains no-openings signal only."""
         mock_result = _make_mock_result(success=True, html="<body> 0 jobs found </body>")
         mock_crawler = AsyncMock()
@@ -308,14 +300,9 @@ class TestCrawl4AIAdapterHealthCheck:
 class TestCrawl4AIUSAJobsAdapterFetch:
     """Tests for Crawl4AIUSAJobsAdapter.fetch() with mocked Crawl4AI."""
 
-    def test_fetch_returns_records_with_source_crawl4ai_usajobs(
-        self, mock_crawler_cls: MagicMock
-    ) -> None:
+    def test_fetch_returns_records_with_source_crawl4ai_usajobs(self, mock_crawler_cls: MagicMock) -> None:
         """Pass 1 job link + detail HTML with salary/description → normalized records."""
-        pass1_html = (
-            "x" * 500
-            + "https://www.usajobs.gov/job/12345678/some-title"
-        )
+        pass1_html = "x" * 500 + "https://www.usajobs.gov/job/12345678/some-title"
         list_result = _make_mock_result(success=True, html=pass1_html)
         detail_html = (
             '<script type="application/ld+json">'
@@ -323,8 +310,7 @@ class TestCrawl4AIUSAJobsAdapterFetch:
             '"description":"Detailed federal job duties and scope of work here.",'
             '"baseSalary":{"value":{"minValue":80000,"maxValue":104000,"unitText":"YEAR"}},'
             '"hiringOrganization":{"name":"Department of Testing"}}'
-            "</script>"
-            + "z" * 200
+            "</script>" + "z" * 200
         )
         detail_result = _make_mock_result(success=True, html=detail_html)
         mock_crawler = AsyncMock()
@@ -345,16 +331,12 @@ class TestCrawl4AIUSAJobsAdapterFetch:
         assert "duties" in r.description.lower() or "federal" in r.description.lower()
         assert r.salary_raw is not None
 
-    def test_fetch_pass1_failed_detail_keeps_partial_record(
-        self, mock_crawler_cls: MagicMock
-    ) -> None:
+    def test_fetch_pass1_failed_detail_keeps_partial_record(self, mock_crawler_cls: MagicMock) -> None:
         """Detail arun raises → one partial RawJobRecord with empty description."""
         pass1_html = "y" * 500 + "https://www.usajobs.gov/job/99999999/my-role"
         list_result = _make_mock_result(success=True, html=pass1_html)
         mock_crawler = AsyncMock()
-        mock_crawler.arun = AsyncMock(
-            side_effect=[list_result, RuntimeError("detail crawl failed")]
-        )
+        mock_crawler.arun = AsyncMock(side_effect=[list_result, RuntimeError("detail crawl failed")])
         mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
         mock_crawler.__aexit__ = AsyncMock(return_value=None)
         mock_crawler_cls.return_value = mock_crawler
@@ -367,9 +349,7 @@ class TestCrawl4AIUSAJobsAdapterFetch:
         assert records[0].source == "crawl4ai_usajobs"
         assert records[0].description == ""
 
-    def test_fetch_returns_empty_when_no_results_signal(
-        self, mock_crawler_cls: MagicMock
-    ) -> None:
+    def test_fetch_returns_empty_when_no_results_signal(self, mock_crawler_cls: MagicMock) -> None:
         """Explicit no-results copy with no job links returns []."""
         html = "z" * 500 + " no jobs found "
         mock_result = _make_mock_result(success=True, html=html)
@@ -419,9 +399,7 @@ class TestCrawl4AIUSAJobsAdapterFetch:
 class TestCrawl4AIIndeedAdapterFetch:
     """Tests for Crawl4AIIndeedAdapter.fetch() and health_check() with mocked Crawl4AI."""
 
-    def test_fetch_returns_empty_on_cloudflare_block(
-        self, mock_crawler_cls: MagicMock
-    ) -> None:
+    def test_fetch_returns_empty_on_cloudflare_block(self, mock_crawler_cls: MagicMock) -> None:
         """cf-ray marker in listing HTML → [] without raising."""
         html = "x" * 400 + " cf-ray: abc123 " + "y" * 200
         mock_result = _make_mock_result(success=True, html=html)
@@ -450,21 +428,15 @@ class TestCrawl4AIIndeedAdapterFetch:
         records = asyncio.run(adapter.fetch(region))
         assert records == []
 
-    def test_fetch_returns_records_with_source_crawl4ai_indeed(
-        self, mock_crawler_cls: MagicMock
-    ) -> None:
+    def test_fetch_returns_records_with_source_crawl4ai_indeed(self, mock_crawler_cls: MagicMock) -> None:
         """Pass 1 jk + detail with description → records with source and description."""
-        pass1_html = (
-            "p" * 500
-            + 'data-jk="abc123def456abcd"'
-        )
+        pass1_html = "p" * 500 + 'data-jk="abc123def456abcd"'
         list_result = _make_mock_result(success=True, html=pass1_html)
         detail_html = (
             '<script type="application/ld+json">'
             '{"@type":"JobPosting","title":"Software Engineer",'
             '"description":"Indeed job body text for testing normalization."}'
-            "</script>"
-            + "q" * 200
+            "</script>" + "q" * 200
         )
         detail_result = _make_mock_result(success=True, html=detail_html)
         mock_crawler = AsyncMock()
@@ -484,16 +456,12 @@ class TestCrawl4AIIndeedAdapterFetch:
         assert r.description != ""
         assert "indeed job body" in r.description.lower()
 
-    def test_fetch_pass1_failed_detail_keeps_partial_record(
-        self, mock_crawler_cls: MagicMock
-    ) -> None:
+    def test_fetch_pass1_failed_detail_keeps_partial_record(self, mock_crawler_cls: MagicMock) -> None:
         """Detail arun raises → partial record, empty description."""
         pass1_html = "r" * 500 + 'data-jk="fedcba9876543210"'
         list_result = _make_mock_result(success=True, html=pass1_html)
         mock_crawler = AsyncMock()
-        mock_crawler.arun = AsyncMock(
-            side_effect=[list_result, RuntimeError("detail failed")]
-        )
+        mock_crawler.arun = AsyncMock(side_effect=[list_result, RuntimeError("detail failed")])
         mock_crawler.__aenter__ = AsyncMock(return_value=mock_crawler)
         mock_crawler.__aexit__ = AsyncMock(return_value=None)
         mock_crawler_cls.return_value = mock_crawler

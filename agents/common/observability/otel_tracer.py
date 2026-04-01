@@ -16,6 +16,7 @@ try:
     from opentelemetry import trace
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+
     _OTEL_AVAILABLE = True
 except ImportError:
     _OTEL_AVAILABLE = False
@@ -77,7 +78,9 @@ class OTelTracer(TracerBase):
 
     def record_error(self, error: Exception, *, context: dict[str, Any] | None = None) -> None:
         if self._spans:
-            self._spans[-1]["events"].append({"event": "error_recorded", "error": str(error), "error_type": type(error).__name__, **(context or {})})
+            self._spans[-1]["events"].append(
+                {"event": "error_recorded", "error": str(error), "error_type": type(error).__name__, **(context or {})}
+            )
             self._spans[-1]["status"] = "error"
 
     def get_spans(self) -> list[dict[str, Any]]:

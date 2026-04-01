@@ -1,0 +1,166 @@
+---
+description: "Cross-pair field registry, bus payload naming, and RecordEnriched shapes (Pair D + fuzzy dedup)"
+alwaysApply: false
+globs:
+  - "agents/enrichment/**"
+  - "agents/common/message_bus/**"
+  - "agents/common/data_store/**"
+  - "agents/analytics/**"
+  - "agents/ingestion/**"
+---
+
+# Integration schema (cross-pair)
+
+**Source of truth for frozen key sets:** `agents/enrichment/resolvers/record_enriched_contract.py` (import in tests).
+
+**Event catalog overview:** `.cursor/rules/event-contracts.mdc`
+
+## Naming
+
+- **Python / `EventEnvelope.payload`:** `snake_case` keys.
+- **PostgreSQL `dbo.*`:** match ORM / migration names; agents map explicitly—do not silently rename columns in events.
+
+## SOC / O*NET normalization (canonical)
+
+Incoming **SOC codes** may include an O*NET-style decimal suffix (e.g. `15-1252.00`). Before BLS wage lookup and O*NET occupation lookup, adapters normalize to the **major form without the fractional segment** (e.g. `15-1252`). Implementations: `agents/enrichment/adapters/bls_adapter.py` and `agents/enrichment/adapters/onet_adapter.py` (`_normalize_soc`). Callers may pass either form; do not persist two different shapes for the same logical SOC without an explicit migration decision.
+
+## Phase 1 async bridge (Phase 2 optimization)
+
+`EnrichmentAgent` and `enrich_record` run **synchronously**. `ExternalEnrichmentFacade.fetch_for_posting` is **async**; the sync path invokes it via `agents/enrichment/async_bridge.run_coroutine`, which uses `asyncio.run` when no loop is running (effectively **one new event loop per call** in that case). This is intentional for Phase 1 volume and simplicity. **Phase 2** should replace this with a strategy that reduces overhead: e.g. shared loop, batched adapter calls, or an async-first agent API.
+
+## Locked enrichment enums (Angel + Fabian)
+
+The following string values are **locked** for columns persisted on **`job_postings`** and for enrichment-related payloads (including fields carried on enriched posting dicts and reflected in batch **`RecordEnriched`** rollups). Source: **Angel + Fabian** (enrichment pair).
+
+**`temporal_period`** — one of:
+
+- `pre_chatgpt`
+- `early_genai`
+- `post_gpt4`
+- `agentic_era`
+
+**`borderplex_subregion`** — one of:
+
+- `el_paso`
+- `las_cruces`
+- `ciudad_juarez`
+- `regional`
+
+**Batch distributions:** `temporal_period_distribution` and `borderplex_subregion_distribution` on batch `RecordEnriched` may still include additional bucket keys such as **`unknown`** when upstream data is missing or unclassified, matching `EnrichmentAgent` `_distribution_bucket` behavior. Prefer the locked literals when the classifier has a definitive result.
+
+## Enriched job profile / Pair enrichment fields (Nestor + Fatima)
+
+Canonical field names for the **enriched job profile** shape (Pydantic `EnrichedJobProfile` in `agents/enrichment/schemas.py` and posting dicts that carry the same logical fields). Source: **Nestor + Fatima**.
+
+| Pair name | Type | Notes |
+|-----------|------|--------|
+| **`soc_code`** | `str \| None` | Classification / crosswalk output. May include O*NET-style decimals in upstream data; **adapter lookups** normalize via § SOC / O*NET normalization before BLS/O*NET calls. Storage and events may still hold the raw string until writers normalize explicitly. |
+| **`naics_code`** | `str \| None` | Employer / sector industry classification string. |
+| **`employer`** | nested **employer profile** | Pair canonical name for company-level enrichment (`company_size`, `ai_maturity_signal`, `sector`, `is_known_employer`, etc.). |
+
+**Code vs pair naming (TODO):** The repository currently exposes **`employer_profile: dict[str, Any] | None`** on `EnrichedJobProfile`, not a field named `employer` or a nested Pydantic `EmployerProfile` model. Treat **`employer`** as the target public name; converge implementation (rename + typed model) in a follow-up when pairs agree. Do not confuse with SQLAlchemy **`EmployerProfile`** / `dbo.employer_profiles` (`agents/common/data_store/models.py`), which is the persistence table—map to/from the enriched shape at promotion time.
+
+## `RecordEnriched` — two shapes (same `event_type`)
+
+| Shape | When | `record_enriched_schema_version` | Notes |
+|-------|------|----------------------------------|--------|
+| **Batch aggregate** | `SkillsExtracted` payload has non-empty `records` list | **Yes** (v3+) | Built by `build_record_enriched_event()`; includes nested `dedup`. |
+| **Single-record** | Flat payload (no batch `records`) | **No** (not used yet) | Per-posting promotion + spam path; optional keys (`normalized_job_id`, spam preview fields). |
+
+Single-record payloads are **not** versioned with `record_enriched_schema_version` until the team adds one; stability tests cover **core** keys only (`RECORD_ENRICHED_SINGLE_RECORD_CORE_KEYS`).
+
+## Batch `RecordEnriched` payload (schema v3)
+
+Top-level keys are exactly `RECORD_ENRICHED_BATCH_PAYLOAD_KEYS` in `record_enriched_contract.py`.
+
+Nested **`dedup`** (always present on batch shape):
+
+| Key | Type | Meaning |
+|-----|------|--------|
+| `cosine_threshold` | float | From `DEDUP_COSINE_THRESHOLD` env, default `0.92` |
+| `rolling_window_days` | int | From `DEDUP_ROLLING_WINDOW_DAYS` env, default `30` |
+| `stub_count` | int | Rows where fuzzy dedup was stubbed (`stub` / `fuzzy_dedup_stub` on posting or enriched dict) |
+| `rows_with_duplicate_cluster_id` | int | Rows with non-empty `duplicate_cluster_id` on posting or enriched |
+| `rows_with_matched_job_posting_id` | int | Rows with non-empty `matched_job_posting_id` |
+
+## Cross-pair field registry (canonical)
+
+*Agreed with Pair (Emilio) — revise if migrations contradict.*
+
+### `dbo.job_postings` — fuzzy-dedup columns
+
+- `is_duplicate` — BOOLEAN  
+- `duplicate_cluster_id` — TEXT  
+- `dedup_text_hash` — TEXT (SHA-256 hex, UTF-8 dedup string)  
+- `dedup_embedding` — `vector(1536)` (pgvector)
+
+### `dbo.job_postings` — read for dedup algorithm
+
+- `job_posting_id` — UUID (as text in queries)  
+- `company_id` — UUID (as text in queries)  
+- `publish_date` — timestamptz  
+- `job_title` — text  
+- `job_description` — text  
+- `salary_range` — text (nullable)  
+- `location` — text (nullable)  
+- `zip` — text (nullable)  
+- `county` — text (nullable)  
+- `source` — text  
+- `external_id` — text  
+
+### Joins
+
+- `dbo.companies.company_name` — text  
+- `dbo.normalized_jobs.requirements` — text  
+
+### Python `FuzzyDedupResult` (target in-process model)
+
+- `is_duplicate` — bool  
+- `duplicate_cluster_id` — str | None  
+- `matched_job_posting_id` — str | None  
+- `survivor_job_posting_id` — str | None  
+- `stub` — bool  
+
+### In-memory / similarity
+
+- Embedding: `numpy.ndarray` dtype float, length **1536**  
+- `cosine_similarity` → **float**  
+
+### Config (env / constants)
+
+- `DEDUP_COSINE_THRESHOLD` — env string → float, default **0.92**  
+- `DEDUP_ROLLING_WINDOW_DAYS` — int, default **30**  
+
+### `dbo.llm_audit_log`
+
+- `id` — INTEGER PK  
+- `agent_name` — VARCHAR(100)  
+- `prompt_hash` — VARCHAR(64)  
+- `model` — VARCHAR(100)  
+- `provider` — VARCHAR(50)  
+- `latency_ms` — INTEGER nullable  
+- `input_tokens` / `output_tokens` / `token_count` — INTEGER nullable  
+- `cost_usd` — FLOAT nullable  
+- `success` — BOOLEAN  
+- `error_reason` — TEXT nullable  
+- `created_at` — TIMESTAMPTZ  
+
+ORM: `LLMAuditLog` in `agents/common/data_store/models.py`.
+
+### TODO — other pairs
+
+- [ ] Align `EnrichedJobProfile.employer_profile` dict with pair canonical field name **`employer`** and optional Pydantic `EmployerProfile` nested model (Nestor + Fatima).  
+- [ ] Normalization / Work Intelligence: add canonical column & event field list when received.  
+- [ ] Analytics: consumer expectations for `RecordEnriched` beyond `batch_id`.  
+- [ ] Orchestration: control-plane fields if any.  
+
+## Pair ownership (working)
+
+| Area | Owner |
+|------|--------|
+| `RecordEnriched` batch builder + dedup rollup block | Pair D (Enrichment) |
+| `temporal_period` / `borderplex_subregion` locked enums | Angel + Fabian |
+| `soc_code`, `naics_code`, nested **`employer`** profile on enriched output | Nestor + Fatima |
+| Fuzzy dedup columns + `FuzzyDedupResult` | Pair Emilio (ingestion/dedup stream) |
+| `llm_audit_log` writes | Owning agent per call site |
+| Message bus routing / `event_type` | Orchestration + `contracts.py` |
