@@ -18,7 +18,6 @@ import webbrowser
 from datetime import datetime, timezone
 from pathlib import Path
 
-from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import OperationalError
@@ -26,7 +25,10 @@ from sqlalchemy.exc import OperationalError
 # Repo root on sys.path (parent of ``agents/``)
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
-load_dotenv(_REPO_ROOT / ".env")
+
+from agents.common.env import load_repo_root_dotenv  # noqa: E402
+
+load_repo_root_dotenv()
 
 
 def _h(s: object) -> str:

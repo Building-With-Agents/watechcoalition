@@ -28,10 +28,12 @@ from agents.tests.fuzzy_dedup_e2e_helpers import (
     SecondCompany,
     add_normalized_job_and_extracted,
     anchor_now,
+    audit_log_ready,
     dedup_columns_ready,
     delete_job_posting,
     delete_normalized_chain,
     embedding_env_ready,
+    fetch_audit_count,
     fetch_dedup_columns,
     fetch_embedding_meta,
     insert_job_posting,
@@ -72,6 +74,8 @@ def _require_dedup_migration(e2e_engine: Engine) -> None:
     try:
         if not dedup_columns_ready(e2e_engine):
             pytest.skip("dbo.job_postings.dedup_embedding missing; run run_migrations(get_engine())")
+        if not audit_log_ready(e2e_engine):
+            pytest.skip("dbo.llm_audit_log missing; run run_migrations(get_engine())")
     except Exception as exc:
         pytest.skip(f"database unreachable or schema check failed: {exc}")
 
@@ -150,6 +154,27 @@ def test_window_29d_in_merges(monkeypatch: pytest.MonkeyPatch, e2e_engine: Engin
             delete_job_posting(e2e_engine, survivor_id)
         if nj_surv is not None:
             delete_normalized_chain(e2e_engine, nj_surv)
+        teardown_enrichment_e2e(e2e_engine, seed)
+
+
+def test_live_embedding_call_writes_llm_audit_log(e2e_engine: Engine) -> None:
+    seed = _seed_or_skip(e2e_engine)
+    before = fetch_audit_count(e2e_engine, agent_name="enrichment-dedup")
+    sf = session_factory_for(e2e_engine)
+    try:
+        with sf() as session:
+            run_dedup_and_persist(session, seed.job_posting_id)
+            session.commit()
+
+        meta = fetch_embedding_meta(e2e_engine, seed.job_posting_id)
+        after = fetch_audit_count(e2e_engine, agent_name="enrichment-dedup")
+        state = fetch_dedup_columns(e2e_engine, seed.job_posting_id)
+
+        assert meta.get("has_embedding") is True
+        assert after >= before + 1
+        assert state.get("is_duplicate") is False
+        assert state.get("duplicate_cluster_id") is None
+    finally:
         teardown_enrichment_e2e(e2e_engine, seed)
 
 

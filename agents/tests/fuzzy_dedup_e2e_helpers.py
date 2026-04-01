@@ -65,6 +65,36 @@ def dedup_columns_ready(engine: Engine) -> bool:
         return row is not None
 
 
+def audit_log_ready(engine: Engine) -> bool:
+    with engine.connect() as conn:
+        row = conn.execute(
+            text(
+                """
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'dbo'
+                  AND table_name = 'llm_audit_log'
+                """
+            )
+        ).first()
+        return row is not None
+
+
+def fetch_audit_count(engine: Engine, *, agent_name: str) -> int:
+    with engine.connect() as conn:
+        count = conn.execute(
+            text(
+                """
+                SELECT COUNT(*)
+                FROM dbo.llm_audit_log
+                WHERE agent_name = :agent_name
+                """
+            ),
+            {"agent_name": agent_name},
+        ).scalar()
+        return int(count or 0)
+
+
 def _job_postings_ts_fragment(insp) -> tuple[str, str]:
     cols = {c["name"] for c in insp.get_columns("job_postings", schema="dbo")}
     if "createdAt" in cols and "updatedAt" in cols:

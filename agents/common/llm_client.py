@@ -10,25 +10,19 @@ from __future__ import annotations
 import os
 import re
 import time
-from pathlib import Path
 from typing import Any, TypeVar
 
+import structlog
 from pydantic import BaseModel
 
-try:
-    from dotenv import load_dotenv
-    _repo_root = Path(__file__).resolve().parent.parent.parent
-    load_dotenv(_repo_root / ".env")
-except ImportError:
-    pass
-
-import structlog
-
+from agents.common.env import load_repo_root_dotenv
 from agents.common.llm_adapter import (
     MODEL_TIER_MAP,
     compute_extraction_cost,
     log_extraction_event,
 )
+
+load_repo_root_dotenv()
 
 AGENT_NAME = "skills-extraction-agent"
 log = structlog.get_logger()
