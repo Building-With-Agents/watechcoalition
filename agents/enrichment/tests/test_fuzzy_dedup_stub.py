@@ -1,4 +1,4 @@
-"""Phase 0 stub for fuzzy dedup — no DB or Azure."""
+"""Fuzzy dedup smoke: missing DB row yields unique, non-stub result."""
 
 from __future__ import annotations
 
@@ -12,14 +12,18 @@ from agents.enrichment.dedup import (
 )
 
 
-def test_run_fuzzy_dedup_stub_returns_safe_default() -> None:
+def test_run_fuzzy_dedup_missing_row_returns_unique_not_stub() -> None:
     session = MagicMock()
+    first = MagicMock()
+    first.mappings.return_value.first.return_value = None
+    session.execute.return_value = first
+
     out = run_fuzzy_dedup(session, "00000000-0000-0000-0000-000000000001")
     assert isinstance(out, FuzzyDedupResult)
     assert out.is_duplicate is False
     assert out.duplicate_cluster_id is None
     assert out.survivor_job_posting_id is None
-    assert out.stub is True
+    assert out.stub is False
 
 
 def test_dedup_cosine_threshold_default_matches_spec() -> None:

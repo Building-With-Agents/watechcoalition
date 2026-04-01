@@ -1,42 +1,54 @@
-# Fuzzy dedup — teammate handoff (Phase 0 → Week 6)
+# Fuzzy dedup — IMP-018 (live implementation)
 
-This package implements **IMP-018**: near-duplicate job postings via embedding cosine similarity, same-company constraint, rolling 30-day window, survivor by field completeness.
+Near-duplicate job postings via embedding cosine similarity, same-`company_id` constraint, rolling 30-day window, survivor by field completeness.
 
-## What exists now (Phase 0)
+## Public API
 
-- **`run_fuzzy_dedup(session, job_posting_id, *, threshold=None)`** in `fuzzy_dedup.py` — **stub**: logs `fuzzy_dedup_stub` and returns `FuzzyDedupResult(is_duplicate=False, stub=True)` with **no** reads/writes.
-- **`FuzzyDedupResult`** in `types.py` — stable contract for the real implementation, including `matched_job_posting_id` so persistence can flip a prior survivor without changing the API later.
-- **`config.py`** — env `DEDUP_COSINE_THRESHOLD` (default **0.92**), window length **30** days, anchor column name **`publish_date`**.
+- **`run_fuzzy_dedup(session, job_posting_id, *, threshold=None)`** in [`fuzzy_dedup.py`](fuzzy_dedup.py) — loads the row, builds dedup text, ensures an embedding (Azure via `_embed_texts_azure` with `audit_agent_name="enrichment-dedup"`), compares to **survivors** in the window, returns **`FuzzyDedupResult` with `stub=False`** on all paths (including soft failures that yield “unique”).
+- **`FuzzyDedupResult`** in [`types.py`](types.py) — `matched_job_posting_id` supports persistence flipping a prior survivor via [`apply_fuzzy_dedup_result`](../../enrichment/job_postings_promotion.py).
+- **`config.py`** — env `DEDUP_COSINE_THRESHOLD` (default **0.92**), window **30** days, anchor **`publish_date`**.
 
-## What you implement next
+## Database columns (`dbo.job_postings`)
 
-1. **Dedup text:** `title | company_name | first 500 chars of requirements` (requirements may come from normalized_jobs / description — follow ARCHITECTURE_DEEP).
-2. **Candidates:** same `company_id`, `is_duplicate = false`, `publish_date` in `[anchor - 30d, anchor)`; this keeps the 29-day case in-window, the 31-day case out-of-window, and prevents self-match on the anchor timestamp.
-3. **Embeddings:** reuse `agents/skills_extraction/extractors/taxonomy.py` → `_embed_texts_azure`; add **`log_extraction_event`** with `agent_name` like `enrichment-dedup` (coordinate Issue #108 pattern).
-4. **Persistence:** `dbo.job_postings.is_duplicate`, `duplicate_cluster_id` (already migrated in `agents/common/data_store/migrations.py`) are written only through `job_postings_promotion.apply_fuzzy_dedup_result`.
-5. **Survivor:** highest field completeness; if a new row beats the survivor, flip flags and keep one cluster id.
+| Column | Purpose |
+|--------|---------|
+| `dedup_text_hash` | SHA-256 of normalized dedup string; skip re-embed when unchanged |
+| `dedup_embedding` | `vector(1536)` — cached embedding for comparisons (see `migrations.py`) |
+| `is_duplicate` / `duplicate_cluster_id` | Cluster membership; written **only** by `job_postings_promotion.apply_fuzzy_dedup_result` |
 
-## Integration point (not wired yet)
+**Threshold note:** `0.92` is calibrated for the same embedding family as taxonomy audit (`text-embedding-3-small` in audit logs). If the embedding deployment changes, recalibrate `DEDUP_COSINE_THRESHOLD`.
 
-Call **`run_fuzzy_dedup`** from `job_postings_promotion.py` immediately after a successful enrichment promotion update. At that point:
+## Algorithm (summary)
 
-- `EnrichmentAgent.process()` already opened the `Session`.
-- `resolve_job_posting_row()` has both `job_posting_id` and `company_id`.
-- rejected spam tiers have already exited, so dedup only runs for rows that remain on `job_postings`.
+1. **Dedup text:** `title | company_name | first 500 chars` of `normalized_jobs.requirements` if present, else `job_description` (see [`text.py`](text.py)).
+2. **Window:** half-open **`[anchor - 30d, anchor)`** on `publish_date` (UTC-aware).
+3. **Candidates:** same `company_id`, **`is_duplicate IS NOT TRUE`**, `dedup_embedding IS NOT NULL`, excluding self.
+4. **Similarity:** cosine in Python (`vectors.py`); compare current vector to each survivor; take **best** match (star clustering — no transitive chaining through duplicates).
+5. **Survivor arbitration:** [`completeness.py`](completeness.py) (salary, location, description length); **recency** tie-break. Reuse matched survivor’s `duplicate_cluster_id` if set; else new **UUID4** cluster id.
+
+## Idempotency / re-runs
+
+- Same dedup text → same hash → **reuse** stored embedding (no second Azure call).
+- Edited description/requirements → new hash → re-embed → cluster membership may change.
+
+## Integration (wired)
+
+After a successful enrichment promotion update, [`apply_enrichment_to_job_postings`](../../enrichment/job_postings_promotion.py) calls `_apply_fuzzy_dedup_after_promotion`, which runs `run_fuzzy_dedup` then `apply_fuzzy_dedup_result`. Dedup failures are logged; promotion is **not** rolled back.
 
 ## Env vars
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `DEDUP_COSINE_THRESHOLD` | `0.92` | Cosine similarity above → near-duplicate |
+| `DEDUP_COSINE_THRESHOLD` | `0.92` | Cosine similarity ≥ threshold → near-duplicate candidate |
 
 ## Tests
 
-- Stub: `tests/test_fuzzy_dedup_stub.py` — import + safe return + log smoke.
-- Add boundary tests (29 vs 31 days) and merge cases when live.
+- [`enrichment/tests/test_fuzzy_dedup.py`](../../enrichment/tests/test_fuzzy_dedup.py) — mocked session + `_embed_texts_azure`: threshold, window params, company filter, completeness, hash skip, embedding failure.
+- [`enrichment/tests/test_fuzzy_dedup_stub.py`](../../enrichment/tests/test_fuzzy_dedup_stub.py) — missing row smoke; threshold default smoke.
+- Promotion + persistence: [`enrichment/tests/test_job_postings_promotion.py`](../../enrichment/tests/test_job_postings_promotion.py).
 
-## References (repo)
+## References
 
-- `agents/skills_extraction/extractors/taxonomy.py` — `_embed_texts_azure`, cosine pattern.
-- `agents/common/llm_adapter.py` — `log_extraction_event`.
-- `docs/planning/ARCHITECTURE_DEEP.md` — enrichment / fuzzy dedup spec.
+- [`agents/skills_extraction/extractors/taxonomy.py`](../../../skills_extraction/extractors/taxonomy.py) — `_embed_texts_azure(..., audit_agent_name=...)`
+- [`agents/common/llm_adapter.py`](../../../common/llm_adapter.py) — `log_extraction_event`
+- `docs/planning/ARCHITECTURE_DEEP.md` — enrichment / fuzzy dedup spec
