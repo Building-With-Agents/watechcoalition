@@ -6,21 +6,9 @@ from agents.enrichment.resolvers.events import (
     RECORD_ENRICHED_SCHEMA_VERSION,
     build_record_enriched_event,
 )
-
-_EXPECTED_KEYS = frozenset(
-    {
-        "event_type",
-        "record_enriched_schema_version",
-        "batch_id",
-        "enriched_count",
-        "spam_rejected_count",
-        "flagged_for_review_count",
-        "temporal_period_distribution",
-        "borderplex_subregion_distribution",
-        "duplicate_count",
-        "soc_classified_count",
-        "naics_classified_count",
-    }
+from agents.enrichment.resolvers.record_enriched_contract import (
+    RECORD_ENRICHED_BATCH_PAYLOAD_KEYS,
+    RECORD_ENRICHED_DEDUP_BLOCK_KEYS,
 )
 
 
@@ -47,10 +35,13 @@ def test_record_enriched_event_type_and_counts() -> None:
         enriched_count=enriched_count,
         spam_rejected_count=spam,
         flagged_for_review_count=flagged,
+        dedup_stub_count=1,
+        dedup_rows_with_duplicate_cluster_id=2,
+        dedup_rows_with_matched_job_posting_id=1,
         **m,
     )
 
-    assert set(event.payload.keys()) == _EXPECTED_KEYS
+    assert set(event.payload.keys()) == RECORD_ENRICHED_BATCH_PAYLOAD_KEYS
     assert event.payload["event_type"] == "RecordEnriched"
     assert event.payload["record_enriched_schema_version"] == RECORD_ENRICHED_SCHEMA_VERSION
     assert event.payload["batch_id"] == "batch-001"
@@ -60,6 +51,14 @@ def test_record_enriched_event_type_and_counts() -> None:
     assert event.payload["duplicate_count"] == 1
     assert event.payload["soc_classified_count"] == 4
     assert event.payload["naics_classified_count"] == 3
+
+    dedup = event.payload["dedup"]
+    assert set(dedup.keys()) == RECORD_ENRICHED_DEDUP_BLOCK_KEYS
+    assert isinstance(dedup["cosine_threshold"], float)
+    assert isinstance(dedup["rolling_window_days"], int)
+    assert dedup["stub_count"] == 1
+    assert dedup["rows_with_duplicate_cluster_id"] == 2
+    assert dedup["rows_with_matched_job_posting_id"] == 1
 
     assert (
         event.payload["enriched_count"]

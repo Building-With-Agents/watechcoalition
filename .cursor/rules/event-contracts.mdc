@@ -50,7 +50,7 @@ Each event's `payload` dict should include:
 - **`IngestBatch`**: `batch_id`, `record_count`, `source`, `dedup_count`, `run_id`
 - **`NormalizationComplete`**: `batch_id`, `record_count`, `quarantine_count`
 - **`SkillsExtracted`**: `batch_id`, `record_count`, `skills_count`, `avg_confidence`
-- **`RecordEnriched`**: `record_enriched_schema_version`, `batch_id`, `enriched_count`, `spam_rejected_count`, `flagged_for_review_count`, `temporal_period_distribution`, `borderplex_subregion_distribution`, `duplicate_count`, `soc_classified_count`, `naics_classified_count` — **one event per batch**; produced by **Enrichment (Pair D)** only, after Pair C spam/quality/classification and Pair D resolution/confidence (issue #87). No per-record emission.
+- **`RecordEnriched`**: Two shapes—see `.cursor/rules/integration-schema.mdc`. **Batch** (non-empty `records` on `SkillsExtracted`): `record_enriched_schema_version` (**v3**), `batch_id`, `enriched_count`, `spam_rejected_count`, `flagged_for_review_count`, `temporal_period_distribution`, `borderplex_subregion_distribution`, `duplicate_count`, `soc_classified_count`, `naics_classified_count`, nested **`dedup`** (`cosine_threshold`, `rolling_window_days`, `stub_count`, `rows_with_duplicate_cluster_id`, `rows_with_matched_job_posting_id`). **Single-record** (flat payload): per-posting fields for classification/spam/promotion; no batch `dedup` block. Frozen key sets: `agents/enrichment/resolvers/record_enriched_contract.py`.
 - **`AnalyticsRefreshed`**: `aggregate_types`, `record_count`, `refresh_duration_ms`
 - **`RenderComplete`**: `pages_rendered`, `exports_generated`
 - **`*Failed`**: `error_type`, `error_message`, `retry_count`, `max_retries`

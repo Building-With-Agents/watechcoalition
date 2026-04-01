@@ -13,23 +13,10 @@ from agents.enrichment.agent import EnrichmentAgent
 from agents.enrichment.agent import register_alert_bus as register_enrichment_alert_bus
 from agents.enrichment.classification import classify_job
 from agents.enrichment.classifiers.spam_preview import SpamPreviewResult
+from agents.enrichment.resolvers.record_enriched_contract import RECORD_ENRICHED_BATCH_PAYLOAD_KEYS
 from agents.scripts.jsearch_enrichment_preview_lib import build_extraction_dict
 
-_RECORD_ENRICHED_KEYS = frozenset(
-    {
-        "event_type",
-        "record_enriched_schema_version",
-        "batch_id",
-        "enriched_count",
-        "spam_rejected_count",
-        "flagged_for_review_count",
-        "temporal_period_distribution",
-        "borderplex_subregion_distribution",
-        "duplicate_count",
-        "soc_classified_count",
-        "naics_classified_count",
-    }
-)
+_RECORD_ENRICHED_KEYS = RECORD_ENRICHED_BATCH_PAYLOAD_KEYS
 
 
 def _batch_row_from_skills_event(skills_event: EventEnvelope, **overrides: Any) -> dict[str, Any]:

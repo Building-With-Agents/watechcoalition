@@ -287,8 +287,32 @@ _EXTRA_POSTING_KEYS = frozenset(
         "borderplex_subregion",
         "is_duplicate",
         "duplicate_cluster_id",
+        "matched_job_posting_id",
+        "survivor_job_posting_id",
+        "stub",
     }
 )
+
+
+def _rollup_fuzzy_dedup_signals(
+    enriched: dict[str, Any],
+    posting: dict[str, Any],
+) -> tuple[int, int, int]:
+    """Return (stub_inc, cluster_row_inc, matched_inc) per row, each 0 or 1."""
+    stub_inc = int(
+        enriched.get("stub") is True
+        or enriched.get("fuzzy_dedup_stub") is True
+        or posting.get("stub") is True
+    )
+
+    def _has_cluster(d: dict[str, Any]) -> bool:
+        v = d.get("duplicate_cluster_id")
+        return v is not None and bool(str(v).strip())
+
+    cluster_inc = int(_has_cluster(enriched) or _has_cluster(posting))
+    mid = enriched.get("matched_job_posting_id") or posting.get("matched_job_posting_id")
+    matched_inc = int(mid is not None and bool(str(mid).strip()))
+    return stub_inc, cluster_inc, matched_inc
 
 
 def _posting_for_enrichment(
@@ -392,10 +416,15 @@ class EnrichmentAgent(BaseAgent):
         duplicate_count = 0
         soc_classified_count = 0
         naics_classified_count = 0
+        dedup_stub_count = 0
+        dedup_rows_with_duplicate_cluster_id = 0
+        dedup_rows_with_matched_job_posting_id = 0
 
         def run_batch(session: Session | None) -> None:
             nonlocal enriched_count, spam_rejected_count, flagged_for_review_count
             nonlocal duplicate_count, soc_classified_count, naics_classified_count
+            nonlocal dedup_stub_count, dedup_rows_with_duplicate_cluster_id
+            nonlocal dedup_rows_with_matched_job_posting_id
             for row in rows:
                 bucket = _spam_bucket(row)
                 if bucket == "rejected":
@@ -424,6 +453,10 @@ class EnrichmentAgent(BaseAgent):
                     naics_raw = enriched.get("naics_code") or posting.get("naics_code")
                     if naics_raw is not None and str(naics_raw).strip():
                         naics_classified_count += 1
+                    ds, dc, dm = _rollup_fuzzy_dedup_signals(enriched, posting)
+                    dedup_stub_count += ds
+                    dedup_rows_with_duplicate_cluster_id += dc
+                    dedup_rows_with_matched_job_posting_id += dm
                 except Exception:
                     log.warning("enrichment_process_degraded", agent=self.agent_id)
 
@@ -452,6 +485,9 @@ class EnrichmentAgent(BaseAgent):
             duplicate_count=duplicate_count,
             soc_classified_count=soc_classified_count,
             naics_classified_count=naics_classified_count,
+            dedup_stub_count=dedup_stub_count,
+            dedup_rows_with_duplicate_cluster_id=dedup_rows_with_duplicate_cluster_id,
+            dedup_rows_with_matched_job_posting_id=dedup_rows_with_matched_job_posting_id,
         )
 
     def process(self, event: EventEnvelope) -> EventEnvelope:
