@@ -1,4 +1,8 @@
-"""Tests for EnrichmentAgent — Pair D batch enrichment and RecordEnriched (issue #87)."""
+"""Tests for EnrichmentAgent — Pair D batch enrichment and RecordEnriched (issue #87).
+
+Issue #96 acceptance: "classifier unavailable → EnrichmentDegraded alert" is not implemented on
+EnrichmentAgent (no such event). Upstream sets ``is_spam=None`` → flagged tier; no alert emission here.
+"""
 
 from __future__ import annotations
 
@@ -418,3 +422,106 @@ class TestEnrichmentAgent:
 
         mock_enrich.assert_called_once()
         assert mock_enrich.call_args.kwargs.get("session") is None
+
+    def test_process_e2e_extraction_spam_resolution_record_enriched(self) -> None:
+        """E2E: SkillsExtracted ``records`` → spam/flag gates → real ``enrich_record`` → ``RecordEnriched`` (#96).
+
+        Does not mock ``enrich_record`` logic; only DB boundary and resolver I/O are patched.
+        Rejected and flagged rows must not call ``resolve_company`` / ``resolve_location``.
+        """
+        correlation_id = "e2e-issue-96"
+        batch_id = "batch-e2e-96"
+        skills = [{"name": "Python", "type": "Technical", "confidence": 0.92}]
+        payload: dict[str, Any] = {
+            "event_type": "SkillsExtracted",
+            "batch_id": batch_id,
+            "records": [
+                {
+                    "posting_id": 901,
+                    "title": "Rejected posting",
+                    "company": "SpamCo",
+                    "location": "Internet",
+                    "skills": skills,
+                    "is_spam": True,
+                },
+                {
+                    "posting_id": 902,
+                    "title": "Flagged posting",
+                    "company": "MaybeCo",
+                    "location": "Unknown",
+                    "skills": skills,
+                    "is_spam": None,
+                },
+                {
+                    "posting_id": 903,
+                    "title": "Software Engineer",
+                    "company": "GoodCorp",
+                    "location": "El Paso, TX",
+                    "skills": skills,
+                    "is_spam": False,
+                    "quality_score": 0.88,
+                    "extraction_confidence": 0.91,
+                    "taxonomy_coverage": 0.84,
+                    "seniority": "mid",
+                    "role_classification": "Software Engineering",
+                    "soc_code": "15-1252",
+                    "naics_code": "541511",
+                    "temporal_period": "agentic_era",
+                    "borderplex_subregion": "el_paso",
+                    "is_duplicate": False,
+                },
+            ],
+        }
+        event = EventEnvelope(
+            correlation_id=correlation_id,
+            agent_id="skills-extraction-agent",
+            payload=payload,
+        )
+
+        agent = EnrichmentAgent()
+        enriched_from_record: list[dict[str, Any]] = []
+
+        def spy_enrich_record(posting: dict[str, Any], session: object) -> dict[str, Any]:
+            out = EnrichmentAgent.enrich_record(agent, posting, session)
+            enriched_from_record.append(out)
+            return out
+
+        agent.enrich_record = spy_enrich_record  # type: ignore[method-assign]
+
+        loc_uuid = "550e8400-e29b-41d4-a716-446655440096"
+        with (
+            patch("agents.enrichment.agent.check_db_connection", return_value=False),
+            patch("agents.enrichment.agent.resolve_company", return_value=(4242, 0.97)) as mock_company,
+            patch(
+                "agents.enrichment.agent.resolve_location",
+                return_value=(loc_uuid, 0.94, "El Paso, TX", "el_paso"),
+            ) as mock_location,
+            patch("agents.enrichment.agent.resolve_sector", return_value="sector-e2e") as mock_sector,
+        ):
+            out = agent.process(event)
+
+        mock_company.assert_called_once_with("GoodCorp", None)
+        mock_location.assert_called_once_with("El Paso, TX", None)
+        mock_sector.assert_called_once_with("Software Engineering", session=None)
+
+        assert len(enriched_from_record) == 1
+        enriched = enriched_from_record[0]
+        assert enriched["posting_id"] == 903
+        assert enriched["company_id"] == 4242
+        assert enriched["location_id"] == loc_uuid
+        assert enriched["borderplex_subregion"] == "el_paso"
+        assert "field_confidence" in enriched
+        assert enriched["overall_confidence"] > 0
+
+        assert out.correlation_id == correlation_id
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert set(out.payload.keys()) == _RECORD_ENRICHED_KEYS
+        assert out.payload["batch_id"] == batch_id
+        assert out.payload["enriched_count"] == 1
+        assert out.payload["spam_rejected_count"] == 1
+        assert out.payload["flagged_for_review_count"] == 1
+        assert out.payload["temporal_period_distribution"] == {"agentic_era": 1}
+        assert out.payload["borderplex_subregion_distribution"] == {"el_paso": 1}
+        assert out.payload["duplicate_count"] == 0
+        assert out.payload["soc_classified_count"] == 1
+        assert out.payload["naics_classified_count"] == 1
