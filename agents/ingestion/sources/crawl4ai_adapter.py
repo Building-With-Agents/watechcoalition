@@ -13,12 +13,18 @@ Region behavior:
 from __future__ import annotations
 
 import hashlib
+import io
 import re
+import sys
 from datetime import datetime
 
 from agents.common.types.raw_job_record import RawJobRecord
 from agents.common.types.region_config import RegionConfig
 from agents.ingestion.sources.base_adapter import SourceAdapter
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 
 class Crawl4AIAdapterError(Exception):
@@ -73,7 +79,7 @@ class Crawl4AIAdapter(SourceAdapter):
 
     def __init__(self, target_urls: list[str] | None = None) -> None:
         # Allow override for testing; default uses fixed El Paso portal.
-        self._target_urls = target_urls or [TEST_URL]
+        self._target_urls = target_urls or [EL_PASO_CAREERS_URL]
 
     @property
     def source_name(self) -> str:
@@ -153,13 +159,6 @@ class Crawl4AIAdapter(SourceAdapter):
             list[RawJobRecord]: Non-empty when jobs found; empty only when
                 page contains an explicit "no jobs / no openings" signal.
         """
-        import io
-        import sys
-
-        if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
-            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
-
         from crawl4ai import AsyncWebCrawler, BrowserConfig, CacheMode, CrawlerRunConfig
 
         url = self._build_search_url(region)
@@ -228,13 +227,6 @@ class Crawl4AIAdapter(SourceAdapter):
             error (str | None): None when status is "operational"; otherwise a
                 short message describing the failure.
         """
-        import io
-        import sys
-
-        if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
-            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
-
         from crawl4ai import AsyncWebCrawler, BrowserConfig, CacheMode, CrawlerRunConfig
 
         target = self._target_urls[0] if self._target_urls else EL_PASO_PORTAL_BASE

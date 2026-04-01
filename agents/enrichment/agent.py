@@ -23,7 +23,22 @@ is set, spam scoring loads the latest ``dbo.extracted_intelligence`` row and cal
 ``score_spam_preview``. Otherwise ``spam_score`` / ``is_spam`` come from the
 walking-skeleton fixture keyed by ``posting_id``.
 
-Fixture: agents/data/fixtures/fixture_enriched.json
+When the normalized job resolves to a ``job_postings`` row, the emitted
+``RecordEnriched`` payload also includes ``temporal_period`` and
+``borderplex_subregion`` derived from normalized-job context so the live
+event output matches the promotion/write path.
+
+With ``normalized_job_id`` and a resolvable ``job_postings`` row (join on
+``source``/``external_id``), Phase 1 enrichment columns are persisted via
+:mod:`agents.enrichment.job_postings_promotion`. **Rejected** spam tier skips
+``UPDATE`` entirely. **Uncertain** (degraded classifier) updates quality fields
+only and leaves ``is_spam``/``spam_score`` unchanged.
+
+Fixture: agents/data/fixtures/fixture_enriched.json — supplies ``company`` /
+``company_id`` / ``sector_id`` when not on the event; role, seniority, and
+``quality_score`` are always computed (not taken from the fixture). Spam
+scores use the fixture only when ``normalized_job_id`` is absent or DB is
+unconfigured.
 
 CLI: ``python -m agents.enrichment.agent --limit 50`` (loads repo-root ``.env`` via
 python-dotenv, then requires ``PYTHON_DATABASE_URL``).
@@ -59,7 +74,11 @@ from agents.enrichment.classifiers.spam_preview import (
     SpamPreviewResult,
     score_spam_preview,
 )
-from agents.enrichment.job_postings_promotion import apply_enrichment_to_job_postings
+from agents.enrichment.job_postings_promotion import (
+    apply_enrichment_to_job_postings,
+    derive_enrichment_output_fields,
+    resolve_job_posting_row,
+)
 from agents.enrichment.resolvers.company_resolver import resolve_company
 from agents.enrichment.resolvers.confidence import (
     compute_field_confidence,
@@ -493,6 +512,8 @@ class EnrichmentAgent(BaseAgent):
     def process(self, event: EventEnvelope) -> EventEnvelope:
         """
         Single-record path: ``RecordEnriched`` with classification, quality, spam preview.
+        Includes ``temporal_period`` and ``borderplex_subregion`` when normalized-job context
+        is available.
 
         Batch path (non-empty ``records``): one aggregate ``RecordEnriched`` via
         :func:`build_record_enriched_event`.
@@ -520,11 +541,13 @@ class EnrichmentAgent(BaseAgent):
         desc_str = description if isinstance(description, str) else None
 
         ei_row: dict[str, Any] | None = None
+        resolved_job_posting: dict[str, Any] | None = None
         ei_fetch_error = False
         if nj_id is not None and _db_url_configured():
             try:
                 with session_scope() as session:
                     ei_row = session.execute(_LATEST_EI_BY_NJ_ID_SQL, {"nj_id": nj_id}).mappings().first()
+                    resolved_job_posting = resolve_job_posting_row(session, nj_id)
             except Exception as exc:
                 log.warning("enrichment_ei_load_failed", normalized_job_id=nj_id, error=str(exc))
                 ei_fetch_error = True
@@ -606,6 +629,8 @@ class EnrichmentAgent(BaseAgent):
             payload_spam_score = fx.get("spam_score")
             payload_is_spam = fx.get("is_spam")
 
+        derived_output_fields = derive_enrichment_output_fields(resolved_job_posting)
+
         base_payload: dict[str, Any] = {
             "event_type": "RecordEnriched",
             "posting_id": posting_id,
@@ -621,6 +646,7 @@ class EnrichmentAgent(BaseAgent):
             "is_spam": payload_is_spam,
             "enrichment_status": fx.get("enrichment_status", "success"),
             "skills": event.payload.get("skills", []),
+            **derived_output_fields,
         }
         if nj_id is not None:
             base_payload["normalized_job_id"] = nj_id

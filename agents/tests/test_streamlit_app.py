@@ -146,19 +146,32 @@ class TestDbAvailable:
         with patch.dict("os.environ", {}, clear=True):
             assert _db_available() is False
 
-    @patch("agents.common.data_store.check_db_connection", return_value=True)
+    @patch("agents.dashboard.readonly_engine.check_dashboard_db_connection", return_value=True)
     def test_returns_true_when_db_reachable(self, mock_check: MagicMock) -> None:
         from agents.dashboard.streamlit_app import _db_available
 
         with patch.dict("os.environ", {"PYTHON_DATABASE_URL": "postgresql+psycopg2://u:p@h/db"}):
             assert _db_available() is True
 
-    @patch("agents.common.data_store.check_db_connection", side_effect=Exception("conn refused"))
+    @patch(
+        "agents.dashboard.readonly_engine.check_dashboard_db_connection",
+        side_effect=Exception("conn refused"),
+    )
     def test_returns_false_when_db_unreachable(self, mock_check: MagicMock) -> None:
         from agents.dashboard.streamlit_app import _db_available
 
         with patch.dict("os.environ", {"PYTHON_DATABASE_URL": "postgresql+psycopg2://u:p@h/db"}):
             assert _db_available() is False
+
+    @patch("agents.dashboard.readonly_engine.check_dashboard_db_connection", return_value=True)
+    def test_returns_true_when_only_readonly_url_set(self, mock_check: MagicMock) -> None:
+        from agents.dashboard.streamlit_app import _db_available
+
+        env = {
+            "PYTHON_DATABASE_URL_READONLY": "postgresql+psycopg2://ro:pw@h/db",
+        }
+        with patch.dict("os.environ", env, clear=True):
+            assert _db_available() is True
 
 
 # ---------------------------------------------------------------------------

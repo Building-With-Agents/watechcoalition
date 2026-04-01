@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -34,6 +35,65 @@ def _batch_row_from_skills_event(skills_event: EventEnvelope, **overrides: Any) 
 
 class TestEnrichmentAgent:
     """Single-record ``SkillsExtracted`` payloads (no ``records`` list)."""
+
+    def _process_with_normalized_job_context(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        *,
+        resolved_job_posting: dict[str, object],
+    ) -> EventEnvelope:
+        monkeypatch.setenv(
+            "PYTHON_DATABASE_URL",
+            "postgresql+psycopg2://user:pass@localhost:5432/db",
+        )
+        agent = EnrichmentAgent()
+        ev = EventEnvelope(
+            correlation_id="c-enrichment-output-fields",
+            agent_id="skills-extraction-agent",
+            payload={
+                "event_type": "SkillsExtracted",
+                "posting_id": 202,
+                "normalized_job_id": 42,
+                "title": "Backend Engineer",
+                "description": "Build APIs.",
+                "company": "Acme",
+                "skills": [],
+            },
+        )
+        ei_row = {
+            "skills": [{"label": "Python"}],
+            "tools": [],
+            "tasks": [],
+            "responsibilities": [],
+            "context": [],
+            "extraction_failed": False,
+        }
+        mock_exec_result = MagicMock()
+        mock_exec_result.mappings.return_value.first.return_value = ei_row
+        mock_session = MagicMock()
+        mock_session.execute.return_value = mock_exec_result
+
+        spam_ret = SpamPreviewResult(
+            spam_score=0.25,
+            is_spam=False,
+            tier="clean",
+            field_confidence={"spam_score": 0.88},
+            overall_confidence=0.88,
+            rationale="unit_test",
+            degraded=False,
+            extraction_note=None,
+            used_heuristic=False,
+        )
+
+        with (
+            patch("agents.enrichment.agent.session_scope") as mock_scope,
+            patch("agents.enrichment.agent.resolve_job_posting_row", return_value=resolved_job_posting),
+            patch("agents.enrichment.agent.score_spam_preview", return_value=spam_ret),
+            patch("agents.enrichment.agent.apply_enrichment_to_job_postings"),
+        ):
+            mock_scope.return_value.__enter__.return_value = mock_session
+            mock_scope.return_value.__exit__.return_value = None
+            return agent.process(ev)
 
     def test_agent_id(self) -> None:
         agent = EnrichmentAgent()
@@ -102,6 +162,154 @@ class TestEnrichmentAgent:
         agent = EnrichmentAgent()
         out = agent.process(skills_event)
         assert out.payload["skills"] == skills_event.payload["skills"]
+
+    def test_process_emits_temporal_period_on_payload(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        out = self._process_with_normalized_job_context(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": datetime(2023, 6, 15, 12, 0, tzinfo=timezone.utc),
+                "city": "Austin",
+                "state_province": "Texas",
+                "country": "United States",
+                "is_remote": False,
+                "work_arrangement": "on-site",
+            },
+        )
+
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert out.payload["temporal_period"] == "post_gpt4"
+
+    def test_process_emits_temporal_period_for_exact_boundary_date(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        out = self._process_with_normalized_job_context(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": datetime(2024, 6, 1, 0, 0, tzinfo=timezone.utc),
+                "city": "Austin",
+                "state_province": "Texas",
+                "country": "United States",
+                "is_remote": False,
+                "work_arrangement": "on-site",
+            },
+        )
+
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert out.payload["temporal_period"] == "agentic_era"
+
+    def test_process_emits_temporal_period_none_when_date_missing(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        out = self._process_with_normalized_job_context(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": None,
+                "city": "Austin",
+                "state_province": "Texas",
+                "country": "United States",
+                "is_remote": False,
+                "work_arrangement": "on-site",
+            },
+        )
+
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert out.payload["temporal_period"] is None
+
+    def test_process_emits_borderplex_subregion_on_payload(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        out = self._process_with_normalized_job_context(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": datetime(2023, 6, 15, 12, 0, tzinfo=timezone.utc),
+                "city": "El Paso",
+                "state_province": "Texas",
+                "country": "United States",
+                "is_remote": False,
+                "work_arrangement": "on-site",
+            },
+        )
+
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert out.payload["borderplex_subregion"] == "el_paso"
+
+    def test_process_emits_borderplex_subregion_for_las_cruces(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        out = self._process_with_normalized_job_context(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": datetime(2023, 6, 15, 12, 0, tzinfo=timezone.utc),
+                "city": "Las Cruces",
+                "state_province": "New Mexico",
+                "country": "United States",
+                "is_remote": False,
+                "work_arrangement": "on-site",
+            },
+        )
+
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert out.payload["borderplex_subregion"] == "las_cruces"
+
+    def test_process_emits_borderplex_subregion_regional_for_remote_job(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        out = self._process_with_normalized_job_context(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": datetime(2023, 6, 15, 12, 0, tzinfo=timezone.utc),
+                "city": None,
+                "state_province": "Texas",
+                "country": "United States",
+                "is_remote": True,
+                "work_arrangement": "Remote",
+            },
+        )
+
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert out.payload["borderplex_subregion"] == "regional"
+
+    def test_process_emits_temporal_period_and_borderplex_subregion_together(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        out = self._process_with_normalized_job_context(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": datetime(2023, 6, 15, 12, 0, tzinfo=timezone.utc),
+                "city": "El Paso",
+                "state_province": "Texas",
+                "country": "United States",
+                "is_remote": False,
+                "work_arrangement": "on-site",
+            },
+        )
+
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert out.payload["temporal_period"] == "post_gpt4"
+        assert out.payload["borderplex_subregion"] == "el_paso"
 
     def test_process_spam_from_ei_uses_score_spam_preview(
         self,
