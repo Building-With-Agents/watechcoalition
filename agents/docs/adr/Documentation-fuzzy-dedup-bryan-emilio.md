@@ -27,6 +27,7 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 | **Survivor**           | Field **completeness** score, then **newer `publish_date`**                                           | Keeps richer / fresher row as canonical.                                                  |
 | **Failure / no match** | Treat as **unique**; persist `is_duplicate = false`, `duplicate_cluster_id = null` for **that** row   | Safe default when embed fails or similarity is low; if that row was the prior survivor, clear only that old cluster to avoid orphaned duplicate-only state. |
 | **Promotion**          | Dedup runs **after** successful enrichment `UPDATE`; errors **logged**, promotion **not** rolled back | Availability over strict dedup consistency.                                               |
+| **Embedding audit**    | Reuse shared Azure embedding helper with `audit_agent_name="enrichment-dedup"`                        | Keeps every dedup embedding call on the same `llm_audit_log` contract as taxonomy Step 4. |
 
 
 ## Persistence (`dbo.job_postings`)
@@ -48,6 +49,7 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 | Piece               | Location                                                                   |
 | ------------------- | -------------------------------------------------------------------------- |
 | Algorithm           | `agents/enrichment/dedup/fuzzy_dedup.py` — `run_fuzzy_dedup`               |
+| Embeddings + audit  | `agents/skills_extraction/extractors/taxonomy.py` — `_embed_texts_azure`   |
 | Result type         | `agents/enrichment/dedup/types.py` — `FuzzyDedupResult`                    |
 | DB writes for flags | `agents/enrichment/job_postings_promotion.py` — `apply_fuzzy_dedup_result` |
 | Migrations          | `agents/common/data_store/migrations.py`                                   |
@@ -59,7 +61,7 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 
 | Layer             | What                                                                              | Command / note                                                            |
 | ----------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| **Unit**          | Mocked SQL + `_embed_texts_azure`; threshold, window, completeness, embed failure | `pytest agents/enrichment/tests/test_fuzzy_dedup.py`                      |
+| **Unit**          | Mocked SQL + `_embed_texts_azure`; threshold, window, completeness, embed failure, dedup audit-agent propagation | `pytest agents/enrichment/tests/test_fuzzy_dedup.py`                      |
 | **E2E matching**  | Real Postgres + Azure embeddings; 29d vs 31d window, near-dup vs different text   | `pytest agents/tests/test_fuzzy_dedup_matching_e2e.py -m fuzzy_dedup_e2e` |
 | **E2E promotion** | Real DB + `EnrichmentAgent`; `run_fuzzy_dedup` mocked; asserts flag persistence   | `pytest agents/tests/test_fuzzy_dedup_promotion_e2e.py`                   |
 
@@ -69,6 +71,11 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 - **Cost & latency:** One embed per posting on cache miss; cached when `dedup_text_hash` unchanged.
 - **Operational:** Requires `AZURE_OPENAI_EMBEDDING_`*; embedding outages leave rows as non-duplicates for that run (no global reset).
 - **Not a substitute** for ingestion dedup: fingerprint dedup still drops exact repeats at `raw_ingested_jobs`.
+
+## Latest Local Verification
+
+- 2026-04-01: `./agents/.venv/bin/python -m pytest agents/enrichment/tests/test_fuzzy_dedup.py -q` → `14 passed`
+- 2026-04-01: `./agents/.venv/bin/python -m pytest agents/enrichment/tests/test_job_postings_promotion.py -q` → `11 passed`
 
 ## References
 

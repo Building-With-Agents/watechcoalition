@@ -160,6 +160,24 @@ def test_unique_when_no_survivors(mock_embed: MagicMock) -> None:
 
 
 @patch("agents.enrichment.dedup.fuzzy_dedup._embed_texts_azure")
+def test_current_embedding_uses_enrichment_dedup_audit_agent(mock_embed: MagicMock) -> None:
+    session = MagicMock()
+    cur = _base_current_row(dedup_hash=None, dedup_emb=None)
+    mock_embed.return_value = [_unit_vec_xy(1.0)]
+
+    session.execute.side_effect = [
+        _exec_first(cur),
+        MagicMock(),
+        _exec_all([]),
+    ]
+
+    run_fuzzy_dedup(session, cur["job_posting_id"])
+
+    assert mock_embed.call_count == 1
+    assert mock_embed.call_args.kwargs["audit_agent_name"] == "enrichment-dedup"
+
+
+@patch("agents.enrichment.dedup.fuzzy_dedup._embed_texts_azure")
 def test_list_survivors_filters_by_company_id_param(mock_embed: MagicMock) -> None:
     session = MagicMock()
     cid = "00000000-0000-0000-0000-0000000000dd"
@@ -284,6 +302,7 @@ def test_cold_start_survivor_without_cached_embedding_is_backfilled_and_compared
     assert out.is_duplicate is True
     assert out.matched_job_posting_id == survivor["job_posting_id"]
     mock_embed.assert_called_once()
+    assert mock_embed.call_args.kwargs["audit_agent_name"] == "enrichment-dedup"
     assert session.execute.call_count == 3
 
 
