@@ -207,10 +207,14 @@ def _apply_fuzzy_dedup_after_promotion(
     normalized_job_id: int,
     job_posting_id: str,
 ) -> None:
-    """Best-effort fuzzy dedup: never roll back enrichment promotion on failure."""
+    """Best-effort fuzzy dedup: isolate failures so promotion writes still commit."""
     try:
-        result = run_fuzzy_dedup(session, job_posting_id)
-        apply_fuzzy_dedup_result(session, job_posting_id, result)
+        # Keep dedup best-effort by containing all reads/writes in a savepoint.
+        # A dedup SQLAlchemy/DB error should roll back only the dedup work, not
+        # poison the outer promotion transaction managed by ``session_scope``.
+        with session.begin_nested():
+            result = run_fuzzy_dedup(session, job_posting_id)
+            apply_fuzzy_dedup_result(session, job_posting_id, result)
     except Exception as exc:
         log.warning(
             "fuzzy_dedup_after_promotion_failed",

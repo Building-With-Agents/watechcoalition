@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import nullcontext
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -208,6 +209,7 @@ def test_apply_enrichment_to_job_postings_skips_dedup_for_rejected_tier() -> Non
 
 def test_apply_enrichment_to_job_postings_logs_and_continues_on_dedup_failure() -> None:
     session = MagicMock()
+    session.begin_nested.return_value = nullcontext()
 
     with (
         patch(
@@ -223,4 +225,5 @@ def test_apply_enrichment_to_job_postings_logs_and_continues_on_dedup_failure() 
         )
 
     assert applied is True
+    session.begin_nested.assert_called_once_with()
     assert session.execute.call_count == 1

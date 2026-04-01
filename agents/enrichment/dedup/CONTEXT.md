@@ -33,7 +33,7 @@ Near-duplicate job postings via embedding cosine similarity, same-`company_id` c
 
 ## Integration (wired)
 
-After a successful enrichment promotion update, [`apply_enrichment_to_job_postings`](../../enrichment/job_postings_promotion.py) calls `_apply_fuzzy_dedup_after_promotion`, which runs `run_fuzzy_dedup` then `apply_fuzzy_dedup_result`. Dedup failures are logged; promotion is **not** rolled back.
+After a successful enrichment promotion update, [`apply_enrichment_to_job_postings`](../../enrichment/job_postings_promotion.py) calls `_apply_fuzzy_dedup_after_promotion`, which runs `run_fuzzy_dedup` then `apply_fuzzy_dedup_result` inside a nested transaction/savepoint. Dedup failures are logged; promotion is **not** rolled back.
 
 ## Env vars
 
