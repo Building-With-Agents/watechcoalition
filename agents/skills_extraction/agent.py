@@ -858,12 +858,16 @@ def _result_summary(result: ExtractionResult) -> dict[str, Any]:
     tasks = list(getattr(result, "tasks", []) or [])
     resp = list(getattr(result, "responsibilities", []) or [])
     ctx = list(getattr(result, "context", []) or [])
+    jr = result.work_item.job_record
     return {
         "job_id": result.work_item.job_id,
         "posting_id": result.work_item.posting_id,
         "normalized_job_id": result.work_item.normalized_job_id,
         "title": result.work_item.title,
         "company": result.work_item.company,
+        "source": jr.source,
+        "external_id": jr.external_id,
+        "description": jr.description,
         "skills": result.skills,
         "tools": [tool.model_dump() for tool in result.tools],
         "tasks": tasks,

@@ -342,9 +342,14 @@ async def enrich_job_profile_soc(
     job_profile: JobProfile,
     session: Session,
     llm: Callable[[str], str],
+    *,
+    soc_code_override: str | None = None,
 ) -> None:
     desc = job_profile.description if isinstance(job_profile.description, str) else ""
-    soc_code = await classify_soc(job_profile.title, desc, session, llm)
+    if soc_code_override is not None:
+        soc_code = soc_code_override
+    else:
+        soc_code = await classify_soc(job_profile.title, desc, session, llm)
     job_profile.soc_code = soc_code
     oc_value = ((soc_code or "").strip()[:20]) or None
     stmt = (
@@ -356,41 +361,17 @@ async def enrich_job_profile_soc(
     session.execute(stmt)
 
 
-def enrich_job_profile_naics(job_profile: JobProfile, session: Session) -> None:
-    """Set ``job_profile.naics_code`` from ``dbo.naics`` via LLM, or ``None`` when unknown."""
-    from agents.enrichment.classifiers.naics_classifier import classify_naics
-
-    desc = job_profile.description if isinstance(job_profile.description, str) else ""
-    code = classify_naics(job_profile.title, desc, session)
-    job_profile.naics_code = None if code == "unknown" else code
-
-
-def enrich_job_profile_employer(job_profile: JobProfile, session: Session) -> None:
-    """Set ``job_profile.employer`` and persist JSON to ``dbo.normalized_jobs.employer_metadata``."""
-    from agents.enrichment.classifiers.employer_classifier import (
-        build_employer_profile,
-        persist_employer_metadata,
-    )
-
-    desc = job_profile.description if isinstance(job_profile.description, str) else ""
-    ep = build_employer_profile(desc, job_profile.company or "", session)
-    job_profile.employer = ep
-    persist_employer_metadata(
-        session,
-        ep,
-        normalized_job_id=None,
-        source=job_profile.source,
-        external_id=job_profile.external_id,
-    )
-
-
 async def build_job_profile_with_soc(
     job_record: JobRecord,
     session: Session,
     llm: Callable[[str], str],
+    *,
+    soc_code_override: str | None = None,
 ) -> JobProfile:
     job_profile = JobProfile.model_validate(job_record.model_dump())
-    await enrich_job_profile_soc(job_profile, session, llm)
+    await enrich_job_profile_soc(
+        job_profile, session, llm, soc_code_override=soc_code_override
+    )
     return job_profile
 
 
@@ -398,5 +379,11 @@ def enrich_job_profile_soc_blocking(
     job_profile: JobProfile,
     session: Session,
     llm: Callable[[str], str],
+    *,
+    soc_code_override: str | None = None,
 ) -> None:
-    asyncio.run(enrich_job_profile_soc(job_profile, session, llm))
+    asyncio.run(
+        enrich_job_profile_soc(
+            job_profile, session, llm, soc_code_override=soc_code_override
+        )
+    )

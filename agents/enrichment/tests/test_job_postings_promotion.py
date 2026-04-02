@@ -339,6 +339,8 @@ def test_apply_enrichment_binds_temporal_period_from_date_posted() -> None:
     assert session.execute.call_count == 2
     _stmt, params = session.execute.call_args_list[1][0]
     assert params["temporal_period"] == "post_gpt4"
+    assert "occupation_code" in params
+    assert params["occupation_code"] is None
 
 
 def test_apply_enrichment_binds_temporal_period_at_exact_boundary_date() -> None:
@@ -406,6 +408,34 @@ def test_apply_enrichment_binds_borderplex_subregion_for_las_cruces() -> None:
     assert out is True
     _stmt, params = session.execute.call_args_list[1][0]
     assert params["borderplex_subregion"] == "las_cruces"
+
+
+def test_apply_enrichment_binds_occupation_code_from_soc_code() -> None:
+    session = MagicMock()
+    resolve_result = MagicMock()
+    resolve_result.mappings.return_value.first.return_value = {
+        "job_posting_id": "11111111-1111-1111-1111-111111111111",
+        "company_id": "22222222-2222-2222-2222-222222222222",
+        "date_posted": datetime(2023, 6, 15, 12, 0, 0, tzinfo=timezone.utc),
+    }
+    update_result = MagicMock()
+    session.execute.side_effect = [resolve_result, update_result]
+
+    out = apply_enrichment_to_job_postings(
+        session,
+        42,
+        {
+            "spam_tier": "clean",
+            "spam_score": 0.2,
+            "quality_score": 0.85,
+            "soc_code": "17-3029",
+            "naics_code": "541512",
+        },
+    )
+    assert out is True
+    _stmt, params = session.execute.call_args_list[1][0]
+    assert params["occupation_code"] == "17-3029"
+    assert params["naics_code"] == "541512"
 
 
 def test_apply_enrichment_binds_borderplex_subregion_regional_for_remote_job() -> None:

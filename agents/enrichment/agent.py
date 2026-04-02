@@ -52,16 +52,17 @@ import os
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Callable, Literal
 
 import structlog
 from dotenv import load_dotenv
-from sqlalchemy import select, text
+from sqlalchemy import select, text, update
 from sqlalchemy.orm import Session
 
 from agents.common.base_agent import BaseAgent
 from agents.common.data_store.database import check_db_connection, session_scope
-from agents.common.data_store.models import IndustrySector, TechnologyArea
+from agents.common.data_store.models import IndustrySector, NormalizedJob, TechnologyArea
+from agents.common.llm_client import invoke_skills_llm
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types.job_profile import EmployerProfile
 from agents.enrichment.adapters.facade import ExternalEnrichmentFacade
@@ -75,9 +76,11 @@ from agents.enrichment.classifiers.employer_classifier import (
     persist_employer_metadata,
 )
 from agents.enrichment.classifiers.naics_classifier import classify_naics
+from agents.enrichment.classifiers.soc_classifier import classify_soc
 from agents.enrichment.classifiers.quality import score_quality
 from agents.enrichment.classifiers.spam_preview import (
     SpamPreviewResult,
+    apply_spam_tiers,
     score_spam_preview,
 )
 from agents.enrichment.job_postings_promotion import (
@@ -97,6 +100,34 @@ from agents.enrichment.schemas import EnrichedJobProfile
 from agents.scripts.jsearch_enrichment_preview_lib import build_extraction_dict
 
 log = structlog.get_logger()
+
+
+def _enrichment_soc_llm() -> Callable[[str], str]:
+    """Sync callable for :func:`classify_soc`; Azure OpenAI via :func:`invoke_skills_llm`."""
+
+    def llm(prompt: str) -> str:
+        try:
+            text, meta = invoke_skills_llm(
+                prompt,
+                agent_name="enrichment-agent",
+            )
+        except TypeError as exc:
+            if "api_key" in str(exc).lower() or "auth" in str(exc).lower():
+                log.warning("soc_llm_auth_failed", error=str(exc))
+                return "unclassified"
+            raise
+        if not meta.get("success") or meta.get("extraction_failed"):
+            log.warning(
+                "enrichment_soc_llm_call_failed",
+                success=meta.get("success"),
+                extraction_failed=meta.get("extraction_failed"),
+                error_reason=meta.get("error_reason"),
+            )
+            return "unclassified"
+        return (text or "").strip()
+
+    return llm
+
 
 _alert_bus: Any = None
 
@@ -357,6 +388,9 @@ def _posting_for_enrichment(
         "company": pick("company"),
         "description": pick("description", None),
         "location": pick("location", "") or "",
+        "normalized_job_id": pick("normalized_job_id"),
+        "source": pick("source"),
+        "external_id": pick("external_id"),
         "quality_score": pick("quality_score"),
         "spam_score": pick("spam_score"),
         "is_spam": pick("is_spam"),
@@ -372,6 +406,33 @@ def _posting_for_enrichment(
         if v is not None:
             base[k] = v
     return base
+
+
+def _job_postings_promotion_payload(
+    enriched: dict[str, Any],
+    posting: dict[str, Any],
+) -> dict[str, Any]:
+    """Build a payload for :func:`apply_enrichment_to_job_postings` from batch enrichment output."""
+    spam_score = enriched.get("spam_score")
+    if spam_score is None:
+        spam_score = posting.get("spam_score")
+    spam_tier = enriched.get("spam_tier")
+    if spam_tier is None:
+        spam_tier = posting.get("spam_tier")
+    if not spam_tier and isinstance(spam_score, (int, float)):
+        _, spam_tier = apply_spam_tiers(float(spam_score))
+    quality_score = enriched.get("quality_score")
+    if quality_score is None:
+        quality_score = posting.get("quality_score")
+    return {
+        "spam_tier": spam_tier,
+        "spam_score": spam_score,
+        "quality_score": quality_score,
+        "overall_confidence": enriched.get("overall_confidence"),
+        "field_confidence": enriched.get("field_confidence"),
+        "naics_code": enriched.get("naics_code"),
+        "soc_code": enriched.get("soc_code"),
+    }
 
 
 class EnrichmentAgent(BaseAgent):
@@ -497,6 +558,22 @@ class EnrichmentAgent(BaseAgent):
                     dedup_stub_count += ds
                     dedup_rows_with_duplicate_cluster_id += dc
                     dedup_rows_with_matched_job_posting_id += dm
+                    nj_promo = _coerce_normalized_job_id(
+                        enriched.get("normalized_job_id") or posting.get("normalized_job_id")
+                    )
+                    if session is not None and nj_promo is not None:
+                        try:
+                            apply_enrichment_to_job_postings(
+                                session,
+                                nj_promo,
+                                _job_postings_promotion_payload(enriched, posting),
+                            )
+                        except Exception as promo_exc:
+                            log.warning(
+                                "enrichment_batch_job_posting_promotion_failed",
+                                normalized_job_id=nj_promo,
+                                error=str(promo_exc),
+                            )
                 except Exception:
                     log.warning("enrichment_process_degraded", agent=self.agent_id)
 
@@ -703,6 +780,32 @@ class EnrichmentAgent(BaseAgent):
                 with session_scope() as session:
                     raw_naics = classify_naics(title, desc_str, session)
                     base_payload["naics_code"] = None if raw_naics == "unknown" else raw_naics
+                    try:
+                        raw_soc = run_coroutine(
+                            classify_soc(
+                                title or "",
+                                desc_str or "",
+                                session,
+                                _enrichment_soc_llm(),
+                            )
+                        )
+                        base_payload["soc_code"] = (
+                            None if raw_soc == "unclassified" else raw_soc
+                        )
+                        _soc = base_payload["soc_code"]
+                        oc_value = _soc[:20] if _soc else None
+                        session.execute(
+                            update(NormalizedJob)
+                            .where(NormalizedJob.id == nj_id)
+                            .values(occupation_code=oc_value)
+                        )
+                    except Exception as soc_exc:
+                        log.warning(
+                            "enrichment_soc_failed",
+                            normalized_job_id=nj_id,
+                            error=str(soc_exc),
+                        )
+                        base_payload["soc_code"] = None
                     ep = build_employer_profile(desc_str, str(company or ""), session)
                     base_payload["employer_metadata"] = ep.model_dump(mode="json")
                     persist_employer_metadata(
@@ -779,6 +882,34 @@ class EnrichmentAgent(BaseAgent):
                 except Exception as naics_exc:
                     log.warning("enrich_record_naics_failed", error=str(naics_exc))
                     merged["naics_code"] = posting.get("naics_code")
+                try:
+                    raw_soc = run_coroutine(
+                        classify_soc(
+                            posting.get("title") or "",
+                            desc_str or "",
+                            session,
+                            _enrichment_soc_llm(),
+                        )
+                    )
+                    merged["soc_code"] = None if raw_soc == "unclassified" else raw_soc
+                except Exception as soc_exc:
+                    log.warning("enrich_record_soc_failed", error=str(soc_exc))
+                    merged["soc_code"] = posting.get("soc_code")
+                else:
+                    nj_soc = _coerce_normalized_job_id(posting.get("normalized_job_id"))
+                    sc = merged.get("soc_code")
+                    if nj_soc is not None and isinstance(sc, str) and sc.strip():
+                        try:
+                            session.execute(
+                                update(NormalizedJob)
+                                .where(NormalizedJob.id == nj_soc)
+                                .values(occupation_code=sc.strip()[:20])
+                            )
+                        except Exception as oc_exc:
+                            log.warning(
+                                "enrich_record_occupation_code_persist_failed",
+                                error=str(oc_exc),
+                            )
                 try:
                     ep = build_employer_profile(desc_str, posting.get("company") or "", session)
                     merged["employer_metadata"] = ep.model_dump(mode="json")
