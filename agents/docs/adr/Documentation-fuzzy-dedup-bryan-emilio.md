@@ -27,7 +27,7 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 | **Survivor**           | Field **completeness** score, then **newer `publish_date`**                                           | Keeps richer / fresher row as canonical.                                                  |
 | **Failure / no match** | Treat as **unique**; persist `is_duplicate = false`, `duplicate_cluster_id = null` for **that** row   | Safe default when embed fails or similarity is low; if that row was the prior survivor, clear only that old cluster to avoid orphaned duplicate-only state. |
 | **Promotion**          | Dedup runs **after** successful enrichment `UPDATE`; errors **logged**, promotion **not** rolled back | Availability over strict dedup consistency.                                               |
-| **Embedding audit**    | Reuse shared Azure embedding helper with `audit_agent_name="enrichment-dedup"`                        | Keeps every dedup embedding call on the same `llm_audit_log` contract as taxonomy Step 4. |
+| **Embedding audit**    | Reuse shared Azure embedding helper with `audit_agent_name="enrichment-dedup"`                        | Keeps every dedup embedding HTTP attempt on the same `llm_audit_log` contract as taxonomy Step 4, including `cost_usd` estimates when token usage is available. |
 
 
 ## Persistence (`dbo.job_postings`)
@@ -83,6 +83,7 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 - Promotion persistence/unit path with fabricated `FuzzyDedupResult` inputs, dedup-after-promotion wiring, and temporal/Borderplex column binding checks in `agents/enrichment/tests/test_job_postings_promotion.py` (the latter shared with the merged `development` enrichment promotion surface).
 - Matching/unit path in `agents/enrichment/tests/test_fuzzy_dedup.py`, including threshold checks, half-open 30-day window params, survivor completeness arbitration, cached-vector reuse, and cold-start survivor backfill.
 - Audit contract at the dedup call site: `_embed_texts_azure(..., audit_agent_name="enrichment-dedup")` for both current-row embedding and lazy survivor backfill.
+- The shared helper now records one `llm_audit_log` row per embedding HTTP attempt, not only successful responses. Failed/rate-limited attempts are logged with `success = false`; `cost_usd` is computed from embedding token usage when the provider returns it.
 - Live-path E2E coverage in `agents/tests/test_fuzzy_dedup_matching_e2e.py` now includes a real `llm_audit_log` assertion, not just dedup state assertions.
 - Scenario coverage already checked into env-gated E2E tests:
   `agents/tests/test_fuzzy_dedup_matching_e2e.py` covers 29 vs 31 days, same-company different content, different companies, and repost merges.
