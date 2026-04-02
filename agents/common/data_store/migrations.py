@@ -154,6 +154,18 @@ CREATE INDEX IF NOT EXISTS ix_employer_profiles_company_id
     ON dbo.employer_profiles (company_id);
 """
 
+# NAICS reference (PostgreSQL). Azure SQL / MSSQL: table is created via SQLAlchemy
+# create_all when running seed_naics.py or agent migrations against that dialect.
+_NAICS_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.naics (
+    naics_code TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    seq_no INTEGER,
+    createdat TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updatedat TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+"""
+
 
 def run_migrations(engine: Engine) -> None:
     """Create agent tables and add Phase 1 columns. Safe to run multiple times."""
@@ -204,6 +216,12 @@ def run_migrations(engine: Engine) -> None:
     with engine.begin() as conn:
         conn.execute(text(_EMPLOYER_PROFILES_DDL))
     log.info("migrations_employer_profiles_created")
+
+    # 4b. Create naics reference table (PostgreSQL DDL; other dialects rely on create_all)
+    if engine.dialect.name == "postgresql":
+        with engine.begin() as conn:
+            conn.execute(text(_NAICS_DDL))
+        log.info("migrations_naics_created")
 
     # 5. Add enrichment columns to dbo.job_postings (and related).
     #    Each ALTER runs in its own transaction so a single failure

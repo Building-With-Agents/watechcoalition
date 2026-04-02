@@ -9,7 +9,7 @@ Agent-created tables: raw_ingested_jobs, job_ingestion_runs, normalized_jobs,
     normalization_quarantine, extracted_intelligence, llm_audit_log,
     employer_profiles.
 Reference tables (seeded, agent-owned): companies, industry_sectors,
-    technology_areas, skills, socc, job_postings.
+    technology_areas, skills, socc, naics, job_postings.
 """
 
 from __future__ import annotations
@@ -443,3 +443,20 @@ class PostalGeoData(Base):
     state: Mapped[str] = mapped_column(String(100), nullable=False)
     lat: Mapped[float] = mapped_column(Float, nullable=False)
     lng: Mapped[float] = mapped_column(Float, nullable=False)
+
+
+class NAICS(Base):
+    """NAICS 2022 US taxonomy — agent-owned.
+
+    Primary key is the official NAICS code (2–6 digit hierarchical code).
+    Seeded from ``data/naics-2022-taxonomy-reference.xlsx``.
+    """
+
+    __tablename__ = "naics"
+    __table_args__ = {"schema": "dbo"}
+
+    naics_code: Mapped[str] = mapped_column(Text, primary_key=True)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    seq_no: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    createdat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updatedat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
