@@ -14,6 +14,7 @@ Reference tables (seeded, agent-owned): companies, industry_sectors,
 
 from __future__ import annotations
 
+import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
@@ -26,6 +27,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    Uuid,
 )
 from sqlalchemy.dialects.postgresql import JSON, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -302,22 +304,34 @@ class LLMAuditLog(Base):
 class EmployerProfile(Base):
     """Company-level enrichment: size, AI maturity, sector, known-employer flag.
 
-    Source of truth: ARCHITECTURE_DEEP.md § EmployerProfile.
+    One row per ``companies.company_id``; job postings reference via ``employer_profile_id``.
     """
 
     __tablename__ = "employer_profiles"
     __table_args__ = (
+        UniqueConstraint("company_id", name="uq_employer_profiles_company_id"),
         Index("ix_employer_profiles_company_id", "company_id"),
         {"schema": "dbo"},
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    company_id: Mapped[str] = mapped_column(Text, nullable=False)
-    company_size: Mapped[str | None] = mapped_column(Text, nullable=True)
-    ai_maturity_signal: Mapped[str | None] = mapped_column(Text, nullable=True)
-    sector: Mapped[str | None] = mapped_column(Text, nullable=True)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    company_id: Mapped[str] = mapped_column(
+        Text,
+        ForeignKey("dbo.companies.company_id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    company_size: Mapped[str] = mapped_column(String(20), nullable=False, default="unknown")
+    ai_maturity_signal: Mapped[str] = mapped_column(String(20), nullable=False, default="unknown")
+    sector: Mapped[str | None] = mapped_column(String(255), nullable=True)
     is_known_employer: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
 
 
 # ===========================================================================

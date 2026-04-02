@@ -744,12 +744,23 @@ class EnrichmentAgent(BaseAgent):
             "borderplex_subregion": enriched_job_profile.borderplex_subregion,
         }
 
+        resolved_company_id: str | None = None
+        if resolved_job_posting and resolved_job_posting.get("company_id") is not None:
+            rc = str(resolved_job_posting["company_id"]).strip()
+            resolved_company_id = rc or None
+        fixture_company_id = fx.get("company_id")
+        if fixture_company_id is not None and not isinstance(fixture_company_id, str):
+            fixture_company_id = str(fixture_company_id).strip() or None
+        elif isinstance(fixture_company_id, str):
+            fixture_company_id = fixture_company_id.strip() or None
+        effective_company_id = resolved_company_id or fixture_company_id
+
         base_payload: dict[str, Any] = {
             "event_type": "RecordEnriched",
             "posting_id": posting_id,
             "title": title or fx.get("title"),
             "company": company,
-            "company_id": fx.get("company_id"),
+            "company_id": effective_company_id,
             "sector_id": fx.get("sector_id"),
             "role_classification": role_classification,
             "seniority": seniority,
@@ -811,6 +822,7 @@ class EnrichmentAgent(BaseAgent):
                     persist_employer_metadata(
                         session,
                         ep,
+                        company_id=effective_company_id,
                         normalized_job_id=nj_id,
                         source=event.payload.get("source"),
                         external_id=event.payload.get("external_id"),
@@ -913,9 +925,16 @@ class EnrichmentAgent(BaseAgent):
                 try:
                     ep = build_employer_profile(desc_str, posting.get("company") or "", session)
                     merged["employer_metadata"] = ep.model_dump(mode="json")
+                    cid_raw = merged.get("company_id")
+                    persist_company_id = (
+                        str(cid_raw).strip()
+                        if cid_raw is not None and str(cid_raw).strip()
+                        else None
+                    )
                     persist_employer_metadata(
                         session,
                         ep,
+                        company_id=persist_company_id,
                         normalized_job_id=_coerce_normalized_job_id(posting.get("normalized_job_id")),
                         source=posting.get("source"),
                         external_id=posting.get("external_id"),

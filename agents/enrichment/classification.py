@@ -361,6 +361,37 @@ async def enrich_job_profile_soc(
     session.execute(stmt)
 
 
+def enrich_job_profile_naics(job_profile: JobProfile, session: Session) -> None:
+    """Set ``job_profile.naics_code`` from ``dbo.naics`` via LLM, or ``None`` when unknown."""
+    from agents.enrichment.classifiers.naics_classifier import classify_naics
+
+    desc = job_profile.description if isinstance(job_profile.description, str) else ""
+    code = classify_naics(job_profile.title, desc, session)
+    job_profile.naics_code = None if code == "unknown" else code
+
+
+def enrich_job_profile_employer(job_profile: JobProfile, session: Session) -> None:
+    """Set ``job_profile.employer`` and persist to ``employer_profiles`` or ``normalized_jobs`` JSON."""
+    from agents.enrichment.classifiers.employer_classifier import (
+        build_employer_profile,
+        persist_employer_metadata,
+    )
+    from agents.enrichment.resolvers.company_resolver import resolve_company
+
+    desc = job_profile.description if isinstance(job_profile.description, str) else ""
+    ep = build_employer_profile(desc, job_profile.company or "", session)
+    job_profile.employer = ep
+    company_id, _conf = resolve_company(job_profile.company or "", session)
+    persist_employer_metadata(
+        session,
+        ep,
+        company_id=company_id,
+        normalized_job_id=None,
+        source=job_profile.source,
+        external_id=job_profile.external_id,
+    )
+
+
 async def build_job_profile_with_soc(
     job_record: JobRecord,
     session: Session,

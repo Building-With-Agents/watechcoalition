@@ -103,7 +103,7 @@ def test_migration_is_idempotent(engine: Engine) -> None:
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
 def test_job_postings_has_phase1_columns(engine: Engine) -> None:
     """
-    Verify that the job_postings table has all nine Phase 1 extension columns.
+    Verify that the job_postings table has the expected Phase 1 extension columns.
     """
     run_migration()
 
@@ -122,6 +122,7 @@ def test_job_postings_has_phase1_columns(engine: Engine) -> None:
         "spam_score",
         "overall_confidence",
         "field_confidence",
+        "employer_profile_id",
     ]
 
     for col in expected_columns:

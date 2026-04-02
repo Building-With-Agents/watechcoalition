@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from agents.common.data_store.models import NormalizedJob
 from agents.common.llm_client import invoke_structured_extraction_llm
 from agents.common.types.job_profile import EmployerProfile
+from agents.enrichment.employer_profile_storage import upsert_employer_profile_by_company_id
 from agents.enrichment.resolvers.company_resolver import (
     lookup_company_exact,
     normalize_company_name,
@@ -191,12 +192,22 @@ def persist_employer_metadata(
     session: Session,
     profile: EmployerProfile,
     *,
+    company_id: str | None = None,
     normalized_job_id: int | None = None,
     source: str | None = None,
     external_id: str | None = None,
 ) -> None:
-    """Write ``profile`` to ``dbo.normalized_jobs.employer_metadata`` when the row can be resolved."""
+    """Persist employer enrichment: upsert ``dbo.employer_profiles`` when ``company_id`` is known.
+
+    If ``company_id`` is missing or blank, write JSON to ``dbo.normalized_jobs.employer_metadata``
+    only (no ``employer_profiles`` row).
+    """
     payload = profile.model_dump(mode="json")
+    cid = str(company_id).strip() if company_id is not None else ""
+    if cid:
+        upsert_employer_profile_by_company_id(session, cid, payload)
+        return
+
     stmt = None
     if normalized_job_id is not None:
         stmt = (

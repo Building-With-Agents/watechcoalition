@@ -80,3 +80,17 @@ def test_persist_employer_metadata_skips_when_no_keys() -> None:
     ep = EmployerProfile()
     persist_employer_metadata(session, ep)
     session.execute.assert_not_called()
+
+
+@patch("agents.enrichment.classifiers.employer_classifier.upsert_employer_profile_by_company_id")
+def test_persist_employer_metadata_upserts_when_company_id(
+    mock_upsert: MagicMock,
+) -> None:
+    import uuid
+
+    session = MagicMock()
+    ep = EmployerProfile(company_size="startup")
+    mock_upsert.return_value = uuid.uuid4()
+    persist_employer_metadata(session, ep, company_id="acme-uuid")
+    mock_upsert.assert_called_once()
+    session.execute.assert_not_called()

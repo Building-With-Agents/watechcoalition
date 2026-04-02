@@ -30,6 +30,8 @@ class EnrichmentE2ESeed:
     company_address_id: str
     job_posting_id: str
     normalized_job_id: int
+    #: Synthetic NAICS code inserted into ``dbo.naics`` when that table exists (for E2E realism).
+    e2e_naics_code: str | None = None
 
 
 def _require_tables(engine: Engine) -> None:
@@ -45,6 +47,25 @@ def _require_tables(engine: Engine) -> None:
     for t in needed:
         if not insp.has_table(t, schema="dbo"):
             raise RuntimeError(f"missing table dbo.{t}")
+
+
+def _seed_optional_naics_reference(engine: Engine, insp) -> str | None:
+    """Insert a dedicated NAICS row for E2E when ``dbo.naics`` exists; return code or None."""
+    if not insp.has_table("naics", schema="dbo"):
+        return None
+    code = "999998"
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                INSERT INTO dbo.naics (naics_code, title, seq_no, createdat, updatedat)
+                VALUES (:code, 'E2E enrichment pipeline reference row', NULL, NOW(), NOW())
+                ON CONFLICT (naics_code) DO NOTHING
+                """
+            ),
+            {"code": code},
+        )
+    return code
 
 
 def _company_ts_columns(insp) -> tuple[str, str]:
@@ -85,6 +106,7 @@ def seed_enrichment_e2e(engine: Engine) -> EnrichmentE2ESeed:
     """Insert one chain of rows; returns identifiers for cleanup."""
     _require_tables(engine)
     insp = inspect(engine)
+    e2e_naics_code = _seed_optional_naics_reference(engine, insp)
     c_created, c_updated = _company_ts_columns(insp)
     zip_col = _address_zip_column(insp)
     a_created, a_updated = _address_ts_columns(insp)
@@ -266,12 +288,24 @@ def seed_enrichment_e2e(engine: Engine) -> EnrichmentE2ESeed:
         company_address_id=company_address_id,
         job_posting_id=job_posting_id,
         normalized_job_id=nj_id,
+        e2e_naics_code=e2e_naics_code,
     )
 
 
 def teardown_enrichment_e2e(engine: Engine, seed: EnrichmentE2ESeed) -> None:
     """Remove seeded rows (best-effort order)."""
     with engine.begin() as conn:
+        if seed.e2e_naics_code:
+            conn.execute(
+                text(
+                    """
+                    DELETE FROM dbo.naics
+                    WHERE naics_code = :code
+                      AND title = 'E2E enrichment pipeline reference row'
+                    """
+                ),
+                {"code": seed.e2e_naics_code},
+            )
         conn.execute(
             text("DELETE FROM dbo.extracted_intelligence WHERE normalized_job_id = :id"),
             {"id": seed.normalized_job_id},
