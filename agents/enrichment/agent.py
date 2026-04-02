@@ -87,6 +87,7 @@ from agents.enrichment.resolvers.confidence import (
 from agents.enrichment.resolvers.events import build_record_enriched_event
 from agents.enrichment.resolvers.location_resolver import resolve_location
 from agents.enrichment.resolvers.sector_resolver import resolve_sector
+from agents.enrichment.schemas import EnrichedJobProfile
 from agents.scripts.jsearch_enrichment_preview_lib import build_extraction_dict
 
 log = structlog.get_logger()
@@ -630,6 +631,21 @@ class EnrichmentAgent(BaseAgent):
             payload_is_spam = fx.get("is_spam")
 
         derived_output_fields = derive_enrichment_output_fields(resolved_job_posting)
+        enriched_job_profile = EnrichedJobProfile(
+            job_record={
+                "posting_id": posting_id,
+                "normalized_job_id": nj_id,
+                "title": title or fx.get("title"),
+                "company": company,
+                "skills": event.payload.get("skills", []),
+            },
+            temporal_period=derived_output_fields.get("temporal_period"),
+            borderplex_subregion=derived_output_fields.get("borderplex_subregion"),
+        )
+        pair_a_profile_fields = {
+            "temporal_period": enriched_job_profile.temporal_period,
+            "borderplex_subregion": enriched_job_profile.borderplex_subregion,
+        }
 
         base_payload: dict[str, Any] = {
             "event_type": "RecordEnriched",
@@ -646,7 +662,7 @@ class EnrichmentAgent(BaseAgent):
             "is_spam": payload_is_spam,
             "enrichment_status": fx.get("enrichment_status", "success"),
             "skills": event.payload.get("skills", []),
-            **derived_output_fields,
+            **pair_a_profile_fields,
         }
         if nj_id is not None:
             base_payload["normalized_job_id"] = nj_id

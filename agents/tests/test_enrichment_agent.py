@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -94,6 +95,71 @@ class TestEnrichmentAgent:
             mock_scope.return_value.__enter__.return_value = mock_session
             mock_scope.return_value.__exit__.return_value = None
             return agent.process(ev)
+
+    def _profile_handoff_kwargs(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        *,
+        resolved_job_posting: dict[str, object],
+    ) -> dict[str, Any]:
+        monkeypatch.setenv(
+            "PYTHON_DATABASE_URL",
+            "postgresql+psycopg2://user:pass@localhost:5432/db",
+        )
+        agent = EnrichmentAgent()
+        ev = EventEnvelope(
+            correlation_id="c-enriched-job-profile-handoff",
+            agent_id="skills-extraction-agent",
+            payload={
+                "event_type": "SkillsExtracted",
+                "posting_id": 202,
+                "normalized_job_id": 42,
+                "title": "Backend Engineer",
+                "description": "Build APIs.",
+                "company": "Acme",
+                "skills": [],
+            },
+        )
+        ei_row = {
+            "skills": [{"label": "Python"}],
+            "tools": [],
+            "tasks": [],
+            "responsibilities": [],
+            "context": [],
+            "extraction_failed": False,
+        }
+        mock_exec_result = MagicMock()
+        mock_exec_result.mappings.return_value.first.return_value = ei_row
+        mock_session = MagicMock()
+        mock_session.execute.return_value = mock_exec_result
+
+        spam_ret = SpamPreviewResult(
+            spam_score=0.25,
+            is_spam=False,
+            tier="clean",
+            field_confidence={"spam_score": 0.88},
+            overall_confidence=0.88,
+            rationale="unit_test",
+            degraded=False,
+            extraction_note=None,
+            used_heuristic=False,
+        )
+
+        with (
+            patch("agents.enrichment.agent.session_scope") as mock_scope,
+            patch("agents.enrichment.agent.resolve_job_posting_row", return_value=resolved_job_posting),
+            patch("agents.enrichment.agent.score_spam_preview", return_value=spam_ret),
+            patch("agents.enrichment.agent.apply_enrichment_to_job_postings"),
+            patch(
+                "agents.enrichment.agent.EnrichedJobProfile",
+                side_effect=lambda **kwargs: SimpleNamespace(**kwargs),
+            ) as mock_profile,
+        ):
+            mock_scope.return_value.__enter__.return_value = mock_session
+            mock_scope.return_value.__exit__.return_value = None
+            agent.process(ev)
+
+        return mock_profile.call_args.kwargs
 
     def test_agent_id(self) -> None:
         agent = EnrichmentAgent()
@@ -310,6 +376,67 @@ class TestEnrichmentAgent:
         assert out.payload["event_type"] == "RecordEnriched"
         assert out.payload["temporal_period"] == "post_gpt4"
         assert out.payload["borderplex_subregion"] == "el_paso"
+
+    def test_process_handoff_builds_enriched_job_profile_with_temporal_period(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        kwargs = self._profile_handoff_kwargs(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": datetime(2023, 6, 15, 12, 0, tzinfo=timezone.utc),
+                "city": "Austin",
+                "state_province": "Texas",
+                "country": "United States",
+                "is_remote": False,
+                "work_arrangement": "on-site",
+            },
+        )
+
+        assert kwargs["temporal_period"] == "post_gpt4"
+
+    def test_process_handoff_builds_enriched_job_profile_with_borderplex_subregion(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        kwargs = self._profile_handoff_kwargs(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": datetime(2023, 6, 15, 12, 0, tzinfo=timezone.utc),
+                "city": "El Paso",
+                "state_province": "Texas",
+                "country": "United States",
+                "is_remote": False,
+                "work_arrangement": "on-site",
+            },
+        )
+
+        assert kwargs["borderplex_subregion"] == "el_paso"
+
+    def test_process_handoff_builds_enriched_job_profile_with_pair_a_fields_together(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        kwargs = self._profile_handoff_kwargs(
+            monkeypatch,
+            resolved_job_posting={
+                "job_posting_id": "11111111-1111-1111-1111-111111111111",
+                "company_id": "22222222-2222-2222-2222-222222222222",
+                "date_posted": datetime(2023, 6, 15, 12, 0, tzinfo=timezone.utc),
+                "city": "El Paso",
+                "state_province": "Texas",
+                "country": "United States",
+                "is_remote": False,
+                "work_arrangement": "on-site",
+            },
+        )
+
+        assert kwargs["temporal_period"] == "post_gpt4"
+        assert kwargs["borderplex_subregion"] == "el_paso"
 
     def test_process_spam_from_ei_uses_score_spam_preview(
         self,
