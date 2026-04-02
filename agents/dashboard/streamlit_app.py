@@ -27,13 +27,14 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-from dotenv import load_dotenv
+
+from agents.common.env import load_repo_root_dotenv
 
 # ---------------------------------------------------------------------------
 # Environment & paths
 # ---------------------------------------------------------------------------
 
-load_dotenv()
+load_repo_root_dotenv()
 
 _HERE = Path(__file__).parent.parent  # agents/
 _RUN_LOG_PATH = _HERE / "data" / "output" / "pipeline_run.json"

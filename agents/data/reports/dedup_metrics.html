@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Fuzzy dedup metrics</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 1.5rem; background: #f6f7f9; color: #1a1a1a; }
+    h1 { font-size: 1.35rem; }
+    .cards { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+    .card { background: #fff; border-radius: 8px; padding: 1rem 1.25rem; min-width: 160px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .card .val { font-size: 1.6rem; font-weight: 600; }
+    .card .lbl { font-size: 0.85rem; color: #555; margin-top: 0.25rem; }
+    table { border-collapse: collapse; width: 100%; max-width: 960px; background: #fff;
+             border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e8e8e8; }
+    th { background: #eef1f5; font-size: 0.85rem; }
+    .muted { color: #666; font-size: 0.9rem; }
+    section { margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <h1>Fuzzy dedup metrics</h1>
+  <p class="muted">Generated 2026-04-01T18:24:38.969351+00:00 (UTC)</p>
+  <p class="muted">is_duplicate: NULL means unknown / not set; see CONTEXT.md.</p>
+
+  <div class="cards">
+    <div class="card"><div class="val">0</div>
+      <div class="lbl">Rows with dedup_embedding</div></div>
+    <div class="card"><div class="val">0</div>
+      <div class="lbl">Distinct duplicate_cluster_id</div></div>
+  </div>
+
+  <section>
+    <h2>is_duplicate buckets</h2>
+    <table>
+      <thead><tr><th>Bucket</th><th>Count</th></tr></thead>
+      <tbody><tr><td>false</td><td>178</td></tr></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Top clusters by member count</h2>
+    <table>
+      <thead><tr><th>cluster_id</th><th>Members</th><th>Sample title (truncated)</th></tr></thead>
+      <tbody><tr><td colspan='3' class='muted'>No clusters</td></tr></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Recent postings (last 7 days, max 100)</h2>
+    <table>
+      <thead><tr><th>job_posting_id</th><th>is_duplicate</th><th>duplicate_cluster_id</th>
+        <th>dedup_hash prefix</th></tr></thead>
+      <tbody><tr><td><code>bed8dd10-e26a-4163-9738-3472f0206bd1</code></td><td>false</td><td><code></code></td><td><code></code></td></tr><tr><td><code>3a5c801d-ed32-4e2d-9038-3fffcf96e442</code></td><td>false</td><td><code></code></td><td><code></code></td></tr><tr><td><code>620556f6-b242-4a14-931a-01e0c95dffb2</code></td><td>false</td><td><code></code></td><td><code></code></td></tr><tr><td><code>f032df87-90ff-4a30-a7ea-70486731635c</code></td><td>false</td><td><code></code></td><td><code></code></td></tr><tr><td><code>96307b55-6c9a-49d0-836c-09b37bf3f93a</code></td><td>false</td><td><code></code></td><td><code></code></td></tr><tr><td><code>69732924-632b-416e-9fa2-de3de3fa9682</code></td><td>false</td><td><code></code></td><td><code></code></td></tr></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>llm_audit_log (enrichment-dedup)</h2>
+    <p><strong>Rows</strong>: 7 &nbsp; <strong>Last created_at</strong>: 2026-04-01 18:23:53.486392+00:00</p>
+  </section>
+</body>
+</html>

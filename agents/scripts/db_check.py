@@ -20,13 +20,12 @@ from pathlib import Path
 # Ensure repo root is on sys.path so "agents.*" imports work
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from dotenv import load_dotenv
-
-load_dotenv(Path(__file__).resolve().parents[2] / ".env")
-
 from sqlalchemy import text  # noqa: E402
 
 from agents.common.data_store.database import get_engine  # noqa: E402
+from agents.common.env import load_repo_root_dotenv  # noqa: E402
+
+load_repo_root_dotenv()
 
 
 def _run_query(sql: str) -> None:

@@ -10,6 +10,10 @@ columns are left unchanged.
 ``borderplex_subregion``; does **not** change ``is_spam`` or ``spam_score`` so prior
 values are preserved.
 
+Successful clean / flagged / uncertain promotions then run best-effort fuzzy
+dedup in the same session. Dedup failures log and return without rolling back
+the enrichment update.
+
 Requires non-null ``company_id`` on the target row; otherwise skips with a log line.
 """
 
@@ -25,6 +29,8 @@ from sqlalchemy.orm import Session
 from agents.enrichment.classifiers.borderplex_subregion import classify_borderplex_subregion
 from agents.enrichment.classifiers.spam_preview import apply_spam_tiers
 from agents.enrichment.classifiers.temporal_period import classify_temporal_period
+from agents.enrichment.dedup import run_fuzzy_dedup
+from agents.enrichment.dedup.types import FuzzyDedupResult
 
 log = structlog.get_logger()
 
@@ -86,6 +92,36 @@ _UPDATE_FLAGGED_SQL = text(
         is_spam = NULL,
         spam_score = :spam_score
     WHERE job_posting_id::text = :job_posting_id
+    """
+)
+
+_UPDATE_FUZZY_DEDUP_SQL = text(
+    """
+    UPDATE dbo.job_postings SET
+        is_duplicate = :is_duplicate,
+        duplicate_cluster_id = :duplicate_cluster_id
+    WHERE job_posting_id::text = :job_posting_id
+    """
+)
+
+_LOAD_FUZZY_DEDUP_STATE_SQL = text(
+    """
+    SELECT
+        jp.is_duplicate AS is_duplicate,
+        jp.duplicate_cluster_id AS duplicate_cluster_id
+    FROM dbo.job_postings jp
+    WHERE jp.job_posting_id::text = :job_posting_id
+    LIMIT 1
+    """
+)
+
+_LIST_CLUSTER_MEMBER_IDS_SQL = text(
+    """
+    SELECT jp.job_posting_id::text AS job_posting_id
+    FROM dbo.job_postings jp
+    WHERE jp.duplicate_cluster_id = :duplicate_cluster_id
+        AND jp.job_posting_id::text <> :job_posting_id
+    ORDER BY jp.job_posting_id::text
     """
 )
 
@@ -155,6 +191,150 @@ def derive_enrichment_output_fields(resolved_job_posting: dict[str, Any] | None)
         "temporal_period": temporal_period,
         "borderplex_subregion": borderplex_subregion,
     }
+
+
+def _load_existing_fuzzy_dedup_state(session: Session, job_posting_id: str) -> dict[str, Any]:
+    row = session.execute(
+        _LOAD_FUZZY_DEDUP_STATE_SQL,
+        {"job_posting_id": job_posting_id},
+    ).mappings().first()
+    return dict(row) if row else {}
+
+
+def _cluster_member_ids(session: Session, cluster_id: str, *, exclude_job_posting_id: str) -> list[str]:
+    rows = session.execute(
+        _LIST_CLUSTER_MEMBER_IDS_SQL,
+        {
+            "duplicate_cluster_id": cluster_id,
+            "job_posting_id": exclude_job_posting_id,
+        },
+    ).mappings().all()
+    return [str(row["job_posting_id"]) for row in rows]
+
+
+def apply_fuzzy_dedup_result(
+    session: Session,
+    job_posting_id: str,
+    result: FuzzyDedupResult,
+) -> bool:
+    """
+    Persist fuzzy-dedup state for the current row and any matched survivor row.
+
+    ``run_fuzzy_dedup`` may write ``dedup_text_hash`` / ``dedup_embedding`` (cache
+    for the anchor and lazily backfilled survivors). This helper is the **only**
+    path that updates ``is_duplicate`` and ``duplicate_cluster_id``.
+    """
+    if result.stub:
+        log.info("fuzzy_dedup_persistence_skipped_stub", job_posting_id=job_posting_id)
+        return False
+
+    cluster_id = result.duplicate_cluster_id
+    matched_id = result.matched_job_posting_id
+    survivor_id = result.survivor_job_posting_id
+
+    if cluster_id is None:
+        existing = _load_existing_fuzzy_dedup_state(session, job_posting_id)
+        prior_cluster_id = existing.get("duplicate_cluster_id")
+        prior_cluster = str(prior_cluster_id).strip() if prior_cluster_id else None
+        prior_was_survivor = existing.get("is_duplicate") is False and prior_cluster is not None
+        if result.is_duplicate:
+            raise ValueError("duplicate fuzzy dedup results must include duplicate_cluster_id")
+        if matched_id or survivor_id:
+            raise ValueError("non-duplicate fuzzy dedup results may not include cluster or survivor metadata")
+        session.execute(
+            _UPDATE_FUZZY_DEDUP_SQL,
+            {
+                "job_posting_id": job_posting_id,
+                "is_duplicate": False,
+                "duplicate_cluster_id": None,
+            },
+        )
+        cleared_peer_count = 0
+        if prior_was_survivor:
+            peer_ids = _cluster_member_ids(
+                session,
+                prior_cluster,
+                exclude_job_posting_id=job_posting_id,
+            )
+            for peer_id in peer_ids:
+                session.execute(
+                    _UPDATE_FUZZY_DEDUP_SQL,
+                    {
+                        "job_posting_id": peer_id,
+                        "is_duplicate": False,
+                        "duplicate_cluster_id": None,
+                    },
+                )
+            cleared_peer_count = len(peer_ids)
+        log.info(
+            "fuzzy_dedup_persisted_unique",
+            job_posting_id=job_posting_id,
+            cleared_prior_cluster=prior_was_survivor,
+            cleared_peer_count=cleared_peer_count,
+        )
+        return True
+
+    effective_survivor_id = survivor_id or (job_posting_id if not result.is_duplicate else None)
+    if effective_survivor_id is None:
+        raise ValueError("duplicate fuzzy dedup results must include survivor_job_posting_id")
+    if result.is_duplicate and effective_survivor_id == job_posting_id:
+        raise ValueError("duplicate fuzzy dedup results cannot mark the current row as survivor")
+    if not result.is_duplicate and effective_survivor_id != job_posting_id:
+        raise ValueError("non-duplicate clustered results must keep the current row as survivor")
+
+    session.execute(
+        _UPDATE_FUZZY_DEDUP_SQL,
+        {
+            "job_posting_id": job_posting_id,
+            "is_duplicate": result.is_duplicate,
+            "duplicate_cluster_id": cluster_id,
+        },
+    )
+
+    peer_ids = {peer_id for peer_id in (matched_id, effective_survivor_id) if peer_id and peer_id != job_posting_id}
+    for peer_id in sorted(peer_ids):
+        session.execute(
+            _UPDATE_FUZZY_DEDUP_SQL,
+            {
+                "job_posting_id": peer_id,
+                "is_duplicate": peer_id != effective_survivor_id,
+                "duplicate_cluster_id": cluster_id,
+            },
+        )
+
+    log.info(
+        "fuzzy_dedup_persisted_cluster",
+        job_posting_id=job_posting_id,
+        duplicate_cluster_id=cluster_id,
+        is_duplicate=result.is_duplicate,
+        survivor_job_posting_id=effective_survivor_id,
+        matched_job_posting_id=matched_id,
+        updated_peer_count=len(peer_ids),
+    )
+    return True
+
+
+def _apply_fuzzy_dedup_after_promotion(
+    session: Session,
+    *,
+    normalized_job_id: int,
+    job_posting_id: str,
+) -> None:
+    """Best-effort fuzzy dedup: isolate failures so promotion writes still commit."""
+    try:
+        # Keep dedup best-effort by containing all reads/writes in a savepoint.
+        # A dedup SQLAlchemy/DB error should roll back only the dedup work, not
+        # poison the outer promotion transaction managed by ``session_scope``.
+        with session.begin_nested():
+            result = run_fuzzy_dedup(session, job_posting_id)
+            apply_fuzzy_dedup_result(session, job_posting_id, result)
+    except Exception as exc:
+        log.warning(
+            "fuzzy_dedup_after_promotion_failed",
+            normalized_job_id=normalized_job_id,
+            job_posting_id=job_posting_id,
+            error=str(exc),
+        )
 
 
 def apply_enrichment_to_job_postings(
@@ -232,6 +412,14 @@ def apply_enrichment_to_job_postings(
         **derived_output_fields,
     }
 
+    def _finish_with_dedup() -> bool:
+        _apply_fuzzy_dedup_after_promotion(
+            session,
+            normalized_job_id=normalized_job_id,
+            job_posting_id=str(job_posting_id),
+        )
+        return True
+
     if tier == "uncertain" or spam_score is None:
         session.execute(_UPDATE_UNCERTAIN_SQL, params_base)
         log.info(
@@ -239,7 +427,7 @@ def apply_enrichment_to_job_postings(
             normalized_job_id=normalized_job_id,
             job_posting_id=job_posting_id,
         )
-        return True
+        return _finish_with_dedup()
 
     try:
         spam_f = float(spam_score)
@@ -250,7 +438,7 @@ def apply_enrichment_to_job_postings(
             normalized_job_id=normalized_job_id,
             job_posting_id=job_posting_id,
         )
-        return True
+        return _finish_with_dedup()
 
     params = {**params_base, "spam_score": spam_f}
 
@@ -261,7 +449,7 @@ def apply_enrichment_to_job_postings(
             normalized_job_id=normalized_job_id,
             job_posting_id=job_posting_id,
         )
-        return True
+        return _finish_with_dedup()
 
     if tier == "clean":
         session.execute(_UPDATE_CLEAN_SQL, params)
@@ -270,7 +458,7 @@ def apply_enrichment_to_job_postings(
             normalized_job_id=normalized_job_id,
             job_posting_id=job_posting_id,
         )
-        return True
+        return _finish_with_dedup()
 
     log.warning(
         "enrichment_promotion_unhandled_tier",

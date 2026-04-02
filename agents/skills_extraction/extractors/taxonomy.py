@@ -362,8 +362,14 @@ def _embedding_cost_usd(input_tokens: int) -> float:
     return (input_tokens / 1000.0) * per_1k
 
 
-def _log_embedding_audit_event(texts: list[str], data: Any, latency_ms: int) -> None:
-    """Write one dbo.llm_audit_log row per successful Step 4 embedding HTTP response (issue #108).
+def _log_embedding_audit_event(
+    texts: list[str],
+    data: Any,
+    latency_ms: int,
+    *,
+    agent_name: str = "taxonomy-resolver",
+) -> None:
+    """Write one dbo.llm_audit_log row per successful embedding HTTP response (issue #108).
 
     taxonomy-resolver owners (Angel/Fabian): tweak model label, add success=False on final failure, or
     align cost with exact Azure billing — see TODO on _embed_texts_azure retry exit.
@@ -372,7 +378,7 @@ def _log_embedding_audit_event(texts: list[str], data: Any, latency_ms: int) -> 
 
     input_tokens = _embedding_usage_input_tokens(data)
     log_extraction_event(
-        agent_name="taxonomy-resolver",
+        agent_name=agent_name,
         prompt=_embedding_audit_prompt(texts),
         model="text-embedding-3-small",
         provider="azure-openai",
@@ -391,11 +397,19 @@ def _extract_retry_after_embedding(error_message: str) -> int | None:
     return int(match.group(1)) if match else None
 
 
-def _embed_texts_azure(texts: list[str]) -> list[list[float]] | None:
+def _embed_texts_azure(
+    texts: list[str],
+    *,
+    audit_agent_name: str = "taxonomy-resolver",
+) -> list[list[float]] | None:
     """Call Azure OpenAI Embeddings API with retry on 429. Returns None if env or request fails.
 
     Retries up to 5 times with exponential backoff + jitter on 429 rate limits.
     Honors Retry-After from error message when available.
+
+    audit_agent_name
+        Written to ``llm_audit_log`` via ``log_extraction_event`` on success (issue #108).
+        Use ``enrichment-dedup`` for job posting fuzzy dedup.
 
     Env: AZURE_OPENAI_EMBEDDING_ENDPOINT, AZURE_OPENAI_EMBEDDING_API_KEY,
          AZURE_OPENAI_EMBEDDING_API_VERSION, AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME.
@@ -464,7 +478,7 @@ def _embed_texts_azure(texts: list[str]) -> list[list[float]] | None:
         return None
 
     # #108: one llm_audit_log row per successful embedding API call (batch chunk = one row).
-    _log_embedding_audit_event(texts, data, latency_ms)
+    _log_embedding_audit_event(texts, data, latency_ms, agent_name=audit_agent_name)
 
     items = data.get("data") if isinstance(data, dict) else None
     if not items or not isinstance(items, list):

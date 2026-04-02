@@ -9,11 +9,13 @@ insert fails (caller should ``pytest.skip``).
 from __future__ import annotations
 
 import uuid
+import warnings
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from sqlalchemy import inspect, text
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import SAWarning
 from sqlalchemy.orm import Session
 
 from agents.common.data_store.models import NormalizedJob
@@ -52,8 +54,10 @@ def _company_ts_columns(insp) -> tuple[str, str]:
     return c_created, c_updated
 
 
-def _job_postings_ts_fragment(insp) -> str:
-    cols = {c["name"] for c in insp.get_columns("job_postings", schema="dbo")}
+def _job_postings_ts_fragment(insp) -> tuple[str, str]:
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=SAWarning)
+        cols = {c["name"] for c in insp.get_columns("job_postings", schema="dbo")}
     if "createdAt" in cols and "updatedAt" in cols:
         return ", createdAt, updatedAt", ", NOW(), NOW()"
     if "created_at" in cols and "updated_at" in cols:
