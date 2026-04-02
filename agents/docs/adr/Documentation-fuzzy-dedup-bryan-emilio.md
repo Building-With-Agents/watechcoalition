@@ -67,12 +67,14 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 | **E2E promotion** | Real DB + `EnrichmentAgent`; `run_fuzzy_dedup` mocked; asserts flag persistence   | `pytest agents/tests/test_fuzzy_dedup_promotion_e2e.py`                   |
 
 
-## Workspace status on April 1, 2026
+## Workspace status on April 2, 2026
 
 - The implementation is materially complete in code: fuzzy matching, survivor arbitration, cached embeddings, DB persistence, and unit coverage are all present.
 - Agent-side local bootstrapping now enforces the **repo root** `.env` as the only `.env` file loaded by the Week 6 test path and dedup tooling. In particular, `agents/conftest.py` no longer falls back to `find_dotenv()`, which previously allowed an unrelated parent or CWD `.env` to change E2E behavior.
 - The repo-root `.env` in this workspace points `PYTHON_DATABASE_URL` at the Azure PostgreSQL development host `pg-jobintel-cfa-dev.postgres.database.azure.com`. That target was unreachable inside the sandbox, but it was reachable outside the sandbox on **April 1, 2026**, which allowed a full live Week 6 validation run against the real database.
 - During that live validation, `run_migrations(get_engine())` added the missing dedup schema on the real DB, including `job_postings.dedup_embedding` and `job_postings.dedup_text_hash`, which had previously been the only blocker for the matching E2E suite.
+- On **April 2, 2026**, the local import-time blocker for promotion E2E and repo-wide `agents/tests` regression was removed by preferring `rapidfuzz` with a `thefuzz` fallback in `agents/enrichment/resolvers/company_resolver.py`. That change does not alter resolver scoring behavior; it only makes the current environment consistent with the installed packages.
+- On **April 2, 2026**, a full local regression pass completed successfully: `./agents/.venv/bin/python -m pytest agents/tests/ -v` → `217 passed, 5 skipped, 2 warnings`.
 
 ## Validation Findings
 
@@ -92,6 +94,8 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 - The current default threshold and survivor rules line up with the intended behavior in unit coverage: same-company reposts merge, different-company rows stay isolated, and richer/newer rows win survivor arbitration.
 - The root `.env` source-of-truth issue was real. Before the fix, agent tests could silently inherit a different `.env` via `find_dotenv()`; after the fix, Week 6 tooling consistently uses the repo-root `.env`.
 - A full live Week 6 validation now exists on the real Azure-backed database outside the sandbox: migrations completed, the matching E2E suite passed, and the promotion E2E suite passed.
+- Repo-level regression is now green in the current local environment, not just the targeted Week 6 tests.
+- Remaining issue-alignment gaps are now narrow and explicit: `duplicate_cluster_id` is still `TEXT`, duplicate threshold behavior is still effectively `>= threshold`, survivor arbitration still uses a weighted score instead of a simple completeness count, and FP/FN tracking is still not implemented.
 - The largest remaining uncertainty is calibration rather than mechanics. The implementation is now live-validated, but false-positive and false-negative **rates** still need a broader replay or labeled sample beyond the six checked-in E2E scenarios.
 
 ### Recommendation
@@ -99,6 +103,7 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 - Keep `DEDUP_COSINE_THRESHOLD=0.92` as the default until the env-gated E2E suite is run against a database with Azure embedding credentials.
 - Treat the checked-in E2E scenarios as the source of truth for rollout validation, then capture real FP/FN counts from a staging or replay run before changing the threshold.
 - Keep the lazy backfill behavior. It materially improves cold-start recall without opening cross-company or out-of-window matches.
+- Treat environment readiness as resolved for this workspace and focus the next implementation pass on the remaining issue-alignment items: strict `>` threshold semantics, completeness-count survivor logic, `UUID` cluster ids, and FP/FN tracking.
 - For **local Docker validation**, keep the repo-root `.env` authoritative:
   set `PYTHON_DATABASE_URL=postgresql+psycopg2://postgres:<POSTGRES_PASSWORD>@localhost:<POSTGRES_PORT>/talent_finder` in the root `.env`, matching `.env.docker`, then start Docker and run migrations before the Week 6 E2E suite.
 
@@ -112,6 +117,9 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 - 2026-04-01 outside sandbox: `./agents/.venv/bin/python agents/scripts/db_check.py migrate` → `Migrations complete`
 - 2026-04-01 outside sandbox: `./agents/.venv/bin/python -m pytest agents/tests/test_fuzzy_dedup_matching_e2e.py -q` → `6 passed`
 - 2026-04-01 outside sandbox: `./agents/.venv/bin/python -m pytest agents/tests/test_fuzzy_dedup_promotion_e2e.py -q` → `1 passed`
+- 2026-04-02: `./agents/.venv/bin/python -m pytest agents/enrichment/tests/test_company_resolver.py -v` → `17 passed`
+- 2026-04-02: `./agents/.venv/bin/python -m pytest agents/tests/test_fuzzy_dedup_promotion_e2e.py -v` → `1 passed`
+- 2026-04-02: `./agents/.venv/bin/python -m pytest agents/tests/ -v` → `217 passed, 5 skipped, 2 warnings`
 
 ## Tradeoffs Acknowledged
 
