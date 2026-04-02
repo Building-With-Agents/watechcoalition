@@ -170,6 +170,7 @@ class NormalizedJob(Base):
     employment_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
     experience_level: Mapped[str | None] = mapped_column(String(50), nullable=True)
     occupation_code: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    naics_code: Mapped[str | None] = mapped_column(Text, nullable=True)
     mapper_used: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     # Date

@@ -63,7 +63,8 @@ _UPDATE_UNCERTAIN_SQL = text(
         overall_confidence = :overall_confidence,
         field_confidence = CAST(:field_confidence AS jsonb),
         temporal_period = :temporal_period,
-        borderplex_subregion = :borderplex_subregion
+        borderplex_subregion = :borderplex_subregion,
+        naics_code = :naics_code
     WHERE job_posting_id::text = :job_posting_id
     """
 )
@@ -76,6 +77,7 @@ _UPDATE_CLEAN_SQL = text(
         field_confidence = CAST(:field_confidence AS jsonb),
         temporal_period = :temporal_period,
         borderplex_subregion = :borderplex_subregion,
+        naics_code = :naics_code,
         is_spam = FALSE,
         spam_score = :spam_score
     WHERE job_posting_id::text = :job_posting_id
@@ -90,6 +92,7 @@ _UPDATE_FLAGGED_SQL = text(
         field_confidence = CAST(:field_confidence AS jsonb),
         temporal_period = :temporal_period,
         borderplex_subregion = :borderplex_subregion,
+        naics_code = :naics_code,
         is_spam = NULL,
         spam_score = :spam_score
     WHERE job_posting_id::text = :job_posting_id
@@ -546,11 +549,15 @@ def apply_enrichment_to_job_postings(
     oc = _overall_confidence_for_storage(record_enriched_payload)
     derived_output_fields = derive_enrichment_output_fields(resolved)
 
+    naics_raw = record_enriched_payload.get("naics_code")
+    naics_code: str | None = naics_raw.strip() if isinstance(naics_raw, str) and naics_raw.strip() else None
+
     params_base: dict[str, Any] = {
         "job_posting_id": str(job_posting_id),
         "quality_score": qs_f,
         "overall_confidence": oc,
         "field_confidence": fc_json,
+        "naics_code": naics_code,
         **derived_output_fields,
     }
 

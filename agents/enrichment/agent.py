@@ -69,6 +69,7 @@ from agents.enrichment.classification import (
     FALLBACK_TECH_AREA_LABELS,
     classify_job,
 )
+from agents.enrichment.classifiers.naics_classifier import classify_naics
 from agents.enrichment.classifiers.quality import score_quality
 from agents.enrichment.classifiers.spam_preview import (
     SpamPreviewResult,
@@ -348,6 +349,7 @@ def _posting_for_enrichment(
         "posting_id": pick("posting_id"),
         "title": pick("title"),
         "company": pick("company"),
+        "description": pick("description", None),
         "location": pick("location", "") or "",
         "quality_score": pick("quality_score"),
         "spam_score": pick("spam_score"),
@@ -693,6 +695,8 @@ class EnrichmentAgent(BaseAgent):
         if nj_id is not None and _db_url_configured():
             try:
                 with session_scope() as session:
+                    raw_naics = classify_naics(title, desc_str, session)
+                    base_payload["naics_code"] = None if raw_naics == "unknown" else raw_naics
                     apply_enrichment_to_job_postings(session, nj_id, base_payload)
             except Exception as exc:
                 log.warning(
@@ -751,6 +755,15 @@ class EnrichmentAgent(BaseAgent):
                     "enrichment_external_adapters_failed",
                     error=str(ext_exc),
                 )
+            if session is not None:
+                try:
+                    desc_raw = posting.get("description")
+                    desc_str = desc_raw if isinstance(desc_raw, str) else None
+                    raw_naics = classify_naics(posting.get("title") or "", desc_str, session)
+                    merged["naics_code"] = None if raw_naics == "unknown" else raw_naics
+                except Exception as naics_exc:
+                    log.warning("enrich_record_naics_failed", error=str(naics_exc))
+                    merged["naics_code"] = posting.get("naics_code")
             return merged
         except Exception:
             log.warning(
@@ -764,6 +777,7 @@ class EnrichmentAgent(BaseAgent):
                 "location_id": None,
                 "raw_location_text": None,
                 "borderplex_subregion": None,
+                "naics_code": posting.get("naics_code"),
                 "field_confidence": {
                     "company_id": 0.0,
                     "location_id": 0.0,

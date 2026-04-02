@@ -117,8 +117,12 @@ _JOB_POSTINGS_LEGACY_CLEANUP = [
 _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS requirements TEXT",
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS responsibilities TEXT",
+<<<<<<< HEAD
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
     "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
+=======
+    "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS naics_code TEXT",
+>>>>>>> 355ede653 (feat(enrichment): add NAICS classification and NAICS testing)
 ]
 
 # Company HQ / location fields for enrichment resolve_location (#110)
