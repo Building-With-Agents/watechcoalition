@@ -365,6 +365,25 @@ def enrich_job_profile_naics(job_profile: JobProfile, session: Session) -> None:
     job_profile.naics_code = None if code == "unknown" else code
 
 
+def enrich_job_profile_employer(job_profile: JobProfile, session: Session) -> None:
+    """Set ``job_profile.employer`` and persist JSON to ``dbo.normalized_jobs.employer_metadata``."""
+    from agents.enrichment.classifiers.employer_classifier import (
+        build_employer_profile,
+        persist_employer_metadata,
+    )
+
+    desc = job_profile.description if isinstance(job_profile.description, str) else ""
+    ep = build_employer_profile(desc, job_profile.company or "", session)
+    job_profile.employer = ep
+    persist_employer_metadata(
+        session,
+        ep,
+        normalized_job_id=None,
+        source=job_profile.source,
+        external_id=job_profile.external_id,
+    )
+
+
 async def build_job_profile_with_soc(
     job_record: JobRecord,
     session: Session,

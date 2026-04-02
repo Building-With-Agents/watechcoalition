@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+from agents.common.types.job_profile import EmployerProfile
 from agents.enrichment.agent import EnrichmentAgent
 
 
+@patch("agents.enrichment.agent.persist_employer_metadata")
+@patch("agents.enrichment.agent.build_employer_profile")
 @patch("agents.enrichment.agent.classify_naics")
 @patch("agents.enrichment.agent.run_coroutine")
 @patch("agents.enrichment.agent.compute_overall_confidence")
@@ -20,6 +23,8 @@ def test_enrich_record_happy_path_has_required_keys(
     mock_overall_confidence: MagicMock,
     mock_run_coroutine: MagicMock,
     mock_classify_naics: MagicMock,
+    mock_build_employer: MagicMock,
+    mock_persist_employer: MagicMock,
 ) -> None:
     mock_resolve_company.return_value = (101, 0.95)
     mock_resolve_location.return_value = ("550e8400-e29b-41d4-a716-446655440007", 0.90, None, None)
@@ -32,6 +37,7 @@ def test_enrich_record_happy_path_has_required_keys(
     mock_overall_confidence.return_value = 0.88
     mock_run_coroutine.return_value = {}
     mock_classify_naics.return_value = "unknown"
+    mock_build_employer.return_value = EmployerProfile(is_known_employer=True)
 
     agent = EnrichmentAgent()
     posting = {
@@ -52,6 +58,9 @@ def test_enrich_record_happy_path_has_required_keys(
     assert out["company"] == "Acme Inc."
     assert "enrichment_status" not in out
     assert out.get("naics_code") is None
+    assert out["employer_metadata"]["is_known_employer"] is True
+    mock_build_employer.assert_called_once()
+    mock_persist_employer.assert_called_once()
 
     mock_resolve_company.assert_called_once_with("Acme Inc.", session)
     mock_resolve_location.assert_called_once_with("Seattle, WA", session)
@@ -83,6 +92,7 @@ def test_enrich_record_degraded_on_resolve_company_failure(
         "sector_id": 0.0,
         "seniority": 0.0,
     }
+    assert out["employer_metadata"]["company_size"] == "unknown"
     mock_resolve_location.assert_not_called()
     mock_field_confidence.assert_not_called()
     mock_overall_confidence.assert_not_called()

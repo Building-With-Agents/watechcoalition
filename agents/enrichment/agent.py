@@ -63,11 +63,16 @@ from agents.common.base_agent import BaseAgent
 from agents.common.data_store.database import check_db_connection, session_scope
 from agents.common.data_store.models import IndustrySector, TechnologyArea
 from agents.common.event_envelope import EventEnvelope
+from agents.common.types.job_profile import EmployerProfile
 from agents.enrichment.adapters.facade import ExternalEnrichmentFacade
 from agents.enrichment.async_bridge import run_coroutine
 from agents.enrichment.classification import (
     FALLBACK_TECH_AREA_LABELS,
     classify_job,
+)
+from agents.enrichment.classifiers.employer_classifier import (
+    build_employer_profile,
+    persist_employer_metadata,
 )
 from agents.enrichment.classifiers.naics_classifier import classify_naics
 from agents.enrichment.classifiers.quality import score_quality
@@ -304,6 +309,7 @@ _EXTRA_POSTING_KEYS = frozenset(
     {
         "soc_code",
         "naics_code",
+        "employer_metadata",
         "temporal_period",
         "borderplex_subregion",
         "is_duplicate",
@@ -697,6 +703,15 @@ class EnrichmentAgent(BaseAgent):
                 with session_scope() as session:
                     raw_naics = classify_naics(title, desc_str, session)
                     base_payload["naics_code"] = None if raw_naics == "unknown" else raw_naics
+                    ep = build_employer_profile(desc_str, str(company or ""), session)
+                    base_payload["employer_metadata"] = ep.model_dump(mode="json")
+                    persist_employer_metadata(
+                        session,
+                        ep,
+                        normalized_job_id=nj_id,
+                        source=event.payload.get("source"),
+                        external_id=event.payload.get("external_id"),
+                    )
                     apply_enrichment_to_job_postings(session, nj_id, base_payload)
             except Exception as exc:
                 log.warning(
@@ -756,14 +771,27 @@ class EnrichmentAgent(BaseAgent):
                     error=str(ext_exc),
                 )
             if session is not None:
+                desc_raw = posting.get("description")
+                desc_str = desc_raw if isinstance(desc_raw, str) else None
                 try:
-                    desc_raw = posting.get("description")
-                    desc_str = desc_raw if isinstance(desc_raw, str) else None
                     raw_naics = classify_naics(posting.get("title") or "", desc_str, session)
                     merged["naics_code"] = None if raw_naics == "unknown" else raw_naics
                 except Exception as naics_exc:
                     log.warning("enrich_record_naics_failed", error=str(naics_exc))
                     merged["naics_code"] = posting.get("naics_code")
+                try:
+                    ep = build_employer_profile(desc_str, posting.get("company") or "", session)
+                    merged["employer_metadata"] = ep.model_dump(mode="json")
+                    persist_employer_metadata(
+                        session,
+                        ep,
+                        normalized_job_id=_coerce_normalized_job_id(posting.get("normalized_job_id")),
+                        source=posting.get("source"),
+                        external_id=posting.get("external_id"),
+                    )
+                except Exception as emp_exc:
+                    log.warning("enrich_record_employer_failed", error=str(emp_exc))
+                    merged["employer_metadata"] = EmployerProfile().model_dump(mode="json")
             return merged
         except Exception:
             log.warning(
@@ -778,6 +806,7 @@ class EnrichmentAgent(BaseAgent):
                 "raw_location_text": None,
                 "borderplex_subregion": None,
                 "naics_code": posting.get("naics_code"),
+                "employer_metadata": EmployerProfile().model_dump(mode="json"),
                 "field_confidence": {
                     "company_id": 0.0,
                     "location_id": 0.0,
