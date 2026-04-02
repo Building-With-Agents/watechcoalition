@@ -61,7 +61,8 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 
 | Layer             | What                                                                              | Command / note                                                            |
 | ----------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| **Unit**          | Mocked SQL + `_embed_texts_azure`; threshold, window, completeness, embed failure, dedup audit-agent propagation | `pytest agents/enrichment/tests/test_fuzzy_dedup.py`                      |
+| **Unit (dedup)**  | Mocked SQL + `_embed_texts_azure`; threshold, window, completeness, embed failure, dedup audit-agent propagation | `pytest agents/enrichment/tests/test_fuzzy_dedup.py`                      |
+| **Unit (promotion)** | `FuzzyDedupResult` persistence, dedup-after-promotion wiring; after merge with `development`, also temporal/Borderplex params on promotion `UPDATE` | `pytest agents/enrichment/tests/test_job_postings_promotion.py`           |
 | **E2E matching**  | Real Postgres + Azure embeddings; 29d vs 31d window, near-dup vs different text, and live `llm_audit_log` insertion for `agent_name='enrichment-dedup'` | `pytest agents/tests/test_fuzzy_dedup_matching_e2e.py -m fuzzy_dedup_e2e` |
 | **E2E promotion** | Real DB + `EnrichmentAgent`; `run_fuzzy_dedup` mocked; asserts flag persistence   | `pytest agents/tests/test_fuzzy_dedup_promotion_e2e.py`                   |
 
@@ -77,7 +78,7 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 
 ### What We Tested
 
-- Promotion persistence/unit path with fabricated `FuzzyDedupResult` inputs in `agents/enrichment/tests/test_job_postings_promotion.py`.
+- Promotion persistence/unit path with fabricated `FuzzyDedupResult` inputs, dedup-after-promotion wiring, and temporal/Borderplex column binding checks in `agents/enrichment/tests/test_job_postings_promotion.py` (the latter shared with the merged `development` enrichment promotion surface).
 - Matching/unit path in `agents/enrichment/tests/test_fuzzy_dedup.py`, including threshold checks, half-open 30-day window params, survivor completeness arbitration, cached-vector reuse, and cold-start survivor backfill.
 - Audit contract at the dedup call site: `_embed_texts_azure(..., audit_agent_name="enrichment-dedup")` for both current-row embedding and lazy survivor backfill.
 - Live-path E2E coverage in `agents/tests/test_fuzzy_dedup_matching_e2e.py` now includes a real `llm_audit_log` assertion, not just dedup state assertions.
@@ -104,7 +105,8 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 ### Data / Evidence
 
 - 2026-04-01: `./agents/.venv/bin/python -m pytest agents/enrichment/tests/test_fuzzy_dedup.py -q` → `14 passed`
-- 2026-04-01: `./agents/.venv/bin/python -m pytest agents/enrichment/tests/test_job_postings_promotion.py -q` → `11 passed`
+- 2026-04-01 (pre–`development` merge): `./agents/.venv/bin/python -m pytest agents/enrichment/tests/test_job_postings_promotion.py -q` → `11 passed` (fuzzy-dedup promotion tests only).
+- After merge with `development`: the same module grows to **`17 passed`** — the original fuzzy-dedup/promotion cases plus six tests that assert `temporal_period` / `borderplex_subregion` are bound on promotion `UPDATE`s (dedup path mocked so `execute` counts stay stable).
 - 2026-04-01 inside sandbox: `./agents/.venv/bin/python agents/scripts/db_check.py tables` → failed with `could not translate host name "pg-jobintel-cfa-dev.postgres.database.azure.com" to address`
 - 2026-04-01 outside sandbox: `./agents/.venv/bin/python agents/scripts/db_check.py tables` → succeeded against the real Azure DB
 - 2026-04-01 outside sandbox: `./agents/.venv/bin/python agents/scripts/db_check.py migrate` → `Migrations complete`
@@ -117,7 +119,7 @@ Detect **near-duplicate job postings** after enrichment promotion using **embedd
 - **Operational:** Requires `AZURE_OPENAI_EMBEDDING_`*; embedding outages leave rows as non-duplicates for that run (no global reset).
 - **Availability bias:** Best-effort dedup favors enrichment availability over strict dedup consistency on every run.
 - **Lazy backfill cost:** Backfilling same-company, in-window survivors improves cold-start recall, but adds embedding cost during historical comparisons.
-- **Tooling warning:** SQLAlchemy emits `SAWarning: Did not recognize type 'vector'` during schema inspection in the E2E helpers, but this did not block migrations or live test execution.
+- **Tooling warning:** SQLAlchemy can emit `SAWarning: Did not recognize type 'vector'` when reflecting `job_postings` columns that include `dedup_embedding`. The enrichment E2E helpers (`agents/tests/db_seed_enrichment_e2e.py`, `agents/tests/fuzzy_dedup_e2e_helpers.py`) filter that warning around `inspect.get_columns` so pytest output stays clean; other ad-hoc reflection may still log the warning. It does not block migrations or live test execution.
 - **Calibration gap:** Unit coverage is strong for contract and control flow, but semantic threshold calibration still depends on live embeddings.
 - **Not a substitute** for ingestion dedup: fingerprint dedup still drops exact repeats at `raw_ingested_jobs`.
 
