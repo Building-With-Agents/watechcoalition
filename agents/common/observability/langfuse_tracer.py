@@ -15,6 +15,7 @@ from agents.common.tracer_base import TracerBase
 
 try:
     from langfuse import Langfuse
+
     _LANGFUSE_AVAILABLE = True
 except ImportError:
     _LANGFUSE_AVAILABLE = False
@@ -78,7 +79,9 @@ class LangfuseTracer(TracerBase):
     def record_error(self, error: Exception, *, context: dict[str, Any] | None = None) -> None:
         active = self._get_active_trace()
         if active is not None:
-            active["events"].append({"event": "error_recorded", "error": str(error), "error_type": type(error).__name__, **(context or {})})
+            active["events"].append(
+                {"event": "error_recorded", "error": str(error), "error_type": type(error).__name__, **(context or {})}
+            )
             active["status"] = "error"
 
     def _get_active_trace(self) -> dict[str, Any] | None:

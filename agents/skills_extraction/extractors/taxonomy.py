@@ -511,9 +511,7 @@ def _load_embeddings_from_db() -> tuple[list[tuple[str, str]], np.ndarray] | Non
         with session_scope() as session:
             rows = session.execute(
                 sa_text(
-                    "SELECT skill_name, embedding::text "
-                    "FROM dbo.skills WHERE embedding IS NOT NULL "
-                    "ORDER BY skill_name"
+                    "SELECT skill_name, embedding::text FROM dbo.skills WHERE embedding IS NOT NULL ORDER BY skill_name"
                 )
             ).fetchall()
 
@@ -735,11 +733,7 @@ def resolve_taxonomy_batch(labels: list[str]) -> list[TaxonomyResult]:
                 confidence=0.0,
             )
             continue
-        r = (
-            _resolve_step1_genai(lab)
-            or _resolve_step2_exact_esco(lab)
-            or _resolve_step3_normalized_esco(lab)
-        )
+        r = _resolve_step1_genai(lab) or _resolve_step2_exact_esco(lab) or _resolve_step3_normalized_esco(lab)
         if r is not None:
             resolved_map[lab] = r
         else:
@@ -826,9 +820,7 @@ def resolution_report(results: list[TaxonomyResult]) -> dict[str, Any]:
     n = len(results)
     genai = sum(1 for r in results if r.is_genai_extension)
     resolved = [r for r in results if r.resolution_step < 6]
-    avg_conf = (
-        sum(r.confidence for r in resolved) / len(resolved) if resolved else 0.0
-    )
+    avg_conf = sum(r.confidence for r in resolved) / len(resolved) if resolved else 0.0
     fallback = stats.get(6, 0)
     coverage = (n - fallback) / n if n else 0.0
     return {

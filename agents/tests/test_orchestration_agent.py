@@ -20,26 +20,20 @@ class TestOrchestrationAgent:
         assert result["status"] == "ok"
         assert result["agent"] == "orchestration-agent"
 
-    def test_process_emits_orchestration_ack(
-        self, render_event: EventEnvelope
-    ) -> None:
+    def test_process_emits_orchestration_ack(self, render_event: EventEnvelope) -> None:
         """Output event_type is OrchestrationAck."""
         agent = OrchestrationAgent()
         out = agent.process(render_event)
         assert out.payload["event_type"] == "OrchestrationAck"
         assert out.agent_id == "orchestration-agent"
 
-    def test_process_acknowledges_upstream_event(
-        self, render_event: EventEnvelope
-    ) -> None:
+    def test_process_acknowledges_upstream_event(self, render_event: EventEnvelope) -> None:
         """Output records the upstream event_type it acknowledged."""
         agent = OrchestrationAgent()
         out = agent.process(render_event)
         assert out.payload["acknowledged_event_type"] == "RenderComplete"
 
-    def test_process_preserves_correlation_id(
-        self, render_event: EventEnvelope
-    ) -> None:
+    def test_process_preserves_correlation_id(self, render_event: EventEnvelope) -> None:
         """Correlation ID passes through unchanged."""
         agent = OrchestrationAgent()
         out = agent.process(render_event)

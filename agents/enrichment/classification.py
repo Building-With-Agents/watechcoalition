@@ -17,8 +17,18 @@ otherwise *unknown*.
 
 from __future__ import annotations
 
+import asyncio
 import re
+from collections.abc import Callable
 from typing import Any
+
+from sqlalchemy import update
+from sqlalchemy.orm import Session
+
+from agents.common.data_store.models import NormalizedJob
+from agents.common.types.job_profile import JobProfile
+from agents.common.types.job_record import JobRecord
+from agents.enrichment.classifiers.soc_classifier import classify_soc
 
 # Role classification
 MIN_TOKEN_LEN = 2
@@ -326,3 +336,39 @@ def classify_job(
         job_title, job_description, extraction, is_internship=is_internship
     )
     return role, seniority
+
+
+async def enrich_job_profile_soc(
+    job_profile: JobProfile,
+    session: Session,
+    llm: Callable[[str], str],
+) -> None:
+    desc = job_profile.description if isinstance(job_profile.description, str) else ""
+    soc_code = await classify_soc(job_profile.title, desc, session, llm)
+    job_profile.soc_code = soc_code
+    oc_value = ((soc_code or "").strip()[:20]) or None
+    stmt = (
+        update(NormalizedJob)
+        .where(NormalizedJob.external_id == job_profile.external_id)
+        .where(NormalizedJob.source == job_profile.source)
+        .values(occupation_code=oc_value)
+    )
+    session.execute(stmt)
+
+
+async def build_job_profile_with_soc(
+    job_record: JobRecord,
+    session: Session,
+    llm: Callable[[str], str],
+) -> JobProfile:
+    job_profile = JobProfile.model_validate(job_record.model_dump())
+    await enrich_job_profile_soc(job_profile, session, llm)
+    return job_profile
+
+
+def enrich_job_profile_soc_blocking(
+    job_profile: JobProfile,
+    session: Session,
+    llm: Callable[[str], str],
+) -> None:
+    asyncio.run(enrich_job_profile_soc(job_profile, session, llm))

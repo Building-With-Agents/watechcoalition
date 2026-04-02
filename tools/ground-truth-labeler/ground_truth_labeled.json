@@ -1,0 +1,726 @@
+[
+  {
+    "ground_truth_id": "gt-001",
+    "external_id": "XmCds3jPojOPD1m-AAAAAA==",
+    "source": "JSearch",
+    "title": "Cybersecurity Data Analyst (Government)",
+    "company": "AT&T",
+    "city": "Washington",
+    "state": "District of Columbia",
+    "description": "This position requires office presence of a minimum of 5 days per week and is only located at customer's site.\n\nAT&T Global Public Sector is a trusted provider of secure, IP enabled, cloud-based, network solutions and professional services to the Federal Government. We are dedicated to recruiting, developing and empowering a diverse, high-performing workforce that is passionate about what they do, committed to our shared values and dedicated to our customers’ mission.\n\nThe cybersecurity data analyst is responsible for conducting analysis on data for improving and optimizing the client’s cybersecurity efforts. This position will be responsible for developing and reporting on key performance indicators to measure effectiveness.\n\nJob Duties/Responsibilities:\n\nThis role examines data from different sources with the goal of providing insight into organizational security processes and information systems. Analysts design, document, and implement custom algorithms, workflow processes, and large data sets used for modeling, data mining, and research purposes.\n\nRequired Clearance:\n\nOF-306 background check (#clearable)\n\nRequired Qualifications:\n\nThe individual performing tasks must meet or exceed the following qualifications:\n\n• Working knowledge of Splunk Search Processing Language (SPL). (Candidates must pass an SPL assessment.)\n\n• At least 1 year of experience performing statistical analysis on large data sets.\n\n+ The successful candidate will demonstrate statistical analysis such as identifying the standard deviation of a large data set.\n\n+ In doing so, the candidate can use any tool such as spreadsheet software, database software, business intelligence and visualization tools, or programming languages and platforms. However, candidates may not utilize LLM or AI-assisted solutions such as ChatGPT.\n\nDesired Qualifications:\n\nNice to have qualifications include:\n\n• At least three years of experience in cybersecurity with at least 1 year of that experience in data analysis.\n\n• Good communication and customer relationship skills.\n\nOur Cybersecurity Data Analyst's earn between $98,100 - $190,000. Not to mention all the other amazing rewards that working at AT&T offers. Individual starting salary within this range may depend on geography, experience, expertise, and education/training.\n\nJoining our team comes with amazing perks and benefits:\n• Medical/Dental/Vision coverage\n• 401(k) plan\n• Tuition reimbursement program\n• Paid Time Off and Holidays (based on date of hire, at least 23 days of vacation each year and 9 company-designated holidays)\n• Paid Parental Leave\n• Paid Caregiver Leave\n• Additional sick leave beyond what state and local law require may be available but is unprotected\n• Adoption Reimbursement\n• Disability Benefits (short term and long term)\n• Life and Accidental Death Insurance\n• Supplemental benefit programs: critical illness/accident hospital indemnity/group legal\n• Employee Assistance Programs (EAP)\n• Extensive employee wellness programs\n• Employee discounts up to 50% off on eligible AT&T mobility plans and accessories, AT&T internet (and fiber where available) and AT&T phone\n\nWeekly Hours:\n40\n\nTime Type:\nRegular\n\nLocation:\nChantilly, Virginia, Washington, District of Columbia\n\nIt is the policy of AT&T to provide equal employment opportunity (EEO) to all persons regardless of age, color, national origin, citizenship status, physical or mental disability, race, religion, creed, gender, sex, sexual orientation, gender identity and/or expression, genetic information, marital status, status with regard to public assistance, veteran status, or any other characteristic protected by federal, state or local law. In addition, AT&T will provide reasonable accommodations for qualified individuals with disabilities. AT&T is a fair chance employer and does not initiate a background check until an offer is made.",
+    "requirements": "- OF-306 background check (#clearable)\n- Working knowledge of Splunk Search Processing Language (SPL). (Candidates must pass an SPL assessment.)\n- At least 1 year of experience performing statistical analysis on large data sets\n- The successful candidate will demonstrate statistical analysis such as identifying the standard deviation of a large data set\n- In doing so, the candidate can use any tool such as spreadsheet software, database software, business intelligence and visualization tools, or programming languages and platforms\n- However, candidates may not utilize LLM or AI-assisted solutions such as ChatGPT\n- At least three years of experience in cybersecurity with at least 1 year of that experience in data analysis\n- Good communication and customer relationship skills\n- AT&T is a fair chance employer and does not initiate a background check until an offer is made",
+    "responsibilities": "- The cybersecurity data analyst is responsible for conducting analysis on data for improving and optimizing the client’s cybersecurity efforts\n- This position will be responsible for developing and reporting on key performance indicators to measure effectiveness\n- This role examines data from different sources with the goal of providing insight into organizational security processes and information systems\n- Analysts design, document, and implement custom algorithms, workflow processes, and large data sets used for modeling, data mining, and research purposes",
+    "skills": [
+      {
+        "skill_id": null,
+        "skill_name": "Performance analytics",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "This position will be responsible for developing and reporting on key performance indicators to measure effectiveness.",
+          "field_source": "description",
+          "start_char": 615,
+          "end_char": 733
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Customer relationship skills",
+        "type": "Soft",
+        "confidence": 1.0,
+        "required_flag": false,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "customer relationship skills",
+          "field_source": "description",
+          "start_char": 2011,
+          "end_char": 2039
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Communication",
+        "type": "Soft",
+        "confidence": 1.0,
+        "required_flag": false,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Good communication",
+          "field_source": "description",
+          "start_char": 1988,
+          "end_char": 2006
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Data analysis",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "The successful candidate will demonstrate statistical analysis such as identifying the standard deviation of a large data set",
+          "field_source": "requirements",
+          "start_char": 225,
+          "end_char": 350
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Algorithm design",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "design, document, and implement custom algorithms",
+          "field_source": "description",
+          "start_char": 918,
+          "end_char": 967
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      }
+    ],
+    "tools": [
+      {
+        "tool_id": null,
+        "tool_name": "Splunk Search Processing Language",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Working knowledge of Splunk Search Processing Language (SPL)",
+          "field_source": "description",
+          "start_char": 1230,
+          "end_char": 1290
+        },
+        "is_genai_tool": false
+      }
+    ],
+    "labeler_notes": {
+      "Data analysis": "Examines data from different sources with the goal of providing insight into organizational security processes and information systems"
+    }
+  },
+  {
+    "ground_truth_id": "gt-002",
+    "external_id": "k_hvYOIgRXiOs8UwAAAAAA==",
+    "source": "JSearch",
+    "title": "Enterprise Cybersecurity Penetration Tester",
+    "company": "Booz Allen Hamilton",
+    "city": null,
+    "state": null,
+    "description": "Job Number: R0236285\n\nEnterprise Cybersecurity Penetration Tester\n\nThe Opportunity:\n\nAre you ready to make a meaningful impact at Booz Allen? As a pivotal member of our Enterprise Cybersecurity (ECS) Red Team, you will take on a specialized role as a penetration tester, working directly with new products in development to identify vulnerabilities and reinforce our security posture. This unique opportunity allows you to lead dynamic penetration testing and product assessments, uncovering weaknesses and strengthening the security foundations of our organization. You will thrive in a fast-paced environment where cutting-edge offensive security intersects with strategic advising which drives innovative analysis and actionable solutions for the Booz Enterprise.\n\nYou’ll design and execute end-to-end red and purple team exercises, adhering to established rules of engagement, to reveal and address gaps in our security posture. Your expertise will be applied across cloud native and mobile platforms, ensuring our defenses are resilient and agile. You’ll translate complex security concepts to both technical and non-technical stakeholders, including senior executives, making your voice heard at every level.\n\nJoin a passionate team of cybersecurity professionals at the forefront of research, fostering a culture of innovation, knowledge sharing, and continuous improvement. Embark on a career where your skills and curiosity will help shape the future of security at Booz Allen. Due to the nature of work performed within this facility, U.S. citizenship is required.\n\nJoin us. The world can't wait.\n\nYou Have:\n• 3+ years of experience conducting penetration tests and security assessments on new or evolving products\n• Experience successfully launching secure products to market and driving adoption among record of target user groups\n• Experience independently leading organized product security testing engagements while fostering strong team collaboration\n• Experience with vulnerability enumeration and exploitation frameworks, including Burp Suite Pro, Metasploit, or Cobalt Strike\n• Knowledge of front-end and back-end frameworks commonly used in modern web development\n• Ability to write comprehensive product security assessment reports and communicating findings to clients and senior leadership\n• Ability to mentor junior-level staff in the latest techniques for product penetration testing and security assessments\n• Bachelor’s degree in information security, computer science, product, or application security\n\nNice If You Have:\n• Experience with testing cloud-hosted solutions\n• Knowledge of Active Directory, Azure, and Amazon Web Services\n• Knowledge of programming languages such as JavaScript, Python, and PHP\n• Ability to operate in a fast-paced work environment, multi-task, and handle truncated delivery deadlines\n• Possession of excellent oral and written communication skills\n• Offensive Security Certified Professional (OSCP) Certification\n\nCompensation\n\nAt Booz Allen, we celebrate your contributions, provide you with opportunities and choices, and support your total well-being. Our offerings include health, life, disability, financial, and retirement benefits, as well as paid leave, professional development, tuition assistance, work-life programs, and dependent care. Our recognition awards program acknowledges employees for exceptional performance and superior demonstration of our values. Full-time and part-time employees working at least 20 hours a week on a regular basis are eligible to participate in Booz Allen’s benefit programs. Individuals that do not meet the threshold are only eligible for select offerings, not inclusive of health benefits. We encourage you to learn more about our total benefits by visiting the Resource page on our Careers site and reviewing Our Employee Benefits page.\n\nSalary at Booz Allen is determined by various factors, including but not limited to location, the individual’s particular combination of education, knowledge, skills, competencies, and experience, as well as contract-specific affordability and organizational requirements. The projected compensation range for this position is $86,800.00 to $198,000.00 (annualized USD). The estimate displayed represents the typical salary range for this position and is just one component of Booz Allen’s total compensation package for employees. This posting will close within 90 days from the Posting Date.\n\nIdentity Statement\n\nAs part of the application process, you are expected to be on camera during interviews and assessments. We reserve the right to take your picture to verify your identity and prevent fraud.\n\nWork Model\n\nOur people-first culture prioritizes the benefits of flexibility and collaboration, whether that happens in person or remotely.\n• If this position is listed as remote or hybrid, you’ll periodically work from a Booz Allen or client site facility.\n• If this position is listed as onsite, you’ll work with colleagues and clients in person, as needed for the specific role.\n\nCommitment to Non-Discrimination\n\nAll qualified applicants will receive consideration for employment without regard to disability, status as a protected veteran or any other status protected by applicable federal, state, local, or international law.",
+    "requirements": "- 3+ years of experience conducting penetration tests and security assessments on new or evolving products\n- Experience successfully launching secure products to market and driving adoption among record of target user groups\n- Experience independently leading organized product security testing engagements while fostering strong team collaboration\n- Experience with vulnerability enumeration and exploitation frameworks, including Burp Suite Pro, Metasploit, or Cobalt Strike\n- Knowledge of front-end and back-end frameworks commonly used in modern web development\n- Ability to write comprehensive product security assessment reports and communicating findings to clients and senior leadership\n- Ability to mentor junior-level staff in the latest techniques for product penetration testing and security assessments\n- Bachelor’s degree in information security, computer science, product, or application security\n- Experience with testing cloud-hosted solutions\n- Knowledge of Active Directory, Azure, and Amazon Web Services\n- Knowledge of programming languages such as JavaScript, Python, and PHP\n- Ability to operate in a fast-paced work environment, multi-task, and handle truncated delivery deadlines\n- Possession of excellent oral and written communication skills\n- Offensive Security Certified Professional (OSCP) Certification",
+    "responsibilities": "- You will thrive in a fast-paced environment where cutting-edge offensive security intersects with strategic advising which drives innovative analysis and actionable solutions for the Booz Enterprise\n- You’ll design and execute end-to-end red and purple team exercises, adhering to established rules of engagement, to reveal and address gaps in our security posture\n- Your expertise will be applied across cloud native and mobile platforms, ensuring our defenses are resilient and agile\n- You’ll translate complex security concepts to both technical and non-technical stakeholders, including senior executives, making your voice heard at every level\n- If this position is listed as remote or hybrid, you’ll periodically work from a Booz Allen or client site facility\n- If this position is listed as onsite, you’ll work with colleagues and clients in person, as needed for the specific role",
+    "skills": [
+      {
+        "skill_id": null,
+        "skill_name": "Penetration Testing",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "This unique opportunity allows you to lead dynamic penetration testing and product assessments",
+          "field_source": "description",
+          "start_char": 381,
+          "end_char": 475
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Security Assesment",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "security assessments on new or evolving products",
+          "field_source": "requirements",
+          "start_char": 58,
+          "end_char": 106
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Web development",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Knowledge of front-end and back-end frameworks commonly used in modern web development",
+          "field_source": "requirements",
+          "start_char": 472,
+          "end_char": 558
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Cloud security",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": false,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Experience with testing cloud-hosted solutions",
+          "field_source": "requirements",
+          "start_char": 899,
+          "end_char": 945
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Communication",
+        "type": "Soft",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "communicating findings to clients and senior leadership",
+          "field_source": "description",
+          "start_char": 2250,
+          "end_char": 2305
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Security reporting",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Ability to write comprehensive product security assessment reports",
+          "field_source": "description",
+          "start_char": 2179,
+          "end_char": 2245
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Offensive Securtiy Certified Professional (OSCP) Certification",
+        "type": "Certification",
+        "confidence": 1.0,
+        "required_flag": false,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Offensive Security Certified Professional (OSCP) Certification",
+          "field_source": "description",
+          "start_char": 2900,
+          "end_char": 2962
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Leadership",
+        "type": "Soft",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Experience independently leading organized product security testing engagements while fostering strong team collaboration",
+          "field_source": "description",
+          "start_char": 1838,
+          "end_char": 1959
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      }
+    ],
+    "tools": [
+      {
+        "tool_id": null,
+        "tool_name": "JavaScript",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Knowledge of programming languages such as JavaScript",
+          "field_source": "description",
+          "start_char": 2656,
+          "end_char": 2709
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Python",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Python",
+          "field_source": "description",
+          "start_char": 2710,
+          "end_char": 2716
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "PHP",
+        "category": "language",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "PHP",
+          "field_source": "requirements",
+          "start_char": 1075,
+          "end_char": 1078
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Azure",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Azure",
+          "field_source": "requirements",
+          "start_char": 977,
+          "end_char": 982
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Amazon Web Services (AWS)",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Amazon Web Services",
+          "field_source": "requirements",
+          "start_char": 987,
+          "end_char": 1006
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Burp Suite Pro",
+        "category": "framework",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Burp Suite Pro",
+          "field_source": "requirements",
+          "start_char": 427,
+          "end_char": 441
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Metasploit",
+        "category": "framework",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Metasploit",
+          "field_source": "requirements",
+          "start_char": 443,
+          "end_char": 453
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Cobalt Strike",
+        "category": "framework",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Cobalt Strike",
+          "field_source": "requirements",
+          "start_char": 458,
+          "end_char": 471
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Active Directory",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Knowledge of Active Directory",
+          "field_source": "description",
+          "start_char": 2591,
+          "end_char": 2620
+        },
+        "is_genai_tool": false
+      }
+    ],
+    "labeler_notes": {}
+  },
+  {
+    "ground_truth_id": "gt-003",
+    "external_id": "NaoVoicG4adIQ9X5AAAAAA==",
+    "source": "JSearch",
+    "title": "Cyber Security Analyst",
+    "company": "Leidos",
+    "city": null,
+    "state": null,
+    "description": "Leidos has a current job opportunity for a Cyber Security Analyst on the DISA GSMO-IIprogram inArlington, VA - this position is 100% on-site and applicants must be willing to support rotating shift work.\n\nPOSITION SUMMARY:\nThis position provides 24x7 cybersecurity monitoringand analysisservices for Department of Defense networksabove the SECRET level. This includes performingreal-timecyber threat intelligence analysis, correlating actionable security events, performing network traffic analysis using raw packet data, andparticipatingin the coordination of resources during the incident response process.\n\nPRIMARY RESPONSIBILITIES:\n• Review DoD andopen-sourceintelligence for threatsand toidentifyIndicators of Compromise (IOCs) and integrate those into sensors and SIEMs\n• Utilize alerts from endpoints, IDS/IPS,netflow, and custom sensors toidentifycompromises on customer networks/endpoints\n• Review massive log files, pivot between data sets, andcorrelateevidence for incident investigations\n• Triage alerts toidentifymalicious actors on customer networks\n• Report incidents to customers and USCYBERCOM\n\nBASIC QUALIFICATIONS:\n• Active DoD Top Secret security clearance with SCI eligibility required for consideration.\n• BachelorsDegreeand 4+ years ofprior relevant experience;additionalwork experience or Cyber courses/certifications may be substituted in lieu of a degree.\n• Demonstrated understanding of TCP/IP, common networking ports and protocols, traffic flow, system administration, OSI model, defense-in-depthand common security elements.\n• Motivated self-starter with strong written and verbal communication skills, and the ability to create complex technical reports on analytic findings\n• DoD 8570 IAT level II or higher certification such as CompTIA Security+ CE, ISC2 SSCP, SANS GSEC prior to starting.\n• DoD 8570 CSSP-A level Certification such as CEH,CySA+, GCIA or othercertification isrequiredwithin 180 days of hire.\n• Demonstrated commitment to training, self-study andmaintainingproficiencyin the technical cyber security domain and an ability to think and work independently\n• Strong analytical and troubleshooting skills\n• Willing to perform shift work\n• Must be a US Citizen\n\nPREFERRED QUALIFICATIONS:\n• CND experience (Protect, Detect, Respond and Sustain) within a Computer Incident Response organization.\n• Demonstrated understanding of the life cycle of networkthreats, attacks, attackvectorsand methods of exploitation with an understanding of intrusion set tactics,techniquesand procedures (TTPs).\n• Advanced understanding of TCP/IP, common networking ports and protocols, traffic flow, system administration, OSI model, defense-in-depthand common security elements.\n• Demonstrated hands-on experience analyzing high volumes of logs, network data (e.g.Splunk,Suricata, Zeek, Full Packet Capture), and other attack artifacts in support of incident investigations.\n• In-depth knowledge of architecture, engineering, and operations of at least one enterprise SIEM platform (e.g.SplunkES,CoreLight/Elastic).\n• Experience andproficiencywith any of the following:Splunk, Suricata, Zeek, Full Packet Capture, Network Forensics, Endpoint Security.\n• Experience with malware analysis concepts and methods.\n• Unix/Linux command line experience.\n• Scripting andorprogramming experienceto write Suricata and Zeek rule sets.\n• Motivated self-starter with strong written and verbal communication skills, and the ability to create complex technical reports on analytic findings.\n• Familiarity or experience in Intelligence Driven Defense and/orMitreATT&CK, and/orCyber Kill Chain methodologies.\n• Existing 8570CSSPAnalyst Certifications (CEH),CySA+ etc.\n\nIf you're looking for comfort, keep scrolling. At Leidos, we outthink, outbuild, and outpace the status quo - because the mission demands it. We're not hiring followers. We're recruiting the ones who disrupt, provoke, and refuse to fail. Step 10 is ancient history. We're already at step 30 - and moving faster than anyone else dares.\nOriginal Posting:February 27, 2026\n\nFor U.S. Positions: While subject to change based on business needs, Leidos reasonably anticipates that this job requisition will remain open for at least 3 days with an anticipated close date of no earlier than 3 days after the original posting date as listed above.\n\nPay Range:Pay Range $87,100.00 - $157,450.00\n\nThe Leidos pay range for this job level is a general guideline onlyand not a guarantee of compensation or salary. Additional factors considered in extending an offer include (but are not limited to) responsibilities of the job, education, experience, knowledge, skills, and abilities, as well as internal equity, alignment with market data, applicable bargaining agreement (if any), or other law.",
+    "requirements": "- Active DoD Top Secret security clearance with SCI eligibility required for consideration\n- BachelorsDegreeand 4+ years ofprior relevant experience;additionalwork experience or Cyber courses/certifications may be substituted in lieu of a degree\n- Demonstrated understanding of TCP/IP, common networking ports and protocols, traffic flow, system administration, OSI model, defense-in-depthand common security elements\n- Motivated self-starter with strong written and verbal communication skills, and the ability to create complex technical reports on analytic findings\n- DoD 8570 IAT level II or higher certification such as CompTIA Security+ CE, ISC2 SSCP, SANS GSEC prior to starting\n- DoD 8570 CSSP-A level Certification such as CEH,CySA+, GCIA or othercertification isrequiredwithin 180 days of hire\n- Demonstrated commitment to training, self-study andmaintainingproficiencyin the technical cyber security domain and an ability to think and work independently\n- Strong analytical and troubleshooting skills\n- Willing to perform shift work\n- Must be a US Citizen\n- For U.S. Positions: While subject to change based on business needs, Leidos reasonably anticipates that this job requisition will remain open for at least 3 days with an anticipated close date of no earlier than 3 days after the original posting date as listed above",
+    "responsibilities": "- This position provides 24x7 cybersecurity monitoringand analysisservices for Department of Defense networksabove the SECRET level\n- This includes performingreal-timecyber threat intelligence analysis, correlating actionable security events, performing network traffic analysis using raw packet data, andparticipatingin the coordination of resources during the incident response process\n- Review DoD andopen-sourceintelligence for threatsand toidentifyIndicators of Compromise (IOCs) and integrate those into sensors and SIEMs\n- Utilize alerts from endpoints, IDS/IPS,netflow, and custom sensors toidentifycompromises on customer networks/endpoints\n- Review massive log files, pivot between data sets, andcorrelateevidence for incident investigations\n- Triage alerts toidentifymalicious actors on customer networks\n- Report incidents to customers and USCYBERCOM",
+    "skills": [
+      {
+        "skill_id": null,
+        "skill_name": "Cybersecurity monitoring",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "This position provides 24x7 cybersecurity monitoring",
+          "field_source": "description",
+          "start_char": 222,
+          "end_char": 274
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Cybersecurity analysis",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "This position provides 24x7 cybersecurity monitoringand analysisservices",
+          "field_source": "description",
+          "start_char": 222,
+          "end_char": 294
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Network traffic analysis",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "performing network traffic analysis",
+          "field_source": "description",
+          "start_char": 462,
+          "end_char": 497
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Intrusion detection",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Utilize alerts from endpoints, IDS/IPS,netflow, and custom sensors toidentifycompromises on customer networks/endpoints",
+          "field_source": "description",
+          "start_char": 776,
+          "end_char": 895
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Networking protocols",
+        "type": "Domain",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Demonstrated understanding of TCP/IP, common networking ports and protocols,",
+          "field_source": "description",
+          "start_char": 1380,
+          "end_char": 1456
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Communication",
+        "type": "Soft",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Motivated self-starter with strong written and verbal communication skills, and the ability to create complex technical reports on analytic findings",
+          "field_source": "description",
+          "start_char": 1554,
+          "end_char": 1702
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "System administration",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Motivated self-starter with strong written and verbal communication skills, and the ability to create complex technical reports on analytic findings",
+          "field_source": "description",
+          "start_char": 1554,
+          "end_char": 1702
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Troubleshooting skills",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Strong analytical and troubleshooting skills",
+          "field_source": "requirements",
+          "start_char": 954,
+          "end_char": 998
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "CompTIA Security+",
+        "type": "Certification",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "DoD 8570 IAT level II or higher certification such as CompTIA Security+ CE",
+          "field_source": "requirements",
+          "start_char": 564,
+          "end_char": 638
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "ISC2 SSCP",
+        "type": "Certification",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "ISC2 SSCP,",
+          "field_source": "description",
+          "start_char": 1780,
+          "end_char": 1790
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "SANS GSEC",
+        "type": "Certification",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "SANS GSEC",
+          "field_source": "description",
+          "start_char": 1792,
+          "end_char": 1801
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Cerified Ethical Hacker (CEH)",
+        "type": "Certification",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "SANS GSEC",
+          "field_source": "description",
+          "start_char": 1792,
+          "end_char": 1801
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "CompTIA CySA+",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "CySA+",
+          "field_source": "description",
+          "start_char": 1871,
+          "end_char": 1876
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "GIAC Certified Intrusion Analyst (GCIA)",
+        "type": "Certification",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "GCIA",
+          "field_source": "description",
+          "start_char": 1878,
+          "end_char": 1882
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      },
+      {
+        "skill_id": null,
+        "skill_name": "Linux",
+        "type": "Technical",
+        "confidence": 1.0,
+        "required_flag": true,
+        "esco_uri": null,
+        "is_genai_extension": false,
+        "source_span": {
+          "text": "Unix/Linux command line experience.",
+          "field_source": "description",
+          "start_char": 3232,
+          "end_char": 3267
+        },
+        "span_auto_corrected": false,
+        "original_end_char": null
+      }
+    ],
+    "tools": [
+      {
+        "tool_id": null,
+        "tool_name": "Splunk",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Splunk",
+          "field_source": "description",
+          "start_char": 2785,
+          "end_char": 2791
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Suricata",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Suricata",
+          "field_source": "description",
+          "start_char": 2792,
+          "end_char": 2800
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Zeek",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "Zeek",
+          "field_source": "description",
+          "start_char": 2802,
+          "end_char": 2806
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Splunk Enterprise Security",
+        "category": "platform",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "SplunkES",
+          "field_source": "description",
+          "start_char": 3008,
+          "end_char": 3016
+        },
+        "is_genai_tool": false
+      },
+      {
+        "tool_id": null,
+        "tool_name": "Elastic Stack",
+        "category": "framework",
+        "confidence": 1.0,
+        "source_span": {
+          "text": "CoreLight/Elastic",
+          "field_source": "description",
+          "start_char": 3017,
+          "end_char": 3034
+        },
+        "is_genai_tool": false
+      }
+    ],
+    "labeler_notes": {}
+  }
+]

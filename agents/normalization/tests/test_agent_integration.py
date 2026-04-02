@@ -18,7 +18,6 @@ def _skip_if_no_db():
 
 
 class TestNormalizationAgentIntegration:
-
     def test_health_check_with_db(self) -> None:
         agent = NormalizationAgent()
         result = agent.health_check()

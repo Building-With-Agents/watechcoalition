@@ -32,9 +32,7 @@ _LEGAL_SUFFIXES: tuple[str, ...] = (
 )
 
 _SUFFIX_TAIL = re.compile(
-    r"(?:,\s*|\s+)("
-    + "|".join(re.escape(s) for s in _LEGAL_SUFFIXES)
-    + r")\.?$",
+    r"(?:,\s*|\s+)(" + "|".join(re.escape(s) for s in _LEGAL_SUFFIXES) + r")\.?$",
     re.IGNORECASE,
 )
 
@@ -52,24 +50,18 @@ def normalize_company_name(raw: str) -> str:
 
 def lookup_company_exact(normalized_name: str, session: Session) -> str | None:
     """Return ``companies.company_id`` when ``normalize_company_name(company_name)`` matches."""
-    for company_id, company_name in session.execute(
-        select(Company.company_id, Company.company_name)
-    ).all():
+    for company_id, company_name in session.execute(select(Company.company_id, Company.company_name)).all():
         if normalize_company_name(company_name) == normalized_name:
             return company_id
     return None
 
 
-def find_best_fuzzy_match(
-    normalized_name: str, session: Session
-) -> tuple[str, float] | tuple[None, float]:
+def find_best_fuzzy_match(normalized_name: str, session: Session) -> tuple[str, float] | tuple[None, float]:
     """
     Load all companies and return the best weighted fuzzy match at or above
     ``FUZZY_THRESHOLD``, else ``(None, best_score)``.
     """
-    rows = session.execute(
-        select(Company.company_id, Company.company_name)
-    ).all()
+    rows = session.execute(select(Company.company_id, Company.company_name)).all()
     if not rows:
         return (None, 0.0)
 

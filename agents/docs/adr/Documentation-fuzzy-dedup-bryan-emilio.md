@@ -3,7 +3,7 @@
 
 |            |                                                 |
 | ---------- | ----------------------------------------------- |
-| **Owner**  | Bryan                                           |
+| **Owner**  | Pair C                                           |
 | **Spec**   | IMP-018                                         |
 | **Status** | Accepted (implemented)                          |
 | **Scope**  | Enrichment → `dbo.job_postings` after promotion |

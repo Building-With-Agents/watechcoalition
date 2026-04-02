@@ -56,6 +56,7 @@ def _scheduled_job() -> None:
     try:
         os.environ["SCHEDULER_TYPE"] = "apscheduler"
         from agents.orchestration.run_ingestion import main as run_ingestion_main  # noqa: E402
+
         run_ingestion_main()
     except SystemExit as e:
         if e.code != 0:
@@ -96,6 +97,7 @@ def main() -> None:
 
     if cron_expr:
         from apscheduler.triggers.cron import CronTrigger  # noqa: E402
+
         scheduler.add_job(
             _scheduled_job,
             trigger=CronTrigger.from_crontab(cron_expr),
@@ -128,6 +130,7 @@ def main() -> None:
     except (KeyboardInterrupt, SystemExit):
         log.info("scheduler_stopping")
         scheduler.shutdown(wait=True)
+
 
 if __name__ == "__main__":
     main()

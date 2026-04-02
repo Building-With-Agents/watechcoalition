@@ -44,10 +44,7 @@ def _run_query(sql: str) -> None:
 
 def tables() -> None:
     """List all tables in the dbo schema."""
-    _run_query(
-        "SELECT table_name FROM information_schema.tables "
-        "WHERE table_schema = 'dbo' ORDER BY table_name"
-    )
+    _run_query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'dbo' ORDER BY table_name")
 
 
 def counts() -> None:

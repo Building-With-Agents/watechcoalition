@@ -317,17 +317,23 @@ python -m ruff check agents/
 ## 10. Dashboard (Streamlit)
 
 ```bash
-streamlit run agents/dashboard/streamlit_app.py
+streamlit run agents/dashboard/app.py
+# Alias: streamlit run agents/dashboard/streamlit_app.py
 ```
 
 Opens in browser at `http://localhost:8501`.
 
-**Data source:** The dashboard auto-detects whether PostgreSQL is available via `PYTHON_DATABASE_URL`.
+**Data source:** The dashboard auto-detects whether PostgreSQL is available via `PYTHON_DATABASE_URL` or `PYTHON_DATABASE_URL_READONLY`.
 
-- **Connected:** Sidebar shows "Connected to PostgreSQL" — pages query live DB tables.
-- **Fallback:** Sidebar shows "Using fixture data (JSON)" — pages read from `agents/data/output/pipeline_run.json`.
+- **Connected:** Sidebar shows "Connected to PostgreSQL (read-only)" — dashboard uses a separate SQLAlchemy engine with `default_transaction_read_only=on` (see `agents/dashboard/readonly_engine.py`).
+- **Fallback:** Sidebar shows "Using fixture data (JSON)" — journey pages read from `agents/data/output/pipeline_run.json`. Week 6 observability pages require PostgreSQL.
 
-**Check pages:**
+**Week 6 observability pages:**
+
+- Ingestion Overview — records per day (UTC), dedup rate, error rate, recent runs
+- Normalization Quality — conformance gauge, quarantine breakdown, salary coverage
+
+**Journey pages (earlier weeks):**
 
 - Pipeline Run Summary — ingestion runs, record counts, stage completion
 - Record Journey — trace a single job through ingestion → normalization

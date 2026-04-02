@@ -1,21 +1,32 @@
 """
-Enrichment Agent — Phase 1 lite (Pair C: classification + quality + spam; Pair D: resolvers in resolvers/).
+Enrichment Agent — Phase 1 lite (Pair C: classification + quality + spam; Pair D: resolvers).
 
-Loads reference labels from ``technology_areas`` and ``industry_sectors`` when
-``PYTHON_DATABASE_URL`` is set; otherwise uses
-``classification.FALLBACK_TECH_AREA_LABELS`` for offline / walking-skeleton
-runs.
+When ``SkillsExtracted`` includes a non-empty ``records`` list, applies Pair C gating and
+Pair D resolution per row, then emits one batch-level ``RecordEnriched`` (Week 5 counts +
+Week 6 distributions) via :func:`build_record_enriched_event`.
+
+Otherwise (flat single-record payloads), loads reference labels from ``technology_areas`` and
+``industry_sectors`` when ``PYTHON_DATABASE_URL`` is set; uses
+``classification.FALLBACK_TECH_AREA_LABELS`` for offline runs; emits a per-record
+``RecordEnriched`` with role, seniority, quality, and spam preview fields.
+
+When ``check_db_connection()`` is true, batch mode opens one ``session_scope()`` for the
+whole batch so ``resolve_company`` / ``resolve_location`` use the real dbo session.
 
 Agent ID (canonical): enrichment-agent
 Emits:    RecordEnriched
           EnrichmentDegraded (alert bus, when registered)
 Consumes: SkillsExtracted
 
-When the inbound ``SkillsExtracted``-shaped payload includes ``normalized_job_id``
-(int) and ``PYTHON_DATABASE_URL`` is set, spam scoring loads the latest
-``dbo.extracted_intelligence`` row for that id and calls
-``score_spam_preview`` (Decision #8). Otherwise ``spam_score`` / ``is_spam``
-come from the walking-skeleton fixture keyed by ``posting_id``.
+When the inbound payload includes ``normalized_job_id`` (int) and ``PYTHON_DATABASE_URL``
+is set, spam scoring loads the latest ``dbo.extracted_intelligence`` row and calls
+``score_spam_preview``. Otherwise ``spam_score`` / ``is_spam`` come from the
+walking-skeleton fixture keyed by ``posting_id``.
+
+When the normalized job resolves to a ``job_postings`` row, the emitted
+``RecordEnriched`` payload also includes ``temporal_period`` and
+``borderplex_subregion`` derived from normalized-job context so the live
+event output matches the promotion/write path.
 
 With ``normalized_job_id`` and a resolvable ``job_postings`` row (join on
 ``source``/``external_id``), Phase 1 enrichment columns are persisted via
@@ -39,8 +50,9 @@ import argparse
 import json
 import os
 import sys
+from collections import defaultdict
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import structlog
 from dotenv import load_dotenv
@@ -51,6 +63,8 @@ from agents.common.base_agent import BaseAgent
 from agents.common.data_store.database import check_db_connection, session_scope
 from agents.common.data_store.models import IndustrySector, TechnologyArea
 from agents.common.event_envelope import EventEnvelope
+from agents.enrichment.adapters.facade import ExternalEnrichmentFacade
+from agents.enrichment.async_bridge import run_coroutine
 from agents.enrichment.classification import (
     FALLBACK_TECH_AREA_LABELS,
     classify_job,
@@ -60,15 +74,25 @@ from agents.enrichment.classifiers.spam_preview import (
     SpamPreviewResult,
     score_spam_preview,
 )
-from agents.enrichment.job_postings_promotion import apply_enrichment_to_job_postings
+from agents.enrichment.job_postings_promotion import (
+    apply_enrichment_to_job_postings,
+    derive_enrichment_output_fields,
+    resolve_job_posting_row,
+)
+from agents.enrichment.resolvers.company_resolver import resolve_company
+from agents.enrichment.resolvers.confidence import (
+    compute_field_confidence,
+    compute_overall_confidence,
+)
+from agents.enrichment.resolvers.events import build_record_enriched_event
+from agents.enrichment.resolvers.location_resolver import resolve_location
+from agents.enrichment.resolvers.sector_resolver import resolve_sector
 from agents.scripts.jsearch_enrichment_preview_lib import build_extraction_dict
 
 log = structlog.get_logger()
 
-# Optional bus for emitting EnrichmentDegraded; set via register_alert_bus().
 _alert_bus: Any = None
 
-# agents/enrichment/agent.py -> parents[0]=enrichment, [1]=agents, [2]=repo root
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _ENV_PATH = _REPO_ROOT / ".env"
 
@@ -234,16 +258,124 @@ def _emit_enrichment_degraded(
         )
 
 
+SpamBucket = Literal["rejected", "flagged", "proceed"]
+
+
+def _records_from_skills_payload(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    """Rows from ``records`` only (batch path caller ensures non-empty list)."""
+    raw = payload.get("records")
+    if not isinstance(raw, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for item in raw:
+        out.append(dict(item) if isinstance(item, dict) else {})
+    return out
+
+
+def _spam_bucket(record: dict[str, Any]) -> SpamBucket:
+    if "is_spam" in record:
+        if record["is_spam"] is True:
+            return "rejected"
+        if record["is_spam"] is None:
+            return "flagged"
+    spam_score = record.get("spam_score")
+    if spam_score is not None:
+        try:
+            s = float(spam_score)
+        except (TypeError, ValueError):
+            return "proceed"
+        if s > 0.9:
+            return "rejected"
+        if s >= 0.7:
+            return "flagged"
+    return "proceed"
+
+
+def _distribution_bucket(value: Any) -> str:
+    if value is None:
+        return "unknown"
+    s = str(value).strip()
+    return s if s else "unknown"
+
+
+_EXTRA_POSTING_KEYS = frozenset(
+    {
+        "soc_code",
+        "naics_code",
+        "temporal_period",
+        "borderplex_subregion",
+        "is_duplicate",
+        "duplicate_cluster_id",
+        "matched_job_posting_id",
+        "survivor_job_posting_id",
+        "stub",
+    }
+)
+
+
+def _rollup_fuzzy_dedup_signals(
+    enriched: dict[str, Any],
+    posting: dict[str, Any],
+) -> tuple[int, int, int]:
+    """Return (stub_inc, cluster_row_inc, matched_inc) per row, each 0 or 1."""
+    stub_inc = int(
+        enriched.get("stub") is True
+        or enriched.get("fuzzy_dedup_stub") is True
+        or posting.get("stub") is True
+    )
+
+    def _has_cluster(d: dict[str, Any]) -> bool:
+        v = d.get("duplicate_cluster_id")
+        return v is not None and bool(str(v).strip())
+
+    cluster_inc = int(_has_cluster(enriched) or _has_cluster(posting))
+    mid = enriched.get("matched_job_posting_id") or posting.get("matched_job_posting_id")
+    matched_inc = int(mid is not None and bool(str(mid).strip()))
+    return stub_inc, cluster_inc, matched_inc
+
+
+def _posting_for_enrichment(
+    record: dict[str, Any],
+    batch_payload: dict[str, Any],
+) -> dict[str, Any]:
+    def pick(key: str, default: Any = None) -> Any:
+        if key in record and record[key] is not None:
+            return record[key]
+        return batch_payload.get(key, default)
+
+    base: dict[str, Any] = {
+        "posting_id": pick("posting_id"),
+        "title": pick("title"),
+        "company": pick("company"),
+        "location": pick("location", "") or "",
+        "quality_score": pick("quality_score"),
+        "spam_score": pick("spam_score"),
+        "is_spam": pick("is_spam"),
+        "seniority": pick("seniority"),
+        "role_classification": pick("role_classification"),
+        "skills": pick("skills", []) or [],
+        "seniority_confidence": 0.90 if pick("seniority") is not None else 0.0,
+        "extraction_confidence": pick("extraction_confidence"),
+        "taxonomy_coverage": pick("taxonomy_coverage"),
+    }
+    for k in _EXTRA_POSTING_KEYS:
+        v = pick(k, None)
+        if v is not None:
+            base[k] = v
+    return base
+
+
 class EnrichmentAgent(BaseAgent):
-    """Deterministic enrichment: role + seniority from reference tables and text rules."""
+    """Deterministic enrichment: role + seniority; batch Pair D when ``records`` is set."""
 
     @property
     def agent_id(self) -> str:
         return "enrichment-agent"
 
-    def __init__(self) -> None:
+    def __init__(self, external_facade: ExternalEnrichmentFacade | None = None) -> None:
         self._fixture: dict[int, dict] = {}
         self._refs: tuple[list[tuple[str, str]], list[tuple[str, str]]] | None = None
+        self._external_facade = external_facade or ExternalEnrichmentFacade()
 
     @staticmethod
     def _load_reference_labels(session: Session) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
@@ -290,21 +422,101 @@ class EnrichmentAgent(BaseAgent):
             "metrics": {**metrics, "reason": "database_unreachable"},
         }
 
+    def _process_skills_extracted_batch(self, event: EventEnvelope) -> EventEnvelope:
+        payload = event.payload
+        correlation_id = event.correlation_id
+        batch_id = str(payload.get("batch_id") or "batch-unknown")
+        rows = _records_from_skills_payload(payload)
+        enriched_count = 0
+        spam_rejected_count = 0
+        flagged_for_review_count = 0
+        temporal_period_distribution: dict[str, int] = defaultdict(int)
+        borderplex_subregion_distribution: dict[str, int] = defaultdict(int)
+        duplicate_count = 0
+        soc_classified_count = 0
+        naics_classified_count = 0
+        dedup_stub_count = 0
+        dedup_rows_with_duplicate_cluster_id = 0
+        dedup_rows_with_matched_job_posting_id = 0
+
+        def run_batch(session: Session | None) -> None:
+            nonlocal enriched_count, spam_rejected_count, flagged_for_review_count
+            nonlocal duplicate_count, soc_classified_count, naics_classified_count
+            nonlocal dedup_stub_count, dedup_rows_with_duplicate_cluster_id
+            nonlocal dedup_rows_with_matched_job_posting_id
+            for row in rows:
+                bucket = _spam_bucket(row)
+                if bucket == "rejected":
+                    spam_rejected_count += 1
+                    continue
+                if bucket == "flagged":
+                    flagged_for_review_count += 1
+                    continue
+
+                posting = _posting_for_enrichment(row, payload)
+                try:
+                    enriched = self.enrich_record(posting, session=session)
+                    sector_id = resolve_sector(posting.get("role_classification"), session=session)
+                    enriched["sector_id"] = sector_id
+                    enriched_count += 1
+
+                    tp = _distribution_bucket(enriched.get("temporal_period", posting.get("temporal_period")))
+                    temporal_period_distribution[tp] += 1
+                    bp = _distribution_bucket(enriched.get("borderplex_subregion"))
+                    borderplex_subregion_distribution[bp] += 1
+                    if enriched.get("is_duplicate") is True:
+                        duplicate_count += 1
+                    soc_raw = enriched.get("soc_code") or posting.get("soc_code")
+                    if soc_raw is not None and str(soc_raw).strip():
+                        soc_classified_count += 1
+                    naics_raw = enriched.get("naics_code") or posting.get("naics_code")
+                    if naics_raw is not None and str(naics_raw).strip():
+                        naics_classified_count += 1
+                    ds, dc, dm = _rollup_fuzzy_dedup_signals(enriched, posting)
+                    dedup_stub_count += ds
+                    dedup_rows_with_duplicate_cluster_id += dc
+                    dedup_rows_with_matched_job_posting_id += dm
+                except Exception:
+                    log.warning("enrichment_process_degraded", agent=self.agent_id)
+
+        if check_db_connection():
+            try:
+                with session_scope() as db_session:
+                    run_batch(db_session)
+            except Exception as exc:
+                log.warning(
+                    "enrichment_session_scope_failed",
+                    agent=self.agent_id,
+                    error=str(exc),
+                )
+                run_batch(None)
+        else:
+            run_batch(None)
+
+        return build_record_enriched_event(
+            correlation_id=correlation_id,
+            batch_id=batch_id,
+            enriched_count=enriched_count,
+            spam_rejected_count=spam_rejected_count,
+            flagged_for_review_count=flagged_for_review_count,
+            temporal_period_distribution=dict(temporal_period_distribution),
+            borderplex_subregion_distribution=dict(borderplex_subregion_distribution),
+            duplicate_count=duplicate_count,
+            soc_classified_count=soc_classified_count,
+            naics_classified_count=naics_classified_count,
+            dedup_stub_count=dedup_stub_count,
+            dedup_rows_with_duplicate_cluster_id=dedup_rows_with_duplicate_cluster_id,
+            dedup_rows_with_matched_job_posting_id=dedup_rows_with_matched_job_posting_id,
+        )
+
     def process(self, event: EventEnvelope) -> EventEnvelope:
         """
-        Emit RecordEnriched with deterministic role_classification and seniority.
-        Other enrichment fields come from the walking-skeleton fixture when present.
+        Single-record path: ``RecordEnriched`` with classification, quality, spam preview.
+        Includes ``temporal_period`` and ``borderplex_subregion`` when normalized-job context
+        is available.
 
-        Spam: if ``normalized_job_id`` is set and DB is configured, scores from
-        latest ``extracted_intelligence`` via ``score_spam_preview``; else fixture
-        ``spam_score`` / ``is_spam`` only.
-
-        Quality: deterministic composite via :func:`score_quality` (same title,
-        description, and extraction blob as classification when EI is loaded).
-
-        When ``normalized_job_id`` is set and the DB is configured, enrichment
-        columns are written to ``job_postings`` (see
-        :func:`agents.enrichment.job_postings_promotion.apply_enrichment_to_job_postings`).
+        Batch path (non-empty ``records``): one aggregate ``RecordEnriched`` via
+        :func:`build_record_enriched_event`.
         """
         if not self._fixture:
             if _FIXTURE_PATH.exists():
@@ -312,6 +524,10 @@ class EnrichmentAgent(BaseAgent):
                 self._fixture = {r["posting_id"]: r for r in records}
             else:
                 self._fixture = {}
+
+        raw_records = event.payload.get("records")
+        if isinstance(raw_records, list) and len(raw_records) > 0:
+            return self._process_skills_extracted_batch(event)
 
         posting_id = event.payload.get("posting_id")
         fx = self._fixture.get(posting_id, {})
@@ -325,11 +541,13 @@ class EnrichmentAgent(BaseAgent):
         desc_str = description if isinstance(description, str) else None
 
         ei_row: dict[str, Any] | None = None
+        resolved_job_posting: dict[str, Any] | None = None
         ei_fetch_error = False
         if nj_id is not None and _db_url_configured():
             try:
                 with session_scope() as session:
                     ei_row = session.execute(_LATEST_EI_BY_NJ_ID_SQL, {"nj_id": nj_id}).mappings().first()
+                    resolved_job_posting = resolve_job_posting_row(session, nj_id)
             except Exception as exc:
                 log.warning("enrichment_ei_load_failed", normalized_job_id=nj_id, error=str(exc))
                 ei_fetch_error = True
@@ -411,6 +629,8 @@ class EnrichmentAgent(BaseAgent):
             payload_spam_score = fx.get("spam_score")
             payload_is_spam = fx.get("is_spam")
 
+        derived_output_fields = derive_enrichment_output_fields(resolved_job_posting)
+
         base_payload: dict[str, Any] = {
             "event_type": "RecordEnriched",
             "posting_id": posting_id,
@@ -426,6 +646,7 @@ class EnrichmentAgent(BaseAgent):
             "is_spam": payload_is_spam,
             "enrichment_status": fx.get("enrichment_status", "success"),
             "skills": event.payload.get("skills", []),
+            **derived_output_fields,
         }
         if nj_id is not None:
             base_payload["normalized_job_id"] = nj_id
@@ -457,6 +678,73 @@ class EnrichmentAgent(BaseAgent):
             agent_id=self.agent_id,
             payload=base_payload,
         )
+
+    def enrich_record(
+        self,
+        posting: dict[str, Any],
+        session: Session | None,
+    ) -> dict[str, Any]:
+        try:
+            company_id, company_confidence = resolve_company(posting.get("company") or "", session)
+            location_id, location_confidence, raw_location_text, borderplex_subregion = resolve_location(
+                posting.get("location", ""), session
+            )
+            field_confidence = compute_field_confidence(
+                company_confidence,
+                location_confidence,
+                sector_id=None,
+                seniority_confidence=posting.get("seniority_confidence"),
+            )
+            overall_confidence = compute_overall_confidence(
+                field_confidence=field_confidence,
+                extraction_confidence=posting.get("extraction_confidence"),
+                quality_score=posting.get("quality_score"),
+                taxonomy_coverage=posting.get("taxonomy_coverage"),
+            )
+            merged: dict[str, Any] = {
+                **posting,
+                "company_id": company_id,
+                "location_id": location_id,
+                "raw_location_text": raw_location_text,
+                "borderplex_subregion": borderplex_subregion,
+                "field_confidence": field_confidence,
+                "overall_confidence": overall_confidence,
+            }
+            try:
+                ext = run_coroutine(self._external_facade.fetch_for_posting(merged))
+                merged.update(ext)
+            except RuntimeError as re_exc:
+                log.warning(
+                    "enrichment_external_adapters_skipped",
+                    reason=str(re_exc),
+                )
+            except Exception as ext_exc:  # noqa: BLE001
+                log.warning(
+                    "enrichment_external_adapters_failed",
+                    error=str(ext_exc),
+                )
+            return merged
+        except Exception:
+            log.warning(
+                "enrich_record_degraded",
+                agent=self.agent_id,
+                reason="resolver_exception",
+            )
+            return {
+                **posting,
+                "company_id": None,
+                "location_id": None,
+                "raw_location_text": None,
+                "borderplex_subregion": None,
+                "field_confidence": {
+                    "company_id": 0.0,
+                    "location_id": 0.0,
+                    "sector_id": 0.0,
+                    "seniority": 0.0,
+                },
+                "overall_confidence": 0.0,
+                "enrichment_status": "degraded",
+            }
 
     def run_cli_preview(self, limit: int) -> None:
         """Load jobs from DB and print role + seniority (stdout)."""
@@ -492,9 +780,9 @@ class EnrichmentAgent(BaseAgent):
             )
             jid = row.get("job_posting_id") or ""
             src = row.get("source") or ""
-            ext = row.get("external_id") or ""
+            ext_id = row.get("external_id") or ""
             line = (
-                f"job_posting_id={jid}\tsource={src}\texternal_id={ext}\t"
+                f"job_posting_id={jid}\tsource={src}\texternal_id={ext_id}\t"
                 f"seniority={seniority}\trole_classification={role}"
             )
             print(line)  # noqa: T201

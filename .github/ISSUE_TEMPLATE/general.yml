@@ -1,0 +1,57 @@
+name: General Issue
+description: Bug report, feature request, evaluation task, or any other issue
+title: "[TYPE]: "
+labels: []
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Issue Type
+      options:
+        - bug
+        - feat
+        - fix
+        - eval
+        - test
+        - data
+        - integration
+        - clarify
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What is this about and why does it matter?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Checklist of what "done" looks like
+      value: |
+        - [ ]
+    validations:
+      required: false
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Blocked by or related to other issues/PRs?
+    validations:
+      required: false
+  - type: input
+    id: branch
+    attributes:
+      label: Branch
+      description: Working branch name (if known)
+    validations:
+      required: false
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference
+      description: Runbook, architecture doc, or other reference links
+    validations:
+      required: false

@@ -12,8 +12,8 @@ for every record processed.  In Week 7 the Analytics Agent accumulates data
 across all records before emitting a single AnalyticsRefreshed event at
 the end of a batch run.
 
-``RecordEnriched`` (Week 5 lite, issue #87) includes ``batch_id`` and batch
-counts only; this stub sets ``triggered_by_batch_id`` from that envelope.
+``RecordEnriched`` batch payloads (schema v3) include ``batch_id``, batch counts,
+distributions, and ``dedup``; this stub sets ``triggered_by_batch_id`` from that envelope.
 
 Agent ID (canonical): analytics-agent
 Emits:    AnalyticsRefreshed
@@ -39,9 +39,7 @@ from pathlib import Path
 from agents.common.base_agent import BaseAgent
 from agents.common.event_envelope import EventEnvelope
 
-_FIXTURE_PATH = (
-    Path(__file__).parent.parent / "data" / "fixtures" / "fixture_analytics_refreshed.json"
-)
+_FIXTURE_PATH = Path(__file__).parent.parent / "data" / "fixtures" / "fixture_analytics_refreshed.json"
 
 
 class AnalyticsAgent(BaseAgent):

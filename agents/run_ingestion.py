@@ -68,7 +68,7 @@ DEFAULT_REGION = {
     "states": ["TX"],
     "countries": ["US"],
     "sources": ["jsearch"],
-    "role_categories": [], #["Technology", "Healthcare"],
+    "role_categories": [],  # ["Technology", "Healthcare"],
     "keywords": ["software", "engineer", "data"],
 }
 
@@ -133,9 +133,7 @@ def main() -> None:
     log.info("ingestion_output_written", path=str(_INGESTION_OUTPUT_FILE))
 
     if args.json:
-        payload_serializable = json.loads(
-            json.dumps(out.model_dump(mode="json"), default=str)
-        )
+        payload_serializable = json.loads(json.dumps(out.model_dump(mode="json"), default=str))
         log.info("ingestion_event", payload=payload_serializable)
         return
 

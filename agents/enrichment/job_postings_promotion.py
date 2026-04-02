@@ -6,8 +6,9 @@ no ``UPDATE`` — the row may already exist from upstream ingestion; enrichment
 columns are left unchanged.
 
 **Uncertain / degraded** (no numeric ``spam_score``): updates ``quality_score``,
-``overall_confidence``, and merged ``field_confidence`` only; does **not** change
-``is_spam`` or ``spam_score`` so prior values are preserved.
+``overall_confidence``, merged ``field_confidence``, ``temporal_period``, and
+``borderplex_subregion``; does **not** change ``is_spam`` or ``spam_score`` so prior
+values are preserved.
 
 Successful clean / flagged / uncertain promotions then run best-effort fuzzy
 dedup in the same session. Dedup failures log and return without rolling back
@@ -25,7 +26,9 @@ import structlog
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from agents.enrichment.classifiers.borderplex_subregion import classify_borderplex_subregion
 from agents.enrichment.classifiers.spam_preview import apply_spam_tiers
+from agents.enrichment.classifiers.temporal_period import classify_temporal_period
 from agents.enrichment.dedup import run_fuzzy_dedup
 from agents.enrichment.dedup.types import FuzzyDedupResult
 
@@ -34,7 +37,13 @@ log = structlog.get_logger()
 _RESOLVE_JOB_POSTING_SQL = text(
     """
     SELECT jp.job_posting_id::text AS job_posting_id,
-           jp.company_id::text AS company_id
+           jp.company_id::text AS company_id,
+           nj.date_posted AS date_posted,
+           nj.city AS city,
+           nj.state_province AS state_province,
+           nj.country AS country,
+           nj.is_remote AS is_remote,
+           nj.work_arrangement AS work_arrangement
     FROM dbo.job_postings jp
     INNER JOIN dbo.normalized_jobs nj
         ON jp.source IS NOT NULL
@@ -51,7 +60,9 @@ _UPDATE_UNCERTAIN_SQL = text(
     UPDATE dbo.job_postings SET
         quality_score = :quality_score,
         overall_confidence = :overall_confidence,
-        field_confidence = CAST(:field_confidence AS jsonb)
+        field_confidence = CAST(:field_confidence AS jsonb),
+        temporal_period = :temporal_period,
+        borderplex_subregion = :borderplex_subregion
     WHERE job_posting_id::text = :job_posting_id
     """
 )
@@ -62,6 +73,8 @@ _UPDATE_CLEAN_SQL = text(
         quality_score = :quality_score,
         overall_confidence = :overall_confidence,
         field_confidence = CAST(:field_confidence AS jsonb),
+        temporal_period = :temporal_period,
+        borderplex_subregion = :borderplex_subregion,
         is_spam = FALSE,
         spam_score = :spam_score
     WHERE job_posting_id::text = :job_posting_id
@@ -74,6 +87,8 @@ _UPDATE_FLAGGED_SQL = text(
         quality_score = :quality_score,
         overall_confidence = :overall_confidence,
         field_confidence = CAST(:field_confidence AS jsonb),
+        temporal_period = :temporal_period,
+        borderplex_subregion = :borderplex_subregion,
         is_spam = NULL,
         spam_score = :spam_score
     WHERE job_posting_id::text = :job_posting_id
@@ -112,7 +127,7 @@ _LIST_CLUSTER_MEMBER_IDS_SQL = text(
 
 
 def resolve_job_posting_row(session: Session, normalized_job_id: int) -> dict[str, Any] | None:
-    """Return ``job_posting_id`` and ``company_id`` text, or None if not found."""
+    """Return resolved posting row keys including geo fields for Borderplex tagging, or None."""
     row = session.execute(_RESOLVE_JOB_POSTING_SQL, {"nj_id": normalized_job_id}).mappings().first()
     return dict(row) if row else None
 
@@ -144,6 +159,38 @@ def _overall_confidence_for_storage(payload: dict[str, Any]) -> float | None:
         except (TypeError, ValueError):
             pass
     return None
+
+
+def derive_enrichment_output_fields(resolved_job_posting: dict[str, Any] | None) -> dict[str, Any]:
+    """Derive non-score enrichment output fields from resolved normalized-job context."""
+    if not resolved_job_posting:
+        return {
+            "temporal_period": None,
+            "borderplex_subregion": None,
+        }
+
+    temporal_period = classify_temporal_period(resolved_job_posting.get("date_posted"))
+    borderplex_subregion = classify_borderplex_subregion(
+        city=resolved_job_posting.get("city")
+        if isinstance(resolved_job_posting.get("city"), str)
+        else None,
+        state_province=resolved_job_posting.get("state_province")
+        if isinstance(resolved_job_posting.get("state_province"), str)
+        else None,
+        country=resolved_job_posting.get("country")
+        if isinstance(resolved_job_posting.get("country"), str)
+        else None,
+        is_remote=resolved_job_posting.get("is_remote")
+        if isinstance(resolved_job_posting.get("is_remote"), bool)
+        else None,
+        work_arrangement=resolved_job_posting.get("work_arrangement")
+        if isinstance(resolved_job_posting.get("work_arrangement"), str)
+        else None,
+    )
+    return {
+        "temporal_period": temporal_period,
+        "borderplex_subregion": borderplex_subregion,
+    }
 
 
 def _load_existing_fuzzy_dedup_state(session: Session, job_posting_id: str) -> dict[str, Any]:
@@ -355,13 +402,23 @@ def apply_enrichment_to_job_postings(
     fc_merged = merge_field_confidence_for_storage(record_enriched_payload)
     fc_json = json.dumps(fc_merged)
     oc = _overall_confidence_for_storage(record_enriched_payload)
+    derived_output_fields = derive_enrichment_output_fields(resolved)
 
     params_base: dict[str, Any] = {
         "job_posting_id": str(job_posting_id),
         "quality_score": qs_f,
         "overall_confidence": oc,
         "field_confidence": fc_json,
+        **derived_output_fields,
     }
+
+    def _finish_with_dedup() -> bool:
+        _apply_fuzzy_dedup_after_promotion(
+            session,
+            normalized_job_id=normalized_job_id,
+            job_posting_id=str(job_posting_id),
+        )
+        return True
 
     if tier == "uncertain" or spam_score is None:
         session.execute(_UPDATE_UNCERTAIN_SQL, params_base)
@@ -370,44 +427,42 @@ def apply_enrichment_to_job_postings(
             normalized_job_id=normalized_job_id,
             job_posting_id=job_posting_id,
         )
-    else:
-        try:
-            spam_f = float(spam_score)
-        except (TypeError, ValueError):
-            session.execute(_UPDATE_UNCERTAIN_SQL, params_base)
-            log.info(
-                "enrichment_promotion_applied_uncertain_spam_invalid_score",
-                normalized_job_id=normalized_job_id,
-                job_posting_id=job_posting_id,
-            )
-        else:
-            params = {**params_base, "spam_score": spam_f}
+        return _finish_with_dedup()
 
-            if tier == "flagged":
-                session.execute(_UPDATE_FLAGGED_SQL, params)
-                log.info(
-                    "enrichment_promotion_applied_flagged",
-                    normalized_job_id=normalized_job_id,
-                    job_posting_id=job_posting_id,
-                )
-            elif tier == "clean":
-                session.execute(_UPDATE_CLEAN_SQL, params)
-                log.info(
-                    "enrichment_promotion_applied_clean",
-                    normalized_job_id=normalized_job_id,
-                    job_posting_id=job_posting_id,
-                )
-            else:
-                log.warning(
-                    "enrichment_promotion_unhandled_tier",
-                    normalized_job_id=normalized_job_id,
-                    tier=tier or raw_tier,
-                )
-                return False
+    try:
+        spam_f = float(spam_score)
+    except (TypeError, ValueError):
+        session.execute(_UPDATE_UNCERTAIN_SQL, params_base)
+        log.info(
+            "enrichment_promotion_applied_uncertain_spam_invalid_score",
+            normalized_job_id=normalized_job_id,
+            job_posting_id=job_posting_id,
+        )
+        return _finish_with_dedup()
 
-    _apply_fuzzy_dedup_after_promotion(
-        session,
+    params = {**params_base, "spam_score": spam_f}
+
+    if tier == "flagged":
+        session.execute(_UPDATE_FLAGGED_SQL, params)
+        log.info(
+            "enrichment_promotion_applied_flagged",
+            normalized_job_id=normalized_job_id,
+            job_posting_id=job_posting_id,
+        )
+        return _finish_with_dedup()
+
+    if tier == "clean":
+        session.execute(_UPDATE_CLEAN_SQL, params)
+        log.info(
+            "enrichment_promotion_applied_clean",
+            normalized_job_id=normalized_job_id,
+            job_posting_id=job_posting_id,
+        )
+        return _finish_with_dedup()
+
+    log.warning(
+        "enrichment_promotion_unhandled_tier",
         normalized_job_id=normalized_job_id,
-        job_posting_id=str(job_posting_id),
+        tier=tier or raw_tier,
     )
-    return True
+    return False

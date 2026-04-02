@@ -55,6 +55,7 @@ from agents.common.data_store.database import session_scope  # noqa: E402
 
 log = structlog.get_logger()
 
+
 def _get_azure_url(cli_override: str | None = None) -> str:
     """Resolve Azure DB URL from CLI arg > AZURE_DATABASE_URL > AZURE_POSTGRES_DATABASE_URL."""
     if cli_override:
@@ -72,12 +73,7 @@ def status_local() -> dict[str, int]:
     """Check local DB embedding status."""
     with session_scope() as s:
         total = s.execute(text("SELECT COUNT(*) FROM dbo.skills")).scalar() or 0
-        with_emb = (
-            s.execute(
-                text("SELECT COUNT(*) FROM dbo.skills WHERE embedding IS NOT NULL")
-            ).scalar()
-            or 0
-        )
+        with_emb = s.execute(text("SELECT COUNT(*) FROM dbo.skills WHERE embedding IS NOT NULL")).scalar() or 0
     return {"total": total, "with_embeddings": with_emb, "missing": total - with_emb}
 
 
@@ -90,11 +86,7 @@ def sync(azure_url: str) -> None:
 
     with azure_engine.connect() as conn:
         azure_rows = conn.execute(
-            text(
-                "SELECT skill_name, embedding::text "
-                "FROM dbo.skills WHERE embedding IS NOT NULL "
-                "ORDER BY skill_name"
-            )
+            text("SELECT skill_name, embedding::text FROM dbo.skills WHERE embedding IS NOT NULL ORDER BY skill_name")
         ).fetchall()
 
     azure_engine.dispose()
@@ -127,10 +119,7 @@ def sync(azure_url: str) -> None:
     with session_scope() as s:
         # Get local skills that need embeddings
         local_rows = s.execute(
-            text(
-                "SELECT skill_id, skill_name FROM dbo.skills "
-                "WHERE embedding IS NULL ORDER BY skill_name"
-            )
+            text("SELECT skill_id, skill_name FROM dbo.skills WHERE embedding IS NULL ORDER BY skill_name")
         ).fetchall()
 
         for skill_id, skill_name in local_rows:
@@ -148,10 +137,7 @@ def sync(azure_url: str) -> None:
                 vec_json = vec_str
 
             s.execute(
-                text(
-                    "UPDATE dbo.skills SET embedding = CAST(:vec AS vector), "
-                    "updatedat = NOW() WHERE skill_id = :sid"
-                ),
+                text("UPDATE dbo.skills SET embedding = CAST(:vec AS vector), updatedat = NOW() WHERE skill_id = :sid"),
                 {"vec": vec_json, "sid": skill_id},
             )
             updated += 1

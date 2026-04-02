@@ -20,18 +20,14 @@ class TestVisualizationAgent:
         assert result["status"] == "ok"
         assert result["agent"] == "visualization-agent"
 
-    def test_process_emits_render_complete(
-        self, analytics_event: EventEnvelope
-    ) -> None:
+    def test_process_emits_render_complete(self, analytics_event: EventEnvelope) -> None:
         """Output event_type is RenderComplete."""
         agent = VisualizationAgent()
         out = agent.process(analytics_event)
         assert out.payload["event_type"] == "RenderComplete"
         assert out.agent_id == "visualization-agent"
 
-    def test_process_payload_shape(
-        self, analytics_event: EventEnvelope
-    ) -> None:
+    def test_process_payload_shape(self, analytics_event: EventEnvelope) -> None:
         """Output has expected stub fields: pages, render_status, export_formats."""
         agent = VisualizationAgent()
         out = agent.process(analytics_event)

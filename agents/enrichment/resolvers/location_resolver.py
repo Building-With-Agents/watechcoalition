@@ -80,9 +80,8 @@ def resolve_location(
     if cid is not None:
         return (str(cid), _CONF_NORMALIZED_LOCATION, raw_keep, borderplex)
 
-    stmt_geo = (
-        select(Company.company_id, Company.city, Company.state)
-        .where(and_(Company.city.isnot(None), Company.state.isnot(None)))
+    stmt_geo = select(Company.company_id, Company.city, Company.state).where(
+        and_(Company.city.isnot(None), Company.state.isnot(None))
     )
     for row in session.execute(stmt_geo):
         company_id, city, state = row[0], row[1], row[2]

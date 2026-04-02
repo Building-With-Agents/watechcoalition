@@ -35,7 +35,7 @@ def main(argv: list[str] | None = None) -> int:
         "--mode",
         choices=("stub", "pipeline"),
         default="stub",
-        help="stub: keyword heuristic; pipeline: Pass-1 tools + LLM skills (needs Azure env)",
+        help="stub: keyword heuristic; pipeline: context+tools+skills+tasks+responsibilities (needs Azure env)",
     )
     parser.add_argument("--label", default="", help="Tag for backlog/snapshot filenames")
     parser.add_argument("--limit", type=int, default=None, help="Evaluate only first N jobs")

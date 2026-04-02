@@ -8,8 +8,8 @@ from agents.common.event_envelope import EventEnvelope
 from agents.enrichment.agent import EnrichmentAgent
 
 
-def _base_payload(**overrides: object) -> dict:
-    p = {
+def _base_payload(**row_overrides: object) -> dict:
+    row = {
         "posting_id": 1,
         "title": "Engineer",
         "company": "Acme",
@@ -18,10 +18,16 @@ def _base_payload(**overrides: object) -> dict:
         "seniority": "senior",
         "role_classification": "Software Engineering",
         "skills": [],
-        "batch_id": "batch-xyz",
     }
-    p.update(overrides)
-    return p
+    batch_id = "batch-xyz"
+    extra: dict[str, object] = {}
+    for k, v in row_overrides.items():
+        if k == "batch_id":
+            batch_id = v  # type: ignore[assignment]
+        else:
+            extra[k] = v
+    row.update(extra)
+    return {"batch_id": batch_id, "records": [row]}
 
 
 def test_process_is_spam_true_spam_rejected() -> None:
