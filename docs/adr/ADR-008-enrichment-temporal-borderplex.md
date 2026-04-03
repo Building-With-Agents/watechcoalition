@@ -16,7 +16,9 @@ LLM dependence.
 This ADR records what was implemented, what was validated in tests, and the
 recommended Phase 1 approach.
 
-These fields are derived within the Enrichment agent and integrated into both the event pipeline and database persistence layer.
+These fields are derived within the Enrichment agent and integrated into the
+active shared typed profile handoff (`EnrichedJobProfile`), the event
+pipeline, and the database persistence layer.
 
 ---
 
@@ -26,10 +28,14 @@ These fields are derived within the Enrichment agent and integrated into both th
   date boundaries.
 - Deterministic Borderplex subregion tagging from structured normalized
   location fields (`city`, `state_province`, `country`, remote signals).
-- Shared runtime derivation for emitted `RecordEnriched` payload fields and
-  `job_postings` promotion/write-path fields.
+- Shared runtime derivation for the active `EnrichedJobProfile` handoff,
+  emitted `RecordEnriched` payload fields, and `job_postings`
+  promotion/write-path fields.
 - Promotion behavior under the existing spam-tier semantics.
 - DB-backed persistence for one live clean-tier enrichment flow.
+- Cross-layer consistency for one representative seeded record across:
+  normalized-job context -> derivation helper -> `EnrichedJobProfile` ->
+  `RecordEnriched` -> `job_postings`.
 
 ---
 
@@ -44,10 +50,12 @@ These fields are derived within the Enrichment agent and integrated into both th
   ambiguous, missing, conflicting, or remote cases fall back to `regional`.
 - Both derived fields are produced through shared derivation logic in the
   enrichment runtime, then reused in both places that matter:
+  - the active `EnrichedJobProfile` handoff
   - the emitted `RecordEnriched` payload
   - the `job_postings` promotion/write path
 - This shared derivation reduces duplication and helps keep emitted event data
-  aligned with persisted database values for the same normalized job context.
+  aligned with typed-profile and persisted database values for the same
+  normalized job context.
 - Persistence follows the existing promotion semantics:
   - clean, flagged, and uncertain paths can write the derived fields
   - rejected tier skips the `UPDATE`, so no enrichment columns are changed for
@@ -76,6 +84,8 @@ This ensures consistent enrichment signals across downstream agents, analytics, 
   these fields is intentionally skipped in that path.
 - Current E2E coverage validates one live persisted clean-tier scenario, not
   every edge case or every spam-tier/storage combination.
+- Cross-layer consistency was verified on the active runtime path for one
+  representative seeded record, not as a broad multi-record pipeline sweep.
 
 ---
 
@@ -99,8 +109,15 @@ This ensures consistent enrichment signals across downstream agents, analytics, 
 - Enrichment agent runtime tests:
   `agents/tests/test_enrichment_agent.py` passed, including emitted
   `RecordEnriched` payload coverage for `temporal_period`,
-  `borderplex_subregion`, and the combined runtime derivation path.
+  `borderplex_subregion`, the combined runtime derivation path, and the
+  active `EnrichedJobProfile` handoff for both fields.
 - Clean-tier E2E persistence:
   `agents/tests/test_enrichment_job_postings_e2e.py` passed for the live
   persisted clean-tier scenario, verifying stored `temporal_period` and
   `borderplex_subregion` values on `dbo.job_postings`.
+- Cross-layer consistency validation:
+  `agents/tests/test_enrichment_job_postings_e2e.py` also passed for one
+  seeded representative record, verifying equality across
+  `derive_enrichment_output_fields(...)`, the `EnrichedJobProfile` handoff,
+  the emitted `RecordEnriched` payload, and persisted `dbo.job_postings`
+  values.
