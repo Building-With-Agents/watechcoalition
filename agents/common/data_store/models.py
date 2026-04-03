@@ -15,6 +15,8 @@ Reference tables (seeded, agent-owned): companies, industry_sectors,
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import os
+from typing import Literal
 
 from sqlalchemy import (
     Boolean,
@@ -35,6 +37,19 @@ class Base(DeclarativeBase):
     """Shared declarative base for all agent models."""
 
     pass
+
+
+FRESH_THRESHOLD_DAYS = int(os.getenv("FRESH_THRESHOLD_DAYS", "30"))
+STALE_THRESHOLD_DAYS = int(os.getenv("STALE_THRESHOLD_DAYS", "90"))
+
+
+def classify_freshness(days: int) -> Literal["fresh", "stale", "expired"]:
+    """Classify posting age in whole days using FRESH_THRESHOLD_DAYS and STALE_THRESHOLD_DAYS."""
+    if days <= FRESH_THRESHOLD_DAYS:
+        return "fresh"
+    if days <= STALE_THRESHOLD_DAYS:
+        return "stale"
+    return "expired"
 
 
 # ---------------------------------------------------------------------------
@@ -316,6 +331,35 @@ class EmployerProfile(Base):
     sector: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_known_employer: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+
+# ---------------------------------------------------------------------------
+# Analytics (Week 7) — posting freshness
+# ---------------------------------------------------------------------------
+
+
+class PostingFreshness(Base):
+    """Per-job-posting freshness snapshot for analytics (dbo.posting_freshness)."""
+
+    __tablename__ = "posting_freshness"
+    __table_args__ = (
+        Index("ix_posting_freshness_job_posting_id", "job_posting_id"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    job_posting_id: Mapped[str] = mapped_column(
+        Text,
+        ForeignKey("dbo.job_postings.job_posting_id"),
+        nullable=False,
+    )
+    last_seen_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    days_since_posted: Mapped[int] = mapped_column(Integer, nullable=False)
+    freshness_status: Mapped[str] = mapped_column(String(16), nullable=False)
+    checked_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
 
 
 # ===========================================================================
