@@ -1,0 +1,16 @@
+{
+  "exportedAt": "2026-04-03T17:18:35.158829Z",
+  "source": "postgresql",
+  "schema": "dbo",
+  "counts": {
+    "raw_ingested_jobs": 1080,
+    "job_ingestion_runs": 67,
+    "normalized_jobs": 1076,
+    "normalization_quarantine": 8,
+    "extracted_intelligence": 550,
+    "llm_audit_log": 2891
+  },
+  "skipped": [
+    "employer_profiles"
+  ]
+}
