@@ -144,36 +144,20 @@ _INSERT_PLACEHOLDER_COMPANY_SQL = text(
     """
 )
 
-_PLACEHOLDER_LOCATION_ID = "00000000-0000-0000-0000-000000000001"
-
-_ENSURE_PLACEHOLDER_ADDRESS_SQL = text(
-    """
-    INSERT INTO dbo.company_addresses (company_address_id, company_id, zip_region)
-    VALUES (
-        CAST(:addr_id AS uuid),
-        CAST(:company_id AS uuid),
-        :zip
-    )
-    ON CONFLICT (company_address_id) DO NOTHING
-    """
-)
 
 _INSERT_JOB_POSTING_SQL = text(
     """
     INSERT INTO dbo.job_postings (
-        job_posting_id, company_id, location_id,
+        job_posting_id, company_id,
         job_title, job_description, employment_type,
         location, salary_range, source, external_id,
-        ingestion_run_id,
-        county, zip, publish_date, unpublish_date, status
+        ingestion_run_id, status
     ) VALUES (
         CAST(:job_posting_id AS uuid),
         CAST(:company_id AS uuid),
-        CAST(:location_id AS uuid),
         :job_title, :job_description, :employment_type,
         :location, :salary_range, :source, :external_id,
-        :ingestion_run_id,
-        :county, :zip, :publish_date, :unpublish_date, :status
+        :ingestion_run_id, :status
     )
     ON CONFLICT (job_posting_id) DO NOTHING
     """
@@ -239,14 +223,6 @@ def _insert_job_posting_from_normalized(
 
     company_id = _resolve_or_create_company(session, nj["company"] or "")
     job_posting_id = str(uuid.uuid4())
-
-    # Ensure a placeholder company_address row exists for the FK constraint
-    location_id = _PLACEHOLDER_LOCATION_ID
-    session.execute(
-        _ENSURE_PLACEHOLDER_ADDRESS_SQL,
-        {"addr_id": location_id, "company_id": company_id, "zip": "79901"},
-    )
-
     location_parts = [p for p in (nj["city"], nj["state_province"], nj["country"]) if p]
     location_str = ", ".join(location_parts) or "Unknown"
     salary_parts = []
@@ -256,16 +232,11 @@ def _insert_job_posting_from_normalized(
         salary_parts.append(str(nj["salary_max"]))
     salary_range = "-".join(salary_parts) if salary_parts else "N/A"
 
-    from datetime import datetime, timezone
-
-    now = datetime.now(timezone.utc)
-    county_val = nj["state_province"] or nj["country"] or "Unknown"
     session.execute(
         _INSERT_JOB_POSTING_SQL,
         {
             "job_posting_id": job_posting_id,
             "company_id": company_id,
-            "location_id": location_id,
             "job_title": (nj["title"] or "")[:255],
             "job_description": nj["description"] or "",
             "employment_type": (nj["employment_type"] or "full-time")[:255],
@@ -274,10 +245,6 @@ def _insert_job_posting_from_normalized(
             "source": nj["source"],
             "external_id": nj["external_id"],
             "ingestion_run_id": nj["ingestion_run_id"],
-            "county": county_val[:255],
-            "zip": "00000",
-            "publish_date": nj["date_posted"] or now,
-            "unpublish_date": nj["date_posted"] or now,
             "status": "open",
         },
     )
