@@ -69,14 +69,36 @@ def _count_pending() -> int:
         return -1
 
 
+def _count_unextracted() -> int:
+    """Count normalized_jobs that don't have an extracted_intelligence row yet."""
+    try:
+        from agents.common.data_store.database import session_scope
+        from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
+
+        with session_scope() as session:
+            return (
+                session.query(NormalizedJob)
+                .outerjoin(
+                    ExtractedIntelligence,
+                    NormalizedJob.id == ExtractedIntelligence.normalized_job_id,
+                )
+                .filter(ExtractedIntelligence.id == None)  # noqa: E711
+                .count()
+            )
+    except Exception as exc:
+        log.error("count_unextracted_failed", error=str(exc))
+        return -1
+
+
 def _count_enriched() -> int:
     """Count job_postings (enriched output)."""
     try:
         from agents.common.data_store.database import session_scope
-        from agents.common.data_store.models import JobPosting
 
         with session_scope() as session:
-            return session.query(JobPosting).count()
+            from sqlalchemy import text
+            row = session.execute(text("SELECT COUNT(*) FROM dbo.job_postings")).scalar()
+            return row or 0
     except Exception as exc:
         log.error("count_enriched_failed", error=str(exc))
         return -1
@@ -105,18 +127,24 @@ def main() -> None:
         max_iterations=args.max_iterations or "unlimited",
     )
 
+    unextracted_preview = _count_unextracted()
+
     if args.dry_run:
-        print(f"\nPending: {pending} raw records")
+        print(f"\nPending raw: {pending}")
+        print(f"Unextracted normalized: {unextracted_preview}")
         print(f"Enriched: {enriched} job postings")
         print(f"Batch size: {args.batch_size}")
-        estimated_iterations = (pending + args.batch_size - 1) // args.batch_size if pending > 0 else 0
+        total_work = max(pending, unextracted_preview)
+        estimated_iterations = (total_work + args.batch_size - 1) // args.batch_size if total_work > 0 else 0
         print(f"Estimated iterations: {estimated_iterations}")
         print(f"Estimated time: ~{estimated_iterations * (args.delay + 30)}s ({estimated_iterations * (args.delay + 30) // 60} min)")
         return
 
-    if pending <= 0:
-        log.info("no_pending_records")
-        print("No pending records to process.")
+    unextracted = _count_unextracted()
+
+    if pending <= 0 and unextracted <= 0:
+        log.info("nothing_to_process", pending=pending, unextracted=unextracted)
+        print("No pending or unextracted records to process.")
         return
 
     # Late imports — heavy pipeline dependencies
@@ -130,7 +158,9 @@ def main() -> None:
     enrich_agent = EnrichmentAgent()
 
     iteration = 0
-    total_processed = 0
+    total_normalized = 0
+    total_extracted = 0
+    total_enriched_count = 0
     total_errors = 0
 
     while True:
@@ -140,89 +170,92 @@ def main() -> None:
             break
 
         pending = _count_pending()
-        if pending <= 0:
-            log.info("all_records_processed", total_processed=total_processed, total_errors=total_errors)
+        unextracted = _count_unextracted()
+
+        if pending <= 0 and unextracted <= 0:
+            log.info(
+                "all_records_processed",
+                total_normalized=total_normalized,
+                total_extracted=total_extracted,
+                total_enriched=total_enriched_count,
+                total_errors=total_errors,
+            )
             break
 
         log.info(
             "iteration_start",
             iteration=iteration,
-            pending=pending,
-            batch_size=min(args.batch_size, pending),
+            pending_raw=pending,
+            unextracted=unextracted,
         )
 
-        # Build a trigger event (normalization reads from DB, not from payload)
         trigger = EventEnvelope(
             correlation_id=f"processing-loop-iter-{iteration}",
             agent_id="processing-loop",
-            payload={"event_type": "ProcessingTrigger", "batch_id": f"loop-{iteration}"},
+            payload={"event_type": "ProcessingTrigger", "batch_id": ""},
         )
 
         try:
-            # Stage 1: Normalize
+            # Stage 1: Normalize (may return 0 if all raw are already normalized)
             norm_out = norm_agent.process(trigger)
-            if norm_out is None:
-                log.error("normalization_returned_none", iteration=iteration)
-                total_errors += 1
-                time.sleep(args.delay)
-                continue
+            norm_count = 0
+            if norm_out is not None:
+                norm_count = norm_out.payload.get("normalized_count", 0)
+                quarantined = norm_out.payload.get("quarantined_count", 0)
+                if norm_count > 0 or quarantined > 0:
+                    log.info("normalized", count=norm_count, quarantined=quarantined, iteration=iteration)
+                total_normalized += norm_count
 
-            norm_count = norm_out.payload.get("normalized_count", 0)
-            quarantined = norm_out.payload.get("quarantined_count", 0)
-            log.info("normalized", count=norm_count, quarantined=quarantined, iteration=iteration)
+            # Stage 2: Extract skills (FIFO — finds unextracted records itself)
+            extract_event = norm_out or trigger
+            extract_out = extract_agent.process(extract_event)
+            extract_count = 0
+            if extract_out is not None:
+                records = extract_out.payload.get("records", [])
+                extract_count = len(records) if isinstance(records, list) else 0
+                log.info("extracted", count=extract_count, iteration=iteration)
+                total_extracted += extract_count
 
-            if norm_count == 0:
-                log.info("nothing_normalized", iteration=iteration)
-                time.sleep(args.delay)
-                continue
+            # Stage 3: Enrich (processes extraction output records)
+            if extract_out is not None and extract_count > 0:
+                enrich_out = enrich_agent.process(extract_out)
+                enriched_count = 0
+                if enrich_out is not None:
+                    enriched_count = enrich_out.payload.get("enriched_count", 0)
+                    log.info("enriched", count=enriched_count, iteration=iteration)
+                    total_enriched_count += enriched_count
 
-            # Stage 2: Extract skills
-            extract_out = extract_agent.process(norm_out)
-            if extract_out is None:
-                log.error("extraction_returned_none", iteration=iteration)
-                total_errors += 1
-                time.sleep(args.delay)
-                continue
-
-            extract_count = extract_out.payload.get("records_extracted", 0)
-            log.info("extracted", count=extract_count, iteration=iteration)
-
-            # Stage 3: Enrich
-            enrich_out = enrich_agent.process(extract_out)
-            if enrich_out is None:
-                log.error("enrichment_returned_none", iteration=iteration)
-                total_errors += 1
-                time.sleep(args.delay)
-                continue
-
-            enriched_count = enrich_out.payload.get("enriched_count", 0)
-            log.info("enriched", count=enriched_count, iteration=iteration)
-
-            total_processed += norm_count
             enriched_total = _count_enriched()
-            remaining = _count_pending()
+            remaining_raw = _count_pending()
+            remaining_unextracted = _count_unextracted()
 
             log.info(
                 "iteration_complete",
                 iteration=iteration,
-                batch_processed=norm_count,
-                total_processed=total_processed,
+                norm_batch=norm_count,
+                extract_batch=extract_count,
                 total_enriched=enriched_total,
-                remaining=remaining,
+                remaining_raw=remaining_raw,
+                remaining_unextracted=remaining_unextracted,
             )
+
+            if extract_count == 0 and norm_count == 0:
+                log.info("no_progress", iteration=iteration)
+                break
 
         except Exception as exc:
             log.error("iteration_failed", iteration=iteration, error=str(exc))
             total_errors += 1
 
-        if _count_pending() > 0:
-            log.info("rate_limit_pause", seconds=args.delay)
-            time.sleep(args.delay)
+        log.info("rate_limit_pause", seconds=args.delay)
+        time.sleep(args.delay)
 
     enriched_final = _count_enriched()
     print("\nProcessing complete.")
     print(f"  Iterations: {iteration}")
-    print(f"  Records processed: {total_processed}")
+    print(f"  Normalized: {total_normalized}")
+    print(f"  Extracted: {total_extracted}")
+    print(f"  Enriched: {total_enriched_count}")
     print(f"  Errors: {total_errors}")
     print(f"  Total enriched job postings: {enriched_final}")
 

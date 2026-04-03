@@ -158,6 +158,11 @@ class EventOrDatabaseWorkItemLoader:
         if batch_id and check_db_connection():
             return self._from_database(batch_id)
 
+        # FIFO: load normalized records not yet extracted (processing loop mode)
+        if check_db_connection():
+            batch_size = int(os.environ.get("NORM_BATCH_SIZE", "50"))
+            return self._from_database_unextracted(batch_size)
+
         return []
 
     def _from_database(self, batch_id: str) -> list[ExtractionWorkItem]:
@@ -170,6 +175,22 @@ class EventOrDatabaseWorkItemLoader:
                 .all()
             )
 
+        return [self._from_normalized_row(row) for row in rows]
+
+    def _from_database_unextracted(self, limit: int = 50) -> list[ExtractionWorkItem]:
+        """FIFO: load normalized jobs that don't yet have extraction results."""
+        with session_scope() as session:
+            rows = (
+                session.query(NormalizedJob)
+                .outerjoin(
+                    ExtractedIntelligence,
+                    NormalizedJob.id == ExtractedIntelligence.normalized_job_id,
+                )
+                .filter(ExtractedIntelligence.id == None)  # noqa: E711
+                .order_by(NormalizedJob.id.asc())
+                .limit(limit)
+                .all()
+            )
         return [self._from_normalized_row(row) for row in rows]
 
     def _from_normalized_row(self, row: NormalizedJob) -> ExtractionWorkItem:

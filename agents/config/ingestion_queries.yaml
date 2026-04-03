@@ -1,37 +1,61 @@
 # Ingestion query configuration for batch_ingest_borderplex.py
 #
-# Each query = 1 API request per page (10 results/page).
-# Total requests per run = sum of all query `pages` values.
+# Round 3: additional query variants to push past 1000 raw records.
+# Key 1 is exhausted (429). Key 2 has ~320 requests remaining.
 #
 # API keys: set JSEARCH_API_KEY and JSEARCH_API_KEY_2 in .env
 # Primary key is used first; rotates to secondary on budget limit or 429.
 #
 # Budget: 500 free requests/month per RapidAPI key.
-# The script rotates to the next key when budget_per_key is hit or a 429 is received.
 
 budget_per_key: 500
 
 queries:
-  - name: ai-engineering
-    keywords: ["AI engineer", "machine learning engineer"]
+  # --- Round 3: new keyword variants to avoid dedup overlap ---
+  - name: react-frontend
+    keywords: ["React developer", "frontend engineer", "TypeScript developer"]
     pages: 10
 
-  - name: data-science
-    keywords: ["data scientist", "data analyst", "data engineer"]
+  - name: java-enterprise
+    keywords: ["Java developer", "Java engineer", "Spring Boot developer"]
     pages: 10
 
-  - name: prompt-llm
-    keywords: ["prompt engineer", "LLM", "generative AI"]
+  - name: systems-engineer
+    keywords: ["systems engineer", "Linux engineer", "systems administrator"]
     pages: 10
 
-  - name: software-engineering
-    keywords: ["software engineer", "backend developer", "full stack"]
+  - name: blockchain-web3
+    keywords: ["blockchain developer", "Web3 engineer", "smart contract developer"]
     pages: 10
 
-  - name: devops-cloud
-    keywords: ["DevOps engineer", "cloud architect", "platform engineer"]
-    pages: 5
+  - name: data-governance
+    keywords: ["data governance analyst", "data quality engineer", "data steward"]
+    pages: 10
 
-  - name: cybersecurity
-    keywords: ["cybersecurity analyst", "security engineer"]
-    pages: 5
+  - name: ai-safety
+    keywords: ["AI safety engineer", "responsible AI", "AI ethics"]
+    pages: 10
+
+  - name: mobile-dev
+    keywords: ["mobile developer", "iOS developer", "Android developer"]
+    pages: 10
+
+  - name: database-engineer
+    keywords: ["database engineer", "DBA", "database architect"]
+    pages: 10
+
+  - name: rust-go-modern
+    keywords: ["Rust developer", "Go developer", "Golang engineer"]
+    pages: 10
+
+  - name: ml-scientist
+    keywords: ["machine learning scientist", "applied ML", "ML researcher"]
+    pages: 10
+
+  - name: technical-lead
+    keywords: ["technical lead", "engineering manager", "staff engineer"]
+    pages: 10
+
+  - name: platform-engineer
+    keywords: ["platform engineer", "developer experience", "internal tools engineer"]
+    pages: 10
