@@ -333,43 +333,42 @@ class EmployerProfile(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
-class JobPosting(Base):
-    """Minimal ORM anchor for ``dbo.job_postings`` PK so :class:`PostingFreshness` FK resolves.
-
-    The live table is pgloader-seeded with many columns; only ``job_posting_id`` is mapped for
-    SQLAlchemy metadata and ``create_all`` dependency ordering.
-    """
-
-    __tablename__ = "job_postings"
-    __table_args__ = {"schema": "dbo"}
-
-    job_posting_id: Mapped[str] = mapped_column(Text, primary_key=True)
-
-
 # ---------------------------------------------------------------------------
 # Analytics (Week 7) — posting freshness
 # ---------------------------------------------------------------------------
 
 
 class PostingFreshness(Base):
-    """Per-job-posting freshness snapshot for analytics (dbo.posting_freshness)."""
+    """Per-job-posting freshness snapshot for analytics (dbo.posting_freshness). Runbook schema."""
 
     __tablename__ = "posting_freshness"
     __table_args__ = (
-        Index("ix_posting_freshness_job_posting_id", "job_posting_id"),
+        Index("ix_posting_freshness_posting_id", "posting_id"),
         {"schema": "dbo"},
     )
 
-    id: Mapped[str] = mapped_column(Text, primary_key=True)
-    job_posting_id: Mapped[str] = mapped_column(
-        Text,
-        ForeignKey("dbo.job_postings.job_posting_id"),
-        nullable=False,
+    posting_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    first_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    duration_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_repost: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    repost_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    fill_proxy: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    computed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
     )
-    last_seen_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    days_since_posted: Mapped[int] = mapped_column(Integer, nullable=False)
-    freshness_status: Mapped[str] = mapped_column(String(16), nullable=False)
-    checked_at: Mapped[datetime] = mapped_column(
+
+
+class TrajectoryMap(Base):
+    """Phase 2 scaffold — trajectory data per role (dbo.trajectory_map). Empty data, schema only."""
+
+    __tablename__ = "trajectory_map"
+    __table_args__ = ({"schema": "dbo"},)
+
+    role_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    trajectory_data: Mapped[dict] = mapped_column(JSON, nullable=True)
+    computed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
     )
