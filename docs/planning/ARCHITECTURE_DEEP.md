@@ -379,6 +379,26 @@ class JobRecord(BaseModel):
 | Duplicate rate forwarded | < 0.5% |
 | Dead-letter volume | < 1%; alert above 2% |
 
+#### Flywheel Operational Pattern (Week 6+)
+
+The monolithic `pipeline_runner.py` chains all agents in a single pass, which couples ingestion throughput (API budget/rate-limited) to processing throughput (LLM rate-limited). The **flywheel pattern** decouples these into two independent loops connected via the database as a queue:
+
+**Loop 1 — Batch Ingest** (`agents/scripts/batch_ingest_borderplex.py`):
+- Reads query configuration from `agents/config/ingestion_queries.yaml`
+- Rotates API keys (`JSEARCH_API_KEY`, `JSEARCH_API_KEY_2`) when budget is exhausted or 429 received
+- Stages raw records to `raw_ingested_jobs` with `processing_status = 'pending'`
+- Does NOT trigger downstream processing — ingestion only
+- Supports `--dry-run` (show plan without API calls) and `--delay` (seconds between queries)
+
+**Loop 2 — Paced Processing** (`agents/scripts/run_processing_loop.py`):
+- Polls `raw_ingested_jobs` (pending) and `normalized_jobs` (unextracted) in a loop
+- Each iteration: Normalize → Skills Extraction → Enrichment
+- Pauses between iterations (`--delay`) to manage LLM rate limits
+- Exits when no pending/unextracted records remain, or `--max-iterations` reached
+- Supports `--batch-size`, `--delay`, `--max-iterations`, `--dry-run`
+
+This separation allows bulk ingestion (hundreds of API calls) to run independently from LLM-intensive processing, which can be throttled to match Azure OpenAI TPM/RPM limits.
+
 ---
 
 ### 2. Normalization Agent
@@ -1013,6 +1033,13 @@ SPAM_FLAG_THRESHOLD=0.7
 SPAM_REJECT_THRESHOLD=0.9
 SKILL_CONFIDENCE_THRESHOLD=0.75
 BATCH_SIZE=100
+
+# Flywheel / processing loop (Week 6+)
+JSEARCH_API_KEY_2=                             # Secondary JSearch key for rotation (optional)
+NORM_BATCH_SIZE=50                             # Records per normalization batch
+SKILLS_EXTRACTION_CHUNK_SIZE=50                # Records per extraction chunk before cooldown
+SKILLS_EXTRACTION_CHUNK_COOLDOWN=2             # Seconds between chunks (adjust to Azure TPM)
+SKILLS_EXTRACTION_DELAY=0.1                    # Seconds between records within a chunk
 
 # Model tier routing (Work Intelligence Agent)
 EXTRACTION_MODEL_SKILLS=claude-sonnet-4-5      # Sonnet-class for skills/responsibilities
