@@ -1,0 +1,63 @@
+# Ingestion query configuration for batch_ingest.py
+#
+# Broad keyword queries targeting AI/agentic roles and adjacent tech.
+# Region filtering happens at enrichment (borderplex_subregion classifier),
+# NOT at ingestion — ingest broadly, filter on consumer side.
+
+budget_per_key: 500
+
+queries:
+  # --- Tier 1: Direct agentic/LLM-consumer roles ---
+  - name: agentic-ai
+    keywords: ["AI agent developer", "autonomous systems engineer", "agentic AI"]
+    pages: 10
+
+  - name: prompt-llm
+    keywords: ["prompt engineer", "LLM", "generative AI"]
+    pages: 10
+
+  - name: ai-safety
+    keywords: ["AI safety engineer", "responsible AI", "AI ethics"]
+    pages: 5
+
+  - name: ai-research
+    keywords: ["AI researcher", "applied scientist", "research engineer"]
+    pages: 10
+
+  # --- Tier 2: Strong AI-adjacent (LLM consumers, not model builders) ---
+  - name: ai-engineering
+    keywords: ["AI engineer", "machine learning engineer"]
+    pages: 10
+
+  - name: software-engineering
+    keywords: ["software engineer", "backend developer", "full stack"]
+    pages: 10
+
+  - name: python-developer
+    keywords: ["Python developer", "Python engineer"]
+    pages: 10
+
+  - name: product-tech
+    keywords: ["technical product manager", "AI product manager"]
+    pages: 10
+
+  - name: data-engineering
+    keywords: ["data engineer", "data pipeline", "ETL developer"]
+    pages: 10
+
+  - name: data-science
+    keywords: ["data scientist", "data analyst", "data engineer"]
+    pages: 10
+
+  # --- Tier 3: ML/model-building roles (breadth) ---
+  - name: ml-scientist
+    keywords: ["machine learning scientist", "applied ML", "ML researcher"]
+    pages: 10
+
+  - name: deep-learning
+    keywords: ["deep learning engineer", "NLP engineer", "computer vision"]
+    pages: 10
+
+  - name: ml-ops
+    keywords: ["MLOps engineer", "ML infrastructure", "model deployment"]
+    pages: 5

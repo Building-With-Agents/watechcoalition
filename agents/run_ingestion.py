@@ -43,8 +43,6 @@ try:
 except ImportError:
     pass
 
-# Output file for ingestion agent result (agents/ingestion_agent_output.json)
-_INGESTION_OUTPUT_FILE = Path(__file__).resolve().parent / "ingestion_agent_output.json"
 
 structlog.configure(
     processors=[
@@ -124,13 +122,7 @@ def main() -> None:
         log.error("ingestion_agent_returned_none")
         sys.exit(1)
 
-    # Write full ingestion agent output to file
-    output_data = json.loads(json.dumps(out.model_dump(mode="json"), default=str))
-    _INGESTION_OUTPUT_FILE.write_text(
-        json.dumps(output_data, indent=2, default=str),
-        encoding="utf-8",
-    )
-    log.info("ingestion_output_written", path=str(_INGESTION_OUTPUT_FILE))
+    log.info("ingestion_complete", event_type=out.payload.get("event_type"))
 
     if args.json:
         payload_serializable = json.loads(json.dumps(out.model_dump(mode="json"), default=str))

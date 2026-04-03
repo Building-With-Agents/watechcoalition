@@ -35,6 +35,7 @@ class JobRecord(BaseModel):
     city: str | None = None
     state_province: str | None = None
     country: str | None = None
+    zip_code: str | None = None
     work_arrangement: str | None = None
     is_remote: bool | None = None
 

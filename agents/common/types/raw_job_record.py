@@ -29,6 +29,7 @@ class RawJobRecord(BaseModel):
     city: str | None = None
     state: str | None = None
     country: str | None = None
+    zip_code: str | None = None
     is_remote: bool | None = None
 
     # Dates

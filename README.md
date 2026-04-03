@@ -49,27 +49,68 @@ cd watechcoalition
 - `seed`: Seeds the MSSQL database with synthetic/faker-generated data via Prisma (deprecated).
 - `lint`: Runs ESLint to check for code issues.
 
-## Agent Pipeline (Walking Skeleton)
+## Agent Pipeline (Flywheel Architecture)
 
-The **Job Intelligence Engine** is an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings. The walking skeleton (Week 2) is functional — all eight agent stubs process 10 demo job postings end-to-end with fixture data. Real agent logic is built out over the 12-week curriculum.
+The **Job Intelligence Engine** is an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings. The pipeline uses a **flywheel pattern**: ingestion (cheap HTTP) is decoupled from processing (LLM-based extraction and enrichment) so each loop runs independently at its own pace.
 
 See [CLAUDE.md](CLAUDE.md) for full architecture details, agent specs, and build order.
 
+### Setup (one time)
+
 ```bash
-# Setup (one time — from repo root)
 py -3.11 -m venv agents/.venv
 agents\.venv\Scripts\Activate.ps1          # Windows PowerShell
 pip install -r agents/requirements.txt
+```
 
-# Run the pipeline (produces agents/data/output/pipeline_run.json)
-python agents/pipeline_runner.py
+### Seed Local Database with Enriched Data
 
-# Run the Streamlit dashboard (http://localhost:8501)
+New devs should seed their local database with pre-processed job postings so analytics and visualization have data to work with:
+
+```bash
+python scripts/pg-seed-data/seed_agent_data.py
+```
+
+This imports enriched records from `scripts/pg-seed-data/agent-fixtures/` using UPSERT (safe to run multiple times).
+
+### Run the Pipeline
+
+```bash
+# Loop 1: Bulk ingest from JSearch API (budget-aware, key rotation)
+python agents/scripts/batch_ingest.py              # run all queries from config
+python agents/scripts/batch_ingest.py --dry-run    # preview without API calls
+
+# Loop 2: Paced processing (normalize → extract → enrich)
+python agents/scripts/run_processing_loop.py --batch-size 50 --delay 2
+
+# Streamlit dashboard (http://localhost:8501)
 streamlit run agents/dashboard/streamlit_app.py
 
-# Run agent tests
+# Agent tests
 python -m pytest agents/tests/ -v
 ```
+
+### Environment Variables (Pipeline)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `PYTHON_DATABASE_URL` | Yes | PostgreSQL connection string |
+| `JSEARCH_API_KEY` | For ingestion | RapidAPI JSearch key (primary) |
+| `JSEARCH_API_KEY_2` | Optional | Second JSearch key for budget rotation |
+| `NORM_BATCH_SIZE` | Optional | Records per processing batch (default: 50) |
+| `PROCESSING_DELAY` | Optional | Seconds between processing batches (default: 10) |
+| `AZURE_OPENAI_*` | For extraction/enrichment | Azure OpenAI credentials |
+
+### Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `agents/scripts/batch_ingest.py` | Loop 1 — budget-aware JSearch ingestion |
+| `agents/scripts/run_processing_loop.py` | Loop 2 — paced normalize/extract/enrich |
+| `scripts/pg-seed-data/seed_agent_data.py` | Import enriched data to local DB |
+| `scripts/pg-seed-data/export_agent_data.py` | Export pipeline data to JSON fixtures (admin) |
+| `scripts/pg-seed-data/clean_stale_postings.py` | Purge old pipeline data before re-seeding (admin) |
+| `agents/config/ingestion_queries.yaml` | Editable query configuration for batch_ingest |
 
 ## Technologies Used
 
@@ -86,7 +127,7 @@ python -m pytest agents/tests/ -v
 - **SQLAlchemy**: Python database access (PostgreSQL via psycopg2). [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
 - **Streamlit**: Read-only analytics dashboards. [Streamlit Documentation](https://docs.streamlit.io/)
 - **Redis Streams**: Inter-agent event bus (`XADD`/`XREADGROUP`/`XACK`). [Redis Streams Documentation](https://redis.io/docs/data-types/streams/)
-- **LangSmith**: Agent tracing and evaluation. [LangSmith Documentation](https://docs.smith.langchain.com/)
+- **Langfuse**: LLM observability and tracing. [Langfuse Documentation](https://langfuse.com/docs)
 
 ## License
 

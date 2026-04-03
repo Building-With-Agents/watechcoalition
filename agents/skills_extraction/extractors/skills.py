@@ -4,39 +4,74 @@ Extracts nuanced skills from normalized job postings using a Sonnet-class LLM.
 Each skill is linked to the ESCO digital skills taxonomy via the 6-step
 resolution order, with GenAI Extension Layer checked first.
 
-Week 4 implementation (Bryan + Emilio):
-- Consume normalized JobRecord documents
-- Extract skills from title, description, requirements, responsibilities
-- Produce SkillRecord per skill with esco_uri and source_span
-- Use Sonnet-class model (configured via EXTRACTION_MODEL_SKILLS env var)
-- Track tokens_used per extraction call
-- Handle LLM timeout: retry once, then emit with skills=[] and extraction_failed=true
-- Handle rate limit (429): exponential back-off with SkillsExtractionAlert
+Uses ``invoke_structured_extraction_llm`` with a Pydantic root model
+(``_SkillsLLMRoot``) for consistent structured output across all extraction
+dimensions (matching tasks.py and responsibilities.py).  SpanRecord
+auto-correction happens at the Pydantic validator level.
 
 Reference: ARCHITECTURE_DEEP.md § Work Intelligence Agent — Hybrid Extraction.
 """
 
 from __future__ import annotations
 
-import json
 import os
+import random
 import time
 from typing import Any
 
 import structlog
+from pydantic import BaseModel, Field
 
-from agents.common.types import JobRecord, SkillRecord, SpanRecord, TaxonomyResult, ToolRecord
+from agents.common.llm_client import invoke_structured_extraction_llm
+from agents.common.types import JobRecord, SkillRecord, TaxonomyResult, ToolRecord
 from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
 from agents.skills_extraction.prompts import build_skills_prompt
 
 log = structlog.get_logger()
 
-# Back-off delays for 429 in seconds
-RATE_LIMIT_BACKOFF_SECS = (1, 2, 4)
-RATE_LIMIT_MAX_CYCLES = 3
+# Back-off delays for 429 in seconds. Azure OpenAI typically asks for 10-30s.
+# Jitter added at runtime to prevent thundering herd.
+RATE_LIMIT_BACKOFF_SECS = (5, 15, 30, 60)
+RATE_LIMIT_MAX_CYCLES = 4
 
 DEFAULT_SKILL_CONFIDENCE_THRESHOLD = 0.75
 
+AGENT_SKILLS = "skills-extraction-agent"
+
+_SKILLS_DEPLOYMENT_KEYS = (
+    "EXTRACTION_DEPLOYMENT_SKILLS",
+    "EXTRACTION_MODEL_SKILLS",
+    "AZURE_OPENAI_DEPLOYMENT_NAME",
+)
+
+
+# ---------------------------------------------------------------------------
+# Pydantic models for structured LLM output
+# ---------------------------------------------------------------------------
+
+class _LLMSkill(BaseModel):
+    """Single skill from LLM structured output.
+
+    Uses ``label`` (the prompt field name) and maps to ``skill_name`` on
+    SkillRecord during post-processing.
+    """
+
+    label: str = ""
+    type: str = "Technical"
+    confidence: float = Field(default=0.5, ge=0.0, le=1.0)
+    required_flag: bool | None = None
+    source_span: dict[str, Any] = Field(default_factory=dict)
+
+
+class _SkillsLLMRoot(BaseModel):
+    """Root schema for structured LLM output (list of skills)."""
+
+    skills: list[_LLMSkill] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
 def _skill_confidence_threshold() -> float:
     """Minimum confidence for a skill to be kept; skills below this are discarded."""
@@ -46,85 +81,42 @@ def _skill_confidence_threshold() -> float:
         return DEFAULT_SKILL_CONFIDENCE_THRESHOLD
 
 
-def _invoke_client(prompt: str) -> tuple[str, dict[str, Any]]:
-    """Call the LLM client. Isolated for testing."""
-    from agents.common.llm_client import invoke_skills_llm
-
-    return invoke_skills_llm(prompt)
-
-
-def _parse_skills_response(response_text: str) -> list[dict[str, Any]]:
-    """Extract skills array from LLM JSON response. Strips markdown code blocks if present."""
-    text = response_text.strip()
-    if text.startswith("```"):
-        lines = text.split("\n")
-        if lines[0].startswith("```"):
-            lines = lines[1:]
-        if lines and lines[-1].strip() == "```":
-            lines = lines[:-1]
-        text = "\n".join(lines)
-    try:
-        data = json.loads(text)
-        raw = data.get("skills")
-        return list(raw) if isinstance(raw, list) else []
-    except (json.JSONDecodeError, TypeError):
-        return []
-
-
-def _skill_dict_to_record(raw: dict[str, Any]) -> SkillRecord | None:
-    """Build SkillRecord from parsed dict. Returns None if validation fails.
-
-    Auto-corrects source_span when the LLM returns end_char such that
-    end_char - start_char != len(text): sets end_char = start_char + len(text)
-    so the skill is kept instead of dropped (avoids skills_extraction_skip_invalid_skill).
-    """
+def _llm_skill_to_record(raw: _LLMSkill) -> SkillRecord | None:
+    """Convert an LLM skill to a SkillRecord. SpanRecord auto-corrects offsets."""
     from pydantic import ValidationError
 
+    from agents.common.types.extraction_types import SpanRecord
+
     try:
-        span = raw.get("source_span")
-        if not isinstance(span, dict):
+        span_dict = raw.source_span
+        if not span_dict or not isinstance(span_dict, dict):
             return None
-        text = str(span.get("text", ""))
-        field_source = span.get("field_source", "description")
-        start_char = int(span.get("start_char", 0))
-        end_char = int(span.get("end_char", 0))
-        expected_end = start_char + len(text)
-        span_auto_corrected = False
-        original_end_char = None
-        if end_char != expected_end:
-            log.debug(
-                "skills_extraction_span_auto_correct",
-                label=raw.get("label"),
-                original_end_char=end_char,
-                corrected_end_char=expected_end,
-            )
-            span_auto_corrected = True
-            original_end_char = end_char
-            end_char = expected_end
         source_span = SpanRecord(
-            text=text,
-            field_source=field_source,
-            start_char=start_char,
-            end_char=end_char,
+            text=str(span_dict.get("text", "")),
+            field_source=span_dict.get("field_source", "description"),
+            start_char=int(span_dict.get("start_char", 0)),
+            end_char=int(span_dict.get("end_char", 0)),
         )
         return SkillRecord(
-            skill_name=str(raw.get("skill_name") or raw.get("label", "")).strip() or "unknown",
-            type=raw.get("type", "Technical"),
-            confidence=float(raw.get("confidence", 0.0)),
-            required_flag=raw.get("required_flag"),
+            skill_name=raw.label.strip() or "unknown",
+            type=raw.type,
+            confidence=raw.confidence,
+            required_flag=raw.required_flag,
             source_span=source_span,
-            span_auto_corrected=span_auto_corrected,
-            original_end_char=original_end_char,
         )
     except (ValidationError, TypeError, ValueError, KeyError):
         return None
 
 
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
 def extract_skills(
     job_record: JobRecord,
     pass1_tools: list[ToolRecord] | None = None,
 ) -> tuple[list[SkillRecord], dict[str, Any]]:
-    """Extract skills from a normalized job record using LLM inference.
+    """Extract skills from a normalized job record using structured LLM output.
 
     Parameters
     ----------
@@ -161,16 +153,21 @@ def extract_skills(
         "extraction_warnings": [],
     }
 
-    text = ""
-    meta: dict[str, Any] = {}
-
-    def _do_invoke() -> tuple[str, dict[str, Any]]:
-        return _invoke_client(prompt)
+    def _do_invoke() -> tuple[_SkillsLLMRoot | None, dict[str, Any]]:
+        return invoke_structured_extraction_llm(
+            prompt,
+            _SkillsLLMRoot,
+            agent_name=AGENT_SKILLS,
+            deployment_env_keys=_SKILLS_DEPLOYMENT_KEYS,
+            model_tier_for_cost="sonnet",
+        )
 
     # Timeout: retry once
+    parsed: _SkillsLLMRoot | None = None
+    meta: dict[str, Any] = {}
     for timeout_attempt in range(2):
         try:
-            text, meta = _do_invoke()
+            parsed, meta = _do_invoke()
             metadata.update(meta)
             break
         except Exception as e:
@@ -181,29 +178,36 @@ def extract_skills(
             metadata["error_reason"] = str(e)
             return [], metadata
 
-    # 429: exponential back-off up to RATE_LIMIT_MAX_CYCLES
+    # 429: back-off with jitter, always respecting server Retry-After header
     is_rate_limited = not meta.get("success") and (
         meta.get("is_rate_limit")
         or meta.get("retry_after_seconds") is not None
         or "429" in str(meta.get("error_reason", ""))
     )
     if is_rate_limited:
-        for cycle, delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
+        for cycle, fallback_delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
             if cycle >= RATE_LIMIT_MAX_CYCLES:
                 metadata["alert_skills_extraction"] = True
                 return [], metadata
-            # Honor server Retry-After if provided, otherwise use backoff sequence
             server_delay = meta.get("retry_after_seconds")
-            actual_delay = server_delay if server_delay and cycle == 0 else delay
+            base_delay = server_delay if server_delay else fallback_delay
+            jitter = random.uniform(0.5, min(base_delay * 0.3, 5.0))
+            actual_delay = base_delay + jitter
+            log.info(
+                "skills_extraction_429_backoff",
+                cycle=cycle,
+                delay_seconds=round(actual_delay, 1),
+                server_retry_after=server_delay,
+            )
             time.sleep(actual_delay)
             try:
-                text, meta = _do_invoke()
+                parsed, meta = _do_invoke()
                 metadata["tokens_used"] = metadata.get("tokens_used", 0) + meta.get("tokens_used", 0)
                 metadata["cost_usd"] = metadata.get("cost_usd", 0.0) + meta.get("cost_usd", 0.0)
                 metadata["latency_ms"] = metadata.get("latency_ms", 0) + meta.get("latency_ms", 0)
                 metadata["provider"] = meta.get("provider", metadata["provider"])
                 metadata["model"] = meta.get("model", metadata["model"])
-                if meta.get("success") and text:
+                if meta.get("success") and parsed is not None:
                     metadata.update(meta)
                     break
             except Exception as e2:
@@ -212,26 +216,26 @@ def extract_skills(
             metadata["alert_skills_extraction"] = True
             return [], metadata
 
-    if not meta.get("success") or not text:
+    if not meta.get("success") or parsed is None:
         metadata["error_reason"] = meta.get("error_reason") or "empty response"
         return [], metadata
 
-    raw_skills = _parse_skills_response(text)
-    if not raw_skills:
-        log.warning("skills_extraction_empty_or_invalid_json", raw_preview=text[:500])
+    if not parsed.skills:
+        log.warning("skills_extraction_empty_skills_array")
         metadata["extraction_warnings"] = metadata.get("extraction_warnings", []) + [
             "LLM response had no valid skills array"
         ]
         metadata["extraction_failed"] = True
         return [], metadata
 
+    # Post-process: convert LLM skills to SkillRecords
     skills: list[SkillRecord] = []
-    for raw in raw_skills:
-        rec = _skill_dict_to_record(raw)
+    for raw in parsed.skills:
+        rec = _llm_skill_to_record(raw)
         if rec is None:
-            log.warning("skills_extraction_skip_invalid_skill", raw=raw)
+            log.warning("skills_extraction_skip_invalid_skill", label=raw.label)
             metadata["extraction_warnings"] = metadata.get("extraction_warnings", []) + [
-                f"Invalid skill skipped: {raw.get('label', raw)}"
+                f"Invalid skill skipped: {raw.label}"
             ]
             continue
         skills.append(rec)
@@ -308,15 +312,21 @@ def extract_skills_no_taxonomy(
         "extraction_warnings": [],
     }
 
-    text = ""
-    meta: dict[str, Any] = {}
+    def _do_invoke() -> tuple[_SkillsLLMRoot | None, dict[str, Any]]:
+        return invoke_structured_extraction_llm(
+            prompt,
+            _SkillsLLMRoot,
+            agent_name=AGENT_SKILLS,
+            deployment_env_keys=_SKILLS_DEPLOYMENT_KEYS,
+            model_tier_for_cost="sonnet",
+        )
 
-    def _do_invoke() -> tuple[str, dict[str, Any]]:
-        return _invoke_client(prompt)
+    parsed: _SkillsLLMRoot | None = None
+    meta: dict[str, Any] = {}
 
     for timeout_attempt in range(2):
         try:
-            text, meta = _do_invoke()
+            parsed, meta = _do_invoke()
             metadata.update(meta)
             break
         except Exception as e:
@@ -333,21 +343,23 @@ def extract_skills_no_taxonomy(
         or "429" in str(meta.get("error_reason", ""))
     )
     if is_rate_limited:
-        for cycle, delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
+        for cycle, fallback_delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
             if cycle >= RATE_LIMIT_MAX_CYCLES:
                 metadata["alert_skills_extraction"] = True
                 return [], metadata
             server_delay = meta.get("retry_after_seconds")
-            actual_delay = server_delay if server_delay and cycle == 0 else delay
+            base_delay = server_delay if server_delay else fallback_delay
+            jitter = random.uniform(0.5, min(base_delay * 0.3, 5.0))
+            actual_delay = base_delay + jitter
             time.sleep(actual_delay)
             try:
-                text, meta = _do_invoke()
+                parsed, meta = _do_invoke()
                 metadata["tokens_used"] = metadata.get("tokens_used", 0) + meta.get("tokens_used", 0)
                 metadata["cost_usd"] = metadata.get("cost_usd", 0.0) + meta.get("cost_usd", 0.0)
                 metadata["latency_ms"] = metadata.get("latency_ms", 0) + meta.get("latency_ms", 0)
                 metadata["provider"] = meta.get("provider", metadata["provider"])
                 metadata["model"] = meta.get("model", metadata["model"])
-                if meta.get("success") and text:
+                if meta.get("success") and parsed is not None:
                     metadata.update(meta)
                     break
             except Exception as e2:
@@ -356,13 +368,12 @@ def extract_skills_no_taxonomy(
             metadata["alert_skills_extraction"] = True
             return [], metadata
 
-    if not meta.get("success") or not text:
+    if not meta.get("success") or parsed is None:
         metadata["error_reason"] = meta.get("error_reason") or "empty response"
         return [], metadata
 
-    raw_skills = _parse_skills_response(text)
-    if not raw_skills:
-        log.warning("skills_extraction_empty_or_invalid_json", raw_preview=text[:500])
+    if not parsed.skills:
+        log.warning("skills_extraction_empty_skills_array")
         metadata["extraction_warnings"] = metadata.get("extraction_warnings", []) + [
             "LLM response had no valid skills array"
         ]
@@ -370,12 +381,12 @@ def extract_skills_no_taxonomy(
         return [], metadata
 
     skills: list[SkillRecord] = []
-    for raw in raw_skills:
-        rec = _skill_dict_to_record(raw)
+    for raw in parsed.skills:
+        rec = _llm_skill_to_record(raw)
         if rec is None:
-            log.warning("skills_extraction_skip_invalid_skill", raw=raw)
+            log.warning("skills_extraction_skip_invalid_skill", label=raw.label)
             metadata["extraction_warnings"] = metadata.get("extraction_warnings", []) + [
-                f"Invalid skill skipped: {raw.get('label', raw)}"
+                f"Invalid skill skipped: {raw.label}"
             ]
             continue
         skills.append(rec)

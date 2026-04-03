@@ -217,7 +217,17 @@ with get_engine().connect() as conn:
 
 ## 7. Full Pipeline Run
 
-Run the complete pipeline (Ingestion → Normalization → stub agents):
+Run the flywheel pipeline (decoupled ingestion + processing):
+
+```bash
+# Loop 1: Ingest from JSearch API
+python agents/scripts/batch_ingest.py
+
+# Loop 2: Process pending records (normalize → extract → enrich)
+python agents/scripts/run_processing_loop.py --batch-size 50 --delay 2
+```
+
+**Demo run** (fixture data only, Week 2 demo):
 
 ```bash
 python agents/pipeline_runner.py

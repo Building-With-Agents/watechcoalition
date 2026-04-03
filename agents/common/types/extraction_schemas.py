@@ -46,6 +46,8 @@ class TaskRecord(BaseModel):
         ...,
         description="Evidence span in title, description, requirements, or responsibilities.",
     )
+    span_auto_corrected: bool = False
+    original_end_char: int | None = None
 
 
 class ResponsibilityRecord(BaseModel):
@@ -68,6 +70,8 @@ class ResponsibilityRecord(BaseModel):
         ...,
         description="Evidence span in the job text.",
     )
+    span_auto_corrected: bool = False
+    original_end_char: int | None = None
 
 
 class ContextSignal(BaseModel):

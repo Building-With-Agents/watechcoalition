@@ -95,11 +95,30 @@ _JOB_POSTINGS_ALTER_STATEMENTS = [
     # Fuzzy dedup (IMP-018): cached embedding + content hash for same-company window search
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS dedup_text_hash TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS dedup_embedding vector(1536)",
+    # Zip code (flywheel #161): resolved during normalization from posting or postal_geo_data lookup
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
+]
+
+# Legacy Prisma cleanup: drop FK constraints and make NOT NULL columns nullable (#159).
+# Pipeline stores location directly on job_postings row, not via company_addresses FK.
+_JOB_POSTINGS_LEGACY_CLEANUP = [
+    # Drop FK to company_addresses — pipeline stores location directly on job_postings
+    "ALTER TABLE dbo.job_postings DROP CONSTRAINT IF EXISTS fk_job_postings_company_addresses1",
+    # Drop FK to companies — pipeline resolves company_id via _resolve_or_create_company
+    "ALTER TABLE dbo.job_postings DROP CONSTRAINT IF EXISTS fk_job_postings_companies1",
+    # Make legacy NOT NULL columns nullable
+    "ALTER TABLE dbo.job_postings ALTER COLUMN location_id DROP NOT NULL",
+    "ALTER TABLE dbo.job_postings ALTER COLUMN county DROP NOT NULL",
+    "ALTER TABLE dbo.job_postings ALTER COLUMN zip DROP NOT NULL",
+    "ALTER TABLE dbo.job_postings ALTER COLUMN publish_date DROP NOT NULL",
+    "ALTER TABLE dbo.job_postings ALTER COLUMN unpublish_date DROP NOT NULL",
 ]
 
 _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS requirements TEXT",
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS responsibilities TEXT",
+    "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
+    "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
 ]
 
 # Company HQ / location fields for enrichment resolve_location (#110)
@@ -218,6 +237,19 @@ def run_migrations(engine: Engine) -> None:
         except Exception as exc:
             log.warning(
                 "migration_companies_location_alter_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
+
+    # 6. Drop legacy Prisma FK constraints and make NOT NULL columns nullable (#159).
+    #    Pipeline stores location directly on job_postings, not via company_addresses.
+    for stmt in _JOB_POSTINGS_LEGACY_CLEANUP:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(stmt))
+        except Exception as exc:
+            log.warning(
+                "migration_legacy_cleanup_skipped",
                 statement=stmt,
                 error=str(exc),
             )

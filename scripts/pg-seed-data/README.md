@@ -18,11 +18,15 @@ agents\.venv\Scripts\Activate.ps1          # Windows PowerShell
 # 3. Install dependencies (if not done yet)
 pip install -r agents/requirements.txt
 
-# 4. Seed the database
+# 4. Seed reference data (tables, taxonomies, companies, etc.)
 python scripts/pg-seed-data/seed_pg_database.py
 
-# 5. Verify — run the pipeline
-python agents/pipeline_runner.py
+# 5. Seed agent pipeline data (enriched job postings for analytics)
+python scripts/pg-seed-data/seed_agent_data.py
+
+# 6. Verify — run the flywheel pipeline
+python agents/scripts/batch_ingest.py --dry-run
+python agents/scripts/run_processing_loop.py --dry-run
 ```
 
 The seed script is **idempotent** — you can run it multiple times safely.
@@ -79,8 +83,11 @@ The seed script (`seed_pg_database.py`) does everything in one command:
 ```
 scripts/pg-seed-data/
   README.md                     ← This file
-  seed_pg_database.py           ← Seed script (junior devs run this)
-  export_pg_fixtures.py         ← Export script (admin only)
+  seed_pg_database.py           ← Seed reference data (junior devs run this)
+  seed_agent_data.py            ← Seed agent pipeline data (junior devs run this)
+  export_pg_fixtures.py         ← Export reference data (admin only)
+  export_agent_data.py          ← Export agent pipeline data (admin only)
+  clean_stale_postings.py       ← Purge old pipeline data (admin only)
   clean_schema.py               ← Schema cleaner (admin only)
   schema.sql                    ← Cleaned DDL (idempotent)
   schema_raw.sql                ← Raw pg_dump output (admin reference)
@@ -90,6 +97,11 @@ scripts/pg-seed-data/
     companies.json              ← 122 companies
     job_postings.json           ← 172 job postings
     ... (40 fixture files)
+  agent-fixtures/
+    raw_ingested_jobs.json      ← Ingested job data
+    normalized_jobs.json        ← Normalized records
+    extracted_intelligence.json ← Extraction results
+    job_postings.json           ← Enriched job postings
 ```
 
 ## Troubleshooting

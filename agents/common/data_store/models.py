@@ -70,6 +70,7 @@ class RawIngestedJob(Base):
     city: Mapped[str | None] = mapped_column(String(255), nullable=True)
     state: Mapped[str | None] = mapped_column(String(100), nullable=True)
     country: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    zip_code: Mapped[str | None] = mapped_column(String(10), nullable=True)
     is_remote: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     # URLs
@@ -158,6 +159,7 @@ class NormalizedJob(Base):
     city: Mapped[str | None] = mapped_column(String(255), nullable=True)
     state_province: Mapped[str | None] = mapped_column(String(100), nullable=True)
     country: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    zip_code: Mapped[str | None] = mapped_column(String(10), nullable=True)
     work_arrangement: Mapped[str | None] = mapped_column(String(20), nullable=True)
     is_remote: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
@@ -420,3 +422,24 @@ class SOCC(Base):
     version: Mapped[str] = mapped_column(Text, nullable=False)
     createdat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updatedat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+
+class PostalGeoData(Base):
+    """US zip code reference — read-only lookup table.
+
+    Provides city, county, state, lat/lng for zip code resolution.
+    Used by normalization to resolve zip_code from city+state when
+    the source posting doesn't include a zip. County and other fields
+    are always looked up via JOIN, never stored redundantly on job tables.
+    """
+
+    __tablename__ = "postal_geo_data"
+    __table_args__ = {"schema": "dbo"}
+
+    zip: Mapped[str] = mapped_column(String(5), primary_key=True)
+    city: Mapped[str] = mapped_column(String(100), nullable=False)
+    county: Mapped[str] = mapped_column(String(100), nullable=False)
+    state_code: Mapped[str] = mapped_column(String(2), nullable=False)
+    state: Mapped[str] = mapped_column(String(100), nullable=False)
+    lat: Mapped[float] = mapped_column(Float, nullable=False)
+    lng: Mapped[float] = mapped_column(Float, nullable=False)
