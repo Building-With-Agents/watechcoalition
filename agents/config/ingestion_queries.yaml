@@ -1,0 +1,37 @@
+# Ingestion query configuration for batch_ingest_borderplex.py
+#
+# Each query = 1 API request per page (10 results/page).
+# Total requests per run = sum of all query `pages` values.
+#
+# API keys: set JSEARCH_API_KEY and JSEARCH_API_KEY_2 in .env
+# Primary key is used first; rotates to secondary on budget limit or 429.
+#
+# Budget: 500 free requests/month per RapidAPI key.
+# The script rotates to the next key when budget_per_key is hit or a 429 is received.
+
+budget_per_key: 500
+
+queries:
+  - name: ai-engineering
+    keywords: ["AI engineer", "machine learning engineer"]
+    pages: 10
+
+  - name: data-science
+    keywords: ["data scientist", "data analyst", "data engineer"]
+    pages: 10
+
+  - name: prompt-llm
+    keywords: ["prompt engineer", "LLM", "generative AI"]
+    pages: 10
+
+  - name: software-engineering
+    keywords: ["software engineer", "backend developer", "full stack"]
+    pages: 10
+
+  - name: devops-cloud
+    keywords: ["DevOps engineer", "cloud architect", "platform engineer"]
+    pages: 5
+
+  - name: cybersecurity
+    keywords: ["cybersecurity analyst", "security engineer"]
+    pages: 5

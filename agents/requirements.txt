@@ -20,3 +20,4 @@ thefuzz>=0.22
 ruff>=0.4
 matplotlib>=3.8
 rapidfuzz>=3.0
+pyyaml>=6.0

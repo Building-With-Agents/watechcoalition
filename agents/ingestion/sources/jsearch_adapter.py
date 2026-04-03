@@ -73,6 +73,7 @@ def _job_to_raw_record(job: dict, region_id: str) -> RawJobRecord:
     city = job.get("job_city")
     state = job.get("job_state") or job.get("job_state_code")
     country = job.get("job_country")
+    zip_code = job.get("job_zip_code") or job.get("job_postal_code")
     is_remote = job.get("job_is_remote")
     if is_remote is not None and not isinstance(is_remote, bool):
         is_remote = str(is_remote).lower() in ("true", "1", "yes")
@@ -115,6 +116,7 @@ def _job_to_raw_record(job: dict, region_id: str) -> RawJobRecord:
         city=city[:255] if isinstance(city, str) else None,
         state=state[:100] if isinstance(state, str) else None,
         country=country[:10] if isinstance(country, str) else None,
+        zip_code=str(zip_code)[:10] if zip_code else None,
         is_remote=is_remote,
         date_posted=date_posted,
         salary_raw=str(salary_raw)[:255] if salary_raw is not None else None,
