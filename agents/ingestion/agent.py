@@ -237,6 +237,7 @@ def stage_records(state: IngestionState) -> IngestionState:
                     city=record.city,
                     state=record.state,
                     country=record.country,
+                    zip_code=record.zip_code,
                     is_remote=record.is_remote,
                     job_url=record.job_url,
                     source_url=record.source_url or None,

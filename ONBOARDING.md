@@ -218,9 +218,25 @@ See [scripts/pg-seed-data/README.md](scripts/pg-seed-data/README.md) for details
 
 ### Agent Pipeline
 
-The **Job Intelligence Engine** is an eight-agent Python pipeline that will ingest, normalize, enrich, and analyze external job postings alongside the Next.js app. The `agents/` directory is scaffolded; the pipeline is built out over the **12-week curriculum** as specified in [CLAUDE.md](CLAUDE.md).
+The **Job Intelligence Engine** is an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings alongside the Next.js app. The pipeline uses a **flywheel pattern** — ingestion and processing run as independent loops.
 
-**Walking skeleton (Week 2+):**
+**Seed local DB with enriched data (first time):**
+
+```bash
+python scripts/pg-seed-data/seed_agent_data.py
+```
+
+**Flywheel pipeline (production):**
+
+```bash
+# Loop 1: Bulk ingest from JSearch API
+python agents/scripts/batch_ingest.py
+
+# Loop 2: Paced processing (normalize → extract → enrich)
+python agents/scripts/run_processing_loop.py --batch-size 50 --delay 2
+```
+
+**Demo run (fixture data only, Week 2 demo):**
 
 ```bash
 python agents/pipeline_runner.py

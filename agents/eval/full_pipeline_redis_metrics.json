@@ -1,8 +1,277 @@
 {
-  "success": false,
-  "error": "Redis connection failed: Error 61 connecting to localhost:6379. Connection refused.",
-  "correlation_id": "redis-pipe-4ceea103",
-  "stages": [],
-  "e2e_latency_ms": null,
-  "run_start_iso": "2026-04-01T21:35:21.308161+00:00"
+  "success": true,
+  "correlation_id": "redis-pipe-cd457f5d",
+  "stages": [
+    {
+      "stage": "ingestion",
+      "event_type_in": "PipelineTrigger",
+      "event_type_out": "IngestBatch",
+      "event_id_out": "0143cc6e-d464-43f3-8c5a-bea55b8d6cc9",
+      "start_ts": "2026-04-03T00:41:58.330846+00:00",
+      "end_ts": "2026-04-03T00:42:23.440527+00:00",
+      "latency_ms": 25109.83,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "IngestBatch",
+        "batch_id": "c956ec3c-214a-4b64-8758-608021aa9894",
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "normalization",
+      "event_type_in": "IngestBatch",
+      "event_type_out": "NormalizationComplete",
+      "event_id_out": "99d024c4-9e39-43a4-8d35-0acc38d6b0bf",
+      "start_ts": "2026-04-03T00:42:23.444035+00:00",
+      "end_ts": "2026-04-03T00:42:23.524754+00:00",
+      "latency_ms": 80.53,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "NormalizationComplete",
+        "batch_id": "c956ec3c-214a-4b64-8758-608021aa9894",
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "skills",
+      "event_type_in": "NormalizationComplete",
+      "event_type_out": "SkillsExtracted",
+      "event_id_out": "8e86342c-e7f7-405b-a4fb-3418001e0cf8",
+      "start_ts": "2026-04-03T00:42:23.527767+00:00",
+      "end_ts": "2026-04-03T00:42:23.539306+00:00",
+      "latency_ms": 11.65,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "SkillsExtracted",
+        "batch_id": "0a9402f4-129d-47ba-b754-de2a6bcfb914",
+        "job_ids": []
+      }
+    },
+    {
+      "stage": "skills",
+      "event_type_in": "NormalizationComplete",
+      "event_type_out": "SkillsExtracted",
+      "event_id_out": "1c0de3a4-d8a7-4ec7-b61e-f062f473219f",
+      "start_ts": "2026-04-03T00:42:23.542306+00:00",
+      "end_ts": "2026-04-03T00:42:41.600212+00:00",
+      "latency_ms": 18057.93,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "SkillsExtracted",
+        "batch_id": "c956ec3c-214a-4b64-8758-608021aa9894",
+        "job_ids": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ]
+      }
+    },
+    {
+      "stage": "enrichment",
+      "event_type_in": "SkillsExtracted",
+      "event_type_out": "RecordEnriched",
+      "event_id_out": "e324dc5e-d4a0-4c9b-aa37-2cece5a75649",
+      "start_ts": "2026-04-03T00:42:41.604228+00:00",
+      "end_ts": "2026-04-03T00:42:41.612244+00:00",
+      "latency_ms": 7.63,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "RecordEnriched",
+        "batch_id": null,
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "enrichment",
+      "event_type_in": "SkillsExtracted",
+      "event_type_out": "RecordEnriched",
+      "event_id_out": "2dd11cd6-583d-457e-b088-a5c8c6aed220",
+      "start_ts": "2026-04-03T00:42:41.613250+00:00",
+      "end_ts": "2026-04-03T00:42:41.688287+00:00",
+      "latency_ms": 75.36,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "RecordEnriched",
+        "batch_id": "c956ec3c-214a-4b64-8758-608021aa9894",
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "analytics",
+      "event_type_in": "RecordEnriched",
+      "event_type_out": "AnalyticsRefreshed",
+      "event_id_out": "6b4eaf92-6f00-4e99-9512-bd6d36964f51",
+      "start_ts": "2026-04-03T00:42:41.691298+00:00",
+      "end_ts": "2026-04-03T00:42:41.691797+00:00",
+      "latency_ms": 0.36,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "AnalyticsRefreshed",
+        "batch_id": null,
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "analytics",
+      "event_type_in": "RecordEnriched",
+      "event_type_out": "AnalyticsRefreshed",
+      "event_id_out": "0ef17090-8ff5-4dc0-a9fb-745eae2ab270",
+      "start_ts": "2026-04-03T00:42:41.692798+00:00",
+      "end_ts": "2026-04-03T00:42:41.692798+00:00",
+      "latency_ms": 0.05,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "AnalyticsRefreshed",
+        "batch_id": null,
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "visualization",
+      "event_type_in": "AnalyticsRefreshed",
+      "event_type_out": "RenderComplete",
+      "event_id_out": "c09ac93e-5396-4fbf-8be7-9a3c2d5c28c0",
+      "start_ts": "2026-04-03T00:42:41.694799+00:00",
+      "end_ts": "2026-04-03T00:42:41.694799+00:00",
+      "latency_ms": 0.05,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "RenderComplete",
+        "batch_id": null,
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "visualization",
+      "event_type_in": "AnalyticsRefreshed",
+      "event_type_out": "RenderComplete",
+      "event_id_out": "4cca20da-707e-4136-adc7-18eb1e45551b",
+      "start_ts": "2026-04-03T00:42:41.696309+00:00",
+      "end_ts": "2026-04-03T00:42:41.696309+00:00",
+      "latency_ms": 0.06,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "RenderComplete",
+        "batch_id": null,
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "orchestration",
+      "event_type_in": "RenderComplete",
+      "event_type_out": "OrchestrationAck",
+      "event_id_out": "fe5f126a-8c94-428d-be7b-0fb026a2b5fe",
+      "start_ts": "2026-04-03T00:42:41.699814+00:00",
+      "end_ts": "2026-04-03T00:42:41.699814+00:00",
+      "latency_ms": 0.05,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "OrchestrationAck",
+        "batch_id": null,
+        "job_ids": null
+      }
+    },
+    {
+      "stage": "orchestration",
+      "event_type_in": "RenderComplete",
+      "event_type_out": "OrchestrationAck",
+      "event_id_out": "577037fa-624a-45c8-a714-4353853ff3e8",
+      "start_ts": "2026-04-03T00:42:41.700315+00:00",
+      "end_ts": "2026-04-03T00:42:41.700315+00:00",
+      "latency_ms": 0.03,
+      "success": true,
+      "error": null,
+      "payload_summary": {
+        "event_type": "OrchestrationAck",
+        "batch_id": "c956ec3c-214a-4b64-8758-608021aa9894",
+        "job_ids": null
+      }
+    }
+  ],
+  "e2e_latency_ms": 43535.47,
+  "run_start_iso": "2026-04-03T00:42:41.700815+00:00",
+  "redis_url_used": "(set)",
+  "counters": {
+    "pipeline:ingestion": {
+      "published_events": 1,
+      "delivered_events": 1,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 1,
+      "max_in_flight_seen": 1
+    },
+    "pipeline:normalization": {
+      "published_events": 1,
+      "delivered_events": 1,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 1,
+      "max_in_flight_seen": 1
+    },
+    "pipeline:skills": {
+      "published_events": 1,
+      "delivered_events": 2,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 1,
+      "max_in_flight_seen": 1
+    },
+    "pipeline:enrichment": {
+      "published_events": 2,
+      "delivered_events": 2,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 2,
+      "max_in_flight_seen": 1
+    },
+    "pipeline:analytics": {
+      "published_events": 2,
+      "delivered_events": 2,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 2,
+      "max_in_flight_seen": 1
+    },
+    "pipeline:visualization": {
+      "published_events": 2,
+      "delivered_events": 2,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 2,
+      "max_in_flight_seen": 1
+    },
+    "pipeline:orchestration": {
+      "published_events": 2,
+      "delivered_events": 2,
+      "handler_failures": 0,
+      "queue_depth": 0,
+      "in_flight": 0,
+      "max_queue_depth_seen": 2,
+      "max_in_flight_seen": 1
+    }
+  }
 }

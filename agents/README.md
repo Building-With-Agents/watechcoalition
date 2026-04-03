@@ -8,7 +8,18 @@ From repo root with venv activated:
 
 ```bash
 pip install -r agents/requirements.txt
-python agents/pipeline_runner.py
+
+# Seed local DB with enriched data (first time)
+python scripts/pg-seed-data/seed_agent_data.py
+
+# Flywheel pipeline (production)
+python agents/scripts/batch_ingest.py                          # Loop 1: ingest
+python agents/scripts/run_processing_loop.py --batch-size 50   # Loop 2: process
+
+# Demo run (fixture data only, Week 2 demo)
+# python agents/pipeline_runner.py
+
+# Streamlit dashboard
 streamlit run agents/dashboard/app.py
 # (alias) streamlit run agents/dashboard/streamlit_app.py
 ```

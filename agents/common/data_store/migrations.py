@@ -95,6 +95,8 @@ _JOB_POSTINGS_ALTER_STATEMENTS = [
     # Fuzzy dedup (IMP-018): cached embedding + content hash for same-company window search
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS dedup_text_hash TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS dedup_embedding vector(1536)",
+    # Zip code (flywheel #161): resolved during normalization from posting or postal_geo_data lookup
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
 ]
 
 # Legacy Prisma cleanup: drop FK constraints and make NOT NULL columns nullable (#159).
@@ -115,6 +117,8 @@ _JOB_POSTINGS_LEGACY_CLEANUP = [
 _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS requirements TEXT",
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS responsibilities TEXT",
+    "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
+    "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
 ]
 
 # Company HQ / location fields for enrichment resolve_location (#110)

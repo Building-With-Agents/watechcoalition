@@ -32,6 +32,10 @@ ignore = [
 "scripts/dedup_metrics_report.py" = ["T201"]
 "agents/scripts/ingest_duplicate_demo.py" = ["T201"]
 "scripts/ingest_duplicate_demo.py" = ["T201"]
+"agents/scripts/batch_ingest.py" = ["T201"]
+"scripts/batch_ingest.py" = ["T201"]
+"agents/scripts/run_processing_loop.py" = ["T201"]
+"scripts/run_processing_loop.py" = ["T201"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["agents"]
