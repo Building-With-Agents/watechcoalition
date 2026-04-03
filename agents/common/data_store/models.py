@@ -333,6 +333,19 @@ class EmployerProfile(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
+class JobPosting(Base):
+    """Minimal ORM anchor for ``dbo.job_postings`` PK so :class:`PostingFreshness` FK resolves.
+
+    The live table is pgloader-seeded with many columns; only ``job_posting_id`` is mapped for
+    SQLAlchemy metadata and ``create_all`` dependency ordering.
+    """
+
+    __tablename__ = "job_postings"
+    __table_args__ = {"schema": "dbo"}
+
+    job_posting_id: Mapped[str] = mapped_column(Text, primary_key=True)
+
+
 # ---------------------------------------------------------------------------
 # Analytics (Week 7) — posting freshness
 # ---------------------------------------------------------------------------
