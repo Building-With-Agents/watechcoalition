@@ -1,8 +1,8 @@
 {
   "success": false,
   "error": "Redis connection failed: No module named 'redis'",
-  "correlation_id": "redis-pipe-34e25a37",
+  "correlation_id": "redis-pipe-7bd8b5d3",
   "stages": [],
   "e2e_latency_ms": null,
-  "run_start_iso": "2026-04-03T21:21:32.173257+00:00"
+  "run_start_iso": "2026-04-03T21:47:53.572379+00:00"
 }
