@@ -23,11 +23,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
+import structlog
+
 from agents.common.base_agent import BaseAgent
 
+log = structlog.get_logger()
+
 # Proactive inter-request delay to avoid Azure OpenAI 429 rate limits.
+# Default raised from 0.5s to 2.0s to reduce sustained burst on low-TPM deployments.
 # Set SKILLS_EXTRACTION_DELAY=0 to disable; increase for lower-tier deployments.
-_INTER_LLM_DELAY = float(os.environ.get("SKILLS_EXTRACTION_DELAY", "0.5"))
+_INTER_LLM_DELAY = float(os.environ.get("SKILLS_EXTRACTION_DELAY", "2.0"))
 from agents.common.data_store import check_db_connection, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
@@ -259,13 +264,25 @@ class SQLAlchemyExtractionStore:
     """Persist extracted intelligence rows using the canonical ORM models."""
 
     def save(self, results: Sequence[ExtractionResult]) -> None:
-        if not results or not check_db_connection():
+        if not results:
+            log.warning("extraction_store_save_skip_empty_results")
+            return
+        if not check_db_connection():
+            log.error("extraction_store_save_skip_no_db", result_count=len(results))
             return
 
+        saved = 0
+        skipped_no_id = 0
         with session_scope() as session:
             for result in results:
                 normalized_job_id = result.work_item.normalized_job_id
                 if normalized_job_id is None:
+                    skipped_no_id += 1
+                    log.warning(
+                        "extraction_store_skip_no_normalized_job_id",
+                        job_id=result.work_item.job_id,
+                        title=result.work_item.title[:80] if result.work_item.title else "",
+                    )
                     continue
 
                 existing_rows = (
@@ -304,6 +321,14 @@ class SQLAlchemyExtractionStore:
                 row.extraction_failed = result.extraction_status == "failed"
                 em = result.extraction_metadata
                 row.extraction_metadata = em if isinstance(em, dict) else None
+                saved += 1
+
+        log.info(
+            "extraction_store_save_complete",
+            saved=saved,
+            skipped_no_normalized_job_id=skipped_no_id,
+            total=len(results),
+        )
 
 
 class SkillsExtractionAgent(BaseAgent):

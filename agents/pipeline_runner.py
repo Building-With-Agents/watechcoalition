@@ -367,7 +367,7 @@ def main() -> None:
 
         entries = run_pipeline(PIPELINE, correlation_id, trigger_payload)
 
-        # Write run log
+        # Write run log — TODO: migrate dashboard to read from DB instead of JSON
         _OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
         _RUN_LOG_PATH.write_text(
             json.dumps(entries, indent=2, default=str),

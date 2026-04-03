@@ -25,15 +25,17 @@ from typing import Any
 
 import structlog
 
-from agents.common.types import JobRecord, SkillRecord, SpanRecord, TaxonomyResult, ToolRecord
+from agents.common.types import JobRecord, SkillRecord, TaxonomyResult, ToolRecord
+from agents.skills_extraction.extractors.span_utils import auto_correct_span
 from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
 from agents.skills_extraction.prompts import build_skills_prompt
 
 log = structlog.get_logger()
 
-# Back-off delays for 429 in seconds
-RATE_LIMIT_BACKOFF_SECS = (1, 2, 4)
-RATE_LIMIT_MAX_CYCLES = 3
+# Back-off delays for 429 in seconds. Azure OpenAI typically asks for 10-30s.
+# Jitter added at runtime to prevent thundering herd.
+RATE_LIMIT_BACKOFF_SECS = (5, 15, 30, 60)
+RATE_LIMIT_MAX_CYCLES = 4
 
 DEFAULT_SKILL_CONFIDENCE_THRESHOLD = 0.75
 
@@ -81,31 +83,13 @@ def _skill_dict_to_record(raw: dict[str, Any]) -> SkillRecord | None:
     from pydantic import ValidationError
 
     try:
-        span = raw.get("source_span")
-        if not isinstance(span, dict):
+        span_raw = raw.get("source_span")
+        if not isinstance(span_raw, dict):
             return None
-        text = str(span.get("text", ""))
-        field_source = span.get("field_source", "description")
-        start_char = int(span.get("start_char", 0))
-        end_char = int(span.get("end_char", 0))
-        expected_end = start_char + len(text)
-        span_auto_corrected = False
-        original_end_char = None
-        if end_char != expected_end:
-            log.debug(
-                "skills_extraction_span_auto_correct",
-                label=raw.get("label"),
-                original_end_char=end_char,
-                corrected_end_char=expected_end,
-            )
-            span_auto_corrected = True
-            original_end_char = end_char
-            end_char = expected_end
-        source_span = SpanRecord(
-            text=text,
-            field_source=field_source,
-            start_char=start_char,
-            end_char=end_char,
+        source_span, span_auto_corrected, original_end_char = auto_correct_span(
+            span_raw,
+            dimension="skills",
+            label=str(raw.get("label", "")),
         )
         return SkillRecord(
             skill_name=str(raw.get("skill_name") or raw.get("label", "")).strip() or "unknown",
@@ -181,20 +165,30 @@ def extract_skills(
             metadata["error_reason"] = str(e)
             return [], metadata
 
-    # 429: exponential back-off up to RATE_LIMIT_MAX_CYCLES
+    # 429: back-off with jitter, always respecting server Retry-After header
+    import random
+
     is_rate_limited = not meta.get("success") and (
         meta.get("is_rate_limit")
         or meta.get("retry_after_seconds") is not None
         or "429" in str(meta.get("error_reason", ""))
     )
     if is_rate_limited:
-        for cycle, delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
+        for cycle, fallback_delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
             if cycle >= RATE_LIMIT_MAX_CYCLES:
                 metadata["alert_skills_extraction"] = True
                 return [], metadata
-            # Honor server Retry-After if provided, otherwise use backoff sequence
+            # Always honor server Retry-After when available; add jitter to prevent burst
             server_delay = meta.get("retry_after_seconds")
-            actual_delay = server_delay if server_delay and cycle == 0 else delay
+            base_delay = server_delay if server_delay else fallback_delay
+            jitter = random.uniform(0.5, min(base_delay * 0.3, 5.0))
+            actual_delay = base_delay + jitter
+            log.info(
+                "skills_extraction_429_backoff",
+                cycle=cycle,
+                delay_seconds=round(actual_delay, 1),
+                server_retry_after=server_delay,
+            )
             time.sleep(actual_delay)
             try:
                 text, meta = _do_invoke()
