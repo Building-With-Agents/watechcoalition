@@ -29,8 +29,9 @@ python agents/scripts/batch_ingest.py --dry-run
 python agents/scripts/run_processing_loop.py --dry-run
 ```
 
-The seed script is **idempotent** — you can run it multiple times safely.
-It truncates all tables before inserting, so you always get a clean state.
+**`seed_pg_database.py`** is **idempotent** for a full refresh: it truncates (nearly) all tables, then reloads reference fixtures — safe to re-run; you always get a clean reference baseline.
+
+**`seed_agent_data.py`** is a **separate** command (step 5): it UPSERTs pipeline snapshot rows from `agent-fixtures/*.json` without truncating reference tables. Run it after step 4.
 
 ## What Gets Seeded
 
@@ -68,15 +69,21 @@ The seed script populates **40 reference tables** with ~56,000 rows:
 
 ## How It Works
 
-The seed script (`seed_pg_database.py`) does everything in one command:
+### `seed_pg_database.py` (step 4 — reference data only)
+
+This script does **all reference seeding** in **one** command (it does **not** load `agent-fixtures/`; use step 5 for that):
 
 1. **Creates schema** — runs `schema.sql` (DDL for all `dbo.*` tables, extensions, indexes)
 2. **Disables FK triggers** — allows loading in any order without constraint violations
 3. **Truncates all tables** — ensures idempotent re-runs
-4. **Loads JSON fixtures** — inserts data in FK-safe tier order (parents before children)
+4. **Loads JSON fixtures** — inserts data from `fixtures/*.json` in FK-safe tier order (parents before children)
 5. **Re-enables FK triggers** — restores referential integrity enforcement
-6. **Runs agent migrations** — creates agent-managed tables + adds Phase 1 columns to `job_postings`
-7. **Verifies row counts** — compares actual counts against expected from `metadata.json`
+6. **Runs agent migrations** — creates empty agent-managed tables + adds Phase 1 columns to `job_postings`
+7. **Verifies row counts** — compares actual counts against `fixtures/metadata.json`
+
+### `seed_agent_data.py` (step 5 — pipeline snapshot)
+
+Run **after** step 4. Loads `agent-fixtures/*.json` into staging/enrichment tables (and additional `job_postings` rows) via `INSERT … ON CONFLICT DO NOTHING`. Row counts are documented in `agent-fixtures/metadata.json`.
 
 ## File Structure
 
