@@ -369,6 +369,40 @@ def test_current_wins_completeness_flips_contract(mock_embed: MagicMock) -> None
 
 
 @patch("agents.enrichment.dedup.fuzzy_dedup._embed_texts_azure")
+def test_current_wins_by_field_count_not_weighted_score(mock_embed: MagicMock) -> None:
+    session = MagicMock()
+    cur = _base_current_row(dedup_hash=None, dedup_emb=None, salary=None)
+    cur["zip"] = "98101"
+    cur["county"] = "King"
+    mock_embed.return_value = [_unit_vec_xy(1.0)]
+    anchor = cur["publish_date"]
+    assert isinstance(anchor, datetime)
+    survivor = _survivor_row(
+        job_posting_id="00000000-0000-0000-0000-000000000002",
+        duplicate_cluster_id=None,
+        similarity=1.0,
+        salary_range="100k-120k",
+        location="TX",
+        job_description="",
+        publish_date=anchor - timedelta(days=5),
+    )
+
+    session.execute.side_effect = [
+        _exec_first(cur),
+        MagicMock(),
+        _exec_all([survivor]),
+    ]
+
+    out = run_fuzzy_dedup(session, cur["job_posting_id"], threshold=0.99)
+
+    assert out.stub is False
+    assert out.is_duplicate is False
+    assert out.survivor_job_posting_id == cur["job_posting_id"]
+    assert out.matched_job_posting_id == survivor["job_posting_id"]
+    assert out.duplicate_cluster_id is not None
+
+
+@patch("agents.enrichment.dedup.fuzzy_dedup._embed_texts_azure")
 def test_window_params_half_open(mock_embed: MagicMock) -> None:
     session = MagicMock()
     anchor = datetime(2025, 6, 15, 12, 0, 0, tzinfo=timezone.utc)
