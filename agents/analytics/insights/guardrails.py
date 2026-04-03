@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 STALENESS_THRESHOLD_MINUTES = int(os.getenv("STALENESS_THRESHOLD_MINUTES", "15"))
+CARDINALITY_CAP = int(os.getenv("CARDINALITY_CAP", "500"))
 
 
 def _utc_now() -> datetime:
@@ -48,4 +49,36 @@ def build_stale_alert_payload(
         "computed_at": ca.isoformat(),
         "queried_at": qa.isoformat(),
         "age_minutes": age_minutes,
+    }
+
+
+def cap_cardinality(values: list[str], limit: int | None = None) -> tuple[list[str], bool]:
+    """Cap a list of category labels; overflow is coalesced into a single ``\"Other\"`` bucket.
+
+    If ``limit`` is ``None``, uses :data:`CARDINALITY_CAP` (read on each call so tests can monkeypatch).
+
+    Returns ``(capped_list, needs_warning)``. When capping, the result is ``values[:limit] + [\"Other\"]`` —
+    ``\"Other\"`` appears exactly once at the end.
+    """
+    cap = CARDINALITY_CAP if limit is None else limit
+    if len(values) <= cap:
+        return (list(values), False)
+    capped = list(values[:cap]) + ["Other"]
+    return (capped, True)
+
+
+def build_cardinality_warning_payload(
+    table: str,
+    column: str,
+    original_count: int,
+    cap: int,
+) -> dict[str, Any]:
+    """Build a ``CardinalityWarning``-shaped payload dict (see ``typed_events`` / runbook)."""
+    return {
+        "event_type": "CardinalityWarning",
+        "table": table,
+        "column": column,
+        "cardinality_count": original_count,
+        "threshold": cap,
+        "triggered_at": _utc_now().isoformat(),
     }

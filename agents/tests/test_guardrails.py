@@ -8,7 +8,12 @@ from unittest.mock import patch
 import pytest
 
 import agents.analytics.insights.guardrails as guardrails
-from agents.analytics.insights.guardrails import build_stale_alert_payload, check_staleness
+from agents.analytics.insights.guardrails import (
+    build_cardinality_warning_payload,
+    build_stale_alert_payload,
+    cap_cardinality,
+    check_staleness,
+)
 
 
 def test_check_staleness_fresh_returns_false(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -52,3 +57,59 @@ def test_staleness_threshold_configurable(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.setattr(guardrails, "STALENESS_THRESHOLD_MINUTES", 1)
     with patch.object(guardrails, "_utc_now", return_value=fixed_now):
         assert check_staleness("t", computed) is True
+
+
+def test_cap_cardinality_under_limit_unchanged() -> None:
+    values = [f"v{i}" for i in range(10)]
+    out, warn = cap_cardinality(values, limit=50)
+    assert out == values
+    assert warn is False
+
+
+def test_cap_cardinality_over_limit_appends_other() -> None:
+    values = [f"v{i}" for i in range(12)]
+    out, warn = cap_cardinality(values, limit=10)
+    assert warn is True
+    assert out == values[:10] + ["Other"]
+    assert out[-1] == "Other"
+
+
+def test_cap_cardinality_exactly_at_limit_no_warning() -> None:
+    values = [f"v{i}" for i in range(10)]
+    out, warn = cap_cardinality(values, limit=10)
+    assert warn is False
+    assert out == values
+
+
+def test_cap_cardinality_other_appears_once_when_many_coalesced() -> None:
+    values = [f"v{i}" for i in range(1000)]
+    out, warn = cap_cardinality(values, limit=500)
+    assert warn is True
+    assert out.count("Other") == 1
+    assert out[-1] == "Other"
+    assert len(out) == 501
+
+
+def test_build_cardinality_warning_payload_shape() -> None:
+    fixed = datetime(2026, 3, 1, 9, 0, 0, tzinfo=timezone.utc)
+    with patch.object(guardrails, "_utc_now", return_value=fixed):
+        payload = build_cardinality_warning_payload(
+            "skill_demand_weekly",
+            "skill_label",
+            1200,
+            500,
+        )
+    assert payload["event_type"] == "CardinalityWarning"
+    assert payload["table"] == "skill_demand_weekly"
+    assert payload["column"] == "skill_label"
+    assert payload["cardinality_count"] == 1200
+    assert payload["threshold"] == 500
+    assert payload["triggered_at"] == fixed.isoformat()
+
+
+def test_cardinality_cap_configurable(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(guardrails, "CARDINALITY_CAP", 3)
+    values = ["a", "b", "c", "d", "e"]
+    out, warn = cap_cardinality(values)
+    assert warn is True
+    assert out == ["a", "b", "c", "Other"]
