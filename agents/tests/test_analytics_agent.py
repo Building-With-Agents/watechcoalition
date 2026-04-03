@@ -39,12 +39,15 @@ class TestAnalyticsAgent:
         assert out.agent_id == "analytics-agent"
 
     def test_process_includes_batch_data(self, enriched_event: EventEnvelope) -> None:
-        """Output payload contains the batch-level fixture keys."""
+        """Output payload contains AnalyticsRefreshed Week 7 count fields."""
         agent = AnalyticsAgent()
         agent.health_check()  # pre-load fixture
         out = agent.process(enriched_event)
         p = out.payload
-        assert "top_skills" in p
-        assert "seniority_distribution" in p
-        assert "run_id" in p
+        assert p["event_type"] == "AnalyticsRefreshed"
+        assert p["batch_id"] == enriched_event.payload["batch_id"]
+        assert "refreshed_at" in p
+        assert "freshness_record_count" in p
+        assert "trajectory_map_count" in p
+        assert "summaries_generated_count" in p
         assert p["triggered_by_batch_id"] == enriched_event.payload["batch_id"]
