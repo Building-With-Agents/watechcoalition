@@ -10,9 +10,9 @@ Prerequisites:
   - PYTHON_DATABASE_URL for database staging
 
 Usage (from repo root):
-  python agents/scripts/batch_ingest_borderplex.py                # run all queries
-  python agents/scripts/batch_ingest_borderplex.py --dry-run      # show plan without API calls
-  python agents/scripts/batch_ingest_borderplex.py --delay 10     # seconds between queries
+  python agents/scripts/batch_ingest.py                # run all queries
+  python agents/scripts/batch_ingest.py --dry-run      # show plan without API calls
+  python agents/scripts/batch_ingest.py --delay 10     # seconds between queries
 """
 
 from __future__ import annotations
@@ -76,14 +76,19 @@ def _load_api_keys() -> list[str]:
 
 
 def _build_region_config(query: dict) -> dict:
-    """Build a RegionConfig dict from a YAML query entry. No location restriction."""
+    """Build a RegionConfig dict from a YAML query entry.
+
+    Supports optional ``location`` field for geo-targeted queries
+    (e.g. ``location: "El Paso, TX"``).
+    """
+    location = query.get("location", "")
     return {
         "region_id": f"batch-{query['name']}",
         "display_name": query["name"],
-        "query_location": "",
-        "radius_miles": 9999,
-        "states": [],
-        "countries": ["US"],
+        "query_location": location,
+        "radius_miles": query.get("radius_miles", 9999),
+        "states": query.get("states", []),
+        "countries": query.get("countries", ["US"]),
         "sources": ["jsearch"],
         "role_categories": [],
         "keywords": query["keywords"],

@@ -6,7 +6,7 @@ normalization, skills extraction, and enrichment. Pauses between batches
 to respect LLM rate limits. Exits when no pending records remain.
 
 This is Loop 2 of the flywheel pattern (see issue #161):
-  Loop 1: batch_ingest_borderplex.py fills raw_ingested_jobs
+  Loop 1: batch_ingest.py fills raw_ingested_jobs
   Loop 2: this script processes them at a sustainable pace
 
 Prerequisites:

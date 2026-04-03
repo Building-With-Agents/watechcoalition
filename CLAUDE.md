@@ -510,8 +510,17 @@ py -3.11 -m venv agents/.venv               # Windows
 agents\.venv\Scripts\Activate.ps1            # Windows PowerShell
 pip install -r agents/requirements.txt
 
-# Run the walking skeleton pipeline (Week 2+) — single-pass demo
-python agents/pipeline_runner.py
+# --- Flywheel pipeline (production) — decoupled ingestion + processing ---
+# Loop 1: Bulk ingest from JSearch (budget-aware, key rotation)
+python agents/scripts/batch_ingest.py              # run all queries from config
+python agents/scripts/batch_ingest.py --dry-run    # show plan without API calls
+
+# Loop 2: Paced processing (normalize → extract → enrich)
+python agents/scripts/run_processing_loop.py --batch-size 50 --delay 2
+python agents/scripts/run_processing_loop.py --dry-run        # show pending counts
+
+# Seed local DB with enriched data (dev setup)
+python scripts/pg-seed-data/seed_agent_data.py
 
 # Run the Streamlit dashboard
 streamlit run agents/dashboard/streamlit_app.py
@@ -519,18 +528,12 @@ streamlit run agents/dashboard/streamlit_app.py
 # Run agent tests
 python -m pytest agents/tests/ -v
 
-# --- Flywheel pattern (Week 6+) — decoupled ingestion + processing ---
-# Loop 1: Bulk ingest from JSearch (budget-aware, key rotation)
-python agents/scripts/batch_ingest_borderplex.py              # run all queries
-python agents/scripts/batch_ingest_borderplex.py --dry-run    # show plan without API calls
-
-# Loop 2: Paced processing (normalize → extract → enrich)
-python agents/scripts/run_processing_loop.py --batch-size 50 --delay 2
-python agents/scripts/run_processing_loop.py --dry-run        # show pending counts
-
-# Run a single agent manually (Week 3+)
+# Run a single agent manually
 # python -m agents.ingestion.agent --source jsearch --limit 50
 # python -m agents.ingestion.agent --source crawl4ai --limit 50
+
+# Demo run: Walking skeleton single-pass with fixture data (Week 2 demo only)
+# python agents/pipeline_runner.py
 ```
 
 ---

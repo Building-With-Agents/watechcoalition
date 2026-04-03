@@ -383,7 +383,7 @@ class JobRecord(BaseModel):
 
 The monolithic `pipeline_runner.py` chains all agents in a single pass, which couples ingestion throughput (API budget/rate-limited) to processing throughput (LLM rate-limited). The **flywheel pattern** decouples these into two independent loops connected via the database as a queue:
 
-**Loop 1 — Batch Ingest** (`agents/scripts/batch_ingest_borderplex.py`):
+**Loop 1 — Batch Ingest** (`agents/scripts/batch_ingest.py`):
 - Reads query configuration from `agents/config/ingestion_queries.yaml`
 - Rotates API keys (`JSEARCH_API_KEY`, `JSEARCH_API_KEY_2`) when budget is exhausted or 429 received
 - Stages raw records to `raw_ingested_jobs` with `processing_status = 'pending'`

@@ -71,7 +71,7 @@ Sources (JSearch API + Crawl4AI)
 Decouples ingestion (API budget-constrained) from processing (LLM rate-limit-constrained) via the database as a queue. See issue #161.
 
 ```
-Loop 1: Batch Ingest (batch_ingest_borderplex.py)
+Loop 1: Batch Ingest (batch_ingest.py)
     JSearch API  ──→  raw_ingested_jobs (processing_status='pending')
     (budget-aware, key rotation, ingestion_queries.yaml config)
 
@@ -259,10 +259,10 @@ For production-scale ingestion (500–1,500 records), use the batch ingestion sc
 
 ```bash
 # Preview what will be ingested (no API calls)
-python agents/scripts/batch_ingest_borderplex.py --dry-run
+python agents/scripts/batch_ingest.py --dry-run
 
 # Run all queries from config (with 5s delay between queries)
-python agents/scripts/batch_ingest_borderplex.py --delay 5
+python agents/scripts/batch_ingest.py --delay 5
 ```
 
 The script reads query configuration from `agents/config/ingestion_queries.yaml`, which defines keyword groups (e.g., `react-frontend`, `java-enterprise`, `ml-scientist`) and how many pages to fetch per group.
@@ -404,7 +404,7 @@ The processing loop (`run_processing_loop.py`) is flywheel Loop 2 — it drains 
 | Scenario | Use |
 |----------|-----|
 | Quick demo with <50 records | `pipeline_runner.py` (Option A) |
-| Production run with 500+ records | `batch_ingest_borderplex.py` then `run_processing_loop.py` (Option B) |
+| Production run with 500+ records | `batch_ingest.py` then `run_processing_loop.py` (Option B) |
 | Re-process after code changes | `run_processing_loop.py` only (raw records already staged) |
 
 ### Preview pending work
@@ -484,7 +484,7 @@ For production runs with large record counts:
 
 ```bash
 # Step 1: Bulk ingest (fills the queue)
-python agents/scripts/batch_ingest_borderplex.py --delay 5
+python agents/scripts/batch_ingest.py --delay 5
 
 # Step 2: Verify raw records staged
 python agents/scripts/db_check.py counts
@@ -565,7 +565,7 @@ python agents/scripts/db_check.py reset
 python agents/pipeline_runner.py
 
 # 5b. Option B — Flywheel (production-scale)
-python agents/scripts/batch_ingest_borderplex.py --delay 5
+python agents/scripts/batch_ingest.py --delay 5
 python agents/scripts/run_processing_loop.py --batch-size 50 --delay 2
 
 # 6. Verify populated data
