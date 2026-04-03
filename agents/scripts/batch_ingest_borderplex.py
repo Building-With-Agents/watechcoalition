@@ -123,7 +123,7 @@ def main() -> None:
 
     if args.dry_run:
         print(f"\n{'='*60}")
-        print(f"Batch Ingestion Plan")
+        print("Batch Ingestion Plan")
         print(f"{'='*60}")
         for i, q in enumerate(queries, 1):
             pages = q.get("pages", 10)

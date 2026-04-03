@@ -220,7 +220,7 @@ def main() -> None:
             time.sleep(args.delay)
 
     enriched_final = _count_enriched()
-    print(f"\nProcessing complete.")
+    print("\nProcessing complete.")
     print(f"  Iterations: {iteration}")
     print(f"  Records processed: {total_processed}")
     print(f"  Errors: {total_errors}")
