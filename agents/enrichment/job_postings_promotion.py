@@ -20,6 +20,7 @@ Requires non-null ``company_id`` on the target row; otherwise skips with a log l
 from __future__ import annotations
 
 import json
+import uuid
 from typing import Any
 
 import structlog
@@ -124,6 +125,145 @@ _LIST_CLUSTER_MEMBER_IDS_SQL = text(
     ORDER BY jp.job_posting_id::text
     """
 )
+
+
+_RESOLVE_COMPANY_BY_NAME_SQL = text(
+    """
+    SELECT company_id::text AS company_id
+    FROM dbo.companies
+    WHERE LOWER(TRIM(company_name)) = LOWER(TRIM(:company_name))
+    LIMIT 1
+    """
+)
+
+_INSERT_PLACEHOLDER_COMPANY_SQL = text(
+    """
+    INSERT INTO dbo.companies (company_id, company_name, is_approved)
+    VALUES (CAST(:company_id AS uuid), :company_name, FALSE)
+    ON CONFLICT (company_id) DO NOTHING
+    """
+)
+
+
+_INSERT_JOB_POSTING_SQL = text(
+    """
+    INSERT INTO dbo.job_postings (
+        job_posting_id, company_id,
+        job_title, job_description, employment_type,
+        location, salary_range, source, external_id,
+        ingestion_run_id, status
+    ) VALUES (
+        CAST(:job_posting_id AS uuid),
+        CAST(:company_id AS uuid),
+        :job_title, :job_description, :employment_type,
+        :location, :salary_range, :source, :external_id,
+        :ingestion_run_id, :status
+    )
+    ON CONFLICT (job_posting_id) DO NOTHING
+    """
+)
+
+_LOAD_NORMALIZED_JOB_SQL = text(
+    """
+    SELECT id, source, external_id, ingestion_run_id,
+           title, company, description,
+           city, state_province, country,
+           is_remote, work_arrangement,
+           employment_type, date_posted,
+           salary_min, salary_max, salary_currency, salary_period
+    FROM dbo.normalized_jobs
+    WHERE id = :nj_id
+    LIMIT 1
+    """
+)
+
+
+def _resolve_or_create_company(session: Session, company_name: str) -> str:
+    """Match company by name or create a placeholder. Returns company_id as string."""
+    if not company_name or not company_name.strip():
+        placeholder_id = str(uuid.uuid4())
+        session.execute(
+            _INSERT_PLACEHOLDER_COMPANY_SQL,
+            {"company_id": placeholder_id, "company_name": "Unknown"},
+        )
+        return placeholder_id
+
+    row = session.execute(
+        _RESOLVE_COMPANY_BY_NAME_SQL, {"company_name": company_name}
+    ).mappings().first()
+    if row:
+        return str(row["company_id"])
+
+    new_id = str(uuid.uuid4())
+    session.execute(
+        _INSERT_PLACEHOLDER_COMPANY_SQL,
+        {"company_id": new_id, "company_name": company_name.strip()},
+    )
+    log.info(
+        "enrichment_promotion_company_placeholder_created",
+        company_name=company_name.strip(),
+        company_id=new_id,
+    )
+    return new_id
+
+
+def _insert_job_posting_from_normalized(
+    session: Session, normalized_job_id: int
+) -> dict[str, Any] | None:
+    """Create a new job_postings row from normalized_jobs data. Returns resolved dict or None."""
+    nj = session.execute(
+        _LOAD_NORMALIZED_JOB_SQL, {"nj_id": normalized_job_id}
+    ).mappings().first()
+    if not nj:
+        log.warning(
+            "enrichment_promotion_normalized_job_not_found",
+            normalized_job_id=normalized_job_id,
+        )
+        return None
+
+    company_id = _resolve_or_create_company(session, nj["company"] or "")
+    job_posting_id = str(uuid.uuid4())
+    location_parts = [p for p in (nj["city"], nj["state_province"], nj["country"]) if p]
+    location_str = ", ".join(location_parts) or "Unknown"
+    salary_parts = []
+    if nj["salary_min"] is not None:
+        salary_parts.append(str(nj["salary_min"]))
+    if nj["salary_max"] is not None:
+        salary_parts.append(str(nj["salary_max"]))
+    salary_range = "-".join(salary_parts) if salary_parts else "N/A"
+
+    session.execute(
+        _INSERT_JOB_POSTING_SQL,
+        {
+            "job_posting_id": job_posting_id,
+            "company_id": company_id,
+            "job_title": (nj["title"] or "")[:255],
+            "job_description": nj["description"] or "",
+            "employment_type": (nj["employment_type"] or "full-time")[:255],
+            "location": location_str[:255],
+            "salary_range": salary_range[:45],
+            "source": nj["source"],
+            "external_id": nj["external_id"],
+            "ingestion_run_id": nj["ingestion_run_id"],
+            "status": "open",
+        },
+    )
+    log.info(
+        "enrichment_promotion_job_posting_inserted",
+        normalized_job_id=normalized_job_id,
+        job_posting_id=job_posting_id,
+        company_id=company_id,
+    )
+    return {
+        "job_posting_id": job_posting_id,
+        "company_id": company_id,
+        "date_posted": nj["date_posted"],
+        "city": nj["city"],
+        "state_province": nj["state_province"],
+        "country": nj["country"],
+        "is_remote": nj["is_remote"],
+        "work_arrangement": nj["work_arrangement"],
+    }
 
 
 def resolve_job_posting_row(session: Session, normalized_job_id: int) -> dict[str, Any] | None:
@@ -350,11 +490,13 @@ def apply_enrichment_to_job_postings(
     """
     resolved = resolve_job_posting_row(session, normalized_job_id)
     if not resolved:
-        log.info(
-            "enrichment_promotion_no_job_posting",
-            normalized_job_id=normalized_job_id,
-        )
-        return False
+        resolved = _insert_job_posting_from_normalized(session, normalized_job_id)
+        if not resolved:
+            log.info(
+                "enrichment_promotion_no_job_posting",
+                normalized_job_id=normalized_job_id,
+            )
+            return False
 
     job_posting_id = resolved.get("job_posting_id")
     company_id = resolved.get("company_id")

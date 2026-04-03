@@ -50,10 +50,14 @@ def tables() -> None:
 def counts() -> None:
     """Row counts for agent-managed tables."""
     _run_query(
-        "SELECT 'raw_ingested_jobs' AS tbl, COUNT(*) AS cnt FROM dbo.raw_ingested_jobs "
+        "SELECT 'job_ingestion_runs' AS tbl, COUNT(*) AS cnt FROM dbo.job_ingestion_runs "
+        "UNION ALL SELECT 'raw_ingested_jobs', COUNT(*) FROM dbo.raw_ingested_jobs "
         "UNION ALL SELECT 'normalized_jobs', COUNT(*) FROM dbo.normalized_jobs "
-        "UNION ALL SELECT 'job_ingestion_runs', COUNT(*) FROM dbo.job_ingestion_runs "
-        "UNION ALL SELECT 'normalization_quarantine', COUNT(*) FROM dbo.normalization_quarantine"
+        "UNION ALL SELECT 'normalization_quarantine', COUNT(*) FROM dbo.normalization_quarantine "
+        "UNION ALL SELECT 'extracted_intelligence', COUNT(*) FROM dbo.extracted_intelligence "
+        "UNION ALL SELECT 'llm_audit_log', COUNT(*) FROM dbo.llm_audit_log "
+        "UNION ALL SELECT 'employer_profiles', COUNT(*) FROM dbo.employer_profiles "
+        "UNION ALL SELECT 'job_postings', COUNT(*) FROM dbo.job_postings"
     )
 
 
@@ -66,21 +70,28 @@ def migrate() -> None:
 
 
 def reset() -> None:
-    """Truncate all agent-managed tables for a clean re-run.
+    """Truncate all agent-managed tables for a clean pipeline re-run.
 
     FK-safe order: child tables first, then parent tables.
+    Preserves: llm_audit_log (cost data persists across runs),
+    socc, companies, industry_sectors, technology_areas, skills (reference data).
     """
-    # Only ingestion + normalization agent tables (Phase 1 Week 03)
     tables_in_order = [
+        "dbo.extracted_intelligence",
+        "dbo.employer_profiles",
         "dbo.normalization_quarantine",
         "dbo.normalized_jobs",
         "dbo.raw_ingested_jobs",
         "dbo.job_ingestion_runs",
+        "dbo.job_postings",
     ]
-    print("This will DELETE all data in agent tables:")
+    print("This will DELETE all data in these agent tables:")
     for t in tables_in_order:
         print(f"  - {t}")
-    confirm = input("Type 'yes' to confirm: ").strip().lower()
+    print("\nPreserved (not truncated):")
+    print("  - dbo.llm_audit_log (cost audit data)")
+    print("  - dbo.socc, companies, industry_sectors, technology_areas, skills (reference data)")
+    confirm = input("\nType 'yes' to confirm: ").strip().lower()
     if confirm != "yes":
         print("Aborted.")
         return
@@ -88,9 +99,12 @@ def reset() -> None:
     engine = get_engine()
     with engine.begin() as conn:
         for t in tables_in_order:
-            conn.execute(text(f"TRUNCATE {t} CASCADE"))
-            print(f"  truncated {t}")
-    print("Reset complete — all agent tables are empty.")
+            try:
+                conn.execute(text(f"TRUNCATE {t} CASCADE"))
+                print(f"  truncated {t}")
+            except Exception as exc:
+                print(f"  skipped {t} ({exc})")
+    print("\nReset complete — agent pipeline tables are empty. Ready for fresh run.")
 
 
 def query(sql: str) -> None:

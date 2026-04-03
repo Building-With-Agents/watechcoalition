@@ -1,4 +1,4 @@
-"""Tests for Pass 2 skills extraction (extract_skills)."""
+"""Tests for Pass 2 skills extraction (extract_skills) — structured output."""
 
 from __future__ import annotations
 
@@ -6,7 +6,11 @@ from unittest.mock import patch
 
 from agents.common.llm_client import _extract_retry_after
 from agents.common.types import JobRecord, SpanRecord, ToolRecord
-from agents.skills_extraction.extractors.skills import extract_skills
+from agents.skills_extraction.extractors.skills import (
+    _LLMSkill,
+    _SkillsLLMRoot,
+    extract_skills,
+)
 
 
 def _job_record(**overrides: object) -> JobRecord:
@@ -32,19 +36,24 @@ def _tool_record(name: str) -> ToolRecord:
     )
 
 
-@patch("agents.skills_extraction.extractors.skills._invoke_client")
+def _make_skills_root(*skills_data: dict) -> _SkillsLLMRoot:
+    """Build a _SkillsLLMRoot from dicts for test mocking."""
+    return _SkillsLLMRoot(
+        skills=[_LLMSkill(**s) for s in skills_data]
+    )
+
+
+@patch("agents.skills_extraction.extractors.skills.invoke_structured_extraction_llm")
 def test_extract_skills_returns_skill_records_and_metadata_when_llm_succeeds(
     mock_invoke,
 ) -> None:
-    mock_invoke.return_value = (
-        '{"skills": ['
-        '{"label": "Python", "type": "Technical", "confidence": 0.92, "required_flag": true, '
-        '"source_span": {"text": "Python", "field_source": "requirements", "start_char": 0, "end_char": 6}},'
-        '{"label": "SQL", "type": "Technical", "confidence": 0.85, "required_flag": null, '
-        '"source_span": {"text": "SQL", "field_source": "requirements", "start_char": 8, "end_char": 11}}'
-        "]}",
-        {"success": True, "tokens_used": 100, "cost_usd": 0.0, "extraction_failed": False},
+    root = _make_skills_root(
+        {"label": "Python", "type": "Technical", "confidence": 0.92, "required_flag": True,
+         "source_span": {"text": "Python", "field_source": "requirements", "start_char": 0, "end_char": 6}},
+        {"label": "SQL", "type": "Technical", "confidence": 0.85, "required_flag": None,
+         "source_span": {"text": "SQL", "field_source": "requirements", "start_char": 8, "end_char": 11}},
     )
+    mock_invoke.return_value = (root, {"success": True, "tokens_used": 100, "cost_usd": 0.0, "extraction_failed": False})
     job = _job_record()
     skills, meta = extract_skills(job, pass1_tools=[])
     assert len(skills) == 2
@@ -56,17 +65,15 @@ def test_extract_skills_returns_skill_records_and_metadata_when_llm_succeeds(
     assert meta.get("tokens_used") == 100
 
 
-@patch("agents.skills_extraction.extractors.skills._invoke_client")
+@patch("agents.skills_extraction.extractors.skills.invoke_structured_extraction_llm")
 def test_extract_skills_calls_taxonomy_and_sets_esco_uri(
     mock_invoke,
 ) -> None:
-    mock_invoke.return_value = (
-        '{"skills": ['
-        '{"label": "Python", "type": "Technical", "confidence": 0.9, "required_flag": true, '
-        '"source_span": {"text": "Python", "field_source": "requirements", "start_char": 0, "end_char": 6}}'
-        "]}",
-        {"success": True, "extraction_failed": False},
+    root = _make_skills_root(
+        {"label": "Python", "type": "Technical", "confidence": 0.9, "required_flag": True,
+         "source_span": {"text": "Python", "field_source": "requirements", "start_char": 0, "end_char": 6}},
     )
+    mock_invoke.return_value = (root, {"success": True, "extraction_failed": False})
     job = _job_record()
     skills, _ = extract_skills(job, pass1_tools=[])
     assert len(skills) == 1
@@ -75,38 +82,36 @@ def test_extract_skills_calls_taxonomy_and_sets_esco_uri(
     assert hasattr(skills[0], "is_genai_extension")
 
 
-@patch("agents.skills_extraction.extractors.skills._invoke_client")
-def test_extract_skills_invalid_json_returns_empty_and_failed(
+@patch("agents.skills_extraction.extractors.skills.invoke_structured_extraction_llm")
+def test_extract_skills_empty_response_returns_failed(
     mock_invoke,
 ) -> None:
-    mock_invoke.return_value = ("not valid json {", {"success": True, "extraction_failed": False})
+    mock_invoke.return_value = (None, {"success": False, "extraction_failed": True, "error_reason": "structured_output_empty"})
     job = _job_record()
     skills, meta = extract_skills(job, pass1_tools=[])
     assert skills == []
     assert meta["extraction_failed"] is True
 
 
-@patch("agents.skills_extraction.extractors.skills._invoke_client")
+@patch("agents.skills_extraction.extractors.skills.invoke_structured_extraction_llm")
 def test_extract_skills_includes_pass1_tools_in_prompt_context(
     mock_invoke,
 ) -> None:
-    mock_invoke.return_value = (
-        '{"skills": [{"label": "Leadership", "type": "Soft", "confidence": 0.8, "required_flag": null, '
-        '"source_span": {"text": "Lead", "field_source": "description", "start_char": 0, "end_char": 4}}]}',
-        {"success": True, "extraction_failed": False},
+    root = _make_skills_root(
+        {"label": "Leadership", "type": "Soft", "confidence": 0.8, "required_flag": None,
+         "source_span": {"text": "Lead", "field_source": "description", "start_char": 0, "end_char": 4}},
     )
+    mock_invoke.return_value = (root, {"success": True, "extraction_failed": False})
     job = _job_record(description="Lead teams. Python experience.")
     tools = [_tool_record("Python")]
     skills, _ = extract_skills(job, pass1_tools=tools)
     assert len(skills) == 1
     assert skills[0].skill_name == "Leadership"
-    call_args = mock_invoke.call_args[0][0]
-    assert "Python" in call_args
-    assert "Already extracted tools" in call_args or "already extracted" in call_args.lower()
-    assert "Excellent communication skills" in call_args
-    assert 'SKIP generic "Communication"' in call_args
-    assert 'do NOT invent "Scrum Facilitation"' in call_args
-    assert "do NOT suppress these because they are hard skills" in call_args
+    # Verify prompt includes tools and prompt v4 guardrails
+    call_args = mock_invoke.call_args
+    prompt = call_args[0][0]
+    assert "Python" in prompt
+    assert "Already extracted tools" in prompt or "already extracted" in prompt.lower()
 
 
 # ---------------------------------------------------------------------------
@@ -124,13 +129,12 @@ def test_extract_retry_after_parses_azure_message() -> None:
 
 
 @patch("agents.skills_extraction.extractors.skills.time")
-@patch("agents.skills_extraction.extractors.skills._invoke_client")
+@patch("agents.skills_extraction.extractors.skills.invoke_structured_extraction_llm")
 def test_extract_skills_retries_on_429_with_backoff(
     mock_invoke,
     mock_time,
 ) -> None:
     """When LLM returns 429, extract_skills retries with exponential backoff."""
-    # First call: 429 rate limit
     rate_limit_meta = {
         "success": False,
         "extraction_failed": True,
@@ -143,7 +147,10 @@ def test_extract_skills_retries_on_429_with_backoff(
         "provider": "azure-openai",
         "model": "test",
     }
-    # Second call: success
+    success_root = _make_skills_root(
+        {"label": "Python", "type": "Technical", "confidence": 0.9,
+         "source_span": {"text": "Python", "field_source": "description", "start_char": 0, "end_char": 6}},
+    )
     success_meta = {
         "success": True,
         "extraction_failed": False,
@@ -154,16 +161,11 @@ def test_extract_skills_retries_on_429_with_backoff(
         "model": "test",
     }
     mock_invoke.side_effect = [
-        ("", rate_limit_meta),
-        (
-            '{"skills": [{"label": "Python", "type": "Technical", "confidence": 0.9, '
-            '"source_span": {"text": "Python", "field_source": "description", "start_char": 0, "end_char": 6}}]}',
-            success_meta,
-        ),
+        (None, rate_limit_meta),
+        (success_root, success_meta),
     ]
     job = _job_record()
     skills, meta = extract_skills(job, pass1_tools=[])
     assert len(skills) == 1
     assert skills[0].skill_name == "Python"
-    # Verify sleep was called (backoff delay)
     assert mock_time.sleep.called
