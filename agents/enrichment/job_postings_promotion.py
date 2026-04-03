@@ -100,7 +100,7 @@ _UPDATE_FUZZY_DEDUP_SQL = text(
     """
     UPDATE dbo.job_postings SET
         is_duplicate = :is_duplicate,
-        duplicate_cluster_id = :duplicate_cluster_id
+        duplicate_cluster_id = CAST(:duplicate_cluster_id AS uuid)
     WHERE job_posting_id::text = :job_posting_id
     """
 )
@@ -109,7 +109,7 @@ _LOAD_FUZZY_DEDUP_STATE_SQL = text(
     """
     SELECT
         jp.is_duplicate AS is_duplicate,
-        jp.duplicate_cluster_id AS duplicate_cluster_id
+        jp.duplicate_cluster_id::text AS duplicate_cluster_id
     FROM dbo.job_postings jp
     WHERE jp.job_posting_id::text = :job_posting_id
     LIMIT 1
@@ -120,7 +120,7 @@ _LIST_CLUSTER_MEMBER_IDS_SQL = text(
     """
     SELECT jp.job_posting_id::text AS job_posting_id
     FROM dbo.job_postings jp
-    WHERE jp.duplicate_cluster_id = :duplicate_cluster_id
+    WHERE jp.duplicate_cluster_id = CAST(:duplicate_cluster_id AS uuid)
         AND jp.job_posting_id::text <> :job_posting_id
     ORDER BY jp.job_posting_id::text
     """

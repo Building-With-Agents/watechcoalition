@@ -36,7 +36,7 @@ _LOAD_CURRENT_SQL = text(
         jp.source AS source,
         jp.external_id AS external_id,
         jp.is_duplicate AS is_duplicate,
-        jp.duplicate_cluster_id AS duplicate_cluster_id,
+        jp.duplicate_cluster_id::text AS duplicate_cluster_id,
         jp.dedup_text_hash AS dedup_text_hash,
         jp.dedup_embedding::text AS dedup_embedding_text,
         c.company_name AS company_name,
@@ -57,7 +57,7 @@ _LIST_SURVIVORS_SQL = text(
     """
     SELECT
         jp.job_posting_id::text AS job_posting_id,
-        jp.duplicate_cluster_id AS duplicate_cluster_id,
+        jp.duplicate_cluster_id::text AS duplicate_cluster_id,
         jp.dedup_text_hash AS dedup_text_hash,
         jp.dedup_embedding::text AS dedup_embedding_text,
         jp.salary_range AS salary_range,
