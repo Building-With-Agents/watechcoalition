@@ -1,0 +1,174 @@
+---
+description: "Week 7 Analytics integration contract: posting_freshness, trajectory_map scaffold, alert payloads, LLM insight summaries"
+alwaysApply: false
+globs:
+  - "agents/analytics/**"
+  - "agents/common/data_store/**"
+---
+
+# Analytics — Week 7 integration contract
+
+This rule freezes the **Week 7** integration surface for velocity, freshness, and insights. It aligns with:
+
+- **ORM / DB:** `agents/common/data_store/models.py` — SQLAlchemy 2.0 `Mapped` / `mapped_column`, tables in schema **`dbo`**, Python identifiers **`snake_case`**, PostgreSQL types as listed below.
+- **Events:** `agents/common/event_envelope.py` — every emission is an `EventEnvelope` with **`correlation_id`** propagated from the pipeline run; **`payload`** is `dict[str, Any]` with **`snake_case`** keys and a top-level **`event_type`** string (same pattern as `ingest_batch_payload()`, Analytics stub, and `sql-guardrails.mdc`).
+
+Orchestration is the **sole consumer** of alert-style events (`AnalyticsStaleAlert`, `CardinalityWarning`), consistent with `.cursor/rules/event-contracts.mdc` (`*Alert` → Orchestrator only).
+
+---
+
+## 1. `posting_freshness` schema
+
+**Table name:** `dbo.posting_freshness`
+
+**Purpose:** Per-posting freshness classification for Week 7 dashboards and `AnalyticsStaleAlert`. Derived from `dbo.job_postings.publish_date` (or equivalent canonical publish timestamp) at analytics refresh time.
+
+| Column | SQL type | Nullable | Notes |
+|--------|----------|----------|--------|
+| `id` | `INTEGER` | no | Primary key, `SERIAL` / autoincrement |
+| `posting_id` | `TEXT` | no | Logical FK to `dbo.job_postings.job_posting_id` (UUID as text, matching existing job posting PK style) |
+| `checked_at` | `TIMESTAMPTZ` | no | When this row was computed (UTC) |
+| `days_since_posted` | `INTEGER` | no | Non-negative; whole days from publish date to `checked_at` |
+| `freshness_status` | `TEXT` | no | One of **`fresh`**, **`stale`**, **`expired`** (application enum; enforce via `CHECK` or SQLAlchemy `Enum` / validated string) |
+
+**`freshness_status` enum values (canonical strings):**
+
+| Value | Meaning |
+|-------|---------|
+| `fresh` | Posting is within the fresh window |
+| `stale` | Posting is older than fresh max but not yet expired |
+| `expired` | Posting exceeds the stale window |
+
+**Staleness thresholds (days, inclusive boundaries):**
+
+| Status | Condition on `days_since_posted` | Config (env) | Default |
+|--------|----------------------------------|--------------|---------|
+| `fresh` | `0 <= days <= F` | `POSTING_FRESHNESS_FRESH_DAYS_MAX` | **30** |
+| `stale` | `F < days <= S` | `POSTING_FRESHNESS_STALE_DAYS_MAX` | **90** |
+| `expired` | `days > S` | — | — |
+
+Where `F` and `S` are the two max-day settings (`F < S`). Implementations read integers from `os.getenv` with the defaults above.
+
+**Implementation note:** Nightly batch summary rows (aggregate counts only) from `docs/planning/ARCHITECTURE_DEEP.md` are orthogonal; this table is the **per-posting** contract for Week 7 freshness insights. New DDL belongs in SQLAlchemy models + `migrations.py`, not Prisma.
+
+---
+
+## 2. `trajectory_map` scaffold
+
+**Table name:** `dbo.trajectory_map` (see `ARCHITECTURE_DEEP.md` DDL sketch)
+
+**Scaffold role (Week 7):** Map **skill** and **sector** keys to compact trajectory signals for visualization and LLM context. Canonical role–level rows (`canonical_role_id`, `period`, `direction`, …) may coexist; the **integration output shape** below is what downstream consumers use for skill/sector tiles.
+
+**Input — aggregate tables read (read-only):**
+
+| Table | Use |
+|-------|-----|
+| `skill_velocity` | Week-over-week velocity and trend strings per skill |
+| `skill_demand_weekly` | Posting counts and growth rates per skill / week |
+| `sector_summary_weekly` | Sector demand, salary, skill mix |
+| `role_snapshot_weekly` | Optional bridge when inferring sector-linked trends |
+
+**Output shape (logical JSON map):**
+
+- **Keys:** `str`
+  - Skill series: **skill label** as stored in aggregates (e.g. `"Python"`, `"Kubernetes"`).
+  - Sector series: **`sector:{label}`** where `label` matches `sector_summary_weekly.sector` (prefix avoids collision with skill names).
+- **Values:** object with exactly:
+
+```python
+{
+    "trend": str,       # e.g. expanding | stable | contracting | emerging (align with ARCHITECTURE_DEEP trajectory vocabulary where possible)
+    "delta": float,    # dimensionless change signal (e.g. normalized velocity or week-over-week delta)
+    "confidence": float  # 0.0–1.0
+}
+```
+
+**Example (illustrative):**
+
+```json
+{
+  "Python": { "trend": "expanding", "delta": 0.12, "confidence": 0.85 },
+  "sector:Health Care": { "trend": "stable", "delta": 0.01, "confidence": 0.72 }
+}
+```
+
+---
+
+## 3. `AnalyticsStaleAlert` event payload
+
+Emitted when a posting is classified **`stale`** or **`expired`** and the analytics run is configured to surface orchestration alerts (Orchestrator-only consumer).
+
+**Envelope:** `EventEnvelope` with `agent_id`: `analytics-agent` (or documented analytics sub-component), **`schema_version`**: `"1.0"` until the payload contract breaks.
+
+**`payload` keys (all snake_case, `event_type` required):**
+
+| Key | Type | Description |
+|-----|------|---------------|
+| `event_type` | `str` | Literal **`AnalyticsStaleAlert`** |
+| `posting_id` | `str` | Same as `dbo.job_postings.job_posting_id` (text UUID) |
+| `freshness_status` | `str` | **`stale`** or **`expired`** (alerts are not emitted for `fresh`) |
+| `days_since_posted` | `int` | Non-negative integer |
+| `triggered_at` | `str` | ISO 8601 timestamp in UTC |
+
+---
+
+## 4. `CardinalityWarning` event payload
+
+Emitted when a dimension exceeds configured cardinality during aggregation (coalesce long-tail per `ARCHITECTURE_DEEP.md` / `sql-guardrails.mdc` spirit).
+
+**`payload` keys:**
+
+| Key | Type | Description |
+|-----|------|---------------|
+| `event_type` | `str` | Literal **`CardinalityWarning`** |
+| `table` | `str` | Table name (unqualified or `dbo.table` per logging convention; be consistent in code) |
+| `column` | `str` | Column name |
+| `cardinality_count` | `int` | Observed distinct value count |
+| `threshold` | `int` | Configured cap that was exceeded |
+| `triggered_at` | `str` | ISO 8601 UTC |
+
+---
+
+## 5. LLM insight summary API (Week 7)
+
+**Purpose:** Natural-language summaries over aggregate tables, with deterministic fallback when the LLM is unavailable (`ARCHITECTURE_DEEP.md`: template fallback; never block aggregate refresh).
+
+**Input — aggregate tables the summarizer may read (read-only):**
+
+| Table |
+|-------|
+| `skill_demand_weekly` |
+| `tool_demand_weekly` |
+| `sector_summary_weekly` |
+| `geo_demand_weekly` |
+| `skill_velocity` |
+| `skill_co_occurrence` |
+
+Optional joins to reference data (`skills`, `industry_sectors`, `job_postings`) must stay within the same allowlists as `sql-guardrails.mdc` when SQL is generated.
+
+**Output object (single summary record):**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `summary_text` | `str` | Human-readable paragraph(s) |
+| `is_llm_generated` | `bool` | `true` if produced by the LLM adapter; `false` if template/deterministic |
+| `generated_at` | `str` | ISO 8601 UTC |
+| `skill_label` | `str \| None` | Set when the summary scope is a single skill; else `null` |
+| `sector_label` | `str \| None` | Set when the summary scope is a single sector; else `null` |
+
+Global or multi-dimension summaries may set **both** `skill_label` and `sector_label` to `null`.
+
+**Fallback when LLM unavailable:**
+
+1. Build **`summary_text`** from a **deterministic template** (fixed sentence patterns filled with latest aggregate metrics from the tables above).
+2. Set **`is_llm_generated`** to **`false`**.
+3. Set **`generated_at`** to the refresh completion time.
+4. Do **not** fail or skip the analytics refresh; log at info level without PII (`structlog`).
+
+---
+
+## Related rules
+
+- `.cursor/rules/sql-guardrails.mdc` — Ask the Data SQL validation
+- `.cursor/rules/event-contracts.mdc` — pipeline `EventEnvelope` rules
+- `docs/planning/ARCHITECTURE_DEEP.md` § Analytics Agent — 10 aggregate tables and processing steps
