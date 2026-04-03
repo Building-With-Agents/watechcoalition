@@ -454,14 +454,14 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 | 1 | Environment + first scrape + basic Streamlit | Working Python env, raw JSON scrape, Streamlit prototype |
 | 2 | LLM adapter + walking skeleton | `llm_adapter.py`, 8 agent stubs, pipeline runner, journey dashboard |
 | 3 | Ingestion Agent + Normalization Agent | `IngestBatch`/`NormalizationComplete` events, staging tables, APScheduler |
-| 4 | Skills Extraction Agent + eval harness + Enrichment-lite | `SkillsExtracted` event, eval dataset (30–50 labeled), prompt iteration log |
-| 5 | Visualization Agent | Production Streamlit dashboards, PDF/CSV/JSON export, live PostgreSQL connection |
-| 6 | Orchestration Agent | Scheduling, alerting tiers, retry policies, audit log, Operations & Alerts page |
+| 4 | Work Intelligence Agent Part 1 | Skills + Tools + Taxonomy + Cost Modeling, `SkillsExtracted` event, eval dataset (30–50 labeled) |
+| 5 | Work Intelligence Agent Part 2 + Enrichment-lite | Tasks + Responsibilities + Context extraction, prompt iteration log |
+| 6 | Enrichment Agent (Full Phase 1) + Visualization Foundations | Temporal/borderplex classification, fuzzy dedup, quality/spam scoring, Streamlit dashboards |
 | 7 | Analytics Agent — aggregates + weekly insights | Aggregate tables, LLM summaries, template fallback, `AnalyticsRefreshed` event |
 | 8 | Analytics Agent — Ask the Data | Text-to-SQL, SQL guardrails + unit tests, “Ask the Data” Streamlit page |
-| 9 | Pipeline hardening | Near-dedup in Ingestion, event contract enforcement, enrichment tuning, perf benchmark |
-| 10 | Testing + security review + load testing | Integration test suite, security checklist, 1k-job load test, Dockerfile |
-| 11 | Documentation | ARCHITECTURE.md, EVENT_CATALOG.md, RUNBOOK.md, CONFIGURATION.md, DEMO_SCRIPT.md |
+| 9 | Orchestration Agent + Visualization Completion | Scheduling, alerting tiers, retry policies, audit log, Operations & Alerts page, PDF/CSV/JSON export |
+| 10 | Pipeline hardening + event contract enforcement | Near-dedup in Ingestion, enrichment tuning, perf benchmark, 1k-job load test |
+| 11 | Testing + security + documentation | Integration test suite, security checklist, Dockerfile, ARCHITECTURE.md, RUNBOOK.md |
 | 12 | Capstone demo + release | Live demo to stakeholders, `v0.1.0-capstone` tag, handoff package, retrospective |
 | Phase 2 | Query Agent (9th agent) | Standalone Q&A: Gap Analysis, Candidate-Role Match, Stakeholder Reports, persona routing |
 
@@ -510,8 +510,17 @@ py -3.11 -m venv agents/.venv               # Windows
 agents\.venv\Scripts\Activate.ps1            # Windows PowerShell
 pip install -r agents/requirements.txt
 
-# Run the walking skeleton pipeline (Week 2+)
-python agents/pipeline_runner.py
+# --- Flywheel pipeline (production) — decoupled ingestion + processing ---
+# Loop 1: Bulk ingest from JSearch (budget-aware, key rotation)
+python agents/scripts/batch_ingest.py              # run all queries from config
+python agents/scripts/batch_ingest.py --dry-run    # show plan without API calls
+
+# Loop 2: Paced processing (normalize → extract → enrich)
+python agents/scripts/run_processing_loop.py --batch-size 50 --delay 2
+python agents/scripts/run_processing_loop.py --dry-run        # show pending counts
+
+# Seed local DB with enriched data (dev setup)
+python scripts/pg-seed-data/seed_agent_data.py
 
 # Run the Streamlit dashboard
 streamlit run agents/dashboard/streamlit_app.py
@@ -519,13 +528,12 @@ streamlit run agents/dashboard/streamlit_app.py
 # Run agent tests
 python -m pytest agents/tests/ -v
 
-# --- Later weeks (not yet available) ---
-# Run full pipeline via Orchestration Agent scheduler (Week 6)
-# python -m agents.orchestration.scheduler
-
-# Run a single agent manually (Week 3+)
+# Run a single agent manually
 # python -m agents.ingestion.agent --source jsearch --limit 50
 # python -m agents.ingestion.agent --source crawl4ai --limit 50
+
+# Demo run: Walking skeleton single-pass with fixture data (Week 2 demo only)
+# python agents/pipeline_runner.py
 ```
 
 ---

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import os
 import re
 import sys
 from datetime import datetime
@@ -22,6 +23,13 @@ from agents.common.types.raw_job_record import RawJobRecord
 from agents.common.types.region_config import RegionConfig
 from agents.ingestion.sources.base_adapter import SourceAdapter
 
+# Force UTF-8 mode at process level for Crawl4AI's Playwright browser subprocess.
+# Previous attempts (PR #111, #125) wrapped stdout/stderr here, but the real issue
+# is that Crawl4AI/Playwright writes Unicode (e.g. → U+2192) to streams that
+# inherit the Windows cp1252 console encoding. Setting PYTHONUTF8=1 forces the
+# interpreter into UTF-8 mode for all I/O including subprocesses.
+os.environ.setdefault("PYTHONUTF8", "1")
+os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
@@ -169,6 +177,10 @@ class Crawl4AIAdapter(SourceAdapter):
                     url,
                     config=CrawlerRunConfig(cache_mode=CacheMode.BYPASS),
                 )
+        except UnicodeEncodeError as e:
+            raise Crawl4AIAdapterError(
+                f"Crawl4AI encoding error (likely Windows cp1252 vs Unicode): {e}"
+            ) from e
         except Exception as e:
             raise Crawl4AIAdapterError(f"Crawl4AI init/fetch failed: {e}") from e
 

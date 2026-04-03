@@ -23,11 +23,19 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
+import structlog
+
 from agents.common.base_agent import BaseAgent
 
-# Proactive inter-request delay to avoid Azure OpenAI 429 rate limits.
-# Set SKILLS_EXTRACTION_DELAY=0 to disable; increase for lower-tier deployments.
-_INTER_LLM_DELAY = float(os.environ.get("SKILLS_EXTRACTION_DELAY", "0.5"))
+log = structlog.get_logger()
+
+# Batch chunking to avoid Azure OpenAI 429 rate limits.
+# Process CHUNK_SIZE records, pause CHUNK_COOLDOWN seconds, then next chunk.
+# This lets the TPM window refill between bursts instead of a flat per-record delay.
+_CHUNK_SIZE = int(os.environ.get("SKILLS_EXTRACTION_CHUNK_SIZE", "5"))
+_CHUNK_COOLDOWN = float(os.environ.get("SKILLS_EXTRACTION_CHUNK_COOLDOWN", "30"))
+# Small inter-record delay within a chunk (keeps burst manageable).
+_INTER_LLM_DELAY = float(os.environ.get("SKILLS_EXTRACTION_DELAY", "1.0"))
 from agents.common.data_store import check_db_connection, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
@@ -150,6 +158,11 @@ class EventOrDatabaseWorkItemLoader:
         if batch_id and check_db_connection():
             return self._from_database(batch_id)
 
+        # FIFO: load normalized records not yet extracted (processing loop mode)
+        if check_db_connection():
+            batch_size = int(os.environ.get("NORM_BATCH_SIZE", "50"))
+            return self._from_database_unextracted(batch_size)
+
         return []
 
     def _from_database(self, batch_id: str) -> list[ExtractionWorkItem]:
@@ -162,6 +175,22 @@ class EventOrDatabaseWorkItemLoader:
                 .all()
             )
 
+        return [self._from_normalized_row(row) for row in rows]
+
+    def _from_database_unextracted(self, limit: int = 50) -> list[ExtractionWorkItem]:
+        """FIFO: load normalized jobs that don't yet have extraction results."""
+        with session_scope() as session:
+            rows = (
+                session.query(NormalizedJob)
+                .outerjoin(
+                    ExtractedIntelligence,
+                    NormalizedJob.id == ExtractedIntelligence.normalized_job_id,
+                )
+                .filter(ExtractedIntelligence.id == None)  # noqa: E711
+                .order_by(NormalizedJob.id.asc())
+                .limit(limit)
+                .all()
+            )
         return [self._from_normalized_row(row) for row in rows]
 
     def _from_normalized_row(self, row: NormalizedJob) -> ExtractionWorkItem:
@@ -259,13 +288,25 @@ class SQLAlchemyExtractionStore:
     """Persist extracted intelligence rows using the canonical ORM models."""
 
     def save(self, results: Sequence[ExtractionResult]) -> None:
-        if not results or not check_db_connection():
+        if not results:
+            log.warning("extraction_store_save_skip_empty_results")
+            return
+        if not check_db_connection():
+            log.error("extraction_store_save_skip_no_db", result_count=len(results))
             return
 
+        saved = 0
+        skipped_no_id = 0
         with session_scope() as session:
             for result in results:
                 normalized_job_id = result.work_item.normalized_job_id
                 if normalized_job_id is None:
+                    skipped_no_id += 1
+                    log.warning(
+                        "extraction_store_skip_no_normalized_job_id",
+                        job_id=result.work_item.job_id,
+                        title=result.work_item.title[:80] if result.work_item.title else "",
+                    )
                     continue
 
                 existing_rows = (
@@ -304,6 +345,14 @@ class SQLAlchemyExtractionStore:
                 row.extraction_failed = result.extraction_status == "failed"
                 em = result.extraction_metadata
                 row.extraction_metadata = em if isinstance(em, dict) else None
+                saved += 1
+
+        log.info(
+            "extraction_store_save_complete",
+            saved=saved,
+            skipped_no_normalized_job_id=skipped_no_id,
+            total=len(results),
+        )
 
 
 class SkillsExtractionAgent(BaseAgent):
@@ -374,13 +423,29 @@ class SkillsExtractionAgent(BaseAgent):
         if max_jobs > 0 and len(work_items) > max_jobs:
             work_items = work_items[:max_jobs]
 
-        # Phase 1: Extract tools + skills for all jobs (taxonomy deferred)
+        # Phase 1: Extract tools + skills in chunks to avoid 429 rate limits.
+        # Process CHUNK_SIZE records with small inter-record delay, then pause
+        # CHUNK_COOLDOWN seconds for the TPM window to refill.
         pending: list[tuple[ExtractionWorkItem, list[ToolRecord], list, dict]] = []
+        total = len(work_items)
         for idx, item in enumerate(work_items):
+            # Inter-record delay within a chunk
             if idx > 0 and _INTER_LLM_DELAY > 0:
                 time.sleep(_INTER_LLM_DELAY)
+
             tools, skills_list, meta, is_llm = self._extract_work_item_no_taxonomy(item)
             pending.append((item, tools, skills_list, meta))
+
+            # Chunk boundary cooldown
+            chunk_pos = idx + 1
+            if _CHUNK_SIZE > 0 and chunk_pos % _CHUNK_SIZE == 0 and chunk_pos < total:
+                log.info(
+                    "skills_extraction_chunk_cooldown",
+                    processed=chunk_pos,
+                    total=total,
+                    cooldown_seconds=_CHUNK_COOLDOWN,
+                )
+                time.sleep(_CHUNK_COOLDOWN)
 
         # Phase 2: Batch taxonomy resolution — single API call for all labels
         all_labels: list[str] = []

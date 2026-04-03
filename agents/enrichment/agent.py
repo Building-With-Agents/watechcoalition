@@ -461,6 +461,18 @@ class EnrichmentAgent(BaseAgent):
                     enriched["sector_id"] = sector_id
                     enriched_count += 1
 
+                    # Promote enrichment columns to job_postings (INSERT if row missing)
+                    row_nj_id = _coerce_normalized_job_id(row.get("normalized_job_id"))
+                    if row_nj_id is not None and session is not None:
+                        try:
+                            apply_enrichment_to_job_postings(session, row_nj_id, enriched)
+                        except Exception as promo_exc:
+                            log.warning(
+                                "enrichment_batch_promotion_failed",
+                                normalized_job_id=row_nj_id,
+                                error=str(promo_exc),
+                            )
+
                     tp = _distribution_bucket(enriched.get("temporal_period", posting.get("temporal_period")))
                     temporal_period_distribution[tp] += 1
                     bp = _distribution_bucket(enriched.get("borderplex_subregion"))

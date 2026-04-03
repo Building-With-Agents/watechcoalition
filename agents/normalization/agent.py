@@ -12,6 +12,7 @@ Consumes: IngestBatch
 
 from __future__ import annotations
 
+import os
 import uuid
 
 import structlog
@@ -61,13 +62,20 @@ def initialize_run(state: NormalizationState) -> NormalizationState:
 
 
 def fetch_pending_records(state: NormalizationState) -> NormalizationState:
-    """Query the DB for raw records with processing_status='pending'."""
+    """Query the DB for raw records with processing_status='pending'.
+
+    Supports batch-limited FIFO processing via NORM_BATCH_SIZE env var.
+    When set, fetches at most N records ordered by created_at (oldest first).
+    When unset or 0, fetches all pending records (legacy behavior).
+    """
     ingestion_run_id = state.get("ingestion_run_id", "")
     batch_id = state.get("batch_id", "")
 
     if not check_db_connection():
         log.warning("normalization_no_db", batch_id=batch_id)
         return {"_pending_records": []}  # type: ignore[typeddict-unknown-key]
+
+    batch_size = int(os.environ.get("NORM_BATCH_SIZE", "0"))
 
     try:
         with session_scope() as session:
@@ -76,6 +84,10 @@ def fetch_pending_records(state: NormalizationState) -> NormalizationState:
             )
             if ingestion_run_id:
                 query = query.filter(RawIngestedJob.ingestion_run_id == ingestion_run_id)
+
+            query = query.order_by(RawIngestedJob.created_at.asc())
+            if batch_size > 0:
+                query = query.limit(batch_size)
 
             raw_rows = query.all()
 
@@ -96,6 +108,7 @@ def fetch_pending_records(state: NormalizationState) -> NormalizationState:
                         "city": r.city,
                         "state": r.state,
                         "country": r.country,
+                        "zip_code": r.zip_code,
                         "is_remote": r.is_remote,
                         "job_url": r.job_url,
                         "source_url": r.source_url,
@@ -158,6 +171,7 @@ def normalize_records(state: NormalizationState) -> NormalizationState:
                     city=raw_dict.get("city"),
                     state=raw_dict.get("state"),
                     country=raw_dict.get("country"),
+                    zip_code=raw_dict.get("zip_code"),
                     is_remote=raw_dict.get("is_remote"),
                     date_posted=raw_dict.get("date_posted"),
                     job_url=raw_dict.get("job_url"),
@@ -193,6 +207,7 @@ def normalize_records(state: NormalizationState) -> NormalizationState:
                     city=job_record.city,
                     state_province=job_record.state_province,
                     country=job_record.country,
+                    zip_code=job_record.zip_code,
                     work_arrangement=job_record.work_arrangement,
                     is_remote=job_record.is_remote,
                     job_url=job_record.job_url,
