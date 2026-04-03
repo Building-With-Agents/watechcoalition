@@ -24,6 +24,7 @@ source agents/.venv/bin/activate
 
 ## Table of Contents
 
+0. [Quick Start — Verifying Pipeline Outputs (Seeded Data)](#0-quick-start--verifying-pipeline-outputs-seeded-data)
 1. [Overview](#1-overview)
 2. [Environment Setup](#2-environment-setup)
 3. [Clean Slate — Reset Agent Tables](#3-clean-slate--reset-agent-tables)
@@ -37,6 +38,184 @@ source agents/.venv/bin/activate
 11. [Streamlit Dashboard](#11-streamlit-dashboard)
 12. [Cloud DB Demo Setup](#12-cloud-db-demo-setup)
 13. [Troubleshooting](#13-troubleshooting)
+
+---
+
+## 0. Quick Start — Verifying Pipeline Outputs (Seeded Data)
+
+**If data has already been processed and seeded into your database, you do not need to run the pipeline.** This section walks you through verifying outputs at every stage and exploring the data via the Streamlit dashboard.
+
+### Prerequisites
+
+1. Your `.env` has `PYTHON_DATABASE_URL` pointing to the seeded database (cloud or local)
+2. Venv is activated and dependencies are installed (`pip install -r agents/requirements.txt`)
+3. Database is reachable: `python agents/scripts/db_check.py tables`
+
+### Step 1 — Confirm data is present
+
+```bash
+python agents/scripts/db_check.py counts
+```
+
+**Expected output (seeded data):**
+
+| Table | Expected |
+|-------|----------|
+| raw_ingested_jobs | 1,000+ |
+| job_ingestion_runs | 20+ |
+| normalized_jobs | 1,000+ |
+| normalization_quarantine | 0–10 |
+| extracted_intelligence | 500+ (records with descriptions) |
+| job_postings | 500+ (enriched, promoted records) |
+| llm_audit_log | 1,000+ (cumulative LLM call records) |
+
+If all tables show 0, the database has not been seeded. Run `python scripts/pg-seed-data/seed_agent_data.py` or ask your instructor to seed it.
+
+### Step 2 — Verify Ingestion outputs
+
+Ingestion writes raw job data from JSearch API and Crawl4AI into `raw_ingested_jobs` and tracks each run in `job_ingestion_runs`.
+
+```bash
+# How many raw records per source?
+python agents/scripts/db_check.py query "SELECT source, COUNT(*) AS records FROM dbo.raw_ingested_jobs GROUP BY source ORDER BY records DESC"
+
+# How many ingestion runs completed successfully?
+python agents/scripts/db_check.py query "SELECT status, COUNT(*) FROM dbo.job_ingestion_runs GROUP BY status"
+
+# What does a raw record look like? (sample 1 row)
+python agents/scripts/db_check.py query "SELECT id, source, external_id, title, company, city, state, date_posted, processing_status FROM dbo.raw_ingested_jobs LIMIT 1"
+```
+
+**What to check:**
+- `source` should show `jsearch` (and optionally `crawl4ai`)
+- `processing_status` should be `normalized` for records that flowed through the pipeline
+- Each record has `source`, `external_id`, `title`, `company` — these are the provenance tags
+
+### Step 3 — Verify Normalization outputs
+
+Normalization maps source-specific fields into a canonical schema and writes to `normalized_jobs`. Records that fail validation go to `normalization_quarantine`.
+
+```bash
+# Total normalized records and field coverage
+python agents/scripts/db_check.py query "SELECT COUNT(*) AS total, COUNT(title) AS has_title, COUNT(company) AS has_company, COUNT(description) AS has_description, COUNT(city) AS has_city, COUNT(state_province) AS has_state FROM dbo.normalized_jobs"
+
+# Quarantine rate (should be < 1%)
+python agents/scripts/db_check.py query "SELECT COUNT(*) AS quarantined FROM dbo.normalization_quarantine"
+
+# If there are quarantined records, see why:
+python agents/scripts/db_check.py query "SELECT error_type, COUNT(*) FROM dbo.normalization_quarantine GROUP BY error_type"
+
+# Sample a normalized record to see canonical field structure
+python agents/scripts/db_check.py query "SELECT id, title, company, city, state_province, employment_type, experience_level, salary_min, salary_max, date_posted FROM dbo.normalized_jobs LIMIT 1"
+```
+
+**What to check:**
+- All records should have `title` and `company` populated
+- `description` will be NULL for ~46% of JSearch records (known API limitation, see issue #165)
+- Dates are standardized to ISO 8601
+- Salary fields are split into `salary_min`/`salary_max`/`salary_currency`/`salary_period`
+- Quarantine rate should be < 1% of total raw records
+
+### Step 4 — Verify Skills Extraction outputs
+
+Skills Extraction uses LLM calls to extract skills, tools, tasks, and responsibilities from job descriptions. Results go to `extracted_intelligence`. Every LLM call is logged in `llm_audit_log`.
+
+```bash
+# Extraction success vs failure breakdown
+python agents/scripts/db_check.py query "SELECT extraction_status, COUNT(*) FROM dbo.extracted_intelligence GROUP BY extraction_status"
+
+# How many records have extracted skills, tools, tasks?
+python agents/scripts/db_check.py query "SELECT COUNT(*) AS total, COUNT(skills) AS has_skills, COUNT(tools) AS has_tools, COUNT(tasks) AS has_tasks, COUNT(responsibilities) AS has_responsibilities FROM dbo.extracted_intelligence"
+
+# Sample one extracted record to see output structure
+python agents/scripts/db_check.py query "SELECT id, normalized_job_id, extraction_status, skills, tools FROM dbo.extracted_intelligence WHERE extraction_status = 'success' LIMIT 1"
+
+# LLM cost audit — spend per agent
+python agents/scripts/db_check.py query "SELECT agent_name, COUNT(*) AS calls, COALESCE(SUM(cost_usd), 0) AS total_usd, COALESCE(SUM(COALESCE(input_tokens,0) + COALESCE(output_tokens,0)), 0) AS total_tokens FROM dbo.llm_audit_log GROUP BY agent_name ORDER BY total_usd DESC NULLS LAST"
+```
+
+**What to check:**
+- `extraction_status` should show mostly `success`; `failed` records are those with empty descriptions (expected)
+- `skills` and `tools` columns contain JSON arrays of extracted items
+- `llm_audit_log` shows per-agent LLM spend — useful for cost projection
+- Records with `extraction_status = 'failed'` and `error_reason` containing "no text" are expected — these are JSearch records without descriptions
+
+### Step 5 — Verify Enrichment outputs
+
+Enrichment adds classification, quality scoring, spam detection, and dedup results to `job_postings`. This is the final promoted table.
+
+```bash
+# Total enriched records
+python agents/scripts/db_check.py query "SELECT COUNT(*) AS enriched_jobs FROM dbo.job_postings"
+
+# Temporal period distribution (4 periods: current, recent, aging, historical)
+python agents/scripts/db_check.py query "SELECT temporal_period, COUNT(*) FROM dbo.job_postings WHERE temporal_period IS NOT NULL GROUP BY temporal_period ORDER BY COUNT(*) DESC"
+
+# Borderplex subregion distribution (el_paso_metro, las_cruces, southern_nm, other)
+python agents/scripts/db_check.py query "SELECT borderplex_subregion, COUNT(*) FROM dbo.job_postings WHERE borderplex_subregion IS NOT NULL GROUP BY borderplex_subregion ORDER BY COUNT(*) DESC"
+
+# Duplicate detection results
+python agents/scripts/db_check.py query "SELECT is_duplicate, COUNT(*) FROM dbo.job_postings GROUP BY is_duplicate"
+
+# Quality and spam scoring summary
+python agents/scripts/db_check.py query "SELECT COUNT(*) AS total, COUNT(quality_score) AS has_quality, ROUND(AVG(quality_score)::numeric, 3) AS avg_quality, COUNT(spam_score) AS has_spam, ROUND(AVG(spam_score)::numeric, 3) AS avg_spam, SUM(CASE WHEN is_spam THEN 1 ELSE 0 END) AS spam_count FROM dbo.job_postings"
+
+# Sample an enriched record to see all classification columns
+python agents/scripts/db_check.py query "SELECT id, title, company_name, temporal_period, borderplex_subregion, is_duplicate, quality_score, spam_score, is_spam, soc_code FROM dbo.job_postings LIMIT 1"
+```
+
+**What to check:**
+- `temporal_period` should distribute across `current`, `recent`, `aging`, `historical` based on `date_posted`
+- `borderplex_subregion` classifies jobs by Borderplex region — `NULL` for non-Borderplex locations
+- `is_duplicate = TRUE` flags jobs detected as near-duplicates via cosine similarity > 0.92
+- `quality_score` is [0–1] — higher is better (completeness + clarity + structural coherence)
+- `spam_score` is [0–1] — below 0.7 passes, 0.7–0.9 flagged for review, above 0.9 auto-rejected
+- `is_spam = TRUE` records were auto-rejected (should be rare in curated data)
+- `soc_code` and `naics_code` may be NULL — these classifiers are pending (PR #149)
+
+### Step 6 — Explore via Streamlit Dashboard
+
+The dashboard provides a visual interface to all the data verified above.
+
+```bash
+streamlit run agents/dashboard/app.py
+```
+
+Open `http://localhost:8501` in your browser and walk through all 5 pages:
+
+| Dashboard Page | What It Shows | What to Verify |
+|----------------|---------------|----------------|
+| **Ingestion Overview** | Dedup hit rate, error rate, records-per-day chart, recent runs table | Dedup rate should be < 10%, error rate near 0%, runs show `completed` status |
+| **Normalization Quality** | Schema conformance gauge, salary coverage %, quarantine breakdown | Conformance should be 100% (or near it), quarantine count should be very low |
+| **Pipeline Run Summary** | Per-run ingestion metrics — select a run from dropdown | Shows total fetched, staged, deduplicated, errors for each ingestion run |
+| **Record Journey** | Select any record and trace it through every pipeline stage | Expand each stage to see raw payload, normalization result, extraction output, enrichment scores |
+| **Batch Insights** | Aggregate charts across entire dataset | Source distribution, top locations, remote vs on-site, employment types, experience levels, salary histogram, processing status |
+
+**Key things to look for on the dashboard:**
+- Sidebar shows green "Connected to PostgreSQL (read-only)" — if yellow, check your `PYTHON_DATABASE_URL`
+- Batch Insights header shows total row count (should match `normalized_jobs` count from Step 3)
+- Record Journey lets you drill into individual records — try expanding the Skills Extraction and Enrichment stages to see extracted skills and quality scores
+- Processing Status chart on Batch Insights shows pipeline throughput — most records should be in `normalized` or later states
+
+### Step 7 — Verify end-to-end record flow (optional deep dive)
+
+Pick a single record and trace it through every table to confirm the full pipeline chain:
+
+```bash
+# Pick a raw record
+python agents/scripts/db_check.py query "SELECT id, external_id, title, company FROM dbo.raw_ingested_jobs LIMIT 1"
+
+# Use its id to find the normalized version
+python agents/scripts/db_check.py query "SELECT id, title, company, description IS NOT NULL AS has_desc FROM dbo.normalized_jobs WHERE raw_job_id = <RAW_ID>"
+
+# Use the normalized id to find extraction results
+python agents/scripts/db_check.py query "SELECT id, extraction_status, skills, tools FROM dbo.extracted_intelligence WHERE normalized_job_id = <NORM_ID>"
+
+# Find the promoted job_postings record (joined on source + external_id)
+python agents/scripts/db_check.py query "SELECT id, title, company_name, temporal_period, borderplex_subregion, quality_score, spam_score, is_spam FROM dbo.job_postings WHERE external_id = '<EXTERNAL_ID>'"
+```
+
+Replace `<RAW_ID>`, `<NORM_ID>`, and `<EXTERNAL_ID>` with actual values from the previous queries. This traces a single job from raw ingestion through normalization, skills extraction, and enrichment — the full Phase 1 pipeline path.
 
 ---
 
@@ -514,24 +693,116 @@ python agents/scripts/db_check.py query "SELECT COUNT(*) AS enriched_jobs FROM d
 
 ## 11. Streamlit Dashboard
 
-The dashboard reads from the same database via a read-only SQLAlchemy engine.
+The dashboard reads from the same database via a read-only SQLAlchemy engine. It has five pages covering ingestion, normalization, pipeline tracing, and aggregate analytics.
+
+### Launch the dashboard
 
 ```bash
-cd agents
-streamlit run dashboard/streamlit_app.py
+# From repo root with venv activated
+streamlit run agents/dashboard/app.py
 ```
 
-### Verify dashboard pages
+The app opens at `http://localhost:8501`. The sidebar shows connection status — green "Connected to PostgreSQL (read-only)" when `PYTHON_DATABASE_URL` is set, or a yellow JSON-fallback warning otherwise.
 
-- **Ingestion Overview:** records-per-day bar chart should show data
-- **Normalization Quality:** conformance gauge, quarantine breakdown
-- **Staleness banners:** should NOT show if data was just populated
-- **Never-blank behavior:** pages should render even with partial data
+### Data source
+
+- **Database mode (default):** All five pages query PostgreSQL via a read-only SQLAlchemy engine. Data is cached for 300 seconds (`@st.cache_data(ttl=300)`).
+- **JSON fallback:** If no database URL is configured, three pages (Pipeline Run Summary, Record Journey, Batch Insights) fall back to `agents/data/output/pipeline_run.json`. The two observability pages (Ingestion Overview, Normalization Quality) require PostgreSQL and will show a setup prompt.
+
+### Page-by-page guide
+
+#### Page 1 — Ingestion Overview
+
+Shows ingestion run history and record counts per run.
+
+**What to look for:**
+- Table of ingestion runs with `run_id`, `source`, `started_at`, `status`, `total_fetched`, `staged_count`, `dedup_count`
+- Runs should show `status = completed`
+- `dedup_count` shows how many duplicates were discarded per run
+
+#### Page 2 — Normalization Quality
+
+Shows schema conformance and quarantine breakdown.
+
+**What to look for:**
+- Total normalized records vs. quarantined records
+- Quarantine breakdown by `error_type` — should be < 1% of total
+- If quarantine rate exceeds 3%, investigate the source data or field mappers
+
+#### Page 3 — Pipeline Run Summary
+
+Shows per-record completion across all pipeline stages.
+
+**What to look for:**
+- Completion table: one row per job record, columns for each agent stage (Ingestion, Normalization, Skills Extraction, Enrichment, Analytics, Visualization, Orchestration)
+- Each cell shows Pass/Fail for whether the record reached that stage
+- "All Stages" column shows end-to-end completion
+- Top metrics: total records processed, total log entries, run timestamp, duration
+
+#### Page 4 — Record Journey
+
+Trace a single record through the full pipeline.
+
+**How to use:**
+1. Select a record from the dropdown (shows `[correlation_id] Title @ Company`)
+2. Expand each stage to see the event payload, event ID, schema version
+3. Skills Extraction stage shows extracted skills as a table
+4. Enrichment stage shows quality_score, spam_score, role_classification, seniority
+
+**What to look for:**
+- Records should flow through Ingestion → Normalization → Skills Extraction → Enrichment
+- Records with empty descriptions will show `extraction_status = "failed"` at Skills Extraction — this is expected for ~46% of JSearch records (see issue #165)
+- Quarantined records stop at Normalization with an error detail
+
+#### Page 5 — Batch Insights
+
+Aggregate analytics across the full dataset using SQL GROUP BY queries.
+
+**Charts and metrics displayed:**
+- **Source Distribution** — bar chart of records by source (jsearch, crawl4ai)
+- **Top Locations (State)** — top 15 states by record count
+- **Top Cities** — top 15 cities by record count
+- **Remote vs On-site** — distribution of remote work flags
+- **Employment Type** — full-time, part-time, contract, etc.
+- **Experience Level** — entry, mid, senior, etc.
+- **Salary Distribution** — median min/max salary, records with salary data, 10-bucket histogram
+- **Processing Status** — bar chart of `raw_ingested_jobs.processing_status` (pending, normalized, quarantined, etc.)
+- **Recent Records** — 50-row sample table of the most recent records
+
+**What to look for:**
+- Header shows total row count and which table is being queried (normalized if available, raw otherwise)
+- Source distribution should show both `jsearch` and `crawl4ai` if both sources were used
+- Salary histogram only renders when there is enough spread in `salary_min` values
+- Processing status chart shows pipeline throughput — most records should be in `normalized` or later states after a full run
+
+### Seeded data (no pipeline run needed)
+
+If you seeded the database using `python scripts/pg-seed-data/seed_agent_data.py`, the dashboard will display the seeded fixture data immediately. This is useful for:
+- Students who want to explore the dashboard without running the pipeline
+- Demo prep when API keys or LLM budget are unavailable
+- Verifying dashboard functionality after code changes
+
+### Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| Sidebar shows "Using fixture data (JSON)" | `PYTHON_DATABASE_URL` not set or DB unreachable | Set the env var in `.env` and restart |
+| Ingestion Overview / Normalization Quality show setup prompt | These pages require PostgreSQL, no JSON fallback | Configure database connection |
+| Charts show "No data" | Tables are empty — pipeline hasn't run or was reset | Run the pipeline or seed data |
+| Stale data after a new pipeline run | 300-second cache TTL | Wait 5 minutes or restart Streamlit |
+| Dashboard crashes on startup | Missing dependency | Run `pip install -r agents/requirements.txt` |
 
 ### Key files
 
-- Streamlit app: https://github.com/Building-With-Agents/watechcoalition/blob/development/agents/dashboard/streamlit_app.py
-- Read-only engine: https://github.com/Building-With-Agents/watechcoalition/blob/development/agents/dashboard/readonly_engine.py
+| File | Purpose |
+|------|---------|
+| `agents/dashboard/streamlit_app.py` | Main app — all 5 pages, DB + JSON modes |
+| `agents/dashboard/app.py` | Entry point with sys.path bootstrap |
+| `agents/dashboard/batch_insights_queries.py` | Full-table SQL aggregates for Batch Insights |
+| `agents/dashboard/pages_observability.py` | Ingestion Overview + Normalization Quality pages |
+| `agents/dashboard/observability_queries.py` | DB query helpers for observability pages |
+| `agents/dashboard/observability_metrics.py` | Metric calculations |
+| `agents/dashboard/readonly_engine.py` | Read-only PostgreSQL engine setup |
 
 ---
 
