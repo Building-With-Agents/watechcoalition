@@ -461,6 +461,16 @@ class EnrichmentAgent(BaseAgent):
                     enriched["sector_id"] = sector_id
                     enriched_count += 1
 
+                    if enriched.get("spam_degraded") is True:
+                        _emit_enrichment_degraded(
+                            correlation_id=correlation_id,
+                            posting_id=posting.get("posting_id"),
+                            normalized_job_id=_coerce_normalized_job_id(row.get("normalized_job_id")),
+                            triggered_by_event_type=payload.get("event_type"),
+                            reason="spam_classifier_unavailable",
+                            extraction_note=enriched.get("spam_extraction_note"),
+                        )
+
                     # Promote enrichment columns to job_postings (INSERT if row missing)
                     row_nj_id = _coerce_normalized_job_id(row.get("normalized_job_id"))
                     if row_nj_id is not None and session is not None:
