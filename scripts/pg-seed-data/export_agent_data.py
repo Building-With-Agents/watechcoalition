@@ -2,7 +2,8 @@
 Export agent pipeline data to JSON fixtures for dev seeding.
 
 Admin tool: run after processing pipeline data, commit fixtures to git
-so devs can seed their local databases with enriched job postings.
+so devs can seed their local databases with pipeline tables and dbo.job_postings
+(enrichment promotion rows) without running the LLM.
 
 Usage (from project root, with venv activated):
     python scripts/pg-seed-data/export_agent_data.py
@@ -38,8 +39,9 @@ AGENT_TABLES = [
     "normalized_jobs",
     "normalization_quarantine",
     "extracted_intelligence",
-    "llm_audit_log",
     "employer_profiles",
+    "job_postings",
+    "llm_audit_log",
 ]
 
 OUTPUT_DIR = Path(__file__).parent / "agent-fixtures"

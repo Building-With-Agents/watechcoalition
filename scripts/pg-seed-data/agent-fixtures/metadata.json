@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-04-03T17:18:35.158829Z",
+  "exportedAt": "2026-04-03T17:30:04.575088Z",
   "source": "postgresql",
   "schema": "dbo",
   "counts": {
@@ -8,6 +8,7 @@
     "normalized_jobs": 1076,
     "normalization_quarantine": 8,
     "extracted_intelligence": 550,
+    "job_postings": 565,
     "llm_audit_log": 2891
   },
   "skipped": [

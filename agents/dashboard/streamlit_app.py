@@ -29,6 +29,11 @@ import pandas as pd
 import streamlit as st
 
 from agents.common.env import load_repo_root_dotenv
+from agents.dashboard.batch_insights_queries import (
+    fetch_batch_insights_bundle,
+    series_from_category_count,
+    series_from_salary_histogram,
+)
 
 # ---------------------------------------------------------------------------
 # Environment & paths
@@ -50,6 +55,21 @@ _AGENT_ORDER = [
     "demand-analysis-agent",
 ]
 _AGENT_ORDER_INDEX = {a: i for i, a in enumerate(_AGENT_ORDER)}
+
+# Values written by ingestion (pending) and normalization (normalized | quarantined) on dbo.raw_ingested_jobs.
+_RAW_STAGED_OK_STATUSES = frozenset({"pending", "normalized", "quarantined", "success"})
+
+
+def _raw_row_ingestion_succeeded(processing_status: object) -> bool:
+    """True when the raw row exists in a post-staging pipeline state (not a failed-ingest marker)."""
+    return str(processing_status or "").strip().lower() in _RAW_STAGED_OK_STATUSES
+
+
+def _clamp_list_window(limit: int, offset: int) -> tuple[int, int]:
+    """Bound Streamlit-driven LIMIT/OFFSET for unscoped raw/normalized list queries."""
+    lim = max(1, min(int(limit), 5000))
+    off = max(0, int(offset))
+    return lim, off
 
 
 # ---------------------------------------------------------------------------
@@ -86,8 +106,17 @@ def _load_ingestion_runs() -> pd.DataFrame:
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def _load_raw_jobs(run_id: str | None = None) -> pd.DataFrame:
-    """Load raw ingested jobs, optionally filtered by run_id."""
+def _load_raw_jobs(
+    run_id: str | None = None,
+    *,
+    limit: int = 500,
+    offset: int = 0,
+) -> pd.DataFrame:
+    """Load raw ingested jobs, optionally filtered by run_id.
+
+    When ``run_id`` is set, returns all rows for that run (no limit — typical batches are small).
+    Otherwise returns a newest-first window: ``LIMIT`` / ``OFFSET`` (for Record Journey paging).
+    """
     from agents.dashboard.readonly_engine import get_dashboard_engine
 
     if run_id:
@@ -102,6 +131,7 @@ def _load_raw_jobs(run_id: str | None = None) -> pd.DataFrame:
             ORDER BY id
         """
         return pd.read_sql(query, get_dashboard_engine(), params={"run_id": run_id})
+    lim, off = _clamp_list_window(limit, offset)
     query = """
         SELECT id, ingestion_run_id, region_id, source, external_id,
                title, company, city, state, country, is_remote,
@@ -110,14 +140,22 @@ def _load_raw_jobs(run_id: str | None = None) -> pd.DataFrame:
                processing_status, error_message, ingestion_timestamp
         FROM dbo.raw_ingested_jobs
         ORDER BY id DESC
-        LIMIT 500
+        LIMIT %(lim)s OFFSET %(off)s
     """
-    return pd.read_sql(query, get_dashboard_engine())
+    return pd.read_sql(query, get_dashboard_engine(), params={"lim": lim, "off": off})
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def _load_normalized_jobs(run_id: str | None = None) -> pd.DataFrame:
-    """Load normalized jobs, optionally filtered by run_id."""
+def _load_normalized_jobs(
+    run_id: str | None = None,
+    *,
+    limit: int = 500,
+    offset: int = 0,
+) -> pd.DataFrame:
+    """Load normalized jobs, optionally filtered by run_id.
+
+    Same window semantics as :func:`_load_raw_jobs`.
+    """
     from agents.dashboard.readonly_engine import get_dashboard_engine
 
     if run_id:
@@ -132,6 +170,7 @@ def _load_normalized_jobs(run_id: str | None = None) -> pd.DataFrame:
             ORDER BY id
         """
         return pd.read_sql(query, get_dashboard_engine(), params={"run_id": run_id})
+    lim, off = _clamp_list_window(limit, offset)
     query = """
         SELECT id, raw_job_id, ingestion_run_id, region_id, source, external_id,
                title, company, city, state_province, country,
@@ -140,9 +179,44 @@ def _load_normalized_jobs(run_id: str | None = None) -> pd.DataFrame:
                normalization_status, created_at
         FROM dbo.normalized_jobs
         ORDER BY id DESC
-        LIMIT 500
+        LIMIT %(lim)s OFFSET %(off)s
     """
-    return pd.read_sql(query, get_dashboard_engine())
+    return pd.read_sql(query, get_dashboard_engine(), params={"lim": lim, "off": off})
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def _load_normalized_for_raw_job(raw_job_id: int) -> pd.DataFrame:
+    """Load normalized row(s) for a single raw job (Record Journey with paged raw list)."""
+    from agents.dashboard.readonly_engine import get_dashboard_engine
+
+    q = """
+        SELECT id, raw_job_id, ingestion_run_id, region_id, source, external_id,
+               title, company, city, state_province, country,
+               work_arrangement, is_remote, employment_type, experience_level,
+               date_posted, salary_min, salary_max, salary_currency, salary_period,
+               normalization_status, created_at
+        FROM dbo.normalized_jobs
+        WHERE raw_job_id = %(rid)s
+        ORDER BY id DESC
+        LIMIT 5
+    """
+    return pd.read_sql(q, get_dashboard_engine(), params={"rid": int(raw_job_id)})
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def _load_quarantine_for_raw_job(raw_job_id: int) -> pd.DataFrame:
+    """Load quarantine row(s) for a single raw job."""
+    from agents.dashboard.readonly_engine import get_dashboard_engine
+
+    q = """
+        SELECT id, raw_job_id, ingestion_run_id, source, external_id,
+               error_type, error_detail, quarantined_at
+        FROM dbo.normalization_quarantine
+        WHERE raw_job_id = %(rid)s
+        ORDER BY quarantined_at DESC
+        LIMIT 5
+    """
+    return pd.read_sql(q, get_dashboard_engine(), params={"rid": int(raw_job_id)})
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -269,7 +343,7 @@ def _page_run_summary_db() -> None:
     rows = []
     for _, raw in raw_df.iterrows():
         raw_id = int(raw["id"])
-        ingested = raw["processing_status"] == "success"
+        ingested = _raw_row_ingestion_succeeded(raw.get("processing_status"))
         normalized = raw_id in norm_raw_ids
         quarantined = raw_id in quarantine_raw_ids
 
@@ -301,10 +375,35 @@ def _page_run_summary_db() -> None:
 def _page_record_journey_db() -> None:
     st.title("Record Journey")
 
-    raw_df = _load_raw_jobs()
+    with st.expander("List window (newest raw rows first by id)", expanded=False):
+        c1, c2 = st.columns(2)
+        rj_limit = c1.number_input(
+            "Max rows to load",
+            min_value=50,
+            max_value=5000,
+            value=500,
+            step=50,
+            key="rj_raw_limit",
+        )
+        rj_offset = c2.number_input(
+            "Skip first N rows (offset)",
+            min_value=0,
+            max_value=1_000_000,
+            value=0,
+            step=100,
+            key="rj_raw_offset",
+        )
+        st.caption(
+            "Use offset to page into older raw ingested jobs. Normalization status is looked up per row in SQL."
+        )
+
+    raw_df = _load_raw_jobs(limit=int(rj_limit), offset=int(rj_offset))
     if raw_df.empty:
-        st.warning("No ingested records in the database yet.")
+        st.warning("No ingested records in this window — try a smaller offset or verify the database.")
         return
+
+    lim_clamped, off_clamped = _clamp_list_window(int(rj_limit), int(rj_offset))
+    st.caption(f"Loaded raw rows **{off_clamped + 1}–{off_clamped + len(raw_df)}** (limit {lim_clamped}, offset {off_clamped}).")
 
     # -- Record selector
     options = []
@@ -361,8 +460,7 @@ def _page_record_journey_db() -> None:
 
     # -- Stage 2: Normalization
     st.markdown("#### Stage 2: Normalization")
-    norm_df = _load_normalized_jobs()
-    norm_match = norm_df[norm_df["raw_job_id"] == raw_id] if not norm_df.empty else pd.DataFrame()
+    norm_match = _load_normalized_for_raw_job(raw_id)
 
     if not norm_match.empty:
         norm_row = norm_match.iloc[0]
@@ -401,9 +499,7 @@ def _page_record_journey_db() -> None:
                     f"{norm_row.get('salary_period', '')}"
                 )
     else:
-        # Check quarantine
-        quarantine_df = _load_quarantined()
-        q_match = quarantine_df[quarantine_df["raw_job_id"] == raw_id] if not quarantine_df.empty else pd.DataFrame()
+        q_match = _load_quarantine_for_raw_job(raw_id)
         if not q_match.empty:
             q_row = q_match.iloc[0]
             with st.expander("Normalization — QUARANTINED", expanded=True):
@@ -427,133 +523,132 @@ def _page_record_journey_db() -> None:
 
 def _page_batch_insights_db() -> None:
     st.title("Batch Insights")
-    st.caption("Aggregate view across ingested and normalized job records from the database.")
+    st.caption(
+        "Aggregate charts use **full-table SQL** (GROUP BY / percentiles). "
+        "Recent records are a 50-row sample only."
+    )
 
-    norm_df = _load_normalized_jobs()
-    raw_df = _load_raw_jobs()
+    try:
+        bundle = fetch_batch_insights_bundle()
+    except Exception as exc:
+        st.error(f"Could not load batch insights: {exc}")
+        return
 
-    if norm_df.empty and raw_df.empty:
+    total = int(bundle["total_rows"])
+    if total <= 0:
         st.warning("No records found in the database yet.")
         return
 
-    # Use normalized if available, otherwise raw
-    df = norm_df if not norm_df.empty else raw_df
-    source_label = "normalized" if not norm_df.empty else "raw ingested"
-
-    st.info(f"Showing aggregates from **{len(df)}** {source_label} records.")
+    source_label = "normalized" if bundle["use_normalized"] else "raw ingested"
+    st.info(f"**{total:,}** rows in **{source_label}** table — charts reflect all of them.")
     st.markdown("---")
 
-    # -- Source distribution
     st.subheader("Source Distribution")
-    if "source" in df.columns:
-        source_counts = df["source"].value_counts()
-        st.bar_chart(source_counts)
+    sc = series_from_category_count(bundle["source_df"])
+    if not sc.empty:
+        st.bar_chart(sc)
+    else:
+        st.info("No source data.")
 
     st.markdown("---")
 
-    # -- Locations
     col1, col2 = st.columns(2)
 
     with col1:
         st.subheader("Top Locations (State)")
-        state_col = "state_province" if "state_province" in df.columns else "state"
-        if state_col in df.columns:
-            state_counts = df[state_col].dropna().value_counts().head(15)
-            if not state_counts.empty:
-                st.bar_chart(state_counts)
-            else:
-                st.info("No location data.")
+        stc = series_from_category_count(bundle["state_df"])
+        if not stc.empty:
+            st.bar_chart(stc)
         else:
-            st.info("No state column found.")
+            st.info("No location data.")
 
     with col2:
         st.subheader("Top Cities")
-        if "city" in df.columns:
-            city_counts = df["city"].dropna().value_counts().head(15)
-            if not city_counts.empty:
-                st.bar_chart(city_counts)
-            else:
-                st.info("No city data.")
+        cc = series_from_category_count(bundle["city_df"])
+        if not cc.empty:
+            st.bar_chart(cc)
+        else:
+            st.info("No city data.")
 
     st.markdown("---")
 
-    # -- Remote distribution
     st.subheader("Remote vs On-site")
-    if "is_remote" in df.columns:
-        remote_counts = df["is_remote"].map({True: "Remote", False: "On-site", None: "Unknown"})
-        remote_counts = remote_counts.fillna("Unknown").value_counts()
-        st.bar_chart(remote_counts)
+    rc = series_from_category_count(bundle["remote_df"])
+    if not rc.empty:
+        st.bar_chart(rc)
+    else:
+        st.info("No remote flag data.")
 
     st.markdown("---")
 
-    # -- Employment type + Experience level (side by side)
     col3, col4 = st.columns(2)
 
     with col3:
         st.subheader("Employment Type")
-        if "employment_type" in df.columns:
-            et_counts = df["employment_type"].dropna().value_counts()
-            if not et_counts.empty:
-                st.bar_chart(et_counts)
-            else:
-                st.info("No employment type data.")
+        ec = series_from_category_count(bundle["employment_df"])
+        if not ec.empty:
+            st.bar_chart(ec)
+        else:
+            st.info("No employment type data.")
 
     with col4:
         st.subheader("Experience Level")
-        if "experience_level" in df.columns:
-            el_counts = df["experience_level"].dropna().value_counts()
-            if not el_counts.empty:
-                st.bar_chart(el_counts)
-            else:
-                st.info("No experience level data.")
+        xc = series_from_category_count(bundle["experience_df"])
+        if not xc.empty:
+            st.bar_chart(xc)
+        else:
+            st.info("No experience level data.")
 
     st.markdown("---")
 
-    # -- Salary distribution
     st.subheader("Salary Distribution")
-    salary_df = df[["salary_min", "salary_max"]].dropna(how="all")
-    if not salary_df.empty:
-        col_s1, col_s2, col_s3 = st.columns(3)
-        valid_min = salary_df["salary_min"].dropna()
-        valid_max = salary_df["salary_max"].dropna()
-        if not valid_min.empty:
-            col_s1.metric("Median Min Salary", f"${valid_min.median():,.0f}")
-        if not valid_max.empty:
-            col_s2.metric("Median Max Salary", f"${valid_max.median():,.0f}")
-        col_s3.metric("Records with Salary", len(salary_df))
+    col_s1, col_s2, col_s3 = st.columns(3)
+    med_min = bundle["median_min"]
+    med_max = bundle["median_max"]
+    if med_min is not None and not pd.isna(med_min):
+        col_s1.metric("Median Min Salary", f"${float(med_min):,.0f}")
+    else:
+        col_s1.metric("Median Min Salary", "—")
+    if med_max is not None and not pd.isna(med_max):
+        col_s2.metric("Median Max Salary", f"${float(med_max):,.0f}")
+    else:
+        col_s2.metric("Median Max Salary", "—")
+    col_s3.metric("Records with salary fields", f"{bundle['salary_rows']:,}")
 
-        # Histogram of salary_min
-        if not valid_min.empty:
-            st.markdown("**Minimum Salary Distribution**")
-            st.bar_chart(valid_min.value_counts(bins=10).sort_index())
+    hist_df = bundle["salary_hist_df"]
+    h_lo = bundle.get("salary_hist_lo")
+    h_hi = bundle.get("salary_hist_hi")
+    if (
+        not hist_df.empty
+        and "cnt" in hist_df.columns
+        and h_lo is not None
+        and h_hi is not None
+    ):
+        st.markdown("**Minimum salary (10 equal-width buckets)** — axis shows USD range per bucket.")
+        h = series_from_salary_histogram(hist_df, float(h_lo), float(h_hi))
+        st.bar_chart(h)
+    elif bundle["salary_rows"] > 0:
+        st.info("Not enough spread in salary_min for a histogram.")
     else:
         st.info("No salary data available.")
 
     st.markdown("---")
 
-    # -- Processing status (raw jobs)
-    if not raw_df.empty and "processing_status" in raw_df.columns:
-        st.subheader("Processing Status (Raw Jobs)")
-        status_counts = raw_df["processing_status"].value_counts()
-        st.bar_chart(status_counts)
+    st.subheader("Processing Status (all raw ingested jobs)")
+    ps = series_from_category_count(bundle["raw_status_df"])
+    if not ps.empty:
+        st.bar_chart(ps)
+    else:
+        st.info("No raw rows.")
 
     st.markdown("---")
 
-    # -- Recent records table
-    st.subheader("Recent Records")
-    display_cols = ["title", "company", "source"]
-    if "city" in df.columns:
-        display_cols.append("city")
-    state_col = "state_province" if "state_province" in df.columns else "state"
-    if state_col in df.columns:
-        display_cols.append(state_col)
-    if "employment_type" in df.columns:
-        display_cols.append("employment_type")
-    if "experience_level" in df.columns:
-        display_cols.append("experience_level")
-
-    available_cols = [c for c in display_cols if c in df.columns]
-    st.dataframe(df[available_cols].head(50), width="stretch", hide_index=True)
+    st.subheader("Recent Records (50-row sample)")
+    recent = bundle["recent_df"]
+    if recent.empty:
+        st.info("No recent rows.")
+    else:
+        st.dataframe(recent, width="stretch", hide_index=True)
 
 
 # ---------------------------------------------------------------------------

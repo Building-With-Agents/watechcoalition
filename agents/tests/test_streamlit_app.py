@@ -204,6 +204,25 @@ class TestAgentOrder:
         assert _AGENT_ORDER[-1] == "demand-analysis-agent"
 
 
+class TestRawRowIngestionSucceeded:
+    """Pipeline Run Summary — ingestion column matches raw_ingested_jobs.processing_status semantics."""
+
+    def test_pending_and_downstream_states_are_pass(self) -> None:
+        from agents.dashboard.streamlit_app import _raw_row_ingestion_succeeded
+
+        assert _raw_row_ingestion_succeeded("pending") is True
+        assert _raw_row_ingestion_succeeded("normalized") is True
+        assert _raw_row_ingestion_succeeded("quarantined") is True
+        assert _raw_row_ingestion_succeeded("PENDING") is True
+
+    def test_unknown_or_empty_is_fail(self) -> None:
+        from agents.dashboard.streamlit_app import _raw_row_ingestion_succeeded
+
+        assert _raw_row_ingestion_succeeded("staged_bad") is False
+        assert _raw_row_ingestion_succeeded("") is False
+        assert _raw_row_ingestion_succeeded(None) is False
+
+
 # ---------------------------------------------------------------------------
 # Tests: JSON fallback page logic (data transformation, not Streamlit rendering)
 # ---------------------------------------------------------------------------

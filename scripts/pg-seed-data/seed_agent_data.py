@@ -50,6 +50,7 @@ INSERT_ORDER = [
     "normalization_quarantine",
     "extracted_intelligence",
     "employer_profiles",
+    "job_postings",
     "llm_audit_log",
 ]
 
@@ -113,7 +114,7 @@ def upsert_records(
             val = record.get(col)
             # Convert ISO datetime strings back to datetime objects
             if isinstance(val, str) and len(val) >= 19:
-                for fmt in ("%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S"):
+                for _fmt in ("%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S"):
                     try:
                         val = datetime.fromisoformat(val)
                         break

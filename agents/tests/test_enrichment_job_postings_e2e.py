@@ -8,15 +8,21 @@ seed fails (e.g. column naming differs from Prisma/pgloader expectations).
 from __future__ import annotations
 
 import os
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 
+from agents.common.data_store.database import session_scope
 from agents.common.event_envelope import EventEnvelope
 from agents.enrichment.agent import EnrichmentAgent
 from agents.enrichment.classifiers.spam_preview import SpamPreviewResult
+from agents.enrichment.job_postings_promotion import (
+    derive_enrichment_output_fields,
+    resolve_job_posting_row,
+)
 from agents.tests.db_seed_enrichment_e2e import (
     EnrichmentE2ESeed,
     seed_enrichment_e2e,
@@ -79,6 +85,35 @@ def _run_agent_with_spam_mock(
             },
         )
         agent.process(ev)
+
+
+def _run_agent_capture_profile_and_payload(
+    seed: EnrichmentE2ESeed,
+    spam_ret: SpamPreviewResult,
+) -> tuple[dict, dict]:
+    with (
+        patch("agents.enrichment.agent.score_spam_preview", return_value=spam_ret),
+        patch(
+            "agents.enrichment.agent.EnrichedJobProfile",
+            side_effect=lambda **kwargs: SimpleNamespace(**kwargs),
+        ) as mock_profile,
+    ):
+        agent = EnrichmentAgent()
+        ev = EventEnvelope(
+            correlation_id="e2e-consistency",
+            agent_id="skills-extraction-agent",
+            payload={
+                "event_type": "SkillsExtracted",
+                "posting_id": 999001,
+                "normalized_job_id": seed.normalized_job_id,
+                "title": "E2E Title",
+                "description": "E2E description body for enrichment promotion test.",
+                "company": "E2E Co",
+                "skills": [],
+            },
+        )
+        out = agent.process(ev)
+    return mock_profile.call_args.kwargs, out.payload
 
 
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
@@ -155,5 +190,39 @@ def test_enrichment_promotion_rejected_skips_update(e2e_engine: Engine) -> None:
         assert after.get("quality_score") == before.get("quality_score")
         assert after.get("spam_score") == before.get("spam_score")
         assert after.get("is_spam") == before.get("is_spam")
+    finally:
+        teardown_enrichment_e2e(e2e_engine, seed)
+
+
+@pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
+def test_pair_a_fields_match_across_derivation_profile_payload_and_db(e2e_engine: Engine) -> None:
+    seed = _seed_or_skip(e2e_engine)
+    try:
+        spam_ret = SpamPreviewResult(
+            spam_score=0.25,
+            is_spam=False,
+            tier="clean",
+            field_confidence={"spam_score": 0.9},
+            overall_confidence=0.9,
+            rationale="e2e",
+            degraded=False,
+            extraction_note=None,
+            used_heuristic=False,
+        )
+        with session_scope() as session:
+            resolved = resolve_job_posting_row(session, seed.normalized_job_id)
+            derived = derive_enrichment_output_fields(resolved)
+
+        profile_kwargs, payload = _run_agent_capture_profile_and_payload(seed, spam_ret)
+        row = _fetch_enrichment_columns(e2e_engine, seed.job_posting_id)
+
+        assert derived["temporal_period"] == "post_gpt4"
+        assert derived["borderplex_subregion"] == "el_paso"
+        assert profile_kwargs["temporal_period"] == derived["temporal_period"]
+        assert profile_kwargs["borderplex_subregion"] == derived["borderplex_subregion"]
+        assert payload["temporal_period"] == derived["temporal_period"]
+        assert payload["borderplex_subregion"] == derived["borderplex_subregion"]
+        assert row["temporal_period"] == derived["temporal_period"]
+        assert row["borderplex_subregion"] == derived["borderplex_subregion"]
     finally:
         teardown_enrichment_e2e(e2e_engine, seed)
