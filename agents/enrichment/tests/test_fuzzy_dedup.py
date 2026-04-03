@@ -229,6 +229,36 @@ def test_threshold_below_returns_unique(mock_embed: MagicMock) -> None:
 
 
 @patch("agents.enrichment.dedup.fuzzy_dedup._embed_texts_azure")
+def test_threshold_equal_returns_unique(mock_embed: MagicMock) -> None:
+    session = MagicMock()
+    cur = _base_current_row(dedup_hash=None, dedup_emb=None)
+    mock_embed.return_value = [_unit_vec_xy(1.0)]
+    anchor = cur["publish_date"]
+    assert isinstance(anchor, datetime)
+    survivor = _survivor_row(
+        job_posting_id="00000000-0000-0000-0000-000000000002",
+        duplicate_cluster_id=None,
+        similarity=0.92,
+        salary_range="100k-120k",
+        location="TX",
+        job_description="threshold equal survivor",
+        publish_date=anchor - timedelta(days=5),
+    )
+
+    session.execute.side_effect = [
+        _exec_first(cur),
+        MagicMock(),
+        _exec_all([survivor]),
+    ]
+
+    out = run_fuzzy_dedup(session, cur["job_posting_id"], threshold=0.92)
+
+    assert out.stub is False
+    assert out.is_duplicate is False
+    assert out.duplicate_cluster_id is None
+
+
+@patch("agents.enrichment.dedup.fuzzy_dedup._embed_texts_azure")
 def test_threshold_above_marks_duplicate_when_survivor_wins(mock_embed: MagicMock) -> None:
     session = MagicMock()
     cur = _base_current_row(dedup_hash=None, dedup_emb=None, salary=None)

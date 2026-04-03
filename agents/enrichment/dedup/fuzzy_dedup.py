@@ -314,7 +314,8 @@ def run_fuzzy_dedup(
         survivor_embeddings_backfilled=survivor_embedded_count,
     )
 
-    if best_row is None or best_sim < effective_threshold:
+    # Week 6 issue contract is strict: equality with the threshold is not a merge.
+    if best_row is None or not (best_sim > effective_threshold):
         return _unique_result()
 
     cur_c = completeness_score(_current_row_dict(current))
