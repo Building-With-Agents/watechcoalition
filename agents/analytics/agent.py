@@ -1,9 +1,10 @@
 """
 Analytics Agent — Week 7 pipeline (scaffold) + Week 2 fixture fallback.
 
-Internal processing order matches ``ARCHITECTURE_DEEP.md`` (13 steps). Steps 1–9 and 12–13 are
+Internal processing order matches ``ARCHITECTURE_DEEP.md`` (13 steps). Steps 1–9 and 13 are
 Phase 1 stubs. Step 10 wires posting-freshness computation + staleness/cardinality guardrails;
-step 11 builds an empty trajectory scaffold (Phase 2 placeholder).
+step 11 builds an empty trajectory scaffold (Phase 2 placeholder); step 12 runs
+``generate_summaries`` over the scaffold + posting freshness; step 13 remains a stub.
 
 Agent ID (canonical): analytics-agent
 Emits:    AnalyticsRefreshed
@@ -23,6 +24,7 @@ from typing import Any
 import structlog
 
 from agents.analytics.insights.freshness import detect_staleness
+from agents.analytics.insights.llm_summary import SummaryResult, generate_summaries
 from agents.analytics.insights.guardrails import (
     CARDINALITY_CAP,
     build_cardinality_warning_payload,
@@ -131,6 +133,7 @@ class AnalyticsAgent(BaseAgent):
     def __init__(self) -> None:
         self._fixture: dict = {}
         self._last_trajectory_scaffold: dict[str, Any] = {}
+        self._summaries: list[SummaryResult] = []
 
     def health_check(self) -> dict:
         """Return ok status if the fixture file is present and loadable."""
@@ -242,7 +245,30 @@ class AnalyticsAgent(BaseAgent):
         log.info("analytics_step_11_trajectory_scaffold", keys=len(self._last_trajectory_scaffold))
 
     def _pipeline_step_12_disruption_fingerprint(self, payload: dict[str, Any]) -> None:
-        """Step 12 — disruption fingerprint (Phase 1 stub)."""
+        """Step 12 — LLM insight summaries from trajectory scaffold + posting freshness."""
+        records = _records_from_record_enriched_payload(payload)
+        detect_inputs: list[dict[str, Any]] = []
+        for r in records:
+            if r.get("posting_id") is None:
+                continue
+            detect_inputs.append(
+                {
+                    "posting_id": str(r.get("posting_id")),
+                    "days_since_posted": int(r.get("days_since_posted", 0)),
+                }
+            )
+        freshness_results = detect_staleness(detect_inputs) if detect_inputs else []
+        trajectory_map = self._last_trajectory_scaffold
+        self._summaries = generate_summaries(trajectory_map, freshness_results)
+        llm_generated = sum(1 for s in self._summaries if s.get("is_llm_generated"))
+        fallback = len(self._summaries) - llm_generated
+        log.info(
+            "analytics_step_12_llm_summaries",
+            total=len(self._summaries),
+            llm_generated=llm_generated,
+            fallback=fallback,
+            batch_id=payload.get("batch_id"),
+        )
 
     def _pipeline_step_13_llm_insight_summary(self, payload: dict[str, Any]) -> None:
         """Step 13 — LLM insight summary (Phase 1 stub)."""
