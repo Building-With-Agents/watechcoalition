@@ -107,7 +107,7 @@ def invoke_skills_llm(
     """
     llm = _get_llm()
     audit_agent = agent_name or AGENT_NAME
-    model_name = (
+    deployment_name = (
         getattr(llm, "azure_deployment", None)
         or getattr(llm, "deployment_name", None)
         or getattr(llm, "model_name", None)
@@ -116,6 +116,7 @@ def invoke_skills_llm(
         or os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
         or "azure-openai"
     )
+    model_name = deployment_name  # overwritten below if response has actual model
     provider = "azure-openai"
     start = time.perf_counter()
 
@@ -123,6 +124,12 @@ def invoke_skills_llm(
         msg = llm.invoke(prompt)
         text = msg.content if hasattr(msg, "content") else str(msg)
         latency_ms = int((time.perf_counter() - start) * 1000)
+
+        # Extract actual model name from response metadata (not just deployment name)
+        if hasattr(msg, "response_metadata") and isinstance(msg.response_metadata, dict):
+            actual_model = msg.response_metadata.get("model_name") or msg.response_metadata.get("model")
+            if actual_model:
+                model_name = f"{actual_model} ({deployment_name})"
 
         # Approximate token count when usage not provided
         if hasattr(msg, "response_metadata") and isinstance(msg.response_metadata, dict):
@@ -281,7 +288,8 @@ def invoke_structured_extraction_llm(
             "model": "",
         }
 
-    model_name = deployment
+    deployment_name = deployment
+    model_name = deployment_name  # overwritten below if response has actual model
     provider = "azure-openai"
     start = time.perf_counter()
 
@@ -311,10 +319,14 @@ def invoke_structured_extraction_llm(
             parsed = raw_out  # type: ignore[assignment]
             msg_for_usage = None
 
+        # Extract actual model name from response metadata
         tokens_used = 0
         if msg_for_usage is not None and hasattr(msg_for_usage, "response_metadata"):
             md = getattr(msg_for_usage, "response_metadata", None) or {}
             if isinstance(md, dict):
+                actual_model = md.get("model_name") or md.get("model")
+                if actual_model:
+                    model_name = f"{actual_model} ({deployment_name})"
                 usage = md.get("token_usage") or md.get("usage")
                 if isinstance(usage, dict):
                     tokens_used = int(
