@@ -21,7 +21,7 @@ pip install -r agents/requirements.txt
 # 4. Seed reference data (tables, taxonomies, companies, etc.)
 python scripts/pg-seed-data/seed_pg_database.py
 
-# 5. Seed agent pipeline data (enriched job postings for analytics)
+# 5. Seed agent pipeline data (staging tables + enriched dbo.job_postings for analytics / dashboard)
 python scripts/pg-seed-data/seed_agent_data.py
 
 # 6. Verify — run the flywheel pipeline
@@ -63,7 +63,7 @@ The seed script populates **40 reference tables** with ~56,000 rows:
 ### What is NOT seeded
 
 - **PII tables** (users, jobseekers, employers, auth) — excluded for privacy
-- **Agent-managed tables** (raw_ingested_jobs, normalized_jobs, job_ingestion_runs) — created empty by the seed script via `run_migrations()`
+- **Agent pipeline rows** — `seed_pg_database.py` creates empty agent tables via `run_migrations()`; load sample pipeline + enriched `job_postings` with step 5 (`seed_agent_data.py`) using `agent-fixtures/*.json`
 - **Skill embeddings** — the `embedding` column is excluded from fixtures (107MB of pgvector data). Regenerate via the admin tool if needed.
 
 ## How It Works
@@ -101,7 +101,8 @@ scripts/pg-seed-data/
     raw_ingested_jobs.json      ← Ingested job data
     normalized_jobs.json        ← Normalized records
     extracted_intelligence.json ← Extraction results
-    job_postings.json           ← Enriched job postings
+    job_postings.json           ← Enriched postings (promotion path; UPSERT after reference seed)
+    ...                         ← job_ingestion_runs, normalization_quarantine, llm_audit_log, metadata.json
 ```
 
 ## Troubleshooting
@@ -122,16 +123,20 @@ If the admin database changes, re-export fixtures:
 
 ```bash
 # 1. Ensure PYTHON_DATABASE_URL points to the admin PostgreSQL instance
-# 2. Export
+# 2. Export reference tables
 python scripts/pg-seed-data/export_pg_fixtures.py
 
-# 3. Optionally regenerate schema.sql
+# 3. Export agent pipeline + job_postings (for seed_agent_data.py / committed agent-fixtures)
+python scripts/pg-seed-data/export_agent_data.py
+
+# 4. Optionally regenerate schema.sql
 docker exec postgres-server pg_dump -U postgres -d talent_finder \
   --schema-only --schema=dbo --no-owner --no-privileges \
   > scripts/pg-seed-data/schema_raw.sql
 python scripts/pg-seed-data/clean_schema.py
 
-# 4. Commit updated fixtures
+# 5. Commit updated fixtures (include agent-fixtures when pipeline snapshot changed)
 git add scripts/pg-seed-data/fixtures/ scripts/pg-seed-data/schema.sql
+git add scripts/pg-seed-data/agent-fixtures/
 git commit -m "Update PostgreSQL seed fixtures"
 ```
