@@ -29,10 +29,13 @@ from agents.common.base_agent import BaseAgent
 
 log = structlog.get_logger()
 
-# Proactive inter-request delay to avoid Azure OpenAI 429 rate limits.
-# Default raised from 0.5s to 2.0s to reduce sustained burst on low-TPM deployments.
-# Set SKILLS_EXTRACTION_DELAY=0 to disable; increase for lower-tier deployments.
-_INTER_LLM_DELAY = float(os.environ.get("SKILLS_EXTRACTION_DELAY", "2.0"))
+# Batch chunking to avoid Azure OpenAI 429 rate limits.
+# Process CHUNK_SIZE records, pause CHUNK_COOLDOWN seconds, then next chunk.
+# This lets the TPM window refill between bursts instead of a flat per-record delay.
+_CHUNK_SIZE = int(os.environ.get("SKILLS_EXTRACTION_CHUNK_SIZE", "5"))
+_CHUNK_COOLDOWN = float(os.environ.get("SKILLS_EXTRACTION_CHUNK_COOLDOWN", "30"))
+# Small inter-record delay within a chunk (keeps burst manageable).
+_INTER_LLM_DELAY = float(os.environ.get("SKILLS_EXTRACTION_DELAY", "1.0"))
 from agents.common.data_store import check_db_connection, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
@@ -399,13 +402,29 @@ class SkillsExtractionAgent(BaseAgent):
         if max_jobs > 0 and len(work_items) > max_jobs:
             work_items = work_items[:max_jobs]
 
-        # Phase 1: Extract tools + skills for all jobs (taxonomy deferred)
+        # Phase 1: Extract tools + skills in chunks to avoid 429 rate limits.
+        # Process CHUNK_SIZE records with small inter-record delay, then pause
+        # CHUNK_COOLDOWN seconds for the TPM window to refill.
         pending: list[tuple[ExtractionWorkItem, list[ToolRecord], list, dict]] = []
+        total = len(work_items)
         for idx, item in enumerate(work_items):
+            # Inter-record delay within a chunk
             if idx > 0 and _INTER_LLM_DELAY > 0:
                 time.sleep(_INTER_LLM_DELAY)
+
             tools, skills_list, meta, is_llm = self._extract_work_item_no_taxonomy(item)
             pending.append((item, tools, skills_list, meta))
+
+            # Chunk boundary cooldown
+            chunk_pos = idx + 1
+            if _CHUNK_SIZE > 0 and chunk_pos % _CHUNK_SIZE == 0 and chunk_pos < total:
+                log.info(
+                    "skills_extraction_chunk_cooldown",
+                    processed=chunk_pos,
+                    total=total,
+                    cooldown_seconds=_CHUNK_COOLDOWN,
+                )
+                time.sleep(_CHUNK_COOLDOWN)
 
         # Phase 2: Batch taxonomy resolution — single API call for all labels
         all_labels: list[str] = []
