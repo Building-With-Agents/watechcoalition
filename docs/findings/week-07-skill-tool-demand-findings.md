@@ -13,6 +13,16 @@
 - **`employer_count`:** Added on `SkillDemandWeekly` to match IMP-021’s `func.count(func.distinct(...))` teaching pattern (Exercise 7.1 checklist focused on `posting_count` only; reading still defines the metric). Default `0` via `server_default`; existing DBs get column via `migrations.py` `ALTER ... ADD COLUMN IF NOT EXISTS`.
 - **Table creation:** `run_migrations(get_engine())` → `Base.metadata.create_all` picks up the new models (no separate DDL block in `migrations.py`).
 
+**Steps 2–3 (aggregate refresh):** [agents/analytics/aggregators/demand_weekly.py](../../agents/analytics/aggregators/demand_weekly.py) — `refresh_skill_demand_weekly(session, week_start)` and `refresh_tool_demand_weekly(session, week_start)`.
+
+- **Join path:** `extracted_intelligence` → `normalized_jobs` (`normalized_job_id`) → `job_postings` (`source` + `external_id`) → `companies` (`company_id` text match).
+- **Unnest:** `jsonb_array_elements` on `skills` / `tools`; labels via `COALESCE(...->>'skill_name', ...->>'label')` (and tool analog).
+- **Spam / reject:** `get_spam_thresholds()` reject bound; exclude `jp.is_spam IS TRUE` and `spam_score > reject_threshold`.
+- **Dedup:** rows with `jp.is_duplicate IS TRUE` are excluded from counts.
+- **Aggregation:** outer query uses `func.count(func.distinct(...))` + `GROUP BY`; `employer_count` = distinct `company_id` per skill/week.
+- **Idempotency:** `DELETE` for `week_start`, then `insert().from_select(...)`; `computed_at` = single UTC timestamp for the batch.
+- **Not wired:** [agents/analytics/agent.py](../../agents/analytics/agent.py) still uses the Week 2 fixture stub (scheduler integration is a later task).
+
 ## Verification Results
 
 **Local run (2026-04-04)** — repo root, venv `.venv`, `PYTHONPATH=.`, `PYTHON_DATABASE_URL` → `localhost:5432/talent_finder`.
@@ -32,13 +42,15 @@ skill_co_occurrence ['id', 'skill_a', 'skill_b', 'co_occurrence_count', 'week_st
 
 3. **Import smoke test** — `from agents.common.data_store.models import SkillDemandWeekly, ToolDemandWeekly, SkillVelocity, SkillCoOccurrence` completed with exit code 0 (no traceback).
 
+4. **Demand refresh tests** — `pytest tests/test_demand_weekly.py -v` from `agents/` (mocked delete/insert + compile check + optional DB smoke when `PYTHON_DATABASE_URL` is set).
+
 ## Dependency Notes
 
 Steps **2** (`skill_demand_weekly`) and **3** (`tool_demand_weekly`) are independent of each other. Steps **8** (`skill_velocity`) and **9** (`skill_co_occurrence`) depend on step **2** completing for the same refresh window so velocity and co-occurrence are not computed against empty or stale demand snapshots. **Pair C** (`role_snapshot_weekly`) will consume **`skill_demand_weekly`** — align any future column changes with them before merge.
 
 ## Dashboard Design Decisions
 
-Deferred to the Weekly Insights Streamlit task; this exercise is schema-only (no dashboard changes).
+Weekly Insights UI still deferred; aggregate **data** for steps 2–3 is produced by `demand_weekly.py` and stored in `dbo.skill_demand_weekly` / `dbo.tool_demand_weekly`.
 
 ## Edge Cases Found
 
@@ -46,6 +58,7 @@ Deferred to the Weekly Insights Streamlit task; this exercise is schema-only (no
 - **`create_all` does not migrate** existing tables: if an old `skill_demand_weekly` (or similar) existed with different columns, Postgres would not auto-alter; dev fix is manual `ALTER` or drop/recreate in non-prod. Same for **new** unique constraints/indexes on already-created empty tables — `create_all` with `checkfirst=True` may skip altering an existing table; add constraints with raw SQL/Alembic if your DB predates this change.
 - **`UniqueConstraint(skill_label, week_start)`** implies at most one aggregate row per skill per week (single `esco_uri` choice in that row if multiple taxonomy links collapse to one label).
 - Runbook wording **“enriched_jobs”** maps to enriched rows in **`dbo.job_postings`** in this repo (and related pipeline tables); there is no separate `enriched_jobs` table.
+- **Week alignment:** `date_trunc('week', ...)` uses PostgreSQL’s default week boundary (Monday). Refresh must pass that week’s `::date` as `week_start`.
 
 ## Cursor Rules Notes
 
@@ -54,8 +67,28 @@ Deferred to the Weekly Insights Streamlit task; this exercise is schema-only (no
 ## Data / Evidence
 
 - **Code:** [agents/common/data_store/models.py](../../agents/common/data_store/models.py) (section “Analytics aggregate tables (Week 7 — Pair A)”).
+- **Aggregators:** [agents/analytics/aggregators/demand_weekly.py](../../agents/analytics/aggregators/demand_weekly.py); tests: [agents/tests/test_demand_weekly.py](../../agents/tests/test_demand_weekly.py).
 - **Migrations entrypoint:** [agents/common/data_store/migrations.py](../../agents/common/data_store/migrations.py) (`run_migrations` → `Base.metadata.create_all` + `employer_count` alter).
 - **Local verification transcript:** same machine as above; see **Verification Results** for captured stdout.
+
+**Manual refresh (example):**
+
+```bash
+PYTHONPATH=. python -c "
+from datetime import date
+from dotenv import load_dotenv
+load_dotenv()
+from agents.common.data_store.database import session_scope
+from agents.analytics.aggregators.demand_weekly import (
+    refresh_skill_demand_weekly,
+    refresh_tool_demand_weekly,
+)
+with session_scope() as s:
+    ws = date(2025, 1, 6)  # Monday of target ISO week
+    print('skills', refresh_skill_demand_weekly(s, ws))
+    print('tools', refresh_tool_demand_weekly(s, ws))
+"
+```
 
 **Commands to verify locally** (repo root, venv activated, `PYTHON_DATABASE_URL` in `.env`):
 
