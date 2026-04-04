@@ -346,7 +346,7 @@ class SkillDemandWeekly(Base):
     esco_uri: Mapped[str | None] = mapped_column(Text, nullable=True)
     week_start: Mapped[date] = mapped_column(Date, nullable=False)
     posting_count: Mapped[int] = mapped_column(Integer, nullable=False)
-    employer_count: Mapped[int] = mapped_column(Integer,nullable=False,server_default=text("0"),)
+    employer_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
     computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
