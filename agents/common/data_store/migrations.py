@@ -140,6 +140,11 @@ _EXTRACTED_INTELLIGENCE_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.extracted_intelligence ADD COLUMN IF NOT EXISTS extraction_metadata JSONB",
 ]
 
+# Week 7: skill_demand_weekly may predate employer_count (IMP-021 distinct-employer metric)
+_SKILL_DEMAND_WEEKLY_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.skill_demand_weekly ADD COLUMN IF NOT EXISTS employer_count INTEGER NOT NULL DEFAULT 0",
+]
+
 _EMPLOYER_PROFILES_DDL = """
 CREATE TABLE IF NOT EXISTS dbo.employer_profiles (
     id SERIAL PRIMARY KEY,
@@ -204,6 +209,18 @@ def run_migrations(engine: Engine) -> None:
     with engine.begin() as conn:
         conn.execute(text(_EMPLOYER_PROFILES_DDL))
     log.info("migrations_employer_profiles_created")
+
+    # 4b. Analytics aggregate columns (idempotent alters if table existed before ORM update)
+    for stmt in _SKILL_DEMAND_WEEKLY_ALTER_STATEMENTS:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(stmt))
+        except Exception as exc:
+            log.warning(
+                "migration_skill_demand_weekly_alter_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
 
     # 5. Add enrichment columns to dbo.job_postings (and related).
     #    Each ALTER runs in its own transaction so a single failure

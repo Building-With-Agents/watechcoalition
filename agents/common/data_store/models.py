@@ -7,17 +7,19 @@ Prisma/MSSQL is being phased out.
 
 Agent-created tables: raw_ingested_jobs, job_ingestion_runs, normalized_jobs,
     normalization_quarantine, extracted_intelligence, llm_audit_log,
-    employer_profiles.
+    employer_profiles, skill_demand_weekly, tool_demand_weekly, skill_velocity,
+    skill_co_occurrence.
 Reference tables (seeded, agent-owned): companies, industry_sectors,
     technology_areas, skills, socc, job_postings.
 """
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from sqlalchemy import (
     Boolean,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -26,6 +28,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSON, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -316,6 +319,96 @@ class EmployerProfile(Base):
     sector: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_known_employer: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+
+# ---------------------------------------------------------------------------
+# Analytics aggregate tables (Week 7 — Pair A)
+# ---------------------------------------------------------------------------
+
+
+class SkillDemandWeekly(Base):
+    """Weekly skill demand counts (Analytics step 2).
+
+    ``employer_count`` stores distinct employers for the skill in the week
+    (``func.count(func.distinct(company_id))`` pattern in SQL — IMP-021).
+    """
+
+    __tablename__ = "skill_demand_weekly"
+    __table_args__ = (
+        UniqueConstraint("skill_label", "week_start", name="uq_skill_demand_week"),
+        Index("ix_skill_demand_weekly_week", "week_start"),
+        Index("ix_skill_demand_weekly_skill", "skill_label"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    skill_label: Mapped[str] = mapped_column(Text, nullable=False)
+    esco_uri: Mapped[str | None] = mapped_column(Text, nullable=True)
+    week_start: Mapped[date] = mapped_column(Date, nullable=False)
+    posting_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    employer_count: Mapped[int] = mapped_column(Integer,nullable=False,server_default=text("0"),)
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class ToolDemandWeekly(Base):
+    """Weekly tool demand counts (Analytics step 3)."""
+
+    __tablename__ = "tool_demand_weekly"
+    __table_args__ = (
+        UniqueConstraint("tool_label", "week_start", name="uq_tool_demand_week"),
+        Index("ix_tool_demand_weekly_week", "week_start"),
+        Index("ix_tool_demand_weekly_tool", "tool_label"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    tool_label: Mapped[str] = mapped_column(Text, nullable=False)
+    week_start: Mapped[date] = mapped_column(Date, nullable=False)
+    posting_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class SkillVelocity(Base):
+    """Skill demand velocity / trend (Analytics step 8).
+
+    Python attribute ``velocity_week`` maps to DB column ``week`` (reserved name).
+    """
+
+    __tablename__ = "skill_velocity"
+    __table_args__ = (
+        UniqueConstraint("skill_label", "week", name="uq_skill_velocity_week"),
+        Index("ix_skill_velocity_week", "week"),
+        Index("ix_skill_velocity_skill", "skill_label"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    skill_label: Mapped[str] = mapped_column(Text, nullable=False)
+    esco_uri: Mapped[str | None] = mapped_column(Text, nullable=True)
+    velocity_week: Mapped[date] = mapped_column("week", Date, nullable=False)
+    demand_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    week_over_week_change: Mapped[float] = mapped_column(Float, nullable=False)
+    four_week_trend: Mapped[str] = mapped_column(Text, nullable=False)
+    trend_confidence: Mapped[float] = mapped_column(Float, nullable=False)
+
+
+class SkillCoOccurrence(Base):
+    """Skill pair co-occurrence within a week (Analytics step 9)."""
+
+    __tablename__ = "skill_co_occurrence"
+    __table_args__ = (
+        UniqueConstraint("skill_a", "skill_b", "week_start", name="uq_skill_co_occurrence_week"),
+        Index("ix_skill_co_occurrence_week", "week_start"),
+        Index("ix_skill_co_occurrence_skills", "skill_a", "skill_b"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    skill_a: Mapped[str] = mapped_column(Text, nullable=False)
+    skill_b: Mapped[str] = mapped_column(Text, nullable=False)
+    co_occurrence_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    week_start: Mapped[date] = mapped_column(Date, nullable=False)
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 # ===========================================================================
