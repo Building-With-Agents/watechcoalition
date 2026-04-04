@@ -15,6 +15,14 @@
 
 **Steps 2–3 (aggregate refresh):** [agents/analytics/aggregators/demand_weekly.py](../../agents/analytics/aggregators/demand_weekly.py) — `refresh_skill_demand_weekly(session, week_start)` and `refresh_tool_demand_weekly(session, week_start)`.
 
+- **Join path:** `extracted_intelligence` → `normalized_jobs` (`normalized_job_id`) → `job_postings` (`source` + `external_id`) → `companies` (`company_id` text match).
+- **Unnest:** `jsonb_array_elements` on `skills` / `tools`; labels via `COALESCE(...->>'skill_name', ...->>'label')` (and tool analog).
+- **Spam / reject:** `get_spam_thresholds()` reject bound; exclude `jp.is_spam IS TRUE` and `spam_score > reject_threshold`.
+- **Dedup:** rows with `jp.is_duplicate IS TRUE` are excluded from counts.
+- **Aggregation:** outer query uses `func.count(func.distinct(...))` + `GROUP BY`; `employer_count` = distinct `company_id` per skill/week.
+- **Idempotency:** `DELETE` for `week_start`, then `insert().from_select(...)`; `computed_at` = single UTC timestamp for the batch.
+- **Not wired:** [agents/analytics/agent.py](../../agents/analytics/agent.py) still uses the Week 2 fixture stub (scheduler integration is a later task).
+
 **Step 8 (`skill_velocity`):** [agents/analytics/aggregators/velocity.py](../../agents/analytics/aggregators/velocity.py) — `refresh_skill_velocity(session, target_week)`.
 
 - **Input:** Last five `week_start` values from `dbo.skill_demand_weekly` ending at `target_week` (Monday anchor, same contract as step 2 / `date_trunc('week', ...)`).
@@ -25,13 +33,12 @@
 - **Idempotency:** `DELETE` from `skill_velocity` where `week = target_week`, then `INSERT` one row per skill in the pivot. Empty history still runs `DELETE` and returns `0` inserted.
 - **Export:** `from agents.analytics.aggregators import refresh_skill_velocity` (re-exported in `aggregators/__init__.py`). Tests: [agents/tests/test_velocity.py](../../agents/tests/test_velocity.py).
 
-- **Join path:** `extracted_intelligence` → `normalized_jobs` (`normalized_job_id`) → `job_postings` (`source` + `external_id`) → `companies` (`company_id` text match).
-- **Unnest:** `jsonb_array_elements` on `skills` / `tools`; labels via `COALESCE(...->>'skill_name', ...->>'label')` (and tool analog).
-- **Spam / reject:** `get_spam_thresholds()` reject bound; exclude `jp.is_spam IS TRUE` and `spam_score > reject_threshold`.
-- **Dedup:** rows with `jp.is_duplicate IS TRUE` are excluded from counts.
-- **Aggregation:** outer query uses `func.count(func.distinct(...))` + `GROUP BY`; `employer_count` = distinct `company_id` per skill/week.
-- **Idempotency:** `DELETE` for `week_start`, then `insert().from_select(...)`; `computed_at` = single UTC timestamp for the batch.
-- **Not wired:** [agents/analytics/agent.py](../../agents/analytics/agent.py) still uses the Week 2 fixture stub (scheduler integration is a later task).
+**Step 9 (`skill_co_occurrence`):** [agents/analytics/aggregators/co_occurrence.py](../../agents/analytics/aggregators/co_occurrence.py) — `refresh_skill_co_occurrence(session, week_start)`.
+
+- **Data fetch:** Reuses `_SKILLS_EXPANDED` from `demand_weekly.py` so filters match step 2 exactly (spam, reject threshold, `is_duplicate`, `extraction_failed`, week filter). `SELECT job_posting_id, skill_label` from that subquery; Python groups rows into `list[list[str]]` per posting.
+- **Pair counting:** `sorted(set(skills))[:20]` per posting, then `itertools.combinations`; aggregate counts in a dict; keep **top 200** pairs by count (`sorted(..., key=lambda x: -x[1])[:200]`).
+- **Persistence:** `DELETE` `skill_co_occurrence` where `week_start == target_week`; bulk `INSERT` with one shared `computed_at` (`datetime.now(timezone.utc)`). Empty week: delete only, return `0`.
+- **Export:** `from agents.analytics.aggregators import refresh_skill_co_occurrence`. Tests: [agents/tests/test_co_occurrence.py](../../agents/tests/test_co_occurrence.py).
 
 ## Verification Results
 
@@ -56,6 +63,8 @@ skill_co_occurrence ['id', 'skill_a', 'skill_b', 'co_occurrence_count', 'week_st
 
 5. **Velocity tests** — `pytest tests/test_velocity.py -v` (window/classify/sanitize helpers, mocked refresh, optional DB smoke).
 
+6. **Co-occurrence tests** — `pytest tests/test_co_occurrence.py -v` (pair extraction, top-200 cap, mocked refresh, compile check, optional DB smoke).
+
 ## Dependency Notes
 
 Steps **2** (`skill_demand_weekly`) and **3** (`tool_demand_weekly`) are independent of each other. Steps **8** (`skill_velocity`) and **9** (`skill_co_occurrence`) depend on step **2** completing for the same refresh window so velocity and co-occurrence are not computed against empty or stale demand snapshots. **Pair C** (`role_snapshot_weekly`) will consume **`skill_demand_weekly`** — align any future column changes with them before merge.
@@ -79,7 +88,7 @@ Weekly Insights UI still deferred; aggregate **data** for steps 2–3 is produce
 ## Data / Evidence
 
 - **Code:** [agents/common/data_store/models.py](../../agents/common/data_store/models.py) (section “Analytics aggregate tables (Week 7 — Pair A)”).
-- **Aggregators:** [agents/analytics/aggregators/demand_weekly.py](../../agents/analytics/aggregators/demand_weekly.py), [agents/analytics/aggregators/velocity.py](../../agents/analytics/aggregators/velocity.py); tests: [agents/tests/test_demand_weekly.py](../../agents/tests/test_demand_weekly.py), [agents/tests/test_velocity.py](../../agents/tests/test_velocity.py).
+- **Aggregators:** [agents/analytics/aggregators/demand_weekly.py](../../agents/analytics/aggregators/demand_weekly.py), [agents/analytics/aggregators/velocity.py](../../agents/analytics/aggregators/velocity.py), [agents/analytics/aggregators/co_occurrence.py](../../agents/analytics/aggregators/co_occurrence.py); tests: [agents/tests/test_demand_weekly.py](../../agents/tests/test_demand_weekly.py), [agents/tests/test_velocity.py](../../agents/tests/test_velocity.py), [agents/tests/test_co_occurrence.py](../../agents/tests/test_co_occurrence.py).
 - **Migrations entrypoint:** [agents/common/data_store/migrations.py](../../agents/common/data_store/migrations.py) (`run_migrations` → `Base.metadata.create_all` + `employer_count` alter).
 - **Local verification transcript:** same machine as above; see **Verification Results** for captured stdout.
 
@@ -100,7 +109,9 @@ with session_scope() as s:
     print('skills', refresh_skill_demand_weekly(s, ws))
     print('tools', refresh_tool_demand_weekly(s, ws))
     from agents.analytics.aggregators.velocity import refresh_skill_velocity
+    from agents.analytics.aggregators.co_occurrence import refresh_skill_co_occurrence
     print('velocity', refresh_skill_velocity(s, ws))
+    print('co_occurrence', refresh_skill_co_occurrence(s, ws))
 "
 ```
 
