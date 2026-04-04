@@ -4,8 +4,10 @@ from agents.analytics.aggregators.demand_weekly import (
     refresh_skill_demand_weekly,
     refresh_tool_demand_weekly,
 )
+from agents.analytics.aggregators.velocity import refresh_skill_velocity
 
 __all__ = [
     "refresh_skill_demand_weekly",
     "refresh_tool_demand_weekly",
+    "refresh_skill_velocity",
 ]
