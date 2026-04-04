@@ -1,0 +1,73 @@
+---
+description: "Week 7 Pair A (IMP-021) — skill/tool demand, velocity, co-occurrence, Weekly Insights contract"
+alwaysApply: false
+globs:
+  - "agents/analytics/**"
+  - "agents/common/data_store/**"
+  - "agents/dashboard/**"
+---
+
+# Skill & tool demand (Pair A — IMP-021)
+
+**Owners:** Ángel + Fabian. **Steps in scope:** 2, 3, 8, 9 + **Weekly Insights** Streamlit (see `.cursor/rules/streamlit-dashboard.mdc`).
+
+**Specs:** `docs/planning/ARCHITECTURE_DEEP.md` (table names + base columns); **IMP-021** (dependency ordering, refresh behavior, velocity/co-occurrence behavior, dashboard expectations). ORM + DDL: `agents/common/data_store/models.py`, `migrations.py`.
+
+**Coordinate:** Pair C (`role_snapshot_weekly`) consumes **`skill_demand_weekly`** — align schema before they ship.
+
+---
+
+## Dependency order (partial DAG)
+
+| Step | Writes | Reads (logical) |
+|------|--------|------------------|
+| 2 | `skill_demand_weekly` | Enriched postings + canonical skill source for the week |
+| 3 | `tool_demand_weekly` | Same for tools |
+| 8 | `skill_velocity` | `skill_demand_weekly` (step 2) |
+| 9 | `skill_co_occurrence` | Posting-level skill lists **and** step 2 outputs (see IMP-021) |
+
+Steps **2 and 3** are independent (either order). **8 and 9 must not run before 2** for the same refresh — wrong order yields empty or stale tables **without necessarily erroring**.
+
+---
+
+## Aggregation rules (Pair A)
+
+- **DB-side aggregation:** Prefer SQLAlchemy `func.*` + `GROUP BY` in PostgreSQL; avoid loading all rows into Python for counts.
+- **Spam / reject:** Exclude postings that are auto-rejected or equivalent spam tier (map IMP-021’s `spam_tier != "reject"` to the columns the pipeline actually uses, e.g. `is_spam` / `spam_score` / enrichment flags).
+- **Refresh for target week:** **Delete** existing rows for that `week_start`, then **insert** fresh rows (full replace per week — no partial incremental merge in v1).
+- **`computed_at`:** Every aggregate row (or a run-level timestamp agreed in implementation) must support **staleness** — dashboards warn if data is older than policy (IMP-021: **24h** guideline).
+- **Empty weeks:** Emit **explicit zero / empty result shape** for a week with no postings; do **not** omit the week (avoids gaps in time-series).
+- **Verification:** After a step, reconcile counts vs a manual recount baseline; **> 0.5%** drift should **fail the run** (log + stop), per IMP-021.
+
+---
+
+## Table columns (ARCHITECTURE_DEEP + IMP-021)
+
+Base DDL lives in **ARCHITECTURE_DEEP** (`skill_label` / `tool_label`, `posting_count`, `growth_rate`, velocity fields, co-occurrence fields). **IMP-021 adds:** persist **`computed_at`** (timestamptz) on these aggregate tables when you add the ORM/migration (deep doc DDL may omit it — Pair A extends for freshness).
+
+**Step 8 — `trend` labels (lock to IMP-021):** `accelerating` | `declining` | `stable` | `volatile` | `emerging`. Thresholds (~15% / ~5% bands) are **constants** / env-tunable, not magic numbers in-line.
+
+**Step 8 — smoothing:** Velocity uses a **4-week rolling** view of demand before classifying trend (dampens single-week batch-posting spikes).
+
+**Step 9 — `skill_co_occurrence`:** Symmetric pairs only: enforce **`skill_a` < `skill_b`** lexicographically. **Cap** skills per posting (IMP-021 default **20**) and **cap** stored pairs (e.g. top **200** by `co_count`) to avoid quadratic blow-up.
+
+---
+
+## Weekly Insights (dashboard)
+
+- **Read-only** DB access; **`PYTHON_DATABASE_URL`** consistent with `agents/common/data_store/database.py`.
+- **Chart mapping (IMP-021):** demand tables → horizontal bar (`px.bar`, `orientation="h"`); velocity → sparkline / line per skill; co-occurrence → heatmap (`px.imshow`).
+- **Partial data:** If step 2 ran but step 8 did not, show demand charts and a clear **“Velocity not yet available”** (or similar) message — **no blank panels**.
+- **Staleness:** If `computed_at` (or run timestamp) exceeds policy age, show a **staleness banner** in addition to Streamlit TTL rules.
+
+---
+
+## Events
+
+`AnalyticsRefreshed` / payload details: **`.cursor/rules/event-contracts.mdc`** and `agents/common/events/` — extend there when batch metadata changes.
+
+---
+
+## Schema changes
+
+Renaming or removing **contract columns** requires migration + updating this file + notifying **Pair C** and Week 8 consumers.
