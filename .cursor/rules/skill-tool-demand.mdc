@@ -41,15 +41,34 @@ Steps **2 and 3** are independent (either order). **8 and 9 must not run before 
 
 ---
 
-## Table columns (ARCHITECTURE_DEEP + IMP-021)
+## Table columns — **frozen IMP-021 implementation (Week 7 final)**
 
-Base DDL lives in **ARCHITECTURE_DEEP** (`skill_label` / `tool_label`, `posting_count`, `growth_rate`, velocity fields, co-occurrence fields). **IMP-021 adds:** persist **`computed_at`** (timestamptz) on these aggregate tables when you add the ORM/migration (deep doc DDL may omit it — Pair A extends for freshness).
+Authoritative ORM: `agents/common/data_store/models.py`. Aggregators: `agents/analytics/aggregators/demand_weekly.py`, `velocity.py`, `co_occurrence.py`. Older **ARCHITECTURE_DEEP** snippets that mention `growth_rate` or omit these columns are **superseded** by this section.
 
-**Step 8 — `trend` labels (lock to IMP-021):** `accelerating` | `declining` | `stable` | `volatile` | `emerging`. Thresholds (~15% / ~5% bands) are **constants** / env-tunable, not magic numbers in-line.
+### Step 2 — `dbo.skill_demand_weekly`
 
-**Step 8 — smoothing:** Velocity uses a **4-week rolling** view of demand before classifying trend (dampens single-week batch-posting spikes).
+- **Columns:** `skill_label`, `esco_uri`, `week_start`, `posting_count`, **`employer_count`**, `computed_at` (plus surrogate `id`).
+- **`employer_count`:** Distinct employers per skill per week — implemented as **`func.count(func.distinct(company_id))`** on the expanded skill rows joined to `job_postings` (stable dedup key), not `company_name`.
+- **`posting_count`:** Distinct `job_posting_id` per skill per week (same join path as IMP-021 step 2).
 
-**Step 9 — `skill_co_occurrence`:** Symmetric pairs only: enforce **`skill_a` < `skill_b`** lexicographically. **Cap** skills per posting (IMP-021 default **20**) and **cap** stored pairs (e.g. top **200** by `co_count`) to avoid quadratic blow-up.
+### Step 3 — `dbo.tool_demand_weekly`
+
+- **Columns:** `tool_label`, `week_start`, `posting_count`, `computed_at` (plus `id`).
+
+### Step 8 — `dbo.skill_velocity`
+
+- **Columns:** `skill_label`, `esco_uri`, **`week`** (velocity anchor date), **`demand_count`**, **`week_over_week_change`**, **`four_week_trend`**, **`trend_confidence`** (plus `id`).
+- **ORM mapping:** Python attribute **`velocity_week`** → database column **`week`** (`mapped_column("week", ...)`).
+- **Semantics:** `demand_count` / `esco_uri` for the target week come from step 2’s `skill_demand_weekly` history; **`week_over_week_change`** stores the rolling pct-change scalar (finite floats only in DB — non-finite sanitized to `0.0`). Do **not** use the name `growth_rate` in new code or migrations.
+- **`four_week_trend` labels (IMP-021):** `accelerating` | `declining` | `stable` | `volatile` | `emerging`. Thresholds (e.g. 0.15 / -0.15 / 0.05) live as **module constants** in `velocity.py` (env-tunable if you extend later).
+- **Smoothing:** **4-week rolling** mean of weekly demand (from pivoted `posting_count`) before `pct_change` and classification.
+
+### Step 9 — `dbo.skill_co_occurrence`
+
+- **Columns:** `skill_a`, `skill_b`, **`co_occurrence_count`**, `week_start`, `computed_at` (plus `id`).
+- **Lexicographic pair order:** Before `itertools.combinations`, each posting’s skills are **`unique = sorted(set(skills))[:20]`** — so every emitted pair has **`skill_a` < `skill_b`** lexicographically.
+- **Caps:** Max **20** skill labels considered per posting; persist only the top **200** pairs by **`co_occurrence_count`** for the week.
+- **Data source:** `refresh_skill_co_occurrence` uses the same **`_SKILLS_EXPANDED`** SQL fragment as step 2 (`co_occurrence.py` imports from `demand_weekly.py`) — same joins and spam/dedup filters. The DAG still requires **running step 2 before step 9** for the same `week_start` so downstream dashboards and Pair A assumptions stay aligned; the co-occurrence refresh does not read `skill_demand_weekly` rows directly.
 
 ---
 
