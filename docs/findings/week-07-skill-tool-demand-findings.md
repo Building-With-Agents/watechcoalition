@@ -90,6 +90,8 @@ skill_co_occurrence ['id', 'skill_a', 'skill_b', 'co_occurrence_count', 'week_st
 
 7. **Analytics agent tests** — `pytest tests/test_analytics_agent.py -v` (health states, mocked four `refresh_*`, step 8–9 skip when step 2 fails, target-week helpers). `tests/test_pipeline_runner.py::test_all_pass` is skipped when `PYTHON_DATABASE_URL` is set but the server is unreachable (enrichment health requires a live DB in that case).
 
+8. **IMP-021 aggregate verification** — [agents/scripts/verify_aggregates.py](../../agents/scripts/verify_aggregates.py): compares `SUM(posting_count)` on `skill_demand_weekly` for a target Monday to the same total built from `_SKILLS_EXPANDED` (per-skill `COUNT(DISTINCT job_posting_id)` summed). Drift > **0.5%** → exit code 1. **`--list-weeks`** prints Mondays that have Step-2-filtered expanded skill rows (pick `week_start` for `--week`). Run: `PYTHONPATH=. python agents/scripts/verify_aggregates.py` or `--week 2025-01-06` (real Monday, not the literal `YYYY-MM-DD` placeholder).
+
 ## Dependency Notes
 
 Steps **2** (`skill_demand_weekly`) and **3** (`tool_demand_weekly`) are independent of each other.

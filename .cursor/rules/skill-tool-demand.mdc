@@ -15,6 +15,8 @@ globs:
 
 **Coordinate:** Pair C (`role_snapshot_weekly`) consumes **`skill_demand_weekly`** — align schema before they ship.
 
+**Orchestration:** `agents/analytics/agent.py` `process()` runs **`refresh_skill_demand_weekly` → `refresh_tool_demand_weekly` → (`refresh_skill_velocity`, `refresh_skill_co_occurrence` only after step 2 succeeds)**, each in its own `session_scope()` — maps to ARCHITECTURE_DEEP **13-step** internal steps **2, 3, 8, 9**.
+
 ---
 
 ## Dependency order (partial DAG)
@@ -24,9 +26,9 @@ globs:
 | 2 | `skill_demand_weekly` | Enriched postings + canonical skill source for the week |
 | 3 | `tool_demand_weekly` | Same for tools |
 | 8 | `skill_velocity` | `skill_demand_weekly` (step 2) |
-| 9 | `skill_co_occurrence` | Posting-level skill lists **and** step 2 outputs (see IMP-021) |
+| 9 | `skill_co_occurrence` | Same **`_SKILLS_EXPANDED`** posting-level skills as step 2 (does **not** read `skill_demand_weekly`); still run **after** step 2 in the pipeline for alignment |
 
-Steps **2 and 3** are independent (either order). **8 and 9 must not run before 2** for the same refresh — wrong order yields empty or stale tables **without necessarily erroring**.
+Steps **2 and 3** are independent (either order). **8 must not run before 2** (velocity reads `skill_demand_weekly`). **9** uses the same raw skill expansion as step 2 but should still follow step 2 in the schedule so dashboards and Pair A assumptions stay consistent — wrong ordering for step 8 yields empty or wrong velocity **without necessarily erroring**.
 
 ---
 
