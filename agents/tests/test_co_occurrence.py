@@ -19,9 +19,18 @@ def test_extract_cooccurrence_pairs_runbook_shape() -> None:
         ["a", "b"],
     ]
     out = co._extract_cooccurrence_pairs(posting_skills)
+    for sa, sb in out:
+        assert sa < sb
     assert out[("a", "b")] == 2
     assert out[("a", "c")] == 1
     assert out[("b", "c")] == 1
+
+
+def test_extract_cooccurrence_pairs_lexicographic_canonical() -> None:
+    """Same unordered pair always aggregates under skill_a < skill_b."""
+    out = co._extract_cooccurrence_pairs([["zebra", "apple"], ["apple", "zebra"]])
+    assert out == {("apple", "zebra"): 2}
+    assert "apple" < "zebra"
 
 
 def test_extract_cooccurrence_pairs_top_200_cap() -> None:

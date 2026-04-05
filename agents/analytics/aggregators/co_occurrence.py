@@ -4,7 +4,9 @@ Join path and spam/dedup/extraction filters match
 :mod:`agents.analytics.aggregators.demand_weekly` (``_SKILLS_EXPANDED``).
 
 Per posting, skills are deduped, sorted, capped at 20, then unordered pairs are
-counted. Only the top 200 pairs by frequency are persisted.
+counted with **lexicographic** ``skill_a < skill_b`` so each pair appears once
+(symmetric matrix, no ``(B,A)`` duplicate of ``(A,B)``). Only the top 200 pairs
+by frequency are persisted.
 """
 
 from __future__ import annotations
@@ -32,7 +34,8 @@ def _extract_cooccurrence_pairs(posting_skills: list[list[str]]) -> dict[tuple[s
     for skills in posting_skills:
         unique = sorted(set(skills))[:20]  # Cap per-posting to prevent explosion
         for a, b in combinations(unique, 2):
-            pairs[(a, b)] = pairs.get((a, b), 0) + 1
+            skill_a, skill_b = sorted((a, b))
+            pairs[(skill_a, skill_b)] = pairs.get((skill_a, skill_b), 0) + 1
     # Keep top 200 pairs by count to prevent quadratic blowup
     return dict(sorted(pairs.items(), key=lambda x: -x[1])[:_TOP_PAIR_LIMIT])
 

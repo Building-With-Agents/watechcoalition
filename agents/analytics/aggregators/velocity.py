@@ -7,8 +7,11 @@ IMP-021 / runbook. ``target_week`` must be the same Monday-anchored ``DATE`` as
 Run **step 2** for ``target_week`` before this refresh so ``demand_count`` and
 ``esco_uri`` match that week.
 
-``pct_change`` can yield ``inf`` when the prior rolling mean is zero; we
-**classify** using the raw value (``inf`` → ``accelerating``, ``-inf`` →
+Trend classification is **not** driven by raw single-week spikes: demand is
+first smoothed with a **4-week rolling mean** along time, then
+``pct_change`` compares the latest two smoothed values (WoW on the smoothed
+series). ``pct_change`` can yield ``inf`` when the prior rolling mean is zero;
+we **classify** using that value (``inf`` → ``accelerating``, ``-inf`` →
 ``declining``) but persist **``week_over_week_change``** as finite floats
 (``0.0`` when non-finite) so the DB never stores NaN/inf.
 """
@@ -33,6 +36,8 @@ STABLE_THRESHOLD = 0.05
 TREND_CONFIDENCE_DEFAULT = 0.8
 
 _NUM_WEEKS_HISTORY = 5
+# Rolling mean window (weeks) before WoW pct_change — must stay aligned with runbook / IMP-021.
+ROLLING_WINDOW_WEEKS = 4
 
 
 def _week_starts_for_velocity(target_week: date) -> list[date]:
@@ -74,7 +79,7 @@ def _compute_latest_pct_change(pivoted: pd.DataFrame) -> pd.Series:
     """Runbook pipeline: rolling mean then pct_change along time axis."""
     col_order = sorted(pivoted.columns, key=lambda d: d)
     ordered = pivoted[col_order]
-    rolling = ordered.T.rolling(window=4, min_periods=2).mean().T
+    rolling = ordered.T.rolling(window=ROLLING_WINDOW_WEEKS, min_periods=2).mean().T
     latest_pct = rolling.pct_change(axis=1, fill_method=None).iloc[:, -1]
     return latest_pct
 

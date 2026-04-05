@@ -58,6 +58,21 @@ def test_compute_latest_pct_change_monotonic_columns() -> None:
     assert isinstance(s.loc["Python"], (float, type(s.iloc[0])))
 
 
+def test_compute_latest_pct_change_uses_four_week_rolling_not_raw_spike() -> None:
+    """Classification input is WoW change on 4-week rolling mean, not raw last week."""
+    assert vel.ROLLING_WINDOW_WEEKS == 4
+    w0 = date(2025, 1, 6)
+    weeks = [w0 + timedelta(days=7 * i) for i in range(5)]
+    pivoted = pd.DataFrame({w: [10] for w in weeks[:-1]} | {weeks[-1]: [1000]}, index=["S"])
+    smoothed = vel._compute_latest_pct_change(pivoted).loc["S"]
+    col_order = sorted(pivoted.columns, key=lambda d: d)
+    ordered = pivoted[col_order]
+    raw_wow = (ordered.iloc[0, -1] - ordered.iloc[0, -2]) / ordered.iloc[0, -2]
+    assert float(raw_wow) == pytest.approx(99.0)
+    assert float(smoothed) == pytest.approx(24.75)
+    assert abs(float(smoothed)) < abs(float(raw_wow))
+
+
 def test_refresh_skill_velocity_delete_then_insert_mock() -> None:
     w = date(2025, 1, 6)
     weeks = vel._week_starts_for_velocity(w)
