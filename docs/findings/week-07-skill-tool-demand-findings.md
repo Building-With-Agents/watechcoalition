@@ -1,5 +1,26 @@
 # Week 7 — Skill & tool demand (Pair A) — findings
 
+## Sync status (keep current when contracts change)
+
+**Implementation alignment:** Aggregate tables and refresh functions match across:
+
+| Artifact | Role |
+|----------|------|
+| `agents/common/data_store/models.py` | ORM: `SkillDemandWeekly`, `ToolDemandWeekly`, `SkillVelocity`, `SkillCoOccurrence` |
+| `agents/analytics/aggregators/demand_weekly.py` | Steps **2–3** (`refresh_skill_demand_weekly`, `refresh_tool_demand_weekly`; exports `_SKILLS_EXPANDED` for step 9) |
+| `agents/analytics/aggregators/velocity.py` | Step **8** (`refresh_skill_velocity`) |
+| `agents/analytics/aggregators/co_occurrence.py` | Step **9** (`refresh_skill_co_occurrence`) |
+| `agents/analytics/aggregators/__init__.py` | Public exports for all four refresh functions |
+| `.cursor/rules/skill-tool-demand.mdc` | **Frozen IMP-021** column contract + DAG (supersedes stale `ARCHITECTURE_DEEP` names like `growth_rate`) |
+
+**Done in this track:** Steps 2, 3, 8, 9 aggregators + unit/DB-smoke tests under `agents/tests/test_{demand_weekly,velocity,co_occurrence}.py`.
+
+**Still Week 7 / Pair A (typical next tasks):** Weekly Insights Streamlit (see `.cursor/rules/streamlit-dashboard.mdc`), optional drift / IMP-021 verification automation, `AnalyticsRefreshed` payload extensions per `event-contracts.mdc`.
+
+**Analytics agent wiring:** [agents/analytics/agent.py](../../agents/analytics/agent.py) runs aggregators **2 → 3 → (8, 9 if 2 ok)** inside `process()`, each step in its own `session_scope()` (no single wrapping transaction). `default_analytics_target_week()` uses the **prior ISO week’s Monday** (PostgreSQL week anchor); override with payload keys `analytics_target_week`, `week_start`, or `aggregate_week_start` (ISO date). Outbound `AnalyticsRefreshed` includes `aggregate_refresh` (row counts / skip flags) plus the legacy fixture JSON overlay. Health: `ok` if DB reachable; `degraded` if URL missing, or URL set but DB unreachable **and** analytics fixture exists (walking skeleton); `down` if unreachable and no fixture. Tests: [agents/tests/test_analytics_agent.py](../../agents/tests/test_analytics_agent.py) (patches all four `refresh_*`). [agents/pipeline_runner.py](../../agents/pipeline_runner.py) documents that **13-step** internal items **2, 3, 8, 9** execute inside the Analytics agent’s `process()`.
+
+---
+
 ## What I Built
 
 - **File:** [agents/common/data_store/models.py](../../agents/common/data_store/models.py)
@@ -40,6 +61,8 @@
 - **Persistence:** `DELETE` `skill_co_occurrence` where `week_start == target_week`; bulk `INSERT` with one shared `computed_at` (`datetime.now(timezone.utc)`). Empty week: delete only, return `0`.
 - **Export:** `from agents.analytics.aggregators import refresh_skill_co_occurrence`. Tests: [agents/tests/test_co_occurrence.py](../../agents/tests/test_co_occurrence.py).
 
+**Package exports:** [agents/analytics/aggregators/__init__.py](../../agents/analytics/aggregators/__init__.py) re-exports `refresh_skill_demand_weekly`, `refresh_tool_demand_weekly`, `refresh_skill_velocity`, `refresh_skill_co_occurrence` (alphabetical in `__all__`).
+
 ## Verification Results
 
 **Local run (2026-04-04)** — repo root, venv `.venv`, `PYTHONPATH=.`, `PYTHON_DATABASE_URL` → `localhost:5432/talent_finder`.
@@ -65,13 +88,20 @@ skill_co_occurrence ['id', 'skill_a', 'skill_b', 'co_occurrence_count', 'week_st
 
 6. **Co-occurrence tests** — `pytest tests/test_co_occurrence.py -v` (pair extraction, top-200 cap, mocked refresh, compile check, optional DB smoke).
 
+7. **Analytics agent tests** — `pytest tests/test_analytics_agent.py -v` (health states, mocked four `refresh_*`, step 8–9 skip when step 2 fails, target-week helpers). `tests/test_pipeline_runner.py::test_all_pass` is skipped when `PYTHON_DATABASE_URL` is set but the server is unreachable (enrichment health requires a live DB in that case).
+
 ## Dependency Notes
 
-Steps **2** (`skill_demand_weekly`) and **3** (`tool_demand_weekly`) are independent of each other. Steps **8** (`skill_velocity`) and **9** (`skill_co_occurrence`) depend on step **2** completing for the same refresh window so velocity and co-occurrence are not computed against empty or stale demand snapshots. **Pair C** (`role_snapshot_weekly`) will consume **`skill_demand_weekly`** — align any future column changes with them before merge.
+Steps **2** (`skill_demand_weekly`) and **3** (`tool_demand_weekly`) are independent of each other.
+
+- **Step 8** reads **`skill_demand_weekly`** (last five `week_start` slices). Run step **2** for the same Monday `week_start` before step 8 or velocity rows will be empty or wrong for `demand_count` / `esco_uri`.
+- **Step 9** does **not** query `skill_demand_weekly`; it uses the same **`_SKILLS_EXPANDED`** SQL as step 2 (same postings/skills after spam/dedup filters). Run step **2** before step **9** in the pipeline for **workflow alignment** and dashboard expectations (see `.cursor/rules/skill-tool-demand.mdc`).
+
+**Pair C** (`role_snapshot_weekly`) will consume **`skill_demand_weekly`** — align any future column changes with them before merge.
 
 ## Dashboard Design Decisions
 
-Weekly Insights UI still deferred; aggregate **data** for steps 2–3 is produced by `demand_weekly.py` and stored in `dbo.skill_demand_weekly` / `dbo.tool_demand_weekly`.
+Weekly Insights UI still deferred. Aggregate **data** is available for charts: steps 2–3 (`skill_demand_weekly`, `tool_demand_weekly`), step 8 (`skill_velocity`), step 9 (`skill_co_occurrence`). IMP-021 chart mapping is in `.cursor/rules/skill-tool-demand.mdc` (bars / sparkline / heatmap).
 
 ## Edge Cases Found
 
@@ -83,12 +113,13 @@ Weekly Insights UI still deferred; aggregate **data** for steps 2–3 is produce
 
 ## Cursor Rules Notes
 
-[`.cursor/rules/skill-tool-demand.mdc`](../../.cursor/rules/skill-tool-demand.mdc) still reflects earlier IMP-021 / ARCHITECTURE_DEEP shapes (e.g. `growth_rate`, `trend` enum). This runbook slice uses **`esco_uri`**, **`four_week_trend`**, **`co_occurrence_count`**, and DB column **`week`** on `skill_velocity`. Update that rule in a later task once the aggregate schema is frozen across pairs.
+[`.cursor/rules/skill-tool-demand.mdc`](../../.cursor/rules/skill-tool-demand.mdc) is **frozen** with this implementation: section **“Table columns — frozen IMP-021 implementation (Week 7 final)”** matches `models.py` and `aggregators/` (`week_over_week_change`, `demand_count`, `velocity_week` → `week`, `employer_count` = distinct `company_id`, co-occurrence caps and `_SKILLS_EXPANDED` source). When you change schema or refresh behavior, update **this findings doc**, **`skill-tool-demand.mdc`**, and notify Pair C as listed in that rule.
 
 ## Data / Evidence
 
 - **Code:** [agents/common/data_store/models.py](../../agents/common/data_store/models.py) (section “Analytics aggregate tables (Week 7 — Pair A)”).
-- **Aggregators:** [agents/analytics/aggregators/demand_weekly.py](../../agents/analytics/aggregators/demand_weekly.py), [agents/analytics/aggregators/velocity.py](../../agents/analytics/aggregators/velocity.py), [agents/analytics/aggregators/co_occurrence.py](../../agents/analytics/aggregators/co_occurrence.py); tests: [agents/tests/test_demand_weekly.py](../../agents/tests/test_demand_weekly.py), [agents/tests/test_velocity.py](../../agents/tests/test_velocity.py), [agents/tests/test_co_occurrence.py](../../agents/tests/test_co_occurrence.py).
+- **Aggregators:** [agents/analytics/aggregators/__init__.py](../../agents/analytics/aggregators/__init__.py), [demand_weekly.py](../../agents/analytics/aggregators/demand_weekly.py), [velocity.py](../../agents/analytics/aggregators/velocity.py), [co_occurrence.py](../../agents/analytics/aggregators/co_occurrence.py); **agent:** [agents/analytics/agent.py](../../agents/analytics/agent.py); tests: [test_demand_weekly.py](../../agents/tests/test_demand_weekly.py), [test_velocity.py](../../agents/tests/test_velocity.py), [test_co_occurrence.py](../../agents/tests/test_co_occurrence.py), [test_analytics_agent.py](../../agents/tests/test_analytics_agent.py).
+- **Cursor contract:** [.cursor/rules/skill-tool-demand.mdc](../../.cursor/rules/skill-tool-demand.mdc).
 - **Migrations entrypoint:** [agents/common/data_store/migrations.py](../../agents/common/data_store/migrations.py) (`run_migrations` → `Base.metadata.create_all` + `employer_count` alter).
 - **Local verification transcript:** same machine as above; see **Verification Results** for captured stdout.
 
@@ -100,16 +131,16 @@ from datetime import date
 from dotenv import load_dotenv
 load_dotenv()
 from agents.common.data_store.database import session_scope
-from agents.analytics.aggregators.demand_weekly import (
+from agents.analytics.aggregators import (
+    refresh_skill_co_occurrence,
     refresh_skill_demand_weekly,
+    refresh_skill_velocity,
     refresh_tool_demand_weekly,
 )
 with session_scope() as s:
     ws = date(2025, 1, 6)  # Monday of target ISO week
     print('skills', refresh_skill_demand_weekly(s, ws))
     print('tools', refresh_tool_demand_weekly(s, ws))
-    from agents.analytics.aggregators.velocity import refresh_skill_velocity
-    from agents.analytics.aggregators.co_occurrence import refresh_skill_co_occurrence
     print('velocity', refresh_skill_velocity(s, ws))
     print('co_occurrence', refresh_skill_co_occurrence(s, ws))
 "
