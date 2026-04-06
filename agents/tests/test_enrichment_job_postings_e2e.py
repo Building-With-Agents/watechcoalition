@@ -5,7 +5,7 @@ company_addresses, job_postings, normalized_jobs, extracted_intelligence). Skips
 seed fails (e.g. column naming differs from Prisma/pgloader expectations).
 
 Run ``python agents/scripts/db_check.py migrate`` so ``job_postings`` has ``naics_code``,
-``occupation_code``, and ``employer_profile_id`` before the extended promotion test.
+``soc_code``, and ``employer_profile_id`` before the extended promotion test.
 """
 
 from __future__ import annotations
@@ -118,7 +118,7 @@ def _fetch_job_postings_naics_soc_employer_columns(engine: Engine, job_posting_i
             conn.execute(
                 text(
                     """
-                    SELECT quality_score, naics_code, occupation_code, employer_profile_id
+                    SELECT quality_score, naics_code, soc_code, employer_profile_id
                     FROM dbo.job_postings
                     WHERE job_posting_id::text = :jpid
                     """
@@ -299,10 +299,10 @@ def test_pair_a_fields_match_across_derivation_profile_payload_and_db(e2e_engine
 
 
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
-def test_enrichment_promotion_writes_naics_occupation_employer_profile_to_job_postings(
+def test_enrichment_promotion_writes_naics_soc_employer_profile_to_job_postings(
     e2e_engine: Engine,
 ) -> None:
-    """Real ``process()`` + DB session: NAICS, SOC→occupation, employer profile land on ``job_postings``.
+    """Real ``process()`` + DB session: NAICS, SOC→soc_code, employer profile land on ``job_postings``.
 
     Classifiers are patched for deterministic outputs; spam preview stays mocked. When
     ``dbo.naics`` exists, :func:`seed_enrichment_e2e` inserts reference code ``999998``;
@@ -354,7 +354,7 @@ def test_enrichment_promotion_writes_naics_occupation_employer_profile_to_job_po
 
         assert row.get("quality_score") is not None
         assert row.get("naics_code") == naics_expected
-        assert row.get("occupation_code") == soc_expected
+        assert row.get("soc_code") == soc_expected
         assert row.get("employer_profile_id") is not None
     finally:
         teardown_enrichment_e2e(e2e_engine, seed)

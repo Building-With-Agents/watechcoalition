@@ -1,6 +1,6 @@
 """Integration tests: EnrichmentAgent promotion → ``dbo.job_postings`` + ``dbo.employer_profiles``.
 
-Requires ``PYTHON_DATABASE_URL``, migrated schema (``naics_code``, ``occupation_code``,
+Requires ``PYTHON_DATABASE_URL``, migrated schema (``naics_code``, ``soc_code``,
 ``employer_profile_id``, UUID ``employer_profiles``). Uses :func:`seed_enrichment_e2e` /
 :func:`teardown_enrichment_e2e`.
 
@@ -115,7 +115,7 @@ def _fetch_job_postings_promotion_columns(engine: Engine, job_posting_id: str) -
             conn.execute(
                 text(
                     """
-                    SELECT quality_score, spam_score, is_spam, naics_code, occupation_code,
+                    SELECT quality_score, spam_score, is_spam, naics_code, soc_code,
                            employer_profile_id::text AS employer_profile_id,
                            temporal_period, borderplex_subregion
                     FROM dbo.job_postings
@@ -189,7 +189,7 @@ def _clean_spam_preview() -> SpamPreviewResult:
 
 
 @pytest.mark.skipif(not os.getenv("PYTHON_DATABASE_URL"), reason="requires database")
-def test_mocked_skills_extracted_event_writes_naics_occupation_and_employer_fk_to_job_postings(
+def test_mocked_skills_extracted_event_writes_naics_soc_and_employer_fk_to_job_postings(
     enrichment_promotion_bundle: tuple[Engine, EnrichmentE2ESeed],
 ) -> None:
     engine, seed = enrichment_promotion_bundle
@@ -217,7 +217,7 @@ def test_mocked_skills_extracted_event_writes_naics_occupation_and_employer_fk_t
 
     assert row.get("quality_score") is not None
     assert row.get("naics_code") == naics_expected
-    assert row.get("occupation_code") == soc_expected
+    assert row.get("soc_code") == soc_expected
     assert row.get("employer_profile_id") is not None
     uuid.UUID(str(row["employer_profile_id"]))
 
@@ -283,7 +283,7 @@ def test_mocked_unknown_naics_soc_and_partial_employer_fields_persist_without_er
 
     assert jp.get("quality_score") is not None
     assert str(jp.get("naics_code") or "").strip().lower() == "unknown"
-    assert jp.get("occupation_code") is None
+    assert jp.get("soc_code") is None
     assert jp.get("employer_profile_id") is not None
 
     ep = _fetch_employer_profile_row(engine, seed.company_id)

@@ -340,8 +340,8 @@ def test_apply_enrichment_binds_temporal_period_from_date_posted() -> None:
     assert session.execute.call_count == 2
     _stmt, params = session.execute.call_args_list[1][0]
     assert params["temporal_period"] == "post_gpt4"
-    assert "occupation_code" in params
-    assert params["occupation_code"] is None
+    assert "soc_code" in params
+    assert params["soc_code"] is None
     assert params["naics_code"] == "unknown"
 
 
@@ -412,7 +412,7 @@ def test_apply_enrichment_binds_borderplex_subregion_for_las_cruces() -> None:
     assert params["borderplex_subregion"] == "las_cruces"
 
 
-def test_apply_enrichment_binds_occupation_code_from_soc_code() -> None:
+def test_apply_enrichment_binds_soc_code_column_from_payload() -> None:
     session = MagicMock()
     resolve_result = MagicMock()
     resolve_result.mappings.return_value.first.return_value = {
@@ -436,7 +436,7 @@ def test_apply_enrichment_binds_occupation_code_from_soc_code() -> None:
     )
     assert out is True
     _stmt, params = session.execute.call_args_list[1][0]
-    assert params["occupation_code"] == "17-3029"
+    assert params["soc_code"] == "17-3029"
     assert params["naics_code"] == "541512"
 
 

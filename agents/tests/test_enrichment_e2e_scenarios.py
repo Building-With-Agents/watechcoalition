@@ -12,7 +12,7 @@ No LLM mocks — classifiers and spam preview call real endpoints.
 
 Assertions:
 
-- **SOC:** ``occupation_code`` must be non-null and digit-grounded in ``dbo.socc`` (checked
+- **SOC:** ``soc_code`` must be non-null and digit-grounded in ``dbo.socc`` (checked
   before NAICS so failures still prove SOC).
 - **NAICS:** ``naics_code`` is always non-null text: a 6-digit code grounded in ``dbo.naics``,
   or the literal ``unknown`` (same pattern as employer categorical fields).
@@ -221,7 +221,7 @@ def _fetch_job_posting_promotion(engine: Engine, job_posting_id: str) -> dict[st
             conn.execute(
                 text(
                     """
-                    SELECT naics_code, occupation_code, employer_profile_id::text AS employer_profile_id,
+                    SELECT naics_code, soc_code, employer_profile_id::text AS employer_profile_id,
                            quality_score
                     FROM dbo.job_postings
                     WHERE job_posting_id::text = :jpid
@@ -459,11 +459,11 @@ def test_live_enrichment_scenario_end_to_end_grounded_codes_and_employer_profile
         jp = _fetch_job_posting_promotion(scenarios_e2e_engine, seed.job_posting_id)
         assert jp.get("quality_score") is not None, "promotion should set quality_score"
 
-        occ = jp.get("occupation_code")
-        assert occ and str(occ).strip(), f"expected occupation_code on job_postings, got {occ!r}"
-        log.info("extracted_soc_occupation_code slug=%s occupation_code=%s", scenario.slug, occ)
+        occ = jp.get("soc_code")
+        assert occ and str(occ).strip(), f"expected soc_code on job_postings, got {occ!r}"
+        log.info("extracted_soc_code slug=%s soc_code=%s", scenario.slug, occ)
         assert _occupation_code_grounded_in_socc(scenarios_e2e_engine, str(occ)), (
-            f"occupation_code {occ!r} not found in dbo.socc (digit-normalized match)"
+            f"soc_code {occ!r} not found in dbo.socc (digit-normalized match)"
         )
 
         naics = jp.get("naics_code")

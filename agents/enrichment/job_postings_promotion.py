@@ -74,7 +74,7 @@ _UPDATE_UNCERTAIN_SQL = text(
         temporal_period = :temporal_period,
         borderplex_subregion = :borderplex_subregion,
         naics_code = :naics_code,
-        occupation_code = :occupation_code,
+        soc_code = :soc_code,
         employer_profile_id = COALESCE(CAST(:employer_profile_id AS uuid), employer_profile_id)
     WHERE job_posting_id::text = :job_posting_id
     """
@@ -89,7 +89,7 @@ _UPDATE_CLEAN_SQL = text(
         temporal_period = :temporal_period,
         borderplex_subregion = :borderplex_subregion,
         naics_code = :naics_code,
-        occupation_code = :occupation_code,
+        soc_code = :soc_code,
         employer_profile_id = COALESCE(CAST(:employer_profile_id AS uuid), employer_profile_id),
         is_spam = FALSE,
         spam_score = :spam_score
@@ -106,7 +106,7 @@ _UPDATE_FLAGGED_SQL = text(
         temporal_period = :temporal_period,
         borderplex_subregion = :borderplex_subregion,
         naics_code = :naics_code,
-        occupation_code = :occupation_code,
+        soc_code = :soc_code,
         employer_profile_id = COALESCE(CAST(:employer_profile_id AS uuid), employer_profile_id),
         is_spam = NULL,
         spam_score = :spam_score
@@ -573,7 +573,7 @@ def apply_enrichment_to_job_postings(
     )
 
     soc_raw = record_enriched_payload.get("soc_code")
-    occupation_code: str | None = (
+    soc_code: str | None = (
         soc_raw.strip() if isinstance(soc_raw, str) and soc_raw.strip() else None
     )
 
@@ -595,7 +595,7 @@ def apply_enrichment_to_job_postings(
         "overall_confidence": oc,
         "field_confidence": fc_json,
         "naics_code": naics_code,
-        "occupation_code": occupation_code,
+        "soc_code": soc_code,
         "employer_profile_id": employer_profile_id_param,
         **derived_output_fields,
     }
