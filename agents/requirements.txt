@@ -23,3 +23,5 @@ ruff>=0.4
 matplotlib>=3.8
 rapidfuzz>=3.0
 pyyaml>=6.0
+hdbscan==0.8.42
+
