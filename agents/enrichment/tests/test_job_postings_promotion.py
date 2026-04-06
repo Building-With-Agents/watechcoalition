@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import uuid
 from contextlib import nullcontext
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
@@ -339,6 +340,9 @@ def test_apply_enrichment_binds_temporal_period_from_date_posted() -> None:
     assert session.execute.call_count == 2
     _stmt, params = session.execute.call_args_list[1][0]
     assert params["temporal_period"] == "post_gpt4"
+    assert "soc_code" in params
+    assert params["soc_code"] is None
+    assert params["naics_code"] == "unknown"
 
 
 def test_apply_enrichment_binds_temporal_period_at_exact_boundary_date() -> None:
@@ -408,6 +412,34 @@ def test_apply_enrichment_binds_borderplex_subregion_for_las_cruces() -> None:
     assert params["borderplex_subregion"] == "las_cruces"
 
 
+def test_apply_enrichment_binds_soc_code_column_from_payload() -> None:
+    session = MagicMock()
+    resolve_result = MagicMock()
+    resolve_result.mappings.return_value.first.return_value = {
+        "job_posting_id": "11111111-1111-1111-1111-111111111111",
+        "company_id": "22222222-2222-2222-2222-222222222222",
+        "date_posted": datetime(2023, 6, 15, 12, 0, 0, tzinfo=timezone.utc),
+    }
+    update_result = MagicMock()
+    session.execute.side_effect = [resolve_result, update_result]
+
+    out = apply_enrichment_to_job_postings(
+        session,
+        42,
+        {
+            "spam_tier": "clean",
+            "spam_score": 0.2,
+            "quality_score": 0.85,
+            "soc_code": "17-3029",
+            "naics_code": "541512",
+        },
+    )
+    assert out is True
+    _stmt, params = session.execute.call_args_list[1][0]
+    assert params["soc_code"] == "17-3029"
+    assert params["naics_code"] == "541512"
+
+
 def test_apply_enrichment_binds_borderplex_subregion_regional_for_remote_job() -> None:
     out, session = _apply_with_resolved_row_for_temporal_borderplex(
         {
@@ -425,3 +457,39 @@ def test_apply_enrichment_binds_borderplex_subregion_regional_for_remote_job() -
     assert out is True
     _stmt, params = session.execute.call_args_list[1][0]
     assert params["borderplex_subregion"] == "regional"
+
+
+def test_apply_enrichment_selects_employer_profile_id_when_metadata_present() -> None:
+    ep_id = uuid.uuid4()
+    session = MagicMock()
+    resolve_result = MagicMock()
+    resolve_result.mappings.return_value.first.return_value = {
+        "job_posting_id": "11111111-1111-1111-1111-111111111111",
+        "company_id": "22222222-2222-2222-2222-222222222222",
+        "date_posted": datetime(2023, 6, 15, 12, 0, 0, tzinfo=timezone.utc),
+    }
+    select_scalar = MagicMock()
+    select_scalar.scalar_one_or_none.return_value = ep_id
+    update_result = MagicMock()
+    session.execute.side_effect = [
+        resolve_result,
+        select_scalar,
+        update_result,
+        *[MagicMock() for _ in range(10)],
+    ]
+
+    out = apply_enrichment_to_job_postings(
+        session,
+        42,
+        {
+            "spam_tier": "clean",
+            "spam_score": 0.2,
+            "quality_score": 0.85,
+            "employer_metadata": {"company_size": "smb", "is_known_employer": True},
+        },
+    )
+
+    assert out is True
+    # Index 2: main promotion UPDATE (after resolve + employer_profile id lookup).
+    _stmt, params = session.execute.call_args_list[2][0]
+    assert params["employer_profile_id"] == ep_id

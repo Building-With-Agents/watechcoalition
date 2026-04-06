@@ -9,11 +9,12 @@ Agent-created tables: raw_ingested_jobs, job_ingestion_runs, normalized_jobs,
     normalization_quarantine, extracted_intelligence, llm_audit_log,
     employer_profiles.
 Reference tables (seeded, agent-owned): companies, industry_sectors,
-    technology_areas, skills, socc, job_postings.
+    technology_areas, skills, socc, naics, job_postings.
 """
 
 from __future__ import annotations
 
+import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
@@ -26,6 +27,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    Uuid,
 )
 from sqlalchemy.dialects.postgresql import JSON, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -170,6 +172,8 @@ class NormalizedJob(Base):
     employment_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
     experience_level: Mapped[str | None] = mapped_column(String(50), nullable=True)
     occupation_code: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    naics_code: Mapped[str | None] = mapped_column(Text, nullable=True)
+    employer_metadata: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     mapper_used: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     # Date
@@ -300,22 +304,34 @@ class LLMAuditLog(Base):
 class EmployerProfile(Base):
     """Company-level enrichment: size, AI maturity, sector, known-employer flag.
 
-    Source of truth: ARCHITECTURE_DEEP.md § EmployerProfile.
+    One row per ``companies.company_id``; job postings reference via ``employer_profile_id``.
     """
 
     __tablename__ = "employer_profiles"
     __table_args__ = (
+        UniqueConstraint("company_id", name="uq_employer_profiles_company_id"),
         Index("ix_employer_profiles_company_id", "company_id"),
         {"schema": "dbo"},
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    company_id: Mapped[str] = mapped_column(Text, nullable=False)
-    company_size: Mapped[str | None] = mapped_column(Text, nullable=True)
-    ai_maturity_signal: Mapped[str | None] = mapped_column(Text, nullable=True)
-    sector: Mapped[str | None] = mapped_column(Text, nullable=True)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    company_id: Mapped[str] = mapped_column(
+        Text,
+        ForeignKey("dbo.companies.company_id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    company_size: Mapped[str] = mapped_column(String(20), nullable=False, default="unknown")
+    ai_maturity_signal: Mapped[str] = mapped_column(String(20), nullable=False, default="unknown")
+    sector: Mapped[str | None] = mapped_column(String(255), nullable=True)
     is_known_employer: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
 
 
 # ===========================================================================
@@ -443,3 +459,20 @@ class PostalGeoData(Base):
     state: Mapped[str] = mapped_column(String(100), nullable=False)
     lat: Mapped[float] = mapped_column(Float, nullable=False)
     lng: Mapped[float] = mapped_column(Float, nullable=False)
+
+
+class NAICS(Base):
+    """NAICS 2022 US taxonomy — agent-owned.
+
+    Primary key is the official NAICS code (2–6 digit hierarchical code).
+    Seeded from ``data/naics-2022-taxonomy-reference.xlsx``.
+    """
+
+    __tablename__ = "naics"
+    __table_args__ = {"schema": "dbo"}
+
+    naics_code: Mapped[str] = mapped_column(Text, primary_key=True)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    seq_no: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    createdat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updatedat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

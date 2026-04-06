@@ -869,7 +869,7 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS naics_code TEXT;
 ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS temporal_period TEXT;       -- pre_chatgpt | early_genai | post_gpt4 | agentic_era
 ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS borderplex_subregion TEXT;  -- el_paso | las_cruces | ciudad_juarez | regional
 ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS is_duplicate BOOLEAN DEFAULT FALSE;
-ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS duplicate_cluster_id TEXT;
+ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS duplicate_cluster_id UUID;
 
 -- Phase 1: extracted_intelligence table (Work Intelligence Agent output)
 CREATE TABLE IF NOT EXISTS extracted_intelligence (

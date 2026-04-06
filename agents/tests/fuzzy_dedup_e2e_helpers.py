@@ -282,7 +282,7 @@ def fetch_dedup_columns(engine: Engine, job_posting_id: str) -> dict:
             conn.execute(
                 text(
                     """
-                    SELECT is_duplicate, duplicate_cluster_id
+                    SELECT is_duplicate, duplicate_cluster_id::text AS duplicate_cluster_id
                     FROM dbo.job_postings
                     WHERE job_posting_id::text = :jpid
                     """

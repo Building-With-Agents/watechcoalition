@@ -1,0 +1,206 @@
+[
+  {
+    "case_id": "same-company-identical-repost-2d",
+    "expected_duplicate": true,
+    "same_company": true,
+    "days_apart": 2,
+    "notes": "Identical repost at the same company within two days.",
+    "current": {
+      "job_title": "Senior Data Engineer",
+      "company_name": "Northwind Health",
+      "requirements": "Build batch and streaming data pipelines in Python and SQL, own Airflow orchestration, and partner with analytics engineers on warehouse modeling."
+    },
+    "candidate": {
+      "job_title": "Senior Data Engineer",
+      "company_name": "Northwind Health",
+      "requirements": "Build batch and streaming data pipelines in Python and SQL, own Airflow orchestration, and partner with analytics engineers on warehouse modeling."
+    }
+  },
+  {
+    "case_id": "same-company-near-duplicate-wording-5d",
+    "expected_duplicate": true,
+    "same_company": true,
+    "days_apart": 5,
+    "notes": "Same role reposted with minor wording changes and reordered requirements.",
+    "current": {
+      "job_title": "Platform Reliability Engineer",
+      "company_name": "Blue Mesa Energy",
+      "requirements": "Improve Kubernetes reliability, automate incident response, maintain Terraform infrastructure, and participate in on-call rotations for cloud production systems."
+    },
+    "candidate": {
+      "job_title": "Senior Platform Reliability Engineer",
+      "company_name": "Blue Mesa Energy",
+      "requirements": "Maintain Terraform-based cloud infrastructure, improve Kubernetes platform reliability, automate production incident response, and share an on-call rotation with the SRE team."
+    }
+  },
+  {
+    "case_id": "same-company-near-duplicate-29d",
+    "expected_duplicate": true,
+    "same_company": true,
+    "days_apart": 29,
+    "notes": "Boundary-positive repost inside the 30-day window.",
+    "current": {
+      "job_title": "Clinical Operations Analyst",
+      "company_name": "Cascade Care Group",
+      "requirements": "Analyze care-delivery metrics, build SQL dashboards, audit scheduling workflows, and partner with clinic managers to improve throughput and patient access."
+    },
+    "candidate": {
+      "job_title": "Clinical Operations Analyst",
+      "company_name": "Cascade Care Group",
+      "requirements": "Build SQL dashboards for care-delivery metrics, audit clinic scheduling workflows, and partner with operations leaders to improve patient access and throughput."
+    }
+  },
+  {
+    "case_id": "same-company-window-expired-31d",
+    "expected_duplicate": false,
+    "same_company": true,
+    "days_apart": 31,
+    "notes": "Otherwise similar repost that must stay unique because it falls outside the rolling window.",
+    "current": {
+      "job_title": "Clinical Operations Analyst",
+      "company_name": "Cascade Care Group",
+      "requirements": "Analyze care-delivery metrics, build SQL dashboards, audit scheduling workflows, and partner with clinic managers to improve throughput and patient access."
+    },
+    "candidate": {
+      "job_title": "Clinical Operations Analyst",
+      "company_name": "Cascade Care Group",
+      "requirements": "Build SQL dashboards for care-delivery metrics, audit clinic scheduling workflows, and partner with operations leaders to improve patient access and throughput."
+    }
+  },
+  {
+    "case_id": "same-company-different-role-negative",
+    "expected_duplicate": false,
+    "same_company": true,
+    "days_apart": 4,
+    "notes": "Same company, similar hiring period, but clearly different functions.",
+    "current": {
+      "job_title": "Payroll Analyst",
+      "company_name": "Riverbend Logistics",
+      "requirements": "Process biweekly payroll, audit timecard exceptions, manage garnishment setup, and answer employee pay inquiries in Workday."
+    },
+    "candidate": {
+      "job_title": "Warehouse Operations Supervisor",
+      "company_name": "Riverbend Logistics",
+      "requirements": "Lead warehouse shift planning, coach forklift operators, manage safety checklists, and hit outbound fulfillment targets."
+    }
+  },
+  {
+    "case_id": "same-role-different-company-negative",
+    "expected_duplicate": false,
+    "same_company": false,
+    "days_apart": 2,
+    "notes": "Same role text at different employers must never merge.",
+    "current": {
+      "job_title": "Senior Data Engineer",
+      "company_name": "Northwind Health",
+      "requirements": "Build batch and streaming data pipelines in Python and SQL, own Airflow orchestration, and partner with analytics engineers on warehouse modeling."
+    },
+    "candidate": {
+      "job_title": "Senior Data Engineer",
+      "company_name": "Harbor Retail Group",
+      "requirements": "Build batch and streaming data pipelines in Python and SQL, own Airflow orchestration, and partner with analytics engineers on warehouse modeling."
+    }
+  },
+  {
+    "case_id": "same-company-related-but-different-discipline-negative",
+    "expected_duplicate": false,
+    "same_company": true,
+    "days_apart": 8,
+    "notes": "Same company and product area, but engineering vs product management should stay separate.",
+    "current": {
+      "job_title": "Software Engineer, Payments Platform",
+      "company_name": "Pioneer Commerce",
+      "requirements": "Ship backend APIs in Kotlin, improve payment service reliability, write automated tests, and partner with SRE on production readiness."
+    },
+    "candidate": {
+      "job_title": "Product Manager, Payments Platform",
+      "company_name": "Pioneer Commerce",
+      "requirements": "Own payment roadmap prioritization, define merchant requirements, coordinate launches, and align engineering delivery with business outcomes."
+    }
+  },
+  {
+    "case_id": "same-company-duplicate-with-benefits-fluff",
+    "expected_duplicate": true,
+    "same_company": true,
+    "days_apart": 7,
+    "notes": "Same core role where the repost adds benefits language and a longer intro.",
+    "current": {
+      "job_title": "Customer Success Manager",
+      "company_name": "Summit Practice Software",
+      "requirements": "Manage strategic accounts, lead onboarding plans, review renewal risk, and drive product adoption with executive business reviews."
+    },
+    "candidate": {
+      "job_title": "Customer Success Manager",
+      "company_name": "Summit Practice Software",
+      "requirements": "Join our growing team with great benefits and flexible work. Manage strategic accounts, drive product adoption, lead onboarding plans, and review renewal risk with executive business reviews."
+    }
+  },
+  {
+    "case_id": "same-company-title-match-different-requirements-negative",
+    "expected_duplicate": false,
+    "same_company": true,
+    "days_apart": 6,
+    "notes": "Title alone should not force a merge when the actual work is materially different.",
+    "current": {
+      "job_title": "Operations Specialist",
+      "company_name": "Evergreen Municipal Services",
+      "requirements": "Coordinate procurement paperwork, reconcile vendor invoices, maintain asset records, and support budgeting for fleet maintenance."
+    },
+    "candidate": {
+      "job_title": "Operations Specialist",
+      "company_name": "Evergreen Municipal Services",
+      "requirements": "Schedule field crews, dispatch emergency work orders, track storm-response readiness, and coordinate radio communications for service outages."
+    }
+  },
+  {
+    "case_id": "same-company-duplicate-shortened-requirements",
+    "expected_duplicate": true,
+    "same_company": true,
+    "days_apart": 3,
+    "notes": "Shortened repost that keeps the same core role and requirements.",
+    "current": {
+      "job_title": "Business Intelligence Analyst",
+      "company_name": "Copper State Financial",
+      "requirements": "Create Tableau dashboards, write SQL for finance reporting, validate source-of-truth metrics, and support monthly executive scorecards."
+    },
+    "candidate": {
+      "job_title": "BI Analyst",
+      "company_name": "Copper State Financial",
+      "requirements": "Write SQL and build Tableau dashboards for finance reporting and monthly executive scorecards."
+    }
+  },
+  {
+    "case_id": "same-company-similar-analytics-role-negative",
+    "expected_duplicate": false,
+    "same_company": true,
+    "days_apart": 4,
+    "notes": "Very similar analytics language, but different business functions and distinct openings.",
+    "current": {
+      "job_title": "Marketing Data Analyst",
+      "company_name": "Copper State Financial",
+      "requirements": "Build Looker dashboards for funnel performance, write SQL for campaign attribution, analyze paid-media efficiency, and partner with lifecycle marketing on experiments."
+    },
+    "candidate": {
+      "job_title": "Finance Data Analyst",
+      "company_name": "Copper State Financial",
+      "requirements": "Build Looker dashboards for monthly revenue reporting, write SQL for margin analysis, analyze budget variance, and partner with FP&A on executive finance reviews."
+    }
+  },
+  {
+    "case_id": "same-company-similar-platform-role-negative",
+    "expected_duplicate": false,
+    "same_company": true,
+    "days_apart": 5,
+    "notes": "Same engineering stack and platform language, but separate product domains that should not merge.",
+    "current": {
+      "job_title": "Software Engineer, Billing Platform",
+      "company_name": "Pioneer Commerce",
+      "requirements": "Ship Kotlin backend services, build billing APIs, improve platform reliability, write automated tests, and partner with SRE on production readiness."
+    },
+    "candidate": {
+      "job_title": "Software Engineer, Fraud Platform",
+      "company_name": "Pioneer Commerce",
+      "requirements": "Ship Kotlin backend services, build fraud-detection APIs, improve platform reliability, write automated tests, and partner with SRE on production readiness."
+    }
+  }
+]
