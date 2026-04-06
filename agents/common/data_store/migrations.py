@@ -23,6 +23,38 @@ from agents.common.data_store.models import Base
 
 log = structlog.get_logger()
 
+
+def _drop_legacy_employer_profiles_if_serial_pk(engine: Engine) -> None:
+    """Replace pre-UUID ``employer_profiles`` (SERIAL id) so ORM/create_all can recreate."""
+    if engine.dialect.name != "postgresql":
+        return
+    with engine.begin() as conn:
+        exists = conn.execute(
+            text(
+                """
+                SELECT EXISTS (
+                    SELECT 1 FROM information_schema.tables
+                    WHERE table_schema = 'dbo' AND table_name = 'employer_profiles'
+                )
+                """
+            )
+        ).scalar()
+        if not exists:
+            return
+        row = conn.execute(
+            text(
+                """
+                SELECT data_type FROM information_schema.columns
+                WHERE table_schema = 'dbo' AND table_name = 'employer_profiles'
+                  AND column_name = 'id'
+                """
+            )
+        ).first()
+        if row and row[0] in ("integer", "bigint", "smallint"):
+            conn.execute(text("DROP TABLE IF EXISTS dbo.employer_profiles CASCADE"))
+            log.info("migrations_employer_profiles_legacy_serial_dropped")
+
+
 _EXTRACTED_INTELLIGENCE_DDL = """
 CREATE TABLE IF NOT EXISTS dbo.extracted_intelligence (
     id SERIAL PRIMARY KEY,
@@ -85,7 +117,7 @@ _JOB_POSTINGS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS spam_score DOUBLE PRECISION",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS overall_confidence DOUBLE PRECISION",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB",
-    # Phase 1b — Week 5 enrichment output
+    # Phase 1b — Week 5 enrichment output (SOC persisted here; legacy Prisma column may be occupation_code)
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS soc_code TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS naics_code TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS temporal_period TEXT",
@@ -97,6 +129,8 @@ _JOB_POSTINGS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS dedup_embedding vector(1536)",
     # Zip code (flywheel #161): resolved during normalization from posting or postal_geo_data lookup
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
+    # Link to dbo.employer_profiles (UUID PK) after enrichment upsert
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS employer_profile_id UUID REFERENCES dbo.employer_profiles(id)",
 ]
 
 # Legacy Prisma cleanup: drop FK constraints and make NOT NULL columns nullable (#159).
@@ -119,6 +153,8 @@ _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS responsibilities TEXT",
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
     "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
+    "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS naics_code TEXT",
+    "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS employer_metadata JSONB",
 ]
 
 # Company HQ / location fields for enrichment resolve_location (#110)
@@ -140,18 +176,34 @@ _EXTRACTED_INTELLIGENCE_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.extracted_intelligence ADD COLUMN IF NOT EXISTS extraction_metadata JSONB",
 ]
 
-_EMPLOYER_PROFILES_DDL = """
-CREATE TABLE IF NOT EXISTS dbo.employer_profiles (
-    id SERIAL PRIMARY KEY,
-    company_id TEXT NOT NULL,
-    company_size TEXT,
-    ai_maturity_signal TEXT,
-    sector TEXT,
-    is_known_employer BOOLEAN NOT NULL DEFAULT FALSE,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+# NAICS reference (PostgreSQL). Azure SQL / MSSQL: table is created via SQLAlchemy
+# create_all when running seed_naics.py or agent migrations against that dialect.
+_NAICS_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.naics (
+    naics_code TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    seq_no INTEGER,
+    createdat TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updatedat TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS ix_employer_profiles_company_id
-    ON dbo.employer_profiles (company_id);
+"""
+
+# Week 7 Pair B — weekly analytics aggregates (issues #180 / #181)
+_WEEK7_ANALYTICS_AGGREGATES_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.sector_summary_weekly (
+    id SERIAL PRIMARY KEY,
+    week_start DATE NOT NULL,
+    sector TEXT NOT NULL,
+    posting_count INTEGER NOT NULL,
+    avg_salary DOUBLE PRECISION,
+    median_salary DOUBLE PRECISION
+);
+CREATE TABLE IF NOT EXISTS dbo.geo_demand_weekly (
+    id SERIAL PRIMARY KEY,
+    week_start DATE NOT NULL,
+    borderplex_subregion VARCHAR(32) NOT NULL,
+    posting_count INTEGER NOT NULL
+);
 """
 
 
@@ -162,6 +214,9 @@ def run_migrations(engine: Engine) -> None:
     # 0. Ensure the dbo schema exists (required by ORM models)
     with engine.begin() as conn:
         conn.execute(text("CREATE SCHEMA IF NOT EXISTS dbo"))
+
+    # 0b. Drop legacy SERIAL-key employer_profiles before create_all (PostgreSQL only)
+    _drop_legacy_employer_profiles_if_serial_pk(engine)
 
     # 1. Create agent-managed tables via SQLAlchemy metadata
     Base.metadata.create_all(engine)
@@ -200,10 +255,25 @@ def run_migrations(engine: Engine) -> None:
                 error=str(exc),
             )
 
-    # 4. Create employer_profiles table
-    with engine.begin() as conn:
-        conn.execute(text(_EMPLOYER_PROFILES_DDL))
-    log.info("migrations_employer_profiles_created")
+    # 4. employer_profiles is created via Base.metadata.create_all (UUID PK, FK to companies)
+
+    # 4b. Create naics reference table (PostgreSQL DDL; other dialects rely on create_all)
+    if engine.dialect.name == "postgresql":
+        with engine.begin() as conn:
+            conn.execute(text(_NAICS_DDL))
+        log.info("migrations_naics_created")
+
+    # 4c. Week 7 analytics aggregate tables (PostgreSQL DDL; ORM also registers via create_all)
+    if engine.dialect.name == "postgresql":
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(_WEEK7_ANALYTICS_AGGREGATES_DDL))
+            log.info("migrations_week7_analytics_aggregates_created")
+        except Exception as exc:
+            log.warning(
+                "migration_week7_analytics_aggregates_skipped",
+                error=str(exc),
+            )
 
     # 5. Add enrichment columns to dbo.job_postings (and related).
     #    Each ALTER runs in its own transaction so a single failure
