@@ -143,10 +143,19 @@ def mock_complete(prompt: str, agent_name: str, **kwargs: Any) -> dict[str, Any]
 def mock_invoke_skills_llm(
     prompt: str, *, agent_name: str | None = None
 ) -> tuple[str, dict[str, Any]]:
-    """Mock replacement for llm_client.invoke_skills_llm()."""
+    """Mock replacement for llm_client.invoke_skills_llm().
+
+    Handles skills extraction (default) and SOC classification
+    (when called via enrichment-agent for SOC prompts).
+    """
     gt = _next_gt_record()
 
-    content = json.dumps({"skills": _map_skills_for_llm(gt)})
+    # SOC classification: enrichment-agent uses invoke_skills_llm for SOC
+    if agent_name and "enrichment" in agent_name.lower() and "soc" in prompt.lower():
+        content = "15-1252"  # Software Developers — realistic mock SOC code
+    else:
+        content = json.dumps({"skills": _map_skills_for_llm(gt)})
+
     metrics = _simulate_metrics(prompt, content)
     time.sleep(metrics["latency_ms"] / 1000.0)
 
@@ -176,7 +185,17 @@ def mock_invoke_structured(
     gt = _next_gt_record()
 
     # Build structured response matching the Pydantic schema
-    if "tasks" in agent_name.lower():
+    schema_name = output_schema.__name__.lower() if hasattr(output_schema, "__name__") else ""
+
+    if "naics" in agent_name.lower() or "naics" in schema_name:
+        raw_data = {"naics_code": "541511"}  # Custom Computer Programming Services
+    elif "employer" in agent_name.lower() or "employer" in schema_name:
+        raw_data = {
+            "company_size": "mid_market",
+            "ai_maturity_signal": "ai_adopting",
+            "sector": "technology",
+        }
+    elif "tasks" in agent_name.lower():
         raw_data = {"tasks": _map_tasks_for_llm(gt)}
     elif "responsibilities" in agent_name.lower() or "resp" in agent_name.lower():
         raw_data = {"responsibilities": _map_responsibilities_for_llm(gt)}
