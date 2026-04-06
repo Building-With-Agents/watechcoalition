@@ -8,8 +8,6 @@ Env vars: LANGFUSE_SECRET_KEY, LANGFUSE_PUBLIC_KEY, LANGFUSE_BASE_URL.
 
 from __future__ import annotations
 
-import time
-import uuid
 from collections.abc import Generator
 from contextlib import contextmanager
 from typing import Any

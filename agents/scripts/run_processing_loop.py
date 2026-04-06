@@ -53,6 +53,39 @@ structlog.configure(
 )
 log = structlog.get_logger()
 
+# ---------------------------------------------------------------------------
+# Langfuse tracer (optional — activates if LANGFUSE_SECRET_KEY is set)
+# ---------------------------------------------------------------------------
+_tracer = None
+
+
+def _init_tracer() -> None:
+    global _tracer
+    if not os.getenv("LANGFUSE_SECRET_KEY"):
+        return
+    try:
+        from agents.common.llm_adapter import register_tracer
+        from agents.common.observability import LangfuseTracer
+
+        _tracer = LangfuseTracer(agent_id="processing-loop")
+        register_tracer(_tracer)
+        log.info("langfuse_tracer_registered", agent_id="processing-loop")
+    except Exception as exc:
+        log.warning("langfuse_tracer_init_failed", error=str(exc))
+
+
+def _shutdown_tracer() -> None:
+    global _tracer
+    if _tracer is not None:
+        try:
+            from agents.common.llm_adapter import register_tracer
+
+            _tracer.shutdown()
+            register_tracer(None)
+        except Exception:
+            pass
+        _tracer = None
+
 
 def _count_pending() -> int:
     """Count raw_ingested_jobs with processing_status='pending'."""
@@ -114,6 +147,9 @@ def main() -> None:
 
     # Set batch size for normalization agent
     os.environ["NORM_BATCH_SIZE"] = str(args.batch_size)
+
+    # Initialize Langfuse tracer (optional)
+    _init_tracer()
 
     pending = _count_pending()
     enriched = _count_enriched()
@@ -249,6 +285,8 @@ def main() -> None:
 
         log.info("rate_limit_pause", seconds=args.delay)
         time.sleep(args.delay)
+
+    _shutdown_tracer()
 
     enriched_final = _count_enriched()
     print("\nProcessing complete.")

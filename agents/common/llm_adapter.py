@@ -181,6 +181,39 @@ def complete(
         - success: bool
         - extraction_failed: bool (True after timeout retry or API error)
     """
+    provider = os.getenv("LLM_PROVIDER", "anthropic")
+
+    # Mock provider: return ground truth data, no API calls
+    if provider == "mock":
+        from agents.common.mock_llm_provider import mock_complete
+
+        correlation_id = correlation_id or str(uuid.uuid4())
+        span_ctx = (
+            _tracer.start_span(agent_name, correlation_id=correlation_id, input=prompt,
+                               metadata={"agent_name": agent_name, "model": "mock-sonnet-v1"})
+            if _tracer
+            else nullcontext()
+        )
+        with span_ctx:
+            result = mock_complete(prompt, agent_name, model=model, system=system, max_tokens=max_tokens)
+            log_extraction_event(
+                agent_name=agent_name, prompt=prompt, model="mock-sonnet-v1",
+                provider="mock", latency_ms=result.get("latency_ms", 0),
+                input_tokens=result["input_tokens"], output_tokens=result["output_tokens"],
+                cost_usd=result["cost_usd"], success=True,
+            )
+            if _tracer:
+                try:
+                    _tracer.log_event("llm_success", {
+                        "input_tokens": result["input_tokens"],
+                        "output_tokens": result["output_tokens"],
+                        "cost_usd": result["cost_usd"],
+                        "output": result["content"][:4000],
+                    })
+                except Exception:
+                    pass
+            return result
+
     try:
         from anthropic import Anthropic, APIStatusError, APITimeoutError
     except ImportError as exc:
@@ -191,7 +224,6 @@ def complete(
         ) from exc
 
     model = model or os.getenv("EXTRACTION_MODEL_SKILLS", "claude-sonnet-4-5")
-    provider = os.getenv("LLM_PROVIDER", "anthropic")
     model_tier = MODEL_TIER_MAP.get(model, "sonnet")
     client = Anthropic()
 

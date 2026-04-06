@@ -424,9 +424,13 @@ class EnrichmentAgent(BaseAgent):
         }
 
     def _process_skills_extracted_batch(self, event: EventEnvelope) -> EventEnvelope:
+        from agents.common.llm_adapter import get_tracer
+
         payload = event.payload
         correlation_id = event.correlation_id
         batch_id = str(payload.get("batch_id") or "batch-unknown")
+
+        tracer = get_tracer()
         rows = _records_from_skills_payload(payload)
         enriched_count = 0
         spam_rejected_count = 0
@@ -505,6 +509,21 @@ class EnrichmentAgent(BaseAgent):
                 run_batch(None)
         else:
             run_batch(None)
+
+        if tracer:
+            try:
+                total_processed = enriched_count + spam_rejected_count + flagged_for_review_count
+                tracer.log_event("enrichment_metrics", {
+                    "enriched_count": enriched_count,
+                    "spam_rejected_count": spam_rejected_count,
+                    "flagged_for_review_count": flagged_for_review_count,
+                    "duplicate_count": duplicate_count,
+                    "soc_classified_count": soc_classified_count,
+                    "naics_classified_count": naics_classified_count,
+                    "total_processed": total_processed,
+                })
+            except Exception:
+                pass
 
         return build_record_enriched_event(
             correlation_id=correlation_id,

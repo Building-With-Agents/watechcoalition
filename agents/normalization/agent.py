@@ -381,24 +381,37 @@ class NormalizationAgent(AgentBase):
 
     def process(self, event: EventEnvelope) -> EventEnvelope:
         """Run the normalization graph and return the result event."""
+        from contextlib import nullcontext
+
+        from agents.common.llm_adapter import get_tracer
+
         payload = event.payload
         batch_id = payload.get("batch_id", "")
         ingestion_run_id = payload.get("batch_id", "")  # batch_id == run_id from ingestion
         region_id = payload.get("region_id", "")
 
-        initial_state: NormalizationState = {
-            "ingestion_run_id": ingestion_run_id,
-            "correlation_id": event.correlation_id,
-            "batch_id": batch_id,
-            "region_id": region_id,
-        }
+        tracer = get_tracer()
+        span_ctx = (
+            tracer.start_span(
+                "normalization",
+                correlation_id=event.correlation_id,
+                metadata={"batch_id": batch_id, "region_id": region_id},
+            )
+            if tracer
+            else nullcontext()
+        )
 
-        result = _COMPILED_GRAPH.invoke(initial_state)
+        with span_ctx:
+            initial_state: NormalizationState = {
+                "ingestion_run_id": ingestion_run_id,
+                "correlation_id": event.correlation_id,
+                "batch_id": batch_id,
+                "region_id": region_id,
+            }
 
-        return EventEnvelope(
-            correlation_id=event.correlation_id,
-            agent_id=self.agent_id,
-            payload=result.get(
+            result = _COMPILED_GRAPH.invoke(initial_state)
+
+            out_payload = result.get(
                 "normalization_complete_event",
                 {
                     "event_type": "NormalizationComplete",
@@ -407,5 +420,23 @@ class NormalizationAgent(AgentBase):
                     "quarantined_count": 0,
                     "normalization_status": "success",
                 },
-            ),
-        )
+            )
+
+            if tracer:
+                try:
+                    normalized = out_payload.get("normalized_count", 0)
+                    quarantined = out_payload.get("quarantined_count", 0)
+                    total = normalized + quarantined
+                    tracer.log_event("normalization_metrics", {
+                        "normalized_count": normalized,
+                        "quarantined_count": quarantined,
+                        "quarantine_rate": round(quarantined / total, 4) if total > 0 else 0.0,
+                    })
+                except Exception:
+                    pass
+
+            return EventEnvelope(
+                correlation_id=event.correlation_id,
+                agent_id=self.agent_id,
+                payload=out_payload,
+            )

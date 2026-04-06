@@ -116,6 +116,43 @@ def invoke_skills_llm(
         (response_text, metadata). metadata includes: tokens_used, cost_usd,
         latency_ms, success, error_reason (optional), provider, model.
     """
+    # Mock provider: return ground truth data, no API calls
+    if os.getenv("LLM_PROVIDER", "").strip().lower() == "mock":
+        from agents.common.mock_llm_provider import mock_invoke_skills_llm
+
+        audit_agent = agent_name or AGENT_NAME
+        tracer = get_tracer()
+        span_ctx = (
+            tracer.start_span(
+                _SPAN_NAME_MAP.get(audit_agent, audit_agent),
+                correlation_id=str(uuid.uuid4()),
+                input=prompt,
+                metadata={"agent_name": audit_agent, "model": "mock-sonnet-v1"},
+            )
+            if tracer
+            else nullcontext()
+        )
+        with span_ctx:
+            text, meta = mock_invoke_skills_llm(prompt, agent_name=audit_agent)
+            log_extraction_event(
+                agent_name=audit_agent, prompt=prompt, model="mock-sonnet-v1",
+                provider="mock", latency_ms=meta["latency_ms"],
+                input_tokens=meta.get("tokens_used", 0) // 2,
+                output_tokens=meta.get("tokens_used", 0) // 2,
+                cost_usd=meta["cost_usd"], success=True,
+            )
+            if tracer:
+                try:
+                    tracer.log_event("llm_success", {
+                        "input_tokens": meta.get("tokens_used", 0) // 2,
+                        "output_tokens": meta.get("tokens_used", 0) // 2,
+                        "cost_usd": meta["cost_usd"],
+                        "output": text[:4000],
+                    })
+                except Exception:
+                    pass
+            return text, meta
+
     llm = _get_llm()
     audit_agent = agent_name or AGENT_NAME
     deployment_name = (
@@ -299,6 +336,44 @@ def invoke_structured_extraction_llm(
     model_tier_for_cost
         ``haiku`` or ``sonnet`` for ``compute_extraction_cost``.
     """
+    # Mock provider: return ground truth data, no API calls
+    if os.getenv("LLM_PROVIDER", "").strip().lower() == "mock":
+        from agents.common.mock_llm_provider import mock_invoke_structured
+
+        tracer = get_tracer()
+        span_ctx = (
+            tracer.start_span(
+                _SPAN_NAME_MAP.get(agent_name, agent_name),
+                correlation_id=str(uuid.uuid4()),
+                input=prompt,
+                metadata={"agent_name": agent_name, "model": "mock-sonnet-v1"},
+            )
+            if tracer
+            else nullcontext()
+        )
+        with span_ctx:
+            parsed, meta = mock_invoke_structured(prompt, output_schema, agent_name=agent_name)
+            log_extraction_event(
+                agent_name=agent_name, prompt=prompt, model="mock-sonnet-v1",
+                provider="mock", latency_ms=meta["latency_ms"],
+                input_tokens=meta.get("tokens_used", 0) // 2,
+                output_tokens=meta.get("tokens_used", 0) // 2,
+                cost_usd=meta["cost_usd"],
+                success=meta["success"],
+                error_reason=meta.get("error_reason"),
+            )
+            if tracer:
+                try:
+                    tracer.log_event("llm_success", {
+                        "input_tokens": meta.get("tokens_used", 0) // 2,
+                        "output_tokens": meta.get("tokens_used", 0) // 2,
+                        "cost_usd": meta["cost_usd"],
+                        "output": str(parsed)[:4000] if parsed else "mock_parse_failed",
+                    })
+                except Exception:
+                    pass
+            return parsed, meta
+
     try:
         from langchain_openai import AzureChatOpenAI
     except ImportError as e:
