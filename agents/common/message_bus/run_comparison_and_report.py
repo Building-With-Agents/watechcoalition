@@ -71,7 +71,14 @@ def _log_report(rows: list[dict[str, str]]) -> None:
         p50 = row.get("latency_p50_ms", "")
         p95 = row.get("latency_p95_ms", "")
         p99 = row.get("latency_p99_ms", "")
-        log.info("exp004_latency", transport=transport, backend=backend, p50_ms=_format_val(p50), p95_ms=_format_val(p95), p99_ms=_format_val(p99))
+        log.info(
+            "exp004_latency",
+            transport=transport,
+            backend=backend,
+            p50_ms=_format_val(p50),
+            p95_ms=_format_val(p95),
+            p99_ms=_format_val(p99),
+        )
 
     log.info("exp004_report", section="max_in_flight", message="Peak events sent but not yet acknowledged (or N/A).")
     for row in rows:
@@ -86,7 +93,14 @@ def _log_report(rows: list[dict[str, str]]) -> None:
         replay_count = row.get("replay_count", "")
         replay_pct = row.get("replay_completeness_pct", "")
         complete = row.get("crash_replay_complete", "")
-        log.info("exp004_replay", transport=transport, backend=backend, replay_count=_format_val(replay_count), replay_completeness_pct=_format_val(replay_pct), crash_replay_complete=_format_val(complete))
+        log.info(
+            "exp004_replay",
+            transport=transport,
+            backend=backend,
+            replay_count=_format_val(replay_count),
+            replay_completeness_pct=_format_val(replay_pct),
+            crash_replay_complete=_format_val(complete),
+        )
 
     corr_key = "correlation_id_propagation_passed"
     if rows and corr_key not in rows[0]:
@@ -103,7 +117,13 @@ def _log_report(rows: list[dict[str, str]]) -> None:
             backend = row.get("backend", "?")
             delivered = row.get("producer_crash_delivered", "")
             lost = row.get("producer_crash_events_lost", "")
-            log.info("exp004_producer_crash", transport=transport, backend=backend, delivered=_format_val(delivered), events_lost=_format_val(lost))
+            log.info(
+                "exp004_producer_crash",
+                transport=transport,
+                backend=backend,
+                delivered=_format_val(delivered),
+                events_lost=_format_val(lost),
+            )
 
     if rows and "events_lost_consumer_crash" in rows[0]:
         for row in rows:

@@ -103,9 +103,7 @@ def fetch_sources(state: IngestionState) -> IngestionState:
     async def _gather_crawl4ai(
         indices_and_names: list[tuple[int, str]],
     ) -> list[tuple[int, str, list[RawJobRecord], Exception | None]]:
-        async def fetch_one(
-            idx: int, source_name: str
-        ) -> tuple[int, str, list[RawJobRecord], Exception | None]:
+        async def fetch_one(idx: int, source_name: str) -> tuple[int, str, list[RawJobRecord], Exception | None]:
             try:
                 adapter = get_adapter(source_name)
                 recs = await adapter.fetch(region)
@@ -118,9 +116,7 @@ def fetch_sources(state: IngestionState) -> IngestionState:
             *[fetch_one(i, name) for i, name in indices_and_names],
         )
 
-    crawl4ai_pending = [
-        (i, sources[i]) for i in range(n) if sources[i].startswith("crawl4ai")
-    ]
+    crawl4ai_pending = [(i, sources[i]) for i in range(n) if sources[i].startswith("crawl4ai")]
 
     for i, source_name in enumerate(sources):
         if source_name.startswith("crawl4ai"):
@@ -137,9 +133,7 @@ def fetch_sources(state: IngestionState) -> IngestionState:
             log.warning("source_fetch_failed", source=source_name, error=str(exc))
 
     if crawl4ai_pending:
-        for idx, source_name, records, exc in asyncio.run(
-            _gather_crawl4ai(crawl4ai_pending)
-        ):
+        for idx, source_name, records, exc in asyncio.run(_gather_crawl4ai(crawl4ai_pending)):
             if exc is not None:
                 err_msg = f"{source_name}: {exc}"
                 errors.append(err_msg)
@@ -243,6 +237,7 @@ def stage_records(state: IngestionState) -> IngestionState:
                     city=record.city,
                     state=record.state,
                     country=record.country,
+                    zip_code=record.zip_code,
                     is_remote=record.is_remote,
                     job_url=record.job_url,
                     source_url=record.source_url or None,
@@ -278,9 +273,7 @@ def emit_ingest_batch(state: IngestionState) -> IngestionState:
     source_names = region_cfg.get("sources", ["crawl4ai"])
     source_label = ",".join(source_names) if len(source_names) > 1 else source_names[0]
 
-    original_fetched = sum(
-        r.records_fetched for r in state.get("source_results", [])
-    )
+    original_fetched = sum(r.records_fetched for r in state.get("source_results", []))
 
     payload = ingest_batch_payload(
         batch_id=state.get("run_id", ""),
@@ -299,9 +292,7 @@ def finalize_run(state: IngestionState) -> IngestionState:
     run_id = state.get("run_id", "")
     status = state.get("status", "completed")
 
-    original_fetched = sum(
-        r.records_fetched for r in state.get("source_results", [])
-    )
+    original_fetched = sum(r.records_fetched for r in state.get("source_results", []))
 
     _update_run(
         run_id,
@@ -439,12 +430,15 @@ class IngestionAgent(AgentBase):
         return EventEnvelope(
             correlation_id=event.correlation_id,
             agent_id=self.agent_id,
-            payload=result.get("ingest_batch_event", {
-                "event_type": "IngestBatch",
-                "batch_id": run_id,
-                "total_fetched": 0,
-                "staged_count": 0,
-            }),
+            payload=result.get(
+                "ingest_batch_event",
+                {
+                    "event_type": "IngestBatch",
+                    "batch_id": run_id,
+                    "total_fetched": 0,
+                    "staged_count": 0,
+                },
+            ),
         )
 
 
@@ -492,6 +486,7 @@ def _cli() -> None:
     import argparse
 
     from dotenv import load_dotenv
+
     load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
     parser = argparse.ArgumentParser(description="Run the Ingestion Agent")
@@ -505,6 +500,7 @@ def _cli() -> None:
     if args.migrate:
         from agents.common.data_store.database import get_engine
         from agents.common.data_store.migrations import run_migrations
+
         run_migrations(get_engine())
 
     agent = IngestionAgent()

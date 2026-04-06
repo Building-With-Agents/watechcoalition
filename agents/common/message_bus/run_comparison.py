@@ -22,9 +22,7 @@ from agents.common.message_bus.comparison import (
 
 def build_parser() -> argparse.ArgumentParser:
     """Build the CLI parser for the transport comparison command."""
-    parser = argparse.ArgumentParser(
-        description="Run the shared EXP-004 transport comparison across all three buses."
-    )
+    parser = argparse.ArgumentParser(description="Run the shared EXP-004 transport comparison across all three buses.")
     parser.add_argument("--count", type=int, default=1000, help="Number of input harness events.")
     parser.add_argument("--seed", type=int, default=42, help="Deterministic harness seed.")
     parser.add_argument(
@@ -183,9 +181,7 @@ def _render_markdown_summary(
 ) -> str:
     fastest_publish = max(results, key=lambda result: result.throughput_publish_events_per_sec)
     fastest_e2e = max(results, key=lambda result: result.throughput_e2e_events_per_sec)
-    latency_candidates = [
-        result for result in results if result.latency_p95_ms is not None
-    ]
+    latency_candidates = [result for result in results if result.latency_p95_ms is not None]
     lowest_p95 = min(latency_candidates, key=lambda result: result.latency_p95_ms or 0)
     replay_label = "enabled" if scenario.include_crash_replay else "disabled"
     producer_crash_lines = [
@@ -197,17 +193,9 @@ def _render_markdown_summary(
     ]
     producer_summary = None
     if producer_crash_lines:
-        max_loss = max(
-            result.producer_crash_loss_count or 0 for result in producer_crash_lines
-        )
-        min_recovered = min(
-            result.producer_resume_recovered_count or 0
-            for result in producer_crash_lines
-        )
-        all_recovered = all(
-            result.producer_resume_complete is True
-            for result in producer_crash_lines
-        )
+        max_loss = max(result.producer_crash_loss_count or 0 for result in producer_crash_lines)
+        min_recovered = min(result.producer_resume_recovered_count or 0 for result in producer_crash_lines)
+        all_recovered = all(result.producer_resume_complete is True for result in producer_crash_lines)
         producer_summary = (
             f"Producer crash at `{scenario.crash_at}`: immediate loss `{max_loss}` "
             f"events; resumed recovery `{min_recovered}` events; "

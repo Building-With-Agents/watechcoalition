@@ -1,10 +1,12 @@
 """
-Pipeline Runner — Week 3 Batch-Oriented.
+Pipeline Runner — Demo Run (Week 2 fixture data only).
 
-Sends a batch trigger to the Ingestion Agent, which fetches its own data.
-The Normalization Agent reads staged records from the DB.
-Downstream agents (Skills Extraction through Orchestration) are still stubs
-that pass through the upstream event.
+DEPRECATED for production use. Use the flywheel pipeline instead:
+  - Loop 1 (ingest):  python agents/scripts/batch_ingest.py
+  - Loop 2 (process): python agents/scripts/run_processing_loop.py
+
+This script runs all agents sequentially in a single pass with fixture data.
+Kept for Week 2 walking skeleton demos and test_pipeline_runner.py.
 
 Usage (from the repo root):
     python agents/pipeline_runner.py
@@ -376,7 +378,7 @@ def main() -> None:
 
         entries = run_pipeline(PIPELINE, correlation_id, trigger_payload)
 
-        # Write run log
+        # Write run log — TODO: migrate dashboard to read from DB instead of JSON
         _OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
         _RUN_LOG_PATH.write_text(
             json.dumps(entries, indent=2, default=str),

@@ -28,6 +28,17 @@ ignore = [
 # CLI harness scripts intentionally print to stdout
 "agents/common/events/view_harness.py" = ["T201"]
 "common/events/view_harness.py" = ["T201"]
+"agents/scripts/dedup_metrics_report.py" = ["T201"]
+"scripts/dedup_metrics_report.py" = ["T201"]
+"agents/scripts/ingest_duplicate_demo.py" = ["T201"]
+"scripts/ingest_duplicate_demo.py" = ["T201"]
+"agents/scripts/batch_ingest.py" = ["T201"]
+"scripts/batch_ingest.py" = ["T201"]
+"agents/scripts/run_processing_loop.py" = ["T201"]
+"scripts/run_processing_loop.py" = ["T201"]
+# Repo-root pg-seed CLI scripts (stdout UX for devs)
+"../scripts/pg-seed-data/export_agent_data.py" = ["T201"]
+"../scripts/pg-seed-data/seed_agent_data.py" = ["T201"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["agents"]
@@ -42,4 +53,5 @@ python_functions = ["test_*"]
 addopts = "-v --tb=short"
 markers = [
     "integration: marks tests requiring a live database",
+    "fuzzy_dedup_e2e: PostgreSQL + Azure embedding fuzzy dedup matching E2E",
 ]

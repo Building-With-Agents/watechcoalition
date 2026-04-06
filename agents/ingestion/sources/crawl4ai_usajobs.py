@@ -11,13 +11,22 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import io
 import json
+import os
 import re
+import sys
 from datetime import datetime
 from typing import Any
 from urllib.parse import urlencode
 
 import structlog
+
+os.environ.setdefault("PYTHONUTF8", "1")
+os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 from agents.common.types.raw_job_record import RawJobRecord
 from agents.common.types.region_config import RegionConfig
@@ -135,9 +144,7 @@ def _parse_ld_json_jobposting(html: str) -> dict[str, Any] | None:
             if not isinstance(item, dict):
                 continue
             types = item.get("@type")
-            ok = types == "JobPosting" or (
-                isinstance(types, list) and "JobPosting" in types
-            )
+            ok = types == "JobPosting" or (isinstance(types, list) and "JobPosting" in types)
             if ok:
                 return item
     return None
@@ -196,9 +203,7 @@ def _normalize_employment_type(raw: str | None) -> str | None:
 def _parse_detail_fields_from_ld(ld: dict[str, Any]) -> dict[str, Any]:
     """Map schema.org JobPosting JSON-LD to our detail field dict."""
     desc = ld.get("description")
-    description = (
-        _strip_html_tags(desc) if isinstance(desc, str) else ""
-    )
+    description = _strip_html_tags(desc) if isinstance(desc, str) else ""
 
     org = ld.get("hiringOrganization")
     company = ""
@@ -265,11 +270,7 @@ def _parse_detail_fields_fallback(html: str) -> dict[str, Any]:
 def _parse_detail_html(html: str) -> dict[str, Any]:
     """Extract detail fields from a job announcement HTML page."""
     ld = _parse_ld_json_jobposting(html)
-    base = (
-        _parse_detail_fields_from_ld(ld)
-        if ld
-        else _parse_detail_fields_fallback(html)
-    )
+    base = _parse_detail_fields_from_ld(ld) if ld else _parse_detail_fields_fallback(html)
 
     if not base.get("description"):
         fb = _parse_detail_fields_fallback(html)
@@ -323,9 +324,7 @@ class Crawl4AIUSAJobsAdapter(SourceAdapter):
             seen.add(job_id)
             job_url = f"https://www.usajobs.gov/job/{job_id}/{slug}".rstrip("/")
             title = _title_from_slug(slug) or f"Job {job_id}"
-            jobs.append(
-                {"external_id": job_id, "title": title, "job_url": job_url}
-            )
+            jobs.append({"external_id": job_id, "title": title, "job_url": job_url})
 
         for m in _JOB_URL_REL_RE.finditer(html):
             path, job_id = m.group(1), m.group(2)
@@ -336,9 +335,7 @@ class Crawl4AIUSAJobsAdapter(SourceAdapter):
             segs = [p for p in path.split("/") if p]
             slug = segs[2] if len(segs) > 2 else ""
             title = _title_from_slug(slug) or f"Job {job_id}"
-            jobs.append(
-                {"external_id": job_id, "title": title, "job_url": job_url}
-            )
+            jobs.append({"external_id": job_id, "title": title, "job_url": job_url})
 
         return jobs
 
@@ -381,9 +378,7 @@ class Crawl4AIUSAJobsAdapter(SourceAdapter):
                 company = _normalize_str(str(detail["company"])) or company
 
         region_id = _normalize_str(region.region_id)
-        raw_hash = hashlib.sha256(
-            f"crawl4ai_usajobs|{external_id}|{title}|{job_url}".encode()
-        ).hexdigest()
+        raw_hash = hashlib.sha256(f"crawl4ai_usajobs|{external_id}|{title}|{job_url}".encode()).hexdigest()
         payload: dict[str, Any] = {
             "external_id": external_id,
             "title": title,
@@ -433,19 +428,13 @@ class Crawl4AIUSAJobsAdapter(SourceAdapter):
                     msg = getattr(result, "error_message", str(result)) or "unknown"
                     raise Crawl4AIUSAJobsAdapterError(f"Target unreachable: {msg}")
 
-                html = getattr(result, "html", None) or getattr(
-                    result, "cleaned_html", None
-                )
+                html = getattr(result, "html", None) or getattr(result, "cleaned_html", None)
                 if html is None:
-                    raise Crawl4AIUSAJobsAdapterError(
-                        "Crawl result missing html and cleaned_html"
-                    )
+                    raise Crawl4AIUSAJobsAdapterError("Crawl result missing html and cleaned_html")
                 html = str(html) if html else ""
 
                 if len(html) < _MIN_HTML_LEN:
-                    raise Crawl4AIUSAJobsAdapterError(
-                        f"Page content too small ({len(html)} chars)"
-                    )
+                    raise Crawl4AIUSAJobsAdapterError(f"Page content too small ({len(html)} chars)")
 
                 no_results = _NO_RESULTS_RE.search(html) is not None
                 cards = self._extract_job_cards(html)
@@ -453,9 +442,7 @@ class Crawl4AIUSAJobsAdapter(SourceAdapter):
                 if not cards and len(html) >= _MIN_HTML_LEN:
                     if no_results:
                         return []
-                    raise Crawl4AIUSAJobsAdapterError(
-                        "Large page with zero job links; possible parser breakage"
-                    )
+                    raise Crawl4AIUSAJobsAdapterError("Large page with zero job links; possible parser breakage")
 
                 sem = asyncio.Semaphore(5)
 
@@ -477,9 +464,7 @@ class Crawl4AIUSAJobsAdapter(SourceAdapter):
                                 error=getattr(dr, "error_message", None) or "unknown",
                             )
                             return None
-                        dhtml = getattr(dr, "html", None) or getattr(
-                            dr, "cleaned_html", None
-                        )
+                        dhtml = getattr(dr, "html", None) or getattr(dr, "cleaned_html", None)
                         if dhtml is None:
                             log.warning(
                                 "usajobs_detail_missing_html",
@@ -488,25 +473,17 @@ class Crawl4AIUSAJobsAdapter(SourceAdapter):
                             return None
                         return _parse_detail_html(str(dhtml))
 
-                detail_results = await asyncio.gather(
-                    *[_fetch_one_detail(str(c["job_url"])) for c in cards]
-                )
+                detail_results = await asyncio.gather(*[_fetch_one_detail(str(c["job_url"])) for c in cards])
 
                 records: list[RawJobRecord] = []
                 for i, card in enumerate(cards):
-                    detail = (
-                        detail_results[i] if i < len(detail_results) else None
-                    )
-                    records.append(
-                        self._to_raw_job_record(card, region, detail, i)
-                    )
+                    detail = detail_results[i] if i < len(detail_results) else None
+                    records.append(self._to_raw_job_record(card, region, detail, i))
                 return records
         except Crawl4AIUSAJobsAdapterError:
             raise
         except Exception as e:
-            raise Crawl4AIUSAJobsAdapterError(
-                f"Crawl4AI init/fetch failed: {e}"
-            ) from e
+            raise Crawl4AIUSAJobsAdapterError(f"Crawl4AI init/fetch failed: {e}") from e
 
     async def health_check(self) -> dict:
         """Probe USAJobs search reachability with the same SPA crawl settings."""
@@ -522,9 +499,7 @@ class Crawl4AIUSAJobsAdapter(SourceAdapter):
             async with AsyncWebCrawler(config=BrowserConfig(headless=True)) as crawler:
                 result = await crawler.arun(probe_url, config=cfg)
             success = bool(getattr(result, "success", False))
-            html = getattr(result, "html", None) or getattr(
-                result, "cleaned_html", None
-            )
+            html = getattr(result, "html", None) or getattr(result, "cleaned_html", None)
             html_str = str(html) if html else ""
             ok = success and len(html_str) >= _MIN_HTML_LEN
             err_msg = None

@@ -108,19 +108,21 @@ def log_extraction_event(
     try:
         prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()
         with session_scope() as session:
-            session.add(LLMAuditLog(
-                agent_name=agent_name,
-                prompt_hash=prompt_hash,
-                model=model,
-                provider=provider,
-                latency_ms=latency_ms,
-                input_tokens=input_tokens,
-                output_tokens=output_tokens,
-                token_count=input_tokens + output_tokens,
-                cost_usd=cost_usd,
-                success=success,
-                error_reason=error_reason,
-            ))
+            session.add(
+                LLMAuditLog(
+                    agent_name=agent_name,
+                    prompt_hash=prompt_hash,
+                    model=model,
+                    provider=provider,
+                    latency_ms=latency_ms,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    token_count=input_tokens + output_tokens,
+                    cost_usd=cost_usd,
+                    success=success,
+                    error_reason=error_reason,
+                )
+            )
     except Exception as exc:
         log.warning("llm_audit_log_write_failed", error=str(exc))
 

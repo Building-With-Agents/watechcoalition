@@ -16,6 +16,7 @@ if str(REPO_ROOT) not in sys.path:
 
 try:
     from dotenv import load_dotenv
+
     load_dotenv(REPO_ROOT / ".env")
 except ImportError:
     pass

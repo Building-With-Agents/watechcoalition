@@ -28,17 +28,19 @@ class TestJobRecord:
         assert record.title == "Software Engineer"
 
     def test_valid_full_record(self) -> None:
-        record = JobRecord(**self._base_record(
-            location="Seattle, WA",
-            normalized_location="Seattle, WA",
-            employment_type="full_time",
-            date_posted=datetime(2026, 1, 15, tzinfo=timezone.utc),
-            salary_raw="$120k-$160k/year",
-            salary_min=120000.0,
-            salary_max=160000.0,
-            salary_currency="USD",
-            salary_period="annual",
-        ))
+        record = JobRecord(
+            **self._base_record(
+                location="Seattle, WA",
+                normalized_location="Seattle, WA",
+                employment_type="full_time",
+                date_posted=datetime(2026, 1, 15, tzinfo=timezone.utc),
+                salary_raw="$120k-$160k/year",
+                salary_min=120000.0,
+                salary_max=160000.0,
+                salary_currency="USD",
+                salary_period="annual",
+            )
+        )
         assert record.salary_min == 120000.0
 
     def test_empty_title_fails(self) -> None:

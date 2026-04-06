@@ -13,12 +13,26 @@ Region behavior:
 from __future__ import annotations
 
 import hashlib
+import io
+import os
 import re
+import sys
 from datetime import datetime
 
 from agents.common.types.raw_job_record import RawJobRecord
 from agents.common.types.region_config import RegionConfig
 from agents.ingestion.sources.base_adapter import SourceAdapter
+
+# Force UTF-8 mode at process level for Crawl4AI's Playwright browser subprocess.
+# Previous attempts (PR #111, #125) wrapped stdout/stderr here, but the real issue
+# is that Crawl4AI/Playwright writes Unicode (e.g. → U+2192) to streams that
+# inherit the Windows cp1252 console encoding. Setting PYTHONUTF8=1 forces the
+# interpreter into UTF-8 mode for all I/O including subprocesses.
+os.environ.setdefault("PYTHONUTF8", "1")
+os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 
 class Crawl4AIAdapterError(Exception):
@@ -73,7 +87,7 @@ class Crawl4AIAdapter(SourceAdapter):
 
     def __init__(self, target_urls: list[str] | None = None) -> None:
         # Allow override for testing; default uses fixed El Paso portal.
-        self._target_urls = target_urls or [TEST_URL]
+        self._target_urls = target_urls or [EL_PASO_CAREERS_URL]
 
     @property
     def source_name(self) -> str:
@@ -96,9 +110,7 @@ class Crawl4AIAdapter(SourceAdapter):
                 continue
             seen_ids.add(job_id)
             job_url = _normalize_url(path, base_url)
-            title = _normalize_str(
-                slug.replace("-", " ").title() if slug else f"Job {job_id}"
-            )
+            title = _normalize_str(slug.replace("-", " ").title() if slug else f"Job {job_id}")
             jobs.append({"external_id": job_id.strip(), "title": title, "job_url": job_url})
         return jobs
 
@@ -116,9 +128,7 @@ class Crawl4AIAdapter(SourceAdapter):
         job_url = _normalize_url(str(card.get("job_url", "")), EL_PASO_PORTAL_BASE)
         company = _normalize_str("City of El Paso")  # Portal employer
         region_id = _normalize_str(region.region_id)
-        raw_hash = hashlib.sha256(
-            f"crawl4ai|{external_id}|{title}|{job_url}".encode()
-        ).hexdigest()
+        raw_hash = hashlib.sha256(f"crawl4ai|{external_id}|{title}|{job_url}".encode()).hexdigest()
         payload = {"external_id": external_id, "title": title, "job_url": job_url}
         return RawJobRecord(
             external_id=external_id,
@@ -157,13 +167,6 @@ class Crawl4AIAdapter(SourceAdapter):
             list[RawJobRecord]: Non-empty when jobs found; empty only when
                 page contains an explicit "no jobs / no openings" signal.
         """
-        import io
-        import sys
-
-        if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
-            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
-
         from crawl4ai import AsyncWebCrawler, BrowserConfig, CacheMode, CrawlerRunConfig
 
         url = self._build_search_url(region)
@@ -174,6 +177,10 @@ class Crawl4AIAdapter(SourceAdapter):
                     url,
                     config=CrawlerRunConfig(cache_mode=CacheMode.BYPASS),
                 )
+        except UnicodeEncodeError as e:
+            raise Crawl4AIAdapterError(
+                f"Crawl4AI encoding error (likely Windows cp1252 vs Unicode): {e}"
+            ) from e
         except Exception as e:
             raise Crawl4AIAdapterError(f"Crawl4AI init/fetch failed: {e}") from e
 
@@ -201,7 +208,7 @@ class Crawl4AIAdapter(SourceAdapter):
             try:
                 with open("debug_elpaso_page.html", "w", encoding="utf-8") as f:
                     f.write(html)
-            except OSError :
+            except OSError:
                 # print(f"[DEBUG fetch] could not save HTML: {e}")
                 pass
 
@@ -210,9 +217,7 @@ class Crawl4AIAdapter(SourceAdapter):
                 # _debug_save_html()
                 return []
             # _debug_save_html()
-            raise Crawl4AIAdapterError(
-                "Large page with zero job links; possible parser breakage"
-            )
+            raise Crawl4AIAdapterError("Large page with zero job links; possible parser breakage")
         records: list[RawJobRecord] = []
         for i, card in enumerate(cards):
             records.append(self._to_raw_job_record(card, region, i))
@@ -234,14 +239,8 @@ class Crawl4AIAdapter(SourceAdapter):
             error (str | None): None when status is "operational"; otherwise a
                 short message describing the failure.
         """
-        import io
-        import sys
-
-        if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
-            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
-
         from crawl4ai import AsyncWebCrawler, BrowserConfig, CacheMode, CrawlerRunConfig
+
         target = self._target_urls[0] if self._target_urls else EL_PASO_PORTAL_BASE
         try:
             async with AsyncWebCrawler(config=BrowserConfig(headless=True)) as crawler:
@@ -253,9 +252,7 @@ class Crawl4AIAdapter(SourceAdapter):
             html = getattr(result, "html", None) or getattr(result, "cleaned_html", None)
             html_str = str(html) if html else ""
             extractable = bool(
-                success
-                and html_str
-                and (_JOB_LINK_RE.search(html_str) or _NO_OPENINGS_RE.search(html_str))
+                success and html_str and (_JOB_LINK_RE.search(html_str) or _NO_OPENINGS_RE.search(html_str))
             )
             if success:
                 status = "operational" if extractable else "reachable_but_unextractable"

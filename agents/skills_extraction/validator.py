@@ -74,19 +74,13 @@ def _check_skill(
         warnings.append(f"skill[{index}] missing required field: name")
 
     if record.confidence < threshold:
-        warnings.append(
-            f"skill[{index}] '{record.name}' low confidence: "
-            f"{record.confidence:.2f} < {threshold}"
-        )
+        warnings.append(f"skill[{index}] '{record.name}' low confidence: {record.confidence:.2f} < {threshold}")
 
     if not record.source_span:
         warnings.append(f"skill[{index}] '{record.name}' empty source_span")
 
     if record.skill_type != "raw" and record.esco_uri is None:
-        warnings.append(
-            f"skill[{index}] '{record.name}' non-raw skill (type='{record.skill_type}') "
-            f"has null esco_uri"
-        )
+        warnings.append(f"skill[{index}] '{record.name}' non-raw skill (type='{record.skill_type}') has null esco_uri")
 
 
 def _check_tool(
@@ -99,10 +93,7 @@ def _check_tool(
         warnings.append(f"tool[{index}] missing required field: name")
 
     if record.confidence < threshold:
-        warnings.append(
-            f"tool[{index}] '{record.name}' low confidence: "
-            f"{record.confidence:.2f} < {threshold}"
-        )
+        warnings.append(f"tool[{index}] '{record.name}' low confidence: {record.confidence:.2f} < {threshold}")
 
     if not record.source_span:
         warnings.append(f"tool[{index}] '{record.name}' empty source_span")

@@ -159,3 +159,6 @@ agents/skills_extraction/taxonomy/skills_en.csv
 agents/skills_extraction/taxonomy/onet_skills.txt
 # ESCO embedding disk cache (deprecated — use PostgreSQL pgvector)
 agents/skills_extraction/taxonomy/cache/
+
+# Debug scratch scripts (local dev only)
+_debug_*.py

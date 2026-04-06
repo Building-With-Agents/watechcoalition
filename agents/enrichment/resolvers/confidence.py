@@ -39,11 +39,6 @@ def compute_overall_confidence(
     values = list(field_confidence.values())
     field_avg = sum(values) / len(values) if values else 0.0
 
-    total = (
-        ext * 0.40
-        + qual * 0.30
-        + field_avg * 0.20
-        + tax * 0.10
-    )
+    total = ext * 0.40 + qual * 0.30 + field_avg * 0.20 + tax * 0.10
     total = _clamp01(total)
     return round(total, 4)

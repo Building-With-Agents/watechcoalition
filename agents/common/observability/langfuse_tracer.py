@@ -18,6 +18,7 @@ from agents.common.tracer_base import TracerBase
 
 try:
     from langfuse import Langfuse
+
     _LANGFUSE_AVAILABLE = True
 except ImportError:
     _LANGFUSE_AVAILABLE = False

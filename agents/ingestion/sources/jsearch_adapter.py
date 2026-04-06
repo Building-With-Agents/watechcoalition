@@ -19,7 +19,6 @@ JSEARCH_BASE_URL = "https://jsearch.p.rapidapi.com/search"
 JSEARCH_HOST = "jsearch.p.rapidapi.com"
 
 
-
 def _fingerprint(source: str, external_id: str, title: str, company: str, date_posted: str) -> str:
     """SHA-256 fingerprint for dedup: source + external_id + title + company + date_posted."""
     payload = f"{source}|{external_id}|{title}|{company}|{date_posted}"
@@ -52,13 +51,18 @@ def _job_to_raw_record(job: dict, region_id: str) -> RawJobRecord:
 
     title = (job.get("job_title") or job.get("title") or "").strip() or "Untitled"
     company = (job.get("employer_name") or job.get("company_name") or job.get("company") or "").strip() or "Unknown"
-    description = (job.get("job_description") or job.get("description") or job.get("job_highlights") or "")
+    description = job.get("job_description") or job.get("description") or job.get("job_highlights") or ""
     if isinstance(description, dict):
-        description = " ".join(str(v) for v in (description.get("Qualifications", []) or []) + (description.get("Responsibilities", []) or []))
+        description = " ".join(
+            str(v)
+            for v in (description.get("Qualifications", []) or []) + (description.get("Responsibilities", []) or [])
+        )
     if not isinstance(description, str):
         description = str(description or "")
 
-    date_posted_val = job.get("job_posted_at_timestamp") or job.get("job_posted_at_datetime_utc") or job.get("posted_at")
+    date_posted_val = (
+        job.get("job_posted_at_timestamp") or job.get("job_posted_at_datetime_utc") or job.get("posted_at")
+    )
     date_posted = _parse_date(date_posted_val)
 
     job_url = job.get("job_apply_link") or job.get("job_google_link") or job.get("apply_link") or None
@@ -69,6 +73,7 @@ def _job_to_raw_record(job: dict, region_id: str) -> RawJobRecord:
     city = job.get("job_city")
     state = job.get("job_state") or job.get("job_state_code")
     country = job.get("job_country")
+    zip_code = job.get("job_zip_code") or job.get("job_postal_code")
     is_remote = job.get("job_is_remote")
     if is_remote is not None and not isinstance(is_remote, bool):
         is_remote = str(is_remote).lower() in ("true", "1", "yes")
@@ -91,7 +96,11 @@ def _job_to_raw_record(job: dict, region_id: str) -> RawJobRecord:
     salary_raw = job.get("job_salary") or job.get("job_salary_display")
 
     employment_type = job.get("job_employment_type") or job.get("employment_type")
-    experience_level = job.get("job_required_experience", {}).get("required_experience_level") if isinstance(job.get("job_required_experience"), dict) else job.get("experience_level")
+    experience_level = (
+        job.get("job_required_experience", {}).get("required_experience_level")
+        if isinstance(job.get("job_required_experience"), dict)
+        else job.get("experience_level")
+    )
 
     date_posted_str = date_posted.isoformat() if date_posted else ""
     raw_payload_hash = _fingerprint("jsearch", external_id, title, company, date_posted_str)
@@ -107,6 +116,7 @@ def _job_to_raw_record(job: dict, region_id: str) -> RawJobRecord:
         city=city[:255] if isinstance(city, str) else None,
         state=state[:100] if isinstance(state, str) else None,
         country=country[:10] if isinstance(country, str) else None,
+        zip_code=str(zip_code)[:10] if zip_code else None,
         is_remote=is_remote,
         date_posted=date_posted,
         salary_raw=str(salary_raw)[:255] if salary_raw is not None else None,

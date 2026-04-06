@@ -109,19 +109,22 @@ def _metrics_from_results(results: Sequence[ExtractionResult]) -> dict:
         if isinstance(s, dict) and (s.get("esco_uri") or s.get("is_genai_extension"))
     )
     taxonomy_coverage = (skills_with_taxonomy / total_skills) if total_skills else 0.0
-    return _normalize_metrics({
-        "tokens_used": total_tokens,
-        "extraction_cost_usd": round(total_cost, 6),
-        "skills_count": total_skills,
-        "tools_count": total_tools,
-        "failed_count": failed,
-        "skills_extraction_alert": any_alert,
-        "record_count": len(results),
-        "taxonomy_coverage": round(taxonomy_coverage, 4),
-        "llm_provider": "azure-openai" if any_llm_called else "stub",
-        "llm_model": "sonnet" if any_llm_called else "stub",
-        "llm_call_logged": any_llm_called,
-    }, fill_none=True)
+    return _normalize_metrics(
+        {
+            "tokens_used": total_tokens,
+            "extraction_cost_usd": round(total_cost, 6),
+            "skills_count": total_skills,
+            "tools_count": total_tools,
+            "failed_count": failed,
+            "skills_extraction_alert": any_alert,
+            "record_count": len(results),
+            "taxonomy_coverage": round(taxonomy_coverage, 4),
+            "llm_provider": "azure-openai" if any_llm_called else "stub",
+            "llm_model": "sonnet" if any_llm_called else "stub",
+            "llm_call_logged": any_llm_called,
+        },
+        fill_none=True,
+    )
 
 
 def _source_span_cell(span: dict | None) -> str:
@@ -138,7 +141,7 @@ def _source_span_cell(span: dict | None) -> str:
 def _render_tools_table(tools_full: list[dict]) -> str:
     """Render full tools list with source_span as HTML table."""
     if not tools_full:
-        return "<p class=\"desc\">No tools extracted.</p>"
+        return '<p class="desc">No tools extracted.</p>'
     parts = [
         '<h3 class="subsection">Pass 1: Tools extracted</h3>',
         '<table class="data-table"><thead><tr><th>Tool</th><th>Category</th><th>Confidence</th><th>Source span</th></tr></thead><tbody>',
@@ -146,7 +149,7 @@ def _render_tools_table(tools_full: list[dict]) -> str:
     for t in tools_full:
         span = t.get("source_span") if isinstance(t.get("source_span"), dict) else {}
         parts.append(
-            "<tr><td>{}</td><td>{}</td><td>{}</td><td class=\"span-cell\">{}</td></tr>".format(
+            '<tr><td>{}</td><td>{}</td><td>{}</td><td class="span-cell">{}</td></tr>'.format(
                 html.escape(str(t.get("tool_name") or t.get("label") or "")),
                 html.escape(str(t.get("category", ""))),
                 t.get("confidence", ""),
@@ -157,7 +160,9 @@ def _render_tools_table(tools_full: list[dict]) -> str:
     return "\n    ".join(parts)
 
 
-def _source_span_cell_with_debug(span: dict | None, span_auto_corrected: bool = False, original_end_char: int | None = None) -> str:
+def _source_span_cell_with_debug(
+    span: dict | None, span_auto_corrected: bool = False, original_end_char: int | None = None
+) -> str:
     """Format source_span for a table cell; append debug note when span was auto-corrected."""
     cell = _source_span_cell(span)
     if span_auto_corrected and original_end_char is not None and span and isinstance(span, dict):
@@ -169,7 +174,7 @@ def _source_span_cell_with_debug(span: dict | None, span_auto_corrected: bool = 
 def _render_skills_table(skills_full: list[dict]) -> str:
     """Render full skills list with source_span as HTML table."""
     if not skills_full:
-        return "<p class=\"desc\">No skills extracted.</p>"
+        return '<p class="desc">No skills extracted.</p>'
     parts = [
         '<h3 class="subsection">Pass 2: Skills extracted</h3>',
         '<table class="data-table"><thead><tr><th>Label</th><th>Type</th><th>Confidence</th><th>Required</th><th>ESCO / GenAI</th><th>Source span</th></tr></thead><tbody>',
@@ -187,7 +192,7 @@ def _render_skills_table(skills_full: list[dict]) -> str:
             original_end_char=s.get("original_end_char"),
         )
         parts.append(
-            "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td class=\"span-cell\">{}</td></tr>".format(
+            '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td class="span-cell">{}</td></tr>'.format(
                 html.escape(str(s.get("label") or s.get("skill_name") or s.get("name") or "")),
                 html.escape(str(s.get("type", ""))),
                 s.get("confidence", ""),
@@ -250,7 +255,7 @@ def build_timeline_html(steps: list[dict], output_path: Path, run_context: dict 
     # Job posting section
     if posting and any(posting.get(k) for k in ("title", "company", "description", "requirements", "responsibilities")):
         html_parts.append('  <section class="posting">\n')
-        html_parts.append('    <h2>Job posting (input)</h2>\n')
+        html_parts.append("    <h2>Job posting (input)</h2>\n")
         for field_label, key in (
             ("Title", "title"),
             ("Company", "company"),
@@ -259,7 +264,9 @@ def build_timeline_html(steps: list[dict], output_path: Path, run_context: dict 
             ("Responsibilities", "responsibilities"),
         ):
             val = posting.get(key) or ""
-            html_parts.append(f'    <div class="field"><span class="field-label">{field_label}</span><div class="field-body">{html.escape(str(val))}</div></div>\n')
+            html_parts.append(
+                f'    <div class="field"><span class="field-label">{field_label}</span><div class="field-body">{html.escape(str(val))}</div></div>\n'
+            )
         html_parts.append("  </section>\n")
 
     for i, step in enumerate(steps, 1):
@@ -270,7 +277,7 @@ def build_timeline_html(steps: list[dict], output_path: Path, run_context: dict 
         ts = step.get("timestamp", "")
 
         html_parts.append('  <section class="step">\n')
-        html_parts.append(f'    <h2>{i}. {html.escape(label)}</h2>\n')
+        html_parts.append(f"    <h2>{i}. {html.escape(label)}</h2>\n")
         if ts:
             html_parts.append(f'    <p class="desc">At {ts}</p>\n')
         if desc:
@@ -283,11 +290,15 @@ def build_timeline_html(steps: list[dict], output_path: Path, run_context: dict 
                     v = "N/A"
                 elif isinstance(v, bool):
                     v = "Yes" if v else "No"
-                html_parts.append(f'      <div class="metric"><span class="key">{html.escape(str(k))}</span>: <span class="val">{html.escape(str(v))}</span></div>\n')
+                html_parts.append(
+                    f'      <div class="metric"><span class="key">{html.escape(str(k))}</span>: <span class="val">{html.escape(str(v))}</span></div>\n'
+                )
             html_parts.append("    </div>\n")
 
         if payload_summary:
-            html_parts.append("    <pre>" + html.escape(json.dumps(payload_summary, indent=2, default=str)) + "</pre>\n")
+            html_parts.append(
+                "    <pre>" + html.escape(json.dumps(payload_summary, indent=2, default=str)) + "</pre>\n"
+            )
 
         # Full tools and skills tables on "Extraction completed & store saved" step
         if label == "Extraction completed & store saved" and (tools_full or skills_full):
@@ -338,13 +349,15 @@ def main() -> int:
     step1_metrics = {k: None for k in ALL_METRIC_KEYS}
     step1_metrics["batch_id"] = input_payload.get("batch_id")
     step1_metrics["job"] = input_payload.get("title")
-    steps.append({
-        "timestamp": _utc_now(),
-        "label": "Input event received",
-        "description": "NormalizationComplete event passed to Skills Extraction Agent.",
-        "payload_summary": _payload_summary(input_payload),
-        "metrics": step1_metrics,
-    })
+    steps.append(
+        {
+            "timestamp": _utc_now(),
+            "label": "Input event received",
+            "description": "NormalizationComplete event passed to Skills Extraction Agent.",
+            "payload_summary": _payload_summary(input_payload),
+            "metrics": step1_metrics,
+        }
+    )
 
     # Custom store to capture results and record "Extraction completed & store saved"
     saved_results: list = []
@@ -359,16 +372,18 @@ def main() -> int:
                 pass1_tool_names = [t.tool_name for t in results[0].tools]
             handoff_metrics = {k: None for k in ALL_METRIC_KEYS}
             handoff_metrics["tools_count"] = len(pass1_tool_names)
-            steps.append({
-                "timestamp": _utc_now(),
-                "label": "Pass 1 (tools) complete → input to Pass 2 (skills)",
-                "description": "Tool names produced by Pass 1 and passed as pass1_tools into the skills extractor.",
-                "payload_summary": {
-                    "pass1_tool_names": pass1_tool_names,
-                    "pass1_tool_count": len(pass1_tool_names),
-                },
-                "metrics": handoff_metrics,
-            })
+            steps.append(
+                {
+                    "timestamp": _utc_now(),
+                    "label": "Pass 1 (tools) complete → input to Pass 2 (skills)",
+                    "description": "Tool names produced by Pass 1 and passed as pass1_tools into the skills extractor.",
+                    "payload_summary": {
+                        "pass1_tool_names": pass1_tool_names,
+                        "pass1_tool_count": len(pass1_tool_names),
+                    },
+                    "metrics": handoff_metrics,
+                }
+            )
             # Extraction completed & store saved
             metrics = _metrics_from_results(results)
             if extraction_start is not None:
@@ -384,13 +399,15 @@ def main() -> int:
                     "tools_count": len(r.tools),
                     "extraction_status": r.extraction_status,
                 }
-            steps.append({
-                "timestamp": _utc_now(),
-                "label": "Extraction completed & store saved",
-                "description": "Pass 1 (tools) and Pass 2 (skills) ran. Results persisted.",
-                "payload_summary": payload_preview,
-                "metrics": metrics,
-            })
+            steps.append(
+                {
+                    "timestamp": _utc_now(),
+                    "label": "Extraction completed & store saved",
+                    "description": "Pass 1 (tools) and Pass 2 (skills) ran. Results persisted.",
+                    "payload_summary": payload_preview,
+                    "metrics": metrics,
+                }
+            )
 
     store = TimelineExtractionStore()
     agent = SkillsExtractionAgent(extraction_store=store)
@@ -406,9 +423,7 @@ def main() -> int:
             type="Technical",
             confidence=0.92,
             esco_uri="http://data.europa.eu/esco/skill/example",
-            source_span=SpanRecord(
-                text="Python", field_source="requirements", start_char=0, end_char=6
-            ),
+            source_span=SpanRecord(text="Python", field_source="requirements", start_char=0, end_char=6),
         )
         mock_meta = {
             "extraction_failed": False,
@@ -428,30 +443,35 @@ def main() -> int:
     # Step 4: SkillsExtracted event emitted (use saved_results for tokens/cost when available)
     out_payload = out_envelope.payload
     total_run_ms = (time.perf_counter() - extraction_start) * 1000
-    step3_metrics = _normalize_metrics({
-        "latency_ms": round(total_run_ms, 2),
-        "extraction_cost_usd": out_payload.get("extraction_cost_usd"),
-        "taxonomy_coverage": out_payload.get("taxonomy_coverage"),
-        "skills_count": out_payload.get("skills_count"),
-        "tools_count": out_payload.get("tools_count"),
-        "failed_count": out_payload.get("failed_count"),
-        "llm_provider": out_payload.get("llm_provider"),
-        "llm_model": out_payload.get("llm_model"),
-        "llm_call_logged": out_payload.get("llm_call_logged"),
-        "skills_extraction_alert": out_payload.get("skills_extraction_alert"),
-        "record_count": len(saved_results) if saved_results else None,
-    }, fill_none=True)
+    step3_metrics = _normalize_metrics(
+        {
+            "latency_ms": round(total_run_ms, 2),
+            "extraction_cost_usd": out_payload.get("extraction_cost_usd"),
+            "taxonomy_coverage": out_payload.get("taxonomy_coverage"),
+            "skills_count": out_payload.get("skills_count"),
+            "tools_count": out_payload.get("tools_count"),
+            "failed_count": out_payload.get("failed_count"),
+            "llm_provider": out_payload.get("llm_provider"),
+            "llm_model": out_payload.get("llm_model"),
+            "llm_call_logged": out_payload.get("llm_call_logged"),
+            "skills_extraction_alert": out_payload.get("skills_extraction_alert"),
+            "record_count": len(saved_results) if saved_results else None,
+        },
+        fill_none=True,
+    )
     if saved_results:
         agg = _metrics_from_results(saved_results)
         step3_metrics["tokens_used"] = agg.get("tokens_used")
         step3_metrics["extraction_cost_usd"] = agg.get("extraction_cost_usd")
-    steps.append({
-        "timestamp": _utc_now(),
-        "label": "SkillsExtracted event emitted",
-        "description": "Agent returned the final event with payload and metrics.",
-        "payload_summary": _payload_summary(out_payload),
-        "metrics": step3_metrics,
-    })
+    steps.append(
+        {
+            "timestamp": _utc_now(),
+            "label": "SkillsExtracted event emitted",
+            "description": "Agent returned the final event with payload and metrics.",
+            "payload_summary": _payload_summary(out_payload),
+            "metrics": step3_metrics,
+        }
+    )
 
     # Run context for HTML: posting, full tools, full skills
     posting = {

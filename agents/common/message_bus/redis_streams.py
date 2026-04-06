@@ -36,8 +36,7 @@ class HandlerExecutionError(RedisStreamsError):
         cause: Exception,
     ) -> None:
         super().__init__(
-            f"handler '{subscriber_id}' failed for stream_id='{stream_id}' "
-            f"event_type='{event_type}': {cause}"
+            f"handler '{subscriber_id}' failed for stream_id='{stream_id}' event_type='{event_type}': {cause}"
         )
         self.stream_id = stream_id
         self.event_type = event_type
@@ -67,10 +66,7 @@ class RedisStreamsClient(Protocol):
         streams: Mapping[str, str],
         count: int | None = None,
         block: int | None = None,
-    ) -> (
-        list[tuple[str | bytes, list[tuple[str | bytes, dict[str | bytes, str | bytes]]]]]
-        | None
-    ):
+    ) -> list[tuple[str | bytes, list[tuple[str | bytes, dict[str | bytes, str | bytes]]]]] | None:
         """Read stream entries from a consumer group."""
 
     def xack(self, name: str, groupname: str, *ids: str) -> int:
@@ -95,9 +91,7 @@ class RedisStreamsEventBus(EventBusBase):
         self._consumer_name = consumer_name
         self._group_start_id = group_start_id
 
-        self._subscribers: dict[str, list[tuple[Subscription, EventHandler]]] = (
-            defaultdict(list)
-        )
+        self._subscribers: dict[str, list[tuple[Subscription, EventHandler]]] = defaultdict(list)
         self._published_events = 0
         self._delivered_events = 0
         self._handler_failures = 0
@@ -123,9 +117,7 @@ class RedisStreamsEventBus(EventBusBase):
         try:
             import redis
         except ImportError as exc:  # pragma: no cover - environment-dependent
-            raise RedisDependencyError(
-                "redis-py is required to construct RedisStreamsEventBus.from_url"
-            ) from exc
+            raise RedisDependencyError("redis-py is required to construct RedisStreamsEventBus.from_url") from exc
 
         client = redis.Redis.from_url(redis_url)
         return cls(
@@ -193,9 +185,7 @@ class RedisStreamsEventBus(EventBusBase):
         """Register a handler for one validated event type."""
         subscription = self.validate_subscription(event_type, subscriber_id)
         validated_handler = self.validate_subscription_handler(handler)
-        self._subscribers[subscription.event_type].append(
-            (subscription, validated_handler)
-        )
+        self._subscribers[subscription.event_type].append((subscription, validated_handler))
         return subscription
 
     def consume_available(
@@ -254,9 +244,7 @@ class RedisStreamsEventBus(EventBusBase):
             message = str(exc)
             if "BUSYGROUP" in message:
                 return
-            raise RedisStreamsError(
-                f"failed to create or access consumer group '{self._group_name}'"
-            ) from exc
+            raise RedisStreamsError(f"failed to create or access consumer group '{self._group_name}'") from exc
 
     def _read_entries(
         self,
@@ -282,8 +270,7 @@ class RedisStreamsEventBus(EventBusBase):
         for _, stream_entries in raw_response:
             for stream_id, fields in stream_entries:
                 normalized_fields = {
-                    _to_text(field_name): _to_text(field_value)
-                    for field_name, field_value in fields.items()
+                    _to_text(field_name): _to_text(field_value) for field_name, field_value in fields.items()
                 }
                 entries.append((_to_text(stream_id), normalized_fields))
 

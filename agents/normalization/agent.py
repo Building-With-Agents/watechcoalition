@@ -12,6 +12,7 @@ Consumes: IngestBatch
 
 from __future__ import annotations
 
+import os
 import uuid
 
 import structlog
@@ -61,13 +62,20 @@ def initialize_run(state: NormalizationState) -> NormalizationState:
 
 
 def fetch_pending_records(state: NormalizationState) -> NormalizationState:
-    """Query the DB for raw records with processing_status='pending'."""
+    """Query the DB for raw records with processing_status='pending'.
+
+    Supports batch-limited FIFO processing via NORM_BATCH_SIZE env var.
+    When set, fetches at most N records ordered by created_at (oldest first).
+    When unset or 0, fetches all pending records (legacy behavior).
+    """
     ingestion_run_id = state.get("ingestion_run_id", "")
     batch_id = state.get("batch_id", "")
 
     if not check_db_connection():
         log.warning("normalization_no_db", batch_id=batch_id)
         return {"_pending_records": []}  # type: ignore[typeddict-unknown-key]
+
+    batch_size = int(os.environ.get("NORM_BATCH_SIZE", "0"))
 
     try:
         with session_scope() as session:
@@ -77,37 +85,44 @@ def fetch_pending_records(state: NormalizationState) -> NormalizationState:
             if ingestion_run_id:
                 query = query.filter(RawIngestedJob.ingestion_run_id == ingestion_run_id)
 
+            query = query.order_by(RawIngestedJob.created_at.asc())
+            if batch_size > 0:
+                query = query.limit(batch_size)
+
             raw_rows = query.all()
 
             # Store row data as serializable dicts keyed by DB id
             records_data = []
             for r in raw_rows:
-                records_data.append({
-                    "db_id": r.id,
-                    "ingestion_run_id": r.ingestion_run_id,
-                    "region_id": r.region_id or "",
-                    "source": r.source,
-                    "external_id": r.external_id,
-                    "raw_payload_hash": r.raw_payload_hash,
-                    "title": r.title,
-                    "company": r.company,
-                    "description": r.description,
-                    "city": r.city,
-                    "state": r.state,
-                    "country": r.country,
-                    "is_remote": r.is_remote,
-                    "job_url": r.job_url,
-                    "source_url": r.source_url,
-                    "date_posted": str(r.date_posted) if r.date_posted else None,
-                    "employment_type": r.employment_type,
-                    "experience_level": r.experience_level,
-                    "salary_raw": r.salary_raw,
-                    "salary_min": r.salary_min,
-                    "salary_max": r.salary_max,
-                    "salary_currency": r.salary_currency,
-                    "salary_period": r.salary_period,
-                    "raw_payload": r.raw_payload or {},
-                })
+                records_data.append(
+                    {
+                        "db_id": r.id,
+                        "ingestion_run_id": r.ingestion_run_id,
+                        "region_id": r.region_id or "",
+                        "source": r.source,
+                        "external_id": r.external_id,
+                        "raw_payload_hash": r.raw_payload_hash,
+                        "title": r.title,
+                        "company": r.company,
+                        "description": r.description,
+                        "city": r.city,
+                        "state": r.state,
+                        "country": r.country,
+                        "zip_code": r.zip_code,
+                        "is_remote": r.is_remote,
+                        "job_url": r.job_url,
+                        "source_url": r.source_url,
+                        "date_posted": str(r.date_posted) if r.date_posted else None,
+                        "employment_type": r.employment_type,
+                        "experience_level": r.experience_level,
+                        "salary_raw": r.salary_raw,
+                        "salary_min": r.salary_min,
+                        "salary_max": r.salary_max,
+                        "salary_currency": r.salary_currency,
+                        "salary_period": r.salary_period,
+                        "raw_payload": r.raw_payload or {},
+                    }
+                )
 
         log.info("normalization_fetched_pending", count=len(records_data), batch_id=batch_id)
         # Stash in state as a generic dict list (TypedDict doesn't restrict extra keys)
@@ -156,6 +171,7 @@ def normalize_records(state: NormalizationState) -> NormalizationState:
                     city=raw_dict.get("city"),
                     state=raw_dict.get("state"),
                     country=raw_dict.get("country"),
+                    zip_code=raw_dict.get("zip_code"),
                     is_remote=raw_dict.get("is_remote"),
                     date_posted=raw_dict.get("date_posted"),
                     job_url=raw_dict.get("job_url"),
@@ -191,6 +207,7 @@ def normalize_records(state: NormalizationState) -> NormalizationState:
                     city=job_record.city,
                     state_province=job_record.state_province,
                     country=job_record.country,
+                    zip_code=job_record.zip_code,
                     work_arrangement=job_record.work_arrangement,
                     is_remote=job_record.is_remote,
                     job_url=job_record.job_url,
@@ -381,11 +398,14 @@ class NormalizationAgent(AgentBase):
         return EventEnvelope(
             correlation_id=event.correlation_id,
             agent_id=self.agent_id,
-            payload=result.get("normalization_complete_event", {
-                "event_type": "NormalizationComplete",
-                "batch_id": batch_id,
-                "normalized_count": 0,
-                "quarantined_count": 0,
-                "normalization_status": "success",
-            }),
+            payload=result.get(
+                "normalization_complete_event",
+                {
+                    "event_type": "NormalizationComplete",
+                    "batch_id": batch_id,
+                    "normalized_count": 0,
+                    "quarantined_count": 0,
+                    "normalization_status": "success",
+                },
+            ),
         )

@@ -14,6 +14,7 @@ from agents.common.tracer_base import TracerBase
 
 try:
     from langsmith import Client
+
     _LANGSMITH_AVAILABLE = True
 except ImportError:
     _LANGSMITH_AVAILABLE = False

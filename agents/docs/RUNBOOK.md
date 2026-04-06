@@ -217,7 +217,17 @@ with get_engine().connect() as conn:
 
 ## 7. Full Pipeline Run
 
-Run the complete pipeline (Ingestion → Normalization → stub agents):
+Run the flywheel pipeline (decoupled ingestion + processing):
+
+```bash
+# Loop 1: Ingest from JSearch API
+python agents/scripts/batch_ingest.py
+
+# Loop 2: Process pending records (normalize → extract → enrich)
+python agents/scripts/run_processing_loop.py --batch-size 50 --delay 2
+```
+
+**Demo run** (fixture data only, Week 2 demo):
 
 ```bash
 python agents/pipeline_runner.py
@@ -317,17 +327,23 @@ python -m ruff check agents/
 ## 10. Dashboard (Streamlit)
 
 ```bash
-streamlit run agents/dashboard/streamlit_app.py
+streamlit run agents/dashboard/app.py
+# Alias: streamlit run agents/dashboard/streamlit_app.py
 ```
 
 Opens in browser at `http://localhost:8501`.
 
-**Data source:** The dashboard auto-detects whether PostgreSQL is available via `PYTHON_DATABASE_URL`.
+**Data source:** The dashboard auto-detects whether PostgreSQL is available via `PYTHON_DATABASE_URL` or `PYTHON_DATABASE_URL_READONLY`.
 
-- **Connected:** Sidebar shows "Connected to PostgreSQL" — pages query live DB tables.
-- **Fallback:** Sidebar shows "Using fixture data (JSON)" — pages read from `agents/data/output/pipeline_run.json`.
+- **Connected:** Sidebar shows "Connected to PostgreSQL (read-only)" — dashboard uses a separate SQLAlchemy engine with `default_transaction_read_only=on` (see `agents/dashboard/readonly_engine.py`).
+- **Fallback:** Sidebar shows "Using fixture data (JSON)" — journey pages read from `agents/data/output/pipeline_run.json`. Week 6 observability pages require PostgreSQL.
 
-**Check pages:**
+**Week 6 observability pages:**
+
+- Ingestion Overview — records per day (UTC), dedup rate, error rate, recent runs
+- Normalization Quality — conformance gauge, quarantine breakdown, salary coverage
+
+**Journey pages (earlier weeks):**
 
 - Pipeline Run Summary — ingestion runs, record counts, stage completion
 - Record Journey — trace a single job through ingestion → normalization

@@ -21,6 +21,7 @@ if str(REPO_ROOT) not in sys.path:
 # Load .env from repo root so Azure vars are available
 try:
     from dotenv import load_dotenv
+
     load_dotenv(REPO_ROOT / ".env")
 except ImportError:
     pass
@@ -57,7 +58,9 @@ def main() -> int:
     try:
         text, meta = invoke_skills_llm("Reply with exactly: OK")
         print(f"  Response: {repr(text)}")
-        print(f"  Meta: success={meta.get('success')}, tokens_used={meta.get('tokens_used')}, cost_usd={meta.get('cost_usd')}, latency_ms={meta.get('latency_ms')}")
+        print(
+            f"  Meta: success={meta.get('success')}, tokens_used={meta.get('tokens_used')}, cost_usd={meta.get('cost_usd')}, latency_ms={meta.get('latency_ms')}"
+        )
         if not meta.get("success"):
             print(f"  ERROR: {meta.get('error_reason', 'unknown')}")
             return 1

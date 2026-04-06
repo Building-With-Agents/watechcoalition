@@ -27,10 +27,7 @@ def test_extract_tools_finds_canonical_and_alias_matches() -> None:
         title="Senior Python Engineer",
         requirements="Build APIs with FastAPI and deploy them to Docker.",
         responsibilities="Own infrastructure in Terraform and GitHub Actions.",
-        description=(
-            "Experience with Amazon Web Services (AWS), PostgreSQL, and LangChain "
-            "for internal AI workflows."
-        ),
+        description=("Experience with Amazon Web Services (AWS), PostgreSQL, and LangChain for internal AI workflows."),
     )
 
     records = extract_tools(job_record)
@@ -45,9 +42,7 @@ def test_extract_tools_finds_canonical_and_alias_matches() -> None:
         "PostgreSQL",
         "LangChain",
     ]
-    assert next(record for record in records if record.tool_name == "AWS").source_span.text == (
-        "Amazon Web Services"
-    )
+    assert next(record for record in records if record.tool_name == "AWS").source_span.text == ("Amazon Web Services")
     assert next(record for record in records if record.tool_name == "LangChain").is_genai_tool is True
     assert next(record for record in records if record.tool_name == "Python").tool_id == "tool-python"
 
@@ -122,9 +117,7 @@ def test_extract_tools_keeps_c_plus_plus_and_c_sharp_distinct() -> None:
     records = extract_tools(job_record)
 
     assert [record.tool_name for record in records] == ["Python", "Scala", "Java", "C++", "C#"]
-    assert next(record for record in records if record.tool_name == "C++").tool_id == (
-        "tool-c-plus-plus"
-    )
+    assert next(record for record in records if record.tool_name == "C++").tool_id == ("tool-c-plus-plus")
     assert next(record for record in records if record.tool_name == "C#").tool_id == "tool-c-sharp"
 
 

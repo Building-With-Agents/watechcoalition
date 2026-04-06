@@ -78,7 +78,7 @@ def _embed_batch(texts: list[str]) -> list[list[float]] | None:
                     import re
 
                     match = re.search(r"retry after (\d+)\s*seconds?", resp.text, re.IGNORECASE)
-                    delay = int(match.group(1)) if match else 2 ** attempt
+                    delay = int(match.group(1)) if match else 2**attempt
                     log.warning("embedding_rate_limited", attempt=attempt, delay_s=delay)
                     if attempt == max_retries:
                         return None
@@ -91,7 +91,7 @@ def _embed_batch(texts: list[str]) -> list[list[float]] | None:
             log.warning("embedding_api_error", attempt=attempt, error=str(exc))
             if attempt == max_retries:
                 return None
-            time.sleep(2 ** attempt)
+            time.sleep(2**attempt)
             continue
     else:
         return None
@@ -104,9 +104,7 @@ def status() -> None:
     """Log embedding status without modifying anything."""
     with session_scope() as s:
         total = s.execute(text("SELECT COUNT(*) FROM dbo.skills")).scalar()
-        with_emb = s.execute(
-            text("SELECT COUNT(*) FROM dbo.skills WHERE embedding IS NOT NULL")
-        ).scalar()
+        with_emb = s.execute(text("SELECT COUNT(*) FROM dbo.skills WHERE embedding IS NOT NULL")).scalar()
         log.info("embedding_status", total=total, with_embeddings=with_emb, missing=total - with_emb)
 
 
@@ -114,10 +112,7 @@ def seed() -> None:
     """Embed all skills with NULL embeddings and store in PostgreSQL."""
     with session_scope() as s:
         rows = s.execute(
-            text(
-                "SELECT skill_id, skill_name FROM dbo.skills "
-                "WHERE embedding IS NULL ORDER BY skill_name"
-            )
+            text("SELECT skill_id, skill_name FROM dbo.skills WHERE embedding IS NULL ORDER BY skill_name")
         ).fetchall()
 
     if not rows:

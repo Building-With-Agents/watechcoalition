@@ -21,15 +21,15 @@ def test_span_record_accepts_legacy_char_aliases() -> None:
     assert span.end_char == 16
 
 
-def test_span_record_rejects_mismatched_offsets() -> None:
-    """Offsets must match the captured text length for provenance integrity."""
-    with pytest.raises(ValidationError):
-        SpanRecord(
-            text="AWS",
-            field_source="description",
-            start_char=5,
-            end_char=10,
-        )
+def test_span_record_auto_corrects_mismatched_offsets() -> None:
+    """SpanRecord auto-corrects end_char to match start_char + len(text)."""
+    span = SpanRecord(
+        text="AWS",
+        field_source="description",
+        start_char=5,
+        end_char=10,  # wrong — should be 8
+    )
+    assert span.end_char == 8  # auto-corrected: 5 + len("AWS") = 8
 
 
 def test_tool_record_accepts_legacy_label_alias() -> None:

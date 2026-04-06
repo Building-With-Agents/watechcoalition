@@ -12,26 +12,20 @@ import re
 import time
 import uuid
 from contextlib import nullcontext
-from pathlib import Path
 from typing import Any, TypeVar
 
+import structlog
 from pydantic import BaseModel
 
-try:
-    from dotenv import load_dotenv
-    _repo_root = Path(__file__).resolve().parent.parent.parent
-    load_dotenv(_repo_root / ".env")
-except ImportError:
-    pass
-
-import structlog
-
+from agents.common.env import load_repo_root_dotenv
 from agents.common.llm_adapter import (
     MODEL_TIER_MAP,
     compute_extraction_cost,
     get_tracer,
     log_extraction_event,
 )
+
+load_repo_root_dotenv()
 
 AGENT_NAME = "skills-extraction-agent"
 log = structlog.get_logger()
@@ -78,8 +72,7 @@ def _get_llm() -> Any:
         from langchain_openai import AzureChatOpenAI
     except ImportError as e:
         raise ImportError(
-            "langchain-openai is required for Pass 2 skills extraction. "
-            "Install with: pip install langchain-openai"
+            "langchain-openai is required for Pass 2 skills extraction. Install with: pip install langchain-openai"
         ) from e
 
     deployment = (
@@ -125,7 +118,7 @@ def invoke_skills_llm(
     """
     llm = _get_llm()
     audit_agent = agent_name or AGENT_NAME
-    model_name = (
+    deployment_name = (
         getattr(llm, "azure_deployment", None)
         or getattr(llm, "deployment_name", None)
         or getattr(llm, "model_name", None)
@@ -134,6 +127,7 @@ def invoke_skills_llm(
         or os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
         or "azure-openai"
     )
+    model_name = deployment_name  # overwritten below if response has actual model
     provider = "azure-openai"
 
     tracer = get_tracer()
@@ -155,6 +149,12 @@ def invoke_skills_llm(
             text = msg.content if hasattr(msg, "content") else str(msg)
             latency_ms = int((time.perf_counter() - start) * 1000)
 
+            # Extract actual model name from response metadata (not just deployment name)
+            if hasattr(msg, "response_metadata") and isinstance(msg.response_metadata, dict):
+                actual_model = msg.response_metadata.get("model_name") or msg.response_metadata.get("model")
+                if actual_model:
+                    model_name = f"{actual_model} ({deployment_name})"
+
             # Approximate token count when usage not provided
             if hasattr(msg, "response_metadata") and isinstance(msg.response_metadata, dict):
                 usage = msg.response_metadata.get("token_usage") or msg.response_metadata.get("usage")
@@ -171,10 +171,6 @@ def invoke_skills_llm(
                         output_tokens = max(0, tokens_used - input_tokens)
                 else:
                     tokens_used = (len(prompt) + len(text)) // 4
-                    input_tokens = len(prompt) // 4
-                    output_tokens = max(0, tokens_used - input_tokens)
-            else:
-                tokens_used = (len(prompt) + len(text)) // 4
                 input_tokens = len(prompt) // 4
                 output_tokens = max(0, tokens_used - input_tokens)
 
@@ -224,6 +220,7 @@ def invoke_skills_llm(
             retry_after: int | None = None
             try:
                 from openai import RateLimitError
+
                 is_rate_limit = isinstance(e, RateLimitError)
             except ImportError:
                 pass
@@ -332,7 +329,8 @@ def invoke_structured_extraction_llm(
             "model": "",
         }
 
-    model_name = deployment
+    deployment_name = deployment
+    model_name = deployment_name  # overwritten below if response has actual model
     provider = "azure-openai"
 
     tracer = get_tracer()
@@ -375,10 +373,14 @@ def invoke_structured_extraction_llm(
                 parsed = raw_out  # type: ignore[assignment]
                 msg_for_usage = None
 
+            # Extract actual model name from response metadata
             tokens_used = 0
             if msg_for_usage is not None and hasattr(msg_for_usage, "response_metadata"):
                 md = getattr(msg_for_usage, "response_metadata", None) or {}
                 if isinstance(md, dict):
+                    actual_model = md.get("model_name") or md.get("model")
+                    if actual_model:
+                        model_name = f"{actual_model} ({deployment_name})"
                     usage = md.get("token_usage") or md.get("usage")
                     if isinstance(usage, dict):
                         tokens_used = int(

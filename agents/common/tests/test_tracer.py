@@ -139,6 +139,7 @@ def test_100_job_batch(kind: str) -> None:
 
 def test_structlog_tracer_has_no_framework_dependency() -> None:
     import sys
+
     hidden = {}
     for mod in list(sys.modules.keys()):
         if "langchain" in mod or "langgraph" in mod:
