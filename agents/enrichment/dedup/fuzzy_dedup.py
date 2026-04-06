@@ -36,7 +36,7 @@ _LOAD_CURRENT_SQL = text(
         jp.source AS source,
         jp.external_id AS external_id,
         jp.is_duplicate AS is_duplicate,
-        jp.duplicate_cluster_id AS duplicate_cluster_id,
+        jp.duplicate_cluster_id::text AS duplicate_cluster_id,
         jp.dedup_text_hash AS dedup_text_hash,
         jp.dedup_embedding::text AS dedup_embedding_text,
         c.company_name AS company_name,
@@ -57,7 +57,7 @@ _LIST_SURVIVORS_SQL = text(
     """
     SELECT
         jp.job_posting_id::text AS job_posting_id,
-        jp.duplicate_cluster_id AS duplicate_cluster_id,
+        jp.duplicate_cluster_id::text AS duplicate_cluster_id,
         jp.dedup_text_hash AS dedup_text_hash,
         jp.dedup_embedding::text AS dedup_embedding_text,
         jp.salary_range AS salary_range,
@@ -314,7 +314,8 @@ def run_fuzzy_dedup(
         survivor_embeddings_backfilled=survivor_embedded_count,
     )
 
-    if best_row is None or best_sim < effective_threshold:
+    # Week 6 issue contract is strict: equality with the threshold is not a merge.
+    if best_row is None or not (best_sim > effective_threshold):
         return _unique_result()
 
     cur_c = completeness_score(_current_row_dict(current))
