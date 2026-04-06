@@ -7,8 +7,8 @@ from unittest.mock import patch
 from agents.analytics.insights.freshness import PostingFreshnessResult
 from agents.analytics.insights.llm_summary import (
     FALLBACK_TEMPLATE,
-    generate_summary,
     generate_summaries,
+    generate_summary,
 )
 from agents.analytics.insights.trajectory import TrajectoryEntry
 
@@ -122,8 +122,6 @@ def test_generate_summaries_mixed_map_order_and_labels():
         }
         out = generate_summaries(tm, _sample_freshness())
     assert len(out) == 2
-    # dict iteration order preserved in 3.7+
-    keys = list(tm.keys())
     assert out[0]["skill_label"] == "Python" and out[0]["sector_label"] is None
     assert out[1]["sector_label"] == "finance" and out[1]["skill_label"] is None
 

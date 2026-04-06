@@ -85,6 +85,7 @@ from agents.enrichment.resolvers.confidence import (
     compute_overall_confidence,
 )
 from agents.enrichment.resolvers.events import build_record_enriched_event
+from agents.enrichment.resolvers.freshness_slice import build_freshness_record_for_analytics
 from agents.enrichment.resolvers.location_resolver import resolve_location
 from agents.enrichment.resolvers.sector_resolver import resolve_sector
 from agents.enrichment.schemas import EnrichedJobProfile
@@ -310,6 +311,7 @@ _EXTRA_POSTING_KEYS = frozenset(
         "matched_job_posting_id",
         "survivor_job_posting_id",
         "stub",
+        "date_posted",
     }
 )
 
@@ -439,6 +441,7 @@ class EnrichmentAgent(BaseAgent):
         dedup_stub_count = 0
         dedup_rows_with_duplicate_cluster_id = 0
         dedup_rows_with_matched_job_posting_id = 0
+        freshness_records: list[dict[str, Any]] = []
 
         def run_batch(session: Session | None) -> None:
             nonlocal enriched_count, spam_rejected_count, flagged_for_review_count
@@ -499,6 +502,7 @@ class EnrichmentAgent(BaseAgent):
                     dedup_stub_count += ds
                     dedup_rows_with_duplicate_cluster_id += dc
                     dedup_rows_with_matched_job_posting_id += dm
+                    freshness_records.append(build_freshness_record_for_analytics(posting, enriched))
                 except Exception:
                     log.warning("enrichment_process_degraded", agent=self.agent_id)
 
@@ -530,6 +534,7 @@ class EnrichmentAgent(BaseAgent):
             dedup_stub_count=dedup_stub_count,
             dedup_rows_with_duplicate_cluster_id=dedup_rows_with_duplicate_cluster_id,
             dedup_rows_with_matched_job_posting_id=dedup_rows_with_matched_job_posting_id,
+            freshness_records=freshness_records,
         )
 
     def process(self, event: EventEnvelope) -> EventEnvelope:

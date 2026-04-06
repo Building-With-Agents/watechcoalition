@@ -2,8 +2,10 @@
 Analytics Agent — Week 7 pipeline (scaffold) + Week 2 fixture fallback.
 
 Internal processing order matches ``ARCHITECTURE_DEEP.md`` (13 steps). Steps 1–9 are Phase 1
-stubs. Step 10 wires posting-freshness computation + staleness/cardinality guardrails;
-step 11 builds an empty trajectory scaffold (Phase 2 placeholder); step 12 runs
+stubs. Step 10 wires posting-freshness computation + staleness/cardinality guardrails and,
+when ``PYTHON_DATABASE_URL`` is set and the DB is reachable, upserts rows to
+``dbo.posting_freshness``; step 11 builds an empty trajectory scaffold (Phase 2 placeholder);
+step 12 runs
 ``generate_summaries`` over the scaffold + posting freshness; step 13 emits
 ``AnalyticsRefreshed`` via :func:`agents.analytics.insights.events.build_analytics_refreshed_event`.
 
@@ -26,13 +28,17 @@ import structlog
 
 from agents.analytics.insights.events import build_analytics_refreshed_event
 from agents.analytics.insights.freshness import PostingFreshnessResult, detect_staleness
-from agents.analytics.insights.llm_summary import SummaryResult, generate_summaries
 from agents.analytics.insights.guardrails import (
     CARDINALITY_CAP,
     build_cardinality_warning_payload,
     build_stale_alert_payload,
     cap_cardinality,
     check_staleness,
+)
+from agents.analytics.insights.llm_summary import SummaryResult, generate_summaries
+from agents.analytics.insights.posting_freshness_store import (
+    build_posting_freshness_row_dicts,
+    persist_posting_freshness_rows,
 )
 from agents.analytics.insights.trajectory import TrajectoryEntry, build_trajectory_map
 from agents.common.base_agent import BaseAgent
@@ -43,6 +49,7 @@ log = structlog.get_logger()
 _FIXTURE_PATH = Path(__file__).parent.parent / "data" / "fixtures" / "fixture_analytics_refreshed.json"
 
 _analytics_alert_bus: Any | None = None
+_trajectory_scaffold_phase2_logged = False
 
 
 def register_analytics_alert_bus(bus: Any | None) -> None:
@@ -57,6 +64,9 @@ def _utc_now() -> datetime:
 
 def _records_from_record_enriched_payload(payload: dict[str, Any]) -> list[dict[str, Any]]:
     """Normalize ``RecordEnriched`` payload to a list of job rows (batch or single-record)."""
+    fr = payload.get("freshness_records")
+    if isinstance(fr, list) and len(fr) > 0:
+        return [dict(x) if isinstance(x, dict) else {} for x in fr]
     raw = payload.get("records")
     if isinstance(raw, list) and len(raw) > 0:
         return [dict(x) if isinstance(x, dict) else {} for x in raw]
@@ -72,39 +82,6 @@ def _parse_optional_iso(dt_val: Any) -> datetime | None:
         return datetime.fromisoformat(dt_val.replace("Z", "+00:00"))
     except ValueError:
         return None
-
-
-def _build_posting_freshness_rows_from_enriched(
-    records: list[dict[str, Any]],
-    computed_at: datetime,
-) -> list[dict[str, Any]]:
-    """Build runbook-shaped posting freshness rows (in-memory; no DB write in Phase 1)."""
-    rows: list[dict[str, Any]] = []
-    for r in records:
-        pid = r.get("posting_id")
-        if pid is None:
-            continue
-        days = int(r.get("days_since_posted", 0))
-        last_seen = computed_at
-        first_seen = last_seen
-        is_repost = bool(r.get("is_duplicate") or r.get("is_repost"))
-        repost_count = int(r.get("repost_count", 0))
-        if is_repost and repost_count == 0:
-            repost_count = 1
-        fill_proxy = bool(r.get("fill_proxy", False))
-        rows.append(
-            {
-                "posting_id": str(pid),
-                "first_seen": first_seen,
-                "last_seen": last_seen,
-                "duration_days": days,
-                "is_repost": is_repost,
-                "repost_count": repost_count,
-                "fill_proxy": fill_proxy,
-                "computed_at": computed_at,
-            }
-        )
-    return rows
 
 
 def _collect_skill_labels(records: list[dict[str, Any]]) -> list[str]:
@@ -201,7 +178,8 @@ class AnalyticsAgent(BaseAgent):
         """Step 10 — posting freshness rows, posting-age staleness, aggregate staleness alert, cardinality."""
         computed_at = _utc_now()
         records = _records_from_record_enriched_payload(payload)
-        posting_rows = _build_posting_freshness_rows_from_enriched(records, computed_at)
+        posting_rows = build_posting_freshness_row_dicts(records, computed_at)
+        persist_posting_freshness_rows(posting_rows)
         log.info(
             "analytics_step_10_posting_freshness",
             row_count=len(posting_rows),
@@ -246,8 +224,15 @@ class AnalyticsAgent(BaseAgent):
 
     def _pipeline_step_11_trajectory_scaffold(self, payload: dict[str, Any]) -> None:
         """Step 11 — trajectory map scaffold (empty in-memory; ``dbo.trajectory_map`` Phase 2)."""
+        global _trajectory_scaffold_phase2_logged
         self._last_trajectory_scaffold = build_trajectory_map([])
         log.info("analytics_step_11_trajectory_scaffold", keys=len(self._last_trajectory_scaffold))
+        if not _trajectory_scaffold_phase2_logged:
+            log.info(
+                "analytics_trajectory_map_schema_only_phase2",
+                note="dbo.trajectory_map row population is Phase 2; scaffold is in-memory only",
+            )
+            _trajectory_scaffold_phase2_logged = True
 
     def _pipeline_step_12_disruption_fingerprint(self, payload: dict[str, Any]) -> None:
         """Step 12 — LLM insight summaries from trajectory scaffold + posting freshness."""

@@ -14,8 +14,8 @@ Reference tables (seeded, agent-owned): companies, industry_sectors,
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import os
+from datetime import datetime, timezone
 from typing import Literal
 
 from sqlalchemy import (

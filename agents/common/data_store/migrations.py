@@ -154,6 +154,30 @@ CREATE INDEX IF NOT EXISTS ix_employer_profiles_company_id
     ON dbo.employer_profiles (company_id);
 """
 
+# Analytics Week 7 — posting_freshness + trajectory_map (ORM-aligned; idempotent with create_all).
+_POSTING_FRESHNESS_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.posting_freshness (
+    posting_id TEXT PRIMARY KEY,
+    first_seen TIMESTAMPTZ NOT NULL,
+    last_seen TIMESTAMPTZ NOT NULL,
+    duration_days INTEGER NOT NULL,
+    is_repost BOOLEAN NOT NULL DEFAULT FALSE,
+    repost_count INTEGER NOT NULL DEFAULT 0,
+    fill_proxy BOOLEAN NOT NULL DEFAULT FALSE,
+    computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_posting_freshness_posting_id
+    ON dbo.posting_freshness (posting_id);
+"""
+
+_TRAJECTORY_MAP_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.trajectory_map (
+    role_id TEXT PRIMARY KEY,
+    trajectory_data JSONB,
+    computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+"""
+
 
 def run_migrations(engine: Engine) -> None:
     """Create agent tables and add Phase 1 columns. Safe to run multiple times."""
@@ -204,6 +228,12 @@ def run_migrations(engine: Engine) -> None:
     with engine.begin() as conn:
         conn.execute(text(_EMPLOYER_PROFILES_DDL))
     log.info("migrations_employer_profiles_created")
+
+    # 4b. Analytics tables (posting_freshness, trajectory_map) — explicit DDL mirrors ORM models.
+    with engine.begin() as conn:
+        conn.execute(text(_POSTING_FRESHNESS_DDL))
+        conn.execute(text(_TRAJECTORY_MAP_DDL))
+    log.info("migrations_analytics_tables_created")
 
     # 5. Add enrichment columns to dbo.job_postings (and related).
     #    Each ALTER runs in its own transaction so a single failure
