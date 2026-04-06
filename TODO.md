@@ -3,6 +3,10 @@
 > **Branch:** `feat/parallel-skills-extraction`
 > **Base:** `development`
 > **Goal:** Reduce 568-job extraction from 3–6 hours to under 1 hour via intra-job + inter-job concurrency.
+>
+> **Status snapshot:** Phase A and Phase B are implemented. The current production path runs
+> Pass 2 dimensions concurrently within each job when `SKILLS_EXTRACTION_PARALLEL=1`
+> (default), while the outer batch loop remains serial until Phase C lands.
 
 ---
 
@@ -70,13 +74,13 @@ store.save(results)
 ### Phase A: Async LLM Infrastructure (no behavior change yet)
 
 #### A1. Add `ainvoke_structured_extraction_llm` to `agents/common/llm_client.py`
-- [ ] Create async counterpart of `invoke_structured_extraction_llm` (line 234)
-- [ ] Use `AzureChatOpenAI` with `chain.ainvoke(prompt)` instead of `chain.invoke(prompt)`
-- [ ] Same audit logging: `log_extraction_event()` call, token counting, cost computation
-- [ ] Same error handling shape: return `(parsed | None, metadata_dict)`, never raise
-- [ ] Same 429 detection: `is_rate_limit`, `retry_after_seconds` in metadata
-- [ ] Reuse `_resolve_azure_deployment()`, `_model_tier_for_skills_extraction()`, `compute_extraction_cost()` — these are pure functions, no async needed
-- [ ] Keep sync `invoke_structured_extraction_llm` intact (no regression for callers outside skills extraction)
+- [x] Create async counterpart of `invoke_structured_extraction_llm` (line 234)
+- [x] Use `AzureChatOpenAI` with `chain.ainvoke(prompt)` instead of `chain.invoke(prompt)`
+- [x] Same audit logging: `log_extraction_event()` call, token counting, cost computation
+- [x] Same error handling shape: return `(parsed | None, metadata_dict)`, never raise
+- [x] Same 429 detection: `is_rate_limit`, `retry_after_seconds` in metadata
+- [x] Reuse `_resolve_azure_deployment()`, `_model_tier_for_skills_extraction()`, `compute_extraction_cost()` — these are pure functions, no async needed
+- [x] Keep sync `invoke_structured_extraction_llm` intact (no regression for callers outside skills extraction)
 
 **Implementation notes:**
 - `AzureChatOpenAI` from `langchain_openai` supports `ainvoke()` natively via `httpx.AsyncClient` under the hood
@@ -93,42 +97,42 @@ store.save(results)
 Three files, same pattern for each:
 
 ##### A2a. `agents/skills_extraction/extractors/tasks.py` — add `extract_tasks_async`
-- [ ] Create `async def extract_tasks_async(job_record, pass1_context=None) -> tuple[list[TaskRecord], dict]`
-- [ ] Same prompt building (`_build_tasks_prompt` is pure, no change needed)
-- [ ] Call `ainvoke_structured_extraction_llm` instead of `invoke_structured_extraction_llm`
-- [ ] Same error handling: try/except returns `([], metadata)` with `extraction_failed=True`
-- [ ] Same metadata shape as sync version
-- [ ] Keep sync `extract_tasks` untouched for backward compatibility
+- [x] Create `async def extract_tasks_async(job_record, pass1_context=None) -> tuple[list[TaskRecord], dict]`
+- [x] Same prompt building (`_build_tasks_prompt` is pure, no change needed)
+- [x] Call `ainvoke_structured_extraction_llm` instead of `invoke_structured_extraction_llm`
+- [x] Same error handling: try/except returns `([], metadata)` with `extraction_failed=True`
+- [x] Same metadata shape as sync version
+- [x] Keep sync `extract_tasks` untouched for backward compatibility
 
 **Tests:** `agents/skills_extraction/tests/test_async_extractors.py` (new file)
 
 ##### A2b. `agents/skills_extraction/extractors/responsibilities.py` — add `extract_responsibilities_async`
-- [ ] Same pattern as A2a, using `_build_responsibilities_prompt` + `ainvoke_structured_extraction_llm`
-- [ ] Deployment keys: `_RESP_DEPLOYMENT_KEYS`
-- [ ] Model tier: `"sonnet"`
+- [x] Same pattern as A2a, using `_build_responsibilities_prompt` + `ainvoke_structured_extraction_llm`
+- [x] Deployment keys: `_RESP_DEPLOYMENT_KEYS`
+- [x] Model tier: `"sonnet"`
 
 ##### A2c. `agents/skills_extraction/extractors/skills.py` — add `extract_skills_no_taxonomy_async`
-- [ ] Same prompt building via `build_skills_prompt`
-- [ ] **Critical:** Port the 429 backoff loop to async: replace `time.sleep()` with `await asyncio.sleep()`
-- [ ] Port the timeout retry loop to async
-- [ ] Keep `RATE_LIMIT_BACKOFF_SECS`, `RATE_LIMIT_MAX_CYCLES` constants
-- [ ] Keep `_llm_skill_to_record`, `_skill_confidence_threshold` helpers (pure functions)
-- [ ] Same confidence threshold filtering
-- [ ] No taxonomy resolution (matches existing `extract_skills_no_taxonomy` behavior)
+- [x] Same prompt building via `build_skills_prompt`
+- [x] **Critical:** Port the 429 backoff loop to async: replace `time.sleep()` with `await asyncio.sleep()`
+- [x] Port the timeout retry loop to async
+- [x] Keep `RATE_LIMIT_BACKOFF_SECS`, `RATE_LIMIT_MAX_CYCLES` constants
+- [x] Keep `_llm_skill_to_record`, `_skill_confidence_threshold` helpers (pure functions)
+- [x] Same confidence threshold filtering
+- [x] No taxonomy resolution (matches existing `extract_skills_no_taxonomy` behavior)
 
 **This is the most complex of the three** because of the retry/backoff logic.
 
 ##### A2d. Update `agents/skills_extraction/extractors/__init__.py`
-- [ ] Export `extract_tasks_async`, `extract_responsibilities_async`, `extract_skills_no_taxonomy_async`
+- [x] Export `extract_tasks_async`, `extract_responsibilities_async`, `extract_skills_no_taxonomy_async`
 
 ---
 
 ### Phase B: Intra-Job Parallelism (Level 1)
 
 #### B1. Refactor `_extract_work_item_no_taxonomy` to async
-- [ ] Rename or create `async def _extract_work_item_no_taxonomy_async(self, item)` in `agent.py`
-- [ ] Keep Pass 1 sync (tools + context are regex, instant)
-- [ ] Replace sequential LLM calls (lines 541-545) with `asyncio.gather`:
+- [x] Rename or create `async def _extract_work_item_no_taxonomy_async(self, item)` in `agent.py`
+- [x] Keep Pass 1 sync (tools + context are regex, instant)
+- [x] Replace sequential LLM calls (lines 541-545) with `asyncio.gather`:
   ```python
   tasks_result, resp_result, skills_result = await asyncio.gather(
       extract_tasks_async(job, pass1_context=context_signals),
@@ -137,10 +141,10 @@ Three files, same pattern for each:
       return_exceptions=True,  # prevent one failure from cancelling others
   )
   ```
-- [ ] Handle `return_exceptions=True`: if any result is an Exception, treat it as failed extraction for that dimension — build appropriate metadata
-- [ ] Metadata aggregation unchanged: sum tokens, cost, latency; status = failed/degraded/success based on dimension results
-- [ ] `latency_ms` should now reflect wall-clock time (max of three) not sum — update `total_latency` computation to use wall-clock measurement instead
-- [ ] Keep sync `_extract_work_item_no_taxonomy` as fallback (controlled by env flag `SKILLS_EXTRACTION_PARALLEL=1|0`)
+- [x] Handle `return_exceptions=True`: if any result is an Exception, treat it as failed extraction for that dimension — build appropriate metadata
+- [x] Metadata aggregation unchanged: sum tokens, cost, latency; status = failed/degraded/success based on dimension results
+- [x] `latency_ms` should now reflect wall-clock time (max of three) not sum — update `total_latency` computation to use wall-clock measurement instead
+- [x] Keep sync `_extract_work_item_no_taxonomy` as fallback (controlled by env flag `SKILLS_EXTRACTION_PARALLEL=1|0`)
 
 **File:** `agents/skills_extraction/agent.py`
 **Tests:** Update `test_extraction_integration.py` with async-aware mocks
@@ -245,18 +249,18 @@ Three files, same pattern for each:
 ### Phase F: Testing
 
 #### F1. Unit tests for async LLM client
-- [ ] Test `ainvoke_structured_extraction_llm` with mocked `AzureChatOpenAI.ainvoke`
-- [ ] Test error paths: timeout, 429 rate limit, empty response, import error
-- [ ] Test token counting and cost computation match sync version
-- [ ] Test metadata shape matches sync version exactly
+- [x] Test `ainvoke_structured_extraction_llm` with mocked `AzureChatOpenAI.ainvoke`
+- [x] Test error paths: timeout, 429 rate limit, empty response, import error
+- [x] Test token counting and cost computation match sync version
+- [x] Test metadata shape matches sync version exactly
 
 **File:** `agents/common/tests/test_llm_client_async.py`
 
 #### F2. Unit tests for async extractors
-- [ ] Test `extract_tasks_async` returns same shape as `extract_tasks` with mocked LLM
-- [ ] Test `extract_responsibilities_async` returns same shape as `extract_responsibilities`
-- [ ] Test `extract_skills_no_taxonomy_async` returns same shape, including 429 backoff behavior
-- [ ] Test that a failed dimension returns `([], metadata)` without raising
+- [x] Test `extract_tasks_async` returns same shape as `extract_tasks` with mocked LLM
+- [x] Test `extract_responsibilities_async` returns same shape as `extract_responsibilities`
+- [x] Test `extract_skills_no_taxonomy_async` returns same shape, including 429 backoff behavior
+- [x] Test that a failed dimension returns `([], metadata)` without raising
 
 **File:** `agents/skills_extraction/tests/test_async_extractors.py`
 
@@ -279,7 +283,7 @@ Three files, same pattern for each:
 **File:** `agents/skills_extraction/tests/test_extraction_integration.py` (extend existing)
 
 #### F5. Test fallback to serial mode
-- [ ] Set `SKILLS_EXTRACTION_PARALLEL=0`, verify serial path runs
+- [x] Set `SKILLS_EXTRACTION_PARALLEL=0`, verify serial path runs
 - [ ] Verify `_CHUNK_SIZE`, `_CHUNK_COOLDOWN`, `_INTER_LLM_DELAY` are respected in serial mode
 - [ ] Verify parallel env vars (`SKILLS_EXTRACTION_CONCURRENCY`) are ignored in serial mode
 
@@ -293,7 +297,7 @@ Three files, same pattern for each:
 - [ ] Note deprecation of `_CHUNK_SIZE`, `_CHUNK_COOLDOWN`, `_INTER_LLM_DELAY` in parallel mode
 
 #### G2. Update `agents/skills_extraction/agent.py` module docstring
-- [ ] Describe parallel execution model
+- [x] Describe parallel execution model
 - [ ] Document concurrency limits and how to tune
 
 #### G3. Mark deprecated constants
@@ -307,11 +311,11 @@ Three files, same pattern for each:
 
 ## Acceptance Criteria Checklist
 
-- [ ] Tasks, responsibilities, and skills extraction run concurrently for each job (intra-job parallelism) — **Phase B**
+- [x] Tasks, responsibilities, and skills extraction run concurrently for each job (intra-job parallelism) — **Phase B**
 - [ ] Multiple jobs processed concurrently with configurable concurrency limit (inter-job parallelism) — **Phase C**
 - [ ] `_CHUNK_SIZE` / `_CHUNK_COOLDOWN` / `_INTER_LLM_DELAY` replaced by semaphore-based concurrency control — **Phase C1**
 - [ ] Concurrency limit configurable via env var (`SKILLS_EXTRACTION_CONCURRENCY=5`) — **Phase E1**
-- [ ] Failed LLM call for one dimension does not block other dimensions — **Phase B1** (`return_exceptions=True`)
+- [x] Failed LLM call for one dimension does not block other dimensions — **Phase B1** (`return_exceptions=True`)
 - [ ] DB writes remain safe (no session conflicts) — **Phase D**
 - [ ] No regression on extraction quality (same results, just faster) — **Phase F4**
 - [ ] 568-job batch completes in under 1 hour — **Phase C** (expected: 20-40 min)

@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from sqlalchemy import delete
@@ -35,8 +35,17 @@ def _patch_skills_extraction_pass2_llm(
     with (
         patch("agents.skills_extraction.agent.extract_context") as m_ctx,
         patch("agents.skills_extraction.agent.extract_tasks") as m_tasks,
+        patch("agents.skills_extraction.agent.extract_tasks_async", new_callable=AsyncMock) as m_tasks_async,
         patch("agents.skills_extraction.agent.extract_responsibilities") as m_resp,
+        patch(
+            "agents.skills_extraction.agent.extract_responsibilities_async",
+            new_callable=AsyncMock,
+        ) as m_resp_async,
         patch("agents.skills_extraction.agent.extract_skills_no_taxonomy") as m_skills,
+        patch(
+            "agents.skills_extraction.agent.extract_skills_no_taxonomy_async",
+            new_callable=AsyncMock,
+        ) as m_skills_async,
     ):
         m_ctx.return_value = (
             [],
@@ -56,6 +65,7 @@ def _patch_skills_extraction_pass2_llm(
                 "extraction_metadata": {},
             },
         )
+        m_tasks_async.return_value = m_tasks.return_value
         m_resp.return_value = (
             [],
             {
@@ -65,7 +75,9 @@ def _patch_skills_extraction_pass2_llm(
                 "extraction_metadata": {},
             },
         )
+        m_resp_async.return_value = m_resp.return_value
         m_skills.return_value = (skills_list, skills_meta)
+        m_skills_async.return_value = (skills_list, skills_meta)
         yield
 
 
@@ -404,3 +416,145 @@ class TestSkillsExtractionAgent:
         ):
             out = agent.process(event)
         assert out.payload.get("skills_extraction_alert") is True
+
+    def test_process_parallel_path_degrades_when_async_dimension_raises(self) -> None:
+        """One failed async dimension should not cancel the others for the same job."""
+        from agents.common.types import SkillRecord, SpanRecord, TaxonomyResult
+
+        event = EventEnvelope(
+            correlation_id="test-parallel-degraded",
+            agent_id="normalization-agent",
+            payload={
+                "event_type": "NormalizationComplete",
+                "batch_id": "batch-parallel-degraded",
+                "title": "Platform Engineer",
+                "company": "Acme",
+                "description": "Python required for platform work.",
+                "source": "test",
+                "external_id": "job-parallel-degraded",
+            },
+        )
+        agent = SkillsExtractionAgent()
+        skill = SkillRecord(
+            skill_name="Python",
+            type="Technical",
+            confidence=0.9,
+            source_span=SpanRecord(
+                text="Python",
+                field_source="description",
+                start_char=0,
+                end_char=6,
+            ),
+        )
+        with (
+            patch.dict(os.environ, {"SKILLS_EXTRACTION_PARALLEL": "1"}, clear=False),
+            patch("agents.skills_extraction.agent.extract_context", return_value=([], {"tokens_used": 0, "cost_usd": 0.0, "latency_ms": 5, "extraction_failed": False, "extraction_metadata": {}})),
+            patch("agents.skills_extraction.agent.extract_tasks_async", new=AsyncMock(side_effect=RuntimeError("tasks boom"))),
+            patch(
+                "agents.skills_extraction.agent.extract_responsibilities_async",
+                new=AsyncMock(return_value=([], {"extraction_failed": False, "tokens_used": 7, "cost_usd": 0.001, "latency_ms": 50, "extraction_metadata": {}})),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_skills_no_taxonomy_async",
+                new=AsyncMock(return_value=([skill], {"extraction_failed": False, "tokens_used": 13, "cost_usd": 0.002, "latency_ms": 70, "model": "skills-deployment"})),
+            ),
+            patch(
+                "agents.skills_extraction.agent.resolve_taxonomy_batch",
+                return_value=[TaxonomyResult(original_label="Python", resolution_step=6)],
+            ),
+        ):
+            out = agent.process(event)
+
+        assert out.payload["failed_count"] == 0
+        assert out.payload["skills_count"] == 1
+        assert out.payload["tasks_count"] == 0
+        assert out.payload["records"][0]["extraction_status"] == "degraded"
+
+    def test_process_parallel_path_uses_wall_clock_latency_not_sum(self) -> None:
+        """Parallel pass-2 latency should reflect wall-clock gather time, not sum of dimension latencies."""
+
+        @dataclass
+        class _FakeLoader:
+            work_items: list[ExtractionWorkItem]
+
+            def load(self, event: EventEnvelope) -> list[ExtractionWorkItem]:
+                return self.work_items
+
+        class _FakeStore:
+            def __init__(self) -> None:
+                self.saved_results = []
+
+            def save(self, results) -> None:
+                self.saved_results = list(results)
+
+        work_item = ExtractionWorkItem(
+            job_id=501,
+            posting_id=None,
+            normalized_job_id=501,
+            title="Engineer",
+            company="Acme",
+            job_record=JobRecord(
+                source="test",
+                external_id="job-501",
+                title="Engineer",
+                company="Acme",
+                description="Python and SQL required.",
+            ),
+        )
+        store = _FakeStore()
+        agent = SkillsExtractionAgent(
+            work_item_loader=_FakeLoader([work_item]),
+            extraction_store=store,
+        )
+
+        with (
+            patch.dict(os.environ, {"SKILLS_EXTRACTION_PARALLEL": "1"}, clear=False),
+            patch("agents.skills_extraction.agent.extract_context", return_value=([], {"tokens_used": 0, "cost_usd": 0.0, "latency_ms": 40, "extraction_failed": False, "extraction_metadata": {}})),
+            patch("agents.skills_extraction.agent.extract_tasks_async", new=AsyncMock(return_value=([], {"extraction_failed": False, "tokens_used": 10, "cost_usd": 0.001, "latency_ms": 200, "extraction_metadata": {}}))),
+            patch("agents.skills_extraction.agent.extract_responsibilities_async", new=AsyncMock(return_value=([], {"extraction_failed": False, "tokens_used": 11, "cost_usd": 0.001, "latency_ms": 300, "extraction_metadata": {}}))),
+            patch("agents.skills_extraction.agent.extract_skills_no_taxonomy_async", new=AsyncMock(return_value=([], {"extraction_failed": False, "tokens_used": 12, "cost_usd": 0.001, "latency_ms": 500, "extraction_metadata": {}, "model": "skills-deployment"}))),
+            patch("agents.skills_extraction.agent.time.perf_counter", side_effect=[100.0, 100.25]),
+        ):
+            agent.process(
+                EventEnvelope(
+                    correlation_id="test-wall-clock",
+                    agent_id="normalization-agent",
+                    payload={"event_type": "NormalizationComplete", "batch_id": "batch-wall-clock"},
+                )
+            )
+
+        assert len(store.saved_results) == 1
+        extraction_meta = store.saved_results[0].extraction_metadata or {}
+        assert extraction_meta["extraction_duration_ms"] == 290
+
+    def test_process_serial_fallback_when_parallel_disabled(self) -> None:
+        """Disabling the env flag should keep the existing sync extractor path."""
+        event = EventEnvelope(
+            correlation_id="test-serial-fallback",
+            agent_id="normalization-agent",
+            payload={
+                "event_type": "NormalizationComplete",
+                "batch_id": "batch-serial-fallback",
+                "title": "Engineer",
+                "company": "Acme",
+                "description": "Python required.",
+                "source": "test",
+                "external_id": "job-serial-fallback",
+            },
+        )
+        agent = SkillsExtractionAgent()
+        with (
+            patch.dict(os.environ, {"SKILLS_EXTRACTION_PARALLEL": "0"}, clear=False),
+            patch("agents.skills_extraction.agent.extract_tasks", return_value=([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0, "latency_ms": 10, "extraction_metadata": {}})) as m_tasks,
+            patch("agents.skills_extraction.agent.extract_responsibilities", return_value=([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0, "latency_ms": 10, "extraction_metadata": {}})) as m_resp,
+            patch("agents.skills_extraction.agent.extract_skills_no_taxonomy", return_value=([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0, "latency_ms": 10, "extraction_metadata": {}})) as m_skills,
+            patch("agents.skills_extraction.agent.extract_tasks_async", new=AsyncMock(side_effect=AssertionError("async path should not run"))),
+            patch("agents.skills_extraction.agent.extract_responsibilities_async", new=AsyncMock(side_effect=AssertionError("async path should not run"))),
+            patch("agents.skills_extraction.agent.extract_skills_no_taxonomy_async", new=AsyncMock(side_effect=AssertionError("async path should not run"))),
+        ):
+            out = agent.process(event)
+
+        assert out.payload["event_type"] == "SkillsExtracted"
+        assert m_tasks.called
+        assert m_resp.called
+        assert m_skills.called

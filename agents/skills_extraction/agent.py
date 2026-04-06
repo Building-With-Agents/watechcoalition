@@ -6,6 +6,12 @@ Pass 2: ``extract_tasks`` (Haiku-tier deployment), ``extract_responsibilities`` 
 deployment), ``extract_skills`` (skills deployment). Pass 1 context signals are injected
 into task and responsibility prompts.
 
+Current execution model:
+- ``SKILLS_EXTRACTION_PARALLEL=1`` (default): tasks, responsibilities, and skills run
+  concurrently within each job via ``asyncio.gather``.
+- ``SKILLS_EXTRACTION_PARALLEL=0``: fall back to the legacy synchronous per-dimension flow.
+- The outer batch loop remains serial until Phase C lands.
+
 Input modes (in order):
 1. Inline normalized records on the event payload
 2. Batch load from ``dbo.normalized_jobs`` by ``batch_id`` / ``ingestion_run_id``
@@ -14,6 +20,7 @@ Input modes (in order):
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import time
@@ -43,12 +50,15 @@ from agents.common.types import ExtractionMetadata, JobRecord, ToolRecord
 from agents.skills_extraction.extractors import (
     extract_context,
     extract_responsibilities,
+    extract_responsibilities_async,
     extract_tasks,
+    extract_tasks_async,
     extract_tools,
 )
 from agents.skills_extraction.extractors.skills import (
     apply_taxonomy_to_skills,
     extract_skills_no_taxonomy,
+    extract_skills_no_taxonomy_async,
 )
 from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
 from agents.skills_extraction.prompts import SKILLS_PROMPT_VERSION
@@ -70,6 +80,12 @@ def _llm_deployment_name() -> str:
         or os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
         or "azure-openai"
     )
+
+
+def _parallel_enabled() -> bool:
+    """Return True when intra-job async extraction is enabled."""
+    value = os.getenv("SKILLS_EXTRACTION_PARALLEL", "1").strip().lower()
+    return value not in {"0", "false", "no", "off"}
 
 
 def _persisted_extraction_model_llm() -> str:
@@ -428,12 +444,16 @@ class SkillsExtractionAgent(BaseAgent):
         # CHUNK_COOLDOWN seconds for the TPM window to refill.
         pending: list[tuple[ExtractionWorkItem, list[ToolRecord], list, dict]] = []
         total = len(work_items)
+        intra_job_parallel = _parallel_enabled()
         for idx, item in enumerate(work_items):
             # Inter-record delay within a chunk
             if idx > 0 and _INTER_LLM_DELAY > 0:
                 time.sleep(_INTER_LLM_DELAY)
 
-            tools, skills_list, meta, is_llm = self._extract_work_item_no_taxonomy(item)
+            if intra_job_parallel:
+                tools, skills_list, meta, is_llm = self._extract_work_item_no_taxonomy_parallel_bridge(item)
+            else:
+                tools, skills_list, meta, is_llm = self._extract_work_item_no_taxonomy(item)
             pending.append((item, tools, skills_list, meta))
 
             # Chunk boundary cooldown
@@ -485,6 +505,22 @@ class SkillsExtractionAgent(BaseAgent):
             payload=self._build_payload(event, results),
         )
 
+    def _extract_work_item_no_taxonomy_parallel_bridge(
+        self, item: ExtractionWorkItem
+    ) -> tuple[list[ToolRecord], list, dict, bool]:
+        """Run one work item through the async intra-job path from sync agent code."""
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(self._extract_work_item_no_taxonomy_async(item))
+
+        log.warning(
+            "skills_extraction_parallel_fallback_serial",
+            job_id=item.job_id,
+            reason="event_loop_running",
+        )
+        return self._extract_work_item_no_taxonomy(item)
+
     def _extract_work_item_no_taxonomy(
         self, item: ExtractionWorkItem
     ) -> tuple[list[ToolRecord], list, dict, bool]:
@@ -504,39 +540,7 @@ class SkillsExtractionAgent(BaseAgent):
         )
 
         if not has_normalized_text:
-            import structlog as _sl
-
-            _sl.get_logger().warning(
-                "skills_extraction_no_text",
-                job_id=item.job_id,
-                title=item.title,
-                company=item.company,
-                reason="No description/requirements/responsibilities text — cannot extract skills",
-            )
-            warn = _coerce_pass2_warnings(ctx_meta)
-            meta: dict[str, Any] = {
-                "success": False,
-                "extraction_failed": True,
-                "extraction_status": "failed",
-                "error_reason": "no_normalized_text",
-                "tokens_used": int(ctx_meta.get("tokens_used") or 0),
-                "cost_usd": float(ctx_meta.get("cost_usd") or 0.0),
-                "latency_ms": int(ctx_meta.get("latency_ms") or 0),
-                "extraction_warnings": list(warn)
-                + ["No normalized text available for extraction"],
-                "alert_skills_extraction": False,
-                "provider": ctx_meta.get("provider", "pattern-matching"),
-                "model": ctx_meta.get("model", "none"),
-                "context_signals": context_signals,
-                "tasks": [],
-                "responsibilities": [],
-                "dimension_metas": {
-                    "pass1_context": ctx_meta.get("extraction_metadata", {}),
-                },
-                "pass2_llm_calls": 0,
-                "pass2_llm_dimensions": [],
-            }
-            return tools, [], meta, False
+            return tools, [], _no_normalized_text_meta(item, context_signals, ctx_meta), False
 
         tasks, tasks_meta = extract_tasks(job, pass1_context=context_signals)
         responsibilities, resp_meta = extract_responsibilities(
@@ -544,74 +548,66 @@ class SkillsExtractionAgent(BaseAgent):
         )
         skills_list, skills_meta = extract_skills_no_taxonomy(job, pass1_tools=tools)
 
-        total_tokens = (
-            int(ctx_meta.get("tokens_used") or 0)
-            + int(tasks_meta.get("tokens_used") or 0)
-            + int(resp_meta.get("tokens_used") or 0)
-            + int(skills_meta.get("tokens_used") or 0)
+        combined_meta = _build_combined_pass2_meta(
+            context_signals=context_signals,
+            ctx_meta=ctx_meta,
+            tasks=tasks,
+            tasks_meta=tasks_meta,
+            responsibilities=responsibilities,
+            resp_meta=resp_meta,
+            skills_meta=skills_meta,
+            pass2_latency_ms=(
+                int(tasks_meta.get("latency_ms") or 0)
+                + int(resp_meta.get("latency_ms") or 0)
+                + int(skills_meta.get("latency_ms") or 0)
+            ),
         )
-        total_cost = (
-            float(ctx_meta.get("cost_usd") or 0.0)
-            + float(tasks_meta.get("cost_usd") or 0.0)
-            + float(resp_meta.get("cost_usd") or 0.0)
-            + float(skills_meta.get("cost_usd") or 0.0)
+        return tools, skills_list, combined_meta, True
+
+    async def _extract_work_item_no_taxonomy_async(
+        self, item: ExtractionWorkItem
+    ) -> tuple[list[ToolRecord], list, dict, bool]:
+        """Pass 1 sync + Pass 2 async gather for one work item (taxonomy deferred)."""
+        job = item.job_record
+        tools = extract_tools(job)
+        context_signals, ctx_meta = extract_context(job)
+
+        has_normalized_text = bool(
+            (job.description or "").strip()
+            or (job.requirements or "").strip()
+            or (job.responsibilities or "").strip()
         )
-        total_latency = (
-            int(ctx_meta.get("latency_ms") or 0)
-            + int(tasks_meta.get("latency_ms") or 0)
-            + int(resp_meta.get("latency_ms") or 0)
-            + int(skills_meta.get("latency_ms") or 0)
+
+        if not has_normalized_text:
+            return tools, [], _no_normalized_text_meta(item, context_signals, ctx_meta), False
+
+        start = time.perf_counter()
+        tasks_result, resp_result, skills_result = await asyncio.gather(
+            extract_tasks_async(job, pass1_context=context_signals),
+            extract_responsibilities_async(job, pass1_context=context_signals),
+            extract_skills_no_taxonomy_async(job, pass1_tools=tools),
+            return_exceptions=True,
+        )
+        pass2_latency_ms = int((time.perf_counter() - start) * 1000)
+
+        tasks, tasks_meta = _resolve_async_dimension_result(tasks_result, "tasks")
+        responsibilities, resp_meta = _resolve_async_dimension_result(
+            resp_result, "responsibilities"
+        )
+        skills_list, skills_meta = _resolve_async_dimension_result(
+            skills_result, "skills"
         )
 
-        skills_failed = bool(skills_meta.get("extraction_failed"))
-        tasks_failed = bool(tasks_meta.get("extraction_failed"))
-        resp_failed = bool(resp_meta.get("extraction_failed"))
-
-        if skills_failed:
-            extraction_status = "failed"
-        elif tasks_failed or resp_failed:
-            extraction_status = "degraded"
-        else:
-            extraction_status = "success"
-
-        warn = _coerce_pass2_warnings(ctx_meta, tasks_meta, resp_meta, skills_meta)
-
-        combined_meta: dict[str, Any] = {
-            "success": extraction_status == "success",
-            "extraction_failed": skills_failed,
-            "extraction_status": extraction_status,
-            "error_reason": skills_meta.get("error_reason"),
-            "tokens_used": total_tokens,
-            "cost_usd": total_cost,
-            "latency_ms": total_latency,
-            "extraction_warnings": list(warn),
-            "alert_skills_extraction": bool(skills_meta.get("alert_skills_extraction")),
-            "provider": skills_meta.get("provider", "azure-openai"),
-            "model": skills_meta.get("model") or _llm_deployment_name(),
-            "context_signals": context_signals,
-            "tasks": tasks,
-            "responsibilities": responsibilities,
-            "dimension_metas": {
-                "pass1_context": ctx_meta.get("extraction_metadata", {}),
-                "tasks": tasks_meta.get("extraction_metadata", {}),
-                "responsibilities": resp_meta.get("extraction_metadata", {}),
-                "skills": {
-                    k: skills_meta.get(k)
-                    for k in (
-                        "model",
-                        "tokens_used",
-                        "cost_usd",
-                        "latency_ms",
-                        "success",
-                        "extraction_failed",
-                        "error_reason",
-                    )
-                    if k in skills_meta
-                },
-            },
-            "pass2_llm_calls": 3,
-            "pass2_llm_dimensions": ["tasks", "responsibilities", "skills"],
-        }
+        combined_meta = _build_combined_pass2_meta(
+            context_signals=context_signals,
+            ctx_meta=ctx_meta,
+            tasks=tasks,
+            tasks_meta=tasks_meta,
+            responsibilities=responsibilities,
+            resp_meta=resp_meta,
+            skills_meta=skills_meta,
+            pass2_latency_ms=pass2_latency_ms,
+        )
         return tools, skills_list, combined_meta, True
 
     def _build_extraction_result(
@@ -835,6 +831,162 @@ def _metadata_from_pass2(
     out["responsibilities"] = dim.get("responsibilities", {})
     out["skills"] = dim.get("skills", {})
     return out
+
+
+def _no_normalized_text_meta(
+    item: ExtractionWorkItem,
+    context_signals: list[Any],
+    ctx_meta: dict[str, Any],
+) -> dict[str, Any]:
+    """Build the explicit failed-extraction metadata when no normalized text is available."""
+    log.warning(
+        "skills_extraction_no_text",
+        job_id=item.job_id,
+        title=item.title,
+        company=item.company,
+        reason="No description/requirements/responsibilities text — cannot extract skills",
+    )
+    warn = _coerce_pass2_warnings(ctx_meta)
+    return {
+        "success": False,
+        "extraction_failed": True,
+        "extraction_status": "failed",
+        "error_reason": "no_normalized_text",
+        "tokens_used": int(ctx_meta.get("tokens_used") or 0),
+        "cost_usd": float(ctx_meta.get("cost_usd") or 0.0),
+        "latency_ms": int(ctx_meta.get("latency_ms") or 0),
+        "extraction_warnings": list(warn)
+        + ["No normalized text available for extraction"],
+        "alert_skills_extraction": False,
+        "provider": ctx_meta.get("provider", "pattern-matching"),
+        "model": ctx_meta.get("model", "none"),
+        "context_signals": context_signals,
+        "tasks": [],
+        "responsibilities": [],
+        "dimension_metas": {
+            "pass1_context": ctx_meta.get("extraction_metadata", {}),
+        },
+        "pass2_llm_calls": 0,
+        "pass2_llm_dimensions": [],
+    }
+
+
+def _async_dimension_failure_meta(dimension: str, error: BaseException) -> dict[str, Any]:
+    """Build a standard extractor metadata payload when an async dimension raises."""
+    error_reason = f"{type(error).__name__}: {error}" if str(error) else type(error).__name__
+    log.error(
+        "skills_extraction_async_dimension_failed",
+        dimension=dimension,
+        error_type=type(error).__name__,
+        error_reason=error_reason,
+    )
+    return {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "success": False,
+        "extraction_failed": True,
+        "error_reason": error_reason,
+        "provider": "azure-openai",
+        "model": "",
+        "extraction_metadata": {},
+        "extraction_warnings": [f"{dimension} extraction raised {type(error).__name__}"],
+    }
+
+
+def _resolve_async_dimension_result(
+    result: object,
+    dimension: str,
+) -> tuple[list[Any], dict[str, Any]]:
+    """Normalize ``asyncio.gather(..., return_exceptions=True)`` results per dimension."""
+    if isinstance(result, BaseException):
+        return [], _async_dimension_failure_meta(dimension, result)
+    if (
+        isinstance(result, tuple)
+        and len(result) == 2
+        and isinstance(result[1], dict)
+    ):
+        payload, meta = result
+        return list(payload or []), meta
+    malformed = RuntimeError(f"{dimension} extractor returned malformed result")
+    return [], _async_dimension_failure_meta(dimension, malformed)
+
+
+def _build_combined_pass2_meta(
+    *,
+    context_signals: list[Any],
+    ctx_meta: dict[str, Any],
+    tasks: list[Any],
+    tasks_meta: dict[str, Any],
+    responsibilities: list[Any],
+    resp_meta: dict[str, Any],
+    skills_meta: dict[str, Any],
+    pass2_latency_ms: int,
+) -> dict[str, Any]:
+    """Aggregate Pass 1 and Pass 2 metadata into the persisted combined shape."""
+    total_tokens = (
+        int(ctx_meta.get("tokens_used") or 0)
+        + int(tasks_meta.get("tokens_used") or 0)
+        + int(resp_meta.get("tokens_used") or 0)
+        + int(skills_meta.get("tokens_used") or 0)
+    )
+    total_cost = (
+        float(ctx_meta.get("cost_usd") or 0.0)
+        + float(tasks_meta.get("cost_usd") or 0.0)
+        + float(resp_meta.get("cost_usd") or 0.0)
+        + float(skills_meta.get("cost_usd") or 0.0)
+    )
+    total_latency = int(ctx_meta.get("latency_ms") or 0) + max(0, pass2_latency_ms)
+
+    skills_failed = bool(skills_meta.get("extraction_failed"))
+    tasks_failed = bool(tasks_meta.get("extraction_failed"))
+    resp_failed = bool(resp_meta.get("extraction_failed"))
+
+    if skills_failed:
+        extraction_status = "failed"
+    elif tasks_failed or resp_failed:
+        extraction_status = "degraded"
+    else:
+        extraction_status = "success"
+
+    warn = _coerce_pass2_warnings(ctx_meta, tasks_meta, resp_meta, skills_meta)
+
+    return {
+        "success": extraction_status == "success",
+        "extraction_failed": skills_failed,
+        "extraction_status": extraction_status,
+        "error_reason": skills_meta.get("error_reason"),
+        "tokens_used": total_tokens,
+        "cost_usd": total_cost,
+        "latency_ms": total_latency,
+        "extraction_warnings": list(warn),
+        "alert_skills_extraction": bool(skills_meta.get("alert_skills_extraction")),
+        "provider": skills_meta.get("provider", "azure-openai"),
+        "model": skills_meta.get("model") or _llm_deployment_name(),
+        "context_signals": context_signals,
+        "tasks": tasks,
+        "responsibilities": responsibilities,
+        "dimension_metas": {
+            "pass1_context": ctx_meta.get("extraction_metadata", {}),
+            "tasks": tasks_meta.get("extraction_metadata", {}),
+            "responsibilities": resp_meta.get("extraction_metadata", {}),
+            "skills": {
+                k: skills_meta.get(k)
+                for k in (
+                    "model",
+                    "tokens_used",
+                    "cost_usd",
+                    "latency_ms",
+                    "success",
+                    "extraction_failed",
+                    "error_reason",
+                )
+                if k in skills_meta
+            },
+        },
+        "pass2_llm_calls": 3,
+        "pass2_llm_dimensions": ["tasks", "responsibilities", "skills"],
+    }
 
 
 def _coerce_pass2_warnings(*metas: dict[str, Any]) -> tuple[str, ...]:
