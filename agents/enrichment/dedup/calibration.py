@@ -388,27 +388,21 @@ def render_findings_markdown(report: CalibrationReport) -> str:
     ]
     if abs(preferred.threshold - report.default_threshold) >= 1e-9:
         findings.append(
-            (
-                f"- The strongest threshold on this labeled replay was `{preferred.threshold:.2f}` with "
-                f"`FPR={preferred.false_positive_rate:.3f}` / "
-                f"`FNR={preferred.false_negative_rate:.3f}`."
-            )
+            f"- The strongest threshold on this labeled replay was `{preferred.threshold:.2f}` with "
+            f"`FPR={preferred.false_positive_rate:.3f}` / "
+            f"`FNR={preferred.false_negative_rate:.3f}`."
         )
     if nearest_lower is not None:
         findings.append(
-            (
-                f"- Lowering the threshold to `{nearest_lower.threshold:.2f}` changes the rates to "
-                f"`FPR={nearest_lower.false_positive_rate:.3f}` / "
-                f"`FNR={nearest_lower.false_negative_rate:.3f}`."
-            )
+            f"- Lowering the threshold to `{nearest_lower.threshold:.2f}` changes the rates to "
+            f"`FPR={nearest_lower.false_positive_rate:.3f}` / "
+            f"`FNR={nearest_lower.false_negative_rate:.3f}`."
         )
     if nearest_higher is not None:
         findings.append(
-            (
-                f"- Raising the threshold to `{nearest_higher.threshold:.2f}` changes the rates to "
-                f"`FPR={nearest_higher.false_positive_rate:.3f}` / "
-                f"`FNR={nearest_higher.false_negative_rate:.3f}`."
-            )
+            f"- Raising the threshold to `{nearest_higher.threshold:.2f}` changes the rates to "
+            f"`FPR={nearest_higher.false_positive_rate:.3f}` / "
+            f"`FNR={nearest_higher.false_negative_rate:.3f}`."
         )
     findings.extend(
         [
