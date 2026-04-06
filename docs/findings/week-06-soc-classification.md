@@ -1,40 +1,32 @@
-# Week 6 findings: SOC classification
+# Week 6 Enrichment Findings: SOC, NAICS, and EmployerProfile
 
-## What we built
+### What we Tested
+* **SOC Classification:** Verified the two-tier "Candidate Generation + LLM Disambiguation" flow using `dbo.socc` as the primary grounding.
+* **NAICS Mapping:** Tested industry classification against 2022 NAICS reference data, ensuring the LLM selects from a bounded list of ~25 database-backed candidates.
+* **EmployerProfile:** Exercised the extraction of `company_size`, `ai_maturity_signal`, and `sector`, alongside an exact-match check for `is_known_employer` in `dbo.companies`.
+* **Database Promotion:** Validated that enriched data (SOC, NAICS, and Employer ID) successfully promotes from `normalized_jobs` to the live `job_postings` table.
+* **Live E2E scenarios (`pytest tests/test_enrichment_e2e_scenarios.py --live`):** Four diverse postings (startup AI, retail enterprise, gov IT contractor, healthcare analyst); pre-check `dbo.socc` / `dbo.naics` nonempty; assert `job_postings.occupation_code` digit-grounded in `socc`, `naics_code` never NULL (catalog code or literal `unknown`), `employer_profiles` row + four fields; `llm_audit_log` totals and per-`agent_name` token lines.
 
-- **Tier 1 — fuzzy SOC candidate lookup:** Query `dbo.socc` (2018 SOC) using the first word of the job title (case-insensitive substring match on title) to produce a short list of plausible occupation codes.
-- **Tier 2 — LLM selection:** The model chooses the best-matching code from that candidate set only, using Azure OpenAI via `agents.common.llm_client` (aligned with `LLM_PROVIDER=azure_openai` and existing Azure env vars).
-- **DB write-back:** After classification, we persist the chosen code to `dbo.normalized_jobs.occupation_code` on the row that matches both `external_id` and `source`.
+### What we Found
+* **Tech-Awareness:** Standard fuzzy matching often missed IT roles; adding tech-aware fragments (e.g., "Cloud", "SRE") correctly steered the model toward 151xxx-series computer occupations.
+* **Data Integrity:** Using `_canonical_catalog_code()` fixed issues where the LLM returned hyphenated codes that didn't match the digit-only database keys.
+* **Persistence:** One-to-one mapping for `employer_profiles` using `company_id` prevented duplicate profile rows while maintaining metadata JSON for unlinked jobs.
+* **Accuracy:** Defaulting to `unknown` for ambiguous signals successfully prevented the LLM from hallucinating nonexistent industry codes or company sizes.
+* **NAICS on `job_postings`:** Uncertain NAICS is stored as the string `unknown` (VARCHAR), not SQL NULL—aligned with EmployerProfile sentinels and covered by the live scenario tests.
+* **Live run:** All five scenario-module tests passed against a shared PostgreSQL dev instance; SOC logs showed `exact_code_match` within printed candidate sets; some postings received NAICS `unknown` while others received grounded 6-digit codes. LangSmith/Pydantic warnings during the run were non-blocking.
 
-Supporting surfaces include `run_soc_demo.py` for end-to-end smoke checks against the database, and enrichment helpers in `agents/enrichment/classification.py` / `agents/enrichment/classifiers/soc_classifier.py`.
+### Recommendation
+* **Standardize Classification:** Adopt the "two-step" candidate lookup (Deterministic + LLM) as the project-wide pattern for all taxonomy-based mapping to keep data trustworthy.
+* **Unified Promotion:** Continue using the `apply_enrichment_to_job_postings()` method to ensure SOC and NAICS are updated together on the live table.
+* **Environment Sync:** Ensure the `db_check.py migrate` script is run across all dev environments to support the new JSONB and UUID columns.
 
-## How it works
+### Tradeoffs Acknowledged
+* **Accuracy vs. Coverage:** We chose to store `unknown` rather than letting the LLM "guess" a code, which may lead to lower initial coverage but ensures higher data quality.
+* **Latency:** The two-step SOC process adds a database lookup before the LLM call, slightly increasing processing time per record to gain significant accuracy improvements.
+* **Exact Matching:** `is_known_employer` currently relies on exact name normalization; while this misses some variations, it avoids the risk of incorrect fuzzy-match company links.
 
-The pipeline is intentionally **two-step**:
-
-1. **Candidate generation (deterministic):** Fuzzy title matching against `dbo.socc` returns a bounded set of candidates (e.g. top matches within a limit). This grounds every downstream choice in real catalog rows.
-2. **Disambiguation (LLM):** The LLM receives the job title, description, and the numbered candidate list. It must pick **only** from those codes. Any output that is not an allowed candidate is resolved to a safe fallback (e.g. `unclassified`), so the system does not trust free-form SOC strings from the model.
-
-Together, this yields a cheap, explainable first stage and a second stage that handles ambiguity without inventing occupation codes.
-
-## Validation
-
-- **Environment:** Exercised against the **dev** database (`PYTHON_DATABASE_URL`).
-- **Example job:** Title **“Engineering Intern @ EverestX LLC”** was classified as **17-3029** — *Engineering Technologists and Technicians, Except Drafters* (SOC 2018).
-- **Write-back:** Confirmed that `normalized_jobs.occupation_code` was updated for the corresponding normalized job row after enrichment.
-
-## Design decisions
-
-**Why constrain the LLM to candidates instead of free generation**
-
-SOC codes are structured and easy for models to “sound right” while being wrong or nonexistent. Restricting the LLM to a closed set derived from `dbo.socc` ensures every emitted code exists in our reference data and keeps auditing and downstream joins trustworthy. Parsing logic can still normalize noisy replies (e.g. extra punctuation) as long as the final value remains in the candidate set or falls back to `unclassified`.
-
-**Why match on both `external_id` and `source`**
-
-`external_id` is only unique in combination with `source` (see index `ix_normalized_jobs_source_eid`). Updating on `external_id` alone could touch multiple rows if the same external identifier appears under different ingestion sources. Requiring both fields targets exactly one normalized job row for write-back.
-
-## What’s next
-
-- **NAICS classification** — parallel industry-code enrichment where product requirements define scope.
-- **`EmployerProfile` population** — fill employer-level fields on `JobProfile` (size, maturity signal, sector, etc.) from enrichment rules and resolvers.
-- **Wiring into `EnrichedJobProfile`** — integrate SOC (and future NAICS / employer) outputs into the canonical enriched profile type and any promotion or API paths that consume it.
+### Data / Evidence
+* **Case 1:** "Cloud Engineer" previously matched generic engineering; now correctly resolves to **151133** (Software Developers, Systems Software).
+* **Case 2:** "Engineering Intern @ EverestX LLC" successfully mapped to **17-3029** (Engineering Technologists) via the 2018 SOC catalog.
+* **Log Audits:** Verified that all classification calls are successfully appearing in `llm_audit_log` with correct token counts for cost tracking.
+* **E2E scenarios:** Example live outcomes—Senior AI Engineer → SOC **151111**; Store Manager → **119199**; IT Systems Analyst → **151121**; Healthcare Data Analyst → **152051**; NAICS either grounded (e.g. retail/gov paths) or model `unknown` persisted as text. Repeated `normalized_job_id` in logs (e.g. 42) is an artifact of seed sequence resync after teardown on a shared DB, not duplicate postings—`job_posting_id` UUIDs differ per run.

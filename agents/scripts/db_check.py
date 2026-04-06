@@ -8,6 +8,8 @@ Usage (from repo root, venv activated):
     python agents/scripts/db_check.py query "SELECT 1"  # run arbitrary SELECT
     python agents/scripts/db_check.py migrate         # run agent migrations
     python agents/scripts/db_check.py reset           # truncate all agent tables (for fresh re-runs)
+    python agents/scripts/run_enrichment_promotion_demo.py  # seed + enrich + print job_postings (keeps rows)
+    python agents/scripts/run_enrichment_promotion_demo.py --live-llm  # same, real Azure/LLM calls
 
 Reads PYTHON_DATABASE_URL from .env automatically.
 """
