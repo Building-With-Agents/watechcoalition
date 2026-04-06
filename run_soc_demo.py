@@ -7,13 +7,15 @@ from collections.abc import Callable
 from pathlib import Path
 
 from dotenv import load_dotenv
-from sqlalchemy import select, func
+from sqlalchemy import select
 
 from agents.common.data_store.database import session_scope
-from agents.common.data_store.models import NormalizedJob, SOCC
+from agents.common.data_store.models import NormalizedJob
 from agents.common.llm_client import invoke_skills_llm
+from agents.common.types.job_profile import JobProfile
 from agents.common.types.job_record import JobRecord
-from agents.enrichment.classification import build_job_profile_with_soc
+from agents.enrichment.classification import enrich_job_profile_soc
+from agents.enrichment.classifiers.soc_classifier import classify_soc, get_soc_candidates
 
 
 def _load_env() -> None:
@@ -136,19 +138,18 @@ async def main() -> None:
         print("title:", job_record.title)
         print("company:", job_record.company)
 
-        # --- Tier 1 candidate lookup (always runs) ---
-        first_word = job_record.title.lower().split()[0]
-        candidates = session.execute(
-            select(SOCC.code, SOCC.title)
-            .where(func.lower(SOCC.title).contains(first_word))
-            .where(SOCC.version == "2018")
-            .limit(5)
-        ).all()
+        # Same title/description strings for Tier 1 preview, classify_soc, and DB write-back.
+        desc_for_soc = (
+            job_record.description if isinstance(job_record.description, str) else ""
+        )
+        cand_rows = await get_soc_candidates(
+            job_record.title, desc_for_soc or None, session
+        )
 
-        if candidates:
-            print("\nSOC candidates from dbo.socc:")
-            for r in candidates:
-                print(f"  {r.code}: {r.title}")
+        if cand_rows:
+            print("\nSOC candidates from dbo.socc (ranked, top 15):")
+            for r in cand_rows:
+                print(f"  {r['code']}: {r['title']}")
         else:
             print("\nNo SOC candidates found in dbo.socc for this title.")
 
@@ -156,13 +157,26 @@ async def main() -> None:
             print("\n-- SKIP_LLM mode: skipping LLM classification --")
             return
 
-        # --- Full classification with LLM ---
-        job_profile = await build_job_profile_with_soc(
-            job_record,
+        llm = make_soc_llm()
+        # Await LLM classification once, then persist via enrich (override avoids a second LLM call).
+        soc_result = await classify_soc(
+            job_record.title,
+            desc_for_soc,
             session,
-            make_soc_llm(),
+            llm,
         )
-        print("\nsoc_code:", job_profile.soc_code)
+        sys.stdout.flush()
+
+        job_profile = JobProfile.model_validate(job_record.model_dump())
+        await enrich_job_profile_soc(
+            job_profile,
+            session,
+            llm,
+            soc_code_override=soc_result,
+        )
+
+        print("\nsoc_code:", soc_result)
+        sys.stdout.flush()
 
 
 if __name__ == "__main__":

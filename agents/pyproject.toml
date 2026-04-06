@@ -54,4 +54,5 @@ addopts = "-v --tb=short"
 markers = [
     "integration: marks tests requiring a live database",
     "fuzzy_dedup_e2e: PostgreSQL + Azure embedding fuzzy dedup matching E2E",
+    "live_llm: enrichment promotion test using real LLM (pytest --live)",
 ]
