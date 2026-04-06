@@ -8,9 +8,15 @@ into task and responsibility prompts.
 
 Current execution model:
 - ``SKILLS_EXTRACTION_PARALLEL=1`` (default): tasks, responsibilities, and skills run
-  concurrently within each job via ``asyncio.gather``.
+  concurrently within each job via ``asyncio.gather``, and multiple jobs run concurrently
+  within a batch up to ``SKILLS_EXTRACTION_CONCURRENCY`` (default: ``5``).
+- Tune ``SKILLS_EXTRACTION_CONCURRENCY`` down (for example ``3``) if the deployment starts
+  rate limiting aggressively, or up (for example ``8``) if Azure capacity allows it.
 - ``SKILLS_EXTRACTION_PARALLEL=0``: fall back to the legacy synchronous per-dimension flow.
-- The outer batch loop remains serial until Phase C lands.
+- If ``process()`` is called from a thread that already has a running event loop, the agent
+  logs a warning and falls back to the serial path to preserve the synchronous caller contract.
+- ``SKILLS_EXTRACTION_CHUNK_SIZE``, ``SKILLS_EXTRACTION_CHUNK_COOLDOWN``, and
+  ``SKILLS_EXTRACTION_DELAY`` are deprecated and only applied in serial fallback mode.
 
 Input modes (in order):
 1. Inline normalized records on the event payload
@@ -23,6 +29,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import threading
 import time
 from collections.abc import Sequence
 from contextlib import suppress
@@ -36,13 +43,6 @@ from agents.common.base_agent import BaseAgent
 
 log = structlog.get_logger()
 
-# Batch chunking to avoid Azure OpenAI 429 rate limits.
-# Process CHUNK_SIZE records, pause CHUNK_COOLDOWN seconds, then next chunk.
-# This lets the TPM window refill between bursts instead of a flat per-record delay.
-_CHUNK_SIZE = int(os.environ.get("SKILLS_EXTRACTION_CHUNK_SIZE", "5"))
-_CHUNK_COOLDOWN = float(os.environ.get("SKILLS_EXTRACTION_CHUNK_COOLDOWN", "30"))
-# Small inter-record delay within a chunk (keeps burst manageable).
-_INTER_LLM_DELAY = float(os.environ.get("SKILLS_EXTRACTION_DELAY", "1.0"))
 from agents.common.data_store import check_db_connection, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
@@ -70,6 +70,20 @@ _FIXTURE_PATH = (
 EXTRACTION_PASS1_LABEL = "pattern-context-tools-v1"
 EXTRACTION_VERSION = f"week5-six-dim-{SKILLS_PROMPT_VERSION}"
 FIXTURE_EXTRACTION_MODEL = "fixture-week2-skills"
+_DEFAULT_SKILLS_EXTRACTION_CONCURRENCY = 5
+# Deprecated serial-only throttles. Keep env compatibility for callers that still run the
+# legacy serial path by setting SKILLS_EXTRACTION_PARALLEL=0 or by hitting loop fallback mode.
+_DEFAULT_CHUNK_SIZE = 5
+_DEFAULT_CHUNK_COOLDOWN = 30.0
+_DEFAULT_INTER_LLM_DELAY = 1.0
+_DEPRECATED_SERIAL_THROTTLE_ENV_KEYS = (
+    "SKILLS_EXTRACTION_CHUNK_SIZE",
+    "SKILLS_EXTRACTION_CHUNK_COOLDOWN",
+    "SKILLS_EXTRACTION_DELAY",
+)
+_DEPRECATED_SERIAL_THROTTLE_WARNING_LOCK = threading.Lock()
+_DEPRECATED_SERIAL_THROTTLE_WARNING_EMITTED = False
+_EXTRACTION_STORE_SAVE_LOCK = threading.Lock()
 
 
 def _llm_deployment_name() -> str:
@@ -86,6 +100,114 @@ def _parallel_enabled() -> bool:
     """Return True when intra-job async extraction is enabled."""
     value = os.getenv("SKILLS_EXTRACTION_PARALLEL", "1").strip().lower()
     return value not in {"0", "false", "no", "off"}
+
+
+def _env_int(name: str, default: int, *, minimum: int | None = None) -> int:
+    """Parse an integer env var with logging and sane fallback behavior."""
+    raw = os.getenv(name)
+    if raw is None or not raw.strip():
+        return default
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        log.warning(
+            "skills_extraction_invalid_env_int",
+            env_var=name,
+            raw_value=raw,
+            fallback=default,
+        )
+        return default
+    if minimum is not None and value < minimum:
+        log.warning(
+            "skills_extraction_env_int_below_min",
+            env_var=name,
+            raw_value=raw,
+            minimum=minimum,
+            fallback=default,
+        )
+        return default
+    return value
+
+
+def _env_float(name: str, default: float, *, minimum: float | None = None) -> float:
+    """Parse a float env var with logging and sane fallback behavior."""
+    raw = os.getenv(name)
+    if raw is None or not raw.strip():
+        return default
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        log.warning(
+            "skills_extraction_invalid_env_float",
+            env_var=name,
+            raw_value=raw,
+            fallback=default,
+        )
+        return default
+    if minimum is not None and value < minimum:
+        log.warning(
+            "skills_extraction_env_float_below_min",
+            env_var=name,
+            raw_value=raw,
+            minimum=minimum,
+            fallback=default,
+        )
+        return default
+    return value
+
+
+def _parallel_concurrency() -> int:
+    """Return the configured max concurrent jobs for inter-job extraction."""
+    return _env_int(
+        "SKILLS_EXTRACTION_CONCURRENCY",
+        _DEFAULT_SKILLS_EXTRACTION_CONCURRENCY,
+        minimum=1,
+    )
+
+
+def _serial_chunk_size() -> int:
+    """Deprecated serial-only chunk size used when parallel mode is unavailable."""
+    return _env_int("SKILLS_EXTRACTION_CHUNK_SIZE", _DEFAULT_CHUNK_SIZE, minimum=0)
+
+
+def _serial_chunk_cooldown() -> float:
+    """Deprecated serial-only chunk cooldown used when parallel mode is unavailable."""
+    return _env_float(
+        "SKILLS_EXTRACTION_CHUNK_COOLDOWN",
+        _DEFAULT_CHUNK_COOLDOWN,
+        minimum=0.0,
+    )
+
+
+def _serial_inter_job_delay() -> float:
+    """Deprecated serial-only per-job delay used when parallel mode is unavailable."""
+    return _env_float(
+        "SKILLS_EXTRACTION_DELAY",
+        _DEFAULT_INTER_LLM_DELAY,
+        minimum=0.0,
+    )
+
+
+def _warn_parallel_deprecated_serial_throttles() -> None:
+    """Warn once when deprecated serial-only throttle env vars are set in parallel mode."""
+    configured = [
+        name
+        for name in _DEPRECATED_SERIAL_THROTTLE_ENV_KEYS
+        if os.getenv(name) not in (None, "")
+    ]
+    if not configured:
+        return
+
+    global _DEPRECATED_SERIAL_THROTTLE_WARNING_EMITTED
+    with _DEPRECATED_SERIAL_THROTTLE_WARNING_LOCK:
+        if _DEPRECATED_SERIAL_THROTTLE_WARNING_EMITTED:
+            return
+        _DEPRECATED_SERIAL_THROTTLE_WARNING_EMITTED = True
+
+    log.warning(
+        "skills_extraction_parallel_ignores_serial_throttles",
+        ignored_env_vars=configured,
+    )
 
 
 def _persisted_extraction_model_llm() -> str:
@@ -128,6 +250,17 @@ class ExtractionResult:
     extraction_metadata: dict[str, Any] | None = None
     persisted_extraction_version: str = EXTRACTION_VERSION
     persisted_extraction_model: str = FIXTURE_EXTRACTION_MODEL
+
+
+@dataclass(frozen=True)
+class PendingExtraction:
+    """One in-memory extraction result prior to taxonomy application and persistence."""
+
+    item: ExtractionWorkItem
+    tools: list[ToolRecord]
+    skills_list: list[Any]
+    meta: dict[str, Any]
+    wall_clock_ms: int = 0
 
 
 class WorkItemLoader(Protocol):
@@ -311,64 +444,75 @@ class SQLAlchemyExtractionStore:
             log.error("extraction_store_save_skip_no_db", result_count=len(results))
             return
 
-        saved = 0
-        skipped_no_id = 0
-        with session_scope() as session:
-            for result in results:
-                normalized_job_id = result.work_item.normalized_job_id
-                if normalized_job_id is None:
-                    skipped_no_id += 1
-                    log.warning(
-                        "extraction_store_skip_no_normalized_job_id",
-                        job_id=result.work_item.job_id,
-                        title=result.work_item.title[:80] if result.work_item.title else "",
+        acquired = _EXTRACTION_STORE_SAVE_LOCK.acquire(blocking=False)
+        if not acquired:
+            log.warning(
+                "extraction_store_save_waiting_for_lock",
+                result_count=len(results),
+            )
+            _EXTRACTION_STORE_SAVE_LOCK.acquire()
+
+        try:
+            saved = 0
+            skipped_no_id = 0
+            with session_scope() as session:
+                for result in results:
+                    normalized_job_id = result.work_item.normalized_job_id
+                    if normalized_job_id is None:
+                        skipped_no_id += 1
+                        log.warning(
+                            "extraction_store_skip_no_normalized_job_id",
+                            job_id=result.work_item.job_id,
+                            title=result.work_item.title[:80] if result.work_item.title else "",
+                        )
+                        continue
+
+                    existing_rows = (
+                        session.query(ExtractedIntelligence)
+                        .filter(ExtractedIntelligence.normalized_job_id == normalized_job_id)
+                        .order_by(ExtractedIntelligence.id)
+                        .all()
                     )
-                    continue
+                    row = existing_rows[0] if existing_rows else ExtractedIntelligence(
+                        normalized_job_id=normalized_job_id,
+                        extraction_version=EXTRACTION_VERSION,
+                        extraction_model=FIXTURE_EXTRACTION_MODEL,
+                    )
+                    if not existing_rows:
+                        session.add(row)
+                    for duplicate in existing_rows[1:]:
+                        session.delete(duplicate)
 
-                existing_rows = (
-                    session.query(ExtractedIntelligence)
-                    .filter(ExtractedIntelligence.normalized_job_id == normalized_job_id)
-                    .order_by(ExtractedIntelligence.id)
-                    .all()
-                )
-                row = existing_rows[0] if existing_rows else ExtractedIntelligence(
-                    normalized_job_id=normalized_job_id,
-                    extraction_version=EXTRACTION_VERSION,
-                    extraction_model=FIXTURE_EXTRACTION_MODEL,
-                )
-                if not existing_rows:
-                    session.add(row)
-                for duplicate in existing_rows[1:]:
-                    session.delete(duplicate)
+                    row.extraction_version = result.persisted_extraction_version
+                    row.extraction_model = result.persisted_extraction_model
+                    row.extraction_tokens_used = getattr(result, "extraction_tokens_used", 0) or 0
+                    row.extraction_cost_usd = getattr(result, "extraction_cost_usd", 0.0) or 0.0
+                    row.skills = result.skills
+                    row.tools = [tool.model_dump() for tool in result.tools]
+                    row.tasks = list(getattr(result, "tasks", []) or [])
+                    row.responsibilities = list(getattr(result, "responsibilities", []) or [])
+                    row.context = list(getattr(result, "context", []) or [])
+                    validated = validate_extraction_result(
+                        result.skills, [tool.model_dump() for tool in result.tools]
+                    )
+                    row.extraction_warnings = list(
+                        dict.fromkeys([*list(result.extraction_warnings), *validated])
+                    )
+                    row.overall_confidence = _overall_extraction_confidence(result)
+                    # Degraded = partial LLM failure (e.g. tasks) but skills OK — not a hard failure.
+                    row.extraction_failed = result.extraction_status == "failed"
+                    em = result.extraction_metadata
+                    row.extraction_metadata = em if isinstance(em, dict) else None
+                    saved += 1
 
-                row.extraction_version = result.persisted_extraction_version
-                row.extraction_model = result.persisted_extraction_model
-                row.extraction_tokens_used = getattr(result, "extraction_tokens_used", 0) or 0
-                row.extraction_cost_usd = getattr(result, "extraction_cost_usd", 0.0) or 0.0
-                row.skills = result.skills
-                row.tools = [tool.model_dump() for tool in result.tools]
-                row.tasks = list(getattr(result, "tasks", []) or [])
-                row.responsibilities = list(getattr(result, "responsibilities", []) or [])
-                row.context = list(getattr(result, "context", []) or [])
-                validated = validate_extraction_result(
-                    result.skills, [tool.model_dump() for tool in result.tools]
-                )
-                row.extraction_warnings = list(
-                    dict.fromkeys([*list(result.extraction_warnings), *validated])
-                )
-                row.overall_confidence = _overall_extraction_confidence(result)
-                # Degraded = partial LLM failure (e.g. tasks) but skills OK — not a hard failure.
-                row.extraction_failed = result.extraction_status == "failed"
-                em = result.extraction_metadata
-                row.extraction_metadata = em if isinstance(em, dict) else None
-                saved += 1
-
-        log.info(
-            "extraction_store_save_complete",
-            saved=saved,
-            skipped_no_normalized_job_id=skipped_no_id,
-            total=len(results),
-        )
+            log.info(
+                "extraction_store_save_complete",
+                saved=saved,
+                skipped_no_normalized_job_id=skipped_no_id,
+                total=len(results),
+            )
+        finally:
+            _EXTRACTION_STORE_SAVE_LOCK.release()
 
 
 class SkillsExtractionAgent(BaseAgent):
@@ -439,39 +583,38 @@ class SkillsExtractionAgent(BaseAgent):
         if max_jobs > 0 and len(work_items) > max_jobs:
             work_items = work_items[:max_jobs]
 
-        # Phase 1: Extract tools + skills in chunks to avoid 429 rate limits.
-        # Process CHUNK_SIZE records with small inter-record delay, then pause
-        # CHUNK_COOLDOWN seconds for the TPM window to refill.
-        pending: list[tuple[ExtractionWorkItem, list[ToolRecord], list, dict]] = []
-        total = len(work_items)
-        intra_job_parallel = _parallel_enabled()
-        for idx, item in enumerate(work_items):
-            # Inter-record delay within a chunk
-            if idx > 0 and _INTER_LLM_DELAY > 0:
-                time.sleep(_INTER_LLM_DELAY)
+        parallel_enabled = _parallel_enabled()
+        concurrency = _parallel_concurrency() if parallel_enabled else 1
+        if parallel_enabled:
+            _warn_parallel_deprecated_serial_throttles()
+            log.info(
+                "skills_extraction_parallel_start",
+                total_jobs=len(work_items),
+                concurrency=concurrency,
+                parallel_enabled=True,
+            )
+        else:
+            log.info(
+                "skills_extraction_serial_start",
+                total_jobs=len(work_items),
+                parallel_enabled=False,
+                chunk_size=_serial_chunk_size(),
+                chunk_cooldown_seconds=_serial_chunk_cooldown(),
+                inter_job_delay_seconds=_serial_inter_job_delay(),
+            )
 
-            if intra_job_parallel:
-                tools, skills_list, meta, is_llm = self._extract_work_item_no_taxonomy_parallel_bridge(item)
-            else:
-                tools, skills_list, meta, is_llm = self._extract_work_item_no_taxonomy(item)
-            pending.append((item, tools, skills_list, meta))
-
-            # Chunk boundary cooldown
-            chunk_pos = idx + 1
-            if _CHUNK_SIZE > 0 and chunk_pos % _CHUNK_SIZE == 0 and chunk_pos < total:
-                log.info(
-                    "skills_extraction_chunk_cooldown",
-                    processed=chunk_pos,
-                    total=total,
-                    cooldown_seconds=_CHUNK_COOLDOWN,
-                )
-                time.sleep(_CHUNK_COOLDOWN)
+        batch_start = time.perf_counter()
+        if parallel_enabled:
+            pending = self._extract_batch_parallel_bridge(work_items, concurrency=concurrency)
+        else:
+            pending = self._extract_batch_serial(work_items)
+        batch_wall_clock_ms = int((time.perf_counter() - batch_start) * 1000)
 
         # Phase 2: Batch taxonomy resolution — single API call for all labels
         all_labels: list[str] = []
         seen_labels: set[str] = set()
-        for _, _, skills_list, _ in pending:
-            for s in skills_list:
+        for pending_result in pending:
+            for s in pending_result.skills_list:
                 if s.skill_name not in seen_labels:
                     seen_labels.add(s.skill_name)
                     all_labels.append(s.skill_name)
@@ -490,12 +633,22 @@ class SkillsExtractionAgent(BaseAgent):
 
         # Phase 3: Apply taxonomy + build results
         results = []
-        for item, tools, skills_list, meta in pending:
+        for pending_result in pending:
+            item = pending_result.item
+            tools = pending_result.tools
+            skills_list = pending_result.skills_list
+            meta = pending_result.meta
             if skills_list:
                 skills_list = apply_taxonomy_to_skills(skills_list, taxonomy_map)
             results.append(self._build_extraction_result(item, tools, skills_list, meta))
 
         self._extraction_store.save(results)
+        self._log_batch_complete(
+            pending,
+            parallel_enabled=parallel_enabled,
+            concurrency=concurrency,
+            batch_wall_clock_ms=batch_wall_clock_ms,
+        )
         # When payload["skills_extraction_alert"] is True, caller/orchestrator should
         # publish SkillsExtractionAlert so the Orchestration Agent can react.
 
@@ -505,21 +658,169 @@ class SkillsExtractionAgent(BaseAgent):
             payload=self._build_payload(event, results),
         )
 
+    def _extract_batch_parallel_bridge(
+        self,
+        work_items: Sequence[ExtractionWorkItem],
+        *,
+        concurrency: int,
+    ) -> list[PendingExtraction]:
+        """Run the async batch helper from the sync agent entrypoint."""
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(
+                self._extract_batch_parallel(work_items, concurrency=concurrency)
+            )
+
+        log.warning(
+            "skills_extraction_parallel_fallback_serial",
+            reason="event_loop_running",
+            total_jobs=len(work_items),
+            concurrency=concurrency,
+        )
+        return self._extract_batch_serial(work_items)
+
+    def _extract_batch_serial(
+        self,
+        work_items: Sequence[ExtractionWorkItem],
+    ) -> list[PendingExtraction]:
+        """Run the legacy serial batch flow with deprecated throttles preserved."""
+        pending: list[PendingExtraction] = []
+        total = len(work_items)
+        inter_job_delay = _serial_inter_job_delay()
+        chunk_size = _serial_chunk_size()
+        chunk_cooldown = _serial_chunk_cooldown()
+
+        for idx, item in enumerate(work_items):
+            if idx > 0 and inter_job_delay > 0:
+                time.sleep(inter_job_delay)
+
+            job_start = time.perf_counter()
+            try:
+                tools, skills_list, meta, _ = self._extract_work_item_no_taxonomy(item)
+            except Exception as exc:
+                tools = []
+                skills_list = []
+                meta = _job_extraction_failure_meta(item, exc)
+            wall_clock_ms = int((time.perf_counter() - job_start) * 1000)
+            pending_result = PendingExtraction(
+                item=item,
+                tools=tools,
+                skills_list=skills_list,
+                meta=meta,
+                wall_clock_ms=wall_clock_ms,
+            )
+            pending.append(pending_result)
+            self._log_job_complete(pending_result, execution_mode="serial")
+
+            chunk_pos = idx + 1
+            if chunk_size > 0 and chunk_pos % chunk_size == 0 and chunk_pos < total:
+                log.info(
+                    "skills_extraction_chunk_cooldown",
+                    processed=chunk_pos,
+                    total=total,
+                    cooldown_seconds=chunk_cooldown,
+                )
+                time.sleep(chunk_cooldown)
+
+        return pending
+
+    async def _extract_batch_parallel(
+        self,
+        work_items: Sequence[ExtractionWorkItem],
+        *,
+        concurrency: int,
+    ) -> list[PendingExtraction]:
+        """Run multiple jobs concurrently while preserving output ordering."""
+        semaphore = asyncio.Semaphore(concurrency)
+
+        async def _extract_one(item: ExtractionWorkItem) -> PendingExtraction:
+            async with semaphore:
+                job_start = time.perf_counter()
+                try:
+                    tools, skills_list, meta, _ = await self._extract_work_item_no_taxonomy_async(item)
+                except Exception as exc:
+                    tools = []
+                    skills_list = []
+                    meta = _job_extraction_failure_meta(item, exc)
+                wall_clock_ms = int((time.perf_counter() - job_start) * 1000)
+                pending_result = PendingExtraction(
+                    item=item,
+                    tools=tools,
+                    skills_list=skills_list,
+                    meta=meta,
+                    wall_clock_ms=wall_clock_ms,
+                )
+                self._log_job_complete(pending_result, execution_mode="parallel")
+                return pending_result
+
+        return list(await asyncio.gather(*[_extract_one(item) for item in work_items]))
+
+    def _log_job_complete(
+        self,
+        pending_result: PendingExtraction,
+        *,
+        execution_mode: str,
+    ) -> None:
+        """Emit one structured log line per finished job for observability and tuning."""
+        meta = pending_result.meta or {}
+        log.info(
+            "skills_extraction_job_complete",
+            execution_mode=execution_mode,
+            job_id=pending_result.item.job_id,
+            normalized_job_id=pending_result.item.normalized_job_id,
+            wall_clock_ms=pending_result.wall_clock_ms,
+            extraction_status=meta.get("extraction_status"),
+            dimensions_succeeded=list(meta.get("pass2_dimensions_succeeded") or []),
+            dimensions_failed=list(meta.get("pass2_dimensions_failed") or []),
+        )
+
+    def _log_batch_complete(
+        self,
+        pending: Sequence[PendingExtraction],
+        *,
+        parallel_enabled: bool,
+        concurrency: int,
+        batch_wall_clock_ms: int,
+    ) -> None:
+        """Emit a summary log line for one extraction batch."""
+        total_jobs = len(pending)
+        total_job_ms = sum(result.wall_clock_ms for result in pending)
+        utilization_denominator = max(batch_wall_clock_ms * max(concurrency, 1), 1)
+        concurrency_utilization = min(total_job_ms / utilization_denominator, 1.0)
+        log.info(
+            "skills_extraction_batch_complete",
+            total_jobs=total_jobs,
+            parallel_enabled=parallel_enabled,
+            concurrency=concurrency,
+            total_wall_clock_ms=batch_wall_clock_ms,
+            total_llm_calls=sum(int((result.meta or {}).get("pass2_llm_calls") or 0) for result in pending),
+            avg_per_job_ms=int(total_job_ms / total_jobs) if total_jobs else 0,
+            concurrency_utilization=round(concurrency_utilization, 4),
+            failed_jobs=sum(
+                1
+                for result in pending
+                if (result.meta or {}).get("extraction_status") == "failed"
+            ),
+            degraded_jobs=sum(
+                1
+                for result in pending
+                if (result.meta or {}).get("extraction_status") == "degraded"
+            ),
+        )
+
     def _extract_work_item_no_taxonomy_parallel_bridge(
         self, item: ExtractionWorkItem
     ) -> tuple[list[ToolRecord], list, dict, bool]:
         """Run one work item through the async intra-job path from sync agent code."""
-        try:
-            asyncio.get_running_loop()
-        except RuntimeError:
-            return asyncio.run(self._extract_work_item_no_taxonomy_async(item))
-
-        log.warning(
-            "skills_extraction_parallel_fallback_serial",
-            job_id=item.job_id,
-            reason="event_loop_running",
-        )
-        return self._extract_work_item_no_taxonomy(item)
+        pending = self._extract_batch_parallel_bridge([item], concurrency=1)
+        if not pending:
+            return [], [], _job_extraction_failure_meta(
+                item,
+                RuntimeError("parallel bridge returned no pending results"),
+            ), False
+        result = pending[0]
+        return result.tools, result.skills_list, result.meta, True
 
     def _extract_work_item_no_taxonomy(
         self, item: ExtractionWorkItem
@@ -868,6 +1169,45 @@ def _no_normalized_text_meta(
         },
         "pass2_llm_calls": 0,
         "pass2_llm_dimensions": [],
+        "pass2_dimensions_succeeded": [],
+        "pass2_dimensions_failed": [],
+    }
+
+
+def _job_extraction_failure_meta(
+    item: ExtractionWorkItem,
+    error: BaseException,
+) -> dict[str, Any]:
+    """Build metadata for unexpected job-level failures so the batch can continue."""
+    error_reason = f"{type(error).__name__}: {error}" if str(error) else type(error).__name__
+    log.error(
+        "skills_extraction_job_failed",
+        job_id=item.job_id,
+        title=item.title,
+        company=item.company,
+        error_type=type(error).__name__,
+        error_reason=error_reason,
+    )
+    return {
+        "success": False,
+        "extraction_failed": True,
+        "extraction_status": "failed",
+        "error_reason": error_reason,
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": 0,
+        "extraction_warnings": [error_reason],
+        "alert_skills_extraction": False,
+        "provider": "azure-openai",
+        "model": _llm_deployment_name(),
+        "context_signals": [],
+        "tasks": [],
+        "responsibilities": [],
+        "dimension_metas": {},
+        "pass2_llm_calls": 0,
+        "pass2_llm_dimensions": [],
+        "pass2_dimensions_succeeded": [],
+        "pass2_dimensions_failed": [],
     }
 
 
@@ -949,6 +1289,24 @@ def _build_combined_pass2_meta(
     else:
         extraction_status = "success"
 
+    pass2_dimensions_succeeded = [
+        dimension
+        for dimension, failed in (
+            ("tasks", tasks_failed),
+            ("responsibilities", resp_failed),
+            ("skills", skills_failed),
+        )
+        if not failed
+    ]
+    pass2_dimensions_failed = [
+        dimension
+        for dimension, failed in (
+            ("tasks", tasks_failed),
+            ("responsibilities", resp_failed),
+            ("skills", skills_failed),
+        )
+        if failed
+    ]
     warn = _coerce_pass2_warnings(ctx_meta, tasks_meta, resp_meta, skills_meta)
 
     return {
@@ -986,6 +1344,8 @@ def _build_combined_pass2_meta(
         },
         "pass2_llm_calls": 3,
         "pass2_llm_dimensions": ["tasks", "responsibilities", "skills"],
+        "pass2_dimensions_succeeded": pass2_dimensions_succeeded,
+        "pass2_dimensions_failed": pass2_dimensions_failed,
     }
 
 

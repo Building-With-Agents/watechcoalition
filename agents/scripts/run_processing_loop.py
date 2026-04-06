@@ -196,6 +196,7 @@ def main() -> None:
         )
 
         try:
+            iteration_start = time.perf_counter()
             # Stage 1: Normalize (may return 0 if all raw are already normalized)
             norm_out = norm_agent.process(trigger)
             norm_count = 0
@@ -208,12 +209,19 @@ def main() -> None:
 
             # Stage 2: Extract skills (FIFO — finds unextracted records itself)
             extract_event = norm_out or trigger
+            extract_start = time.perf_counter()
             extract_out = extract_agent.process(extract_event)
+            extract_duration_ms = int((time.perf_counter() - extract_start) * 1000)
             extract_count = 0
             if extract_out is not None:
                 records = extract_out.payload.get("records", [])
                 extract_count = len(records) if isinstance(records, list) else 0
-                log.info("extracted", count=extract_count, iteration=iteration)
+                log.info(
+                    "extracted",
+                    count=extract_count,
+                    iteration=iteration,
+                    extraction_duration_ms=extract_duration_ms,
+                )
                 total_extracted += extract_count
 
             # Stage 3: Enrich (processes extraction output records)
@@ -228,12 +236,15 @@ def main() -> None:
             enriched_total = _count_enriched()
             remaining_raw = _count_pending()
             remaining_unextracted = _count_unextracted()
+            iteration_wall_clock_ms = int((time.perf_counter() - iteration_start) * 1000)
 
             log.info(
                 "iteration_complete",
                 iteration=iteration,
                 norm_batch=norm_count,
                 extract_batch=extract_count,
+                extraction_duration_ms=extract_duration_ms,
+                iteration_wall_clock_ms=iteration_wall_clock_ms,
                 total_enriched=enriched_total,
                 remaining_raw=remaining_raw,
                 remaining_unextracted=remaining_unextracted,
