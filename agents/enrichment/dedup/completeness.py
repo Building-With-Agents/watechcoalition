@@ -1,39 +1,35 @@
-"""Field completeness scoring for fuzzy dedup survivor arbitration."""
+"""Field completeness counting for fuzzy dedup survivor arbitration."""
 
 from __future__ import annotations
 
 from datetime import datetime
 from typing import Any
 
-# Plan: salary > location > description richness; recency tie-breaker
-_WEIGHT_SALARY = 40
-_WEIGHT_LOCATION = 30
-_WEIGHT_DESC = 20
+_COMPLETENESS_FIELDS = (
+    "salary_range",
+    "location",
+    "zip",
+    "county",
+    "job_description",
+)
+
+
+def _has_value(value: Any) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    return True
 
 
 def completeness_score(row: dict[str, Any]) -> int:
     """
-    Higher = richer structured data for downstream analytics.
+    Return a simple populated-field count for survivor selection.
 
-    Uses only non-PII structural signals already on job_postings.
+    Week 6 issue semantics call for counting completeness, not weighting fields.
+    Recency remains the tie-breaker in ``publish_date_for_tiebreak``.
     """
-    score = 0
-    salary = row.get("salary_range")
-    if salary is not None and str(salary).strip():
-        score += _WEIGHT_SALARY
-
-    loc = row.get("location")
-    z = row.get("zip")
-    county = row.get("county")
-    if (loc and str(loc).strip()) or (z and str(z).strip()) or (county and str(county).strip()):
-        score += _WEIGHT_LOCATION
-
-    desc = row.get("job_description") or ""
-    if isinstance(desc, str):
-        ld = len(desc.strip())
-        score += min(_WEIGHT_DESC, ld // 100)
-
-    return score
+    return sum(1 for field in _COMPLETENESS_FIELDS if _has_value(row.get(field)))
 
 
 def publish_date_for_tiebreak(row: dict[str, Any]) -> datetime | None:

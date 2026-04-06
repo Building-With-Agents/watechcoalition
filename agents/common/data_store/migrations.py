@@ -123,7 +123,7 @@ _JOB_POSTINGS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS temporal_period TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS borderplex_subregion TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS is_duplicate BOOLEAN DEFAULT FALSE",
-    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS duplicate_cluster_id TEXT",
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS duplicate_cluster_id UUID",
     # Fuzzy dedup (IMP-018): cached embedding + content hash for same-company window search
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS dedup_text_hash TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS dedup_embedding vector(1536)",
@@ -164,6 +164,8 @@ _COMPANIES_LOCATION_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.companies ADD COLUMN IF NOT EXISTS normalized_location TEXT",
 ]
 
+_UUID_REGEX = r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+
 # Backfill token columns when llm_audit_log predates full DDL (idempotent)
 _LLM_AUDIT_LOG_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.llm_audit_log ADD COLUMN IF NOT EXISTS input_tokens INTEGER",
@@ -187,6 +189,119 @@ CREATE TABLE IF NOT EXISTS dbo.naics (
     updatedat TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 """
+
+_SERIAL_SEQUENCE_TARGETS = (
+    ("raw_ingested_jobs", "id"),
+    ("job_ingestion_runs", "id"),
+    ("normalized_jobs", "id"),
+    ("normalization_quarantine", "id"),
+    ("extracted_intelligence", "id"),
+    ("llm_audit_log", "id"),
+    ("employer_profiles", "id"),
+)
+
+
+def _sync_serial_sequence(engine: Engine, *, table_name: str, column_name: str = "id") -> None:
+    """Advance a PostgreSQL serial/identity sequence to at least ``MAX(column)``."""
+    try:
+        with engine.begin() as conn:
+            seq_name = conn.execute(
+                text(
+                    "SELECT pg_get_serial_sequence(CAST(:table_name AS text), CAST(:column_name AS text))"
+                ),
+                {"table_name": f"dbo.{table_name}", "column_name": column_name},
+            ).scalar()
+            if not seq_name:
+                return
+
+            max_value = conn.execute(
+                text(f'SELECT COALESCE(MAX("{column_name}"), 0) FROM dbo.{table_name}')
+            ).scalar()
+            max_value = int(max_value or 0)
+            if max_value > 0:
+                conn.execute(
+                    text("SELECT setval(CAST(:seq AS regclass), :v, true)"),
+                    {"seq": seq_name, "v": max_value},
+                )
+            else:
+                conn.execute(
+                    text("SELECT setval(CAST(:seq AS regclass), 1, false)"),
+                    {"seq": seq_name},
+                )
+    except Exception as exc:
+        log.warning(
+            "migration_sequence_sync_skipped",
+            table_name=table_name,
+            column_name=column_name,
+            error=str(exc),
+        )
+
+
+def _sync_agent_serial_sequences(engine: Engine) -> None:
+    for table_name, column_name in _SERIAL_SEQUENCE_TARGETS:
+        _sync_serial_sequence(engine, table_name=table_name, column_name=column_name)
+
+
+def _ensure_duplicate_cluster_id_uuid(engine: Engine) -> None:
+    """Convert ``job_postings.duplicate_cluster_id`` to ``UUID`` when legacy text remains."""
+    try:
+        with engine.begin() as conn:
+            row = conn.execute(
+                text(
+                    """
+                    SELECT data_type
+                    FROM information_schema.columns
+                    WHERE table_schema = 'dbo'
+                      AND table_name = 'job_postings'
+                      AND column_name = 'duplicate_cluster_id'
+                    """
+                )
+            ).first()
+            if not row:
+                return
+            data_type = str(row[0] or "").lower()
+            if data_type == "uuid":
+                return
+
+            invalid_count = conn.execute(
+                text(
+                    """
+                    SELECT COUNT(*)
+                    FROM dbo.job_postings
+                    WHERE duplicate_cluster_id IS NOT NULL
+                      AND BTRIM(duplicate_cluster_id::text) <> ''
+                      AND NOT (duplicate_cluster_id::text ~* :uuid_regex)
+                    """
+                ),
+                {"uuid_regex": _UUID_REGEX},
+            ).scalar()
+            invalid_count = int(invalid_count or 0)
+            if invalid_count:
+                log.warning(
+                    "migration_duplicate_cluster_id_invalid_values_reset_to_null",
+                    invalid_count=invalid_count,
+                )
+
+            conn.execute(
+                text(
+                    """
+                    ALTER TABLE dbo.job_postings
+                    ALTER COLUMN duplicate_cluster_id TYPE UUID
+                    USING CASE
+                        WHEN duplicate_cluster_id IS NULL THEN NULL
+                        WHEN BTRIM(duplicate_cluster_id::text) = '' THEN NULL
+                        WHEN duplicate_cluster_id::text ~* :uuid_regex THEN duplicate_cluster_id::uuid
+                        ELSE NULL
+                    END
+                    """
+                ),
+                {"uuid_regex": _UUID_REGEX},
+            )
+    except Exception as exc:
+        log.warning(
+            "migration_duplicate_cluster_id_uuid_skipped",
+            error=str(exc),
+        )
 
 
 def run_migrations(engine: Engine) -> None:
@@ -258,6 +373,9 @@ def run_migrations(engine: Engine) -> None:
                 statement=stmt,
                 error=str(exc),
             )
+
+    _ensure_duplicate_cluster_id_uuid(engine)
+    _sync_agent_serial_sequences(engine)
 
     for stmt in _NORMALIZED_JOBS_ALTER_STATEMENTS:
         try:
