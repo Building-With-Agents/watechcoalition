@@ -134,7 +134,9 @@ Rules:
 
 def classify_naics(job_title: str, job_description: str | None, session: Session) -> str:
     """
-    Return a ``naics_code`` present in ``dbo.naics`` or ``unknown``.
+    Return a ``naics_code`` present in ``dbo.naics`` or the literal ``"unknown"``.
+
+    Callers persist that string to ``job_postings.naics_code`` (VARCHAR), not SQL NULL.
 
     On LLM failure or empty candidates, returns ``unknown`` (no exception).
     """

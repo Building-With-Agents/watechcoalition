@@ -362,12 +362,16 @@ async def enrich_job_profile_soc(
 
 
 def enrich_job_profile_naics(job_profile: JobProfile, session: Session) -> None:
-    """Set ``job_profile.naics_code`` from ``dbo.naics`` via LLM, or ``None`` when unknown."""
+    """Set ``job_profile.naics_code`` from ``dbo.naics`` via LLM.
+
+    Returns a 6-digit catalog code or the literal ``"unknown"`` (same sentinel as employer
+    fields); ``unknown`` is kept as a string, not coerced to ``None``.
+    """
     from agents.enrichment.classifiers.naics_classifier import classify_naics
 
     desc = job_profile.description if isinstance(job_profile.description, str) else ""
     code = classify_naics(job_profile.title, desc, session)
-    job_profile.naics_code = None if code == "unknown" else code
+    job_profile.naics_code = (code or "unknown").strip() or "unknown"
 
 
 def enrich_job_profile_employer(job_profile: JobProfile, session: Session) -> None:

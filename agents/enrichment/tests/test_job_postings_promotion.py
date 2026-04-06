@@ -342,6 +342,7 @@ def test_apply_enrichment_binds_temporal_period_from_date_posted() -> None:
     assert params["temporal_period"] == "post_gpt4"
     assert "occupation_code" in params
     assert params["occupation_code"] is None
+    assert params["naics_code"] == "unknown"
 
 
 def test_apply_enrichment_binds_temporal_period_at_exact_boundary_date() -> None:

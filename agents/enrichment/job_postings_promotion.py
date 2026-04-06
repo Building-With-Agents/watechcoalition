@@ -565,7 +565,12 @@ def apply_enrichment_to_job_postings(
     derived_output_fields = derive_enrichment_output_fields(resolved)
 
     naics_raw = record_enriched_payload.get("naics_code")
-    naics_code: str | None = naics_raw.strip() if isinstance(naics_raw, str) and naics_raw.strip() else None
+    # Match employer-style sentinels: never persist SQL NULL when NAICS is missing/uncertain.
+    naics_code = (
+        naics_raw.strip()
+        if isinstance(naics_raw, str) and naics_raw.strip()
+        else "unknown"
+    )
 
     soc_raw = record_enriched_payload.get("soc_code")
     occupation_code: str | None = (

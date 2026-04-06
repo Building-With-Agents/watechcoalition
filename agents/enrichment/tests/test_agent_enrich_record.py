@@ -57,7 +57,7 @@ def test_enrich_record_happy_path_has_required_keys(
     assert out["overall_confidence"] == 0.88
     assert out["company"] == "Acme Inc."
     assert "enrichment_status" not in out
-    assert out.get("naics_code") is None
+    assert out.get("naics_code") == "unknown"
     assert out["employer_metadata"]["is_known_employer"] is True
     mock_build_employer.assert_called_once()
     mock_persist_employer.assert_called_once()

@@ -132,11 +132,11 @@ def main() -> None:
         print(f"  Raw result: {raw!r}")
 
         if raw == "unknown":
-            stored: str | None = None
+            stored = "unknown"
             sector_label = "unknown"
         else:
-            stored = raw.strip() or None
-            sector_label = _naics_title(session, stored) if stored else "unknown"
+            stored = raw.strip() or "unknown"
+            sector_label = _naics_title(session, stored) if stored != "unknown" else "unknown"
 
         print(f"  Stored code:      {stored!r}")
         print(f"  NAICS title:      {sector_label!r}")

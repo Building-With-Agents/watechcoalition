@@ -51,8 +51,9 @@ import json
 import os
 import sys
 from collections import defaultdict
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 import structlog
 from dotenv import load_dotenv
@@ -62,8 +63,8 @@ from sqlalchemy.orm import Session
 from agents.common.base_agent import BaseAgent
 from agents.common.data_store.database import check_db_connection, session_scope
 from agents.common.data_store.models import IndustrySector, NormalizedJob, TechnologyArea
-from agents.common.llm_client import invoke_skills_llm
 from agents.common.event_envelope import EventEnvelope
+from agents.common.llm_client import invoke_skills_llm
 from agents.common.types.job_profile import EmployerProfile
 from agents.enrichment.adapters.facade import ExternalEnrichmentFacade
 from agents.enrichment.async_bridge import run_coroutine
@@ -76,8 +77,8 @@ from agents.enrichment.classifiers.employer_classifier import (
     persist_employer_metadata,
 )
 from agents.enrichment.classifiers.naics_classifier import classify_naics
-from agents.enrichment.classifiers.soc_classifier import classify_soc
 from agents.enrichment.classifiers.quality import score_quality
+from agents.enrichment.classifiers.soc_classifier import classify_soc
 from agents.enrichment.classifiers.spam_preview import (
     SpamPreviewResult,
     apply_spam_tiers,
@@ -358,9 +359,7 @@ def _rollup_fuzzy_dedup_signals(
 ) -> tuple[int, int, int]:
     """Return (stub_inc, cluster_row_inc, matched_inc) per row, each 0 or 1."""
     stub_inc = int(
-        enriched.get("stub") is True
-        or enriched.get("fuzzy_dedup_stub") is True
-        or posting.get("stub") is True
+        enriched.get("stub") is True or enriched.get("fuzzy_dedup_stub") is True or posting.get("stub") is True
     )
 
     def _has_cluster(d: dict[str, Any]) -> bool:
@@ -552,7 +551,8 @@ class EnrichmentAgent(BaseAgent):
                     if soc_raw is not None and str(soc_raw).strip():
                         soc_classified_count += 1
                     naics_raw = enriched.get("naics_code") or posting.get("naics_code")
-                    if naics_raw is not None and str(naics_raw).strip():
+                    naics_st = str(naics_raw).strip() if naics_raw is not None else ""
+                    if naics_st and naics_st.lower() != "unknown":
                         naics_classified_count += 1
                     ds, dc, dm = _rollup_fuzzy_dedup_signals(enriched, posting)
                     dedup_stub_count += ds
@@ -790,7 +790,7 @@ class EnrichmentAgent(BaseAgent):
             try:
                 with session_scope() as session:
                     raw_naics = classify_naics(title, desc_str, session)
-                    base_payload["naics_code"] = None if raw_naics == "unknown" else raw_naics
+                    base_payload["naics_code"] = (raw_naics or "unknown").strip() or "unknown"
                     try:
                         raw_soc = run_coroutine(
                             classify_soc(
@@ -800,15 +800,11 @@ class EnrichmentAgent(BaseAgent):
                                 _enrichment_soc_llm(),
                             )
                         )
-                        base_payload["soc_code"] = (
-                            None if raw_soc == "unclassified" else raw_soc
-                        )
+                        base_payload["soc_code"] = None if raw_soc == "unclassified" else raw_soc
                         _soc = base_payload["soc_code"]
                         oc_value = _soc[:20] if _soc else None
                         session.execute(
-                            update(NormalizedJob)
-                            .where(NormalizedJob.id == nj_id)
-                            .values(occupation_code=oc_value)
+                            update(NormalizedJob).where(NormalizedJob.id == nj_id).values(occupation_code=oc_value)
                         )
                     except Exception as soc_exc:
                         log.warning(
@@ -890,7 +886,7 @@ class EnrichmentAgent(BaseAgent):
                 desc_str = desc_raw if isinstance(desc_raw, str) else None
                 try:
                     raw_naics = classify_naics(posting.get("title") or "", desc_str, session)
-                    merged["naics_code"] = None if raw_naics == "unknown" else raw_naics
+                    merged["naics_code"] = (raw_naics or "unknown").strip() or "unknown"
                 except Exception as naics_exc:
                     log.warning("enrich_record_naics_failed", error=str(naics_exc))
                     merged["naics_code"] = posting.get("naics_code")
@@ -926,11 +922,7 @@ class EnrichmentAgent(BaseAgent):
                     ep = build_employer_profile(desc_str, posting.get("company") or "", session)
                     merged["employer_metadata"] = ep.model_dump(mode="json")
                     cid_raw = merged.get("company_id")
-                    persist_company_id = (
-                        str(cid_raw).strip()
-                        if cid_raw is not None and str(cid_raw).strip()
-                        else None
-                    )
+                    persist_company_id = str(cid_raw).strip() if cid_raw is not None and str(cid_raw).strip() else None
                     persist_employer_metadata(
                         session,
                         ep,
