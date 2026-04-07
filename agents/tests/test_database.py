@@ -122,6 +122,7 @@ def test_job_postings_has_phase1_columns(engine: Engine) -> None:
         "quality_score",
         "is_spam",
         "spam_score",
+        "spam_tier",
         "overall_confidence",
         "field_confidence",
         "employer_profile_id",
