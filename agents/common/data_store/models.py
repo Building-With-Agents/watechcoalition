@@ -513,7 +513,12 @@ class AnalyticsPipelineState(Base):
 
 
 class SectorSummaryWeekly(Base):
-    """Weekly aggregates: job counts and avg/median salary by NAICS sector bucket."""
+    """Weekly aggregates by industry sector (Pair B — Analytics Step 6).
+
+    ``avg_salary`` stores the salary **median (p50)** (same basis as
+    :func:`agents.analytics.aggregators.salary_percentiles.compute_salary_percentiles`).
+    ``top_skills`` is the top 10 most frequent extracted ``skill_name`` values for the sector-week.
+    """
 
     __tablename__ = "sector_summary_weekly"
     __table_args__ = {"schema": "dbo"}
@@ -522,8 +527,14 @@ class SectorSummaryWeekly(Base):
     week_start: Mapped[date] = mapped_column(Date, nullable=False)
     sector: Mapped[str] = mapped_column(Text, nullable=False)
     posting_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    employer_count: Mapped[int] = mapped_column(Integer, nullable=False)
     avg_salary: Mapped[float | None] = mapped_column(Float, nullable=True)
-    median_salary: Mapped[float | None] = mapped_column(Float, nullable=True)
+    top_skills: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    computed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
 
 
 class GeoDemandWeekly(Base):

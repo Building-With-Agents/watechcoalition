@@ -38,13 +38,23 @@ with ``created_at`` / ``createdAt`` strictly after the watermark stored in
 run). If that column is NULL (never run), all qualifying rows are counted.
 Optional payload keys ``last_computed_at`` / ``analytics_last_computed_at`` override
 the DB watermark for backfill and tests.
+
+Thirteen-step batch runner: Step 1 is the minimum-data guard. Step 6 writes
+``dbo.sector_summary_weekly`` via :func:`agents.analytics.aggregators.sector_weekly.compute_sector_summary_weekly`.
+``compute_salary_percentiles`` is implemented for single dimensions without a week
+bucket; Step 6 reuses the same salary expression (:data:`SALARY_VALUE_SQL`) and
+``percentile_disc(0.5)`` in SQL grouped by sector + week (see module docstring in
+``sector_weekly.py``). Steps 2–5 and 7–13 are placeholders until implemented.
+
+Weekly rollups use ``analytics_week_start`` or ``week_start`` in the inbound payload
+(ISO date); if absent, the current UTC week’s Monday is used.
 """
 
 from __future__ import annotations
 
 import json
 import os
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -62,6 +72,9 @@ from agents.enrichment.classifiers.spam_preview import get_spam_thresholds
 log = structlog.get_logger()
 
 MINIMUM_NEW_RECORDS = 50
+
+# Thirteen-step analytics batch pipeline (Week 7+). Step 1 = minimum-data guard in ``run_pipeline``.
+ANALYTICS_PIPELINE_TOTAL_STEPS = 13
 
 _JOB_POSTINGS_GUARD_CACHE: dict[int, Table] = {}
 
@@ -120,6 +133,25 @@ def resolve_analytics_watermark(session: Session, payload: dict[str, Any]) -> da
     if explicit is not None:
         return explicit
     return get_last_analytics_success_at(session)
+
+
+def _coerce_analytics_week_start(payload: dict[str, Any]) -> date:
+    """ISO week bucket for sector/geo aggregates (UTC Monday-based week of ``analytics_week_start``)."""
+    raw = payload.get("analytics_week_start") or payload.get("week_start")
+    if isinstance(raw, date):
+        d = raw
+    elif isinstance(raw, datetime):
+        d = raw.date() if raw.tzinfo is None else raw.astimezone(timezone.utc).date()
+    elif isinstance(raw, str) and raw.strip():
+        d = date.fromisoformat(raw.strip()[:10])
+    else:
+        d = datetime.now(timezone.utc).date()
+    # Normalize to Monday (UTC) as week_start boundary, matching typical weekly rollups.
+    return d - timedelta(days=d.weekday())
+
+
+def _analytics_pipeline_step_placeholder(step: int) -> None:
+    log.debug("analytics_pipeline_step_placeholder", step=step, total_steps=ANALYTICS_PIPELINE_TOTAL_STEPS)
 
 
 def _job_postings_table_for_guard(engine: Engine) -> Table:
@@ -245,11 +277,40 @@ class AnalyticsAgent(BaseAgent):
             },
         )
 
+    def _run_analytics_pipeline_step_6_sector_summary_weekly(
+        self,
+        session: Session,
+        _event: EventEnvelope,
+        ctx: dict[str, Any],
+    ) -> None:
+        """Step 6 — weekly aggregates by industry sector (posting/employer counts, p50 salary, top skills)."""
+        from agents.analytics.aggregators.sector_weekly import compute_sector_summary_weekly
+
+        week_start = ctx["week_start"]
+        rows = compute_sector_summary_weekly(session, week_start)
+        ctx["sector_summary_weekly_rows"] = len(rows)
+        log.info(
+            "analytics_pipeline_step_6_complete",
+            week_start=str(week_start),
+            rows=len(rows),
+        )
+
     def run_pipeline(self, session: Session, event: EventEnvelope) -> EventEnvelope | None:
-        """Run analytics batch work. Minimum-data guard is always the first step."""
+        """Run the 13-step analytics batch. Step 1: minimum-data guard; Step 6: sector weekly rollup."""
         watermark = resolve_analytics_watermark(session, event.payload)
         if not check_minimum_data(session, watermark):
             return None
+
+        ctx: dict[str, Any] = {"week_start": _coerce_analytics_week_start(event.payload)}
+
+        for step in range(2, 6):
+            _analytics_pipeline_step_placeholder(step)
+
+        self._run_analytics_pipeline_step_6_sector_summary_weekly(session, event, ctx)
+
+        for step in range(7, ANALYTICS_PIPELINE_TOTAL_STEPS + 1):
+            _analytics_pipeline_step_placeholder(step)
+
         out = self._emit_analytics_refreshed(event)
         set_last_analytics_success_at(session, datetime.now(timezone.utc))
         return out

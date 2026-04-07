@@ -191,6 +191,14 @@ CREATE TABLE IF NOT EXISTS dbo.naics (
 );
 """
 
+# sector_summary_weekly schema upgrades (Step 6 — employer_count, top_skills, computed_at)
+_SECTOR_SUMMARY_WEEKLY_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.sector_summary_weekly ADD COLUMN IF NOT EXISTS employer_count INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE dbo.sector_summary_weekly ADD COLUMN IF NOT EXISTS top_skills JSONB NOT NULL DEFAULT '[]'::jsonb",
+    "ALTER TABLE dbo.sector_summary_weekly ADD COLUMN IF NOT EXISTS computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()",
+    "ALTER TABLE dbo.sector_summary_weekly DROP COLUMN IF EXISTS median_salary",
+]
+
 # Week 7 Pair B — weekly analytics aggregates (issues #180 / #181)
 _WEEK7_ANALYTICS_AGGREGATES_DDL = """
 CREATE TABLE IF NOT EXISTS dbo.sector_summary_weekly (
@@ -198,8 +206,10 @@ CREATE TABLE IF NOT EXISTS dbo.sector_summary_weekly (
     week_start DATE NOT NULL,
     sector TEXT NOT NULL,
     posting_count INTEGER NOT NULL,
+    employer_count INTEGER NOT NULL DEFAULT 0,
     avg_salary DOUBLE PRECISION,
-    median_salary DOUBLE PRECISION
+    top_skills JSONB NOT NULL DEFAULT '[]'::jsonb,
+    computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE TABLE IF NOT EXISTS dbo.geo_demand_weekly (
     id SERIAL PRIMARY KEY,
@@ -410,6 +420,19 @@ def run_migrations(engine: Engine) -> None:
                 "migration_week7_analytics_aggregates_skipped",
                 error=str(exc),
             )
+
+    # 4d. sector_summary_weekly — align with Analytics Step 6 ORM (idempotent alters)
+    if engine.dialect.name == "postgresql":
+        for stmt in _SECTOR_SUMMARY_WEEKLY_ALTER_STATEMENTS:
+            try:
+                with engine.begin() as conn:
+                    conn.execute(text(stmt))
+            except Exception as exc:
+                log.warning(
+                    "migration_sector_summary_weekly_alter_skipped",
+                    statement=stmt,
+                    error=str(exc),
+                )
 
     # 5. Add enrichment columns to dbo.job_postings (and related).
     #    Each ALTER runs in its own transaction so a single failure

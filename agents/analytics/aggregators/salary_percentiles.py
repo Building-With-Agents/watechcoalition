@@ -15,7 +15,8 @@ _ALLOWED_GROUP_COL_SQL: dict[str, str] = {
     "borderplex_subregion": "jp.borderplex_subregion",
 }
 
-_SALARY_EXPR = """(
+# Shared with sector / weekly aggregations — same basis as ``compute_salary_percentiles``.
+SALARY_VALUE_SQL = """(
     CASE
         WHEN nj.salary_min IS NOT NULL AND nj.salary_max IS NOT NULL
             THEN (nj.salary_min::double precision + nj.salary_max::double precision) / 2.0
@@ -24,6 +25,8 @@ _SALARY_EXPR = """(
         ELSE NULL::double precision
     END
 )"""
+
+_SALARY_EXPR = SALARY_VALUE_SQL
 
 
 def compute_salary_percentiles(
