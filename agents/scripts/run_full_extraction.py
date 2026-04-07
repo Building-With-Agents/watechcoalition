@@ -26,8 +26,9 @@ from dotenv import load_dotenv
 
 load_dotenv(_REPO_ROOT / ".env")
 
-from agents.common.data_store.database import session_scope
 from sqlalchemy import text
+
+from agents.common.data_store.database import session_scope
 
 
 def reset_unextracted_to_pending() -> int:
