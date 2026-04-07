@@ -110,7 +110,7 @@ def _enrichment_soc_llm() -> Callable[[str], str]:
         try:
             text, meta = invoke_skills_llm(
                 prompt,
-                agent_name="enrichment-agent",
+                agent_name="enrichment-soc-classifier",
             )
         except TypeError as exc:
             if "api_key" in str(exc).lower() or "auth" in str(exc).lower():

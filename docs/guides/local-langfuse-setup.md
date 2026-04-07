@@ -29,7 +29,7 @@ Wait ~30 seconds for all services to initialize.
 The docker-compose auto-provisions:
 - **Organization**: Computing For All
 - **Project**: job-intelligence-engine
-- **User**: glarson@localhost.dev / LocalDev123!
+- **User**: dev@localhost.dev / LocalDev123!
 - **API Keys**: `sk-lf-local-dev-secret` / `pk-lf-local-dev-public`
 
 Sign in at http://localhost:3000 with the credentials above.

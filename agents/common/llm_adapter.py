@@ -28,7 +28,7 @@ import structlog
 
 from agents.common.data_store.database import session_scope
 from agents.common.data_store.models import LLMAuditLog
-from agents.common.observability.langfuse_tracer import LangfuseTracer
+from agents.common.observability.langfuse import LangfuseTracer
 
 log = structlog.get_logger()
 

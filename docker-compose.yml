@@ -186,8 +186,8 @@ services:
       LANGFUSE_INIT_PROJECT_NAME: job-intelligence-engine
       LANGFUSE_INIT_PROJECT_PUBLIC_KEY: pk-lf-local-dev-public
       LANGFUSE_INIT_PROJECT_SECRET_KEY: sk-lf-local-dev-secret
-      LANGFUSE_INIT_USER_EMAIL: glarson@localhost.dev
-      LANGFUSE_INIT_USER_NAME: glarson
+      LANGFUSE_INIT_USER_EMAIL: dev@localhost.dev
+      LANGFUSE_INIT_USER_NAME: dev
       LANGFUSE_INIT_USER_PASSWORD: LocalDev123!
     restart: unless-stopped
 

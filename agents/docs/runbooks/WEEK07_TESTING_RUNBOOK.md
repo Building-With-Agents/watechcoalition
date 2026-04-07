@@ -97,7 +97,7 @@ If these queries return errors like `relation "dbo.skill_demand_weekly" does not
 
 ### Step 3 — Verify Langfuse connectivity
 
-Open http://localhost:3000 in your browser. Sign in with `glarson@localhost.dev` / `LocalDev123!`.
+Open http://localhost:3000 in your browser. Sign in with `dev@localhost.dev` / `LocalDev123!`.
 
 If the page does not load, check Docker:
 
@@ -194,7 +194,7 @@ docker compose ps
 All containers should show `running` or `Up (healthy)`. Then open http://localhost:3000 and confirm the login page loads.
 
 **Pre-provisioned account:**
-- Email: `glarson@localhost.dev`
+- Email: `dev@localhost.dev`
 - Password: `LocalDev123!`
 - Organization: Computing For All
 - Project: job-intelligence-engine
@@ -701,7 +701,7 @@ Common causes:
 
 **Login fails with provisioned credentials**
 
-The auto-provisioned user (`glarson@localhost.dev` / `LocalDev123!`) is created on first start only. If you wiped volumes and restarted, it should be re-provisioned. If not:
+The auto-provisioned user (`dev@localhost.dev` / `LocalDev123!`) is created on first start only. If you wiped volumes and restarted, it should be re-provisioned. If not:
 
 ```bash
 # Check if the init vars are set
