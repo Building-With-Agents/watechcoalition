@@ -23,6 +23,38 @@ from agents.common.data_store.models import Base
 
 log = structlog.get_logger()
 
+
+def _drop_legacy_employer_profiles_if_serial_pk(engine: Engine) -> None:
+    """Replace pre-UUID ``employer_profiles`` (SERIAL id) so ORM/create_all can recreate."""
+    if engine.dialect.name != "postgresql":
+        return
+    with engine.begin() as conn:
+        exists = conn.execute(
+            text(
+                """
+                SELECT EXISTS (
+                    SELECT 1 FROM information_schema.tables
+                    WHERE table_schema = 'dbo' AND table_name = 'employer_profiles'
+                )
+                """
+            )
+        ).scalar()
+        if not exists:
+            return
+        row = conn.execute(
+            text(
+                """
+                SELECT data_type FROM information_schema.columns
+                WHERE table_schema = 'dbo' AND table_name = 'employer_profiles'
+                  AND column_name = 'id'
+                """
+            )
+        ).first()
+        if row and row[0] in ("integer", "bigint", "smallint"):
+            conn.execute(text("DROP TABLE IF EXISTS dbo.employer_profiles CASCADE"))
+            log.info("migrations_employer_profiles_legacy_serial_dropped")
+
+
 _EXTRACTED_INTELLIGENCE_DDL = """
 CREATE TABLE IF NOT EXISTS dbo.extracted_intelligence (
     id SERIAL PRIMARY KEY,
@@ -85,18 +117,20 @@ _JOB_POSTINGS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS spam_score DOUBLE PRECISION",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS overall_confidence DOUBLE PRECISION",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB",
-    # Phase 1b — Week 5 enrichment output
+    # Phase 1b — Week 5 enrichment output (SOC persisted here; legacy Prisma column may be occupation_code)
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS soc_code TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS naics_code TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS temporal_period TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS borderplex_subregion TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS is_duplicate BOOLEAN DEFAULT FALSE",
-    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS duplicate_cluster_id TEXT",
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS duplicate_cluster_id UUID",
     # Fuzzy dedup (IMP-018): cached embedding + content hash for same-company window search
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS dedup_text_hash TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS dedup_embedding vector(1536)",
     # Zip code (flywheel #161): resolved during normalization from posting or postal_geo_data lookup
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
+    # Link to dbo.employer_profiles (UUID PK) after enrichment upsert
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS employer_profile_id UUID REFERENCES dbo.employer_profiles(id)",
 ]
 
 # Legacy Prisma cleanup: drop FK constraints and make NOT NULL columns nullable (#159).
@@ -119,6 +153,8 @@ _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS responsibilities TEXT",
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
     "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
+    "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS naics_code TEXT",
+    "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS employer_metadata JSONB",
 ]
 
 # Company HQ / location fields for enrichment resolve_location (#110)
@@ -127,6 +163,8 @@ _COMPANIES_LOCATION_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.companies ADD COLUMN IF NOT EXISTS state TEXT",
     "ALTER TABLE dbo.companies ADD COLUMN IF NOT EXISTS normalized_location TEXT",
 ]
+
+_UUID_REGEX = r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 
 # Backfill token columns when llm_audit_log predates full DDL (idempotent)
 _LLM_AUDIT_LOG_ALTER_STATEMENTS = [
@@ -140,18 +178,16 @@ _EXTRACTED_INTELLIGENCE_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.extracted_intelligence ADD COLUMN IF NOT EXISTS extraction_metadata JSONB",
 ]
 
-_EMPLOYER_PROFILES_DDL = """
-CREATE TABLE IF NOT EXISTS dbo.employer_profiles (
-    id SERIAL PRIMARY KEY,
-    company_id TEXT NOT NULL,
-    company_size TEXT,
-    ai_maturity_signal TEXT,
-    sector TEXT,
-    is_known_employer BOOLEAN NOT NULL DEFAULT FALSE,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+# NAICS reference (PostgreSQL). Azure SQL / MSSQL: table is created via SQLAlchemy
+# create_all when running seed_naics.py or agent migrations against that dialect.
+_NAICS_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.naics (
+    naics_code TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    seq_no INTEGER,
+    createdat TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updatedat TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS ix_employer_profiles_company_id
-    ON dbo.employer_profiles (company_id);
 """
 
 # Analytics Week 7 — posting_freshness + trajectory_map (ORM-aligned; idempotent with create_all).
@@ -178,6 +214,119 @@ CREATE TABLE IF NOT EXISTS dbo.trajectory_map (
 );
 """
 
+_SERIAL_SEQUENCE_TARGETS = (
+    ("raw_ingested_jobs", "id"),
+    ("job_ingestion_runs", "id"),
+    ("normalized_jobs", "id"),
+    ("normalization_quarantine", "id"),
+    ("extracted_intelligence", "id"),
+    ("llm_audit_log", "id"),
+    ("employer_profiles", "id"),
+)
+
+
+def _sync_serial_sequence(engine: Engine, *, table_name: str, column_name: str = "id") -> None:
+    """Advance a PostgreSQL serial/identity sequence to at least ``MAX(column)``."""
+    try:
+        with engine.begin() as conn:
+            seq_name = conn.execute(
+                text(
+                    "SELECT pg_get_serial_sequence(CAST(:table_name AS text), CAST(:column_name AS text))"
+                ),
+                {"table_name": f"dbo.{table_name}", "column_name": column_name},
+            ).scalar()
+            if not seq_name:
+                return
+
+            max_value = conn.execute(
+                text(f'SELECT COALESCE(MAX("{column_name}"), 0) FROM dbo.{table_name}')
+            ).scalar()
+            max_value = int(max_value or 0)
+            if max_value > 0:
+                conn.execute(
+                    text("SELECT setval(CAST(:seq AS regclass), :v, true)"),
+                    {"seq": seq_name, "v": max_value},
+                )
+            else:
+                conn.execute(
+                    text("SELECT setval(CAST(:seq AS regclass), 1, false)"),
+                    {"seq": seq_name},
+                )
+    except Exception as exc:
+        log.warning(
+            "migration_sequence_sync_skipped",
+            table_name=table_name,
+            column_name=column_name,
+            error=str(exc),
+        )
+
+
+def _sync_agent_serial_sequences(engine: Engine) -> None:
+    for table_name, column_name in _SERIAL_SEQUENCE_TARGETS:
+        _sync_serial_sequence(engine, table_name=table_name, column_name=column_name)
+
+
+def _ensure_duplicate_cluster_id_uuid(engine: Engine) -> None:
+    """Convert ``job_postings.duplicate_cluster_id`` to ``UUID`` when legacy text remains."""
+    try:
+        with engine.begin() as conn:
+            row = conn.execute(
+                text(
+                    """
+                    SELECT data_type
+                    FROM information_schema.columns
+                    WHERE table_schema = 'dbo'
+                      AND table_name = 'job_postings'
+                      AND column_name = 'duplicate_cluster_id'
+                    """
+                )
+            ).first()
+            if not row:
+                return
+            data_type = str(row[0] or "").lower()
+            if data_type == "uuid":
+                return
+
+            invalid_count = conn.execute(
+                text(
+                    """
+                    SELECT COUNT(*)
+                    FROM dbo.job_postings
+                    WHERE duplicate_cluster_id IS NOT NULL
+                      AND BTRIM(duplicate_cluster_id::text) <> ''
+                      AND NOT (duplicate_cluster_id::text ~* :uuid_regex)
+                    """
+                ),
+                {"uuid_regex": _UUID_REGEX},
+            ).scalar()
+            invalid_count = int(invalid_count or 0)
+            if invalid_count:
+                log.warning(
+                    "migration_duplicate_cluster_id_invalid_values_reset_to_null",
+                    invalid_count=invalid_count,
+                )
+
+            conn.execute(
+                text(
+                    """
+                    ALTER TABLE dbo.job_postings
+                    ALTER COLUMN duplicate_cluster_id TYPE UUID
+                    USING CASE
+                        WHEN duplicate_cluster_id IS NULL THEN NULL
+                        WHEN BTRIM(duplicate_cluster_id::text) = '' THEN NULL
+                        WHEN duplicate_cluster_id::text ~* :uuid_regex THEN duplicate_cluster_id::uuid
+                        ELSE NULL
+                    END
+                    """
+                ),
+                {"uuid_regex": _UUID_REGEX},
+            )
+    except Exception as exc:
+        log.warning(
+            "migration_duplicate_cluster_id_uuid_skipped",
+            error=str(exc),
+        )
+
 
 def run_migrations(engine: Engine) -> None:
     """Create agent tables and add Phase 1 columns. Safe to run multiple times."""
@@ -186,6 +335,9 @@ def run_migrations(engine: Engine) -> None:
     # 0. Ensure the dbo schema exists (required by ORM models)
     with engine.begin() as conn:
         conn.execute(text("CREATE SCHEMA IF NOT EXISTS dbo"))
+
+    # 0b. Drop legacy SERIAL-key employer_profiles before create_all (PostgreSQL only)
+    _drop_legacy_employer_profiles_if_serial_pk(engine)
 
     # 1. Create agent-managed tables via SQLAlchemy metadata
     Base.metadata.create_all(engine)
@@ -224,10 +376,13 @@ def run_migrations(engine: Engine) -> None:
                 error=str(exc),
             )
 
-    # 4. Create employer_profiles table
-    with engine.begin() as conn:
-        conn.execute(text(_EMPLOYER_PROFILES_DDL))
-    log.info("migrations_employer_profiles_created")
+    # 4. employer_profiles is created via Base.metadata.create_all (UUID PK, FK to companies)
+
+    # 4b. Create naics reference table (PostgreSQL DDL; other dialects rely on create_all)
+    if engine.dialect.name == "postgresql":
+        with engine.begin() as conn:
+            conn.execute(text(_NAICS_DDL))
+        log.info("migrations_naics_created")
 
     # 4b. Analytics tables (posting_freshness, trajectory_map) — explicit DDL mirrors ORM models.
     with engine.begin() as conn:
@@ -248,6 +403,9 @@ def run_migrations(engine: Engine) -> None:
                 statement=stmt,
                 error=str(exc),
             )
+
+    _ensure_duplicate_cluster_id_uuid(engine)
+    _sync_agent_serial_sequences(engine)
 
     for stmt in _NORMALIZED_JOBS_ALTER_STATEMENTS:
         try:

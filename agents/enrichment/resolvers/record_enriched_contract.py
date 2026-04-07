@@ -13,7 +13,8 @@ registry lives in ``.cursor/rules/integration-schema.mdc``.
 2. **Single-record** — flat per-posting payload from ``process()`` when there is no
    batch ``records`` list. Does **not** use ``record_enriched_schema_version`` (optional
    future). Use :data:`RECORD_ENRICHED_SINGLE_RECORD_CORE_KEYS` for stable core keys only;
-   optional keys (e.g. ``normalized_job_id``, spam preview extensions) may appear.
+   optional keys (e.g. ``normalized_job_id``, ``employer_metadata``, ``company_id`` for
+   employer profile persistence, spam preview extensions) may appear.
 """
 
 from __future__ import annotations

@@ -42,6 +42,7 @@ class OTelTracer(TracerBase):
         name: str,
         *,
         correlation_id: str,
+        input: str | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> Generator[Any, None, None]:
         start = time.perf_counter()

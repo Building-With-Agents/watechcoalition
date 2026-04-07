@@ -24,6 +24,7 @@ class TracerBase(ABC):
         name: str,
         *,
         correlation_id: str,
+        input: str | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> Generator[Any, None, None]:
         """Open a tracing span for a logical unit of work."""

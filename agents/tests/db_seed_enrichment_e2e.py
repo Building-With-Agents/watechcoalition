@@ -30,6 +30,8 @@ class EnrichmentE2ESeed:
     company_address_id: str
     job_posting_id: str
     normalized_job_id: int
+    #: Synthetic NAICS code inserted into ``dbo.naics`` when that table exists (for E2E realism).
+    e2e_naics_code: str | None = None
 
 
 def _require_tables(engine: Engine) -> None:
@@ -45,6 +47,25 @@ def _require_tables(engine: Engine) -> None:
     for t in needed:
         if not insp.has_table(t, schema="dbo"):
             raise RuntimeError(f"missing table dbo.{t}")
+
+
+def _seed_optional_naics_reference(engine: Engine, insp) -> str | None:
+    """Insert a dedicated NAICS row for E2E when ``dbo.naics`` exists; return code or None."""
+    if not insp.has_table("naics", schema="dbo"):
+        return None
+    code = "999998"
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                INSERT INTO dbo.naics (naics_code, title, seq_no, createdat, updatedat)
+                VALUES (:code, 'E2E enrichment pipeline reference row', NULL, NOW(), NOW())
+                ON CONFLICT (naics_code) DO NOTHING
+                """
+            ),
+            {"code": code},
+        )
+    return code
 
 
 def _company_ts_columns(insp) -> tuple[str, str]:
@@ -81,10 +102,56 @@ def _address_ts_columns(insp) -> tuple[str, str]:
     return c_created, c_updated
 
 
-def seed_enrichment_e2e(engine: Engine) -> EnrichmentE2ESeed:
-    """Insert one chain of rows; returns identifiers for cleanup."""
+def _resync_normalized_jobs_id_sequence(engine: Engine) -> None:
+    """Align ``normalized_jobs.id`` sequence with ``MAX(id)`` to avoid duplicate PK on insert.
+
+    Shared dev databases often have rows with ids higher than the sequence's next value
+    (restores, manual inserts). E2E seeds rely on autoincrement; without this, the second
+    and later tests can skip with ``duplicate key ... normalized_jobs_pkey``.
+    """
+    if engine.dialect.name != "postgresql":
+        return
+    with engine.begin() as conn:
+        seq = conn.execute(text("SELECT pg_get_serial_sequence('dbo.normalized_jobs', 'id')")).scalar()
+        if not seq:
+            return
+        max_id = conn.execute(text("SELECT MAX(id) FROM dbo.normalized_jobs")).scalar()
+        if max_id is None:
+            conn.execute(
+                text("SELECT setval(CAST(:seq AS regclass), 1, false)"),
+                {"seq": seq},
+            )
+        else:
+            conn.execute(
+                text("SELECT setval(CAST(:seq AS regclass), :mx, true)"),
+                {"seq": seq, "mx": int(max_id)},
+            )
+
+
+def seed_enrichment_e2e(
+    engine: Engine,
+    *,
+    job_title: str | None = None,
+    job_description: str | None = None,
+    company_short_name: str | None = None,
+    company_legal_name: str | None = None,
+) -> EnrichmentE2ESeed:
+    """Insert one chain of rows; returns identifiers for cleanup.
+
+    Optional overrides customize ``job_postings`` / ``normalized_jobs`` / ``companies`` text
+    for live LLM scenario tests. Defaults preserve legacy E2E literals.
+    """
+    _default_title = "E2E Title"
+    _default_desc = "E2E description body for enrichment promotion test."
+    _default_company = "E2E Co"
+    title = job_title if job_title is not None else _default_title
+    description = job_description if job_description is not None else _default_desc
+    company = company_short_name if company_short_name is not None else _default_company
+
     _require_tables(engine)
+    _resync_normalized_jobs_id_sequence(engine)
     insp = inspect(engine)
+    e2e_naics_code = _seed_optional_naics_reference(engine, insp)
     c_created, c_updated = _company_ts_columns(insp)
     zip_col = _address_zip_column(insp)
     a_created, a_updated = _address_ts_columns(insp)
@@ -111,6 +178,7 @@ def seed_enrichment_e2e(engine: Engine) -> EnrichmentE2ESeed:
             {"zip": zip_code},
         )
 
+        cname = company_legal_name if company_legal_name is not None else f"E2E Company {suffix}"
         conn.execute(
             text(
                 f"""
@@ -122,7 +190,7 @@ def seed_enrichment_e2e(engine: Engine) -> EnrichmentE2ESeed:
                 )
                 """
             ),
-            {"cid": company_id, "cname": f"E2E Company {suffix}"},
+            {"cid": company_id, "cname": cname},
         )
 
         conn.execute(
@@ -165,8 +233,8 @@ def seed_enrichment_e2e(engine: Engine) -> EnrichmentE2ESeed:
                     CAST(:jpid AS uuid),
                     CAST(:cid AS uuid),
                     CAST(:lid AS uuid),
-                    'E2E Title',
-                    'E2E description body for enrichment promotion test.',
+                    :jtitle,
+                    :jdesc,
                     false,
                     true,
                     'full-time',
@@ -189,6 +257,8 @@ def seed_enrichment_e2e(engine: Engine) -> EnrichmentE2ESeed:
                 "zip": zip_code,
                 "source": source,
                 "eid": external_id,
+                "jtitle": title,
+                "jdesc": description,
             },
         )
 
@@ -201,9 +271,9 @@ def seed_enrichment_e2e(engine: Engine) -> EnrichmentE2ESeed:
             region_id="e2e",
             source=source,
             external_id=external_id,
-            title="E2E Title",
-            company="E2E Co",
-            description="E2E description body for enrichment promotion test.",
+            title=title,
+            company=company,
+            description=description,
             city="El Paso",
             state_province="Texas",
             country="US",
@@ -266,12 +336,24 @@ def seed_enrichment_e2e(engine: Engine) -> EnrichmentE2ESeed:
         company_address_id=company_address_id,
         job_posting_id=job_posting_id,
         normalized_job_id=nj_id,
+        e2e_naics_code=e2e_naics_code,
     )
 
 
 def teardown_enrichment_e2e(engine: Engine, seed: EnrichmentE2ESeed) -> None:
     """Remove seeded rows (best-effort order)."""
     with engine.begin() as conn:
+        if seed.e2e_naics_code:
+            conn.execute(
+                text(
+                    """
+                    DELETE FROM dbo.naics
+                    WHERE naics_code = :code
+                      AND title = 'E2E enrichment pipeline reference row'
+                    """
+                ),
+                {"code": seed.e2e_naics_code},
+            )
         conn.execute(
             text("DELETE FROM dbo.extracted_intelligence WHERE normalized_job_id = :id"),
             {"id": seed.normalized_job_id},
