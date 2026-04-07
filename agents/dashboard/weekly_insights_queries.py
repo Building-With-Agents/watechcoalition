@@ -158,6 +158,40 @@ def fetch_skill_velocity_for_week(week_start_iso: str) -> tuple[str | None, pd.D
     return None, df
 
 
+@st.cache_data(ttl=300, show_spinner=False)
+def fetch_skill_co_occurrence_for_week(week_start_iso: str) -> tuple[str | None, pd.DataFrame]:
+    """Load ``dbo.skill_co_occurrence`` for ``week_start`` (analytics step 9).
+
+    Returns ``(missing_table_hint, dataframe)`` with success as ``(None, df)``.
+    Columns: ``skill_a``, ``skill_b``, ``co_occurrence_count``, ``week_start``, ``computed_at``.
+    Rows are ordered by co-occurrence count descending (up to 200; cap matches typical persist size).
+    """
+    engine = get_dashboard_engine()
+    sql = """
+        SELECT skill_a,
+               skill_b,
+               co_occurrence_count,
+               week_start,
+               computed_at
+        FROM dbo.skill_co_occurrence
+        WHERE week_start = CAST(%(ws)s AS date)
+        ORDER BY co_occurrence_count DESC
+        LIMIT 200
+    """
+    df, hint = read_sql_relation_safe(
+        sql,
+        engine,
+        params={"ws": week_start_iso},
+        user_hint=(
+            "`dbo.skill_co_occurrence` is missing. Apply migrations and run the Analytics co-occurrence "
+            "refresh (step 9) after `skill_demand_weekly` is populated for that week."
+        ),
+    )
+    if hint:
+        return hint, df
+    return None, df
+
+
 def max_computed_at(df: pd.DataFrame) -> datetime | None:
     """Latest ``computed_at`` in the top-skills frame, or ``None``."""
     if df.empty or "computed_at" not in df.columns:

@@ -10,6 +10,7 @@ import streamlit as st
 
 from agents.dashboard.pages_observability import _staleness_banner
 from agents.dashboard.weekly_insights_queries import (
+    fetch_skill_co_occurrence_for_week,
     fetch_skill_demand_weekly_availability,
     fetch_skill_velocity_for_week,
     fetch_top_skills_for_week,
@@ -33,7 +34,7 @@ def render_weekly_insights() -> None:
     st.title("Weekly Insights")
     st.caption(
         "Analytics aggregates by ISO week (Monday start). Read-only PostgreSQL; populate tables via the "
-        "Analytics agent (`skill_demand_weekly`, `skill_velocity`, …)."
+        "Analytics agent (`skill_demand_weekly`, `skill_velocity`, `skill_co_occurrence`, …)."
     )
 
     avail = fetch_skill_demand_weekly_availability()
@@ -182,3 +183,58 @@ def render_weekly_insights() -> None:
 
         with st.expander("Raw `skill_velocity` rows (same query order)"):
             st.dataframe(vel_df, width="stretch", hide_index=True)
+
+    st.markdown("---")
+    st.subheader("Skill co-occurrence")
+    st.caption(
+        "From **`dbo.skill_co_occurrence`** (analytics step 9): pairs of skills that appear together on "
+        "postings in the week (lexicographic pair order per IMP-021). "
+        "A full heatmap can be added later; this view lists the strongest pairs first."
+    )
+
+    co_hint, co_df = fetch_skill_co_occurrence_for_week(selected_label)
+    if co_hint:
+        st.warning(co_hint)
+    elif co_df.empty:
+        st.info(
+            f"No co-occurrence rows for **week_start = {selected_label}**. "
+            "Run the Analytics co-occurrence refresh (step 9) for this anchor once weekly skill demand exists."
+        )
+    else:
+        co_display = co_df.copy()
+        co_display["pair"] = co_display["skill_a"].astype(str) + " ↔ " + co_display["skill_b"].astype(str)
+        st.dataframe(
+            co_display[["pair", "co_occurrence_count"]].rename(
+                columns={
+                    "pair": "Skill pair",
+                    "co_occurrence_count": "Co-postings",
+                }
+            ),
+            width="stretch",
+            hide_index=True,
+        )
+
+        co_bar_cap = 15
+        co_bar = co_df.head(co_bar_cap).copy()
+        co_bar["pair"] = co_bar["skill_a"].astype(str) + " ↔ " + co_bar["skill_b"].astype(str)
+        co_bar = co_bar.sort_values("co_occurrence_count", ascending=True)
+        fig_co = px.bar(
+            co_bar,
+            x="co_occurrence_count",
+            y="pair",
+            orientation="h",
+            labels={
+                "co_occurrence_count": "Co-posting count",
+                "pair": "Skill pair",
+            },
+            title=f"Top {min(co_bar_cap, len(co_bar))} pairs by co-occurrence",
+        )
+        fig_co.update_layout(
+            margin=dict(t=40, b=40, l=20, r=20),
+            yaxis={"categoryorder": "total ascending"},
+            height=max(320, 22 * len(co_bar)),
+        )
+        st.plotly_chart(fig_co, width="stretch")
+
+        with st.expander("Raw `skill_co_occurrence` rows (query order)"):
+            st.dataframe(co_df, width="stretch", hide_index=True)
