@@ -1,0 +1,94 @@
+---
+description: "Week 7 Pair A (IMP-021) — skill/tool demand, velocity, co-occurrence, Weekly Insights contract"
+alwaysApply: false
+globs:
+  - "agents/analytics/**"
+  - "agents/common/data_store/**"
+  - "agents/dashboard/**"
+---
+
+# Skill & tool demand (Pair A — IMP-021)
+
+**Owners:** Ángel + Fabian. **Steps in scope:** 2, 3, 8, 9 + **Weekly Insights** Streamlit (see `.cursor/rules/streamlit-dashboard.mdc`).
+
+**Specs:** `docs/planning/ARCHITECTURE_DEEP.md` (table names + base columns); **IMP-021** (dependency ordering, refresh behavior, velocity/co-occurrence behavior, dashboard expectations). ORM + DDL: `agents/common/data_store/models.py`, `migrations.py`.
+
+**Coordinate:** Pair C (`role_snapshot_weekly`) consumes **`skill_demand_weekly`** — align schema before they ship.
+
+**Orchestration:** `agents/analytics/agent.py` `process()` runs **`refresh_skill_demand_weekly` → `refresh_tool_demand_weekly` → (`refresh_skill_velocity`, `refresh_skill_co_occurrence` only after step 2 succeeds)**, each in its own `session_scope()` — maps to ARCHITECTURE_DEEP **13-step** internal steps **2, 3, 8, 9**.
+
+---
+
+## Dependency order (partial DAG)
+
+| Step | Writes | Reads (logical) |
+|------|--------|------------------|
+| 2 | `skill_demand_weekly` | Enriched postings + canonical skill source for the week |
+| 3 | `tool_demand_weekly` | Same for tools |
+| 8 | `skill_velocity` | `skill_demand_weekly` (step 2) |
+| 9 | `skill_co_occurrence` | Same **`_SKILLS_EXPANDED`** posting-level skills as step 2 (does **not** read `skill_demand_weekly`); still run **after** step 2 in the pipeline for alignment |
+
+Steps **2 and 3** are independent (either order). **8 must not run before 2** (velocity reads `skill_demand_weekly`). **9** uses the same raw skill expansion as step 2 but should still follow step 2 in the schedule so dashboards and Pair A assumptions stay consistent — wrong ordering for step 8 yields empty or wrong velocity **without necessarily erroring**.
+
+---
+
+## Aggregation rules (Pair A)
+
+- **DB-side aggregation:** Prefer SQLAlchemy `func.*` + `GROUP BY` in PostgreSQL; avoid loading all rows into Python for counts.
+- **Spam / reject:** Exclude postings that are auto-rejected or equivalent spam tier (map IMP-021’s `spam_tier != "reject"` to the columns the pipeline actually uses, e.g. `is_spam` / `spam_score` / enrichment flags).
+- **Refresh for target week:** **Delete** existing rows for that `week_start`, then **insert** fresh rows (full replace per week — no partial incremental merge in v1).
+- **`computed_at`:** Every aggregate row (or a run-level timestamp agreed in implementation) must support **staleness** — dashboards warn if data is older than policy (IMP-021: **24h** guideline).
+- **Empty weeks:** Emit **explicit zero / empty result shape** for a week with no postings; do **not** omit the week (avoids gaps in time-series).
+- **Verification:** After a step, reconcile counts vs a manual recount baseline; **> 0.5%** drift should **fail the run** (log + stop), per IMP-021.
+
+---
+
+## Table columns — **frozen IMP-021 implementation (Week 7 final)**
+
+Authoritative ORM: `agents/common/data_store/models.py`. Aggregators: `agents/analytics/aggregators/demand_weekly.py`, `velocity.py`, `co_occurrence.py`. Older **ARCHITECTURE_DEEP** snippets that mention `growth_rate` or omit these columns are **superseded** by this section.
+
+### Step 2 — `dbo.skill_demand_weekly`
+
+- **Columns:** `skill_label`, `esco_uri`, `week_start`, `posting_count`, **`employer_count`**, `computed_at` (plus surrogate `id`).
+- **`employer_count`:** Distinct employers per skill per week — implemented as **`func.count(func.distinct(company_id))`** on the expanded skill rows joined to `job_postings` (stable dedup key), not `company_name`.
+- **`posting_count`:** Distinct `job_posting_id` per skill per week (same join path as IMP-021 step 2).
+
+### Step 3 — `dbo.tool_demand_weekly`
+
+- **Columns:** `tool_label`, `week_start`, `posting_count`, `computed_at` (plus `id`).
+
+### Step 8 — `dbo.skill_velocity`
+
+- **Columns:** `skill_label`, `esco_uri`, **`week`** (velocity anchor date), **`demand_count`**, **`week_over_week_change`**, **`four_week_trend`**, **`trend_confidence`** (plus `id`).
+- **ORM mapping:** Python attribute **`velocity_week`** → database column **`week`** (`mapped_column("week", ...)`).
+- **Semantics:** `demand_count` / `esco_uri` for the target week come from step 2’s `skill_demand_weekly` history; **`week_over_week_change`** stores the rolling pct-change scalar (finite floats only in DB — non-finite sanitized to `0.0`). Do **not** use the name `growth_rate` in new code or migrations.
+- **`four_week_trend` labels (IMP-021):** `accelerating` | `declining` | `stable` | `volatile` | `emerging`. Thresholds (e.g. 0.15 / -0.15 / 0.05) live as **module constants** in `velocity.py` (env-tunable if you extend later).
+- **Smoothing:** **4-week rolling** mean of weekly demand (from pivoted `posting_count`) before `pct_change` and classification.
+
+### Step 9 — `dbo.skill_co_occurrence`
+
+- **Columns:** `skill_a`, `skill_b`, **`co_occurrence_count`**, `week_start`, `computed_at` (plus `id`).
+- **Lexicographic pair order:** Before `itertools.combinations`, each posting’s skills are **`unique = sorted(set(skills))[:20]`** — so every emitted pair has **`skill_a` < `skill_b`** lexicographically.
+- **Caps:** Max **20** skill labels considered per posting; persist only the top **200** pairs by **`co_occurrence_count`** for the week.
+- **Data source:** `refresh_skill_co_occurrence` uses the same **`_SKILLS_EXPANDED`** SQL fragment as step 2 (`co_occurrence.py` imports from `demand_weekly.py`) — same joins and spam/dedup filters. The DAG still requires **running step 2 before step 9** for the same `week_start` so downstream dashboards and Pair A assumptions stay aligned; the co-occurrence refresh does not read `skill_demand_weekly` rows directly.
+
+---
+
+## Weekly Insights (dashboard)
+
+- **Read-only** DB access; **`PYTHON_DATABASE_URL`** consistent with `agents/common/data_store/database.py`.
+- **Chart mapping (IMP-021):** demand tables → horizontal bar (`px.bar`, `orientation="h"`); velocity → sparkline / line per skill; co-occurrence → heatmap (`px.imshow`).
+- **Partial data:** If step 2 ran but step 8 did not, show demand charts and a clear **“Velocity not yet available”** (or similar) message — **no blank panels**.
+- **Staleness:** If `computed_at` (or run timestamp) exceeds policy age, show a **staleness banner** in addition to Streamlit TTL rules.
+
+---
+
+## Events
+
+`AnalyticsRefreshed` / payload details: **`.cursor/rules/event-contracts.mdc`** and `agents/common/events/` — extend there when batch metadata changes.
+
+---
+
+## Schema changes
+
+Renaming or removing **contract columns** requires migration + updating this file + notifying **Pair C** and Week 8 consumers.
