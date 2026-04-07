@@ -54,9 +54,12 @@ def render_weekly_insights() -> None:
         return
 
     if not avail.week_starts:
+        st.warning("**`dbo.skill_demand_weekly` exists but has no rows yet.**")
         st.info(
-            "Weekly skill demand data is not loaded yet — **`skill_demand_weekly`** has no rows. "
-            "After ingestion and enrichment, run the Analytics agent to compute weekly aggregates."
+            "The table is ready, but no weekly aggregates have been written. Typical next steps:\n\n"
+            "1. Ensure jobs are ingested, normalized, enriched, and promoted where your analytics SQL expects them.\n"
+            "2. Run the Analytics agent (or your Week 7 aggregate refresh) for a **Monday `week_start`** anchor.\n"
+            "3. Re-open this page after refresh — the week dropdown appears once at least one `week_start` is present."
         )
         return
 
@@ -67,6 +70,7 @@ def render_weekly_insights() -> None:
         "Week (Monday start)",
         options=labels,
         index=0,
+        key="weekly_insights_week_start",
         help="Distinct `week_start` values from `skill_demand_weekly` (newest first).",
     )
 
@@ -76,9 +80,13 @@ def render_weekly_insights() -> None:
         return
 
     if skills_df.empty:
+        st.warning(
+            f"No skill rows found for **week_start = {selected_label}**, even though that week appears in the list."
+        )
         st.info(
-            f"No skill demand rows for **week_start = {selected_label}**. "
-            "Pick another week or re-run the aggregate refresh for that anchor."
+            "This usually means data changed since the week list was cached, the refresh wrote no skills for that "
+            "anchor, or rows were removed. Try another week, rerun the app from the Streamlit menu, or re-run the "
+            "analytics aggregate step for that `week_start`."
         )
         return
 
