@@ -71,11 +71,10 @@ python agents/scripts/db_check.py counts
 | job_postings | 596+ | 596 enriched + 172 reference |
 | llm_audit_log | 4,700+ | LLM call tracking |
 
-If all tables show 0, the database has not been seeded. Run both seed scripts in order:
+If all tables show 0, the database has not been seeded. Run the seed script (it handles both reference data and enriched pipeline data in one pass):
 
 ```bash
-python scripts/pg-seed-data/seed_pg_database.py     # reference data (~56k rows)
-python scripts/pg-seed-data/seed_agent_data.py       # enriched pipeline data (~9k rows)
+python scripts/pg-seed-data/seed_pg_database.py
 ```
 
 ### Step 2 — Verify Analytics aggregate tables
@@ -215,7 +214,7 @@ The mock provider returns ground truth data from `agents/eval/extraction_ground_
 
 ### Seed NAICS reference data (required for NAICS classification)
 
-The NAICS classifier queries the `dbo.naics` reference table. If you ran `seed_agent_data.py`, NAICS data (2,125 rows) is already seeded. Otherwise, seed it manually:
+The NAICS classifier queries the `dbo.naics` reference table. If you ran `seed_pg_database.py`, NAICS data (2,125 rows) is already seeded. Otherwise, seed it manually:
 
 ```bash
 python scripts/seed_naics.py --env local
@@ -326,7 +325,7 @@ python agents/scripts/run_processing_loop.py --batch-size 50 --delay 2
 Or seed from the prepared dataset:
 
 ```bash
-python scripts/pg-seed-data/seed_agent_data.py
+python scripts/pg-seed-data/seed_pg_database.py
 ```
 
 ### Spot-check enrichment columns
@@ -807,7 +806,7 @@ python agents/scripts/db_check.py query "SELECT COUNT(*) AS enriched_jobs FROM d
 If fewer than 50 enriched records exist, the minimum data guard may prevent aggregation. Seed more data:
 
 ```bash
-python scripts/pg-seed-data/seed_agent_data.py
+python scripts/pg-seed-data/seed_pg_database.py
 ```
 
 Or run the processing loop to enrich more records:
