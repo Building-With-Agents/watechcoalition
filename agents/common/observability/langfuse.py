@@ -8,6 +8,7 @@ Env vars: LANGFUSE_SECRET_KEY, LANGFUSE_PUBLIC_KEY, LANGFUSE_BASE_URL.
 
 from __future__ import annotations
 
+import contextlib
 import time
 from collections.abc import Generator
 from contextlib import contextmanager
@@ -73,10 +74,8 @@ class LangfuseTracer(TracerBase):
                 finally:
                     self._observation_stack.pop()
         finally:
-            try:
+            with contextlib.suppress(Exception):
                 self._client.flush()
-            except Exception:
-                pass
 
     # ------------------------------------------------------------------
     # Span (one generation / LLM call)
@@ -146,10 +145,8 @@ class LangfuseTracer(TracerBase):
                     self._observation_stack.pop()
         finally:
             # Flush to ensure trace is sent (non-blocking batch flush)
-            try:
+            with contextlib.suppress(Exception):
                 self._client.flush()
-            except Exception:
-                pass
 
     # ------------------------------------------------------------------
     # Event logging
@@ -192,10 +189,8 @@ class LangfuseTracer(TracerBase):
         obs = self._observation_stack[-1] if self._observation_stack else None
         if obs is None:
             return
-        try:
+        with contextlib.suppress(Exception):
             obs.update(metadata={"latency_seconds": round(seconds, 4)})
-        except Exception:
-            pass
 
     def increment_counter(self, metric: str, *, value: int = 1) -> None:
         # Record in-memory for test assertions
@@ -207,10 +202,8 @@ class LangfuseTracer(TracerBase):
         obs = self._observation_stack[-1] if self._observation_stack else None
         if obs is None:
             return
-        try:
+        with contextlib.suppress(Exception):
             obs.update(metadata={f"counter_{metric}": value})
-        except Exception:
-            pass
 
     def record_error(self, error: Exception, *, context: dict[str, Any] | None = None) -> None:
         # Record in-memory for test assertions
@@ -224,14 +217,12 @@ class LangfuseTracer(TracerBase):
         obs = self._observation_stack[-1] if self._observation_stack else None
         if obs is None:
             return
-        try:
+        with contextlib.suppress(Exception):
             obs.update(
                 level="ERROR",
                 status_message=f"{type(error).__name__}: {error}",
                 metadata={"error_context": context or {}},
             )
-        except Exception:
-            pass
 
     # ------------------------------------------------------------------
     # Lifecycle
