@@ -34,11 +34,17 @@ from agents.analytics.clustering.config import (
     DEFAULT_EMERGENCE_MIN_DISTINCT_EMPLOYERS,
     DEFAULT_EMERGENCE_MIN_NOVEL_SKILLS,
     DEFAULT_EMERGENCE_MIN_QUALITY_SCORE,
+    cluster_distance_metric,
+    cluster_min_cluster_size,
+    cluster_min_samples,
+    cluster_min_total_postings,
+    cluster_selection_epsilon,
 )
 from agents.analytics.clustering.embeddings import (
     embed_posting_features,
     embed_prepared_clustering_texts,
 )
+from agents.analytics.clustering.pipeline import run_clustering
 from agents.analytics.clustering.text import (
     build_clustering_text,
     build_clustering_texts,
@@ -61,6 +67,11 @@ from agents.analytics.clustering.types import (
 __all__ = [
     "build_clustering_text",
     "build_clustering_texts",
+    "cluster_distance_metric",
+    "cluster_min_cluster_size",
+    "cluster_min_samples",
+    "cluster_min_total_postings",
+    "cluster_selection_epsilon",
     "ClusterSummary",
     "ClusteredPosting",
     "ClusteringResult",
@@ -85,5 +96,6 @@ __all__ = [
     "prepare_clustering_texts",
     "RankedSkill",
     "RankedTool",
+    "run_clustering",
     "clustering_text_hash",
 ]
