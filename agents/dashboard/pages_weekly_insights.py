@@ -10,6 +10,9 @@ import streamlit as st
 
 from agents.dashboard.pages_observability import _staleness_banner
 from agents.dashboard.weekly_insights_queries import (
+    fetch_insight_summary_placeholder,
+    fetch_posting_freshness_placeholder,
+    fetch_role_snapshot_weekly_placeholder,
     fetch_skill_co_occurrence_for_week,
     fetch_skill_demand_weekly_availability,
     fetch_skill_velocity_for_week,
@@ -34,7 +37,7 @@ def render_weekly_insights() -> None:
     st.title("Weekly Insights")
     st.caption(
         "Analytics aggregates by ISO week (Monday start). Read-only PostgreSQL; populate tables via the "
-        "Analytics agent (`skill_demand_weekly`, `skill_velocity`, `skill_co_occurrence`, …)."
+        "Analytics agent (Pair A–D aggregates: skills, velocity, co-occurrence, roles, freshness, summaries, …)."
     )
 
     avail = fetch_skill_demand_weekly_availability()
@@ -238,3 +241,90 @@ def render_weekly_insights() -> None:
 
         with st.expander("Raw `skill_co_occurrence` rows (query order)"):
             st.dataframe(co_df, width="stretch", hide_index=True)
+
+    # --- Phase 3 cross-pair placeholders (swap queries in weekly_insights_queries when schema is final) ---
+    st.markdown("---")
+    st.subheader("Role salary snapshot")
+    st.caption(
+        "Cross-pair (**`dbo.role_snapshot_weekly`**, Pair C). Placeholder: tabular p25 / median / p75. "
+        f"Filtered to **week_start = {selected_label}** when that column exists. "
+        "Replace with box/violin plots once the schema is stable."
+    )
+    rs_hint, rs_df = fetch_role_snapshot_weekly_placeholder(selected_label)
+    if rs_hint:
+        st.warning(rs_hint)
+    elif rs_df.empty:
+        st.info(
+            f"No role snapshot rows for **week_start = {selected_label}** (or table is empty). "
+            "Pair C aggregates must run for this anchor before salary distributions appear."
+        )
+    else:
+        st.dataframe(rs_df, width="stretch", hide_index=True)
+
+    st.markdown("---")
+    st.subheader("Posting lifecycle")
+    st.caption(
+        "Cross-pair (**`dbo.posting_freshness`**). Placeholder: bucket counts and average days listed "
+        "(runbook shape). Week filtering can be added when the table carries `week_start`."
+    )
+    pf_hint, pf_df = fetch_posting_freshness_placeholder()
+    if pf_hint:
+        st.warning(pf_hint)
+    elif pf_df.empty:
+        st.info(
+            "No posting freshness rows yet. Lifecycle metrics will populate after the analytics "
+            "freshness aggregate is implemented and run."
+        )
+    else:
+        st.dataframe(pf_df, width="stretch", hide_index=True)
+        if "freshness_bucket" in pf_df.columns and "posting_count" in pf_df.columns:
+            pf_chart = pf_df
+            if "avg_days_listed" in pf_df.columns:
+                pf_chart = pf_df.sort_values(
+                    "avg_days_listed",
+                    ascending=True,
+                    na_position="last",
+                )
+            fig_pf = px.bar(
+                pf_chart,
+                x="freshness_bucket",
+                y="posting_count",
+                labels={
+                    "freshness_bucket": "Freshness bucket",
+                    "posting_count": "Postings",
+                },
+                title="Postings by freshness bucket",
+            )
+            fig_pf.update_layout(margin=dict(t=40, b=80, l=40, r=20), xaxis_tickangle=-30)
+            st.plotly_chart(fig_pf, width="stretch")
+
+    st.markdown("---")
+    st.subheader("Weekly insight summary")
+    st.caption(
+        "Cross-pair (**`dbo.insight_summary`**, Pair D). Shows the **latest** row only in this placeholder; "
+        "tie to the selected week when `week_start` (or equivalent) exists on the table."
+    )
+    ins_hint, ins_df = fetch_insight_summary_placeholder()
+    if ins_hint:
+        st.warning(ins_hint)
+    elif ins_df.empty:
+        st.info(
+            "No insight summary rows yet. After Pair D wires the LLM/template writer, "
+            "`is_llm_generated` and `summary_type` will appear here."
+        )
+    else:
+        row = ins_df.iloc[0]
+        raw_flag = row.get("is_llm_generated")
+        is_llm = raw_flag is True or str(raw_flag).lower() in ("true", "1", "t")
+        source_label = "LLM-generated" if is_llm else "Template / deterministic"
+        col_a, col_b, col_c = st.columns(3)
+        col_a.metric("Summary source", source_label)
+        col_b.metric("Type", str(row.get("summary_type") or "—"))
+        created = row.get("created_at")
+        col_c.metric("Created", str(created)[:19] if created is not None else "—")
+        body = row.get("summary_text") or ""
+        with st.expander("Summary text"):
+            if body:
+                st.markdown(str(body))
+            else:
+                st.caption("Empty `summary_text` for this row.")

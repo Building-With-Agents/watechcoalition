@@ -14,6 +14,42 @@ from agents.dashboard.relation_safe import read_sql_relation_safe
 
 _SKILL_DEMAND_TABLE = "skill_demand_weekly"
 
+# ---------------------------------------------------------------------------
+# Cross-pair aggregates (Phase 3 placeholders — replace SQL when schema is final)
+# CONTRACT refs: agents/docs/runbooks/WEEK07_TESTING_RUNBOOK.md (Tables 3, 8, Insight)
+# ---------------------------------------------------------------------------
+
+
+def _read_cross_pair_sql(
+    sql: str,
+    *,
+    params: dict[str, Any] | None,
+    missing_table_hint: str,
+) -> tuple[str | None, pd.DataFrame]:
+    """``read_sql_relation_safe`` plus soft-fail on missing/renamed columns (ProgrammingError)."""
+    engine = get_dashboard_engine()
+    try:
+        df, hint = read_sql_relation_safe(
+            sql,
+            engine,
+            params=params,
+            user_hint=missing_table_hint,
+        )
+        if hint:
+            return hint, df
+        return None, df
+    except Exception as exc:
+        msg = str(exc).lower()
+        if "does not exist" in msg:
+            return (
+                "Cross-pair query failed (table or column missing / renamed). "
+                "Adjust the SQL in `fetch_role_snapshot_weekly_placeholder`, "
+                "`fetch_posting_freshness_placeholder`, or `fetch_insight_summary_placeholder` "
+                "when Pair C/D schema lands.",
+                pd.DataFrame(),
+            )
+        raise
+
 
 def _to_date(value: Any) -> date:
     """Normalize pandas/DB week values to ``date`` for selectbox keys."""
@@ -190,6 +226,78 @@ def fetch_skill_co_occurrence_for_week(week_start_iso: str) -> tuple[str | None,
     if hint:
         return hint, df
     return None, df
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def fetch_role_snapshot_weekly_placeholder(week_start_iso: str) -> tuple[str | None, pd.DataFrame]:
+    """Pair C — ``dbo.role_snapshot_weekly`` salary snapshot for the selected week (placeholder).
+
+    Expected columns (Week 7 runbook): ``role_title``, ``posting_count``, ``median_salary``,
+    ``p25_salary``, ``p75_salary``. Requires ``week_start`` on the table; swap SQL if Pair C differs.
+    """
+    sql = """
+        SELECT role_title,
+               posting_count,
+               median_salary,
+               p25_salary,
+               p75_salary
+        FROM dbo.role_snapshot_weekly
+        WHERE week_start = CAST(%(ws)s AS date)
+        ORDER BY posting_count DESC
+        LIMIT 30
+    """
+    return _read_cross_pair_sql(
+        sql,
+        params={"ws": week_start_iso},
+        missing_table_hint=(
+            "`dbo.role_snapshot_weekly` is not available yet (Pair C). "
+            "Salary distribution charts will appear after migrations and the role snapshot refresh."
+        ),
+    )
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def fetch_posting_freshness_placeholder() -> tuple[str | None, pd.DataFrame]:
+    """Posting lifecycle buckets (placeholder). Week 7 runbook: global bucket table (no week filter in sample)."""
+    sql = """
+        SELECT freshness_bucket,
+               posting_count,
+               avg_days_listed
+        FROM dbo.posting_freshness
+        ORDER BY avg_days_listed NULLS LAST
+        LIMIT 50
+    """
+    return _read_cross_pair_sql(
+        sql,
+        params=None,
+        missing_table_hint=(
+            "`dbo.posting_freshness` is not available yet. "
+            "Lifecycle metrics will appear after the posting-freshness aggregate is implemented."
+        ),
+    )
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def fetch_insight_summary_placeholder() -> tuple[str | None, pd.DataFrame]:
+    """Latest weekly insight row (placeholder). Runbook: ``summary_type``, ``is_llm_generated``, ``summary_text``."""
+    sql = """
+        SELECT id,
+               summary_type,
+               is_llm_generated,
+               summary_text,
+               created_at
+        FROM dbo.insight_summary
+        ORDER BY created_at DESC
+        LIMIT 1
+    """
+    return _read_cross_pair_sql(
+        sql,
+        params=None,
+        missing_table_hint=(
+            "`dbo.insight_summary` is not available yet (Pair D). "
+            "Summary source labels will appear after the analytics insight writer is wired."
+        ),
+    )
 
 
 def max_computed_at(df: pd.DataFrame) -> datetime | None:
