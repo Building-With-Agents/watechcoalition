@@ -7,6 +7,7 @@ Loads .env from repo root so Azure env vars are available when this module is us
 
 from __future__ import annotations
 
+import json as _json
 import os
 import re
 import time
@@ -28,6 +29,18 @@ from agents.common.llm_adapter import (
 load_repo_root_dotenv()
 
 AGENT_NAME = "skills-extraction-agent"
+
+
+def _parse_output_for_trace(text: str, max_chars: int = 4000) -> str | dict | list:
+    """Parse JSON output so Langfuse renders it as a collapsible tree.
+
+    Returns a parsed dict/list if valid JSON, otherwise the raw string truncated.
+    """
+    truncated = text[:max_chars]
+    try:
+        return _json.loads(truncated)
+    except (ValueError, TypeError):
+        return truncated
 log = structlog.get_logger()
 
 # Maps audit-log agent_name values to clean Langfuse span names.
@@ -147,7 +160,7 @@ def invoke_skills_llm(
                         "input_tokens": meta.get("tokens_used", 0) // 2,
                         "output_tokens": meta.get("tokens_used", 0) // 2,
                         "cost_usd": meta["cost_usd"],
-                        "output": text[:4000],
+                        "output": _parse_output_for_trace(text),
                     })
                 except Exception:
                     pass
@@ -233,7 +246,7 @@ def invoke_skills_llm(
                             "input_tokens": input_tokens,
                             "output_tokens": output_tokens,
                             "cost_usd": round(cost_usd, 6),
-                            "output": text[:4000],
+                            "output": _parse_output_for_trace(text),
                         },
                     )
                 except Exception:
@@ -368,7 +381,7 @@ def invoke_structured_extraction_llm(
                         "input_tokens": meta.get("tokens_used", 0) // 2,
                         "output_tokens": meta.get("tokens_used", 0) // 2,
                         "cost_usd": meta["cost_usd"],
-                        "output": (parsed.model_dump_json() if hasattr(parsed, "model_dump_json") else str(parsed))[:4000] if parsed else "mock_parse_failed",
+                        "output": parsed.model_dump(mode="json") if hasattr(parsed, "model_dump") else _parse_output_for_trace(str(parsed)) if parsed else "mock_parse_failed",
                     })
                 except Exception:
                     pass
@@ -495,7 +508,7 @@ def invoke_structured_extraction_llm(
                         "input_tokens": input_tokens_est,
                         "output_tokens": output_tokens_est,
                         "cost_usd": round(cost_usd, 6),
-                        "output": (parsed.model_dump_json() if hasattr(parsed, "model_dump_json") else str(parsed))[:4000] if parsed is not None else "structured_output_empty",
+                        "output": parsed.model_dump(mode="json") if hasattr(parsed, "model_dump") else _parse_output_for_trace(str(parsed)) if parsed is not None else "structured_output_empty",
                     })
                 except Exception:
                     pass

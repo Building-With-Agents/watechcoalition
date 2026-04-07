@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import contextlib
 import hashlib
+import json as _json
 import os
 import time
 import uuid
@@ -31,6 +32,16 @@ from agents.common.data_store.models import LLMAuditLog
 from agents.common.observability.langfuse import LangfuseTracer
 
 log = structlog.get_logger()
+
+
+def _parse_output_for_trace(text: str, max_chars: int = 4000) -> str | dict | list:
+    """Parse JSON output so Langfuse renders it as a collapsible tree."""
+    truncated = text[:max_chars]
+    try:
+        return _json.loads(truncated)
+    except (ValueError, TypeError):
+        return truncated
+
 
 # Optional bus for emitting SkillsExtractionAlert; set via register_alert_bus()
 _alert_bus: Any = None
@@ -208,7 +219,7 @@ def complete(
                         "input_tokens": result["input_tokens"],
                         "output_tokens": result["output_tokens"],
                         "cost_usd": result["cost_usd"],
-                        "output": result["content"][:4000],
+                        "output": _parse_output_for_trace(result["content"]),
                     })
                 except Exception:
                     pass
@@ -288,7 +299,7 @@ def complete(
                                     "input_tokens": input_tokens,
                                     "output_tokens": output_tokens,
                                     "cost_usd": round(cost_usd, 6),
-                                    "output": content[:4000],
+                                    "output": _parse_output_for_trace(content),
                                 },
                             )
                         except Exception:
