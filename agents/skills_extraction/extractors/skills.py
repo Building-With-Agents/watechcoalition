@@ -59,13 +59,9 @@ class _LLMSpan(BaseModel):
 
 
 class _LLMSkill(BaseModel):
-    """Single skill from LLM structured output.
+    """Single skill from LLM structured output."""
 
-    Uses ``label`` (the prompt field name) and maps to ``skill_name`` on
-    SkillRecord during post-processing.
-    """
-
-    label: str = ""
+    skill_name: str = ""
     type: str = "Technical"
     confidence: float = Field(default=0.5, ge=0.0, le=1.0)
     required_flag: bool | None = None
@@ -107,7 +103,7 @@ def _llm_skill_to_record(raw: _LLMSkill) -> SkillRecord | None:
             end_char=span.end_char,
         )
         return SkillRecord(
-            skill_name=raw.label.strip() or "unknown",
+            skill_name=raw.skill_name.strip() or "unknown",
             type=raw.type,
             confidence=raw.confidence,
             required_flag=raw.required_flag,
@@ -242,9 +238,9 @@ def extract_skills(
     for raw in parsed.skills:
         rec = _llm_skill_to_record(raw)
         if rec is None:
-            log.warning("skills_extraction_skip_invalid_skill", label=raw.label)
+            log.warning("skills_extraction_skip_invalid_skill", label=raw.skill_name)
             metadata["extraction_warnings"] = metadata.get("extraction_warnings", []) + [
-                f"Invalid skill skipped: {raw.label}"
+                f"Invalid skill skipped: {raw.skill_name}"
             ]
             continue
         skills.append(rec)
@@ -393,9 +389,9 @@ def extract_skills_no_taxonomy(
     for raw in parsed.skills:
         rec = _llm_skill_to_record(raw)
         if rec is None:
-            log.warning("skills_extraction_skip_invalid_skill", label=raw.label)
+            log.warning("skills_extraction_skip_invalid_skill", label=raw.skill_name)
             metadata["extraction_warnings"] = metadata.get("extraction_warnings", []) + [
-                f"Invalid skill skipped: {raw.label}"
+                f"Invalid skill skipped: {raw.skill_name}"
             ]
             continue
         skills.append(rec)

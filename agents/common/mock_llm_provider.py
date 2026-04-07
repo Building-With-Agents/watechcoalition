@@ -52,10 +52,10 @@ def _next_gt_record() -> dict:
 
 
 def _map_skills_for_llm(gt: dict) -> list[dict]:
-    """Map GT skill records to _LLMSkill format (label instead of skill_name)."""
+    """Map GT skill records to _LLMSkill format."""
     return [
         {
-            "label": s.get("skill_name", ""),
+            "skill_name": s.get("skill_name", ""),
             "type": s.get("type", "Technical"),
             "confidence": s.get("confidence", 0.8),
             "required_flag": s.get("required_flag"),
