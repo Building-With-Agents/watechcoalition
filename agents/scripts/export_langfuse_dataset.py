@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import sys
 from pathlib import Path
 
@@ -27,8 +28,11 @@ from langfuse import Langfuse  # noqa: E402
 DEFAULT_DATASET_NAME = "extraction-ground-truth-v1"
 DEFAULT_OUTPUT = _REPO_ROOT / "agents" / "eval" / "extraction_ground_truth.json"
 
+log = logging.getLogger(__name__)
+
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description="Export Langfuse dataset to ground truth JSON")
     parser.add_argument(
         "--dataset-name", default=DEFAULT_DATASET_NAME,
@@ -74,7 +78,7 @@ def main() -> None:
 
     output_path = Path(args.output)
     output_path.write_text(json.dumps(records, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"Exported {len(records)} records to {output_path}")
+    log.info("Exported %s records to %s", len(records), output_path)
 
 
 if __name__ == "__main__":

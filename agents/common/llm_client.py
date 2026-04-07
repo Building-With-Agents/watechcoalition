@@ -7,6 +7,7 @@ Loads .env from repo root so Azure env vars are available when this module is us
 
 from __future__ import annotations
 
+import contextlib
 import json as _json
 import os
 import re
@@ -41,6 +42,8 @@ def _parse_output_for_trace(text: str, max_chars: int = 4000) -> str | dict | li
         return _json.loads(truncated)
     except (ValueError, TypeError):
         return truncated
+
+
 log = structlog.get_logger()
 
 # Maps audit-log agent_name values to clean Langfuse span names.
@@ -155,15 +158,13 @@ def invoke_skills_llm(
                 cost_usd=meta["cost_usd"], success=True,
             )
             if tracer:
-                try:
+                with contextlib.suppress(Exception):
                     tracer.log_event("llm_success", {
                         "input_tokens": meta.get("tokens_used", 0) // 2,
                         "output_tokens": meta.get("tokens_used", 0) // 2,
                         "cost_usd": meta["cost_usd"],
                         "output": _parse_output_for_trace(text),
                     })
-                except Exception:
-                    pass
             return text, meta
 
     llm = _get_llm()
@@ -238,7 +239,7 @@ def invoke_skills_llm(
                 success=True,
             )
             if tracer:
-                try:
+                with contextlib.suppress(Exception):
                     tracer.record_latency("llm_call", seconds=latency_ms / 1000.0)
                     tracer.log_event(
                         "llm_success",
@@ -249,8 +250,6 @@ def invoke_skills_llm(
                             "output": _parse_output_for_trace(text),
                         },
                     )
-                except Exception:
-                    pass
             return text, {
                 "tokens_used": tokens_used,
                 "cost_usd": cost_usd,
@@ -293,10 +292,8 @@ def invoke_skills_llm(
                 error_reason=error_str,
             )
             if tracer:
-                try:
+                with contextlib.suppress(Exception):
                     tracer.record_error(e, context={"agent_name": audit_agent, "model": model_name})
-                except Exception:
-                    pass
             return "", {
                 "tokens_used": 0,
                 "cost_usd": 0.0,
@@ -376,15 +373,13 @@ def invoke_structured_extraction_llm(
                 error_reason=meta.get("error_reason"),
             )
             if tracer:
-                try:
+                with contextlib.suppress(Exception):
                     tracer.log_event("llm_success", {
                         "input_tokens": meta.get("tokens_used", 0) // 2,
                         "output_tokens": meta.get("tokens_used", 0) // 2,
                         "cost_usd": meta["cost_usd"],
                         "output": parsed.model_dump(mode="json") if hasattr(parsed, "model_dump") else _parse_output_for_trace(str(parsed)) if parsed else "mock_parse_failed",
                     })
-                except Exception:
-                    pass
             return parsed, meta
 
     try:
@@ -502,7 +497,7 @@ def invoke_structured_extraction_llm(
             )
 
             if tracer:
-                try:
+                with contextlib.suppress(Exception):
                     tracer.record_latency("llm_call", seconds=latency_ms / 1000.0)
                     tracer.log_event("llm_success", {
                         "input_tokens": input_tokens_est,
@@ -510,8 +505,6 @@ def invoke_structured_extraction_llm(
                         "cost_usd": round(cost_usd, 6),
                         "output": parsed.model_dump(mode="json") if hasattr(parsed, "model_dump") else _parse_output_for_trace(str(parsed)) if parsed is not None else "structured_output_empty",
                     })
-                except Exception:
-                    pass
 
             if parsed is None:
                 return None, {
@@ -550,10 +543,8 @@ def invoke_structured_extraction_llm(
                 error_reason=str(e),
             )
             if tracer:
-                try:
+                with contextlib.suppress(Exception):
                     tracer.record_error(e, context={"agent_name": agent_name, "model": model_name})
-                except Exception:
-                    pass
             return None, {
                 "tokens_used": 0,
                 "cost_usd": 0.0,
