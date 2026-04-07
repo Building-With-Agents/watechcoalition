@@ -381,24 +381,55 @@ class NormalizationAgent(AgentBase):
 
     def process(self, event: EventEnvelope) -> EventEnvelope:
         """Run the normalization graph and return the result event."""
+        from contextlib import nullcontext
+
+        from agents.common.llm_adapter import get_tracer
+
         payload = event.payload
         batch_id = payload.get("batch_id", "")
         ingestion_run_id = payload.get("batch_id", "")  # batch_id == run_id from ingestion
         region_id = payload.get("region_id", "")
 
-        initial_state: NormalizationState = {
-            "ingestion_run_id": ingestion_run_id,
-            "correlation_id": event.correlation_id,
-            "batch_id": batch_id,
-            "region_id": region_id,
-        }
+        import json as _json
 
-        result = _COMPILED_GRAPH.invoke(initial_state)
+        tracer = get_tracer()
 
-        return EventEnvelope(
-            correlation_id=event.correlation_id,
-            agent_id=self.agent_id,
-            payload=result.get(
+        # Serialize input EventEnvelope for Langfuse trace visibility
+        _input_str: str | None = None
+        if tracer:
+            try:
+                _input_str = _json.dumps({
+                    "event_type": payload.get("event_type", "ProcessingTrigger"),
+                    "correlation_id": event.correlation_id,
+                    "agent_id": event.agent_id,
+                    "batch_id": batch_id,
+                    "region_id": region_id,
+                })
+            except Exception:
+                pass
+
+        span_ctx = (
+            tracer.start_span(
+                "normalization",
+                correlation_id=event.correlation_id,
+                input=_input_str,
+                metadata={"batch_id": batch_id, "region_id": region_id},
+            )
+            if tracer
+            else nullcontext()
+        )
+
+        with span_ctx:
+            initial_state: NormalizationState = {
+                "ingestion_run_id": ingestion_run_id,
+                "correlation_id": event.correlation_id,
+                "batch_id": batch_id,
+                "region_id": region_id,
+            }
+
+            result = _COMPILED_GRAPH.invoke(initial_state)
+
+            out_payload = result.get(
                 "normalization_complete_event",
                 {
                     "event_type": "NormalizationComplete",
@@ -407,5 +438,25 @@ class NormalizationAgent(AgentBase):
                     "quarantined_count": 0,
                     "normalization_status": "success",
                 },
-            ),
-        )
+            )
+
+            if tracer:
+                try:
+                    normalized = out_payload.get("normalized_count", 0)
+                    quarantined = out_payload.get("quarantined_count", 0)
+                    total = normalized + quarantined
+                    # Log output EventEnvelope so it appears in Langfuse Output tab
+                    tracer.log_event("normalization_complete", {
+                        "output": _json.dumps(out_payload),
+                        "normalized_count": normalized,
+                        "quarantined_count": quarantined,
+                        "quarantine_rate": round(quarantined / total, 4) if total > 0 else 0.0,
+                    })
+                except Exception:
+                    pass
+
+            return EventEnvelope(
+                correlation_id=event.correlation_id,
+                agent_id=self.agent_id,
+                payload=out_payload,
+            )

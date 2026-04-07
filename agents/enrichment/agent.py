@@ -110,7 +110,7 @@ def _enrichment_soc_llm() -> Callable[[str], str]:
         try:
             text, meta = invoke_skills_llm(
                 prompt,
-                agent_name="enrichment-agent",
+                agent_name="enrichment-soc-classifier",
             )
         except TypeError as exc:
             if "api_key" in str(exc).lower() or "auth" in str(exc).lower():
@@ -492,10 +492,39 @@ class EnrichmentAgent(BaseAgent):
         }
 
     def _process_skills_extracted_batch(self, event: EventEnvelope) -> EventEnvelope:
+        import json as _json
+        from contextlib import nullcontext, suppress
+
+        from agents.common.llm_adapter import get_tracer
+
         payload = event.payload
         correlation_id = event.correlation_id
         batch_id = str(payload.get("batch_id") or "batch-unknown")
+
+        tracer = get_tracer()
         rows = _records_from_skills_payload(payload)
+
+        # Serialize input EventEnvelope summary for Langfuse trace visibility
+        _input_str: str | None = None
+        if tracer:
+            with suppress(Exception):
+                _input_str = _json.dumps({
+                    "event_type": payload.get("event_type", "SkillsExtracted"),
+                    "correlation_id": correlation_id,
+                    "batch_id": batch_id,
+                    "record_count": len(rows),
+                })
+
+        span_ctx = (
+            tracer.start_span(
+                "enrichment",
+                correlation_id=correlation_id,
+                input=_input_str,
+                metadata={"batch_id": batch_id, "record_count": len(rows)},
+            )
+            if tracer
+            else nullcontext()
+        )
         enriched_count = 0
         spam_rejected_count = 0
         flagged_for_review_count = 0
@@ -527,19 +556,25 @@ class EnrichmentAgent(BaseAgent):
                     enriched = self.enrich_record(posting, session=session)
                     sector_id = resolve_sector(posting.get("role_classification"), session=session)
                     enriched["sector_id"] = sector_id
-                    enriched_count += 1
 
-                    # Promote enrichment columns to job_postings (INSERT if row missing)
-                    row_nj_id = _coerce_normalized_job_id(row.get("normalized_job_id"))
-                    if row_nj_id is not None and session is not None:
-                        try:
-                            apply_enrichment_to_job_postings(session, row_nj_id, enriched)
-                        except Exception as promo_exc:
-                            log.warning(
-                                "enrichment_batch_promotion_failed",
-                                normalized_job_id=row_nj_id,
-                                error=str(promo_exc),
-                            )
+                    # Score quality (deterministic — no LLM call)
+                    extraction = build_extraction_dict(
+                        row.get("skills"),
+                        row.get("tools"),
+                        row.get("tasks"),
+                        row.get("responsibilities"),
+                        row.get("context"),
+                    )
+                    q_res = score_quality(
+                        job_title=posting.get("title") or "",
+                        job_description=posting.get("description"),
+                        extraction=extraction,
+                        extraction_failed=bool(row.get("extraction_failed")),
+                    )
+                    enriched["quality_score"] = q_res.quality_score
+                    enriched["quality_components"] = q_res.components
+
+                    enriched_count += 1
 
                     tp = _distribution_bucket(enriched.get("temporal_period", posting.get("temporal_period")))
                     temporal_period_distribution[tp] += 1
@@ -590,6 +625,32 @@ class EnrichmentAgent(BaseAgent):
                 run_batch(None)
         else:
             run_batch(None)
+
+        # Log enrichment output EventEnvelope to Langfuse (inside span for visibility)
+        with span_ctx:
+            if tracer:
+                try:
+                    total_processed = enriched_count + spam_rejected_count + flagged_for_review_count
+                    tracer.log_event("enrichment_complete", {
+                        "output": _json.dumps({
+                            "event_type": "RecordEnriched",
+                            "batch_id": batch_id,
+                            "enriched_count": enriched_count,
+                            "spam_rejected_count": spam_rejected_count,
+                            "flagged_for_review_count": flagged_for_review_count,
+                            "soc_classified_count": soc_classified_count,
+                            "naics_classified_count": naics_classified_count,
+                            "duplicate_count": duplicate_count,
+                        }),
+                        "enriched_count": enriched_count,
+                        "spam_rejected_count": spam_rejected_count,
+                        "flagged_for_review_count": flagged_for_review_count,
+                        "soc_classified_count": soc_classified_count,
+                        "naics_classified_count": naics_classified_count,
+                        "total_processed": total_processed,
+                    })
+                except Exception:
+                    pass
 
         return build_record_enriched_event(
             correlation_id=correlation_id,
