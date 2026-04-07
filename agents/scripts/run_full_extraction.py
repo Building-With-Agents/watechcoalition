@@ -60,6 +60,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run full extraction on unprocessed records")
     parser.add_argument("--batch-size", type=int, default=5, help="Records per iteration (default: 5)")
     parser.add_argument("--delay", type=int, default=5, help="Seconds between iterations (default: 5)")
+    parser.add_argument("--skip-export", action="store_true", help="Skip fixture export and PR after pipeline completes")
     args = parser.parse_args()
 
     reset_count = reset_unextracted_to_pending()
@@ -85,6 +86,56 @@ def main() -> None:
         "--delay", str(args.delay),
     ]
     run_loop()
+
+    if not args.skip_export:
+        _export_and_open_pr()
+
+
+def _export_and_open_pr() -> None:
+    """Export fixtures and open a PR against development."""
+    import subprocess
+
+    print("\n" + "=" * 60)
+    print("Post-pipeline: exporting fixtures and opening PR")
+    print("=" * 60)
+
+    # Export fixtures
+    print("\nExporting fixtures...")
+    subprocess.run(
+        [sys.executable, str(_REPO_ROOT / "scripts" / "pg-seed-data" / "export_agent_data.py")],
+        cwd=str(_REPO_ROOT),
+        check=True,
+    )
+
+    # Git: create branch, commit, push, open PR
+    branch = "update/re-export-fixtures-with-skills"
+    print(f"\nCreating branch {branch}...")
+    subprocess.run(["git", "checkout", "-b", branch], cwd=str(_REPO_ROOT), check=False)
+    subprocess.run(["git", "add", "scripts/pg-seed-data/agent-fixtures/"], cwd=str(_REPO_ROOT), check=True)
+
+    commit_msg = "update: re-export agent fixtures after full extraction run"
+    result = subprocess.run(
+        ["git", "commit", "-m", commit_msg],
+        cwd=str(_REPO_ROOT),
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        print("No fixture changes to commit.")
+        subprocess.run(["git", "checkout", "development"], cwd=str(_REPO_ROOT), check=False)
+        return
+
+    subprocess.run(["git", "push", "-u", "origin", branch], cwd=str(_REPO_ROOT), check=True)
+    subprocess.run(
+        ["gh", "pr", "create",
+         "--title", "Update fixtures: re-export after full extraction run",
+         "--base", "development",
+         "--body", "Re-exported agent fixtures after running full extraction pipeline. Skills arrays now populated."],
+        cwd=str(_REPO_ROOT),
+        check=True,
+    )
+    subprocess.run(["git", "checkout", "development"], cwd=str(_REPO_ROOT), check=False)
+    print("\nDone — PR opened against development.")
 
 
 if __name__ == "__main__":
