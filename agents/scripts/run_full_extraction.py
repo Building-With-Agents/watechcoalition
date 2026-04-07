@@ -33,7 +33,6 @@ from agents.common.data_store.database import session_scope
 
 log = logging.getLogger(__name__)
 
-
 def reset_unextracted_to_pending() -> int:
     """Reset raw_ingested_jobs to 'pending' for records not yet in extracted_intelligence."""
     with session_scope() as s:

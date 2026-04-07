@@ -83,6 +83,8 @@ Nested **`dedup`** (always present on batch shape):
 | `rows_with_duplicate_cluster_id` | int | Rows with non-empty `duplicate_cluster_id` on posting or enriched |
 | `rows_with_matched_job_posting_id` | int | Rows with non-empty `matched_job_posting_id` |
 
+**`freshness_records`** (always present on batch shape; may be an empty `list`): list of `dict` rows built by `agents/enrichment/resolvers/freshness_slice.py` for **AnalyticsAgent** Step 10 (posting freshness + guardrails). Typical keys include `posting_id`, `days_since_posted`, `skills`, and dedup/repost-related fields. See `.cursor/rules/analytics-guardrails.mdc`.
+
 ## Cross-pair field registry (canonical)
 
 *Agreed with Pair (Emilio) — revise if migrations contradict.*
@@ -152,7 +154,7 @@ ORM: `LLMAuditLog` in `agents/common/data_store/models.py`.
 
 - [ ] Align `EnrichedJobProfile.employer_profile` dict with pair canonical field name **`employer`** and optional Pydantic `EmployerProfile` nested model (Nestor + Fatima).  
 - [ ] Normalization / Work Intelligence: add canonical column & event field list when received.  
-- [ ] Analytics: consumer expectations for `RecordEnriched` beyond `batch_id`.  
+- [x] Analytics: batch `RecordEnriched` includes `freshness_records` for Step 10; details in `analytics-guardrails.mdc`.  
 - [ ] Orchestration: control-plane fields if any.  
 
 ## Pair ownership (working)

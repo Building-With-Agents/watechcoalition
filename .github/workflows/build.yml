@@ -7,27 +7,6 @@ on:
       - development
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.0.0"
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Run Build
-        env:
-          AZURE_STORAGE_ACCOUNT_KEY: "${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}"
-          AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;AccountName=mockBlobStorage;AccountKey=Ju$t@Mock|<3YJu$t@Mock|<3YJu$t@Mock|<3Y==;EndpointSuffix=core.windows.net"
-          AZURE_STORAGE_NAME: "${{ secrets.AZURE_STORAGE_NAME }}"
-        run: npm run build
-
   python-tests:
     runs-on: ubuntu-latest
 
