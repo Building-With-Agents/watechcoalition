@@ -58,17 +58,25 @@ python agents/scripts/db_check.py counts
 
 **Expected output (seeded data):**
 
-| Table | Expected |
-|-------|----------|
-| raw_ingested_jobs | 1,000+ |
-| job_ingestion_runs | 20+ |
-| normalized_jobs | 1,000+ |
-| normalization_quarantine | 0–10 |
-| extracted_intelligence | 500+ |
-| job_postings | 500+ |
-| llm_audit_log | 1,000+ |
+| Table | Expected | Notes |
+|-------|----------|-------|
+| raw_ingested_jobs | 1,080 | Ingested JSearch records |
+| job_ingestion_runs | 67 | Batch run tracking |
+| normalized_jobs | 2 | Most consumed by processing loop |
+| normalization_quarantine | 12 | Schema-violation records |
+| extracted_intelligence | 2 | Skills/tasks extraction results |
+| employer_profiles | 25 | Enrichment-resolved employer metadata |
+| companies | 554 | 122 reference + 432 enrichment-resolved |
+| naics | 2,125 | NAICS 2022 industry classification |
+| job_postings | 596+ | 596 enriched + 172 reference |
+| llm_audit_log | 4,700+ | LLM call tracking |
 
-If all tables show 0, the database has not been seeded. Run `python scripts/pg-seed-data/seed_agent_data.py` or refer to the Week 06 runbook.
+If all tables show 0, the database has not been seeded. Run both seed scripts in order:
+
+```bash
+python scripts/pg-seed-data/seed_pg_database.py     # reference data (~56k rows)
+python scripts/pg-seed-data/seed_agent_data.py       # enriched pipeline data (~9k rows)
+```
 
 ### Step 2 — Verify Analytics aggregate tables
 
@@ -207,13 +215,13 @@ The mock provider returns ground truth data from `agents/eval/extraction_ground_
 
 ### Seed NAICS reference data (required for NAICS classification)
 
-The NAICS classifier queries the `dbo.naics` reference table. If this table does not exist, seed it:
+The NAICS classifier queries the `dbo.naics` reference table. If you ran `seed_agent_data.py`, NAICS data (2,125 rows) is already seeded. Otherwise, seed it manually:
 
 ```bash
-python scripts/seed_naics.py
+python scripts/seed_naics.py --env local
 ```
 
-If `scripts/seed_naics.py` is not available, the NAICS classifier will gracefully degrade — jobs will have `naics_code = NULL`. SOC classification and employer profiling may also fail if they share the same database session as a failed NAICS query.
+If neither script has been run, the NAICS classifier will gracefully degrade — jobs will have `naics_code = 'unknown'`. SOC classification and employer profiling may also fail if they share the same database session as a failed NAICS query.
 
 ### Verify database connectivity
 
@@ -224,7 +232,32 @@ python agents/scripts/db_check.py counts
 
 ---
 
-## 3. Clean Slate — Reset Analytics Tables
+## 3. Clean Slate — Resetting Data
+
+### Re-running the enrichment pipeline (classification iteration)
+
+To iterate on SOC/NAICS/quality classification without re-ingesting from JSearch, clear the processing output and reset raw records to pending:
+
+```bash
+# 1. Clear processing output (keeps raw_ingested_jobs intact)
+python agents/scripts/db_check.py query "TRUNCATE TABLE dbo.normalized_jobs CASCADE"
+python agents/scripts/db_check.py query "TRUNCATE TABLE dbo.extracted_intelligence CASCADE"
+python agents/scripts/db_check.py query "TRUNCATE TABLE dbo.employer_profiles CASCADE"
+
+# 2. Reset raw records to pending (all or a subset)
+python agents/scripts/db_check.py query "UPDATE dbo.raw_ingested_jobs SET processing_status = 'pending'"
+
+# 3. Re-run processing (normalize → extract → enrich)
+python agents/scripts/run_processing_loop.py --batch-size 25 --delay 10
+
+# 4. Evaluate — check classification quality
+python agents/scripts/db_check.py query "SELECT count(*) as total, count(quality_score) as with_quality, count(soc_code) as with_soc, count(naics_code) as with_naics FROM dbo.job_postings"
+
+# 5. Re-export fixtures to capture improved output
+python scripts/pg-seed-data/export_agent_data.py
+```
+
+**Never delete the fixture JSON files** in `scripts/pg-seed-data/agent-fixtures/` — they are your checkpoint. To restore to the last known-good state at any time: `python scripts/pg-seed-data/seed_pg_database.py`
 
 ### Reset analytics aggregate tables
 
@@ -303,7 +336,7 @@ python scripts/pg-seed-data/seed_agent_data.py
 python agents/scripts/db_check.py query "SELECT COUNT(*) AS total, COUNT(temporal_period) AS has_temporal, COUNT(borderplex_subregion) AS has_borderplex, COUNT(quality_score) AS has_quality, COUNT(soc_code) AS has_soc, COUNT(naics_code) AS has_naics FROM dbo.job_postings"
 ```
 
-**Expected:** `has_temporal`, `has_quality`, `has_soc`, and `has_naics` should be close to `total`. `has_borderplex` will be lower (only Borderplex-region jobs have this value).
+**Expected (seeded data):** Of the 596 enriched job_postings: `has_quality` = 596 (100%), `has_soc` ≈ 525 (88%), `has_naics` ≈ 292 non-"unknown" (49%). `has_temporal` and `has_borderplex` depend on the Pair A temporal/borderplex classifiers. The 172 reference job_postings do not have enrichment columns.
 
 ---
 

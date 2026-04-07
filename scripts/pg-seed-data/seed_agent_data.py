@@ -36,14 +36,19 @@ FIXTURES_DIR = Path(__file__).parent / "agent-fixtures"
 
 # ── FK-safe insert order ──────────────────────────────────────────────
 # Tables ordered so that FK dependencies are satisfied:
+# companies has no FK deps — must be before job_postings (company_id FK)
+# naics has no FK deps — reference table for NAICS codes
 # raw_ingested_jobs has no FK deps on other agent tables
 # job_ingestion_runs has no FK deps on other agent tables
 # normalized_jobs → raw_ingested_jobs (via raw_ingested_job_id)
 # extracted_intelligence → normalized_jobs (via normalized_job_id)
 # employer_profiles has no FK deps on other agent tables
+# job_postings → companies (via company_id)
 # llm_audit_log has no FK deps on other agent tables
 
 INSERT_ORDER = [
+    "companies",
+    "naics",
     "raw_ingested_jobs",
     "job_ingestion_runs",
     "normalized_jobs",

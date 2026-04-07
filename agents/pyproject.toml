@@ -36,6 +36,8 @@ ignore = [
 "scripts/batch_ingest.py" = ["T201"]
 "agents/scripts/run_processing_loop.py" = ["T201"]
 "scripts/run_processing_loop.py" = ["T201"]
+"agents/scripts/backfill_enrichment.py" = ["T201"]
+"scripts/backfill_enrichment.py" = ["T201"]
 # Repo-root pg-seed CLI scripts (stdout UX for devs)
 "../scripts/pg-seed-data/export_agent_data.py" = ["T201"]
 "../scripts/pg-seed-data/seed_agent_data.py" = ["T201"]

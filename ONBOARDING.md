@@ -179,7 +179,7 @@ PYTHON_DATABASE_URL=postgresql+psycopg2://postgres:YOUR_POSTGRES_PASSWORD@localh
 
 ## 6. Seed PostgreSQL
 
-The repo includes **JSON fixtures** in `scripts/pg-seed-data/fixtures/` with all reference data (~56,000 rows across 40 tables):
+The repo includes **JSON fixtures** with all reference data (~56,000 rows) and enriched pipeline data (~9,000 rows). A single command seeds everything:
 
 ```bash
 # With venv activated (see step 4.2)
@@ -192,12 +192,58 @@ Or via npm:
 npm run db:seed
 ```
 
-The seed script:
-- Creates the `dbo` schema with all tables, indexes, and constraints
-- Loads all reference data (skills, companies, job postings, taxonomies, etc.)
-- Creates agent-managed tables (`raw_ingested_jobs`, `normalized_jobs`, `job_ingestion_runs`, `extracted_intelligence`, `llm_audit_log`, `employer_profiles`)
-- Adds enrichment columns to `job_postings` (quality_score, soc_code, etc.)
-- Is **idempotent** — safe to run multiple times (drops and recreates schema each time)
+The seed script runs 7 steps automatically:
+1. Creates the `dbo` schema with all tables, indexes, and constraints
+2. Loads reference data (~56,000 rows: skills, companies, job postings, taxonomies, etc.)
+3. Runs agent migrations (creates `raw_ingested_jobs`, `normalized_jobs`, `extracted_intelligence`, `llm_audit_log`, `employer_profiles`, `naics`, etc.)
+4. Seeds enriched pipeline data (~9,000 rows from `scripts/pg-seed-data/agent-fixtures/`):
+   - **596 enriched job_postings** with `quality_score`, `soc_code`, `naics_code`, and `spam_score`
+   - **554 companies** (including enrichment-resolved placeholders)
+   - **2,125 NAICS codes** (industry classification reference)
+   - **1,080 raw_ingested_jobs**, **67 ingestion runs**, **25 employer_profiles**, **4,700+ llm_audit_log** entries
+5. Verifies all row counts
+
+The script is **idempotent** — safe to run multiple times (drops and recreates schema, agent pipeline data uses UPSERT).
+
+### Fixture layout
+
+Fixtures are split into two directories under `scripts/pg-seed-data/`:
+
+| Directory | Purpose | When to re-export |
+|-----------|---------|-------------------|
+| `fixtures/` | Reference data (skills, SOC codes, pathways, companies, etc.) | Rarely — only when reference taxonomy changes |
+| `agent-fixtures/` | Pipeline output (raw_ingested_jobs, enriched job_postings, llm_audit_log, etc.) | After each pipeline run that improves classification quality |
+
+This separation lets you clear and re-run the processing pipeline without losing reference data. **Never delete the fixture JSON files** — they are your checkpoint for restoring the database to a known-good state.
+
+### Re-running the pipeline (classification iteration)
+
+To iterate on SOC/NAICS/quality classification without re-ingesting from JSearch:
+
+```bash
+# 1. Clear processing output tables (keeps raw_ingested_jobs intact)
+python agents/scripts/db_check.py query "TRUNCATE TABLE dbo.normalized_jobs CASCADE"
+python agents/scripts/db_check.py query "TRUNCATE TABLE dbo.extracted_intelligence CASCADE"
+python agents/scripts/db_check.py query "TRUNCATE TABLE dbo.employer_profiles CASCADE"
+
+# 2. Reset raw records to pending (all or a subset)
+python agents/scripts/db_check.py query "UPDATE dbo.raw_ingested_jobs SET processing_status = 'pending'"
+
+# 3. Re-run the processing loop (normalize → extract → enrich)
+python agents/scripts/run_processing_loop.py --batch-size 25 --delay 10
+
+# 4. Evaluate results — check SOC/NAICS/quality classification
+python agents/scripts/db_check.py query "SELECT count(*) as total, count(quality_score) as with_quality, count(soc_code) as with_soc FROM dbo.job_postings"
+
+# 5. Re-export fixtures to capture improved output
+python scripts/pg-seed-data/export_agent_data.py
+```
+
+To restore to the last known-good checkpoint at any time:
+
+```bash
+python scripts/pg-seed-data/seed_pg_database.py
+```
 
 > **Schema ownership:** SQLAlchemy is the single database authority. All schema changes go through `agents/common/data_store/models.py` and `migrations.py`. Prisma migrations are deprecated.
 
@@ -220,10 +266,10 @@ See [scripts/pg-seed-data/README.md](scripts/pg-seed-data/README.md) for details
 
 The **Job Intelligence Engine** is an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings alongside the Next.js app. The pipeline uses a **flywheel pattern** — ingestion and processing run as independent loops.
 
-**Seed local DB with enriched data (first time):**
+**Seed local DB (first time — if not done in step 6):**
 
 ```bash
-python scripts/pg-seed-data/seed_agent_data.py
+python scripts/pg-seed-data/seed_pg_database.py
 ```
 
 **Flywheel pipeline (production):**
