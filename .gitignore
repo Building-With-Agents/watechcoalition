@@ -134,7 +134,6 @@ incident-report_*.md
 
 # Python agent pipeline artifacts
 **/.venv/
-venv/
 **/__pycache__/
 **/*.pyc
 **/.python_packages/
@@ -149,16 +148,3 @@ agents/data/rendered/*
 agents/data/dead_letter/*
 agents/data/output/*
 !agents/data/**/.gitkeep
-agents/venv/
-venv/
-.venv/
-
-# --- Taxonomy raw data (do NOT commit) ---
-agents/skills_extraction/taxonomy/digitalSkillsCollection_en.csv
-agents/skills_extraction/taxonomy/skills_en.csv
-agents/skills_extraction/taxonomy/onet_skills.txt
-# ESCO embedding disk cache (deprecated — use PostgreSQL pgvector)
-agents/skills_extraction/taxonomy/cache/
-
-# Debug scratch scripts (local dev only)
-_debug_*.py

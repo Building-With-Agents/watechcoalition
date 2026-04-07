@@ -5,7 +5,7 @@ This guide walks through setting up the watechcoalition platform after cloning t
 ## Prerequisites
 
 - **Node.js** 18.17 or later ([nodejs.org](https://nodejs.org/) or use [nvm](https://github.com/nvm-sh/nvm))
-- **Python 3.11** (pinned — do not use 3.12+) — [python.org/downloads](https://www.python.org/downloads/); on Windows, enable **"Add python.exe to PATH"** during install
+- **Python** 3.11 or later — [python.org/downloads](https://www.python.org/downloads/); on Windows, enable **"Add python.exe to PATH"** during install
 - **Docker** (for local PostgreSQL) — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md)
 - **Git**
 
@@ -33,7 +33,6 @@ Edit `.env` and set at minimum:
 |----------|-------------|
 | `AUTH_SECRET` | Generate with `openssl rand -base64 32` |
 | `PYTHON_DATABASE_URL` | PostgreSQL connection string (see step 5) |
-| `REDIS_URL` | Redis connection string — default: `redis://localhost:6379/0` |
 | `AZURE_OPENAI_ENDPOINT` | Azure OpenAI resource URL |
 | `AZURE_OPENAI_API_KEY` | Azure OpenAI API key |
 | `AZURE_OPENAI_API_VERSION` | e.g. `2025-01-01-preview` |
@@ -65,7 +64,6 @@ Edit `.env.docker` and set the PostgreSQL variables:
 | `POSTGRES_PASSWORD` | — | Strong password |
 | `POSTGRES_DB` | `talent_finder` | Database name |
 | `POSTGRES_PORT` | `5432` | Host port mapping |
-| `REDIS_PORT` | `6379` | Redis host port mapping |
 
 > **MSSQL variables** (`MSSQL_SA_PASSWORD`, `MSSQL_DATABASE`, `MSSQL_PORT`) are only needed if you run the legacy Next.js app — see [section 8](#8-optional-mssql--nextjs-setup).
 
@@ -87,33 +85,11 @@ You should see `(healthy)` in the STATUS column. The pgvector extension is autom
 
 See [docs/DOCKER_POSTGRESQL_SETUP.md](docs/DOCKER_POSTGRESQL_SETUP.md) for detailed setup, troubleshooting, and connection info.
 
-## 3.1 Start Redis (Docker)
-
-Redis Streams is the inter-agent message bus for the Job Intelligence Engine pipeline. Agents publish and consume typed events via `XADD`/`XREADGROUP`/`XACK`.
-
-```bash
-docker compose --env-file .env.docker up redis -d
-```
-
-Verify the container is healthy:
-
-```bash
-docker ps --filter "name=redis-server"
-```
-
-Test connectivity:
-
-```bash
-docker exec redis-server redis-cli ping
-```
-
-You should see `PONG`. Redis is configured with AOF persistence — data survives container restarts.
-
 ## 4. Python Environment Setup
 
 ### 4.1 Install Python 3.11 (if not already installed)
 
-1. Download from [python.org/downloads](https://www.python.org/downloads/) (**Python 3.11 specifically** — do not use 3.12+; a dependency requires 3.11).
+1. Download from [python.org/downloads](https://www.python.org/downloads/) (Python 3.11 or later).
 2. Run the installer. **On Windows**, check **"Add python.exe to PATH"**.
 3. Verify:
 
@@ -179,7 +155,7 @@ PYTHON_DATABASE_URL=postgresql+psycopg2://postgres:YOUR_POSTGRES_PASSWORD@localh
 
 ## 6. Seed PostgreSQL
 
-The repo includes **JSON fixtures** with all reference data (~56,000 rows) and enriched pipeline data (~9,000 rows). A single command seeds everything:
+The repo includes **JSON fixtures** in `scripts/pg-seed-data/fixtures/` with all reference data (~56,000 rows across 40 tables):
 
 ```bash
 # With venv activated (see step 4.2)
@@ -192,97 +168,22 @@ Or via npm:
 npm run db:seed
 ```
 
-The seed script runs 7 steps automatically:
-1. Creates the `dbo` schema with all tables, indexes, and constraints
-2. Loads reference data (~56,000 rows: skills, companies, job postings, taxonomies, etc.)
-3. Runs agent migrations (creates `raw_ingested_jobs`, `normalized_jobs`, `extracted_intelligence`, `llm_audit_log`, `employer_profiles`, `naics`, etc.)
-4. Seeds enriched pipeline data (~9,000 rows from `scripts/pg-seed-data/agent-fixtures/`):
-   - **596 enriched job_postings** with `quality_score`, `soc_code`, `naics_code`, and `spam_score`
-   - **554 companies** (including enrichment-resolved placeholders)
-   - **2,125 NAICS codes** (industry classification reference)
-   - **1,080 raw_ingested_jobs**, **67 ingestion runs**, **25 employer_profiles**, **4,700+ llm_audit_log** entries
-5. Verifies all row counts
-
-The script is **idempotent** — safe to run multiple times (drops and recreates schema, agent pipeline data uses UPSERT).
-
-### Fixture layout
-
-Fixtures are split into two directories under `scripts/pg-seed-data/`:
-
-| Directory | Purpose | When to re-export |
-|-----------|---------|-------------------|
-| `fixtures/` | Reference data (skills, SOC codes, pathways, companies, etc.) | Rarely — only when reference taxonomy changes |
-| `agent-fixtures/` | Pipeline output (raw_ingested_jobs, enriched job_postings, llm_audit_log, etc.) | After each pipeline run that improves classification quality |
-
-This separation lets you clear and re-run the processing pipeline without losing reference data. **Never delete the fixture JSON files** — they are your checkpoint for restoring the database to a known-good state.
-
-### Re-running the pipeline (classification iteration)
-
-To iterate on SOC/NAICS/quality classification without re-ingesting from JSearch:
-
-```bash
-# 1. Clear processing output tables (keeps raw_ingested_jobs intact)
-python agents/scripts/db_check.py query "TRUNCATE TABLE dbo.normalized_jobs CASCADE"
-python agents/scripts/db_check.py query "TRUNCATE TABLE dbo.extracted_intelligence CASCADE"
-python agents/scripts/db_check.py query "TRUNCATE TABLE dbo.employer_profiles CASCADE"
-
-# 2. Reset raw records to pending (all or a subset)
-python agents/scripts/db_check.py query "UPDATE dbo.raw_ingested_jobs SET processing_status = 'pending'"
-
-# 3. Re-run the processing loop (normalize → extract → enrich)
-python agents/scripts/run_processing_loop.py --batch-size 25 --delay 10
-
-# 4. Evaluate results — check SOC/NAICS/quality classification
-python agents/scripts/db_check.py query "SELECT count(*) as total, count(quality_score) as with_quality, count(soc_code) as with_soc FROM dbo.job_postings"
-
-# 5. Re-export fixtures to capture improved output
-python scripts/pg-seed-data/export_agent_data.py
-```
-
-To restore to the last known-good checkpoint at any time:
-
-```bash
-python scripts/pg-seed-data/seed_pg_database.py
-```
-
-> **Schema ownership:** SQLAlchemy is the single database authority. All schema changes go through `agents/common/data_store/models.py` and `migrations.py`. Prisma migrations are deprecated.
+The seed script:
+- Creates the `dbo` schema with all tables, indexes, and constraints
+- Loads all reference data (skills, companies, job postings, taxonomies, etc.)
+- Creates agent-managed tables (`raw_ingested_jobs`, `normalized_jobs`, `job_ingestion_runs`)
+- Adds Phase 1 columns to `job_postings`
+- Is **idempotent** — safe to run multiple times (drops and recreates schema each time)
 
 See [scripts/pg-seed-data/README.md](scripts/pg-seed-data/README.md) for details and troubleshooting.
-
-## 6.1 Schema Changes
-
-**SQLAlchemy is the single database authority.** To add or modify database tables:
-
-1. Define/update the ORM model in `agents/common/data_store/models.py`
-2. Add idempotent DDL or ALTER statements in `agents/common/data_store/migrations.py`
-3. Run migrations: `python -c "from agents.common.data_store.migrations import run_migrations; from agents.common.data_store.database import get_engine; run_migrations(get_engine())"`
-4. Verify with: `python -c "from agents.common.data_store.models import *; print([c.__name__ for c in Base.__subclasses__()])"`
-
-> **Do NOT create Prisma migrations.** The `prisma/schema.prisma` file and `docs/prisma-workflow.md` are legacy references. All new schema work goes through SQLAlchemy.
 
 ## 7. Run the App
 
 ### Agent Pipeline
 
-The **Job Intelligence Engine** is an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings alongside the Next.js app. The pipeline uses a **flywheel pattern** — ingestion and processing run as independent loops.
+The **Job Intelligence Engine** is an eight-agent Python pipeline that will ingest, normalize, enrich, and analyze external job postings alongside the Next.js app. The `agents/` directory is scaffolded; the pipeline is built out over the **12-week curriculum** as specified in [CLAUDE.md](CLAUDE.md).
 
-**Seed local DB (first time — if not done in step 6):**
-
-```bash
-python scripts/pg-seed-data/seed_pg_database.py
-```
-
-**Flywheel pipeline (production):**
-
-```bash
-# Loop 1: Bulk ingest from JSearch API
-python agents/scripts/batch_ingest.py
-
-# Loop 2: Paced processing (normalize → extract → enrich)
-python agents/scripts/run_processing_loop.py --batch-size 50 --delay 2
-```
-
-**Demo run (fixture data only, Week 2 demo):**
+**Walking skeleton (Week 2+):**
 
 ```bash
 python agents/pipeline_runner.py
@@ -304,7 +205,7 @@ See [CLAUDE.md](CLAUDE.md) for architecture, rules, and the 12-week build order;
 
 ### Next.js App
 
-> **Note:** The Next.js API is currently broken from the SQL Server → PostgreSQL migration (expected). Prisma is being phased out. See [section 8](#8-optional-mssql--nextjs-setup) for legacy setup.
+> Requires MSSQL setup — see [section 8](#8-optional-mssql--nextjs-setup) first.
 
 ```bash
 npm run dev
@@ -386,8 +287,6 @@ If you need vector search (skill autocomplete), visit `/admin/dashboard/generate
 | `PYTHON_DATABASE_URL` connection fails | Ensure PostgreSQL container is running (`docker ps --filter "name=postgres-server"`), port matches `.env.docker`, password is correct |
 | `ERROR: Set PYTHON_DATABASE_URL` | Add `PYTHON_DATABASE_URL=postgresql+psycopg2://postgres:YourPassword@localhost:5432/talent_finder` to `.env` |
 | Port 5432 already in use | Change `POSTGRES_PORT` in `.env.docker` (e.g. to `15432`) and update `PYTHON_DATABASE_URL` |
-| Redis container won't start | Check Docker is running: `docker ps`. Check logs: `docker logs redis-server` |
-| Redis `PONG` test fails | Ensure Redis container is running and healthy: `docker ps --filter "name=redis-server"` |
 | `pip` not recognized / Python not found | Install Python 3.11, enable "Add python.exe to PATH", then use a venv (section 4). On Windows, use `py -3.11 -m venv .venv` and activate before running `pip` |
 | `SQLAlchemy OperationalError` | `DATABASE_URL` uses Prisma's `sqlserver://` format. Set `PYTHON_DATABASE_URL` using `postgresql+psycopg2://` format (see step 5) |
 | Docker not found | Install Docker — see [docs/INSTALL_DOCKER.md](docs/INSTALL_DOCKER.md) |
