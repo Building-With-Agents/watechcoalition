@@ -161,7 +161,7 @@ Sources (JSearch API via httpx / Web scraping via Crawl4AI)
 | Multi-agent framework | LangGraph StateGraph | SA #13 |
 | LLM adapter | LangChain + Azure OpenAI (provider-agnostic) | SA #11 |
 | LLM provider default | Azure OpenAI; switchable via `LLM_PROVIDER` env var | SA #11 |
-| Agent tracing | LangSmith — native LangGraph integration | SA #17 |
+| Agent tracing | Langfuse — open-source, self-hosted or cloud (ADR-006) | SA #17 |
 | Scheduling | APScheduler — inside Orchestration Agent | IC #3 |
 | Ingestion: API source | httpx — JSearch API calls | SA #12 |
 | Ingestion: web scraping | Crawl4AI — local, pip-installable | SA #12 |
@@ -485,7 +485,7 @@ See `docs/planning/ARCHITECTURAL_DECISIONS.md` for full classification details a
 | 14 | Message bus | SA | **In-process Python events** (Phase 1); external bus upgrade path for Phase 2 |
 | 15 | Skill taxonomy | IC | **Internal watechcoalition primary** (`skills` table); O\*NET fallback |
 | 16 | Orchestration engine | SA | **LangGraph StateGraph** (consistent with #13) |
-| 17 | Agent tracing | SA | **LangSmith** — native LangGraph integration |
+| 17 | Agent tracing | SA | **Langfuse** — open-source, self-hosted or cloud (ADR-006) |
 | 18 | Analytics query interface | SA | **REST** — `POST /analytics/query` |
 | 19 | Database engine | IC | **PostgreSQL** — single instance, pgvector-enabled; see `ARCHITECTURAL_DECISIONS.md` #19 |
 | 20 | Enrichment phase split | IC | **Lite (Phase 1) + Full (Phase 2)** |
