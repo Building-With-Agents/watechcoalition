@@ -493,7 +493,7 @@ class EnrichmentAgent(BaseAgent):
 
     def _process_skills_extracted_batch(self, event: EventEnvelope) -> EventEnvelope:
         import json as _json
-        from contextlib import nullcontext
+        from contextlib import nullcontext, suppress
 
         from agents.common.llm_adapter import get_tracer
 
@@ -507,15 +507,13 @@ class EnrichmentAgent(BaseAgent):
         # Serialize input EventEnvelope summary for Langfuse trace visibility
         _input_str: str | None = None
         if tracer:
-            try:
+            with suppress(Exception):
                 _input_str = _json.dumps({
                     "event_type": payload.get("event_type", "SkillsExtracted"),
                     "correlation_id": correlation_id,
                     "batch_id": batch_id,
                     "record_count": len(rows),
                 })
-            except Exception:
-                pass
 
         span_ctx = (
             tracer.start_span(
@@ -558,19 +556,25 @@ class EnrichmentAgent(BaseAgent):
                     enriched = self.enrich_record(posting, session=session)
                     sector_id = resolve_sector(posting.get("role_classification"), session=session)
                     enriched["sector_id"] = sector_id
-                    enriched_count += 1
 
-                    # Promote enrichment columns to job_postings (INSERT if row missing)
-                    row_nj_id = _coerce_normalized_job_id(row.get("normalized_job_id"))
-                    if row_nj_id is not None and session is not None:
-                        try:
-                            apply_enrichment_to_job_postings(session, row_nj_id, enriched)
-                        except Exception as promo_exc:
-                            log.warning(
-                                "enrichment_batch_promotion_failed",
-                                normalized_job_id=row_nj_id,
-                                error=str(promo_exc),
-                            )
+                    # Score quality (deterministic — no LLM call)
+                    extraction = build_extraction_dict(
+                        row.get("skills"),
+                        row.get("tools"),
+                        row.get("tasks"),
+                        row.get("responsibilities"),
+                        row.get("context"),
+                    )
+                    q_res = score_quality(
+                        job_title=posting.get("title") or "",
+                        job_description=posting.get("description"),
+                        extraction=extraction,
+                        extraction_failed=bool(row.get("extraction_failed")),
+                    )
+                    enriched["quality_score"] = q_res.quality_score
+                    enriched["quality_components"] = q_res.components
+
+                    enriched_count += 1
 
                     tp = _distribution_bucket(enriched.get("temporal_period", posting.get("temporal_period")))
                     temporal_period_distribution[tp] += 1
