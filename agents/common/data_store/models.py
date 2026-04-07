@@ -7,7 +7,7 @@ Prisma/MSSQL is being phased out.
 
 Agent-created tables: raw_ingested_jobs, job_ingestion_runs, normalized_jobs,
     normalization_quarantine, extracted_intelligence, llm_audit_log,
-    employer_profiles.
+    employer_profiles, canonical_roles, role_snapshot_weekly.
 Reference tables (seeded, agent-owned): companies, industry_sectors,
     technology_areas, skills, socc, naics, job_postings.
 """
@@ -15,10 +15,11 @@ Reference tables (seeded, agent-owned): companies, industry_sectors,
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from sqlalchemy import (
     Boolean,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -332,6 +333,84 @@ class EmployerProfile(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
     )
+
+
+# ---------------------------------------------------------------------------
+# Analytics — Week 7 canonical role clustering (Pair C, IMP-023)
+# ---------------------------------------------------------------------------
+
+
+class CanonicalRole(Base):
+    """Unsupervised cluster → human-readable canonical role (HDBSCAN + embeddings).
+
+    ``role_id`` is the stable external key (FK from ``job_postings.canonical_role_id``
+    and ``role_snapshot_weekly.canonical_role_id``). ``cluster_centroid`` stores the
+    mean embedding as a JSON array of floats (same dimension as posting embeddings).
+
+    See: ``agents/docs/week 7/WEEK-07-canonical-role-clustering-bryan-emilio-runbook.md``
+    and ``.cursor/rules/canonical-role-clustering.mdc``.
+    """
+
+    __tablename__ = "canonical_roles"
+    __table_args__ = (
+        Index("ix_canonical_roles_computed_at", "computed_at"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    role_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    label: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    posting_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    cluster_centroid: Mapped[list[float] | None] = mapped_column(JSONB, nullable=True)
+    representative_titles: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    top_skills: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    top_tools: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    is_llm_generated: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    computed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
+class RoleSnapshotWeekly(Base):
+    """Weekly aggregates per canonical role (step 5 of the analytics pipeline).
+
+    Salary percentiles align with Pair B helper / runbook; ``avg_salary`` and
+    ``median_salary`` support dashboards and ARCHITECTURE_DEEP examples.
+    """
+
+    __tablename__ = "role_snapshot_weekly"
+    __table_args__ = (
+        UniqueConstraint("week_start", "canonical_role_id", name="uq_role_snapshot_weekly_week_role"),
+        Index("ix_role_snapshot_weekly_week_start", "week_start"),
+        Index("ix_role_snapshot_weekly_canonical_role_id", "canonical_role_id"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    week_start: Mapped[date] = mapped_column(Date, nullable=False)
+    canonical_role_id: Mapped[str] = mapped_column(
+        String(64),
+        ForeignKey("dbo.canonical_roles.role_id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    posting_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    role_title: Mapped[str | None] = mapped_column(Text, nullable=True)
+    avg_salary: Mapped[float | None] = mapped_column(Float, nullable=True)
+    median_salary: Mapped[float | None] = mapped_column(Float, nullable=True)
+    salary_p25: Mapped[float | None] = mapped_column(Float, nullable=True)
+    salary_p50: Mapped[float | None] = mapped_column(Float, nullable=True)
+    salary_p75: Mapped[float | None] = mapped_column(Float, nullable=True)
+    salary_p95: Mapped[float | None] = mapped_column(Float, nullable=True)
+    top_skills: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    top_tools: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    computed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 # ===========================================================================
