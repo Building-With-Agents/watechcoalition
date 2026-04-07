@@ -324,6 +324,7 @@ _EMBED_INTER_REQUEST_DELAY = float(os.getenv("EMBEDDING_REQUEST_DELAY", "0"))
 
 # #108: prompt text for llm_audit_log prompt_hash only (not sent again)
 _EMBEDDING_AUDIT_PROMPT_MAX_CHARS = 8000
+_EMBEDDING_AUDIT_ERROR_MAX_CHARS = 1000
 
 
 def _embedding_audit_prompt(texts: list[str]) -> str:
@@ -362,17 +363,38 @@ def _embedding_cost_usd(input_tokens: int) -> float:
     return (input_tokens / 1000.0) * per_1k
 
 
+def _embedding_error_reason(prefix: str, detail: str | None = None) -> str:
+    """Normalize and cap embedding audit error text for llm_audit_log."""
+    message = prefix.strip()
+    extra = (detail or "").strip()
+    if extra:
+        message = f"{message}: {extra}" if message else extra
+    if len(message) <= _EMBEDDING_AUDIT_ERROR_MAX_CHARS:
+        return message
+    return message[: _EMBEDDING_AUDIT_ERROR_MAX_CHARS - 3] + "..."
+
+
+def _response_json_or_none(resp: httpx.Response) -> Any | None:
+    """Best-effort JSON parse for audit token extraction on success/failure."""
+    try:
+        return resp.json()
+    except Exception:
+        return None
+
+
 def _log_embedding_audit_event(
     texts: list[str],
     data: Any,
     latency_ms: int,
     *,
     agent_name: str = "taxonomy-resolver",
+    success: bool = True,
+    error_reason: str | None = None,
 ) -> None:
-    """Write one dbo.llm_audit_log row per successful embedding HTTP response (issue #108).
+    """Write one dbo.llm_audit_log row per embedding HTTP attempt (issue #108).
 
-    taxonomy-resolver owners (Angel/Fabian): tweak model label, add success=False on final failure, or
-    align cost with exact Azure billing — see TODO on _embed_texts_azure retry exit.
+    Uses response ``usage`` when available so cost tracking works for successful
+    calls and any failure responses that still report token usage.
     """
     from agents.common.llm_adapter import log_extraction_event
 
@@ -386,8 +408,8 @@ def _log_embedding_audit_event(
         input_tokens=input_tokens,
         output_tokens=0,
         cost_usd=_embedding_cost_usd(input_tokens),
-        success=True,
-        error_reason=None,
+        success=success,
+        error_reason=error_reason,
     )
 
 
@@ -408,8 +430,9 @@ def _embed_texts_azure(
     Honors Retry-After from error message when available.
 
     audit_agent_name
-        Written to ``llm_audit_log`` via ``log_extraction_event`` on success (issue #108).
-        Use ``enrichment-dedup`` for job posting fuzzy dedup.
+        Written to ``llm_audit_log`` via ``log_extraction_event`` for every HTTP
+        attempt (success and failure). Use ``enrichment-dedup`` for job posting
+        fuzzy dedup so shared cost tracking stays comparable.
 
     Env: AZURE_OPENAI_EMBEDDING_ENDPOINT, AZURE_OPENAI_EMBEDDING_API_KEY,
          AZURE_OPENAI_EMBEDDING_API_VERSION, AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME.
@@ -437,13 +460,23 @@ def _embed_texts_azure(
     data: Any = None
 
     for attempt in range(1, _EMBED_MAX_RETRIES + 1):
+        attempt_started = time.perf_counter()
         try:
             with httpx.Client(timeout=60.0) as client:
-                t0 = time.perf_counter()
                 resp = client.post(url, json=payload, headers=headers)
+                latency_ms = int((time.perf_counter() - attempt_started) * 1000)
+                response_data = _response_json_or_none(resp)
                 if resp.status_code == 429:
                     retry_after = _extract_retry_after_embedding(resp.text)
                     delay = retry_after if retry_after else _EMBED_BASE_DELAY * (2 ** (attempt - 1))
+                    _log_embedding_audit_event(
+                        texts,
+                        response_data,
+                        latency_ms,
+                        agent_name=audit_agent_name,
+                        success=False,
+                        error_reason=_embedding_error_reason("429_rate_limited", resp.text),
+                    )
                     log.warning(
                         "embedding_rate_limited",
                         attempt=attempt,
@@ -452,16 +485,29 @@ def _embed_texts_azure(
                     )
                     if attempt == _EMBED_MAX_RETRIES:
                         log.error("embedding_rate_limit_exhausted", attempts=_EMBED_MAX_RETRIES)
-                        # TODO #108: optional log_extraction_event(success=False) for taxonomy-resolver owners
                         return None
                     time.sleep(delay)
                     continue
                 resp.raise_for_status()
-                data = resp.json()
-                latency_ms = int((time.perf_counter() - t0) * 1000)
+                if response_data is None:
+                    raise ValueError("embedding_response_json_invalid")
+                data = response_data
                 break
         except httpx.HTTPStatusError as exc:
-            if exc.response.status_code == 429:
+            latency_ms = int((time.perf_counter() - attempt_started) * 1000)
+            response = exc.response
+            response_data = _response_json_or_none(response) if response is not None else None
+            status_code = response.status_code if response is not None else "http_error"
+            detail = response.text if response is not None else str(exc)
+            _log_embedding_audit_event(
+                texts,
+                response_data,
+                latency_ms,
+                agent_name=audit_agent_name,
+                success=False,
+                error_reason=_embedding_error_reason(f"http_{status_code}", detail),
+            )
+            if response is not None and response.status_code == 429:
                 retry_after = _extract_retry_after_embedding(str(exc))
                 delay = retry_after if retry_after else _EMBED_BASE_DELAY * (2 ** (attempt - 1))
                 log.warning("embedding_rate_limited", attempt=attempt, delay_s=round(delay, 2))
@@ -472,6 +518,15 @@ def _embed_texts_azure(
             log.warning("embedding_api_failed", error=str(exc), attempt=attempt)
             return None
         except Exception as exc:
+            latency_ms = int((time.perf_counter() - attempt_started) * 1000)
+            _log_embedding_audit_event(
+                texts,
+                None,
+                latency_ms,
+                agent_name=audit_agent_name,
+                success=False,
+                error_reason=_embedding_error_reason(type(exc).__name__, str(exc)),
+            )
             log.warning("embedding_api_failed", error=str(exc), attempt=attempt)
             return None
     else:
@@ -793,7 +848,38 @@ def resolve_taxonomy_batch(labels: list[str]) -> list[TaxonomyResult]:
                 confidence=0.0,
             )
 
-    return [resolved_map[lab] for lab in labels]
+    results = [resolved_map[lab] for lab in labels]
+
+    # Log taxonomy resolution metrics to Langfuse tracer (if registered)
+    try:
+        from agents.common.llm_adapter import get_tracer
+
+        tracer = get_tracer()
+        if tracer:
+            stats = {i: 0 for i in range(1, 7)}
+            for r in results:
+                if 1 <= r.resolution_step <= 6:
+                    stats[r.resolution_step] = stats.get(r.resolution_step, 0) + 1
+            n = len(results)
+            fallback = stats.get(6, 0)
+            coverage = (n - fallback) / n if n else 0.0
+            resolved = [r for r in results if r.resolution_step < 6]
+            avg_conf = sum(r.confidence for r in resolved) / len(resolved) if resolved else 0.0
+            tracer.log_event("taxonomy_resolution", {
+                "total_labels": n,
+                "taxonomy_coverage": round(coverage, 4),
+                "avg_confidence": round(avg_conf, 4),
+                "step1_genai": stats.get(1, 0),
+                "step2_exact_esco": stats.get(2, 0),
+                "step3_normalized_esco": stats.get(3, 0),
+                "step4_embedding": stats.get(4, 0),
+                "step5_onet": stats.get(5, 0),
+                "step6_raw_fallback": fallback,
+            })
+    except Exception:
+        pass
+
+    return results
 
 
 def resolution_stats(results: list[TaxonomyResult]) -> dict[int, int]:

@@ -18,13 +18,15 @@ Near-duplicate job postings via embedding cosine similarity, same-`company_id` c
 
 **Threshold note:** `0.92` is calibrated for the same embedding family as taxonomy audit (`text-embedding-3-small` in audit logs). If the embedding deployment changes, recalibrate `DEDUP_COSINE_THRESHOLD`.
 
+**Calibration note (April 3, 2026):** The checked-in labeled replay in `agents/eval/dedup_threshold_calibration_cases.json` currently points to `0.88` as the strongest next staging candidate. The production default stays at `0.92` until that lower threshold is validated against a broader staging replay.
+
 ## Algorithm (summary)
 
 1. **Dedup text:** `title | company_name | first 500 chars` of `normalized_jobs.requirements` if present, else `job_description` (see [`text.py`](text.py)).
 2. **Window:** half-open **`[anchor - 30d, anchor)`** on `publish_date` (UTC-aware).
 3. **Candidates:** same `company_id`, **`is_duplicate IS NOT TRUE`**, excluding self. Reuse cached survivor embeddings when present; lazily embed/backfill in-window survivors missing cache so cold-start reposts are still comparable.
 4. **Similarity:** cosine in Python (`vectors.py`); compare current vector to each survivor; take **best** match (star clustering — no transitive chaining through duplicates).
-5. **Survivor arbitration:** [`completeness.py`](completeness.py) (salary, location, description length); **recency** tie-break. Reuse matched survivor’s `duplicate_cluster_id` if set; else new **UUID4** cluster id.
+5. **Survivor arbitration:** [`completeness.py`](completeness.py) counts populated dedup-relevant fields (`salary_range`, `location`, `zip`, `county`, `job_description`); **recency** tie-break. Reuse matched survivor’s `duplicate_cluster_id` if set; else new **UUID4** cluster id.
 
 ## Idempotency / re-runs
 
@@ -40,13 +42,21 @@ After a successful enrichment promotion update, [`apply_enrichment_to_job_postin
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `DEDUP_COSINE_THRESHOLD` | `0.92` | Cosine similarity ≥ threshold → near-duplicate candidate |
+| `DEDUP_COSINE_THRESHOLD` | `0.92` | Cosine similarity > threshold → near-duplicate candidate |
 
 ## Tests
 
 - [`enrichment/tests/test_fuzzy_dedup.py`](../../enrichment/tests/test_fuzzy_dedup.py) — mocked session + `_embed_texts_azure`: threshold, window params, company filter, completeness, hash skip, embedding failure.
 - [`enrichment/tests/test_fuzzy_dedup_stub.py`](../../enrichment/tests/test_fuzzy_dedup_stub.py) — missing row smoke; threshold default smoke.
+- [`enrichment/tests/test_dedup_calibration.py`](../../enrichment/tests/test_dedup_calibration.py) — FP/FN rate math, scope gating, and findings rendering for the labeled calibration replay.
 - Promotion + persistence: [`enrichment/tests/test_job_postings_promotion.py`](../../enrichment/tests/test_job_postings_promotion.py).
+
+## Calibration artifacts
+
+- `agents/scripts/dedup_threshold_calibration.py` — runs the labeled replay with live Azure embeddings.
+- `agents/eval/dedup_threshold_calibration_cases.json` — curated same-company/cross-company/window-boundary cases.
+- `agents/data/reports/dedup_threshold_calibration.json` — latest committed JSON evidence.
+- `agents/docs/week 6/FINDINGS-fuzzy-dedup-bryan-emilio.md` — one-page Week 6 findings summary.
 
 ## References
 

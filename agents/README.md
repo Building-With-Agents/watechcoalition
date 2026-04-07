@@ -4,7 +4,25 @@ Python agent pipeline for the watechcoalition Job Intelligence Engine: ingestion
 
 ## Quick start
 
-From repo root with venv activated:
+**Requires Python 3.11** (do not use 3.12+ — a dependency requires 3.11). See [ONBOARDING.md](../ONBOARDING.md) for full setup.
+
+Create and activate the venv (one time):
+
+**Windows (PowerShell):**
+```powershell
+cd agents
+py -3.11 -m venv .venv
+cd ..
+agents\.venv\Scripts\Activate.ps1
+```
+
+**Linux / macOS:**
+```bash
+cd agents && python3.11 -m venv .venv && cd ..
+source agents/.venv/bin/activate
+```
+
+Install and run:
 
 ```bash
 pip install -r agents/requirements.txt

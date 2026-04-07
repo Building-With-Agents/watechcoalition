@@ -11,7 +11,14 @@ import uuid
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from thefuzz import fuzz
+
+# Prefer rapidfuzz because it is already used elsewhere in the repo and is
+# present in the current test environment; keep thefuzz as a fallback for
+# environments that still install the older wrapper package.
+try:
+    from rapidfuzz import fuzz
+except ImportError:  # pragma: no cover - exercised only in alternate envs
+    from thefuzz import fuzz
 
 from agents.common.data_store.models import Company
 

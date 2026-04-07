@@ -171,7 +171,8 @@ python agents/scripts/db_check.py query "SELECT id, title, company_name, tempora
 - `quality_score` is [0–1] — higher is better (completeness + clarity + structural coherence)
 - `spam_score` is [0–1] — below 0.7 passes, 0.7–0.9 flagged for review, above 0.9 auto-rejected
 - `is_spam = TRUE` records were auto-rejected (should be rare in curated data)
-- `soc_code` and `naics_code` may be NULL — these classifiers are pending (PR #149)
+- `soc_code` — SOC occupation code (e.g., "15-1252"); populated by the SOC classifier via LLM
+- `naics_code` — NAICS industry code (e.g., "541511"); populated by the NAICS classifier via LLM
 
 ### Step 6 — Explore via Streamlit Dashboard
 
@@ -237,8 +238,9 @@ Sources (JSearch API + Crawl4AI)
 [Skills Extraction Agent] → extracted_intelligence, llm_audit_log
     |
 [Enrichment Agent]        → job_postings (temporal_period, borderplex_subregion,
-    |                        is_duplicate, quality_score, is_spam, spam_score)
-    |                      → employer_profiles (when SOC/NAICS merged)
+    |                        is_duplicate, quality_score, is_spam, spam_score,
+    |                        soc_code, naics_code)
+    |                      → employer_profiles
     |
 [Analytics Agent]         → aggregate metrics
 [Visualization Agent]     → dashboard output
@@ -542,8 +544,8 @@ The Enrichment Agent adds classification and quality scoring to `job_postings`:
 | is_duplicate / duplicate_cluster_id | Fuzzy dedup (cosine > 0.92) | Populated |
 | quality_score | Quality scorer | Populated |
 | is_spam / spam_score | Spam classifier | Populated |
-| soc_code | SOC classifier | NULL (PR #149 not merged) |
-| naics_code | NAICS classifier | NULL (PR #149 not merged) |
+| soc_code | SOC classifier (LLM) | Populated (e.g., "15-1252") |
+| naics_code | NAICS classifier (LLM) | Populated (e.g., "541511") |
 
 ### Verify enrichment columns after pipeline run
 
@@ -559,6 +561,15 @@ python agents/scripts/db_check.py query "SELECT is_duplicate, COUNT(*) FROM dbo.
 
 # Quality + spam scoring
 python agents/scripts/db_check.py query "SELECT COUNT(*) AS total, COUNT(quality_score) AS has_quality, COUNT(spam_score) AS has_spam, SUM(CASE WHEN is_spam THEN 1 ELSE 0 END) AS spam_count FROM dbo.job_postings"
+
+# SOC code distribution (top 10)
+python agents/scripts/db_check.py query "SELECT soc_code, COUNT(*) FROM dbo.job_postings WHERE soc_code IS NOT NULL AND soc_code != 'unclassified' GROUP BY soc_code ORDER BY COUNT(*) DESC LIMIT 10"
+
+# NAICS code distribution (top 10)
+python agents/scripts/db_check.py query "SELECT naics_code, COUNT(*) FROM dbo.job_postings WHERE naics_code IS NOT NULL AND naics_code != 'unknown' GROUP BY naics_code ORDER BY COUNT(*) DESC LIMIT 10"
+
+# Employer profiles
+python agents/scripts/db_check.py query "SELECT COUNT(*) AS total_profiles FROM dbo.employer_profiles"
 ```
 
 ### Key files for cross-team inspection
@@ -569,6 +580,12 @@ python agents/scripts/db_check.py query "SELECT COUNT(*) AS total, COUNT(quality
   https://github.com/Building-With-Agents/watechcoalition/blob/development/agents/enrichment/classifiers/borderplex_subregion.py
 - Fuzzy dedup — `run_fuzzy_dedup()`:
   https://github.com/Building-With-Agents/watechcoalition/blob/development/agents/enrichment/dedup/fuzzy_dedup.py
+- SOC classifier — `classify_soc()`:
+  https://github.com/Building-With-Agents/watechcoalition/blob/development/agents/enrichment/classifiers/soc_classifier.py
+- NAICS classifier — `classify_naics()`:
+  https://github.com/Building-With-Agents/watechcoalition/blob/development/agents/enrichment/classifiers/naics_classifier.py
+- Employer classifier — `build_employer_profile()`:
+  https://github.com/Building-With-Agents/watechcoalition/blob/development/agents/enrichment/classifiers/employer_classifier.py
 - Enrichment agent — `EnrichmentAgent.process()`:
   https://github.com/Building-With-Agents/watechcoalition/blob/development/agents/enrichment/agent.py
 
@@ -855,7 +872,7 @@ python agents/scripts/db_check.py counts
 | normalization_quarantine | 0-5 (records that failed validation) |
 | extracted_intelligence | ~same as normalized_jobs |
 | job_postings | ~same as normalized (promoted records) |
-| employer_profiles | 0 (SOC/NAICS not yet merged) |
+| employer_profiles | ~same as job_postings (one per company) |
 | llm_audit_log | cumulative (preserved across resets) |
 
 **Option B (flywheel):**
@@ -868,7 +885,7 @@ python agents/scripts/db_check.py counts
 | normalization_quarantine | 0-10 |
 | extracted_intelligence | ~54% of normalized (records with descriptions) |
 | job_postings | ~same as extracted_intelligence |
-| employer_profiles | 0 (SOC/NAICS not yet merged) |
+| employer_profiles | ~same as job_postings (one per company) |
 | llm_audit_log | cumulative; 2-3 calls per extracted record |
 
 ### Student setup for demo day
@@ -935,7 +952,7 @@ UndefinedTable: relation "dbo.extracted_intelligence" does not exist
 
 ### Enrichment columns are NULL
 
-- `soc_code` / `naics_code`: expected NULL until PR #149 merges
+- `soc_code` / `naics_code`: populated by SOC and NAICS classifiers (requires LLM calls); NULL if job has no description text or LLM returned "unclassified"/"unknown"
 - `temporal_period`: requires `date_posted` on the job posting — null if date missing
 - `borderplex_subregion`: requires location data — null if location missing from source
 - `is_duplicate`: will be FALSE for first run (no prior records to compare against)

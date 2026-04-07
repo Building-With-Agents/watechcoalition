@@ -426,6 +426,12 @@ class SkillsExtractionAgent(BaseAgent):
         # Phase 1: Extract tools + skills in chunks to avoid 429 rate limits.
         # Process CHUNK_SIZE records with small inter-record delay, then pause
         # CHUNK_COOLDOWN seconds for the TPM window to refill.
+        from contextlib import nullcontext
+
+        from agents.common.llm_adapter import get_tracer
+
+        tracer = get_tracer()
+
         pending: list[tuple[ExtractionWorkItem, list[ToolRecord], list, dict]] = []
         total = len(work_items)
         for idx, item in enumerate(work_items):
@@ -433,7 +439,25 @@ class SkillsExtractionAgent(BaseAgent):
             if idx > 0 and _INTER_LLM_DELAY > 0:
                 time.sleep(_INTER_LLM_DELAY)
 
-            tools, skills_list, meta, is_llm = self._extract_work_item_no_taxonomy(item)
+            # Wrap each job's extraction in a Langfuse span so skills/tasks/responsibilities
+            # LLM calls are grouped under the job title in the trace timeline.
+            job_span_ctx = (
+                tracer.start_span(
+                    f"job/{item.title[:60]}",
+                    correlation_id=event.correlation_id,
+                    input=json.dumps({
+                        "job_id": item.job_id,
+                        "title": item.title,
+                        "company": item.company,
+                    }),
+                    metadata={"job_id": item.job_id, "idx": idx + 1, "total": total},
+                )
+                if tracer and hasattr(tracer, "start_span")
+                else nullcontext()
+            )
+
+            with job_span_ctx:
+                tools, skills_list, meta, is_llm = self._extract_work_item_no_taxonomy(item)
             pending.append((item, tools, skills_list, meta))
 
             # Chunk boundary cooldown
