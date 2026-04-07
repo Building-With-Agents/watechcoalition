@@ -2,22 +2,37 @@
 
 **Owners:** Bryan + Emilio  
 **Theme:** Step 4 — Canonical role clustering (HDBSCAN + embeddings) · Step 5 — `role_snapshot_weekly` + salary percentiles · `EmergenceAlert`  
-**Branch:** `week-07/canonical-role-clustering` (or current Pair C branch)
+**Branch:** `week-07/canonical-role-clustering`
 
 This file is the **execution contract** for the pair: who does what, how it must be built for **production**, what to read, and how to **test**.
 
 ---
 
-## How to use this doc
+## Current branch status (2026-04-07)
 
-1. Read **References (both)** once.  
-2. **Person 1** and **Person 2** work in parallel where possible; use the **integration boundary** so merges do not fight.  
-3. **Person 2** owns **`models.py` / `migrations.py`** ordering: append migration steps; do not drop or reorder existing steps (repo rule).  
-4. Land **`.cursor/rules/canonical-role-clustering.mdc` early** (Person 2) with **final** table and event shapes once schema is agreed (even if implementation is stubbed).
+Treat the checklist below as the **remaining execution plan after scaffolding**. 
+
+Current repo state:
+
+- [x] `hdbscan` is already pinned in `agents/requirements.txt`.
+- [x] `CanonicalRole` and `RoleSnapshotWeekly` ORM scaffolding is in `agents/common/data_store/models.py`.
+- [x] `job_postings.canonical_role_id` migration + optional FK is in `agents/common/data_store/migrations.py`.
+- [x] `.cursor/rules/canonical-role-clustering.mdc` is merged on this branch.
+- [x] **`agents/analytics/clustering/`** implemented (text builder, Azure embedding wrapper, HDBSCAN pipeline, labeling, emergence filters, `run_clustering_pipeline`). Env vars and module docstring listed in `__init__.py`.
+- [x] Unit tests: `agents/analytics/tests/test_clustering_package.py` (8 tests; mocks embeddings / clusterer; no live API keys).
+- [ ] `agents/analytics/agent.py` is still the Week 2 fixture stub; steps 4 and 5 are not wired yet.
+- [ ] `EmergenceAlert` typed event / publish flow is not implemented yet.
+- [ ] `agents/docs/runbooks/WEEK07_TESTING_RUNBOOK.md` still uses legacy `p25_salary` / `p75_salary` examples; Pair C’s current schema contract uses `salary_p25` / `salary_p75`.
+- [ ] Final Week 7 findings doc still needs to be written from the completed implementation / run.
+
+## Known doc drift to resolve during implementation
+
+- `WEEK-07-canonical-role-clustering-bryan-emilio-runbook.md` describes `agents/common/events/typed_events.py` as if `EmergenceAlert` already exists. It does **not** exist yet in the repo; Pair C still needs to add the typed payload / helper.
+- `WEEK07_TESTING_RUNBOOK.md` is still partly generic Week 7 guidance. Update its role-snapshot queries once Pair C finalizes step 5 and verifies the live column names.
 
 ---
 
-## References (read in this order)
+## References
 
 | Order | Document | Why |
 |------|----------|-----|
@@ -25,7 +40,7 @@ This file is the **execution contract** for the pair: who does what, how it must
 | 2 | [`IMP-023-unsupervised-clustering-canonical-roles-bryan-emilio-reading.md`](./IMP-023-unsupervised-clustering-canonical-roles-bryan-emilio-reading.md) | HDBSCAN intuition, embedding input, thresholds, emergence **filter** (not all noise). |
 | 3 | [`WEEK-07-canonical-role-clustering-bryan-emilio-runbook.md`](./WEEK-07-canonical-role-clustering-bryan-emilio-runbook.md) | Checklist, evaluation criteria, findings template. |
 | 4 | [`docs/planning/ARCHITECTURE_DEEP.md`](../../../docs/planning/ARCHITECTURE_DEEP.md) | Canonical table sketches (`canonical_roles`, `role_snapshot_weekly`), event catalog (`EmergenceAlert`). **Reconcile** with runbook column names before coding. |
-| 5 | [`agents/docs/runbooks/WEEK07_TESTING_RUNBOOK.md`](../runbooks/WEEK07_TESTING_RUNBOOK.md) | DB verification commands; update queries if your final schema uses `canonical_role_id` / different column names than examples. |
+| 5 | [`agents/docs/runbooks/WEEK07_TESTING_RUNBOOK.md`](../runbooks/WEEK07_TESTING_RUNBOOK.md) | DB verification commands; update queries if your final schema uses `canonical_role_id` / different column names than examples. **Current drift:** role-snapshot examples still use legacy `p25_salary` / `p75_salary`. |
 | 6 | **Embedding precedent** | `agents/skills_extraction/extractors/taxonomy.py` — `_embed_texts_azure()`; dedup usage in `agents/enrichment/dedup/fuzzy_dedup.py` (audit agent name, batch embed, no PII in logs). |
 | 7 | **Integration schema** | `.cursor/rules/integration-schema.mdc` — dedup columns on `job_postings`; clustering should run on **deduplicated / survivor** logic as required by curriculum (issue #135 gate). |
 | 8 | **Pair B** | Coordinate **salary percentile helper** signature (p25, p50, p75, p95) for step 5; document the agreed import path in `.cursor/rules/canonical-role-clustering.mdc`. |
@@ -36,15 +51,15 @@ This file is the **execution contract** for the pair: who does what, how it must
 
 | Artifact | Owner | Contract |
 |----------|--------|----------|
-| `agents/analytics/clustering/*` (pure logic + optional small IO helpers) | **Person 1** | Exposes **testable functions** and **dataclasses** (e.g. inputs: list of posting feature rows + embeddings matrix; outputs: cluster labels per row, cluster summaries, emergence candidate list). |
-| `agents/common/data_store/models.py`, `migrations.py` | **Person 2** | **Single source of truth** for table/column names; Person 1 imports ORM types only after they exist—until then, use shared **Pydantic/dataclasses** in `clustering/` that Person 2 maps in the analytics runner. |
-| `agents/analytics/agent.py` (or submodules called from it) | **Person 2** orchestrates | Loads DB rows → calls Person 1 pipeline → persists → emits events. |
-| `EmergenceAlert` payload + bus publish | **Person 2** | Defined in `agents/common/events/` per repo patterns; Person 1 returns **plain dicts** matching the agreed payload shape. |
-| `.cursor/rules/canonical-role-clustering.mdc` | **Person 2** (draft) + **both** (review) | Final schemas, env vars, HDBSCAN defaults, event payload, embedding deployment name env. |
+| `agents/analytics/clustering/*` (pure logic + optional small IO helpers) | **Bryan** | Exposes **testable functions** and **dataclasses** (e.g. inputs: list of posting feature rows + embeddings matrix; outputs: cluster labels per row, cluster summaries, emergence candidate list). |
+| `agents/common/data_store/models.py`, `migrations.py` | **Emilio** | **Single source of truth** for table/column names; Bryan imports ORM types only after they exist—until then, use shared **Pydantic/dataclasses** in `clustering/` that Emilio maps in the analytics runner. |
+| `agents/analytics/agent.py` (or submodules called from it) | **Emilio** orchestrates | Loads DB rows → calls Bryan’s pipeline → persists → emits events. |
+| `EmergenceAlert` payload + bus publish | **Emilio** | Defined in `agents/common/events/` per repo patterns; Bryan returns **plain dicts** matching the agreed payload shape. |
+| `.cursor/rules/canonical-role-clustering.mdc` | **Emilio** (draft) + **both** (review) | Final schemas, env vars, HDBSCAN defaults, event payload, embedding deployment name env. |
 
 ---
 
-## Person 1 — Clustering & embeddings (“algorithm path”)
+## Bryan — Clustering & embeddings (“algorithm path”)
 
 ### Scope
 
@@ -54,25 +69,25 @@ This file is the **execution contract** for the pair: who does what, how it must
 - **HDBSCAN:** default implementation, parameters from **environment variables** (e.g. `CLUSTER_MIN_CLUSTER_SIZE`, `CLUSTER_MIN_SAMPLES`, `CLUSTER_SELECTION_EPSILON`, metric). Use **`hdbscan`** (already in `agents/requirements.txt`).
 - **Thresholds:** implement runbook + IMP-023 rules: **skip clustering** if total eligible postings is **fewer than 500**; **drop** clusters with **fewer than 10** members (treat as noise or “review” per agreed policy); log structured reasons (counts only—no PII).
 - **Cluster labels:** most-common title with dominance rule; optional **LLM label** via `get_adapter` with **same failure behavior** as other agents (retries + audit log; do **not** block persisting clusters if LLM fails—fallback label).
-- **Emergence candidates:** implement IMP-023 **filters** (quality, skills vs existing clusters, multi-employer) on top of HDBSCAN noise — return a **structured list** for Person 2 to persist/emit.
+- **Emergence candidates:** implement IMP-023 **filters** (quality, skills vs existing clusters, multi-employer) on top of HDBSCAN noise — return a **structured list** for Emilio to persist/emit.
 - **Unit tests** under `agents/analytics/clustering/tests/` (or `agents/analytics/tests/`) with **mocked** embeddings and **fixed** random seeds where needed.
 
-### Production requirements (Person 1)
+### Production requirements (Bryan)
 
 - **structlog** only; **no PII** (no raw descriptions in logs; log hashes, counts, cluster ids).
 - **No secrets** in code; all from `os.getenv`.
 - **Pure functions** where possible — easier tests and clearer failure modes.
 - **Docstrings** on public functions: args, returns, and “what happens when embedding API fails.”
 
-### Done when (Person 1)
+### Done when (Bryan)
 
-- [ ] Package exists; `pytest` for clustering passes without live API keys when mocks are used.
-- [ ] README or module docstring at top of package listing **env vars** and defaults.
-- [ ] Handoff type: documented **Python structure** (dataclass/TypedDict) for “per posting: id, label, features” and “per cluster: id, member ids, label, top skills/tools.”
+- [x] Package exists; `pytest agents/analytics/tests/test_clustering_package.py` passes without live API keys when mocks are used.
+- [x] Module docstring at top of `agents/analytics/clustering/__init__.py` lists **env vars** and defaults (no separate README required).
+- [x] Handoff types: Pydantic models in `agents/analytics/clustering/types.py` — `PostingClusterFeatures`, `ClusteredPosting`, `ClusterSummary`, `EmergenceCandidate`, `ClusteringResult` (plus embedding/text helpers).
 
 ---
 
-## Person 2 — Schema, snapshots, events, wiring (“data & pipeline path”)
+## Emilio — Schema, snapshots, events, wiring (“data & pipeline path”)
 
 ### Scope
 
@@ -85,14 +100,14 @@ This file is the **execution contract** for the pair: who does what, how it must
 - **`.cursor/rules/canonical-role-clustering.mdc`:** integration contract for other pairs (schemas, events, env vars, HDBSCAN defaults).
 - **Findings doc** (runbook template): one page for the team.
 
-### Production requirements (Person 2)
+### Production requirements (Emilio)
 
 - **Transactions:** persist canonical roles + posting updates + snapshots in a **consistent** order; define behavior on mid-run failure (idempotent re-run or run id).
 - **Migrations:** idempotent `CREATE TABLE IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS` consistent with `migrations.py` style in repo.
 - **SQL:** parameterize queries; no string-concatenated user content.
 - **Health check:** extend `AnalyticsAgent.health_check()` to reflect real dependencies (DB reachable, fixture vs production mode if applicable).
 
-### Done when (Person 2)
+### Done when (Emilio)
 
 - [ ] `python agents/scripts/db_check.py tables` shows new tables after migrate.
 - [ ] Step 5 rows verify with queries aligned to **your** column names (update WEEK07 testing runbook examples if needed).
@@ -104,8 +119,8 @@ This file is the **execution contract** for the pair: who does what, how it must
 
 | Layer | What | Who |
 |-------|------|-----|
-| **Unit** | Text builder, label logic, HDBSCAN wrapper on numpy fixtures, emergence filter | Person 1 |
-| **Unit** | SQLAlchemy model round-trip, snapshot math with fake rows | Person 2 |
+| **Unit** | Text builder, label logic, HDBSCAN wrapper on numpy fixtures, emergence filter | Bryan |
+| **Unit** | SQLAlchemy model round-trip, snapshot math with fake rows | Emilio |
 | **Integration** | Load N real or seeded postings → cluster → write DB → query `role_snapshot_weekly` | Both (pair session) |
 | **Manual / QA** | Top clusters: inspect titles for coherence; noise rate sanity | Both — runbook criteria |
 | **Lint** | `cd agents && ruff check . && ruff format .` | Both before PR |
@@ -116,7 +131,7 @@ This file is the **execution contract** for the pair: who does what, how it must
 ```bash
 cd agents && pip install -r requirements.txt
 cd agents && ruff check . && ruff format .
-cd agents && pytest agents/analytics/clustering/tests/ -v   # after Person 1 adds tests
+cd agents && pytest analytics/tests/test_clustering_package.py -v   # Bryan’s clustering unit tests
 cd agents && pytest agents/tests/ -v
 python agents/scripts/db_check.py query "SELECT COUNT(*) FROM dbo.canonical_roles"
 python agents/scripts/db_check.py query "SELECT week_start, canonical_role_id, posting_count FROM dbo.role_snapshot_weekly LIMIT 10"
@@ -126,8 +141,8 @@ python agents/scripts/db_check.py query "SELECT week_start, canonical_role_id, p
 
 ## Coordination cadence
 
-- **Day 1:** Agree **physical schema** (draw 5-minute ERD); Person 2 lands **migrations + empty models**; Person 1 scaffolds **`clustering/`** with fake data tests.  
-- **Mid-week:** Freeze **`EmergenceAlert`** payload keys; Person 1 returns matching dict keys.  
+- **Day 1:** Agree **physical schema** (draw 5-minute ERD); Emilio lands **migrations + empty models**; Bryan scaffolds **`clustering/`** with fake data tests.  
+- **Mid-week:** Freeze **`EmergenceAlert`** payload keys; Bryan returns matching dict keys.  
 - **Before merge:** Pair B percentile **import path** confirmed or TODO explicitly in `.mdc` and code.
 
 ---
@@ -139,7 +154,7 @@ python agents/scripts/db_check.py query "SELECT week_start, canonical_role_id, p
 - [ ] `role_snapshot_weekly` keyed by **`canonical_role_id`** + `week_start` with salary percentiles.  
 - [ ] `EmergenceAlert` emitted when filtered emergence candidates exist (test or manual verification).  
 - [ ] Production practices above satisfied; **ruff + pytest** green.  
-- [ ] `.cursor/rules/canonical-role-clustering.mdc` merged.  
+- [x] `.cursor/rules/canonical-role-clustering.mdc` merged.  
 - [ ] Runbook **findings** section completed.
 
 ---
