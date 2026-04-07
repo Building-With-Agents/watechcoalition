@@ -394,25 +394,11 @@ class NormalizationAgent(AgentBase):
 
         tracer = get_tracer()
 
-        # Serialize input EventEnvelope for Langfuse trace visibility
-        _input_str: str | None = None
-        if tracer:
-            try:
-                _input_str = _json.dumps({
-                    "event_type": payload.get("event_type", "ProcessingTrigger"),
-                    "correlation_id": event.correlation_id,
-                    "agent_id": event.agent_id,
-                    "batch_id": batch_id,
-                    "region_id": region_id,
-                })
-            except Exception:
-                pass
-
         span_ctx = (
             tracer.start_span(
                 "normalization",
                 correlation_id=event.correlation_id,
-                input=_input_str,
+                input=None,  # set after graph runs with actual raw records
                 metadata={"batch_id": batch_id, "region_id": region_id},
             )
             if tracer
@@ -442,16 +428,49 @@ class NormalizationAgent(AgentBase):
 
             if tracer:
                 try:
+                    # Build rich input from the raw records the graph processed
+                    raw_records = result.get("_pending_records", [])
+                    input_summary = {
+                        "event_type": payload.get("event_type", "ProcessingTrigger"),
+                        "correlation_id": event.correlation_id,
+                        "batch_id": batch_id,
+                        "record_count": len(raw_records),
+                        "records": [
+                            {
+                                "title": r.get("title", ""),
+                                "company": r.get("company", ""),
+                                "source": r.get("source", ""),
+                                "external_id": r.get("external_id", ""),
+                                "city": r.get("city"),
+                                "state": r.get("state"),
+                            }
+                            for r in raw_records[:20]  # cap at 20 to avoid bloat
+                        ],
+                    }
+
                     normalized = out_payload.get("normalized_count", 0)
                     quarantined = out_payload.get("quarantined_count", 0)
                     total = normalized + quarantined
-                    # Log output EventEnvelope so it appears in Langfuse Output tab
-                    tracer.log_event("normalization_complete", {
-                        "output": _json.dumps(out_payload),
+
+                    output_summary = {
+                        "event_type": "NormalizationComplete",
+                        "batch_id": batch_id,
                         "normalized_count": normalized,
                         "quarantined_count": quarantined,
                         "quarantine_rate": round(quarantined / total, 4) if total > 0 else 0.0,
+                        "normalization_status": out_payload.get("normalization_status", "success"),
+                    }
+
+                    tracer.log_event("normalization_complete", {
+                        "input_tokens": len(raw_records),  # proxy: 1 per record
+                        "output_tokens": normalized,
+                        "output": _json.dumps(output_summary),
                     })
+
+                    # Update the span input with raw records summary
+                    obs = tracer._observation_stack[-1] if tracer._observation_stack else None
+                    if obs:
+                        obs.update(input=_json.dumps(input_summary))
                 except Exception:
                     pass
 
