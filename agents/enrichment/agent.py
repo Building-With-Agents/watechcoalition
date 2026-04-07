@@ -492,6 +492,9 @@ class EnrichmentAgent(BaseAgent):
         }
 
     def _process_skills_extracted_batch(self, event: EventEnvelope) -> EventEnvelope:
+        import json as _json
+        from contextlib import nullcontext
+
         from agents.common.llm_adapter import get_tracer
 
         payload = event.payload
@@ -500,6 +503,30 @@ class EnrichmentAgent(BaseAgent):
 
         tracer = get_tracer()
         rows = _records_from_skills_payload(payload)
+
+        # Serialize input EventEnvelope summary for Langfuse trace visibility
+        _input_str: str | None = None
+        if tracer:
+            try:
+                _input_str = _json.dumps({
+                    "event_type": payload.get("event_type", "SkillsExtracted"),
+                    "correlation_id": correlation_id,
+                    "batch_id": batch_id,
+                    "record_count": len(rows),
+                })
+            except Exception:
+                pass
+
+        span_ctx = (
+            tracer.start_span(
+                "enrichment",
+                correlation_id=correlation_id,
+                input=_input_str,
+                metadata={"batch_id": batch_id, "record_count": len(rows)},
+            )
+            if tracer
+            else nullcontext()
+        )
         enriched_count = 0
         spam_rejected_count = 0
         flagged_for_review_count = 0
@@ -595,20 +622,31 @@ class EnrichmentAgent(BaseAgent):
         else:
             run_batch(None)
 
-        if tracer:
-            try:
-                total_processed = enriched_count + spam_rejected_count + flagged_for_review_count
-                tracer.log_event("enrichment_metrics", {
-                    "enriched_count": enriched_count,
-                    "spam_rejected_count": spam_rejected_count,
-                    "flagged_for_review_count": flagged_for_review_count,
-                    "duplicate_count": duplicate_count,
-                    "soc_classified_count": soc_classified_count,
-                    "naics_classified_count": naics_classified_count,
-                    "total_processed": total_processed,
-                })
-            except Exception:
-                pass
+        # Log enrichment output EventEnvelope to Langfuse (inside span for visibility)
+        with span_ctx:
+            if tracer:
+                try:
+                    total_processed = enriched_count + spam_rejected_count + flagged_for_review_count
+                    tracer.log_event("enrichment_complete", {
+                        "output": _json.dumps({
+                            "event_type": "RecordEnriched",
+                            "batch_id": batch_id,
+                            "enriched_count": enriched_count,
+                            "spam_rejected_count": spam_rejected_count,
+                            "flagged_for_review_count": flagged_for_review_count,
+                            "soc_classified_count": soc_classified_count,
+                            "naics_classified_count": naics_classified_count,
+                            "duplicate_count": duplicate_count,
+                        }),
+                        "enriched_count": enriched_count,
+                        "spam_rejected_count": spam_rejected_count,
+                        "flagged_for_review_count": flagged_for_review_count,
+                        "soc_classified_count": soc_classified_count,
+                        "naics_classified_count": naics_classified_count,
+                        "total_processed": total_processed,
+                    })
+                except Exception:
+                    pass
 
         return build_record_enriched_event(
             correlation_id=correlation_id,
