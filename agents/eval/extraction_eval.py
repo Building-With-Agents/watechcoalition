@@ -204,8 +204,8 @@ def _log(msg: str) -> None:
 
 
 def _skill_label(s: dict) -> str:
-    """Ground truth skill: support both 'label' (legacy) and 'skill_name' (labeler export)."""
-    return s.get("label") or s.get("skill_name") or ""
+    """Ground truth skill: skill_name is authoritative, 'label' kept for legacy compat."""
+    return s.get("skill_name") or s.get("label") or ""
 
 
 def run_eval(ground_truth_path: str | Path) -> None:

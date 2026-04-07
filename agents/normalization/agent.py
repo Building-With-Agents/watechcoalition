@@ -381,24 +381,41 @@ class NormalizationAgent(AgentBase):
 
     def process(self, event: EventEnvelope) -> EventEnvelope:
         """Run the normalization graph and return the result event."""
+        from contextlib import nullcontext
+
+        from agents.common.llm_adapter import get_tracer
+
         payload = event.payload
         batch_id = payload.get("batch_id", "")
         ingestion_run_id = payload.get("batch_id", "")  # batch_id == run_id from ingestion
         region_id = payload.get("region_id", "")
 
-        initial_state: NormalizationState = {
-            "ingestion_run_id": ingestion_run_id,
-            "correlation_id": event.correlation_id,
-            "batch_id": batch_id,
-            "region_id": region_id,
-        }
+        import json as _json
 
-        result = _COMPILED_GRAPH.invoke(initial_state)
+        tracer = get_tracer()
 
-        return EventEnvelope(
-            correlation_id=event.correlation_id,
-            agent_id=self.agent_id,
-            payload=result.get(
+        span_ctx = (
+            tracer.start_span(
+                "normalization",
+                correlation_id=event.correlation_id,
+                input=None,  # set after graph runs with actual raw records
+                metadata={"batch_id": batch_id, "region_id": region_id},
+            )
+            if tracer
+            else nullcontext()
+        )
+
+        with span_ctx:
+            initial_state: NormalizationState = {
+                "ingestion_run_id": ingestion_run_id,
+                "correlation_id": event.correlation_id,
+                "batch_id": batch_id,
+                "region_id": region_id,
+            }
+
+            result = _COMPILED_GRAPH.invoke(initial_state)
+
+            out_payload = result.get(
                 "normalization_complete_event",
                 {
                     "event_type": "NormalizationComplete",
@@ -407,5 +424,58 @@ class NormalizationAgent(AgentBase):
                     "quarantined_count": 0,
                     "normalization_status": "success",
                 },
-            ),
-        )
+            )
+
+            if tracer:
+                try:
+                    # Build rich input from the raw records the graph processed
+                    raw_records = result.get("_pending_records", [])
+                    input_summary = {
+                        "event_type": payload.get("event_type", "ProcessingTrigger"),
+                        "correlation_id": event.correlation_id,
+                        "batch_id": batch_id,
+                        "record_count": len(raw_records),
+                        "records": [
+                            {
+                                "title": r.get("title", ""),
+                                "company": r.get("company", ""),
+                                "source": r.get("source", ""),
+                                "external_id": r.get("external_id", ""),
+                                "city": r.get("city"),
+                                "state": r.get("state"),
+                            }
+                            for r in raw_records[:20]  # cap at 20 to avoid bloat
+                        ],
+                    }
+
+                    normalized = out_payload.get("normalized_count", 0)
+                    quarantined = out_payload.get("quarantined_count", 0)
+                    total = normalized + quarantined
+
+                    output_summary = {
+                        "event_type": "NormalizationComplete",
+                        "batch_id": batch_id,
+                        "normalized_count": normalized,
+                        "quarantined_count": quarantined,
+                        "quarantine_rate": round(quarantined / total, 4) if total > 0 else 0.0,
+                        "normalization_status": out_payload.get("normalization_status", "success"),
+                    }
+
+                    tracer.log_event("normalization_complete", {
+                        "input_tokens": len(raw_records),  # proxy: 1 per record
+                        "output_tokens": normalized,
+                        "output": _json.dumps(output_summary),
+                    })
+
+                    # Update the span input with raw records summary
+                    obs = tracer._observation_stack[-1] if tracer._observation_stack else None
+                    if obs:
+                        obs.update(input=_json.dumps(input_summary))
+                except Exception:
+                    pass
+
+            return EventEnvelope(
+                correlation_id=event.correlation_id,
+                agent_id=self.agent_id,
+                payload=out_payload,
+            )

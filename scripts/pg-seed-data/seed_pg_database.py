@@ -446,6 +446,18 @@ def seed_database() -> None:
     else:
         print("All row counts verified")
 
+    # ── Step 7: Seed agent pipeline data ─────────────────────────────
+    print("\nStep 7: Seeding agent pipeline data (enriched jobs, companies, NAICS)...")
+    _seed_dir = str(Path(__file__).parent)
+    if _seed_dir not in sys.path:
+        sys.path.insert(0, _seed_dir)
+    try:
+        from seed_agent_data import seed_all
+        seed_all()
+    except Exception as exc:
+        print(f"  Agent pipeline seed failed: {exc}")
+        print("  Run separately: python scripts/pg-seed-data/seed_agent_data.py")
+
     print("\nNext steps:")
     print("  1. Activate venv:  agents\\.venv\\Scripts\\Activate.ps1")
     print("  2. Run pipeline:   python agents/pipeline_runner.py")

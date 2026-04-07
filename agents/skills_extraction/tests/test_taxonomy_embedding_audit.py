@@ -94,3 +94,43 @@ def test_embed_texts_azure_audit_uses_total_tokens_when_no_prompt_tokens(
     kwargs = mock_log.call_args.kwargs
     assert kwargs["input_tokens"] == 99
     assert kwargs["prompt"] == "a\nb"
+
+
+@patch("agents.common.llm_adapter.log_extraction_event")
+def test_embed_texts_azure_logs_failed_attempts_on_rate_limit(
+    mock_log: MagicMock,
+    embedding_env: dict[str, str],
+) -> None:
+    mock_resp = MagicMock()
+    mock_resp.status_code = 429
+    mock_resp.text = "retry after 1 seconds"
+    mock_resp.json.return_value = {"error": {"message": "rate limited"}}
+
+    mock_client_instance = MagicMock()
+    mock_client_instance.post.return_value = mock_resp
+    mock_cm = MagicMock()
+    mock_cm.__enter__.return_value = mock_client_instance
+    mock_cm.__exit__.return_value = None
+
+    with (
+        patch.dict(os.environ, embedding_env, clear=False),
+        patch(
+            "agents.skills_extraction.extractors.taxonomy.httpx.Client",
+            return_value=mock_cm,
+        ),
+        patch("agents.skills_extraction.extractors.taxonomy.time.sleep"),
+    ):
+        out = _embed_texts_azure(["hello"], audit_agent_name="enrichment-dedup")
+
+    assert out is None
+    assert mock_log.call_count == 5
+    for call in mock_log.call_args_list:
+        kwargs = call.kwargs
+        assert kwargs["agent_name"] == "enrichment-dedup"
+        assert kwargs["model"] == "text-embedding-3-small"
+        assert kwargs["provider"] == "azure-openai"
+        assert kwargs["success"] is False
+        assert kwargs["input_tokens"] == 0
+        assert kwargs["output_tokens"] == 0
+        assert kwargs["cost_usd"] == 0.0
+        assert "429_rate_limited" in kwargs["error_reason"]

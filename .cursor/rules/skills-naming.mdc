@@ -1,0 +1,55 @@
+---
+description: "skill_name is the authoritative field name for skills — never use 'label' as a field name"
+alwaysApply: true
+globs:
+  - "agents/skills_extraction/**/*.py"
+  - "agents/common/mock_llm_provider.py"
+  - "agents/eval/**/*.py"
+  - "agents/tests/**/*.py"
+---
+
+# Skills Field Naming: skill_name (NOT label)
+
+## Rule
+
+The authoritative field name for a skill's human-readable name is `skill_name`.
+
+**NEVER** use `label` as a Pydantic field name, dict key, or JSON field for skills.
+
+This applies everywhere in the pipeline:
+
+| Layer | Field | Correct |
+|-------|-------|---------|
+| `SkillRecord` (domain model) | `skill_name` | `SkillRecord(skill_name="Python")` |
+| `_LLMSkill` (LLM schema) | `skill_name` | `_LLMSkill(skill_name="Python")` |
+| LLM prompt | `skill_name` | `"each skill must have: skill_name, type, ..."` |
+| Mock provider | `skill_name` | `{"skill_name": s.get("skill_name")}` |
+| Ground truth JSON | `skill_name` | `{"skill_name": "Python", "type": "Technical"}` |
+| Eval harness | `skill_name` | `s.get("skill_name")` (primary), `s.get("label")` (legacy fallback only) |
+| Langfuse traces | `skill_name` | Output JSON uses `skill_name` key |
+
+## Why
+
+- `SkillRecord.skill_name` is the canonical Pydantic domain model field
+- Using `label` in `_LLMSkill` and then mapping to `skill_name` in post-processing creates unnecessary indirection
+- When `label` appears in Langfuse trace output, it confuses developers who expect `skill_name` to match the domain model
+- Multiple devs have reverted this to `label` — this rule prevents that
+
+## Legacy compatibility
+
+Some older code may still reference `label`. When reading skills from unknown sources, prefer `skill_name` first with `label` as fallback:
+
+```python
+# CORRECT — skill_name is primary
+name = s.get("skill_name") or s.get("label") or ""
+
+# WRONG — label is not primary
+name = s.get("label") or s.get("skill_name") or ""
+```
+
+## Files that enforce this
+
+- `agents/skills_extraction/extractors/skills.py` — `_LLMSkill.skill_name`
+- `agents/skills_extraction/prompts/skills_extraction_v4.py` — prompt uses `skill_name`
+- `agents/common/mock_llm_provider.py` — mock returns `skill_name` key
+- `agents/common/types/extraction_types.py` — `SkillRecord.skill_name`

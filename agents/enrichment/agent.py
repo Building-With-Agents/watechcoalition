@@ -51,27 +51,37 @@ import json
 import os
 import sys
 from collections import defaultdict
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Literal
 
 import structlog
 from dotenv import load_dotenv
-from sqlalchemy import select, text
+from sqlalchemy import select, text, update
 from sqlalchemy.orm import Session
 
 from agents.common.base_agent import BaseAgent
 from agents.common.data_store.database import check_db_connection, session_scope
-from agents.common.data_store.models import IndustrySector, TechnologyArea
+from agents.common.data_store.models import IndustrySector, NormalizedJob, TechnologyArea
 from agents.common.event_envelope import EventEnvelope
+from agents.common.llm_client import invoke_skills_llm
+from agents.common.types.job_profile import EmployerProfile
 from agents.enrichment.adapters.facade import ExternalEnrichmentFacade
 from agents.enrichment.async_bridge import run_coroutine
 from agents.enrichment.classification import (
     FALLBACK_TECH_AREA_LABELS,
     classify_job,
 )
+from agents.enrichment.classifiers.employer_classifier import (
+    build_employer_profile,
+    persist_employer_metadata,
+)
+from agents.enrichment.classifiers.naics_classifier import classify_naics
 from agents.enrichment.classifiers.quality import score_quality
+from agents.enrichment.classifiers.soc_classifier import classify_soc
 from agents.enrichment.classifiers.spam_preview import (
     SpamPreviewResult,
+    apply_spam_tiers,
     score_spam_preview,
 )
 from agents.enrichment.job_postings_promotion import (
@@ -91,6 +101,34 @@ from agents.enrichment.schemas import EnrichedJobProfile
 from agents.scripts.jsearch_enrichment_preview_lib import build_extraction_dict
 
 log = structlog.get_logger()
+
+
+def _enrichment_soc_llm() -> Callable[[str], str]:
+    """Sync callable for :func:`classify_soc`; Azure OpenAI via :func:`invoke_skills_llm`."""
+
+    def llm(prompt: str) -> str:
+        try:
+            text, meta = invoke_skills_llm(
+                prompt,
+                agent_name="enrichment-soc-classifier",
+            )
+        except TypeError as exc:
+            if "api_key" in str(exc).lower() or "auth" in str(exc).lower():
+                log.warning("soc_llm_auth_failed", error=str(exc))
+                return "unclassified"
+            raise
+        if not meta.get("success") or meta.get("extraction_failed"):
+            log.warning(
+                "enrichment_soc_llm_call_failed",
+                success=meta.get("success"),
+                extraction_failed=meta.get("extraction_failed"),
+                error_reason=meta.get("error_reason"),
+            )
+            return "unclassified"
+        return (text or "").strip()
+
+    return llm
+
 
 _alert_bus: Any = None
 
@@ -303,6 +341,7 @@ _EXTRA_POSTING_KEYS = frozenset(
     {
         "soc_code",
         "naics_code",
+        "employer_metadata",
         "temporal_period",
         "borderplex_subregion",
         "is_duplicate",
@@ -320,9 +359,7 @@ def _rollup_fuzzy_dedup_signals(
 ) -> tuple[int, int, int]:
     """Return (stub_inc, cluster_row_inc, matched_inc) per row, each 0 or 1."""
     stub_inc = int(
-        enriched.get("stub") is True
-        or enriched.get("fuzzy_dedup_stub") is True
-        or posting.get("stub") is True
+        enriched.get("stub") is True or enriched.get("fuzzy_dedup_stub") is True or posting.get("stub") is True
     )
 
     def _has_cluster(d: dict[str, Any]) -> bool:
@@ -348,7 +385,11 @@ def _posting_for_enrichment(
         "posting_id": pick("posting_id"),
         "title": pick("title"),
         "company": pick("company"),
+        "description": pick("description", None),
         "location": pick("location", "") or "",
+        "normalized_job_id": pick("normalized_job_id"),
+        "source": pick("source"),
+        "external_id": pick("external_id"),
         "quality_score": pick("quality_score"),
         "spam_score": pick("spam_score"),
         "is_spam": pick("is_spam"),
@@ -364,6 +405,33 @@ def _posting_for_enrichment(
         if v is not None:
             base[k] = v
     return base
+
+
+def _job_postings_promotion_payload(
+    enriched: dict[str, Any],
+    posting: dict[str, Any],
+) -> dict[str, Any]:
+    """Build a payload for :func:`apply_enrichment_to_job_postings` from batch enrichment output."""
+    spam_score = enriched.get("spam_score")
+    if spam_score is None:
+        spam_score = posting.get("spam_score")
+    spam_tier = enriched.get("spam_tier")
+    if spam_tier is None:
+        spam_tier = posting.get("spam_tier")
+    if not spam_tier and isinstance(spam_score, (int, float)):
+        _, spam_tier = apply_spam_tiers(float(spam_score))
+    quality_score = enriched.get("quality_score")
+    if quality_score is None:
+        quality_score = posting.get("quality_score")
+    return {
+        "spam_tier": spam_tier,
+        "spam_score": spam_score,
+        "quality_score": quality_score,
+        "overall_confidence": enriched.get("overall_confidence"),
+        "field_confidence": enriched.get("field_confidence"),
+        "naics_code": enriched.get("naics_code"),
+        "soc_code": enriched.get("soc_code"),
+    }
 
 
 class EnrichmentAgent(BaseAgent):
@@ -424,10 +492,39 @@ class EnrichmentAgent(BaseAgent):
         }
 
     def _process_skills_extracted_batch(self, event: EventEnvelope) -> EventEnvelope:
+        import json as _json
+        from contextlib import nullcontext, suppress
+
+        from agents.common.llm_adapter import get_tracer
+
         payload = event.payload
         correlation_id = event.correlation_id
         batch_id = str(payload.get("batch_id") or "batch-unknown")
+
+        tracer = get_tracer()
         rows = _records_from_skills_payload(payload)
+
+        # Serialize input EventEnvelope summary for Langfuse trace visibility
+        _input_str: str | None = None
+        if tracer:
+            with suppress(Exception):
+                _input_str = _json.dumps({
+                    "event_type": payload.get("event_type", "SkillsExtracted"),
+                    "correlation_id": correlation_id,
+                    "batch_id": batch_id,
+                    "record_count": len(rows),
+                })
+
+        span_ctx = (
+            tracer.start_span(
+                "enrichment",
+                correlation_id=correlation_id,
+                input=_input_str,
+                metadata={"batch_id": batch_id, "record_count": len(rows)},
+            )
+            if tracer
+            else nullcontext()
+        )
         enriched_count = 0
         spam_rejected_count = 0
         flagged_for_review_count = 0
@@ -445,7 +542,7 @@ class EnrichmentAgent(BaseAgent):
             nonlocal duplicate_count, soc_classified_count, naics_classified_count
             nonlocal dedup_stub_count, dedup_rows_with_duplicate_cluster_id
             nonlocal dedup_rows_with_matched_job_posting_id
-            for row in rows:
+            for idx, row in enumerate(rows):
                 bucket = _spam_bucket(row)
                 if bucket == "rejected":
                     spam_rejected_count += 1
@@ -455,56 +552,125 @@ class EnrichmentAgent(BaseAgent):
                     continue
 
                 posting = _posting_for_enrichment(row, payload)
-                try:
-                    enriched = self.enrich_record(posting, session=session)
-                    sector_id = resolve_sector(posting.get("role_classification"), session=session)
-                    enriched["sector_id"] = sector_id
-                    enriched_count += 1
 
-                    # Promote enrichment columns to job_postings (INSERT if row missing)
-                    row_nj_id = _coerce_normalized_job_id(row.get("normalized_job_id"))
-                    if row_nj_id is not None and session is not None:
-                        try:
-                            apply_enrichment_to_job_postings(session, row_nj_id, enriched)
-                        except Exception as promo_exc:
-                            log.warning(
-                                "enrichment_batch_promotion_failed",
-                                normalized_job_id=row_nj_id,
-                                error=str(promo_exc),
-                            )
-
-                    tp = _distribution_bucket(enriched.get("temporal_period", posting.get("temporal_period")))
-                    temporal_period_distribution[tp] += 1
-                    bp = _distribution_bucket(enriched.get("borderplex_subregion"))
-                    borderplex_subregion_distribution[bp] += 1
-                    if enriched.get("is_duplicate") is True:
-                        duplicate_count += 1
-                    soc_raw = enriched.get("soc_code") or posting.get("soc_code")
-                    if soc_raw is not None and str(soc_raw).strip():
-                        soc_classified_count += 1
-                    naics_raw = enriched.get("naics_code") or posting.get("naics_code")
-                    if naics_raw is not None and str(naics_raw).strip():
-                        naics_classified_count += 1
-                    ds, dc, dm = _rollup_fuzzy_dedup_signals(enriched, posting)
-                    dedup_stub_count += ds
-                    dedup_rows_with_duplicate_cluster_id += dc
-                    dedup_rows_with_matched_job_posting_id += dm
-                except Exception:
-                    log.warning("enrichment_process_degraded", agent=self.agent_id)
-
-        if check_db_connection():
-            try:
-                with session_scope() as db_session:
-                    run_batch(db_session)
-            except Exception as exc:
-                log.warning(
-                    "enrichment_session_scope_failed",
-                    agent=self.agent_id,
-                    error=str(exc),
+                # Wrap each job's enrichment in a Langfuse span so NAICS/SOC/employer
+                # classifier calls are grouped under the job title in the trace timeline.
+                job_title = (posting.get("title") or "untitled")[:60]
+                job_span_ctx = (
+                    tracer.start_span(
+                        f"enrich/{job_title}",
+                        correlation_id=correlation_id,
+                        input=_json.dumps({
+                            "title": posting.get("title", ""),
+                            "company": posting.get("company", ""),
+                            "normalized_job_id": posting.get("normalized_job_id"),
+                        }),
+                        metadata={"idx": idx + 1, "total": len(rows)},
+                    )
+                    if tracer
+                    else nullcontext()
                 )
+
+                with job_span_ctx:
+                    try:
+                        enriched = self.enrich_record(posting, session=session)
+                        sector_id = resolve_sector(posting.get("role_classification"), session=session)
+                        enriched["sector_id"] = sector_id
+
+                        # Score quality (deterministic — no LLM call)
+                        extraction = build_extraction_dict(
+                            row.get("skills"),
+                            row.get("tools"),
+                            row.get("tasks"),
+                            row.get("responsibilities"),
+                            row.get("context"),
+                        )
+                        q_res = score_quality(
+                            job_title=posting.get("title") or "",
+                            job_description=posting.get("description"),
+                            extraction=extraction,
+                            extraction_failed=bool(row.get("extraction_failed")),
+                        )
+                        enriched["quality_score"] = q_res.quality_score
+                        enriched["quality_components"] = q_res.components
+
+                        enriched_count += 1
+
+                        tp = _distribution_bucket(enriched.get("temporal_period", posting.get("temporal_period")))
+                        temporal_period_distribution[tp] += 1
+                        bp = _distribution_bucket(enriched.get("borderplex_subregion"))
+                        borderplex_subregion_distribution[bp] += 1
+                        if enriched.get("is_duplicate") is True:
+                            duplicate_count += 1
+                        soc_raw = enriched.get("soc_code") or posting.get("soc_code")
+                        if soc_raw is not None and str(soc_raw).strip():
+                            soc_classified_count += 1
+                        naics_raw = enriched.get("naics_code") or posting.get("naics_code")
+                        naics_st = str(naics_raw).strip() if naics_raw is not None else ""
+                        if naics_st and naics_st.lower() != "unknown":
+                            naics_classified_count += 1
+                        ds, dc, dm = _rollup_fuzzy_dedup_signals(enriched, posting)
+                        dedup_stub_count += ds
+                        dedup_rows_with_duplicate_cluster_id += dc
+                        dedup_rows_with_matched_job_posting_id += dm
+                        nj_promo = _coerce_normalized_job_id(
+                            enriched.get("normalized_job_id") or posting.get("normalized_job_id")
+                        )
+                        if session is not None and nj_promo is not None:
+                            try:
+                                apply_enrichment_to_job_postings(
+                                    session,
+                                    nj_promo,
+                                    _job_postings_promotion_payload(enriched, posting),
+                                )
+                            except Exception as promo_exc:
+                                log.warning(
+                                    "enrichment_batch_job_posting_promotion_failed",
+                                    normalized_job_id=nj_promo,
+                                    error=str(promo_exc),
+                                )
+                    except Exception:
+                        log.warning("enrichment_process_degraded", agent=self.agent_id)
+
+        with span_ctx:
+            if check_db_connection():
+                try:
+                    with session_scope() as db_session:
+                        run_batch(db_session)
+                except Exception as exc:
+                    log.warning(
+                        "enrichment_session_scope_failed",
+                        agent=self.agent_id,
+                        error=str(exc),
+                    )
+                    run_batch(None)
+            else:
                 run_batch(None)
-        else:
-            run_batch(None)
+
+            # Log enrichment output to Langfuse
+            if tracer:
+                try:
+                    total_processed = enriched_count + spam_rejected_count + flagged_for_review_count
+                    tracer.log_event("enrichment_complete", {
+                        "output": _json.dumps({
+                            "event_type": "RecordEnriched",
+                            "batch_id": batch_id,
+                            "enriched_count": enriched_count,
+                            "spam_rejected_count": spam_rejected_count,
+                            "flagged_for_review_count": flagged_for_review_count,
+                            "soc_classified_count": soc_classified_count,
+                            "naics_classified_count": naics_classified_count,
+                            "duplicate_count": duplicate_count,
+                        }),
+                        "enriched_count": enriched_count,
+                        "spam_rejected_count": spam_rejected_count,
+                        "flagged_for_review_count": flagged_for_review_count,
+                        "soc_classified_count": soc_classified_count,
+                        "naics_classified_count": naics_classified_count,
+                        "total_processed": total_processed,
+                    })
+                except Exception:
+                    pass
 
         return build_record_enriched_event(
             correlation_id=correlation_id,
@@ -659,12 +825,23 @@ class EnrichmentAgent(BaseAgent):
             "borderplex_subregion": enriched_job_profile.borderplex_subregion,
         }
 
+        resolved_company_id: str | None = None
+        if resolved_job_posting and resolved_job_posting.get("company_id") is not None:
+            rc = str(resolved_job_posting["company_id"]).strip()
+            resolved_company_id = rc or None
+        fixture_company_id = fx.get("company_id")
+        if fixture_company_id is not None and not isinstance(fixture_company_id, str):
+            fixture_company_id = str(fixture_company_id).strip() or None
+        elif isinstance(fixture_company_id, str):
+            fixture_company_id = fixture_company_id.strip() or None
+        effective_company_id = resolved_company_id or fixture_company_id
+
         base_payload: dict[str, Any] = {
             "event_type": "RecordEnriched",
             "posting_id": posting_id,
             "title": title or fx.get("title"),
             "company": company,
-            "company_id": fx.get("company_id"),
+            "company_id": effective_company_id,
             "sector_id": fx.get("sector_id"),
             "role_classification": role_classification,
             "seniority": seniority,
@@ -693,6 +870,40 @@ class EnrichmentAgent(BaseAgent):
         if nj_id is not None and _db_url_configured():
             try:
                 with session_scope() as session:
+                    raw_naics = classify_naics(title, desc_str, session)
+                    base_payload["naics_code"] = (raw_naics or "unknown").strip() or "unknown"
+                    try:
+                        raw_soc = run_coroutine(
+                            classify_soc(
+                                title or "",
+                                desc_str or "",
+                                session,
+                                _enrichment_soc_llm(),
+                            )
+                        )
+                        base_payload["soc_code"] = None if raw_soc == "unclassified" else raw_soc
+                        _soc = base_payload["soc_code"]
+                        oc_value = _soc[:20] if _soc else None
+                        session.execute(
+                            update(NormalizedJob).where(NormalizedJob.id == nj_id).values(occupation_code=oc_value)
+                        )
+                    except Exception as soc_exc:
+                        log.warning(
+                            "enrichment_soc_failed",
+                            normalized_job_id=nj_id,
+                            error=str(soc_exc),
+                        )
+                        base_payload["soc_code"] = None
+                    ep = build_employer_profile(desc_str, str(company or ""), session)
+                    base_payload["employer_metadata"] = ep.model_dump(mode="json")
+                    persist_employer_metadata(
+                        session,
+                        ep,
+                        company_id=effective_company_id,
+                        normalized_job_id=nj_id,
+                        source=event.payload.get("source"),
+                        external_id=event.payload.get("external_id"),
+                    )
                     apply_enrichment_to_job_postings(session, nj_id, base_payload)
             except Exception as exc:
                 log.warning(
@@ -751,6 +962,59 @@ class EnrichmentAgent(BaseAgent):
                     "enrichment_external_adapters_failed",
                     error=str(ext_exc),
                 )
+            if session is not None:
+                desc_raw = posting.get("description")
+                desc_str = desc_raw if isinstance(desc_raw, str) else None
+                try:
+                    raw_naics = classify_naics(posting.get("title") or "", desc_str, session)
+                    merged["naics_code"] = (raw_naics or "unknown").strip() or "unknown"
+                except Exception as naics_exc:
+                    log.warning("enrich_record_naics_failed", error=str(naics_exc))
+                    merged["naics_code"] = posting.get("naics_code")
+                try:
+                    raw_soc = run_coroutine(
+                        classify_soc(
+                            posting.get("title") or "",
+                            desc_str or "",
+                            session,
+                            _enrichment_soc_llm(),
+                        )
+                    )
+                    merged["soc_code"] = None if raw_soc == "unclassified" else raw_soc
+                except Exception as soc_exc:
+                    log.warning("enrich_record_soc_failed", error=str(soc_exc))
+                    merged["soc_code"] = posting.get("soc_code")
+                else:
+                    nj_soc = _coerce_normalized_job_id(posting.get("normalized_job_id"))
+                    sc = merged.get("soc_code")
+                    if nj_soc is not None and isinstance(sc, str) and sc.strip():
+                        try:
+                            session.execute(
+                                update(NormalizedJob)
+                                .where(NormalizedJob.id == nj_soc)
+                                .values(occupation_code=sc.strip()[:20])
+                            )
+                        except Exception as oc_exc:
+                            log.warning(
+                                "enrich_record_occupation_code_persist_failed",
+                                error=str(oc_exc),
+                            )
+                try:
+                    ep = build_employer_profile(desc_str, posting.get("company") or "", session)
+                    merged["employer_metadata"] = ep.model_dump(mode="json")
+                    cid_raw = merged.get("company_id")
+                    persist_company_id = str(cid_raw).strip() if cid_raw is not None and str(cid_raw).strip() else None
+                    persist_employer_metadata(
+                        session,
+                        ep,
+                        company_id=persist_company_id,
+                        normalized_job_id=_coerce_normalized_job_id(posting.get("normalized_job_id")),
+                        source=posting.get("source"),
+                        external_id=posting.get("external_id"),
+                    )
+                except Exception as emp_exc:
+                    log.warning("enrich_record_employer_failed", error=str(emp_exc))
+                    merged["employer_metadata"] = EmployerProfile().model_dump(mode="json")
             return merged
         except Exception:
             log.warning(
@@ -764,6 +1028,8 @@ class EnrichmentAgent(BaseAgent):
                 "location_id": None,
                 "raw_location_text": None,
                 "borderplex_subregion": None,
+                "naics_code": posting.get("naics_code"),
+                "employer_metadata": EmployerProfile().model_dump(mode="json"),
                 "field_confidence": {
                     "company_id": 0.0,
                     "location_id": 0.0,

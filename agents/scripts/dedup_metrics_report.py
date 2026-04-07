@@ -101,12 +101,12 @@ def gather_metrics(engine: Engine, *, top_n: int) -> dict:
             conn,
             """
             SELECT
-                duplicate_cluster_id AS cluster_id,
+                duplicate_cluster_id::text AS cluster_id,
                 COUNT(*) AS member_count,
                 MAX(SUBSTRING(job_title FROM 1 FOR 80)) AS sample_title
             FROM dbo.job_postings
             WHERE duplicate_cluster_id IS NOT NULL
-            GROUP BY duplicate_cluster_id
+            GROUP BY duplicate_cluster_id::text
             ORDER BY member_count DESC
             LIMIT :n
             """,
@@ -121,7 +121,7 @@ def gather_metrics(engine: Engine, *, top_n: int) -> dict:
                 CASE WHEN is_duplicate IS TRUE THEN 'true'
                      WHEN is_duplicate IS FALSE THEN 'false'
                      ELSE 'null' END AS is_duplicate,
-                duplicate_cluster_id,
+                duplicate_cluster_id::text AS duplicate_cluster_id,
                 SUBSTRING(dedup_text_hash FROM 1 FOR 12) AS dedup_hash_prefix
             FROM dbo.job_postings
             WHERE publish_date >= NOW() - INTERVAL '7 days'
