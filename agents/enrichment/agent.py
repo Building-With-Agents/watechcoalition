@@ -542,7 +542,7 @@ class EnrichmentAgent(BaseAgent):
             nonlocal duplicate_count, soc_classified_count, naics_classified_count
             nonlocal dedup_stub_count, dedup_rows_with_duplicate_cluster_id
             nonlocal dedup_rows_with_matched_job_posting_id
-            for row in rows:
+            for idx, row in enumerate(rows):
                 bucket = _spam_bucket(row)
                 if bucket == "rejected":
                     spam_rejected_count += 1
@@ -552,82 +552,102 @@ class EnrichmentAgent(BaseAgent):
                     continue
 
                 posting = _posting_for_enrichment(row, payload)
-                try:
-                    enriched = self.enrich_record(posting, session=session)
-                    sector_id = resolve_sector(posting.get("role_classification"), session=session)
-                    enriched["sector_id"] = sector_id
 
-                    # Score quality (deterministic — no LLM call)
-                    extraction = build_extraction_dict(
-                        row.get("skills"),
-                        row.get("tools"),
-                        row.get("tasks"),
-                        row.get("responsibilities"),
-                        row.get("context"),
+                # Wrap each job's enrichment in a Langfuse span so NAICS/SOC/employer
+                # classifier calls are grouped under the job title in the trace timeline.
+                job_title = (posting.get("title") or "untitled")[:60]
+                job_span_ctx = (
+                    tracer.start_span(
+                        f"enrich/{job_title}",
+                        correlation_id=correlation_id,
+                        input=_json.dumps({
+                            "title": posting.get("title", ""),
+                            "company": posting.get("company", ""),
+                            "normalized_job_id": posting.get("normalized_job_id"),
+                        }),
+                        metadata={"idx": idx + 1, "total": len(rows)},
                     )
-                    q_res = score_quality(
-                        job_title=posting.get("title") or "",
-                        job_description=posting.get("description"),
-                        extraction=extraction,
-                        extraction_failed=bool(row.get("extraction_failed")),
-                    )
-                    enriched["quality_score"] = q_res.quality_score
-                    enriched["quality_components"] = q_res.components
-
-                    enriched_count += 1
-
-                    tp = _distribution_bucket(enriched.get("temporal_period", posting.get("temporal_period")))
-                    temporal_period_distribution[tp] += 1
-                    bp = _distribution_bucket(enriched.get("borderplex_subregion"))
-                    borderplex_subregion_distribution[bp] += 1
-                    if enriched.get("is_duplicate") is True:
-                        duplicate_count += 1
-                    soc_raw = enriched.get("soc_code") or posting.get("soc_code")
-                    if soc_raw is not None and str(soc_raw).strip():
-                        soc_classified_count += 1
-                    naics_raw = enriched.get("naics_code") or posting.get("naics_code")
-                    naics_st = str(naics_raw).strip() if naics_raw is not None else ""
-                    if naics_st and naics_st.lower() != "unknown":
-                        naics_classified_count += 1
-                    ds, dc, dm = _rollup_fuzzy_dedup_signals(enriched, posting)
-                    dedup_stub_count += ds
-                    dedup_rows_with_duplicate_cluster_id += dc
-                    dedup_rows_with_matched_job_posting_id += dm
-                    nj_promo = _coerce_normalized_job_id(
-                        enriched.get("normalized_job_id") or posting.get("normalized_job_id")
-                    )
-                    if session is not None and nj_promo is not None:
-                        try:
-                            apply_enrichment_to_job_postings(
-                                session,
-                                nj_promo,
-                                _job_postings_promotion_payload(enriched, posting),
-                            )
-                        except Exception as promo_exc:
-                            log.warning(
-                                "enrichment_batch_job_posting_promotion_failed",
-                                normalized_job_id=nj_promo,
-                                error=str(promo_exc),
-                            )
-                except Exception:
-                    log.warning("enrichment_process_degraded", agent=self.agent_id)
-
-        if check_db_connection():
-            try:
-                with session_scope() as db_session:
-                    run_batch(db_session)
-            except Exception as exc:
-                log.warning(
-                    "enrichment_session_scope_failed",
-                    agent=self.agent_id,
-                    error=str(exc),
+                    if tracer
+                    else nullcontext()
                 )
-                run_batch(None)
-        else:
-            run_batch(None)
 
-        # Log enrichment output EventEnvelope to Langfuse (inside span for visibility)
+                with job_span_ctx:
+                    try:
+                        enriched = self.enrich_record(posting, session=session)
+                        sector_id = resolve_sector(posting.get("role_classification"), session=session)
+                        enriched["sector_id"] = sector_id
+
+                        # Score quality (deterministic — no LLM call)
+                        extraction = build_extraction_dict(
+                            row.get("skills"),
+                            row.get("tools"),
+                            row.get("tasks"),
+                            row.get("responsibilities"),
+                            row.get("context"),
+                        )
+                        q_res = score_quality(
+                            job_title=posting.get("title") or "",
+                            job_description=posting.get("description"),
+                            extraction=extraction,
+                            extraction_failed=bool(row.get("extraction_failed")),
+                        )
+                        enriched["quality_score"] = q_res.quality_score
+                        enriched["quality_components"] = q_res.components
+
+                        enriched_count += 1
+
+                        tp = _distribution_bucket(enriched.get("temporal_period", posting.get("temporal_period")))
+                        temporal_period_distribution[tp] += 1
+                        bp = _distribution_bucket(enriched.get("borderplex_subregion"))
+                        borderplex_subregion_distribution[bp] += 1
+                        if enriched.get("is_duplicate") is True:
+                            duplicate_count += 1
+                        soc_raw = enriched.get("soc_code") or posting.get("soc_code")
+                        if soc_raw is not None and str(soc_raw).strip():
+                            soc_classified_count += 1
+                        naics_raw = enriched.get("naics_code") or posting.get("naics_code")
+                        naics_st = str(naics_raw).strip() if naics_raw is not None else ""
+                        if naics_st and naics_st.lower() != "unknown":
+                            naics_classified_count += 1
+                        ds, dc, dm = _rollup_fuzzy_dedup_signals(enriched, posting)
+                        dedup_stub_count += ds
+                        dedup_rows_with_duplicate_cluster_id += dc
+                        dedup_rows_with_matched_job_posting_id += dm
+                        nj_promo = _coerce_normalized_job_id(
+                            enriched.get("normalized_job_id") or posting.get("normalized_job_id")
+                        )
+                        if session is not None and nj_promo is not None:
+                            try:
+                                apply_enrichment_to_job_postings(
+                                    session,
+                                    nj_promo,
+                                    _job_postings_promotion_payload(enriched, posting),
+                                )
+                            except Exception as promo_exc:
+                                log.warning(
+                                    "enrichment_batch_job_posting_promotion_failed",
+                                    normalized_job_id=nj_promo,
+                                    error=str(promo_exc),
+                                )
+                    except Exception:
+                        log.warning("enrichment_process_degraded", agent=self.agent_id)
+
         with span_ctx:
+            if check_db_connection():
+                try:
+                    with session_scope() as db_session:
+                        run_batch(db_session)
+                except Exception as exc:
+                    log.warning(
+                        "enrichment_session_scope_failed",
+                        agent=self.agent_id,
+                        error=str(exc),
+                    )
+                    run_batch(None)
+            else:
+                run_batch(None)
+
+            # Log enrichment output to Langfuse
             if tracer:
                 try:
                     total_processed = enriched_count + spam_rejected_count + flagged_for_review_count
