@@ -15,6 +15,7 @@ Environment variables consumed by later modules in this package:
 - ``CLUSTER_SELECTION_EPSILON`` (default ``0.0``)
 - ``CLUSTER_DISTANCE_METRIC`` (default ``"euclidean"``)
 - ``CLUSTER_LABEL_DOMINANCE_THRESHOLD`` (default ``0.30``)
+- ``CLUSTER_EMBEDDING_BATCH_SIZE`` (default ``50``)
 - ``CLUSTER_EMBEDDING_AUDIT_AGENT_NAME`` (default ``"analytics-clustering"``)
 - ``EMERGENCE_MIN_QUALITY_SCORE`` (default ``0.70``)
 - ``EMERGENCE_MIN_NOVEL_SKILLS`` (default ``3``)
@@ -24,6 +25,7 @@ Environment variables consumed by later modules in this package:
 from agents.analytics.clustering.config import (
     DEFAULT_CLUSTER_DISTANCE_METRIC,
     DEFAULT_CLUSTER_EMBEDDING_AUDIT_AGENT_NAME,
+    DEFAULT_CLUSTER_EMBEDDING_BATCH_SIZE,
     DEFAULT_CLUSTER_LABEL_DOMINANCE_THRESHOLD,
     DEFAULT_CLUSTER_MIN_CLUSTER_SIZE,
     DEFAULT_CLUSTER_MIN_SAMPLES,
@@ -33,21 +35,37 @@ from agents.analytics.clustering.config import (
     DEFAULT_EMERGENCE_MIN_NOVEL_SKILLS,
     DEFAULT_EMERGENCE_MIN_QUALITY_SCORE,
 )
+from agents.analytics.clustering.embeddings import (
+    embed_posting_features,
+    embed_prepared_clustering_texts,
+)
+from agents.analytics.clustering.text import (
+    build_clustering_text,
+    build_clustering_texts,
+    clustering_text_hash,
+    prepare_clustering_text,
+    prepare_clustering_texts,
+)
 from agents.analytics.clustering.types import (
     ClusteredPosting,
     ClusteringResult,
     ClusterSummary,
+    EmbeddedPostingText,
     EmergenceCandidate,
     PostingClusterFeatures,
+    PreparedClusteringText,
     RankedSkill,
     RankedTool,
 )
 
 __all__ = [
+    "build_clustering_text",
+    "build_clustering_texts",
     "ClusterSummary",
     "ClusteredPosting",
     "ClusteringResult",
     "DEFAULT_CLUSTER_DISTANCE_METRIC",
+    "DEFAULT_CLUSTER_EMBEDDING_BATCH_SIZE",
     "DEFAULT_CLUSTER_EMBEDDING_AUDIT_AGENT_NAME",
     "DEFAULT_CLUSTER_LABEL_DOMINANCE_THRESHOLD",
     "DEFAULT_CLUSTER_MIN_CLUSTER_SIZE",
@@ -57,8 +75,15 @@ __all__ = [
     "DEFAULT_EMERGENCE_MIN_DISTINCT_EMPLOYERS",
     "DEFAULT_EMERGENCE_MIN_NOVEL_SKILLS",
     "DEFAULT_EMERGENCE_MIN_QUALITY_SCORE",
+    "embed_posting_features",
+    "embed_prepared_clustering_texts",
+    "EmbeddedPostingText",
     "EmergenceCandidate",
     "PostingClusterFeatures",
+    "PreparedClusteringText",
+    "prepare_clustering_text",
+    "prepare_clustering_texts",
     "RankedSkill",
     "RankedTool",
+    "clustering_text_hash",
 ]

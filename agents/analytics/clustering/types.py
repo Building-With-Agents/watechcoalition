@@ -124,6 +124,52 @@ class PostingClusterFeatures(BaseModel):
         return _normalize_string_list(value)
 
 
+class PreparedClusteringText(BaseModel):
+    """Deterministic clustering text plus a stable hash for safe logging/debugging."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    posting_id: str = Field(description="Stable job posting id.")
+    text: str = Field(description="Deterministic embedding input for the posting.")
+    text_hash: str = Field(
+        min_length=64,
+        max_length=64,
+        description="SHA-256 hash of the deterministic embedding text.",
+    )
+
+    @field_validator("posting_id", "text", mode="before")
+    @classmethod
+    def normalize_required_strings(cls, value: object, info: ValidationInfo) -> str:
+        field_name = info.field_name or "value"
+        return _normalize_required_string(value, field_name=field_name)
+
+    @field_validator("text_hash", mode="before")
+    @classmethod
+    def normalize_text_hash(cls, value: object) -> str:
+        text_hash = _normalize_required_string(value, field_name="text_hash").lower()
+        if len(text_hash) != 64 or any(char not in "0123456789abcdef" for char in text_hash):
+            raise ValueError("text_hash must be a 64-character lowercase hex string")
+        return text_hash
+
+
+class EmbeddedPostingText(PreparedClusteringText):
+    """Prepared clustering text plus the embedding vector returned by Azure."""
+
+    embedding: list[float] = Field(description="Embedding vector for the prepared clustering text.")
+
+    @field_validator("embedding", mode="before")
+    @classmethod
+    def normalize_embedding(cls, value: object) -> list[float]:
+        if isinstance(value, str):
+            raise ValueError("embedding must be a numeric sequence, not a string")
+        if not isinstance(value, Iterable):
+            raise ValueError("embedding must be a numeric sequence")
+        embedding = [float(item) for item in value]
+        if not embedding:
+            raise ValueError("embedding may not be empty")
+        return embedding
+
+
 class ClusteredPosting(BaseModel):
     """Cluster assignment for one posting in a single clustering run."""
 
