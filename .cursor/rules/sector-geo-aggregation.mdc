@@ -1,0 +1,124 @@
+---
+description: Pair B (Fatima + Nestor) Week 7 — sector/geo weekly aggregates, salary percentiles API, minimum-data guard (#179), analytics integration.
+globs: agents/analytics/**/*.py,agents/common/data_store/models.py,agents/common/data_store/migrations.py
+alwaysApply: false
+---
+
+# Sector & geo aggregation — Pair B Week 7 integration contract
+
+Cross-pair coordination: **Pair C (Bryan + Emilio)** consumes `compute_salary_percentiles()` for `role_snapshot_weekly` — track in **issue #188**. Aggregates are written by the **Analytics Agent** Week 7 implementation (`agents/analytics/agent.py`); today that module is still a walking-skeleton stub until real batch aggregation lands.
+
+## 1. SQLAlchemy models (`agents/common/data_store/models.py`)
+
+**Status:** These tables are specified for Week 7; add the classes below to `agents/common/data_store/models.py` (and matching idempotent DDL in `migrations.py` / `create_all`) when implementing. Use schema **`dbo`**, same patterns as other agent tables (`Index`, `{"schema": "dbo"}`).
+
+### `sector_summary_weekly`
+
+Weekly rollups by **NAICS-derived sector** (or equivalent sector bucket stored as text): posting volume plus **average and median** salary.
+
+```python
+from datetime import date
+
+from sqlalchemy import Date, Float, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
+
+
+class SectorSummaryWeekly(Base):
+    """Weekly aggregates: job counts and avg/median salary by NAICS sector bucket."""
+
+    __tablename__ = "sector_summary_weekly"
+    __table_args__ = {"schema": "dbo"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    week_start: Mapped[date] = mapped_column(Date, nullable=False)
+    sector: Mapped[str] = mapped_column(Text, nullable=False)
+    posting_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    avg_salary: Mapped[float | None] = mapped_column(Float, nullable=True)
+    median_salary: Mapped[float | None] = mapped_column(Float, nullable=True)
+```
+
+*Implementers:* choose a single canonical salary basis (e.g. midpoint of min/max when both present, or `salary_max` only) and document it next to the aggregation SQL; keep NAICS→sector mapping consistent with `dbo.naics` / product definitions.
+
+### `geo_demand_weekly`
+
+Weekly job counts by **Borderplex subregion** (enrichment classifier output).
+
+```python
+class GeoDemandWeekly(Base):
+    """Weekly job counts by borderplex_subregion."""
+
+    __tablename__ = "geo_demand_weekly"
+    __table_args__ = {"schema": "dbo"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    week_start: Mapped[date] = mapped_column(Date, nullable=False)
+    borderplex_subregion: Mapped[str] = mapped_column(String(32), nullable=False)
+    posting_count: Mapped[int] = mapped_column(Integer, nullable=False)
+```
+
+*Optional extension (from architecture sketches):* JSONB columns such as `top_roles` or `skill_mix` on sector/geo tables — only add when Pair B and consumers agree on shape; not required for the core contract above.
+
+## 2. `compute_salary_percentiles()` — Pair C interface
+
+Shared helper (intended location: analytics module alongside Week 7 aggregation code, e.g. under `agents/analytics/`). **Pair C** uses this output to populate **`role_snapshot_weekly`**.
+
+**Signature:**
+
+```python
+def compute_salary_percentiles(
+    session: Session,
+    group_col: str,
+    having_threshold: int = 50,
+) -> dict[str, dict[str, float]]:
+    ...
+```
+
+| Parameter | Meaning |
+|-----------|---------|
+| `session` | Open SQLAlchemy `Session` (read path; respect transaction boundaries of the caller). |
+| `group_col` | SQL-safe grouping dimension for the snapshot (e.g. SOC bucket, role label, or mapped column name agreed with Pair C). **Must not** be raw user input — use an allowlist in implementation. |
+| `having_threshold` | Minimum row count per group; groups with fewer postings are omitted from the result. Default **50** aligns with the pipeline minimum-data guard (#179). |
+
+**Return value:** Mapping **group key → percentiles**, each inner dict containing **`p25`**, **`p50`**, **`p75`**, **`p95`** (salary values as floats). Example:
+
+```python
+{
+    "15-1252": {"p25": 95000.0, "p50": 120000.0, "p75": 145000.0, "p95": 175000.0},
+    ...
+}
+```
+
+Use a single defined annualized (or hourly-normalized) salary metric consistent with sector rollups. Prefer PostgreSQL `percentile_disc` / `percentile_cont` or equivalent in-SQL computation for correctness and performance.
+
+## 3. Minimum data guard — issue **#179**
+
+Before running Week 7 aggregation (sector/geo snapshots, percentile jobs, downstream writes):
+
+- Count **new** rows in **`dbo.job_postings`** since the **last successful analytics run** (watermark: store `last_run_at` / high-water `job_posting_id` or `publish_date` — exact mechanism owned by Analytics Week 7).
+- If that count is **strictly less than 50**, **skip the entire pipeline** for this cycle: **no** writes to `sector_summary_weekly`, `geo_demand_weekly`, or dependent tables.
+- Return early and emit a **structured log event** (structlog), e.g. keys: `event="analytics_skipped_insufficient_new_postings"`, `new_postings_count`, `threshold=50`, `last_run_watermark`, `correlation_id` if available.
+
+This avoids noisy aggregates and aligns `having_threshold` defaults with Pair C expectations.
+
+## 4. Key source columns (`job_postings` + joins)
+
+Aggregations read primarily from **`dbo.job_postings`**, enriched by normalization where salary lives on **`dbo.normalized_jobs`** (join on `source` + `external_id`, same pattern as enrichment promotion).
+
+| Column | Source table | Role |
+|--------|----------------|------|
+| **`naics_code`** | `job_postings` | From SOC/NAICS enrichment (PR **#149** / promotion path); use for sector bucketing (map code → sector label as needed). |
+| **`borderplex_subregion`** | `job_postings` | From enrichment classifiers (`temporal_period` / Borderplex pair contract — see `integration-schema.mdc`). |
+| **`soc_code`** | `job_postings` | SOC string for role/SOC dimension rollups and for Pair C role snapshots. |
+| **`salary_min`**, **`salary_max`** | `normalized_jobs` | Salary inputs for percentiles and avg/median; join postings ↔ normalized rows. |
+
+Filter to **active / in-scope** postings as defined by the analytics batch (e.g. status, date window, dedup flags) and document those predicates next to the SQL.
+
+## 5. Integration summary
+
+| Owner | Responsibility |
+|-------|----------------|
+| **Pair B (Fatima + Nestor)** | `sector_summary_weekly` / `geo_demand_weekly` models & migrations; aggregation logic; minimum-data guard (#179); expose `compute_salary_percentiles()`. |
+| **Analytics Agent** | `agents/analytics/agent.py` — Week 7 replaces stub with batch aggregation, watermarking, and `AnalyticsRefreshed` emission after successful runs. |
+| **Pair C (Bryan + Emilio)** | Consumes **`compute_salary_percentiles()`** for **`role_snapshot_weekly`**; coordinate schema and column allowlists via **issue #188**. |
+
+**References:** `docs/planning/ARCHITECTURE_DEEP.md` (table names), `.cursor/rules/soc-naics-enrichment.mdc` (enrichment columns on postings), `.cursor/rules/integration-schema.mdc` (locked `borderplex_subregion` values).

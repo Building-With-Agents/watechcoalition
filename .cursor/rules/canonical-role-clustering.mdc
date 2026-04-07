@@ -1,0 +1,85 @@
+---
+description: "Week 7 Pair C — canonical role clustering, role_snapshot_weekly, EmergenceAlert contract"
+alwaysApply: false
+globs:
+  - "agents/analytics/**"
+  - "agents/common/data_store/**"
+  - "agents/common/events/**"
+---
+
+# Canonical role clustering (Pair C — Bryan + Emilio)
+
+**Runbook:** `agents/docs/week 7/WEEK-07-canonical-role-clustering-bryan-emilio-runbook.md`  
+**Reading:** `agents/docs/week 7/IMP-023-unsupervised-clustering-canonical-roles-bryan-emilio-reading.md`  
+**Work split:** `agents/docs/week 7/TODO.md`  
+**ORM:** `CanonicalRole`, `RoleSnapshotWeekly` in `agents/common/data_store/models.py`
+
+## `dbo.canonical_roles`
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `id` | SERIAL PK | Internal surrogate. |
+| `role_id` | TEXT UNIQUE NOT NULL | **Stable external key** — UUID string or slug; FK target from `job_postings` and `role_snapshot_weekly`. |
+| `label` | TEXT NOT NULL | Human-readable cluster name (dominant title or LLM). |
+| `description` | TEXT | Optional longer description. |
+| `posting_count` | INT | Members in cluster for this run. |
+| `cluster_centroid` | JSONB | Mean embedding as JSON array of floats (dim = posting embedding, e.g. 1536). |
+| `representative_titles` | JSONB | Array of strings — sample titles for QA. |
+| `top_skills` | JSONB | Array of objects (e.g. `{skill_name, count}`) — align with extraction payloads. |
+| `top_tools` | JSONB | Same pattern for tools. |
+| `is_llm_generated` | BOOLEAN | Label provenance. |
+| `computed_at` | TIMESTAMPTZ | When this cluster row was last computed. |
+| `created_at` / `updated_at` | TIMESTAMPTZ | Row lifecycle. |
+
+## `dbo.role_snapshot_weekly`
+
+Unique on `(week_start, canonical_role_id)`.
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `week_start` | DATE | ISO week anchor (Monday or agreed team convention — **document in code**). |
+| `canonical_role_id` | TEXT FK → `canonical_roles.role_id` | **Never** aggregate by raw `job_title` only. |
+| `posting_count` | INT | |
+| `role_title` | TEXT | Optional display snapshot (e.g. canonical `label` at compute time). |
+| `avg_salary` / `median_salary` | DOUBLE PRECISION | Dashboard / legacy compat. |
+| `salary_p25` … `salary_p95` | DOUBLE PRECISION | Use **Pair B** salary percentile helper when available; else interim `percentile()` on numeric salaries. |
+| `top_skills` / `top_tools` | JSONB | |
+| `computed_at` | TIMESTAMPTZ | |
+
+## `dbo.job_postings`
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `canonical_role_id` | TEXT NULL | Set by Analytics step 4 after clustering; FK to `canonical_roles.role_id` when migration applied. |
+
+Clustering should prefer **non-duplicate survivors** when `is_duplicate` / `duplicate_cluster_id` are populated (issue #135 gate). See `.cursor/rules/integration-schema.mdc`.
+
+## `EmergenceAlert` event (payload contract)
+
+Producer: **Analytics Agent** after step 4 (clustering). Consumer: **Orchestration Agent only** (architecture rule for `*Alert`).
+
+Suggested `EventEnvelope.payload` keys (snake_case, extend with `schema_version` if needed):
+
+| Key | Type | Notes |
+|-----|------|--------|
+| `event_type` | str | `"EmergenceAlert"` |
+| `correlation_id` | str | Propagated from pipeline run. |
+| `posting_ids` | list[str] | Job posting UUIDs as text. |
+| `candidate_role_label` | str | Short proposed label for the candidate group. |
+| `posting_count` | int | |
+| `top_skills` | list | |
+| `nearest_canonical_role` | str \| null | `role_id` of closest cluster, if any. |
+| `filter_reason` | str \| null | Why it passed emergence filters (IMP-023), not raw noise. |
+
+**No PII** in payload or logs.
+
+## Embedding & HDBSCAN configuration
+
+- **Embeddings:** Same family as fuzzy dedup (`text-embedding-3-small` / existing `_embed_texts_azure` path). **Do not** mix embedding models in one clustering run.
+- **Audit:** Use a dedicated `audit_agent_name` (e.g. `analytics-clustering`) for `llm_audit_log`.
+- **Env (suggested):** `CLUSTER_MIN_CLUSTER_SIZE` (default 10), `CLUSTER_MIN_SAMPLES` (default 5), `CLUSTER_SELECTION_EPSILON` (default 0.0), `CLUSTER_MIN_TOTAL_POSTINGS` (default 500), `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` (or existing project envs — **list actual names in agent config**).
+
+## Dependencies
+
+- **Pair B:** Agree import path + signature for salary percentiles for step 5.
+- **Migrations:** `agents/common/data_store/migrations.py` — append-only steps; `job_postings.canonical_role_id` + optional FK after `canonical_roles` exists.

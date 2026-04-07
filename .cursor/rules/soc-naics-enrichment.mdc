@@ -1,0 +1,132 @@
+---
+description: SOC/NAICS enrichment integration contract — DB columns, classifiers, employer storage, promotion to job_postings.
+globs: agents/enrichment/**/*.py
+alwaysApply: false
+---
+
+# SOC & NAICS enrichment — integration contract
+
+Canonical implementation lives under `agents/enrichment/`. Pair field names on enriched payloads: `soc_code`, `naics_code`, `employer_metadata` (see `agents/enrichment/schemas.py` and `.cursor/rules/integration-schema.mdc`).
+
+## Table schemas (persistence)
+
+### `dbo.job_postings` (promotion target)
+
+Added idempotently by `agents/common/data_store/migrations.py` (`_JOB_POSTINGS_ALTER_STATEMENTS`):
+
+| Column | Role |
+|--------|------|
+| **`soc_code`** | TEXT — enrichment SOC string chosen from `dbo.socc` (via classifier). Not the legacy Prisma `occupation_code` column when both exist. |
+| **`naics_code`** | TEXT — always a non-NULL string for promotion: a code from `dbo.naics` or the literal **`unknown`** (never SQL NULL in the promotion path). |
+| **`employer_profile_id`** | UUID — FK to `dbo.employer_profiles.id`; set during promotion when `company_id` resolves and employer metadata is applied (`COALESCE` keeps an existing FK if param is null). |
+
+ORM for `job_postings` may be absent in Python; treat migrations + `job_postings_promotion.py` as source of truth for agent-written columns.
+
+### `dbo.normalized_jobs` (pipeline staging)
+
+SQLAlchemy: `agents/common/data_store/models.py` → `NormalizedJob`.
+
+| Column | Role |
+|--------|------|
+| **`occupation_code`** | `String(20)` — after `classify_soc`, enrichment writes a **truncated** copy of the SOC string (first 20 chars) for compatibility / legacy alignment. Full SOC for postings lives in `job_postings.soc_code`. |
+| **`naics_code`** | `Text` — exists on the row for NAICS storage in some flows (e.g. `enrich_job_profile_naics` in `classification.py`); the main `EnrichmentAgent.enrich_record` path sets `naics_code` on the **in-memory enriched dict** and promotes to `job_postings.naics_code` without always updating this column. |
+| **`employer_metadata`** | JSONB — used when there is no resolvable `company_id` for `employer_profiles`; see employer pattern below. |
+
+## Minimum reference data
+
+- **`dbo.socc`** must contain rows matching the classifier query (versions **2010** and **2018** in `SOCC.version`). Empty or missing matches → no candidates → `classify_soc` returns **`unclassified`**.
+- **`dbo.naics`** must be populated (e.g. seed scripts) so `get_naics_candidates` can return rows. Empty candidates or LLM failure → **`unknown`**.
+
+## `classify_soc()` — two-tier: DB candidates + LLM picker
+
+**Module:** `agents/enrichment/classifiers/soc_classifier.py`
+
+```python
+async def classify_soc(
+    title: str,
+    description: str,
+    session: Session,
+    llm: Callable[[str], str],
+) -> str:
+```
+
+**Tier 1 — candidates from DB**
+
+- `get_soc_candidates` / `await get_soc_candidates(...)` builds search needles from title (and description via `tokenize`), queries `dbo.socc` for `code` + `title` where `version` is trimmed `2018` or `2010`.
+- Tech titles get special handling (e.g. filtering generic “engineer” needles, optional `SOCC.title` fragments for IT/software).
+- Results are ranked/deduped (up to **15** codes by default after ranking).
+
+**Tier 2 — LLM constrained pick**
+
+- If there are **no** candidates → return **`unclassified`** (no LLM call).
+- Otherwise the LLM receives the candidate list and must reply with **exactly one** catalog code or `unclassified`.
+- `_resolve_llm_pick_with_reason` + `_canonical_catalog_code` map free text back to a **member of the candidate set** (exact match, digit normalization, regex extraction). If the pick cannot be validated → **`unclassified`**.
+
+**Note:** SOC uses a **sync callable** `llm(prompt) -> str` (not structured extraction); audit behavior depends on that adapter.
+
+## `classify_naics()` — DB candidates + structured LLM
+
+**Module:** `agents/enrichment/classifiers/naics_classifier.py`
+
+```python
+def classify_naics(job_title: str, job_description: str | None, session: Session) -> str:
+```
+
+**Flow**
+
+1. **`get_naics_candidates`** — needles from title (and description tokens), `NAICS.title` ILIKE-style contains matches, up to **25** distinct `{code, title}` rows.
+2. No candidates → **`unknown`**.
+3. **`invoke_structured_extraction_llm`** with `NAICSClassificationOutput` (`naics_code` field), agent name `enrichment-naics-classifier`, deployment keys from `_NAICS_DEPLOYMENT_KEYS`.
+4. On failure / degraded extraction → **`unknown`**.
+5. **`_resolve_llm_naics_pick`** maps parsed text to a **single** candidate code or **`unknown`**; if not in candidate set → **`unknown`**.
+
+Callers persist the return value to **`job_postings.naics_code`** as text (including literal `unknown`), not SQL NULL.
+
+## Employer profile storage pattern
+
+1. **`build_employer_profile`** (`employer_classifier.py`) produces a Pydantic **`EmployerProfile`** from description + company string (LLM-backed).
+2. **`persist_employer_metadata`** (`employer_classifier.py`):
+   - If **`company_id`** is non-empty → **`upsert_employer_profile_by_company_id`** (`employer_profile_storage.py`): `INSERT ... ON CONFLICT (company_id) DO UPDATE` on `dbo.employer_profiles` (UUID `id`, `company_size`, `ai_maturity_signal`, `sector`, `is_known_employer`, timestamps).
+   - Else → `UPDATE dbo.normalized_jobs SET employer_metadata = :json` keyed by `normalized_job_id` or `(source, external_id)`.
+3. **`apply_enrichment_to_job_postings`** (`job_postings_promotion.py`) reads **`employer_metadata`** from the promotion payload, resolves existing `employer_profiles.id` by `company_id` or upserts via **`upsert_employer_profile_by_company_id`**, then sets **`employer_profile_id`** on the posting update.
+
+## Promotion flow: enrichment → payload → `apply_enrichment_to_job_postings`
+
+**Function**
+
+```python
+def apply_enrichment_to_job_postings(
+    session: Session,
+    normalized_job_id: int,
+    record_enriched_payload: dict[str, Any],
+) -> bool:
+```
+
+**Single-record `SkillsExtracted`** (`EnrichmentAgent.process`, when `normalized_job_id` present): inside `session_scope`, order is approximately:
+
+1. `classify_naics` → `base_payload["naics_code"]`
+2. `classify_soc` (async via `run_coroutine`) → `base_payload["soc_code"]` (`None` if `unclassified`)
+3. `UPDATE normalized_jobs` → **`occupation_code`** = truncated SOC when present
+4. `build_employer_profile` → `base_payload["employer_metadata"]` + `persist_employer_metadata`
+5. **`apply_enrichment_to_job_postings(session, nj_id, base_payload)`** — writes `soc_code`, `naics_code`, `employer_profile_id`, spam/quality/confidence fields, then best-effort fuzzy dedup.
+
+**Batch path** (`_process_skills_extracted_batch`): `enrich_record` runs classifiers and persistence (NAICS/SOC/employer) into **`merged`**; promotion may run twice for a row — once with full **`enriched`** dict, then with **`_job_postings_promotion_payload(enriched, posting)`** (spam/quality/confidence + `naics_code` + `soc_code`).
+
+**Payload keys consumed by promotion for SOC/NAICS/employer**
+
+- `soc_code` — stored on **`job_postings.soc_code`** (null/absent/`unclassified` handling in promotion maps to SQL NULL where appropriate).
+- `naics_code` — normalized to non-empty string; missing/blank → **`unknown`** for DB.
+- `employer_metadata` — dict driving employer profile upsert and **`employer_profile_id`**.
+
+## Key file map
+
+| Concern | Location |
+|---------|----------|
+| SOC classifier | `agents/enrichment/classifiers/soc_classifier.py` |
+| NAICS classifier | `agents/enrichment/classifiers/naics_classifier.py` |
+| Employer build + persist hook | `agents/enrichment/classifiers/employer_classifier.py` |
+| Employer upsert SQL | `agents/enrichment/employer_profile_storage.py` |
+| Promotion SQL + params | `agents/enrichment/job_postings_promotion.py` |
+| Orchestration of classifiers + promotion | `agents/enrichment/agent.py` |
+| Optional `JobProfile` helpers | `agents/enrichment/classification.py` |
+| Migrations for columns | `agents/common/data_store/migrations.py` |

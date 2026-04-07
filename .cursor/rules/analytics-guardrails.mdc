@@ -1,0 +1,138 @@
+---
+description: "Week 7 Pair D — analytics posting_freshness, trajectory scaffold, LLM summaries, guardrails, AnalyticsRefreshed (#175)"
+alwaysApply: false
+globs:
+  - "agents/analytics/**"
+  - "agents/common/data_store/**"
+  - "agents/enrichment/resolvers/**"
+---
+
+# Analytics guardrails — implemented contract (Week 7 / Pair D)
+
+Use this rule when changing **`agents/analytics/`**, analytics **ORM tables**, or **`RecordEnriched`** batch fields consumed by the analytics agent.
+
+**Epic:** #175 · **Sub-issues:** #184 (Steps 10–11), #185 (Step 12), #186 (guardrails + Step 13).
+
+---
+
+## 1. ORM tables (`dbo` schema)
+
+**Authority:** `agents/common/data_store/models.py` + idempotent DDL in `agents/common/data_store/migrations.py` (`run_migrations`).
+
+### `dbo.posting_freshness`
+
+Per-posting snapshot written **only** when `PYTHON_DATABASE_URL` is set **and** `check_db_connection()` is true; otherwise persistence is skipped (walking skeleton must not fail).
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `posting_id` | `TEXT` | **Primary key** (text job posting id) |
+| `first_seen` | `TIMESTAMPTZ` | Window start |
+| `last_seen` | `TIMESTAMPTZ` | Window end |
+| `duration_days` | `INTEGER` | Non-negative |
+| `is_repost` | `BOOLEAN` | Dedup / repost signal |
+| `repost_count` | `INTEGER` | |
+| `fill_proxy` | `BOOLEAN` | Explicit flag or stub/dedup heuristic |
+| `computed_at` | `TIMESTAMPTZ` | Row computation time |
+
+Row shaping + optional upsert: `agents/analytics/insights/posting_freshness_store.py` (`build_posting_freshness_row_dicts`, `persist_posting_freshness_rows` via `session.merge`).
+
+### `dbo.trajectory_map`
+
+Phase 2 table present in schema; **Phase 1** does not require populated rows. In-memory scaffold: `build_trajectory_map()` in `agents/analytics/insights/trajectory.py`.
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `role_id` | `TEXT` | **Primary key** |
+| `trajectory_data` | `JSON` / JSONB | Nullable |
+| `computed_at` | `TIMESTAMPTZ` | |
+
+---
+
+## 2. Posting age classification (in-memory, Step 10)
+
+**Module:** `detect_staleness` in `agents/analytics/insights/freshness.py` uses `classify_freshness` from `agents/common/data_store/models.py`.
+
+| Env | Default | Meaning |
+|-----|---------|---------|
+| `FRESH_THRESHOLD_DAYS` | 30 | `days <=` → **fresh** |
+| `STALE_THRESHOLD_DAYS` | 90 | `days <=` → **stale**; else **expired** |
+
+These drive `PostingFreshnessResult` and LLM prompt context — **not** the aggregate-age check below.
+
+---
+
+## 3. Aggregate staleness alert (Step 10)
+
+**Module:** `agents/analytics/insights/guardrails.py`
+
+| Env | Default |
+|-----|---------|
+| `STALENESS_THRESHOLD_MINUTES` | 15 |
+
+`check_staleness(table_name, computed_at)` compares **aggregate** `computed_at` (e.g. from `analytics_aggregate_computed_at` on the envelope) to “now”; if older than the threshold, emit an **`AnalyticsStaleAlert`**-shaped payload.
+
+**Implemented payload** (orchestration-only consumer when `register_analytics_alert_bus` is used):
+
+| Key | Description |
+|-----|-------------|
+| `event_type` | `AnalyticsStaleAlert` |
+| `table_name` | Logical table / facet name (e.g. `posting_freshness`) |
+| `computed_at` | ISO UTC |
+| `queried_at` | ISO UTC |
+| `age_minutes` | int |
+
+**Alert vs log-only:** If no alert bus is registered, `_emit_control_plane_event` is a no-op; structured logs still record step execution.
+
+---
+
+## 4. Cardinality cap (Step 10)
+
+| Env | Default |
+|-----|---------|
+| `CARDINALITY_CAP` | 500 |
+
+`cap_cardinality(labels)` → `(capped_list, needs_warning)`. Overflow appends a single **`Other`** bucket.
+
+**`CardinalityWarning` payload:** `event_type`, `table`, `column`, `cardinality_count`, `threshold`, `triggered_at` (see `build_cardinality_warning_payload`).
+
+---
+
+## 5. `RecordEnriched` → analytics (wiring)
+
+Batch aggregate payloads include **`freshness_records`** (list of dicts): per-row slice for Step 10, built in enrichment via `agents/enrichment/resolvers/freshness_slice.py`. Analytics prefers `freshness_records`, then `records`, then single-record flat shape (`agents/analytics/agent.py`).
+
+Do **not** remove or rename without updating `RECORD_ENRICHED_BATCH_PAYLOAD_KEYS` and contract tests.
+
+---
+
+## 6. Step 12 — LLM insight summaries
+
+**Module:** `agents/analytics/insights/llm_summary.py`
+
+- `generate_summary` / `generate_summaries`: try `complete()` from `agents/common/llm_adapter.py`; on failure or empty content, **deterministic template** (`FALLBACK_TEMPLATE`), `is_llm_generated=False`.
+- **Never raise** from the summary path; analytics refresh must complete.
+
+Tests mock `complete`: `agents/tests/test_llm_summary.py`.
+
+---
+
+## 7. Step 13 — `AnalyticsRefreshed`
+
+**Builder:** `agents/analytics/insights/events.py` — `build_analytics_refreshed_event`.
+
+**Stable payload keys (downstream / #189):** `event_type`, `batch_id`, `triggered_by_batch_id`, `refreshed_at`, `freshness_record_count`, `trajectory_map_count`, `summaries_generated_count`, `llm_generated_count`, `fallback_count`. Add new fields only with dashboard + contract updates.
+
+---
+
+## 8. Verification
+
+- SQL: `agents/scripts/verification_posting_freshness.sql`
+- Tests: `tests/test_guardrails.py`, `tests/test_analytics_agent.py`, `tests/test_analytics_events.py`, `tests/test_trajectory.py`, `tests/test_llm_summary.py`, `tests/test_posting_freshness_store.py`, enrichment contract tests
+
+---
+
+## Related
+
+- `.cursor/rules/event-contracts.mdc` — `EventEnvelope` patterns
+- `.cursor/rules/sql-guardrails.mdc` — SQL validation for ask-the-data paths
+- `docs/planning/ARCHITECTURE_DEEP.md` — long-term aggregate tables (orthogonal to Phase 1 scaffold)
