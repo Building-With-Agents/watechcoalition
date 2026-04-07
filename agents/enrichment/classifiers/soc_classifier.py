@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import re
 from collections.abc import Callable
 
@@ -154,7 +155,7 @@ def _soc_search_needles(title: str, description: str | None) -> list[str]:
             if len(needles) >= 5:
                 break
     if len(needles) < 2 and description:
-        try:
+        with contextlib.suppress(Exception):
             from agents.enrichment.classification import tokenize
 
             for t in tokenize(description[:1200]):
@@ -162,8 +163,6 @@ def _soc_search_needles(title: str, description: str | None) -> list[str]:
                     needles.append(t)
                 if len(needles) >= 5:
                     break
-        except Exception:
-            pass
     if not needles:
         fw = _first_title_word_lower(title)
         if fw and len(fw) >= 2:

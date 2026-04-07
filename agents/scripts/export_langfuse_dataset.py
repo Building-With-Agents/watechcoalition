@@ -74,7 +74,6 @@ def main() -> None:
 
     output_path = Path(args.output)
     output_path.write_text(json.dumps(records, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"Exported {len(records)} records to {output_path}")
 
 
 if __name__ == "__main__":
