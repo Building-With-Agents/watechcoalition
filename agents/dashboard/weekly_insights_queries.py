@@ -10,6 +10,7 @@ import pandas as pd
 import streamlit as st
 
 from agents.dashboard.readonly_engine import get_dashboard_engine
+from agents.dashboard.relation_safe import read_sql_relation_safe
 
 _SKILL_DEMAND_TABLE = "skill_demand_weekly"
 
@@ -118,6 +119,43 @@ def fetch_top_skills_for_week(week_start_iso: str) -> tuple[str | None, pd.DataF
         return None, df
     except Exception as exc:
         return str(exc), pd.DataFrame()
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def fetch_skill_velocity_for_week(week_start_iso: str) -> tuple[str | None, pd.DataFrame]:
+    """Load ``dbo.skill_velocity`` for the analytics anchor week (DB column ``week``).
+
+    Returns ``(user_facing_error_or_missing_table_hint, dataframe)``. On full success the first
+    value is ``None``. Columns match the repo ORM: ``skill_label``, ``esco_uri``, ``week``,
+    ``demand_count``, ``week_over_week_change``, ``four_week_trend``, ``trend_confidence``.
+    Rows are ordered by largest absolute week-over-week move first (up to 100 rows).
+    """
+    engine = get_dashboard_engine()
+    sql = """
+        SELECT skill_label,
+               esco_uri,
+               week,
+               demand_count,
+               week_over_week_change,
+               four_week_trend,
+               trend_confidence
+        FROM dbo.skill_velocity
+        WHERE week = CAST(%(ws)s AS date)
+        ORDER BY ABS(week_over_week_change) DESC
+        LIMIT 100
+    """
+    df, hint = read_sql_relation_safe(
+        sql,
+        engine,
+        params={"ws": week_start_iso},
+        user_hint=(
+            "`dbo.skill_velocity` is missing. Apply migrations and run the Analytics velocity refresh "
+            "(step 8) after `skill_demand_weekly` is populated."
+        ),
+    )
+    if hint:
+        return hint, df
+    return None, df
 
 
 def max_computed_at(df: pd.DataFrame) -> datetime | None:

@@ -4,12 +4,14 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
+import pandas as pd
 import plotly.express as px
 import streamlit as st
 
 from agents.dashboard.pages_observability import _staleness_banner
 from agents.dashboard.weekly_insights_queries import (
     fetch_skill_demand_weekly_availability,
+    fetch_skill_velocity_for_week,
     fetch_top_skills_for_week,
     max_computed_at,
 )
@@ -30,8 +32,8 @@ def _staleness_banner_computed_at(computed_at: datetime | None) -> None:
 def render_weekly_insights() -> None:
     st.title("Weekly Insights")
     st.caption(
-        "Analytics aggregates by ISO week (Monday start). Charts refresh from PostgreSQL read-only; "
-        "run the Analytics agent to populate `skill_demand_weekly`."
+        "Analytics aggregates by ISO week (Monday start). Read-only PostgreSQL; populate tables via the "
+        "Analytics agent (`skill_demand_weekly`, `skill_velocity`, …)."
     )
 
     avail = fetch_skill_demand_weekly_availability()
@@ -113,3 +115,70 @@ def render_weekly_insights() -> None:
 
     with st.expander("Underlying rows (top 20)"):
         st.dataframe(skills_df, width="stretch", hide_index=True)
+
+    st.markdown("---")
+    st.subheader("Skill velocity")
+    st.caption(
+        "From **`dbo.skill_velocity`** (analytics step 8): demand for the anchor week, week-over-week "
+        "change on a smoothed series, IMP-021 trend label, and confidence. "
+        "True multi-week sparklines can be added later from `skill_demand_weekly` history."
+    )
+
+    vel_hint, vel_df = fetch_skill_velocity_for_week(selected_label)
+    if vel_hint:
+        st.warning(vel_hint)
+    elif vel_df.empty:
+        st.info(
+            f"No velocity rows for **week = {selected_label}**. "
+            "Run the Analytics aggregate refresh for this anchor after `skill_demand_weekly` is populated "
+            "(velocity depends on weekly demand history)."
+        )
+    else:
+        display = vel_df.copy()
+        display["wow_pct"] = (pd.to_numeric(display["week_over_week_change"], errors="coerce") * 100.0).map(
+            lambda x: f"{x:+.1f} %" if pd.notna(x) else "—"
+        )
+        display["trend_confidence_fmt"] = pd.to_numeric(
+            display["trend_confidence"], errors="coerce"
+        ).map(lambda x: f"{x:.2f}" if pd.notna(x) else "—")
+        show_cols = [
+            "skill_label",
+            "demand_count",
+            "wow_pct",
+            "four_week_trend",
+            "trend_confidence_fmt",
+        ]
+        rename = {
+            "skill_label": "Skill",
+            "demand_count": "Demand (postings)",
+            "wow_pct": "WoW change (est.)",
+            "four_week_trend": "4w trend",
+            "trend_confidence_fmt": "Trend confidence",
+        }
+        table_df = display[show_cols].rename(columns=rename)
+        st.dataframe(table_df, width="stretch", hide_index=True)
+
+        bar_cap = 15
+        bar_src = vel_df.head(bar_cap).copy()
+        bar_src["wow_pct_float"] = pd.to_numeric(bar_src["week_over_week_change"], errors="coerce") * 100.0
+        bar_src = bar_src.sort_values("wow_pct_float", ascending=True)
+        fig_v = px.bar(
+            bar_src,
+            x="wow_pct_float",
+            y="skill_label",
+            orientation="h",
+            labels={
+                "wow_pct_float": "Week-over-week change (%, smoothed series)",
+                "skill_label": "Skill",
+            },
+            title=f"Largest |WoW| moves (top {bar_cap} by magnitude)",
+        )
+        fig_v.update_layout(
+            margin=dict(t=40, b=40, l=20, r=20),
+            yaxis={"categoryorder": "total ascending"},
+            height=max(320, 24 * len(bar_src)),
+        )
+        st.plotly_chart(fig_v, width="stretch")
+
+        with st.expander("Raw `skill_velocity` rows (same query order)"):
+            st.dataframe(vel_df, width="stretch", hide_index=True)
