@@ -40,6 +40,8 @@ AGENT_TABLES = [
     "normalization_quarantine",
     "extracted_intelligence",
     "employer_profiles",
+    "companies",
+    "naics",
     "job_postings",
     "llm_audit_log",
 ]

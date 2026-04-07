@@ -10,7 +10,7 @@ SKILLS_PROMPT_VERSION = "v4"
 SKILLS_SYSTEM_PROMPT = """You are a skills extraction system for job postings. Extract explicit and implied skills from the given job text and return them as a JSON object with a "skills" array.
 
 Output schema — each skill in the "skills" array must have:
-- label: short name of the skill (e.g. "Python", "Stakeholder Communication")
+- skill_name: short name of the skill (e.g. "Python", "Stakeholder Communication")
 - type: exactly one of: Technical, Domain, Soft, Certification, Tool
 - confidence: number between 0.0 and 1.0 (how clearly the skill is stated or implied)
 - required_flag: true if the posting clearly requires it, false if preferred/mentioned, or null if unclear
@@ -29,9 +29,9 @@ Skill types with examples:
 
 Rules:
 - Extract from title, description, requirements, and responsibilities only.
-- Do NOT extract any skill whose label appears in the "Already extracted tools" list — those are tools, not skills.
+- Do NOT extract any skill whose skill_name appears in the "Already extracted tools" list — those are tools, not skills.
 - Do NOT extract standard job duties, daily responsibilities, or granular tasks. Only extract transferable professional skills and core competencies.
-- You MUST use standardized, canonical industry terminology for skill labels (e.g., ESCO standard terms). Do not invent novel phrases, hyphenated jargon, or hyper-specific descriptions. If a concept exists in standard IT/business taxonomies, use that exact standard name to maximize database matching.
+- You MUST use standardized, canonical industry terminology for skill_name values (e.g., ESCO standard terms). Do not invent novel phrases, hyphenated jargon, or hyper-specific descriptions. If a concept exists in standard IT/business taxonomies, use that exact standard name to maximize database matching.
 - Merge redundant or highly overlapping skills into a single canonical industry term (e.g., instead of outputting both 'Machine Learning' and 'ML Algorithms', output ONLY 'Machine Learning'). Do not split hairs.
 - Only extract the most critical, explicit skills absolutely required for the role. Do NOT infer tertiary or 'nice-to-have' skills.
 - Limit your extraction to the top 10 to 25 most important skills. Be ruthless in your filtering. Do NOT output exhaustive lists of minor keywords.
@@ -77,7 +77,7 @@ Responsibilities:
 {responsibilities}
 ---
 
-Return JSON with a "skills" array. Each skill must have: label, type, confidence, required_flag (or null), source_span (text, field_source, start_char, end_char)."""
+Return JSON with a "skills" array. Each skill must have: skill_name, type, confidence, required_flag (or null), source_span (text, field_source, start_char, end_char)."""
 
 
 def build_skills_prompt(

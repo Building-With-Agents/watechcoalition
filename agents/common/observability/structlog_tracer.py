@@ -28,6 +28,7 @@ class StructlogTracer(TracerBase):
         name: str,
         *,
         correlation_id: str,
+        input: str | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> Generator[None, None, None]:
         span_log = self._log.bind(span=name, correlation_id=correlation_id, **(metadata or {}))

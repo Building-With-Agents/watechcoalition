@@ -78,5 +78,85 @@
     "error_type": "ValidationError",
     "error_detail": "2 validation errors for JobRecord\ntitle\n  Value error, title must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error\ncompany\n  Value error, company must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
     "quarantined_at": "2026-04-03T03:14:16.142926+00:00"
+  },
+  {
+    "id": 61,
+    "raw_job_id": 1,
+    "ingestion_run_id": "bac00998-27ae-432e-a2af-b6209960a74b",
+    "source": "crawl4ai",
+    "external_id": "https://www.governmentjobs.com/careers/elpaso",
+    "error_type": "ValidationError",
+    "error_detail": "2 validation errors for JobRecord\ntitle\n  Value error, title must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error\ncompany\n  Value error, company must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+    "quarantined_at": "2026-04-07T01:32:01.023307+00:00"
+  },
+  {
+    "id": 62,
+    "raw_job_id": 2,
+    "ingestion_run_id": "bac00998-27ae-432e-a2af-b6209960a74b",
+    "source": "crawl4ai",
+    "external_id": "https://www.governmentjobs.com/careers/elpasocounty",
+    "error_type": "ValidationError",
+    "error_detail": "2 validation errors for JobRecord\ntitle\n  Value error, title must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error\ncompany\n  Value error, company must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+    "quarantined_at": "2026-04-07T01:32:01.030801+00:00"
+  },
+  {
+    "id": 63,
+    "raw_job_id": 3,
+    "ingestion_run_id": "bac00998-27ae-432e-a2af-b6209960a74b",
+    "source": "crawl4ai",
+    "external_id": "https://www.governmentjobs.com/careers/lascruces",
+    "error_type": "ValidationError",
+    "error_detail": "2 validation errors for JobRecord\ntitle\n  Value error, title must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error\ncompany\n  Value error, company must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+    "quarantined_at": "2026-04-07T01:32:01.039826+00:00"
+  },
+  {
+    "id": 64,
+    "raw_job_id": 4,
+    "ingestion_run_id": "bac00998-27ae-432e-a2af-b6209960a74b",
+    "source": "crawl4ai",
+    "external_id": "https://www.schooljobs.com/careers/epcc/",
+    "error_type": "ValidationError",
+    "error_detail": "2 validation errors for JobRecord\ntitle\n  Value error, title must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error\ncompany\n  Value error, company must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+    "quarantined_at": "2026-04-07T01:32:01.047343+00:00"
+  },
+  {
+    "id": 65,
+    "raw_job_id": 1,
+    "ingestion_run_id": "911ecacd-b64b-43ee-bd2b-e67e657941ef",
+    "source": "crawl4ai",
+    "external_id": "https://www.governmentjobs.com/careers/elpaso",
+    "error_type": "ValidationError",
+    "error_detail": "2 validation errors for JobRecord\ntitle\n  Value error, title must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error\ncompany\n  Value error, company must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+    "quarantined_at": "2026-04-07T06:15:56.941946+00:00"
+  },
+  {
+    "id": 66,
+    "raw_job_id": 2,
+    "ingestion_run_id": "911ecacd-b64b-43ee-bd2b-e67e657941ef",
+    "source": "crawl4ai",
+    "external_id": "https://www.governmentjobs.com/careers/elpasocounty",
+    "error_type": "ValidationError",
+    "error_detail": "2 validation errors for JobRecord\ntitle\n  Value error, title must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error\ncompany\n  Value error, company must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+    "quarantined_at": "2026-04-07T06:15:56.956140+00:00"
+  },
+  {
+    "id": 67,
+    "raw_job_id": 3,
+    "ingestion_run_id": "911ecacd-b64b-43ee-bd2b-e67e657941ef",
+    "source": "crawl4ai",
+    "external_id": "https://www.governmentjobs.com/careers/lascruces",
+    "error_type": "ValidationError",
+    "error_detail": "2 validation errors for JobRecord\ntitle\n  Value error, title must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error\ncompany\n  Value error, company must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+    "quarantined_at": "2026-04-07T06:15:56.970972+00:00"
+  },
+  {
+    "id": 68,
+    "raw_job_id": 4,
+    "ingestion_run_id": "911ecacd-b64b-43ee-bd2b-e67e657941ef",
+    "source": "crawl4ai",
+    "external_id": "https://www.schooljobs.com/careers/epcc/",
+    "error_type": "ValidationError",
+    "error_detail": "2 validation errors for JobRecord\ntitle\n  Value error, title must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error\ncompany\n  Value error, company must not be empty [type=value_error, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+    "quarantined_at": "2026-04-07T06:15:56.983041+00:00"
   }
 ]

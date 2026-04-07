@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import contextlib
 import hashlib
+import json as _json
 import os
 import time
 import uuid
@@ -28,15 +29,30 @@ import structlog
 
 from agents.common.data_store.database import session_scope
 from agents.common.data_store.models import LLMAuditLog
-from agents.common.observability.langfuse_tracer import LangfuseTracer
+from agents.common.observability.langfuse import LangfuseTracer
 
 log = structlog.get_logger()
+
+
+def _parse_output_for_trace(text: str, max_chars: int = 4000) -> str | dict | list:
+    """Parse JSON output so Langfuse renders it as a collapsible tree."""
+    truncated = text[:max_chars]
+    try:
+        return _json.loads(truncated)
+    except (ValueError, TypeError):
+        return truncated
+
 
 # Optional bus for emitting SkillsExtractionAlert; set via register_alert_bus()
 _alert_bus: Any = None
 
 # Optional Langfuse tracer; set via register_tracer() so every LLM call can be traced
 _tracer: LangfuseTracer | None = None
+
+
+def get_tracer() -> LangfuseTracer | None:
+    """Return the currently registered tracer (None if not set)."""
+    return _tracer
 
 # ---------------------------------------------------------------------------
 # Pricing (per token) — configurable via env vars
@@ -176,6 +192,39 @@ def complete(
         - success: bool
         - extraction_failed: bool (True after timeout retry or API error)
     """
+    provider = os.getenv("LLM_PROVIDER", "anthropic")
+
+    # Mock provider: return ground truth data, no API calls
+    if provider == "mock":
+        from agents.common.mock_llm_provider import mock_complete
+
+        correlation_id = correlation_id or str(uuid.uuid4())
+        span_ctx = (
+            _tracer.start_span(agent_name, correlation_id=correlation_id, input=prompt,
+                               metadata={"agent_name": agent_name, "model": "mock-sonnet-v1"})
+            if _tracer
+            else nullcontext()
+        )
+        with span_ctx:
+            result = mock_complete(prompt, agent_name, model=model, system=system, max_tokens=max_tokens)
+            log_extraction_event(
+                agent_name=agent_name, prompt=prompt, model="mock-sonnet-v1",
+                provider="mock", latency_ms=result.get("latency_ms", 0),
+                input_tokens=result["input_tokens"], output_tokens=result["output_tokens"],
+                cost_usd=result["cost_usd"], success=True,
+            )
+            if _tracer:
+                try:
+                    _tracer.log_event("llm_success", {
+                        "input_tokens": result["input_tokens"],
+                        "output_tokens": result["output_tokens"],
+                        "cost_usd": result["cost_usd"],
+                        "output": _parse_output_for_trace(result["content"]),
+                    })
+                except Exception:
+                    pass
+            return result
+
     try:
         from anthropic import Anthropic, APIStatusError, APITimeoutError
     except ImportError as exc:
@@ -186,14 +235,13 @@ def complete(
         ) from exc
 
     model = model or os.getenv("EXTRACTION_MODEL_SKILLS", "claude-sonnet-4-5")
-    provider = os.getenv("LLM_PROVIDER", "anthropic")
     model_tier = MODEL_TIER_MAP.get(model, "sonnet")
     client = Anthropic()
 
     correlation_id = correlation_id or str(uuid.uuid4())
     span_metadata = {"agent_name": agent_name, "model": model, "model_tier": model_tier}
     span_ctx = (
-        _tracer.start_span("llm_call", correlation_id=correlation_id, metadata=span_metadata)
+        _tracer.start_span(agent_name, correlation_id=correlation_id, input=prompt, metadata=span_metadata)
         if _tracer
         else nullcontext()
     )
@@ -251,6 +299,7 @@ def complete(
                                     "input_tokens": input_tokens,
                                     "output_tokens": output_tokens,
                                     "cost_usd": round(cost_usd, 6),
+                                    "output": _parse_output_for_trace(content),
                                 },
                             )
                         except Exception:
