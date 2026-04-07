@@ -368,7 +368,7 @@ def invoke_structured_extraction_llm(
                         "input_tokens": meta.get("tokens_used", 0) // 2,
                         "output_tokens": meta.get("tokens_used", 0) // 2,
                         "cost_usd": meta["cost_usd"],
-                        "output": str(parsed)[:4000] if parsed else "mock_parse_failed",
+                        "output": (parsed.model_dump_json() if hasattr(parsed, "model_dump_json") else str(parsed))[:4000] if parsed else "mock_parse_failed",
                     })
                 except Exception:
                     pass
@@ -495,7 +495,7 @@ def invoke_structured_extraction_llm(
                         "input_tokens": input_tokens_est,
                         "output_tokens": output_tokens_est,
                         "cost_usd": round(cost_usd, 6),
-                        "output": str(parsed)[:4000] if parsed is not None else "structured_output_empty",
+                        "output": (parsed.model_dump_json() if hasattr(parsed, "model_dump_json") else str(parsed))[:4000] if parsed is not None else "structured_output_empty",
                     })
                 except Exception:
                     pass
