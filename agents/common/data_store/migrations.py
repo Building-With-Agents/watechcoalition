@@ -338,6 +338,26 @@ def run_migrations(engine: Engine) -> None:
     Base.metadata.create_all(engine)
     log.info("migrations_tables_created")
 
+    # 1b. Seed analytics pipeline state singleton (id=1) for DB-backed watermark
+    if engine.dialect.name == "postgresql":
+        try:
+            with engine.begin() as conn:
+                conn.execute(
+                    text(
+                        """
+                        INSERT INTO dbo.analytics_pipeline_state (id, last_successful_run_at, updated_at)
+                        VALUES (1, NULL, NOW())
+                        ON CONFLICT (id) DO NOTHING
+                        """
+                    )
+                )
+            log.info("migrations_analytics_pipeline_state_seeded")
+        except Exception as exc:
+            log.warning(
+                "migration_analytics_pipeline_state_seed_skipped",
+                error=str(exc),
+            )
+
     # 2. Create extracted_intelligence table (DDL may add indexes idempotently)
     with engine.begin() as conn:
         conn.execute(text(_EXTRACTED_INTELLIGENCE_DDL))

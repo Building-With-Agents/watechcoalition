@@ -7,7 +7,7 @@ Prisma/MSSQL is being phased out.
 
 Agent-created tables: raw_ingested_jobs, job_ingestion_runs, normalized_jobs,
     normalization_quarantine, extracted_intelligence, llm_audit_log,
-    employer_profiles, sector_summary_weekly, geo_demand_weekly.
+    employer_profiles, analytics_pipeline_state, sector_summary_weekly, geo_demand_weekly.
 Reference tables (seeded, agent-owned): companies, industry_sectors,
     technology_areas, skills, socc, naics, job_postings.
 """
@@ -477,6 +477,34 @@ class NAICS(Base):
     seq_no: Mapped[int | None] = mapped_column(Integer, nullable=True)
     createdat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updatedat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+
+# ---------------------------------------------------------------------------
+# Analytics pipeline state (Week 7 — minimum-data guard watermark)
+# ---------------------------------------------------------------------------
+
+
+class AnalyticsPipelineState(Base):
+    """Singleton row ``id = 1``: last time analytics completed and emitted ``AnalyticsRefreshed``.
+
+    The analytics agent reads ``last_successful_run_at`` to count new ``job_postings``
+    rows since the previous successful run. Updated only after the guard passes and
+    the pipeline finishes (same session as downstream aggregate writes in Week 7).
+    """
+
+    __tablename__ = "analytics_pipeline_state"
+    __table_args__ = {"schema": "dbo"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    last_successful_run_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
 
 
 # ---------------------------------------------------------------------------

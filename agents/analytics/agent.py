@@ -33,7 +33,11 @@ Week 7 replaces this stub with:
 Minimum data guard (Step 1 / issue #179): when ``PYTHON_DATABASE_URL`` is set and
 ``ANALYTICS_DISABLE_MINIMUM_DATA_GUARD`` is not ``1``, the pipeline counts new rows
 in ``dbo.job_postings`` (the enriched-job store; no separate ``enriched_jobs`` table)
-before any aggregate work or ``AnalyticsRefreshed`` emission.
+with ``created_at`` / ``createdAt`` strictly after the watermark stored in
+``dbo.analytics_pipeline_state.last_successful_run_at`` (updated after each successful
+run). If that column is NULL (never run), all qualifying rows are counted.
+Optional payload keys ``last_computed_at`` / ``analytics_last_computed_at`` override
+the DB watermark for backfill and tests.
 """
 
 from __future__ import annotations
@@ -51,6 +55,7 @@ from sqlalchemy.orm import Session
 
 from agents.common.base_agent import BaseAgent
 from agents.common.data_store.database import session_scope
+from agents.common.data_store.models import AnalyticsPipelineState
 from agents.common.event_envelope import EventEnvelope
 from agents.enrichment.classifiers.spam_preview import get_spam_thresholds
 
@@ -82,6 +87,39 @@ def _coerce_last_computed_at(payload: dict[str, Any]) -> datetime | None:
         dt = datetime.fromisoformat(normalized)
         return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
     return None
+
+
+def get_last_analytics_success_at(session: Session) -> datetime | None:
+    """Return ``last_successful_run_at`` from the singleton analytics state row (``id=1``)."""
+    row = session.get(AnalyticsPipelineState, 1)
+    if row is None:
+        return None
+    return row.last_successful_run_at
+
+
+def set_last_analytics_success_at(session: Session, when: datetime) -> None:
+    """Persist the watermark after a successful analytics pipeline run (same session as writes)."""
+    ts = when if when.tzinfo else when.replace(tzinfo=timezone.utc)
+    row = session.get(AnalyticsPipelineState, 1)
+    if row is None:
+        session.add(
+            AnalyticsPipelineState(
+                id=1,
+                last_successful_run_at=ts,
+                updated_at=ts,
+            )
+        )
+    else:
+        row.last_successful_run_at = ts
+        row.updated_at = ts
+
+
+def resolve_analytics_watermark(session: Session, payload: dict[str, Any]) -> datetime | None:
+    """Watermark for the minimum-data guard: explicit payload override, else DB."""
+    explicit = _coerce_last_computed_at(payload)
+    if explicit is not None:
+        return explicit
+    return get_last_analytics_success_at(session)
 
 
 def _job_postings_table_for_guard(engine: Engine) -> Table:
@@ -207,11 +245,14 @@ class AnalyticsAgent(BaseAgent):
             },
         )
 
-    def run_pipeline(self, session: Session, last_computed_at: datetime | None, event: EventEnvelope) -> EventEnvelope | None:
+    def run_pipeline(self, session: Session, event: EventEnvelope) -> EventEnvelope | None:
         """Run analytics batch work. Minimum-data guard is always the first step."""
-        if not check_minimum_data(session, last_computed_at):
+        watermark = resolve_analytics_watermark(session, event.payload)
+        if not check_minimum_data(session, watermark):
             return None
-        return self._emit_analytics_refreshed(event)
+        out = self._emit_analytics_refreshed(event)
+        set_last_analytics_success_at(session, datetime.now(timezone.utc))
+        return out
 
     def process(self, event: EventEnvelope) -> EventEnvelope | None:
         """
@@ -222,10 +263,8 @@ class AnalyticsAgent(BaseAgent):
         Returns None when the guard skips the run — no partial aggregates and
         no AnalyticsRefreshed event.
         """
-        last_computed_at = _coerce_last_computed_at(event.payload)
-
         if not _minimum_guard_db_configured() or _minimum_guard_disabled():
             return self._emit_analytics_refreshed(event)
 
         with session_scope() as session:
-            return self.run_pipeline(session, last_computed_at, event)
+            return self.run_pipeline(session, event)

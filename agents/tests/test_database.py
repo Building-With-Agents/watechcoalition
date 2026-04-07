@@ -78,6 +78,7 @@ def test_all_tables_exist(engine: Engine) -> None:
     inspector = inspect(engine)
     tables = set(inspector.get_table_names(schema="dbo"))
     expected = {
+        "analytics_pipeline_state",
         "raw_ingested_jobs",
         "normalized_jobs",
         "job_ingestion_runs",

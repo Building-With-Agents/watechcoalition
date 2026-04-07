@@ -8,7 +8,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 from sqlalchemy import Column, DateTime, Integer, MetaData, String, Table
 
-from agents.analytics.agent import MINIMUM_NEW_RECORDS, AnalyticsAgent, check_minimum_data
+from agents.analytics.agent import (
+    MINIMUM_NEW_RECORDS,
+    AnalyticsAgent,
+    check_minimum_data,
+    resolve_analytics_watermark,
+)
+from agents.common.data_store.models import AnalyticsPipelineState
 from agents.common.event_envelope import EventEnvelope
 
 
@@ -65,6 +71,48 @@ def test_run_pipeline_returns_none_without_emit_when_guard_fails() -> None:
     agent = AnalyticsAgent()
     agent.health_check()
     session = MagicMock()
-    with patch("agents.analytics.agent.check_minimum_data", return_value=False):
-        out = agent.run_pipeline(session, None, event)
+    with (
+        patch("agents.analytics.agent.resolve_analytics_watermark", return_value=None),
+        patch("agents.analytics.agent.check_minimum_data", return_value=False),
+    ):
+        out = agent.run_pipeline(session, event)
     assert out is None
+
+
+def test_resolve_analytics_watermark_uses_payload_when_set() -> None:
+    session = MagicMock()
+    wm = resolve_analytics_watermark(
+        session,
+        {"last_computed_at": "2023-01-15T12:00:00+00:00"},
+    )
+    assert wm == datetime(2023, 1, 15, 12, 0, tzinfo=timezone.utc)
+    session.get.assert_not_called()
+
+
+def test_resolve_analytics_watermark_reads_db_when_payload_empty() -> None:
+    row = MagicMock()
+    row.last_successful_run_at = datetime(2024, 6, 1, tzinfo=timezone.utc)
+    session = MagicMock()
+    session.get.return_value = row
+    wm = resolve_analytics_watermark(session, {})
+    assert wm == datetime(2024, 6, 1, tzinfo=timezone.utc)
+    session.get.assert_called_once_with(AnalyticsPipelineState, 1)
+
+
+def test_run_pipeline_updates_watermark_after_success() -> None:
+    event = EventEnvelope(correlation_id="c1", agent_id="upstream", payload={})
+    agent = AnalyticsAgent()
+    agent.health_check()
+    session = MagicMock()
+    with (
+        patch("agents.analytics.agent.resolve_analytics_watermark", return_value=None),
+        patch("agents.analytics.agent.check_minimum_data", return_value=True),
+        patch("agents.analytics.agent.set_last_analytics_success_at") as mock_set,
+    ):
+        out = agent.run_pipeline(session, event)
+    assert out is not None
+    assert out.payload.get("event_type") == "AnalyticsRefreshed"
+    mock_set.assert_called_once()
+    call_session, call_when = mock_set.call_args[0]
+    assert call_session is session
+    assert isinstance(call_when, datetime)
