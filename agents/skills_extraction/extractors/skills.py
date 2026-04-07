@@ -49,6 +49,15 @@ _SKILLS_DEPLOYMENT_KEYS = (
 # Pydantic models for structured LLM output
 # ---------------------------------------------------------------------------
 
+class _LLMSpan(BaseModel):
+    """Source span from LLM structured output — typed for Azure OpenAI compatibility."""
+
+    text: str = ""
+    field_source: str = "description"
+    start_char: int = 0
+    end_char: int = 0
+
+
 class _LLMSkill(BaseModel):
     """Single skill from LLM structured output.
 
@@ -60,7 +69,7 @@ class _LLMSkill(BaseModel):
     type: str = "Technical"
     confidence: float = Field(default=0.5, ge=0.0, le=1.0)
     required_flag: bool | None = None
-    source_span: dict[str, Any] = Field(default_factory=dict)
+    source_span: _LLMSpan = Field(default_factory=_LLMSpan)
 
 
 class _SkillsLLMRoot(BaseModel):
@@ -88,14 +97,14 @@ def _llm_skill_to_record(raw: _LLMSkill) -> SkillRecord | None:
     from agents.common.types.extraction_types import SpanRecord
 
     try:
-        span_dict = raw.source_span
-        if not span_dict or not isinstance(span_dict, dict):
+        span = raw.source_span
+        if not span.text:
             return None
         source_span = SpanRecord(
-            text=str(span_dict.get("text", "")),
-            field_source=span_dict.get("field_source", "description"),
-            start_char=int(span_dict.get("start_char", 0)),
-            end_char=int(span_dict.get("end_char", 0)),
+            text=span.text,
+            field_source=span.field_source,
+            start_char=span.start_char,
+            end_char=span.end_char,
         )
         return SkillRecord(
             skill_name=raw.label.strip() or "unknown",
