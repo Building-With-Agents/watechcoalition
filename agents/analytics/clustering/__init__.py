@@ -35,16 +35,22 @@ from agents.analytics.clustering.config import (
     DEFAULT_EMERGENCE_MIN_NOVEL_SKILLS,
     DEFAULT_EMERGENCE_MIN_QUALITY_SCORE,
     cluster_distance_metric,
+    cluster_label_dominance_threshold,
     cluster_min_cluster_size,
     cluster_min_samples,
     cluster_min_total_postings,
     cluster_selection_epsilon,
+    emergence_min_distinct_employers,
+    emergence_min_novel_skills,
+    emergence_min_quality_score,
 )
 from agents.analytics.clustering.embeddings import (
     embed_posting_features,
     embed_prepared_clustering_texts,
 )
-from agents.analytics.clustering.pipeline import run_clustering
+from agents.analytics.clustering.emergence import detect_emergence_candidates
+from agents.analytics.clustering.labeling import label_clusters
+from agents.analytics.clustering.pipeline import run_clustering, run_clustering_pipeline
 from agents.analytics.clustering.text import (
     build_clustering_text,
     build_clustering_texts,
@@ -68,6 +74,7 @@ __all__ = [
     "build_clustering_text",
     "build_clustering_texts",
     "cluster_distance_metric",
+    "cluster_label_dominance_threshold",
     "cluster_min_cluster_size",
     "cluster_min_samples",
     "cluster_min_total_postings",
@@ -90,6 +97,11 @@ __all__ = [
     "embed_prepared_clustering_texts",
     "EmbeddedPostingText",
     "EmergenceCandidate",
+    "emergence_min_distinct_employers",
+    "emergence_min_novel_skills",
+    "emergence_min_quality_score",
+    "detect_emergence_candidates",
+    "label_clusters",
     "PostingClusterFeatures",
     "PreparedClusteringText",
     "prepare_clustering_text",
@@ -97,5 +109,6 @@ __all__ = [
     "RankedSkill",
     "RankedTool",
     "run_clustering",
+    "run_clustering_pipeline",
     "clustering_text_hash",
 ]

@@ -16,6 +16,8 @@ from agents.analytics.clustering.config import (
     cluster_min_total_postings,
     cluster_selection_epsilon,
 )
+from agents.analytics.clustering.emergence import detect_emergence_candidates
+from agents.analytics.clustering.labeling import ClusterLabeler, label_clusters
 from agents.analytics.clustering.types import (
     ClusteredPosting,
     ClusteringResult,
@@ -327,4 +329,36 @@ def run_clustering(
         noise_posting_count=noise_posting_count,
         skipped=False,
         skip_reason=None,
+    )
+
+
+def run_clustering_pipeline(
+    features_rows: Sequence[PostingClusterFeatures],
+    embedded_rows: Sequence[EmbeddedPostingText],
+    *,
+    clusterer_factory: Callable[..., Any] | None = None,
+    llm_labeler: ClusterLabeler | None = None,
+    allow_llm_fallback: bool = True,
+) -> ClusteringResult:
+    """Run discovery, label clusters, and filter emergence candidates."""
+    base_result = run_clustering(
+        features_rows,
+        embedded_rows,
+        clusterer_factory=clusterer_factory,
+    )
+    labeled_result = label_clusters(
+        base_result,
+        features_rows,
+        llm_labeler=llm_labeler,
+        allow_llm_fallback=allow_llm_fallback,
+    )
+    emergence_candidates = detect_emergence_candidates(
+        labeled_result,
+        features_rows,
+        embedded_rows,
+    )
+    return labeled_result.model_copy(
+        update={
+            "emergence_candidates": emergence_candidates,
+        }
     )

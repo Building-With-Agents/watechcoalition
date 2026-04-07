@@ -27,13 +27,23 @@ def _int_from_env(name: str, default: int, *, minimum: int = 1) -> int:
     return parsed if parsed >= minimum else default
 
 
-def _float_from_env(name: str, default: float, *, minimum: float = 0.0) -> float:
+def _float_from_env(
+    name: str,
+    default: float,
+    *,
+    minimum: float = 0.0,
+    maximum: float | None = None,
+) -> float:
     raw = os.getenv(name, str(default))
     try:
         parsed = float(raw)
     except (TypeError, ValueError):
         return default
-    return parsed if parsed >= minimum else default
+    if parsed < minimum:
+        return default
+    if maximum is not None and parsed > maximum:
+        return default
+    return parsed
 
 
 def cluster_min_total_postings() -> int:
@@ -57,8 +67,38 @@ def cluster_distance_metric() -> str:
     normalized = raw.strip().lower()
     return normalized or DEFAULT_CLUSTER_DISTANCE_METRIC
 
+
+def cluster_label_dominance_threshold() -> float:
+    return _float_from_env(
+        "CLUSTER_LABEL_DOMINANCE_THRESHOLD",
+        DEFAULT_CLUSTER_LABEL_DOMINANCE_THRESHOLD,
+        minimum=0.0,
+        maximum=1.0,
+    )
+
+
+def emergence_min_quality_score() -> float:
+    return _float_from_env(
+        "EMERGENCE_MIN_QUALITY_SCORE",
+        DEFAULT_EMERGENCE_MIN_QUALITY_SCORE,
+        minimum=0.0,
+        maximum=1.0,
+    )
+
+
+def emergence_min_novel_skills() -> int:
+    return _int_from_env("EMERGENCE_MIN_NOVEL_SKILLS", DEFAULT_EMERGENCE_MIN_NOVEL_SKILLS)
+
+
+def emergence_min_distinct_employers() -> int:
+    return _int_from_env(
+        "EMERGENCE_MIN_DISTINCT_EMPLOYERS",
+        DEFAULT_EMERGENCE_MIN_DISTINCT_EMPLOYERS,
+    )
+
 __all__ = [
     "cluster_distance_metric",
+    "cluster_label_dominance_threshold",
     "cluster_min_cluster_size",
     "cluster_min_samples",
     "cluster_min_total_postings",
@@ -74,4 +114,7 @@ __all__ = [
     "DEFAULT_EMERGENCE_MIN_DISTINCT_EMPLOYERS",
     "DEFAULT_EMERGENCE_MIN_NOVEL_SKILLS",
     "DEFAULT_EMERGENCE_MIN_QUALITY_SCORE",
+    "emergence_min_distinct_employers",
+    "emergence_min_novel_skills",
+    "emergence_min_quality_score",
 ]
