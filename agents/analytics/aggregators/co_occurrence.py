@@ -6,7 +6,7 @@ Join path and spam/dedup/extraction filters match
 Per posting, skills are deduped, sorted, capped at 20, then unordered pairs are
 counted with **lexicographic** ``skill_a < skill_b`` so each pair appears once
 (symmetric matrix, no ``(B,A)`` duplicate of ``(A,B)``). Only the top 200 pairs
-by frequency are persisted.
+by frequency are persisted (ties: ascending ``skill_a``, then ``skill_b``).
 """
 
 from __future__ import annotations
@@ -36,8 +36,12 @@ def _extract_cooccurrence_pairs(posting_skills: list[list[str]]) -> dict[tuple[s
         for a, b in combinations(unique, 2):
             skill_a, skill_b = sorted((a, b))
             pairs[(skill_a, skill_b)] = pairs.get((skill_a, skill_b), 0) + 1
-    # Keep top 200 pairs by count to prevent quadratic blowup
-    return dict(sorted(pairs.items(), key=lambda x: -x[1])[:_TOP_PAIR_LIMIT])
+    # Top N by count; ties broken by (skill_a, skill_b) so SQL verification matches.
+    ranked = sorted(
+        pairs.items(),
+        key=lambda kv: (-kv[1], kv[0][0], kv[0][1]),
+    )[:_TOP_PAIR_LIMIT]
+    return dict(ranked)
 
 
 def refresh_skill_co_occurrence(session: Session, week_start: date) -> int:
