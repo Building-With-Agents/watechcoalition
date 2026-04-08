@@ -12,6 +12,7 @@ from agents.common.types.region_config import RegionConfig
 from agents.ingestion.sources.jsearch_adapter import (
     JSearchAdapter,
     _job_to_raw_record,
+    jsearch_extract_description,
     jsearch_num_pages_from_env,
 )
 
@@ -65,6 +66,17 @@ class TestJSearchFieldMapping:
         assert result.company == "Unknown"
 
 
+class TestJsearchExtractDescription:
+    """Shared extractor for search and detail payloads."""
+
+    def test_extract_from_job_description(self) -> None:
+        assert jsearch_extract_description({"job_description": "A"}) == "A"
+
+    def test_extract_from_highlights_dict(self) -> None:
+        d = {"Qualifications": ["q1"], "Responsibilities": ["r1"]}
+        assert "q1" in jsearch_extract_description({"job_highlights": d})
+
+
 class TestJSearchNumPages:
     """``JSEARCH_MAX_PAGES`` + ``BATCH_SIZE`` drive pagination volume."""
 
@@ -91,6 +103,48 @@ class TestJSearchNumPages:
 
 class TestJSearchAdapter:
     """Test adapter behavior."""
+
+    def test_fetch_logs_search_complete(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Regression: fetch completes and emits jsearch_search_* observability keys."""
+        monkeypatch.setenv("JSEARCH_API_KEY", "test-key")
+        monkeypatch.setenv("BATCH_SIZE", "10")
+        monkeypatch.setenv("JSEARCH_MAX_PAGES", "1")
+
+        captured: dict = {}
+
+        def capture_info(_event: str, **kw: object) -> None:
+            captured.update(kw)
+
+        class FakeResponse:
+            status_code = 200
+
+            def raise_for_status(self) -> None:
+                return None
+
+            def json(self):
+                return {"data": []}
+
+        class FakeClient:
+            def __init__(self, *a, **k):
+                pass
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *a):
+                return None
+
+            async def get(self, *a, **k):
+                return FakeResponse()
+
+        monkeypatch.setattr("agents.ingestion.sources.jsearch_adapter.log.info", capture_info)
+        monkeypatch.setattr("httpx.AsyncClient", FakeClient)
+
+        adapter = JSearchAdapter()
+        asyncio.run(adapter.fetch(region=_TEST_REGION))
+        assert "jsearch_search_requests_total" in captured
+        assert "jsearch_search_pages_fetched" in captured
+        assert "search_unique_records_staged" in captured
 
     def test_no_api_key_raises(self) -> None:
         """Without JSEARCH_API_KEY, fetch raises ValueError."""

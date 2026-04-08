@@ -17,10 +17,13 @@ import os
 from datetime import datetime
 
 import httpx
+import structlog
 
 from agents.common.types.raw_job_record import RawJobRecord
 from agents.common.types.region_config import RegionConfig
 from agents.ingestion.sources.base_adapter import SourceAdapter
+
+log = structlog.get_logger()
 
 JSEARCH_BASE_URL = "https://jsearch.p.rapidapi.com/search"
 JSEARCH_HOST = "jsearch.p.rapidapi.com"
@@ -70,6 +73,19 @@ def _parse_date(value: str | int | float | None) -> datetime | None:
     return None
 
 
+def jsearch_extract_description(job: dict) -> str:
+    """Normalize description text from a JSearch job object (search or detail response)."""
+    description = job.get("job_description") or job.get("description") or job.get("job_highlights") or ""
+    if isinstance(description, dict):
+        description = " ".join(
+            str(v)
+            for v in (description.get("Qualifications", []) or []) + (description.get("Responsibilities", []) or [])
+        )
+    if not isinstance(description, str):
+        description = str(description or "")
+    return description
+
+
 def _job_to_raw_record(job: dict, region_id: str) -> RawJobRecord:
     """Map a single JSearch API job object to RawJobRecord."""
     # JSearch often uses employer_name, job_title, job_id, job_apply_link, job_city, job_state, job_country
@@ -79,14 +95,7 @@ def _job_to_raw_record(job: dict, region_id: str) -> RawJobRecord:
 
     title = (job.get("job_title") or job.get("title") or "").strip() or "Untitled"
     company = (job.get("employer_name") or job.get("company_name") or job.get("company") or "").strip() or "Unknown"
-    description = job.get("job_description") or job.get("description") or job.get("job_highlights") or ""
-    if isinstance(description, dict):
-        description = " ".join(
-            str(v)
-            for v in (description.get("Qualifications", []) or []) + (description.get("Responsibilities", []) or [])
-        )
-    if not isinstance(description, str):
-        description = str(description or "")
+    description = jsearch_extract_description(job)
 
     date_posted_val = (
         job.get("job_posted_at_timestamp") or job.get("job_posted_at_datetime_utc") or job.get("posted_at")
@@ -185,8 +194,11 @@ class JSearchAdapter(SourceAdapter):
 
         all_records: list[RawJobRecord] = []
         seen_hashes: set[str] = set()
+        search_requests = 0
+        pages_fetched = 0
         async with httpx.AsyncClient(timeout=30.0) as client:
             for page in range(1, num_pages + 1):
+                search_requests += 1
                 response = await client.get(
                     JSEARCH_BASE_URL,
                     params={
@@ -200,6 +212,7 @@ class JSearchAdapter(SourceAdapter):
                     },
                 )
                 response.raise_for_status()
+                pages_fetched += 1
                 data = response.json()
                 jobs = data.get("data") if isinstance(data, dict) else []
                 if not jobs:
@@ -212,6 +225,13 @@ class JSearchAdapter(SourceAdapter):
                             all_records.append(rec)
                 if len(jobs) < 10:
                     break
+
+        log.info(
+            "jsearch_search_complete",
+            jsearch_search_requests_total=search_requests,
+            jsearch_search_pages_fetched=pages_fetched,
+            search_unique_records_staged=len(all_records),
+        )
 
         return all_records
 

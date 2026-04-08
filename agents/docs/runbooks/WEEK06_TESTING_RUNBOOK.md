@@ -464,6 +464,21 @@ Approximately 46% of JSearch results arrive with empty `job_description` fields.
 
 **Staging status (S3):** New ingests set `dbo.raw_ingested_jobs.processing_status` to `awaiting_description` when the mapped description is empty or whitespace-only. Rows with text are `pending`. The Normalization Agent only reads `pending`, so metadata-only rows do not enter the normalize queue until a future backfill sets them to `pending`. To restore legacy behavior (all rows `pending`), set `ALLOW_EMPTY_DESCRIPTION_PENDING=1` before ingestion.
 
+**JSearch detail backfill (Phase 1a):** Optional second-hop fetch for `source = jsearch` rows in `awaiting_description`. See [`agents/docs/architecture/jsearch_description_detail.md`](../architecture/jsearch_description_detail.md) for API notes and cost formulas.
+
+- **Kill switch:** Live HTTP is off unless `JSEARCH_DETAIL_FETCH_ENABLED=1`. Use `--dry-run` to count unique `external_id` values that would be fetched (no locks on PostgreSQL; read-only sample).
+- **Prereqs:** `JSEARCH_API_KEY`, `PYTHON_DATABASE_URL`, migrations applied (`description_source`, `detail_fetch_attempts`, etc. on `raw_ingested_jobs`).
+- **Run:**
+
+```bash
+python agents/scripts/run_jsearch_description_backfill.py --dry-run
+python agents/scripts/run_jsearch_description_backfill.py --batch-size 25
+```
+
+- **Gating:** Rows move to `pending` only when description length ≥ `DESCRIPTION_MIN_CHARS` (default 200) after a successful detail response. `ALLOW_EMPTY_DESCRIPTION_PENDING=1` does not add rows to this worker (they are already `pending`); normalization still benefits from richer text if you backfill manually.
+- **Concurrency:** On PostgreSQL the worker uses `FOR UPDATE SKIP LOCKED`. Run multiple processes only if you understand duplicate RapidAPI usage; tune `JSEARCH_DETAIL_MAX_ROWS_PER_RUN`.
+- **Observability:** Structured logs include `jsearch_detail_requests_total`, `jsearch_detail_success_total`, `jsearch_429_total`, `detail_dedup_skips_total`, `description_fill_rate` (batch), and `jsearch_search_complete` on `/search` fetches.
+
 **Operator CLI — description coverage sample:**
 
 ```bash

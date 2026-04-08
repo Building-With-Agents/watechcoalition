@@ -67,6 +67,13 @@ class RawIngestedJob(Base):
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     company: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    description_source: Mapped[str | None] = mapped_column(Text, nullable=True)
+    description_fetched_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    detail_fetch_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    detail_last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    detail_fetch_status: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     # Structured location (replaces single ``location`` column)
     city: Mapped[str | None] = mapped_column(String(255), nullable=True)

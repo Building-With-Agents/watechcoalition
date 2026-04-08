@@ -246,6 +246,7 @@ def stage_records(state: IngestionState) -> IngestionState:
                     title=record.title,
                     company=record.company,
                     description=record.description or None,
+                    description_source=("jsearch_search" if record.source == "jsearch" else None),
                     city=record.city,
                     state=record.state,
                     country=record.country,

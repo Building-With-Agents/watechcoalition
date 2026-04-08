@@ -159,6 +159,15 @@ _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS employer_metadata JSONB",
 ]
 
+# JSearch detail backfill (description fill rate — Phase 1a)
+_RAW_INGESTED_JOBS_DESCRIPTION_DETAIL_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS description_source TEXT",
+    "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS description_fetched_at TIMESTAMPTZ",
+    "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS detail_fetch_attempts INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS detail_last_error TEXT",
+    "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS detail_fetch_status TEXT",
+]
+
 # Company HQ / location fields for enrichment resolve_location (#110)
 _COMPANIES_LOCATION_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.companies ADD COLUMN IF NOT EXISTS city TEXT",
@@ -442,6 +451,17 @@ def run_migrations(engine: Engine) -> None:
         except Exception as exc:
             log.warning(
                 "migration_companies_location_alter_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
+
+    for stmt in _RAW_INGESTED_JOBS_DESCRIPTION_DETAIL_ALTER_STATEMENTS:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(stmt))
+        except Exception as exc:
+            log.warning(
+                "migration_raw_ingested_jobs_description_detail_skipped",
                 statement=stmt,
                 error=str(exc),
             )
