@@ -41,6 +41,13 @@ ignore = [
 # Repo-root pg-seed CLI scripts (stdout UX for devs)
 "../scripts/pg-seed-data/export_agent_data.py" = ["T201"]
 "../scripts/pg-seed-data/seed_agent_data.py" = ["T201"]
+# Full-pipeline and dataset CLI scripts
+"agents/scripts/run_full_extraction.py" = ["T201"]
+"scripts/run_full_extraction.py" = ["T201"]
+"agents/scripts/upload_langfuse_dataset.py" = ["T201"]
+"scripts/upload_langfuse_dataset.py" = ["T201"]
+"agents/scripts/export_langfuse_dataset.py" = ["T201"]
+"scripts/export_langfuse_dataset.py" = ["T201"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["agents"]
