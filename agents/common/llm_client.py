@@ -7,6 +7,7 @@ Loads .env from repo root so Azure env vars are available when this module is us
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import json as _json
 import os
@@ -720,7 +721,10 @@ async def ainvoke_structured_extraction_llm(
 
         try:
             chain = _structured_output_chain(llm, output_schema)
-            raw_out: Any = await chain.ainvoke(prompt)
+            timeout_seconds = int(os.getenv("SKILLS_EXTRACTION_LLM_TIMEOUT", "120"))
+            raw_out: Any = await asyncio.wait_for(
+                chain.ainvoke(prompt), timeout=timeout_seconds
+            )
 
             latency_ms = int((time.perf_counter() - start) * 1000)
 
