@@ -108,10 +108,14 @@ All 6 Langfuse containers (`langfuse-server`, `langfuse-worker`, `langfuse-db`, 
 
 ### Step 4 — Verify Langfuse traces exist
 
-Navigate to **Tracing** in the Langfuse UI. If the processing loop has been run with `LANGFUSE_SECRET_KEY` configured, you should see traces. If no traces exist, run:
+Navigate to **Tracing** in the Langfuse UI. If the processing loop has been run with `LANGFUSE_SECRET_KEY` configured, you should see traces. If no traces exist:
 
 ```bash
-python agents/scripts/run_processing_loop.py --max-iterations 1 --batch-size 5
+# The seeded DB is fully processed (pending: 0) — roll back 3 jobs first
+python agents/scripts/reset_sample_jobs.py
+
+# Then run with real LLM for real traces (or LLM_PROVIDER=mock if no API keys)
+python agents/scripts/run_processing_loop.py --max-iterations 1 --batch-size 3
 ```
 
 Then refresh the Tracing page.
@@ -198,19 +202,32 @@ All containers should show `running` or `Up (healthy)`. Then open http://localho
 - Organization: Computing For All
 - Project: job-intelligence-engine
 
-### Mock provider option
+### LLM provider — use real Azure OpenAI for Langfuse traces
 
-For testing without Azure OpenAI API keys, set in `.env`:
+For Week 7 the goal is **real traces in Langfuse** so pairs can inspect prompt inputs, model outputs, token counts, and costs. Use the real LLM:
+
+```bash
+LLM_PROVIDER=azure_openai
+AZURE_OPENAI_ENDPOINT=https://<your-resource>.openai.azure.com/
+AZURE_OPENAI_API_KEY=<your-key>
+AZURE_OPENAI_DEPLOYMENT_NAME=chat-gpt41mini
+```
+
+With a real provider, every skills/tasks/responsibilities/enrichment call produces a real Langfuse generation span with actual token counts and cost. `is_llm_generated` will be `TRUE` in `insight_summary`.
+
+### Mock provider (fallback — no API keys)
+
+If Azure OpenAI keys are unavailable, set:
 
 ```bash
 LLM_PROVIDER=mock
 ```
 
-The mock provider returns ground truth data from `agents/eval/extraction_ground_truth.json` via round-robin, generates realistic token counts and costs, and produces real Langfuse traces. All verification steps in this runbook work with mock.
+The mock provider returns ground truth data from `agents/eval/extraction_ground_truth.json` via round-robin, generates realistic token counts and costs, and produces real Langfuse traces. All verification steps work with mock — but traces will show `model: mock-sonnet-v1` and `is_llm_generated: FALSE`.
 
-> **Note on mock traces:** Mock LLM calls (skills, tasks, responsibilities) only fire for records that have description text. Many JSearch records have empty descriptions — these skip extraction and produce no mock LLM traces. You will see `skills_extraction_no_text` warnings in the console. This is expected. To generate rich mock traces, ensure your database has records with descriptions (the seeded data includes them).
+> **Note on mock traces:** Mock LLM calls only fire for records that have description text. Many JSearch records have empty descriptions — these skip extraction and produce no traces. You will see `skills_extraction_no_text` warnings. This is expected. The seeded fixture data includes descriptions.
 
-> **Note on embeddings:** Taxonomy resolution Step 4 (cosine similarity) requires Azure OpenAI embedding API keys (`AZURE_OPENAI_EMBEDDING_*` env vars). With mock mode and no embedding keys, skills resolve via Steps 1-3 (exact/normalized match) and Step 6 (raw fallback). This is expected.
+> **Note on embeddings:** Taxonomy resolution Step 4 (cosine similarity) requires `AZURE_OPENAI_EMBEDDING_*` env vars. Without embedding keys, skills resolve via Steps 1-3 (exact/normalized match) and Step 6 (raw fallback). This is expected regardless of `LLM_PROVIDER`.
 
 ### Seed NAICS reference data (required for NAICS classification)
 
@@ -232,6 +249,42 @@ python agents/scripts/db_check.py counts
 ---
 
 ## 3. Clean Slate — Resetting Data
+
+### Quick pipeline re-test — 3 jobs (preferred for Week 7 verification)
+
+The seeded database is fully processed (`pending: 0`). Use this script to roll back exactly 3 jobs so `run_processing_loop.py` has real work to process and you can see live traces in Langfuse:
+
+```bash
+# 1. Preview which jobs will be reset (no writes)
+python agents/scripts/reset_sample_jobs.py --dry-run
+
+# 2. Roll back 3 fully-processed jobs to 'pending'
+#    (deletes extracted_intelligence, job_postings rows, normalized_jobs rows
+#     and resets raw_ingested_jobs.processing_status -> 'pending')
+python agents/scripts/reset_sample_jobs.py
+
+# 3. Re-process those 3 jobs through the full pipeline
+python agents/scripts/run_processing_loop.py --max-iterations 1 --batch-size 3
+```
+
+After the loop finishes, verify output:
+
+```bash
+python agents/scripts/db_check.py counts
+```
+
+Expected: `normalized_jobs` +3, `extracted_intelligence` +3, `job_postings` +3 vs before the reset.
+
+To reset more jobs:
+
+```bash
+python agents/scripts/reset_sample_jobs.py --count 5
+python agents/scripts/run_processing_loop.py --max-iterations 1 --batch-size 5
+```
+
+> **Tip:** After each `reset_sample_jobs.py` run you get fresh Langfuse traces for normalization → skills/tasks/responsibilities extraction → enrichment (SOC, NAICS, dedup). This is the fastest way to verify your Week 7 step produces real output without re-running batch_ingest.
+
+---
 
 ### Re-running the enrichment pipeline (classification iteration)
 
@@ -469,8 +522,8 @@ python agents/scripts/db_check.py query "SELECT id, summary_type, is_llm_generat
 ```
 
 **What to check:**
-- `is_llm_generated` should be `FALSE` when using `LLM_PROVIDER=mock` (template fallback)
-- `summary_text` should not be empty — the template fills in aggregate numbers
+- `is_llm_generated` should be `TRUE` when using `LLM_PROVIDER=azure_openai` (real LLM call); `FALSE` with mock (template fallback)
+- `summary_text` should not be empty — the template fills in aggregate numbers even when `is_llm_generated=FALSE`
 - `summary_type` indicates which aggregate the summary covers (e.g., `weekly_skills`, `weekly_roles`)
 
 ### Aggregate row count summary
@@ -483,21 +536,28 @@ python agents/scripts/db_check.py query "SELECT 'skill_demand_weekly' AS tbl, CO
 
 ## 6. Layer 7 — Langfuse Trace Verification
 
-### Step 1 — Run the processing loop with tracing
+### Step 1 — Reset sample jobs and run the processing loop with tracing
 
 Ensure `.env` has:
 
 ```bash
-LLM_PROVIDER=mock
+LLM_PROVIDER=azure_openai
+AZURE_OPENAI_ENDPOINT=https://<your-resource>.openai.azure.com/
+AZURE_OPENAI_API_KEY=<your-key>
+AZURE_OPENAI_DEPLOYMENT_NAME=chat-gpt41mini
 LANGFUSE_SECRET_KEY=sk-lf-local-dev-secret
 LANGFUSE_PUBLIC_KEY=pk-lf-local-dev-public
 LANGFUSE_BASE_URL=http://localhost:3000
 ```
 
-Run a small batch:
+The seeded database is fully processed — reset 3 jobs first so the loop has work to do:
 
 ```bash
-python agents/scripts/run_processing_loop.py --max-iterations 1 --batch-size 5
+# Roll back 3 jobs to 'pending'
+python agents/scripts/reset_sample_jobs.py
+
+# Re-process with real LLM (generates real Langfuse traces)
+python agents/scripts/run_processing_loop.py --max-iterations 1 --batch-size 3
 ```
 
 Watch the console output for:
@@ -507,6 +567,8 @@ langfuse_tracer_registered agent_id=processing-loop
 ```
 
 If this line does not appear, the tracer was not initialized. Check `LANGFUSE_SECRET_KEY` and that the `langfuse` Python package is installed (`pip install langfuse`).
+
+> **If you do not have Azure OpenAI keys**, set `LLM_PROVIDER=mock` — traces will appear in Langfuse but will show `model: mock-sonnet-v1` instead of the real model name.
 
 ### Step 2 — Find traces in the UI
 
@@ -521,9 +583,9 @@ Open http://localhost:3000 → **Tracing**. You should see at least one trace fr
 | Generation names | `processing-loop/normalization`, `processing-loop/enrichment-employer-classifier`, and (when records have descriptions) `processing-loop/skills-extraction`, `processing-loop/tasks-extraction`, `processing-loop/responsibilities-extraction` |
 | Input tab (LLM generations) | Contains full prompt text (system prompt + job posting fields). Non-LLM spans (normalization) show `null`. |
 | Output tab (any generation) | Contains JSON response (skills array, SOC code, etc.) |
-| Metadata | Shows `agent_name`, `model: mock-sonnet-v1` |
-| Token counts | Non-zero (simulated by mock provider) |
-| Cost | Non-zero (computed from simulated tokens) |
+| Metadata | Shows `agent_name`, `model: <deployment-name>` (e.g. `chat-gpt41mini`); `mock-sonnet-v1` if using mock |
+| Token counts | Non-zero (real tokens with `azure_openai`; simulated with mock) |
+| Cost | Non-zero (real cost with `azure_openai`; computed from simulated tokens with mock) |
 
 ### Step 3 — Inspect a skills extraction generation
 
@@ -560,16 +622,18 @@ Some generations include event metadata logged via `tracer.log_event()`:
 
 These metrics appear in the trace metadata or as separate event annotations depending on the agent implementation.
 
-### Step 5 — Verify mock provider trace fidelity
+### Step 5 — Verify LLM audit log entries
 
-With `LLM_PROVIDER=mock`, confirm that traces contain realistic data:
+Check that the processing run wrote to `llm_audit_log`:
 
 ```bash
-# Check llm_audit_log for mock entries
-python agents/scripts/db_check.py query "SELECT agent_name, model, provider, COUNT(*) AS calls, COALESCE(SUM(cost_usd),0) AS total_usd FROM dbo.llm_audit_log WHERE provider = 'mock' GROUP BY agent_name, model, provider ORDER BY calls DESC"
+# Real LLM (azure_openai)
+python agents/scripts/db_check.py query "SELECT agent_name, model, provider, COUNT(*) AS calls, COALESCE(SUM(cost_usd),0) AS total_usd FROM dbo.llm_audit_log GROUP BY agent_name, model, provider ORDER BY calls DESC LIMIT 10"
 ```
 
-**Expected:** Rows with `provider = 'mock'` and `model = 'mock-sonnet-v1'`. Cost should be non-zero (computed from simulated tokens using standard pricing).
+**With `LLM_PROVIDER=azure_openai`:** Rows show your deployment name (e.g. `chat-gpt41mini`) and `provider = 'azure_openai'`. Cost reflects real token usage.
+
+**With `LLM_PROVIDER=mock`:** Rows show `provider = 'mock'` and `model = 'mock-sonnet-v1'`. Cost is computed from simulated tokens.
 
 ---
 
