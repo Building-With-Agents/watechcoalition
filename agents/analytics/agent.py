@@ -28,7 +28,7 @@ from typing import Any
 import structlog
 
 from agents.analytics.canonical_roles.loader import load_posting_cluster_features
-from agents.analytics.canonical_roles.persist import persist_clustering_result
+from agents.analytics.canonical_roles.persist import cleanup_orphan_canonical_roles, persist_clustering_result
 from agents.analytics.canonical_roles.snapshots import refresh_role_snapshot_weekly
 from agents.analytics.clustering.config import cluster_min_total_postings
 from agents.analytics.clustering.embeddings import embed_posting_features
@@ -197,6 +197,7 @@ class AnalyticsAgent(BaseAgent):
                 )
                 week_start = _iso_week_monday(date.today())
                 snapshot_rows = refresh_role_snapshot_weekly(session, week_start=week_start)
+                orphans_deleted = cleanup_orphan_canonical_roles(session)
 
                 extras.update(
                     {
@@ -209,7 +210,7 @@ class AnalyticsAgent(BaseAgent):
                         "clustering_noise_count": result.noise_posting_count,
                         "canonical_roles_inserted": persist_info.get("roles_inserted"),
                         "canonical_postings_updated": persist_info.get("postings_updated"),
-                        "canonical_roles_orphans_deleted": persist_info.get("orphans_deleted"),
+                        "canonical_roles_orphans_deleted": orphans_deleted,
                         "role_snapshot_weekly_rows": snapshot_rows,
                         "role_snapshot_week_start": week_start.isoformat(),
                         "emergence_candidate_count": len(result.emergence_candidates),
