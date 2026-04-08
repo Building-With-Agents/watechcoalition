@@ -8,6 +8,8 @@ Reference: ARCHITECTURE_DEEP.md § Work Intelligence Agent.
 
 from __future__ import annotations
 
+import asyncio
+import random
 from typing import Any
 
 import structlog
@@ -18,6 +20,16 @@ from agents.common.llm_client import (
     invoke_structured_extraction_llm,
 )
 from agents.common.types import ContextSignal, JobRecord, ResponsibilityRecord
+from agents.skills_extraction.extractors._retry import (
+    RATE_LIMIT_BACKOFF_SECS,
+    RATE_LIMIT_MAX_CYCLES,
+)
+from agents.skills_extraction.extractors._retry import (
+    is_rate_limited as _is_rate_limited,
+)
+from agents.skills_extraction.extractors._retry import (
+    merge_retry_metadata as _merge_retry_metadata,
+)
 from agents.skills_extraction.extractors.context import _format_pass1_context_for_prompt
 
 log = structlog.get_logger()
@@ -178,7 +190,13 @@ async def extract_responsibilities_async(
     job_record: JobRecord,
     pass1_context: list[ContextSignal] | None = None,
 ) -> tuple[list[ResponsibilityRecord], dict[str, Any]]:
-    """Async counterpart to ``extract_responsibilities`` with identical output shape."""
+    """Async counterpart to ``extract_responsibilities`` with timeout retry and 429 backoff.
+
+    Retry strategy mirrors ``extract_skills_no_taxonomy_async``:
+    - One timeout retry after 0.5 s.
+    - Up to ``RATE_LIMIT_MAX_CYCLES`` backoff cycles on 429, with jitter.
+    - A failed call returns ``([], metadata)`` — never raises.
+    """
     metadata = _base_responsibilities_metadata()
 
     try:
@@ -191,33 +209,70 @@ async def extract_responsibilities_async(
         metadata["error_reason"] = type(e).__name__
         return [], metadata
 
-    try:
-        parsed, call_meta = await ainvoke_structured_extraction_llm(
+    async def _do_invoke() -> tuple[_ResponsibilitiesLLMRoot | None, dict[str, Any]]:
+        return await ainvoke_structured_extraction_llm(
             prompt,
             _ResponsibilitiesLLMRoot,
             agent_name=AGENT_RESPONSIBILITIES,
             deployment_env_keys=_RESP_DEPLOYMENT_KEYS,
             model_tier_for_cost="sonnet",
         )
-        metadata.update(call_meta)
-        metadata["extraction_metadata"] = _responsibilities_extraction_metadata(call_meta)
 
-        if parsed is None or call_meta.get("extraction_failed"):
-            log.error(
-                "responsibilities_extraction_llm_failed",
-                extraction_failed=True,
-                error_reason=call_meta.get("error_reason"),
-            )
+    parsed: _ResponsibilitiesLLMRoot | None = None
+    meta: dict[str, Any] = {}
+
+    # Level 1: one timeout retry
+    for timeout_attempt in range(2):
+        try:
+            parsed, meta = await _do_invoke()
+            metadata.update(meta)
+            break
+        except Exception as e:
+            err_str = str(e).lower()
+            if ("timeout" in err_str or isinstance(e, TimeoutError)) and timeout_attempt == 0:
+                await asyncio.sleep(0.5)
+                continue
+            metadata["error_reason"] = str(e)
             metadata["extraction_failed"] = True
             return [], metadata
 
-        out = list(parsed.responsibilities)
-        metadata["extraction_failed"] = False
-        metadata["success"] = True
-        log.info("responsibilities_extraction_complete", responsibility_count=len(out))
-        return out, metadata
-    except Exception as e:
-        log.error("responsibilities_extraction_unhandled", error_type=type(e).__name__)
+    # Level 2: rate-limit backoff
+    if _is_rate_limited(meta):
+        for cycle, fallback_delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
+            if cycle >= RATE_LIMIT_MAX_CYCLES:
+                metadata["alert_responsibilities_extraction"] = True
+                return [], metadata
+            server_delay = meta.get("retry_after_seconds")
+            base_delay = server_delay if server_delay else fallback_delay
+            jitter = random.uniform(0.5, min(base_delay * 0.3, 5.0))
+            actual_delay = base_delay + jitter
+            log.info(
+                "responsibilities_extraction_429_backoff",
+                cycle=cycle,
+                delay_seconds=round(actual_delay, 1),
+                server_retry_after=server_delay,
+            )
+            await asyncio.sleep(actual_delay)
+            try:
+                parsed, meta = await _do_invoke()
+                _merge_retry_metadata(metadata, meta)
+                if meta.get("success") and parsed is not None:
+                    metadata.update(meta)
+                    break
+            except Exception as e:
+                metadata["error_reason"] = str(e)
+        else:
+            metadata["alert_responsibilities_extraction"] = True
+            return [], metadata
+
+    if not meta.get("success") or parsed is None:
+        metadata["error_reason"] = meta.get("error_reason") or "empty response"
         metadata["extraction_failed"] = True
-        metadata["error_reason"] = type(e).__name__
         return [], metadata
+
+    metadata["extraction_metadata"] = _responsibilities_extraction_metadata(meta)
+    out = list(parsed.responsibilities)
+    metadata["extraction_failed"] = False
+    metadata["success"] = True
+    log.info("responsibilities_extraction_complete", responsibility_count=len(out))
+    return out, metadata

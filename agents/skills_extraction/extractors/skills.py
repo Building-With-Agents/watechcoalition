@@ -28,15 +28,20 @@ from agents.common.llm_client import (
     invoke_structured_extraction_llm,
 )
 from agents.common.types import JobRecord, SkillRecord, TaxonomyResult, ToolRecord
+from agents.skills_extraction.extractors._retry import (
+    RATE_LIMIT_BACKOFF_SECS,
+    RATE_LIMIT_MAX_CYCLES,
+)
+from agents.skills_extraction.extractors._retry import (
+    is_rate_limited as _is_rate_limited,
+)
+from agents.skills_extraction.extractors._retry import (
+    merge_retry_metadata as _merge_retry_metadata,
+)
 from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
 from agents.skills_extraction.prompts import build_skills_prompt
 
 log = structlog.get_logger()
-
-# Back-off delays for 429 in seconds. Azure OpenAI typically asks for 10-30s.
-# Jitter added at runtime to prevent thundering herd.
-RATE_LIMIT_BACKOFF_SECS = (5, 15, 30, 60)
-RATE_LIMIT_MAX_CYCLES = 4
 
 DEFAULT_SKILL_CONFIDENCE_THRESHOLD = 0.75
 
@@ -150,22 +155,6 @@ def _base_skills_metadata() -> dict[str, Any]:
     }
 
 
-def _is_rate_limited(meta: dict[str, Any]) -> bool:
-    """Return True when the LLM metadata indicates rate limiting."""
-    return not meta.get("success") and (
-        meta.get("is_rate_limit")
-        or meta.get("retry_after_seconds") is not None
-        or "429" in str(meta.get("error_reason", ""))
-    )
-
-
-def _merge_retry_metadata(metadata: dict[str, Any], meta: dict[str, Any]) -> None:
-    """Accumulate retry metadata while keeping the latest provider/model labels."""
-    metadata["tokens_used"] = metadata.get("tokens_used", 0) + meta.get("tokens_used", 0)
-    metadata["cost_usd"] = metadata.get("cost_usd", 0.0) + meta.get("cost_usd", 0.0)
-    metadata["latency_ms"] = metadata.get("latency_ms", 0) + meta.get("latency_ms", 0)
-    metadata["provider"] = meta.get("provider", metadata["provider"])
-    metadata["model"] = meta.get("model", metadata["model"])
 
 
 def _post_process_llm_skills(

@@ -4,6 +4,56 @@ All notable changes to the agents pipeline are documented here.
 
 ---
 
+## Skills Extraction — Gap Close: Retry Parity + Async Entrypoint (Cursor)
+
+**Closes the three remaining review findings from the Phase C PR review.**
+
+### Changes
+
+- **Shared retry module**
+  - `agents/skills_extraction/extractors/_retry.py` (new): canonical home for
+    `RATE_LIMIT_BACKOFF_SECS`, `RATE_LIMIT_MAX_CYCLES`, `is_rate_limited`, and
+    `merge_retry_metadata`. All three async extractors now import from here instead
+    of each defining their own copy.
+
+- **Retry/backoff parity for tasks and responsibilities (P2 fix)**
+  - `agents/skills_extraction/extractors/tasks.py` — `extract_tasks_async` now
+    has the same two-level retry strategy as `extract_skills_no_taxonomy_async`:
+    one timeout retry after 0.5 s, then up to four 429 backoff cycles with jitter.
+    Previously the function made a single call and silently returned `[]` on any
+    failure.
+  - `agents/skills_extraction/extractors/responsibilities.py` —
+    `extract_responsibilities_async` receives the same upgrade.
+
+- **Async public entrypoint (P2 fix)**
+  - `agents/skills_extraction/agent.py` — new `process_async(event)` method on
+    `SkillsExtractionAgent`. Unlike `process()`, it awaits `_extract_batch_parallel`
+    directly and never falls back to serial, so async hosts (FastAPI, async test
+    runners, other async agents) always get the full parallel speedup. The
+    module-level docstring is updated to document both entrypoints.
+
+- **Tests**
+  - `agents/skills_extraction/tests/test_async_extractors.py` — six new tests:
+    429 retry + backoff for `extract_tasks_async` and `extract_responsibilities_async`
+    (including `sleep` mock assertion), persistent-failure empty-return for each,
+    `process_async` returns a valid `SkillsExtracted` envelope, and
+    `process_async` verifies `_extract_batch_parallel` is called (not the serial
+    fallback) even when already inside an event loop.
+  - `agents/skills_extraction/tests/test_parallel_throughput.py` (new): four
+    throughput/correctness benchmark tests using 50 ms mock LLM latency —
+    intra-job parallelism (3 concurrent calls ≈ 1× latency vs 3×), inter-job
+    parallelism (5 and 10 jobs bounded by semaphore), and partial-failure isolation
+    (tasks 429 does not block responsibilities or skills).
+
+### Remaining open items
+
+See `TODO.md` — three acceptance criteria still require work:
+- DB writes: concurrent `log_extraction_event` audit-write stress test (D1)
+- Quality regression: serial ↔ parallel equivalence integration test (F4)
+- 568-job SLA: requires a real run or live benchmark (G4)
+
+---
+
 ## Skills Extraction Phase C (Codex)
 
 **Inter-job async batch execution with semaphore-bounded concurrency.**

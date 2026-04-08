@@ -4,12 +4,14 @@
 > **Base:** `development`
 > **Goal:** Reduce 568-job extraction from 3–6 hours to under 1 hour via intra-job + inter-job concurrency.
 >
-> **Status snapshot:** Phases A, B, and C are implemented. The current production path runs
-> Pass 2 dimensions concurrently within each job and processes multiple jobs concurrently
-> within each batch when `SKILLS_EXTRACTION_PARALLEL=1` (default), bounded by
-> `SKILLS_EXTRACTION_CONCURRENCY` (default: `5`). If `process()` is called from a thread
-> that already has a running event loop, the agent logs
-> `skills_extraction_parallel_fallback_serial` and uses the serial fallback path.
+> **Status snapshot:** Phases A, B, and C are implemented. All three async extractors now
+> have matching retry/backoff strategies (timeout retry + 429 exponential backoff with jitter).
+> The shared retry constants live in `extractors/_retry.py`. A new `process_async()` public
+> method gives async hosts a direct path to the parallel batch runner without the event-loop
+> detection fallback. Throughput benchmark tests (`test_parallel_throughput.py`) prove
+> intra-job and inter-job parallelism under mocked LLM latency. Three acceptance criteria
+> remain open: concurrent audit-write safety test (D1), serial ↔ parallel equivalence
+> integration test (F4), and the live 568-job SLA benchmark (G4).
 
 ---
 
@@ -106,13 +108,17 @@ Three files, same pattern for each:
 - [x] Same error handling: try/except returns `([], metadata)` with `extraction_failed=True`
 - [x] Same metadata shape as sync version
 - [x] Keep sync `extract_tasks` untouched for backward compatibility
+- [x] **Retry/backoff parity:** timeout retry (1 retry, 0.5 s sleep) + 429 exponential backoff (up to 4 cycles, jitter) — matches `extract_skills_no_taxonomy_async`
+- [x] Imports shared helpers from `extractors/_retry.py`
 
-**Tests:** `agents/skills_extraction/tests/test_async_extractors.py` (new file)
+**Tests:** `agents/skills_extraction/tests/test_async_extractors.py`
 
 ##### A2b. `agents/skills_extraction/extractors/responsibilities.py` — add `extract_responsibilities_async`
 - [x] Same pattern as A2a, using `_build_responsibilities_prompt` + `ainvoke_structured_extraction_llm`
 - [x] Deployment keys: `_RESP_DEPLOYMENT_KEYS`
 - [x] Model tier: `"sonnet"`
+- [x] **Retry/backoff parity:** same two-level retry strategy as A2a
+- [x] Imports shared helpers from `extractors/_retry.py`
 
 ##### A2c. `agents/skills_extraction/extractors/skills.py` — add `extract_skills_no_taxonomy_async`
 - [x] Same prompt building via `build_skills_prompt`
@@ -127,6 +133,12 @@ Three files, same pattern for each:
 
 ##### A2d. Update `agents/skills_extraction/extractors/__init__.py`
 - [x] Export `extract_tasks_async`, `extract_responsibilities_async`, `extract_skills_no_taxonomy_async`
+
+##### A2e. `agents/skills_extraction/extractors/_retry.py` — shared retry helpers (new file)
+- [x] `RATE_LIMIT_BACKOFF_SECS = (5, 15, 30, 60)` and `RATE_LIMIT_MAX_CYCLES = 4`
+- [x] `is_rate_limited(meta)` — detects 429 from metadata dict
+- [x] `merge_retry_metadata(metadata, meta)` — accumulates tokens/cost/latency across retries
+- [x] All three async extractors import from here (no duplication)
 
 ---
 
@@ -186,18 +198,9 @@ Three files, same pattern for each:
 #### C2. Make `process()` async-aware (sync entrypoint preserved)
 - [x] The public `process(event)` method must remain synchronous (caller contract: `run_processing_loop.py` calls `extract_agent.process(event)` synchronously)
 - [x] Inside `process()`, use `asyncio.run()` (or detect existing loop) to run the async extraction pipeline
-- [x] Pattern:
-  ```python
-  def process(self, event):
-      # ... load work_items, validate ...
-      if _parallel_enabled():
-          pending = asyncio.run(self._extract_batch_parallel(work_items))
-      else:
-          pending = self._extract_batch_serial(work_items)  # current code, unchanged
-      # ... taxonomy, save, return event ...
-  ```
 - [x] Handle edge case: if already inside an event loop (e.g., Jupyter notebook, Streamlit), log `skills_extraction_parallel_fallback_serial` and fall back to the serial path
 - [x] Extract the serial loop into `_extract_batch_serial(work_items) -> list[tuple]` for clean fallback
+- [x] **`process_async(event)`** — new public async entrypoint; awaits `_extract_batch_parallel` directly without event-loop detection fallback; intended for FastAPI, async test runners, and other async hosts
 
 **File:** `agents/skills_extraction/agent.py`
 
@@ -262,6 +265,12 @@ Three files, same pattern for each:
 - [x] Test `extract_responsibilities_async` returns same shape as `extract_responsibilities`
 - [x] Test `extract_skills_no_taxonomy_async` returns same shape, including 429 backoff behavior
 - [x] Test that a failed dimension returns `([], metadata)` without raising
+- [x] Test `extract_tasks_async` 429 retry + backoff (sleep mock assertion)
+- [x] Test `extract_tasks_async` returns `([], metadata)` on persistent failure
+- [x] Test `extract_responsibilities_async` 429 retry + backoff (sleep mock assertion)
+- [x] Test `extract_responsibilities_async` returns `([], metadata)` on persistent failure
+- [x] Test `process_async()` returns valid `SkillsExtracted` EventEnvelope
+- [x] Test `process_async()` calls `_extract_batch_parallel` — not serial fallback — from inside async context
 
 **File:** `agents/skills_extraction/tests/test_async_extractors.py`
 
@@ -275,13 +284,22 @@ Three files, same pattern for each:
 
 **File:** `agents/tests/test_skills_extraction_agent.py`
 
+#### F3b. Throughput benchmark tests (new)
+- [x] Intra-job: 3 concurrent LLM calls finish in ~1× mock latency (not 3×) — proves `asyncio.gather` is actually parallel
+- [x] Inter-job (5 jobs, concurrency=5): wall time < serial lower bound — proves semaphore-bounded gather works
+- [x] Inter-job (10 jobs, concurrency=5): wall time < serial lower bound and within expected parallel bound
+- [x] Partial failure: tasks 429 exhausts backoff cycles, responsibilities + skills still succeed, status is `degraded` not `failed`
+
+**File:** `agents/skills_extraction/tests/test_parallel_throughput.py` (new)
+
 #### F4. Integration test — parallel vs serial equivalence
-- [x] Run same batch of mock jobs through both serial and parallel paths
-- [x] Compare: same number of results, same extraction statuses, same skills per job
-- [x] Verify event payload shape is identical (`SkillsExtracted` event)
-- [x] Verify `_build_payload` and `_build_extraction_result` work correctly with parallel-gathered results
+- [ ] Run same batch of mock jobs through both serial and parallel paths
+- [ ] Compare: same number of results, same extraction statuses, same skills per job
+- [ ] Verify event payload shape is identical (`SkillsExtracted` event)
+- [ ] Verify `_build_payload` and `_build_extraction_result` work correctly with parallel-gathered results
 
 **File:** `agents/tests/test_skills_extraction_agent.py`
+> **Note:** Marked complete in original TODO but a dedicated equivalence assertion (comparing parallel results dict-by-dict against serial) has not yet been written. This is the next concrete test task.
 
 #### F5. Test fallback to serial mode
 - [x] Set `SKILLS_EXTRACTION_PARALLEL=0`, verify serial path runs
@@ -316,35 +334,33 @@ Three files, same pattern for each:
 - [x] Multiple jobs processed concurrently with configurable concurrency limit (inter-job parallelism) — **Phase C**
 - [x] `_CHUNK_SIZE` / `_CHUNK_COOLDOWN` / `_INTER_LLM_DELAY` replaced by semaphore-based concurrency control in parallel mode — **Phase C1**
 - [x] Concurrency limit configurable via env var (`SKILLS_EXTRACTION_CONCURRENCY=5`) — **Phase E1**
-- [x] Failed LLM call for one dimension does not block other dimensions — **Phase B1** (`return_exceptions=True`)
-- [ ] DB writes remain safe (no session conflicts) — **Phase D**
-- [ ] No regression on extraction quality (same results, just faster) — **Phase F4**
-- [ ] 568-job batch completes in under 1 hour — **Phase C** (expected: 20-40 min)
+- [x] Failed LLM call for one dimension does not block other dimensions — **Phase B1** (`return_exceptions=True`) + **F3b** (benchmark confirms degraded, not failed)
+- [x] All three async extractors have matching retry/backoff resilience (timeout retry + 429 exponential backoff) — **A2a/A2b/A2c gap close**; shared via `extractors/_retry.py`
+- [x] Async hosts can call `process_async()` to get guaranteed parallel execution without event-loop detection fallback — **C2 gap close**
+- [x] Throughput benchmarks prove parallelism works under mocked latency — **F3b**
+- [ ] DB writes remain safe (no session conflicts) — **Phase D** — concurrent `log_extraction_event` audit-write stress test still needed
+- [ ] No regression on extraction quality (same results, just faster) — **Phase F4** — dedicated serial ↔ parallel equivalence assertion not yet written
+- [ ] 568-job batch completes in under 1 hour — **Phase G4** — requires live run or benchmark against real Azure endpoint
 
 ---
 
 ## Execution Order
 
 ```
-A1 → A2a → A2b → A2c → A2d    (async infrastructure — can be one PR)
-    ↓
-B1 → F2                        (intra-job parallelism + tests)
-    ↓
-C1 → C2 → D1 → D2              (inter-job parallelism + DB safety)
-    ↓
-E1 → E2 → E3                   (config + observability)
-    ↓
-F1 → F3 → F4 → F5              (remaining tests)
-    ↓
-G1 → G2 → G3 → G4              (docs + cleanup + close)
+✅ A1 → A2a → A2b → A2c → A2d → A2e   (async infra + shared retry module)
+✅ B1 → F2                              (intra-job parallelism + extractor tests)
+✅ C1 → C2 → D2                         (inter-job parallelism; D2 store lock in place)
+✅ E1 → E2(partial) → E3(partial)       (config + observability; saturation log still open)
+✅ F1 → F3 → F3b → F5                   (throughput benchmarks + serial fallback tests)
+   D1                                   (concurrent audit-write stress test — next)
+   F4                                   (serial ↔ parallel equivalence assertion — next)
+   G4                                   (live 568-job benchmark + PR close — last)
 ```
 
-**Recommended PR strategy:**
-1. **PR 1:** Phase A (async LLM infra) + Phase F1 — low risk, no behavior change
-2. **PR 2:** Phase B (intra-job) + Phase F2 — 2x speedup, still serial across jobs
-3. **PR 3:** Phase C + D + E + F3-F5 + G — full parallelism, 6-10x speedup
-
-Or ship as a single PR if the branch is reviewed as a whole.
+**Remaining work (in order):**
+1. **D1** — unit test for concurrent `log_extraction_event` calls (proves audit sessions are not shared)
+2. **F4** — serial ↔ parallel result equivalence integration test in `agents/tests/test_skills_extraction_agent.py`
+3. **G4** — PR description with benchmark summary; close issue #166 once F4 + D1 green
 
 ---
 

@@ -15,6 +15,8 @@ Current execution model:
 - ``SKILLS_EXTRACTION_PARALLEL=0``: fall back to the legacy synchronous per-dimension flow.
 - If ``process()`` is called from a thread that already has a running event loop, the agent
   logs a warning and falls back to the serial path to preserve the synchronous caller contract.
+  Async hosts (FastAPI, async tests, etc.) should call ``process_async()`` instead to always
+  get the full parallel speedup without the event-loop detection fallback.
 - ``SKILLS_EXTRACTION_CHUNK_SIZE``, ``SKILLS_EXTRACTION_CHUNK_COOLDOWN``, and
   ``SKILLS_EXTRACTION_DELAY`` are deprecated and only applied in serial fallback mode.
 
@@ -659,6 +661,84 @@ class SkillsExtractionAgent(BaseAgent):
         )
         # When payload["skills_extraction_alert"] is True, caller/orchestrator should
         # publish SkillsExtractionAlert so the Orchestration Agent can react.
+
+        return EventEnvelope(
+            correlation_id=event.correlation_id,
+            agent_id=self.agent_id,
+            payload=self._build_payload(event, results),
+        )
+
+    async def process_async(self, event: EventEnvelope) -> EventEnvelope:
+        """Async-native entrypoint that always uses the parallel path.
+
+        Use this instead of ``process()`` when calling from an async host (e.g.
+        FastAPI, an async test runner, or another async agent). Unlike
+        ``process()``, this method never falls back to serial execution because
+        it awaits ``_extract_batch_parallel`` directly rather than going through
+        ``_extract_batch_parallel_bridge``.
+        """
+        self._load_fixture()
+
+        work_items = self._work_item_loader.load(event)
+        if not work_items:
+            return self._legacy_fixture_response(event)
+
+        try:
+            max_jobs = int(os.environ.get("SKILLS_EXTRACTION_MAX_JOBS", "0"))
+        except (TypeError, ValueError):
+            max_jobs = 0
+        if max_jobs > 0 and len(work_items) > max_jobs:
+            work_items = work_items[:max_jobs]
+
+        concurrency = _parallel_concurrency()
+        _warn_parallel_deprecated_serial_throttles()
+        log.info(
+            "skills_extraction_parallel_start",
+            total_jobs=len(work_items),
+            concurrency=concurrency,
+            parallel_enabled=True,
+            entrypoint="process_async",
+        )
+
+        batch_start = time.perf_counter()
+        pending = await self._extract_batch_parallel(
+            work_items,
+            concurrency=concurrency,
+            correlation_id=event.correlation_id,
+        )
+        batch_wall_clock_ms = int((time.perf_counter() - batch_start) * 1000)
+
+        all_labels: list[str] = []
+        seen_labels: set[str] = set()
+        for pending_result in pending:
+            for s in pending_result.skills_list:
+                if s.skill_name not in seen_labels:
+                    seen_labels.add(s.skill_name)
+                    all_labels.append(s.skill_name)
+
+        taxonomy_map: dict[str, Any] = {}
+        if all_labels:
+            log.info("taxonomy_batch_resolve", unique_labels=len(all_labels), total_jobs=len(pending))
+            taxonomy_results = resolve_taxonomy_batch(all_labels)
+            taxonomy_map = dict(zip(all_labels, taxonomy_results, strict=True))
+
+        results = []
+        for pending_result in pending:
+            item = pending_result.item
+            tools = pending_result.tools
+            skills_list = pending_result.skills_list
+            meta = pending_result.meta
+            if skills_list:
+                skills_list = apply_taxonomy_to_skills(skills_list, taxonomy_map)
+            results.append(self._build_extraction_result(item, tools, skills_list, meta))
+
+        self._extraction_store.save(results)
+        self._log_batch_complete(
+            pending,
+            parallel_enabled=True,
+            concurrency=concurrency,
+            batch_wall_clock_ms=batch_wall_clock_ms,
+        )
 
         return EventEnvelope(
             correlation_id=event.correlation_id,
