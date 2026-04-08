@@ -8,9 +8,11 @@ Source of truth: `job_intelligence_engine_architecture.docx` — see `docs/plann
 
 ## Project Summary
 
-**Job Intelligence Engine** — an eight-agent (Phase 1) / nine-agent (Phase 2) Python pipeline that ingests, normalizes, enriches, and analyzes external job postings for the watechcoalition platform. **SQLAlchemy is the single database authority.** Prisma/MSSQL is being phased out — the Next.js API is currently broken from the SQL Server → PostgreSQL switch (expected). All database tables are now agent-managed via SQLAlchemy.
+**Job Intelligence Engine** — an eight-agent Python pipeline that ingests, normalizes, enriches, and analyzes external job postings for the watechcoalition platform. The Next.js app uses MSSQL (via Prisma); the Python agent pipeline uses PostgreSQL (via SQLAlchemy). A future DB-unification effort will consolidate both layers on PostgreSQL.
 
 The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **separate Python layer** that lives in `agents/` and runs alongside it.
+
+**Do NOT modify the Next.js app or `prisma/schema.prisma` unless explicitly instructed.**
 
 ---
 
@@ -21,36 +23,18 @@ The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **s
 3. **The Orchestration Agent is the sole consumer** of `*Failed` and `*Alert` events. No other agent reacts to another agent’s failures.
 4. **No agent writes to another agent’s internal state.**
 5. **Every agent exposes a `health_check()` method** and emits self-evaluation metrics.
-6. **SQLAlchemy is the single database authority.** All schema changes go through `agents/common/data_store/models.py` and `migrations.py`. Prisma is being phased out.
+6. **Python agents access PostgreSQL via SQLAlchemy only.** Prisma is Next.js-only — never import or invoke it from Python.
 7. **No credentials in code or logs.** Environment variables only.
 8. **Do NOT implement Phase 2 items during Phase 1** unless explicitly instructed.
-
----
-
-## Table Ownership
-
-**SQLAlchemy is the single database authority.** All tables live in the `dbo` schema on PostgreSQL.
-
-| Category | Tables | Notes |
-|----------|--------|-------|
-| **Agent-created** | `raw_ingested_jobs`, `job_ingestion_runs`, `normalized_jobs`, `normalization_quarantine`, `extracted_intelligence`, `llm_audit_log`, `employer_profiles` | Created by `migrations.py` |
-| **Reference (seeded, agent-owned)** | `companies`, `industry_sectors`, `technology_areas`, `skills`, `socc`, `job_postings` | Seeded via pgloader from MSSQL; agents have full read+write |
-| **Legacy Prisma** | All other tables in `prisma/schema.prisma` | Being phased out; Next.js API currently broken (expected) |
-
-**Rules:**
-- New tables and columns go through `agents/common/data_store/models.py` + `migrations.py`
-- Enrichment output (quality_score, is_spam, soc_code, etc.) goes to `job_postings` columns
-- Company resolution writes placeholders directly to the `companies` table
-- Prisma migrations are deprecated — do not create new Prisma migrations
 
 ---
 
 ## Repository Structure
 
 ```
-/                              ← Next.js app root
+/                              ← Next.js app root (DO NOT MODIFY)
 ├── app/
-├── prisma/schema.prisma       ← Legacy (being phased out)
+├── prisma/schema.prisma       ← Read-only from Python
 └── agents/
     ├── ingestion/
     │   ├── agent.py
@@ -89,7 +73,7 @@ The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **s
     │   ├── saga/              ← Phase 2 only — scaffold, do not implement
     │   ├── admin_api/         ← Phase 2 only — scaffold, do not implement
     │   └── tests/
-    ├── demand_analysis/       ← Phase 2 — demand analysis capabilities absorbed into Analytics; scaffold reserved for Query Agent
+    ├── demand_analysis/       ← Phase 2 only — scaffold directory, do not implement
     │   ├── agent.py
     │   ├── time_series/
     │   ├── forecasting/
@@ -114,7 +98,7 @@ The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **s
     │   ├── normalized/        ← normalized_jobs output
     │   ├── enriched/          ← enriched records pre-promotion
     │   ├── analytics/         ← computed aggregates
-    │   ├── demand_signals/    ← Phase 2 (Analytics Agent expansion)
+    │   ├── demand_signals/    ← Phase 2
     │   ├── rendered/          ← Visualization artifact cache
     │   └── dead_letter/       ← quarantined records (retry-exhausted)
     ├── eval/                  ← 30–50 hand-labeled JSON records (Week 4)
@@ -127,7 +111,7 @@ The existing app is a Next.js/TypeScript/Prisma app. The agent pipeline is a **s
 
 ---
 
-## Architecture — Eight Agents (Phase 1), Nine Agents (Phase 2)
+## Architecture — Eight Agents, One Pipeline
 
 ```
 Sources (JSearch API via httpx / Web scraping via Crawl4AI)
@@ -139,16 +123,13 @@ Sources (JSearch API via httpx / Web scraping via Crawl4AI)
 [Skills Extraction Agent] → SkillsExtracted
     ↓
 [Enrichment Agent]        → RecordEnriched
+    ↓              ↘
+[Analytics Agent]    [Demand Analysis Agent]  ← Phase 2 only
     ↓
-[Analytics Agent]         → AnalyticsRefreshed
-    ↓                        (Phase 2: absorbs demand analysis capabilities)
 [Visualization Agent]     → RenderComplete
 
 [Orchestration Agent]     ← sole consumer of ALL *Failed/*Alert events
                           ← schedules, monitors, retries all agents above
-
-[Query Agent]             ← Phase 2 (9th agent) — standalone workforce Q&A
-                          ← Gap Analysis, Candidate-Role Match, Stakeholder Reports
 ```
 
 ---
@@ -157,16 +138,16 @@ Sources (JSearch API via httpx / Web scraping via Crawl4AI)
 
 | Layer | Technology | Decision |
 |-------|-----------|---------|
-| Agent runtime | Python 3.11 (pinned) | — |
+| Agent runtime | Python 3.11+ | — |
 | Multi-agent framework | LangGraph StateGraph | SA #13 |
 | LLM adapter | LangChain + Azure OpenAI (provider-agnostic) | SA #11 |
 | LLM provider default | Azure OpenAI; switchable via `LLM_PROVIDER` env var | SA #11 |
-| Agent tracing | Langfuse — open-source, self-hosted or cloud (ADR-006) | SA #17 |
+| Agent tracing | LangSmith — native LangGraph integration | SA #17 |
 | Scheduling | APScheduler — inside Orchestration Agent | IC #3 |
 | Ingestion: API source | httpx — JSearch API calls | SA #12 |
 | Ingestion: web scraping | Crawl4AI — local, pip-installable | SA #12 |
-| DB access (all) | SQLAlchemy + psycopg2 → PostgreSQL (single authority) | IC #19 |
-| DB access (Next.js app) | Prisma — being phased out, API currently broken | IC #19 |
+| DB access (agents) | SQLAlchemy + psycopg2 → PostgreSQL | IC #19 |
+| DB access (Next.js app) | Prisma — do not touch from Python | IC #19 |
 | Message bus (Phase 1) | In-process Python pub/sub | SA #14 |
 | Message bus (Phase 2) | External bus (Kafka / RabbitMQ / Redis Streams) | SA #14 |
 | Dashboards | Streamlit — read-only SQLAlchemy connection | — |
@@ -217,19 +198,18 @@ BATCH_SIZE=100
 ### Event envelope (every inter-agent event must use this shape)
 
 ```python
-# agents/common/event_envelope.py
-from pydantic import BaseModel, Field
+# agents/common/events/base.py
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Any
-import uuid
 
-class EventEnvelope(BaseModel):
-    event_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+@dataclass
+class AgentEvent:
+    event_id: str          # uuid4
     correlation_id: str    # propagated unchanged from IngestBatch through all downstream events
-    agent_id: str          # e.g. "ingestion-agent"
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    schema_version: str = "1.0"  # increment on breaking payload changes
-    payload: dict[str, Any]
+    agent_id: str          # e.g. "ingestion_agent"
+    timestamp: datetime
+    schema_version: str    # "1.0" — increment on breaking payload changes
+    payload: dict
 ```
 
 ### LLM adapter usage
@@ -315,7 +295,7 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 | Analytics | `agents/analytics/agent.py` | 1 | `AnalyticsRefreshed` | `RecordEnriched` |
 | Visualization | `agents/visualization/agent.py` | 1 | `RenderComplete` | `AnalyticsRefreshed` |
 | Orchestration | `agents/orchestration/agent.py` | 1 | trigger/retry signals | ALL events incl. `*Failed`/`*Alert` |
-| Query Agent | `agents/query/agent.py` | 2 | `QueryResponse` | `AnalyticsRefreshed` |
+| Demand Analysis | `agents/demand_analysis/agent.py` | 2 | `DemandSignalsUpdated` | `RecordEnriched` |
 
 ---
 
@@ -323,7 +303,6 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 
 ### Ingestion Agent
 - Sources: JSearch via `httpx`; web scraping via Crawl4AI
-- **JSearch queries must be broad across sites** (no `site` filter parameter). Narrowing is done via `RegionConfig` (location, keywords, role_categories) — not by restricting to specific job boards. Site-filtered queries return incomplete data (missing `job_description`).
 - Fingerprint: `sha256(source + external_id + title + company + date_posted)`
 - **JSearch wins over scraped** when the same job appears in both sources (IC #9)
 - Dedup before staging — duplicates discarded silently, counter incremented
@@ -334,16 +313,13 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 - Standardizes: dates (ISO 8601), salaries (min/max/currency/period), locations, employment types
 - Quarantines schema violations — never passes bad records downstream
 
-### Skills Extraction Agent *(Work Intelligence Agent)*
-- **No fixture fallback in testing or production.** When normalized text is empty or extraction fails, the agent must fail explicitly (`extraction_status = "failed"`, `extraction_failed = True`) with a clear `error_reason` — never silently return fixture/placeholder data. Fixture data masks real pipeline issues (e.g., empty descriptions from JSearch, misconfigured normalization mappers). Fixture fallback is only acceptable in walking-skeleton demos (Week 2).
+### Skills Extraction Agent
 - Taxonomy linking order (strict):
-  1. Exact match → GenAI Extension Layer (10 predefined GenAI skills; `is_genai_extension = True`, `esco_uri` maps to parent ESCO cluster)
-  2. Exact name match → ESCO digital skills cluster (maps to `skills` table)
-  3. Normalized name match → ESCO digital skills cluster (maps to `skills` table)
-  4. Embedding cosine similarity ≥ 0.92 → ESCO digital skills cluster
-  5. O\*NET occupation code match
-  6. Emit as `raw_skill` (null taxonomy_id) — Enrichment resolves in Phase 2
-- **ESCO embeddings in PostgreSQL:** Step 4 cosine similarity requires pre-computed embeddings for all skills in `dbo.skills`. These are stored in the `embedding vector(1536)` column (pgvector). **Admin seeds embeddings once** via `python agents/scripts/seed_esco_embeddings.py` against Azure PostgreSQL. Devs pull embeddings from the Azure DB to their local PostgreSQL. **Never call Azure OpenAI embedding API for the full corpus** — only the admin seeding script does this. The taxonomy resolver loads embeddings from PostgreSQL on first use and caches in memory for the process lifetime.
+  1. Exact name match → `skills` table
+  2. Normalized name match → `skills` table
+  3. Embedding cosine similarity ≥ 0.92 → `skills` table
+  4. O\*NET occupation code match
+  5. Emit as `raw_skill` (null taxonomy_id) — Enrichment resolves in Phase 2
 - Log every LLM call to `llm_audit_log`
 
 ### Enrichment Agent (Phase 1 lite)
@@ -385,21 +361,6 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 
 - Audit log: 100% completeness required — every trigger, retry, and alert creation must be recorded
 
-### Query Agent (Phase 2 — 9th agent)
-- Standalone workforce intelligence Q&A agent with persona-based response routing
-- Three new output modes beyond Phase 1 Q&A: Gap Analysis, Candidate-Role Match, Stakeholder Reports
-- `QueryPersona` enum: `workforce_board_director | employer_partner | cfa_internal | cohort_student`
-- `QueryRequest` model: `query`, `persona`, `intent_hint` (optional), `max_results`
-- Requires upstream data not in Phase 1: candidate/cohort profiles (new ingestion source)
-- Forward-compatibility: `persona` field added to query API schema in Week 6 (Phase 1 ignores it; Phase 2 uses it for routing)
-- Phase 1 Q&A (inside Analytics Agent) handles: intent classification, evidence citation, Comparative Analysis, Trend Narrative
-- Phase 2 Query Agent handles: Gap Analysis, Candidate-Role Match, Stakeholder Reports, persona routing, formatted document generation (PDF/DOCX)
-
-### Analytics Agent — Phase 2 Expansion
-- Absorbs Demand Analysis Agent capabilities: time-series indexing, velocity windows (7d/30d/90d), 30-day demand forecasts, anomaly detection with significance testing, TrajectoryRecord projections
-- Emits `DemandSignalsUpdated` and `DemandAnomaly` events (previously attributed to standalone Demand Analysis Agent)
-- Q&A migrates out to standalone Query Agent in Phase 2; Analytics retains aggregation + disruption + demand analysis
-
 ---
 
 ## Evaluation Targets (non-negotiable — check against these)
@@ -428,12 +389,6 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 | Orchestration | Mean time to recover (auto) | < 5 min |
 | Orchestration | Audit log completeness | 100% |
 | System | Batch throughput | 1,000 jobs < 5 minutes |
-| Query Agent (Phase 2) | Intent classification accuracy | ≥ 90% |
-| Query Agent (Phase 2) | Response relevance (human eval) | ≥ 85% |
-| Query Agent (Phase 2) | Persona routing accuracy | ≥ 95% |
-| Analytics (Phase 2) | Forecast MAPE (30-day) | < 15% |
-| Analytics (Phase 2) | Trend accuracy | ≥ 85% |
-| Analytics (Phase 2) | Anomaly precision | ≥ 80% |
 
 ---
 
@@ -454,16 +409,15 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 | 1 | Environment + first scrape + basic Streamlit | Working Python env, raw JSON scrape, Streamlit prototype |
 | 2 | LLM adapter + walking skeleton | `llm_adapter.py`, 8 agent stubs, pipeline runner, journey dashboard |
 | 3 | Ingestion Agent + Normalization Agent | `IngestBatch`/`NormalizationComplete` events, staging tables, APScheduler |
-| 4 | Work Intelligence Agent Part 1 | Skills + Tools + Taxonomy + Cost Modeling, `SkillsExtracted` event, eval dataset (30–50 labeled) |
-| 5 | Work Intelligence Agent Part 2 + Enrichment-lite | Tasks + Responsibilities + Context extraction, prompt iteration log |
-| 6 | Enrichment Agent (Full Phase 1) + Visualization Foundations | Temporal/borderplex classification, fuzzy dedup, quality/spam scoring, Streamlit dashboards |
+| 4 | Skills Extraction Agent + eval harness + Enrichment-lite | `SkillsExtracted` event, eval dataset (30–50 labeled), prompt iteration log |
+| 5 | Visualization Agent | Production Streamlit dashboards, PDF/CSV/JSON export, live PostgreSQL connection |
+| 6 | Orchestration Agent | Scheduling, alerting tiers, retry policies, audit log, Operations & Alerts page |
 | 7 | Analytics Agent — aggregates + weekly insights | Aggregate tables, LLM summaries, template fallback, `AnalyticsRefreshed` event |
 | 8 | Analytics Agent — Ask the Data | Text-to-SQL, SQL guardrails + unit tests, “Ask the Data” Streamlit page |
-| 9 | Orchestration Agent + Visualization Completion | Scheduling, alerting tiers, retry policies, audit log, Operations & Alerts page, PDF/CSV/JSON export |
-| 10 | Pipeline hardening + event contract enforcement | Near-dedup in Ingestion, enrichment tuning, perf benchmark, 1k-job load test |
-| 11 | Testing + security + documentation | Integration test suite, security checklist, Dockerfile, ARCHITECTURE.md, RUNBOOK.md |
+| 9 | Pipeline hardening | Near-dedup in Ingestion, event contract enforcement, enrichment tuning, perf benchmark |
+| 10 | Testing + security review + load testing | Integration test suite, security checklist, 1k-job load test, Dockerfile |
+| 11 | Documentation | ARCHITECTURE.md, EVENT_CATALOG.md, RUNBOOK.md, CONFIGURATION.md, DEMO_SCRIPT.md |
 | 12 | Capstone demo + release | Live demo to stakeholders, `v0.1.0-capstone` tag, handoff package, retrospective |
-| Phase 2 | Query Agent (9th agent) | Standalone Q&A: Gap Analysis, Candidate-Role Match, Stakeholder Reports, persona routing |
 
 ---
 
@@ -485,7 +439,7 @@ See `docs/planning/ARCHITECTURAL_DECISIONS.md` for full classification details a
 | 14 | Message bus | SA | **In-process Python events** (Phase 1); external bus upgrade path for Phase 2 |
 | 15 | Skill taxonomy | IC | **Internal watechcoalition primary** (`skills` table); O\*NET fallback |
 | 16 | Orchestration engine | SA | **LangGraph StateGraph** (consistent with #13) |
-| 17 | Agent tracing | SA | **Langfuse** — open-source, self-hosted or cloud (ADR-006) |
+| 17 | Agent tracing | SA | **LangSmith** — native LangGraph integration |
 | 18 | Analytics query interface | SA | **REST** — `POST /analytics/query` |
 | 19 | Database engine | IC | **PostgreSQL** — single instance, pgvector-enabled; see `ARCHITECTURAL_DECISIONS.md` #19 |
 | 20 | Enrichment phase split | IC | **Lite (Phase 1) + Full (Phase 2)** |
@@ -502,38 +456,25 @@ See `docs/planning/ARCHITECTURAL_DECISIONS.md` for full classification details a
 
 ## How to Run
 
-All commands run from the **repo root** with the venv activated.
-
 ```bash
-# One-time setup: create venv and install deps
-py -3.11 -m venv agents/.venv               # Windows
-agents\.venv\Scripts\Activate.ps1            # Windows PowerShell
-pip install -r agents/requirements.txt
+# Install Python deps
+cd agents && pip install -r requirements.txt
 
-# --- Flywheel pipeline (production) — decoupled ingestion + processing ---
-# Loop 1: Bulk ingest from JSearch (budget-aware, key rotation)
-python agents/scripts/batch_ingest.py              # run all queries from config
-python agents/scripts/batch_ingest.py --dry-run    # show plan without API calls
-
-# Loop 2: Paced processing (normalize → extract → enrich)
-python agents/scripts/run_processing_loop.py --batch-size 50 --delay 2
-python agents/scripts/run_processing_loop.py --dry-run        # show pending counts
-
-# Seed local DB with enriched data (dev setup)
-python scripts/pg-seed-data/seed_agent_data.py
-
-# Run the Streamlit dashboard
+# Run Streamlit dashboard
 streamlit run agents/dashboard/streamlit_app.py
 
-# Run agent tests
-python -m pytest agents/tests/ -v
+# Run full pipeline (via Orchestration Agent scheduler)
+python -m agents.orchestration.scheduler
 
 # Run a single agent manually
-# python -m agents.ingestion.agent --source jsearch --limit 50
-# python -m agents.ingestion.agent --source crawl4ai --limit 50
+python -m agents.ingestion.agent --source jsearch --limit 50
+python -m agents.ingestion.agent --source crawl4ai --limit 50
 
-# Demo run: Walking skeleton single-pass with fixture data (Week 2 demo only)
-# python agents/pipeline_runner.py
+# Run tests
+cd agents && pytest tests/
+
+# Run integration tests only
+cd agents && pytest tests/test_pipeline_integration.py
 ```
 
 ---
@@ -545,7 +486,7 @@ python -m pytest agents/tests/ -v
 - Do NOT use Prisma from Python — SQLAlchemy only
 - Do NOT write to `job_postings` without a resolved `company_id`
 - Do NOT store credentials in code or logs
-- Do NOT implement Phase 2 items (circuit-breaking, saga, admin API, demand analysis (now Analytics Phase 2), Query Agent, full enrichment, external bus)
+- Do NOT implement Phase 2 items (circuit-breaking, saga, admin API, demand analysis, full enrichment, external bus)
 - Do NOT skip writing tests alongside implementation
 - Do NOT modify the Next.js app or `prisma/schema.prisma` unless explicitly instructed
 - Do NOT serve a blank dashboard page — always serve stale data with a staleness banner
