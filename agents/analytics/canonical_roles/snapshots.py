@@ -10,12 +10,10 @@ import structlog
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from agents.analytics.aggregators.salary_percentiles import compute_salary_percentiles
 from agents.common.data_store.models import RoleSnapshotWeekly
-from agents.common.message_bus.comparison import percentile
 
 log = structlog.get_logger()
-
-# TODO issue #188 — swap to Pair B ``compute_salary_percentiles(session, group_col, ...)`` when available.
 
 _WEEK_ROWS_SQL = text(
     """
@@ -76,6 +74,12 @@ def refresh_role_snapshot_weekly(session: Session, *, week_start: date) -> int:
     )
 
     rows = session.execute(_WEEK_ROWS_SQL, {"week_start": week_start}).mappings().all()
+    percentile_by_role = compute_salary_percentiles(
+        session,
+        "canonical_role_id",
+        having_threshold=1,
+        week_start=week_start,
+    )
     by_role: dict[str, dict[str, Any]] = {}
     salaries_by_role: dict[str, list[float]] = defaultdict(list)
     posting_counts: dict[str, int] = defaultdict(int)
@@ -103,10 +107,11 @@ def refresh_role_snapshot_weekly(session: Session, *, week_start: date) -> int:
     inserted = 0
     for rid, meta in by_role.items():
         sal = salaries_by_role.get(rid, [])
-        p25 = percentile(sal, 25) if sal else None
-        p50 = percentile(sal, 50) if sal else None
-        p75 = percentile(sal, 75) if sal else None
-        p95 = percentile(sal, 95) if sal else None
+        percentile_row = percentile_by_role.get(rid, {})
+        p25 = percentile_row.get("p25")
+        p50 = percentile_row.get("p50")
+        p75 = percentile_row.get("p75")
+        p95 = percentile_row.get("p95")
         avg_s = sum(sal) / len(sal) if sal else None
         median_s = p50
 
