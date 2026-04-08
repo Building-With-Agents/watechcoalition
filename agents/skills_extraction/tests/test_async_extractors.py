@@ -234,6 +234,9 @@ def test_extract_skills_no_taxonomy_async_retries_on_429_with_async_backoff(
     assert skills[0].skill_name == "Python"
     assert meta["success"] is True
     assert meta["extraction_failed"] is False
+    assert meta["tokens_used"] == 100
+    assert meta["cost_usd"] == 0.01
+    assert meta["latency_ms"] == 550
     sleep_mock.assert_any_await(10.5)
 
 
@@ -322,6 +325,9 @@ def test_extract_tasks_async_retries_on_429_with_backoff(dummy_job: JobRecord) -
     assert tasks[0].task_description == "Design APIs"
     assert meta["success"] is True
     assert meta["extraction_failed"] is False
+    assert meta["tokens_used"] == 80
+    assert meta["cost_usd"] == 0.005
+    assert meta["latency_ms"] == 440
     sleep_mock.assert_any_await(8.5)
 
 
@@ -413,6 +419,9 @@ def test_extract_responsibilities_async_retries_on_429_with_backoff(dummy_job: J
     assert rows[0].responsibility_description == "Own backend delivery"
     assert meta["success"] is True
     assert meta["extraction_failed"] is False
+    assert meta["tokens_used"] == 90
+    assert meta["cost_usd"] == 0.008
+    assert meta["latency_ms"] == 500
     sleep_mock.assert_any_await(12.5)
 
 

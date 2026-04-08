@@ -106,19 +106,40 @@ def test_intra_job_parallel_faster_than_serial() -> None:
     mock_store = MagicMock()
 
     agent = SkillsExtractionAgent(work_item_loader=mock_loader, extraction_store=mock_store)
+    in_flight = 0
+    max_in_flight = 0
+
+    async def _tracked(root):
+        nonlocal in_flight, max_in_flight
+        in_flight += 1
+        max_in_flight = max(max_in_flight, in_flight)
+        try:
+            await asyncio.sleep(_SIMULATED_LLM_LATENCY_S)
+            return root, _dim_meta()
+        finally:
+            in_flight -= 1
+
+    async def _tracked_tasks(*_args, **_kwargs):
+        return await _tracked(_TasksLLMRoot(tasks=[]))
+
+    async def _tracked_resp(*_args, **_kwargs):
+        return await _tracked(_ResponsibilitiesLLMRoot(responsibilities=[]))
+
+    async def _tracked_skills(*_args, **_kwargs):
+        return await _tracked(_SkillsLLMRoot(skills=[]))
 
     with (
         patch(
             "agents.skills_extraction.extractors.tasks.ainvoke_structured_extraction_llm",
-            new=AsyncMock(side_effect=_slow_tasks_invoke),
+            new=AsyncMock(side_effect=_tracked_tasks),
         ),
         patch(
             "agents.skills_extraction.extractors.responsibilities.ainvoke_structured_extraction_llm",
-            new=AsyncMock(side_effect=_slow_resp_invoke),
+            new=AsyncMock(side_effect=_tracked_resp),
         ),
         patch(
             "agents.skills_extraction.extractors.skills.ainvoke_structured_extraction_llm",
-            new=AsyncMock(side_effect=_slow_skills_invoke),
+            new=AsyncMock(side_effect=_tracked_skills),
         ),
         patch(
             "agents.skills_extraction.agent.resolve_taxonomy_batch",
@@ -130,10 +151,13 @@ def test_intra_job_parallel_faster_than_serial() -> None:
         elapsed = time.perf_counter() - start
 
     serial_lower_bound = 3 * _SIMULATED_LLM_LATENCY_S
-    # Parallel should finish in roughly 1× latency + overhead; require it finishes
-    # in less than 2.5× serial lower bound (generous threshold for CI jitter).
-    assert elapsed < serial_lower_bound * 2.5, (
-        f"Intra-job parallel took {elapsed:.3f}s — expected < {serial_lower_bound * 2.5:.3f}s "
+    parallel_upper_bound = _SIMULATED_LLM_LATENCY_S * 2.2
+    assert max_in_flight == 3, (
+        f"Expected all three intra-job LLM calls to overlap, but observed only "
+        f"{max_in_flight} concurrent call(s)."
+    )
+    assert elapsed < parallel_upper_bound, (
+        f"Intra-job parallel took {elapsed:.3f}s — expected < {parallel_upper_bound:.3f}s "
         f"(serial lower bound is {serial_lower_bound:.3f}s). "
         "Tasks/responsibilities/skills are not running concurrently."
     )
@@ -268,10 +292,8 @@ def test_failed_dimension_does_not_block_other_dimensions() -> None:
 
     assert isinstance(result_event, EventEnvelope)
     payload = result_event.payload
-    # Skills should have been extracted despite the tasks failure (degraded, not failed)
-    results = payload.get("results", [])
-    if results:
-        status = results[0].get("extraction_status")
-        assert status in ("success", "degraded"), (
-            f"Expected success or degraded extraction status, got {status!r}"
-        )
+    assert payload["failed_count"] == 0
+    assert payload["skills_count"] == 1
+    assert payload["extraction_status"] == "degraded"
+    assert len(payload["records"]) == 1
+    assert payload["records"][0]["extraction_status"] == "degraded"

@@ -247,7 +247,6 @@ async def extract_tasks_async(
                 parsed, meta = await _do_invoke()
                 _merge_retry_metadata(metadata, meta)
                 if meta.get("success") and parsed is not None:
-                    metadata.update(meta)
                     break
             except Exception as e:
                 metadata["error_reason"] = str(e)

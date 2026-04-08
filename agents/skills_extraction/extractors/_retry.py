@@ -16,6 +16,15 @@ from typing import Any
 # Jitter added at runtime to prevent thundering herd.
 RATE_LIMIT_BACKOFF_SECS: tuple[int, ...] = (5, 15, 30, 60)
 RATE_LIMIT_MAX_CYCLES: int = 4
+_LATEST_RETRY_META_KEYS: tuple[str, ...] = (
+    "success",
+    "extraction_failed",
+    "error_reason",
+    "provider",
+    "model",
+    "is_rate_limit",
+    "retry_after_seconds",
+)
 
 
 def is_rate_limited(meta: dict[str, Any]) -> bool:
@@ -28,9 +37,10 @@ def is_rate_limited(meta: dict[str, Any]) -> bool:
 
 
 def merge_retry_metadata(metadata: dict[str, Any], meta: dict[str, Any]) -> None:
-    """Accumulate token/cost/latency across retry attempts, keeping latest labels."""
+    """Accumulate retry totals while keeping the latest status and label fields."""
     metadata["tokens_used"] = metadata.get("tokens_used", 0) + meta.get("tokens_used", 0)
     metadata["cost_usd"] = metadata.get("cost_usd", 0.0) + meta.get("cost_usd", 0.0)
     metadata["latency_ms"] = metadata.get("latency_ms", 0) + meta.get("latency_ms", 0)
-    metadata["provider"] = meta.get("provider", metadata.get("provider", ""))
-    metadata["model"] = meta.get("model", metadata.get("model", ""))
+    for key in _LATEST_RETRY_META_KEYS:
+        if key in meta:
+            metadata[key] = meta[key]
