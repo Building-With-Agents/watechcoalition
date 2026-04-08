@@ -4,6 +4,63 @@ All notable changes to the agents pipeline are documented here.
 
 ---
 
+## Skills Extraction Phase C (Codex)
+
+**Inter-job async batch execution with semaphore-bounded concurrency.**
+
+### Changes
+
+- **Agent execution**
+  - `agents/skills_extraction/agent.py`: adds batch-level inter-job concurrency controlled by
+    `SKILLS_EXTRACTION_CONCURRENCY` (default `5`) when `SKILLS_EXTRACTION_PARALLEL=1`.
+  - Refactors `process()` into explicit serial and parallel batch helpers so the public entrypoint
+    remains synchronous while the internal batch path uses `asyncio.run(...)`.
+  - Running-loop callers now log `skills_extraction_parallel_fallback_serial` and use the serial
+    fallback path rather than attempting nested event-loop execution.
+  - Deprecated serial throttles (`SKILLS_EXTRACTION_CHUNK_SIZE`,
+    `SKILLS_EXTRACTION_CHUNK_COOLDOWN`, `SKILLS_EXTRACTION_DELAY`) are preserved only for serial
+    mode and ignored in parallel mode with a warning.
+  - Per-job completion and batch summary logs now include wall-clock timings and concurrency
+    utilization, and `SQLAlchemyExtractionStore.save()` serializes concurrent callers with a
+    process-local lock.
+- **Processing loop**
+  - `agents/scripts/run_processing_loop.py`: logs `extraction_duration_ms` and
+    `iteration_wall_clock_ms` so serial vs parallel extraction time can be compared in the loop.
+- **Tests**
+  - `agents/tests/test_skills_extraction_agent.py`: adds coverage for semaphore limits, job-level
+    failure isolation, running-loop serial fallback, serial throttle preservation, serial/parallel
+    payload equivalence, and empty-text short-circuit behavior in parallel mode.
+- **Docs/config**
+  - `CLAUDE.md`, `.env.example`, and `TODO.md` updated for the new concurrency flag, deprecated
+    serial throttles, and Phase C status.
+
+## Skills Extraction Phase B (Codex)
+
+**Intra-job async Pass 2 execution with serial fallback preserved.**
+
+### Changes
+
+- **Agent execution**
+  - `agents/skills_extraction/agent.py`: adds `SKILLS_EXTRACTION_PARALLEL`-controlled
+    intra-job concurrency for Pass 2 extraction.
+  - New `_extract_work_item_no_taxonomy_async(...)` runs tasks, responsibilities,
+    and no-taxonomy skills extraction with `asyncio.gather(..., return_exceptions=True)`.
+  - The existing synchronous `_extract_work_item_no_taxonomy(...)` remains as the
+    fallback path when `SKILLS_EXTRACTION_PARALLEL=0`, and the outer batch loop is
+    still serial pending Phase C inter-job concurrency.
+  - Combined extraction latency now reflects Pass 2 wall-clock time in the async path
+    instead of summing dimension latencies.
+- **Tests**
+  - `agents/tests/test_skills_extraction_agent.py`: covers degraded async-dimension
+    failure handling, wall-clock latency aggregation, and the explicit serial fallback.
+- **Docs/config**
+  - `TODO.md`, `CLAUDE.md`, and `.env.example` updated to reflect the current Phase A/B state.
+
+### Current boundary
+
+- Phase B is complete: one job can run its three Pass 2 LLM dimensions concurrently.
+- Phase C is still pending: the agent does not yet process multiple jobs concurrently.
+
 ## EXP-004 Commit 4 (Bryan)
 
 **Kafka event bus candidate + transport parity tests.**
