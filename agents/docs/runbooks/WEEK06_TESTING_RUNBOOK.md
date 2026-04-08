@@ -460,7 +460,33 @@ python agents/scripts/db_check.py counts
 
 ### Known issue: empty descriptions (#165)
 
-Approximately 46% of JSearch results arrive with empty `job_description` fields. These records are staged but will be skipped by Skills Extraction (logged as `skills_extraction_no_text`). This is a JSearch API limitation, not a mapping bug. See [issue #165](https://github.com/Building-With-Agents/watechcoalition/issues/165) for backfill solutions.
+Approximately 46% of JSearch results arrive with empty `job_description` fields. This is a JSearch API limitation, not a mapping bug. See [issue #165](https://github.com/Building-With-Agents/watechcoalition/issues/165) for backfill solutions.
+
+**Staging status (S3):** New ingests set `dbo.raw_ingested_jobs.processing_status` to `awaiting_description` when the mapped description is empty or whitespace-only. Rows with text are `pending`. The Normalization Agent only reads `pending`, so metadata-only rows do not enter the normalize queue until a future backfill sets them to `pending`. To restore legacy behavior (all rows `pending`), set `ALLOW_EMPTY_DESCRIPTION_PENDING=1` before ingestion.
+
+**Operator CLI — description coverage sample:**
+
+```bash
+python agents/scripts/ingest_description_sample.py --limit 50
+python agents/scripts/ingest_description_sample.py --limit 50 --query "data engineer" --location "Texas"
+```
+
+Prints `Description coverage: X/Y (Z%)` plus counts of `pending` vs `awaiting_description` for that run’s `ingestion_run_id`. The script resyncs PostgreSQL SERIAL/IDENTITY sequences before ingest (fixes `duplicate key ... job_ingestion_runs_pkey` after restores). To skip that step: `--no-sync-sequences`. To run sync only: `python agents/scripts/sync_agent_sequences.py` (or `run_migrations`, which also syncs).
+
+**SQL — description fill rate by ingestion run:**
+
+```sql
+SELECT ingestion_run_id,
+       COUNT(*) AS total,
+       COUNT(*) FILTER (WHERE description IS NOT NULL AND btrim(description) <> '') AS with_description,
+       COUNT(*) FILTER (WHERE processing_status = 'awaiting_description') AS awaiting_description
+FROM dbo.raw_ingested_jobs
+GROUP BY ingestion_run_id
+ORDER BY MAX(created_at) DESC
+LIMIT 20;
+```
+
+**Skills Extraction:** Jobs with no description/requirements/responsibilities skip Pass 1 extractors early; structured log event `skills_extraction_no_text` is emitted at **info** (not warning).
 
 ---
 
@@ -994,7 +1020,7 @@ SKILLS_EXTRACTION_DELAY=1.0
 
 ### Empty descriptions from JSearch
 
-Many `skills_extraction_no_text` warnings in the processing loop output indicate JSearch returned metadata-only listings without descriptions. This affects approximately 46% of records. See [issue #165](https://github.com/Building-With-Agents/watechcoalition/issues/165). These records are skipped by Skills Extraction — this is expected behavior, not an error.
+`skills_extraction_no_text` at **info** level indicates a normalized row had no description/requirements/responsibilities text. New JSearch ingests also stage empty-description rows as `awaiting_description` (skipped by Normalization until backfill). See [issue #165](https://github.com/Building-With-Agents/watechcoalition/issues/165).
 
 ### Processing loop exits with "no_progress"
 

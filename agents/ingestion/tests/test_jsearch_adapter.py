@@ -6,8 +6,14 @@ import asyncio
 import os
 from unittest.mock import patch
 
+import pytest
+
 from agents.common.types.region_config import RegionConfig
-from agents.ingestion.sources.jsearch_adapter import JSearchAdapter, _job_to_raw_record
+from agents.ingestion.sources.jsearch_adapter import (
+    JSearchAdapter,
+    _job_to_raw_record,
+    jsearch_num_pages_from_env,
+)
 
 _TEST_REGION = RegionConfig(
     region_id="test-region",
@@ -59,13 +65,35 @@ class TestJSearchFieldMapping:
         assert result.company == "Unknown"
 
 
+class TestJSearchNumPages:
+    """``JSEARCH_MAX_PAGES`` + ``BATCH_SIZE`` drive pagination volume."""
+
+    def test_default_matches_legacy_cap(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("JSEARCH_MAX_PAGES", raising=False)
+        monkeypatch.setenv("BATCH_SIZE", "300")
+        assert jsearch_num_pages_from_env() == 10
+
+    def test_max_pages_allows_thirty_with_batch(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("BATCH_SIZE", "300")
+        monkeypatch.setenv("JSEARCH_MAX_PAGES", "30")
+        assert jsearch_num_pages_from_env() == 30
+
+    def test_ceiling_fifty(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("BATCH_SIZE", "1000")
+        monkeypatch.setenv("JSEARCH_MAX_PAGES", "200")
+        assert jsearch_num_pages_from_env() == 50
+
+    def test_batch_smaller_than_max(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("BATCH_SIZE", "50")
+        monkeypatch.setenv("JSEARCH_MAX_PAGES", "30")
+        assert jsearch_num_pages_from_env() == 5
+
+
 class TestJSearchAdapter:
     """Test adapter behavior."""
 
     def test_no_api_key_raises(self) -> None:
         """Without JSEARCH_API_KEY, fetch raises ValueError."""
-        import pytest
-
         with patch.dict(os.environ, {"JSEARCH_API_KEY": ""}, clear=False):
             adapter = JSearchAdapter()
             with pytest.raises(ValueError):

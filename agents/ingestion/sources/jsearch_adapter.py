@@ -1,6 +1,13 @@
 """JSearch source adapter — fetches job postings via RapidAPI JSearch (httpx).
 
-API key from environment: JSEARCH_API_KEY. No hardcoded credentials.
+Environment:
+
+- ``JSEARCH_API_KEY`` — required for fetch.
+- ``BATCH_SIZE`` — target batch size; used to derive how many pages to request
+  (roughly ``ceil(BATCH_SIZE / 10)``, ~10 jobs per page).
+- ``JSEARCH_MAX_PAGES`` — hard cap on search pages per fetch (default ``10``,
+  max ``50``). Raise with ``BATCH_SIZE`` when you need more than ~100 listings
+  in one adapter call (mind RapidAPI rate limits).
 """
 
 from __future__ import annotations
@@ -17,6 +24,27 @@ from agents.ingestion.sources.base_adapter import SourceAdapter
 
 JSEARCH_BASE_URL = "https://jsearch.p.rapidapi.com/search"
 JSEARCH_HOST = "jsearch.p.rapidapi.com"
+
+# Upper bound for JSEARCH_MAX_PAGES to avoid accidental huge request loops.
+_JSEARCH_MAX_PAGES_CEILING = 50
+
+
+def jsearch_num_pages_from_env() -> int:
+    """How many ``/search`` pages to request for one :meth:`JSearchAdapter.fetch` call.
+
+    Combines ``BATCH_SIZE`` (desired volume) with ``JSEARCH_MAX_PAGES`` (safety cap).
+    """
+    try:
+        batch_size = int(os.getenv("BATCH_SIZE", "100"))
+    except (TypeError, ValueError):
+        batch_size = 100
+    computed = max(1, (batch_size + 9) // 10)
+    try:
+        max_pages = int(os.getenv("JSEARCH_MAX_PAGES", "10"))
+    except (TypeError, ValueError):
+        max_pages = 10
+    max_pages = max(1, min(max_pages, _JSEARCH_MAX_PAGES_CEILING))
+    return min(computed, max_pages)
 
 
 def _fingerprint(source: str, external_id: str, title: str, company: str, date_posted: str) -> str:
@@ -153,13 +181,7 @@ class JSearchAdapter(SourceAdapter):
             query_parts.extend(region.role_categories[:2])
         query = " ".join(query_parts).strip() or "jobs"
 
-        num_pages = 1
-        try:
-            batch_size = int(os.getenv("BATCH_SIZE", "100"))
-            # Roughly 10 jobs per page on JSearch; cap pages to avoid rate limits
-            num_pages = min(10, max(1, (batch_size + 9) // 10))
-        except (TypeError, ValueError):
-            num_pages = 1
+        num_pages = jsearch_num_pages_from_env()
 
         all_records: list[RawJobRecord] = []
         seen_hashes: set[str] = set()

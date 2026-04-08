@@ -56,8 +56,10 @@ _AGENT_ORDER = [
 ]
 _AGENT_ORDER_INDEX = {a: i for i, a in enumerate(_AGENT_ORDER)}
 
-# Values written by ingestion (pending) and normalization (normalized | quarantined) on dbo.raw_ingested_jobs.
-_RAW_STAGED_OK_STATUSES = frozenset({"pending", "normalized", "quarantined", "success"})
+# Values written by ingestion (pending | awaiting_description) and normalization (normalized | quarantined).
+_RAW_STAGED_OK_STATUSES = frozenset(
+    {"pending", "awaiting_description", "normalized", "quarantined", "success"}
+)
 
 
 def _raw_row_ingestion_succeeded(processing_status: object) -> bool:

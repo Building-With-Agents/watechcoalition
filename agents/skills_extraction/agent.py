@@ -363,7 +363,9 @@ class SkillsExtractionAgent(BaseAgent):
     Normalized text present: Pass 1 context + tools, then Pass 2 LLM dimensions;
     persists to dbo.extracted_intelligence when ``normalized_job_id`` is set;
     emits ``SkillsExtracted``.
-    No normalized text: falls back to Week 2 fixture by ``posting_id`` when available.
+    No normalized text: short-circuit before ``extract_tools`` / ``extract_context``;
+    logs ``skills_extraction_no_text`` at info. Week 2 fixture fallback applies when
+    ``posting_id`` is configured.
     """
 
     @property
@@ -518,9 +520,6 @@ class SkillsExtractionAgent(BaseAgent):
         serialized dimension payloads and per-dimension metadata for ``_build_extraction_result``.
         """
         job = item.job_record
-        tools = extract_tools(job)
-        context_signals, ctx_meta = extract_context(job)
-
         has_normalized_text = bool(
             (job.description or "").strip()
             or (job.requirements or "").strip()
@@ -530,37 +529,41 @@ class SkillsExtractionAgent(BaseAgent):
         if not has_normalized_text:
             import structlog as _sl
 
-            _sl.get_logger().warning(
+            _sl.get_logger().info(
                 "skills_extraction_no_text",
                 job_id=item.job_id,
                 title=item.title,
                 company=item.company,
                 reason="No description/requirements/responsibilities text — cannot extract skills",
             )
+            ctx_meta: dict[str, Any] = {}
             warn = _coerce_pass2_warnings(ctx_meta)
             meta: dict[str, Any] = {
                 "success": False,
                 "extraction_failed": True,
                 "extraction_status": "failed",
                 "error_reason": "no_normalized_text",
-                "tokens_used": int(ctx_meta.get("tokens_used") or 0),
-                "cost_usd": float(ctx_meta.get("cost_usd") or 0.0),
-                "latency_ms": int(ctx_meta.get("latency_ms") or 0),
+                "tokens_used": 0,
+                "cost_usd": 0.0,
+                "latency_ms": 0,
                 "extraction_warnings": list(warn)
                 + ["No normalized text available for extraction"],
                 "alert_skills_extraction": False,
-                "provider": ctx_meta.get("provider", "pattern-matching"),
-                "model": ctx_meta.get("model", "none"),
-                "context_signals": context_signals,
+                "provider": "pattern-matching",
+                "model": "none",
+                "context_signals": [],
                 "tasks": [],
                 "responsibilities": [],
                 "dimension_metas": {
-                    "pass1_context": ctx_meta.get("extraction_metadata", {}),
+                    "pass1_context": {},
                 },
                 "pass2_llm_calls": 0,
                 "pass2_llm_dimensions": [],
             }
-            return tools, [], meta, False
+            return [], [], meta, False
+
+        tools = extract_tools(job)
+        context_signals, ctx_meta = extract_context(job)
 
         tasks, tasks_meta = extract_tasks(job, pass1_context=context_signals)
         responsibilities, resp_meta = extract_responsibilities(
