@@ -4,6 +4,50 @@ All notable changes to the agents pipeline are documented here.
 
 ---
 
+## Skills Extraction — Acceptance Criteria Closeout (Codex)
+
+**Closes the remaining local correctness gaps for issue #166.**
+
+### Changes
+
+- **Retry metadata correctness**
+  - `agents/skills_extraction/extractors/_retry.py`: `merge_retry_metadata(...)` now keeps
+    the latest retry status fields while preserving accumulated `tokens_used`, `cost_usd`,
+    and `latency_ms`.
+  - `agents/skills_extraction/extractors/tasks.py`,
+    `agents/skills_extraction/extractors/responsibilities.py`, and
+    `agents/skills_extraction/extractors/skills.py`: remove the overwrite that previously
+    discarded accumulated retry totals after a successful backoff retry.
+
+- **Benchmark test fixes**
+  - `agents/skills_extraction/tests/test_parallel_throughput.py`: the intra-job benchmark
+    now asserts real overlap (`max_in_flight == 3`) and uses a threshold that fails a
+    serial regression.
+  - The partial-failure benchmark now checks the actual payload contract
+    (`records` + top-level `extraction_status`) and asserts degraded-not-failed behavior.
+
+- **Acceptance coverage**
+  - `agents/common/tests/test_llm_adapter.py`: adds a concurrent audit-write test proving
+    each `log_extraction_event()` call gets a distinct short-lived session and closes it.
+  - `agents/tests/test_skills_extraction_agent.py`: strengthens serial ↔ parallel
+    equivalence by comparing saved extraction output dict-for-dict, not just payload shape.
+  - `agents/tests/test_skills_extractor.py` and
+    `agents/skills_extraction/tests/test_async_extractors.py`: assert retry totals are
+    accumulated, not overwritten, after a `429 -> success` recovery.
+
+- **Benchmark estimate**
+  - `TODO.md`: documents the 568-job estimate at concurrency `5`.
+    Using the expected 10-15 s parallel per-job wall clock, the batch projects to
+    `19-29 minutes`; with a conservative 2× buffer for taxonomy/persistence/logging
+    overhead, the estimate is `38-57 minutes`, still under the 1-hour target.
+
+### Status
+
+- All acceptance-criteria items in `TODO.md` are now checked off locally.
+- Remaining unchecked TODO items are observability follow-ups, not issue blockers.
+
+---
+
 ## Skills Extraction — Gap Close: Retry Parity + Async Entrypoint (Cursor)
 
 **Closes the three remaining review findings from the Phase C PR review.**

@@ -8,7 +8,10 @@ Run with:
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 import hashlib
+import threading
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -128,3 +131,56 @@ def test_log_extraction_event_token_count_equals_sum(input_t: int, output_t: int
 
     _, kwargs = MockLLMAuditLog.call_args
     assert kwargs["token_count"] == input_t + output_t
+
+
+def test_log_extraction_event_uses_fresh_session_per_concurrent_call() -> None:
+    """Concurrent audit writes should not share or leak SQLAlchemy sessions."""
+    created_sessions: list[MagicMock] = []
+    exited_sessions: list[MagicMock] = []
+    lock = threading.Lock()
+
+    def _session_scope_factory():
+        session = MagicMock()
+        with lock:
+            created_sessions.append(session)
+
+        @contextmanager
+        def _scope():
+            try:
+                yield session
+            finally:
+                session.close()
+                with lock:
+                    exited_sessions.append(session)
+
+        return _scope()
+
+    def _write_one(i: int) -> None:
+        log_extraction_event(
+            agent_name=f"agent-{i}",
+            prompt=f"prompt-{i}",
+            model="gpt-4o-mini",
+            provider="azure_openai",
+            latency_ms=25,
+            input_tokens=10,
+            output_tokens=5,
+            cost_usd=0.001,
+            success=True,
+        )
+
+    with (
+        patch("agents.common.llm_adapter.session_scope", side_effect=_session_scope_factory),
+        patch("agents.common.llm_adapter.LLMAuditLog", side_effect=lambda **kwargs: kwargs),
+    ):
+        with ThreadPoolExecutor(max_workers=6) as executor:
+            list(executor.map(_write_one, range(12)))
+
+    assert len(created_sessions) == 12
+    assert len({id(session) for session in created_sessions}) == 12
+    assert len(exited_sessions) == 12
+    assert {id(session) for session in exited_sessions} == {
+        id(session) for session in created_sessions
+    }
+    for session in created_sessions:
+        session.add.assert_called_once()
+        session.close.assert_called_once()

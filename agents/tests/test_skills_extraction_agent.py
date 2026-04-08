@@ -11,9 +11,9 @@ from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from sqlalchemy import delete
+from sqlalchemy import delete, inspect
 
-from agents.common.data_store.database import check_db_connection, session_scope
+from agents.common.data_store.database import check_db_connection, get_engine, session_scope
 from agents.common.data_store.models import ExtractedIntelligence, NormalizedJob
 from agents.common.event_envelope import EventEnvelope
 from agents.common.types import JobRecord
@@ -23,7 +23,13 @@ from agents.skills_extraction.agent import ExtractionWorkItem, SkillsExtractionA
 def _integration_db_available() -> bool:
     if not os.getenv("PYTHON_DATABASE_URL"):
         return False
-    return check_db_connection()
+    if not check_db_connection():
+        return False
+    try:
+        tables = set(inspect(get_engine()).get_table_names(schema="dbo"))
+    except Exception:
+        return False
+    return {"normalized_jobs", "extracted_intelligence"}.issubset(tables)
 
 
 @contextmanager
@@ -120,6 +126,37 @@ def _make_work_item(
             description=description,
         ),
     )
+
+
+def _normalize_saved_results(saved_results: list[Any]) -> list[dict[str, Any]]:
+    """Strip execution-mode-only timing so serial and parallel outputs compare cleanly."""
+    normalized: list[dict[str, Any]] = []
+    for result in saved_results:
+        extraction_metadata = dict(result.extraction_metadata or {})
+        extraction_metadata.pop("extraction_duration_ms", None)
+        normalized.append(
+            {
+                "job_id": result.work_item.job_id,
+                "posting_id": result.work_item.posting_id,
+                "normalized_job_id": result.work_item.normalized_job_id,
+                "title": result.work_item.title,
+                "company": result.work_item.company,
+                "skills": list(result.skills),
+                "tools": [tool.model_dump() for tool in result.tools],
+                "tasks": list(result.tasks),
+                "responsibilities": list(result.responsibilities),
+                "context": list(result.context),
+                "extraction_status": result.extraction_status,
+                "extraction_tokens_used": result.extraction_tokens_used,
+                "extraction_cost_usd": result.extraction_cost_usd,
+                "alert_skills_extraction": result.alert_skills_extraction,
+                "extraction_warnings": list(result.extraction_warnings),
+                "extraction_metadata": extraction_metadata,
+                "persisted_extraction_version": result.persisted_extraction_version,
+                "persisted_extraction_model": result.persisted_extraction_model,
+            }
+        )
+    return normalized
 
 
 class TestSkillsExtractionAgent:
@@ -817,10 +854,19 @@ class TestSkillsExtractionAgent:
         assert len(store.saved_results) == 3
 
     def test_process_parallel_batch_matches_serial_output(self) -> None:
-        """Parallel and serial batch execution should emit the same payload for the same inputs."""
-        from agents.common.types import SkillRecord, SpanRecord, TaxonomyResult
+        """Parallel and serial batch execution should match result-for-result on extraction output."""
+        from agents.common.types import (
+            ResponsibilityRecord,
+            SkillRecord,
+            SpanRecord,
+            TaskRecord,
+            TaxonomyResult,
+        )
 
-        work_items = [_make_work_item(11), _make_work_item(12)]
+        work_items = [
+            _make_work_item(11, description="Design APIs with Python and mentor engineers."),
+            _make_work_item(12, description="Design APIs with Python and mentor engineers."),
+        ]
         serial_store = _FakeStore()
         parallel_store = _FakeStore()
         serial_agent = SkillsExtractionAgent(
@@ -837,12 +883,75 @@ class TestSkillsExtractionAgent:
             confidence=0.9,
             source_span=SpanRecord(text="Python", field_source="description", start_char=0, end_char=6),
         )
+        task = TaskRecord(
+            task_description="Design APIs",
+            task_category="technical",
+            seniority_signal="senior",
+            confidence=0.88,
+            source_span=SpanRecord(
+                text="Design APIs",
+                field_source="description",
+                start_char=0,
+                end_char=11,
+            ),
+        )
+        responsibility = ResponsibilityRecord(
+            responsibility_description="Mentor engineers",
+            scope="team",
+            requires_ai_competency=False,
+            confidence=0.84,
+            source_span=SpanRecord(
+                text="mentor engineers",
+                field_source="description",
+                start_char=24,
+                end_char=40,
+            ),
+        )
         taxonomy = TaxonomyResult(
             original_label="Python",
             esco_uri="http://data.europa.eu/esco/skill/python",
             is_genai_extension=False,
             resolution_step=2,
         )
+        ctx_meta = {
+            "tokens_used": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 0,
+            "extraction_failed": False,
+            "provider": "pattern-matching",
+            "model": "none",
+            "extraction_metadata": {"context_signals": 0},
+        }
+        tasks_meta = {
+            "success": True,
+            "extraction_failed": False,
+            "tokens_used": 17,
+            "cost_usd": 0.0012,
+            "latency_ms": 40,
+            "provider": "azure-openai",
+            "model": "tasks-deployment",
+            "extraction_metadata": {"dimension": "tasks"},
+        }
+        responsibilities_meta = {
+            "success": True,
+            "extraction_failed": False,
+            "tokens_used": 19,
+            "cost_usd": 0.0015,
+            "latency_ms": 45,
+            "provider": "azure-openai",
+            "model": "responsibilities-deployment",
+            "extraction_metadata": {"dimension": "responsibilities"},
+        }
+        skills_meta = {
+            "success": True,
+            "extraction_failed": False,
+            "tokens_used": 50,
+            "cost_usd": 0.001,
+            "latency_ms": 40,
+            "provider": "azure-openai",
+            "model": "skills-deployment",
+            "extraction_metadata": {"dimension": "skills"},
+        }
         event = EventEnvelope(
             correlation_id="test-serial-vs-parallel",
             agent_id="normalization-agent",
@@ -850,15 +959,27 @@ class TestSkillsExtractionAgent:
         )
 
         with (
-            _patch_skills_extraction_pass2_llm(
-                skills_list=[skill],
-                skills_meta={
-                    "extraction_failed": False,
-                    "tokens_used": 50,
-                    "cost_usd": 0.001,
-                    "latency_ms": 40,
-                    "model": "skills-deployment",
-                },
+            patch("agents.skills_extraction.agent.extract_context", return_value=([], ctx_meta)),
+            patch("agents.skills_extraction.agent.extract_tasks", return_value=([task], tasks_meta)),
+            patch(
+                "agents.skills_extraction.agent.extract_tasks_async",
+                new=AsyncMock(return_value=([task], tasks_meta)),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_responsibilities",
+                return_value=([responsibility], responsibilities_meta),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_responsibilities_async",
+                new=AsyncMock(return_value=([responsibility], responsibilities_meta)),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_skills_no_taxonomy",
+                return_value=([skill], skills_meta),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_skills_no_taxonomy_async",
+                new=AsyncMock(return_value=([skill], skills_meta)),
             ),
             patch(
                 "agents.skills_extraction.agent.resolve_taxonomy_batch",
@@ -875,9 +996,9 @@ class TestSkillsExtractionAgent:
                 parallel_out = parallel_agent.process(event)
 
         assert serial_out.payload == parallel_out.payload
-        assert [result.extraction_status for result in serial_store.saved_results] == [
-            result.extraction_status for result in parallel_store.saved_results
-        ]
+        assert _normalize_saved_results(serial_store.saved_results) == _normalize_saved_results(
+            parallel_store.saved_results
+        )
 
     def test_process_parallel_batch_short_circuits_empty_text_jobs(self) -> None:
         """Jobs with no normalized text should fail fast without consuming async extractor calls."""
