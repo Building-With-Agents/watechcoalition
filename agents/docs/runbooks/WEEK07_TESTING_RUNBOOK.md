@@ -27,7 +27,7 @@ source agents/.venv/bin/activate
 0. [Quick Start — Verifying Analytics + Langfuse (Seeded Data)](#0-quick-start--verifying-analytics--langfuse-seeded-data)
 1. [Overview](#1-overview)
 2. [Environment Setup](#2-environment-setup)
-3. [Clean Slate — Reset Analytics Tables](#3-clean-slate--reset-analytics-tables)
+3. [Clean Slate — Resetting Data](#3-clean-slate--resetting-data)
 4. [Layers 1-5 — Upstream Pipeline (Week 06)](#4-layers-1-5--upstream-pipeline-week-06)
 5. [Layer 6 — Analytics Agent Outputs](#5-layer-6--analytics-agent-outputs)
 6. [Layer 7 — Langfuse Trace Verification](#6-layer-7--langfuse-trace-verification)
@@ -600,8 +600,8 @@ Click a trace → find the `processing-loop/skills-extraction` generation → cl
 
 **Metadata tab:** Should show:
 - `agent_name: skills-extraction-agent`
-- `model: mock-sonnet-v1`
-- `latency_seconds` (simulated)
+- `model: <deployment-name>` (e.g. `chat-gpt41mini` with real LLM; `mock-sonnet-v1` with mock)
+- `latency_seconds`
 
 ### Step 4 — Verify normalization and enrichment events
 
