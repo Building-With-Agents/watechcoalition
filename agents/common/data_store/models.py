@@ -339,6 +339,7 @@ class EmployerProfile(Base):
 
 # ---------------------------------------------------------------------------
 # Analytics aggregate tables (Week 7 — Pair A)
+# Frozen column contract: .cursor/rules/skill-tool-demand.mdc (IMP-021).
 # ---------------------------------------------------------------------------
 
 

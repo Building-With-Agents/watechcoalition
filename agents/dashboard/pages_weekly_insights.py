@@ -279,7 +279,8 @@ def render_weekly_insights() -> None:
     st.markdown("---")
     st.subheader("Role salary snapshot")
     st.caption(
-        "**`dbo.role_snapshot_weekly`** (Pair C). Tabular p25 / median / p75; box plots when schema is stable. "
+        "**`dbo.role_snapshot_weekly`** (Pair C — placeholder). "
+        "Contract columns include **`canonical_role_id`**, **`role_title`**, **`salary_p25`** / **`median_salary`** / **`salary_p75`**. "
         f"Filtered to **week_start = {selected_label}**."
     )
     rs_hint, rs_df = fetch_role_snapshot_weekly_placeholder(selected_label)
@@ -297,37 +298,30 @@ def render_weekly_insights() -> None:
     st.markdown("---")
     st.subheader("Posting lifecycle")
     st.caption(
-        "**`dbo.posting_freshness`**: bucket counts and avg. days listed (runbook shape). "
-        "Week filtering when the table adds `week_start`."
+        "**`dbo.posting_freshness`** (Pair D — placeholder): per-posting lifecycle snapshot per "
+        "`.cursor/rules/analytics-guardrails.mdc` (`duration_days`, `is_repost`, …); not a pre-aggregated bucket table."
     )
     pf_hint, pf_df = fetch_posting_freshness_placeholder()
     if _section_has_data(
         pf_hint,
         pf_df,
         title="Posting lifecycle",
-        empty_detail="No freshness rows yet. Run the posting-freshness aggregate when it is implemented.",
+        empty_detail="No per-posting freshness rows yet. Run the Pair D posting-freshness persistence when wired.",
     ):
         st.dataframe(pf_df, width="stretch", hide_index=True)
-        if "freshness_bucket" in pf_df.columns and "posting_count" in pf_df.columns:
-            pf_chart = pf_df
-            if "avg_days_listed" in pf_df.columns:
-                pf_chart = pf_df.sort_values(
-                    "avg_days_listed",
-                    ascending=True,
-                    na_position="last",
+        if "duration_days" in pf_df.columns and not pf_df.empty:
+            hist_df = pf_df.assign(
+                _dd=pd.to_numeric(pf_df["duration_days"], errors="coerce")
+            ).dropna(subset=["_dd"])
+            if not hist_df.empty:
+                fig_pf = px.histogram(
+                    hist_df,
+                    x="_dd",
+                    labels={"_dd": "Duration (days listed)"},
+                    title="Sample of postings by duration_days (latest rows)",
                 )
-            fig_pf = px.bar(
-                pf_chart,
-                x="freshness_bucket",
-                y="posting_count",
-                labels={
-                    "freshness_bucket": "Freshness bucket",
-                    "posting_count": "Postings",
-                },
-                title="Postings by freshness bucket",
-            )
-            fig_pf.update_layout(margin=dict(t=40, b=80, l=40, r=20), xaxis_tickangle=-30)
-            st.plotly_chart(fig_pf, width="stretch")
+                fig_pf.update_layout(margin=dict(t=40, b=60, l=40, r=20))
+                st.plotly_chart(fig_pf, width="stretch")
 
     st.markdown("---")
     st.subheader("Weekly insight summary")

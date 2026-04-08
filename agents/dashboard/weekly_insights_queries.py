@@ -15,8 +15,9 @@ from agents.dashboard.relation_safe import read_sql_relation_safe
 _SKILL_DEMAND_TABLE = "skill_demand_weekly"
 
 # ---------------------------------------------------------------------------
-# Cross-pair aggregates (Phase 3 placeholders — replace SQL when schema is final)
-# CONTRACT refs: agents/docs/runbooks/WEEK07_TESTING_RUNBOOK.md (Tables 3, 8, Insight)
+# Cross-pair sections — placeholder / fallback SQL until Pair C/D tables are populated.
+# CONTRACT refs: .cursor/rules/canonical-role-clustering.mdc (role_snapshot_weekly),
+# .cursor/rules/analytics-guardrails.mdc (posting_freshness per-posting shape).
 # ---------------------------------------------------------------------------
 
 
@@ -137,12 +138,13 @@ def fetch_top_skills_for_week(week_start_iso: str) -> tuple[str | None, pd.DataF
     """Top 20 skills by ``posting_count`` for a single ``week_start``.
 
     Returns ``(error_message, dataframe)``. On success, ``error_message`` is ``None``.
-    Columns: ``skill_label``, ``posting_count``, ``employer_count``, ``computed_at``.
+    Columns: ``skill_label``, ``esco_uri``, ``posting_count``, ``employer_count``, ``computed_at``.
     """
     try:
         engine = get_dashboard_engine()
         sql = """
             SELECT skill_label,
+                   esco_uri,
                    posting_count,
                    employer_count,
                    computed_at
@@ -230,17 +232,18 @@ def fetch_skill_co_occurrence_for_week(week_start_iso: str) -> tuple[str | None,
 
 @st.cache_data(ttl=300, show_spinner=False)
 def fetch_role_snapshot_weekly_placeholder(week_start_iso: str) -> tuple[str | None, pd.DataFrame]:
-    """Pair C — ``dbo.role_snapshot_weekly`` salary snapshot for the selected week (placeholder).
+    """Pair C — ``dbo.role_snapshot_weekly`` for the selected week (placeholder / fallback).
 
-    Expected columns (Week 7 runbook): ``role_title``, ``posting_count``, ``median_salary``,
-    ``p25_salary``, ``p75_salary``. Requires ``week_start`` on the table; swap SQL if Pair C differs.
+    Column names per ``.cursor/rules/canonical-role-clustering.mdc``: ``canonical_role_id``,
+    ``role_title``, ``posting_count``, ``median_salary``, ``salary_p25``, ``salary_p75``.
     """
     sql = """
-        SELECT role_title,
+        SELECT canonical_role_id,
+               role_title,
                posting_count,
                median_salary,
-               p25_salary,
-               p75_salary
+               salary_p25,
+               salary_p75
         FROM dbo.role_snapshot_weekly
         WHERE week_start = CAST(%(ws)s AS date)
         ORDER BY posting_count DESC
@@ -258,21 +261,29 @@ def fetch_role_snapshot_weekly_placeholder(week_start_iso: str) -> tuple[str | N
 
 @st.cache_data(ttl=300, show_spinner=False)
 def fetch_posting_freshness_placeholder() -> tuple[str | None, pd.DataFrame]:
-    """Posting lifecycle buckets (placeholder). Week 7 runbook: global bucket table (no week filter in sample)."""
+    """Pair D — per-posting ``dbo.posting_freshness`` rows (placeholder / fallback).
+
+    Shape per ``.cursor/rules/analytics-guardrails.mdc`` — not a bucket aggregate table.
+    """
     sql = """
-        SELECT freshness_bucket,
-               posting_count,
-               avg_days_listed
+        SELECT posting_id,
+               first_seen,
+               last_seen,
+               duration_days,
+               is_repost,
+               repost_count,
+               fill_proxy,
+               computed_at
         FROM dbo.posting_freshness
-        ORDER BY avg_days_listed NULLS LAST
-        LIMIT 50
+        ORDER BY computed_at DESC NULLS LAST
+        LIMIT 100
     """
     return _read_cross_pair_sql(
         sql,
         params=None,
         missing_table_hint=(
-            "`dbo.posting_freshness` is not available yet. "
-            "Lifecycle metrics will appear after the posting-freshness aggregate is implemented."
+            "`dbo.posting_freshness` is not available yet (Pair D). "
+            "Lifecycle rows appear after the analytics posting-freshness writer runs."
         ),
     )
 
