@@ -32,7 +32,7 @@ import os
 import threading
 import time
 from collections.abc import Sequence
-from contextlib import suppress
+from contextlib import nullcontext, suppress
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
@@ -40,6 +40,7 @@ from typing import Any, Protocol
 import structlog
 
 from agents.common.base_agent import BaseAgent
+from agents.common.llm_adapter import get_tracer
 
 log = structlog.get_logger()
 
@@ -605,9 +606,16 @@ class SkillsExtractionAgent(BaseAgent):
 
         batch_start = time.perf_counter()
         if parallel_enabled:
-            pending = self._extract_batch_parallel_bridge(work_items, concurrency=concurrency)
+            pending = self._extract_batch_parallel_bridge(
+                work_items,
+                concurrency=concurrency,
+                correlation_id=event.correlation_id,
+            )
         else:
-            pending = self._extract_batch_serial(work_items)
+            pending = self._extract_batch_serial(
+                work_items,
+                correlation_id=event.correlation_id,
+            )
         batch_wall_clock_ms = int((time.perf_counter() - batch_start) * 1000)
 
         # Phase 2: Batch taxonomy resolution — single API call for all labels
@@ -658,18 +666,57 @@ class SkillsExtractionAgent(BaseAgent):
             payload=self._build_payload(event, results),
         )
 
+    def _job_span_context(
+        self,
+        item: ExtractionWorkItem,
+        *,
+        execution_mode: str,
+        correlation_id: str | None,
+        index: int,
+        total: int,
+    ) -> Any:
+        """Create an optional per-job trace span when a tracer is registered."""
+        tracer = get_tracer()
+        if not tracer or not hasattr(tracer, "start_span"):
+            return nullcontext()
+
+        return tracer.start_span(
+            f"job/{item.title[:60]}",
+            correlation_id=correlation_id
+            or str(item.job_id or item.normalized_job_id or item.posting_id or "unknown-job"),
+            input=json.dumps(
+                {
+                    "job_id": item.job_id,
+                    "title": item.title,
+                    "company": item.company,
+                }
+            ),
+            metadata={
+                "job_id": item.job_id,
+                "normalized_job_id": item.normalized_job_id,
+                "execution_mode": execution_mode,
+                "idx": index,
+                "total": total,
+            },
+        )
+
     def _extract_batch_parallel_bridge(
         self,
         work_items: Sequence[ExtractionWorkItem],
         *,
         concurrency: int,
+        correlation_id: str | None = None,
     ) -> list[PendingExtraction]:
         """Run the async batch helper from the sync agent entrypoint."""
         try:
             asyncio.get_running_loop()
         except RuntimeError:
             return asyncio.run(
-                self._extract_batch_parallel(work_items, concurrency=concurrency)
+                self._extract_batch_parallel(
+                    work_items,
+                    concurrency=concurrency,
+                    correlation_id=correlation_id,
+                )
             )
 
         log.warning(
@@ -678,11 +725,13 @@ class SkillsExtractionAgent(BaseAgent):
             total_jobs=len(work_items),
             concurrency=concurrency,
         )
-        return self._extract_batch_serial(work_items)
+        return self._extract_batch_serial(work_items, correlation_id=correlation_id)
 
     def _extract_batch_serial(
         self,
         work_items: Sequence[ExtractionWorkItem],
+        *,
+        correlation_id: str | None = None,
     ) -> list[PendingExtraction]:
         """Run the legacy serial batch flow with deprecated throttles preserved."""
         pending: list[PendingExtraction] = []
@@ -695,14 +744,21 @@ class SkillsExtractionAgent(BaseAgent):
             if idx > 0 and inter_job_delay > 0:
                 time.sleep(inter_job_delay)
 
-            job_start = time.perf_counter()
-            try:
-                tools, skills_list, meta, _ = self._extract_work_item_no_taxonomy(item)
-            except Exception as exc:
-                tools = []
-                skills_list = []
-                meta = _job_extraction_failure_meta(item, exc)
-            wall_clock_ms = int((time.perf_counter() - job_start) * 1000)
+            with self._job_span_context(
+                item,
+                execution_mode="serial",
+                correlation_id=correlation_id,
+                index=idx + 1,
+                total=total,
+            ):
+                job_start = time.perf_counter()
+                try:
+                    tools, skills_list, meta, _ = self._extract_work_item_no_taxonomy(item)
+                except Exception as exc:
+                    tools = []
+                    skills_list = []
+                    meta = _job_extraction_failure_meta(item, exc)
+                wall_clock_ms = int((time.perf_counter() - job_start) * 1000)
             pending_result = PendingExtraction(
                 item=item,
                 tools=tools,
@@ -730,20 +786,29 @@ class SkillsExtractionAgent(BaseAgent):
         work_items: Sequence[ExtractionWorkItem],
         *,
         concurrency: int,
+        correlation_id: str | None = None,
     ) -> list[PendingExtraction]:
         """Run multiple jobs concurrently while preserving output ordering."""
         semaphore = asyncio.Semaphore(concurrency)
+        total = len(work_items)
 
-        async def _extract_one(item: ExtractionWorkItem) -> PendingExtraction:
+        async def _extract_one(index: int, item: ExtractionWorkItem) -> PendingExtraction:
             async with semaphore:
-                job_start = time.perf_counter()
-                try:
-                    tools, skills_list, meta, _ = await self._extract_work_item_no_taxonomy_async(item)
-                except Exception as exc:
-                    tools = []
-                    skills_list = []
-                    meta = _job_extraction_failure_meta(item, exc)
-                wall_clock_ms = int((time.perf_counter() - job_start) * 1000)
+                with self._job_span_context(
+                    item,
+                    execution_mode="parallel",
+                    correlation_id=correlation_id,
+                    index=index,
+                    total=total,
+                ):
+                    job_start = time.perf_counter()
+                    try:
+                        tools, skills_list, meta, _ = await self._extract_work_item_no_taxonomy_async(item)
+                    except Exception as exc:
+                        tools = []
+                        skills_list = []
+                        meta = _job_extraction_failure_meta(item, exc)
+                    wall_clock_ms = int((time.perf_counter() - job_start) * 1000)
                 pending_result = PendingExtraction(
                     item=item,
                     tools=tools,
@@ -754,7 +819,11 @@ class SkillsExtractionAgent(BaseAgent):
                 self._log_job_complete(pending_result, execution_mode="parallel")
                 return pending_result
 
-        return list(await asyncio.gather(*[_extract_one(item) for item in work_items]))
+        return list(
+            await asyncio.gather(
+                *[_extract_one(index, item) for index, item in enumerate(work_items, start=1)]
+            )
+        )
 
     def _log_job_complete(
         self,

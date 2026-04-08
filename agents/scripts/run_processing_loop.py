@@ -26,6 +26,7 @@ import argparse
 import os
 import sys
 import time
+from contextlib import nullcontext
 from pathlib import Path
 
 # Path bootstrap
@@ -52,6 +53,39 @@ structlog.configure(
     logger_factory=structlog.PrintLoggerFactory(),
 )
 log = structlog.get_logger()
+
+# ---------------------------------------------------------------------------
+# Langfuse tracer (optional — activates if LANGFUSE_SECRET_KEY is set)
+# ---------------------------------------------------------------------------
+_tracer = None
+
+
+def _init_tracer() -> None:
+    global _tracer
+    if not os.getenv("LANGFUSE_SECRET_KEY"):
+        return
+    try:
+        from agents.common.llm_adapter import register_tracer
+        from agents.common.observability import LangfuseTracer
+
+        _tracer = LangfuseTracer(agent_id="processing-loop")
+        register_tracer(_tracer)
+        log.info("langfuse_tracer_registered", agent_id="processing-loop")
+    except Exception as exc:
+        log.warning("langfuse_tracer_init_failed", error=str(exc))
+
+
+def _shutdown_tracer() -> None:
+    global _tracer
+    if _tracer is not None:
+        try:
+            from agents.common.llm_adapter import register_tracer
+
+            _tracer.shutdown()
+            register_tracer(None)
+        except Exception:
+            pass
+        _tracer = None
 
 
 def _count_pending() -> int:
@@ -114,6 +148,9 @@ def main() -> None:
 
     # Set batch size for normalization agent
     os.environ["NORM_BATCH_SIZE"] = str(args.batch_size)
+
+    # Initialize Langfuse tracer (optional)
+    _init_tracer()
 
     pending = _count_pending()
     enriched = _count_enriched()
@@ -194,72 +231,85 @@ def main() -> None:
             agent_id="processing-loop",
             payload={"event_type": "ProcessingTrigger", "batch_id": ""},
         )
-
-        try:
-            iteration_start = time.perf_counter()
-            # Stage 1: Normalize (may return 0 if all raw are already normalized)
-            norm_out = norm_agent.process(trigger)
-            norm_count = 0
-            if norm_out is not None:
-                norm_count = norm_out.payload.get("normalized_count", 0)
-                quarantined = norm_out.payload.get("quarantined_count", 0)
-                if norm_count > 0 or quarantined > 0:
-                    log.info("normalized", count=norm_count, quarantined=quarantined, iteration=iteration)
-                total_normalized += norm_count
-
-            # Stage 2: Extract skills (FIFO — finds unextracted records itself)
-            extract_event = norm_out or trigger
-            extract_start = time.perf_counter()
-            extract_out = extract_agent.process(extract_event)
-            extract_duration_ms = int((time.perf_counter() - extract_start) * 1000)
-            extract_count = 0
-            if extract_out is not None:
-                records = extract_out.payload.get("records", [])
-                extract_count = len(records) if isinstance(records, list) else 0
-                log.info(
-                    "extracted",
-                    count=extract_count,
-                    iteration=iteration,
-                    extraction_duration_ms=extract_duration_ms,
-                )
-                total_extracted += extract_count
-
-            # Stage 3: Enrich (processes extraction output records)
-            if extract_out is not None and extract_count > 0:
-                enrich_out = enrich_agent.process(extract_out)
-                enriched_count = 0
-                if enrich_out is not None:
-                    enriched_count = enrich_out.payload.get("enriched_count", 0)
-                    log.info("enriched", count=enriched_count, iteration=iteration)
-                    total_enriched_count += enriched_count
-
-            enriched_total = _count_enriched()
-            remaining_raw = _count_pending()
-            remaining_unextracted = _count_unextracted()
-            iteration_wall_clock_ms = int((time.perf_counter() - iteration_start) * 1000)
-
-            log.info(
-                "iteration_complete",
-                iteration=iteration,
-                norm_batch=norm_count,
-                extract_batch=extract_count,
-                extraction_duration_ms=extract_duration_ms,
-                iteration_wall_clock_ms=iteration_wall_clock_ms,
-                total_enriched=enriched_total,
-                remaining_raw=remaining_raw,
-                remaining_unextracted=remaining_unextracted,
+        # Wrap entire iteration in a parent trace so all agent spans
+        # and LLM call generations appear nested under one trace in Langfuse.
+        iteration_start = time.perf_counter()
+        trace_ctx = (
+            _tracer.start_trace(
+                f"processing-loop-iter-{iteration}",
+                metadata={"iteration": iteration, "batch_size": args.batch_size},
             )
+            if _tracer and hasattr(_tracer, "start_trace")
+            else nullcontext()
+        )
 
-            if extract_count == 0 and norm_count == 0:
-                log.info("no_progress", iteration=iteration)
-                break
+        with trace_ctx:
+            try:
+                # Stage 1: Normalize (may return 0 if all raw are already normalized)
+                norm_out = norm_agent.process(trigger)
+                norm_count = 0
+                if norm_out is not None:
+                    norm_count = norm_out.payload.get("normalized_count", 0)
+                    quarantined = norm_out.payload.get("quarantined_count", 0)
+                    if norm_count > 0 or quarantined > 0:
+                        log.info("normalized", count=norm_count, quarantined=quarantined, iteration=iteration)
+                    total_normalized += norm_count
 
-        except Exception as exc:
-            log.error("iteration_failed", iteration=iteration, error=str(exc))
-            total_errors += 1
+                # Stage 2: Extract skills (FIFO — finds unextracted records itself)
+                extract_event = norm_out or trigger
+                extract_start = time.perf_counter()
+                extract_out = extract_agent.process(extract_event)
+                extract_duration_ms = int((time.perf_counter() - extract_start) * 1000)
+                extract_count = 0
+                if extract_out is not None:
+                    records = extract_out.payload.get("records", [])
+                    extract_count = len(records) if isinstance(records, list) else 0
+                    log.info(
+                        "extracted",
+                        count=extract_count,
+                        iteration=iteration,
+                        extraction_duration_ms=extract_duration_ms,
+                    )
+                    total_extracted += extract_count
+
+                # Stage 3: Enrich (processes extraction output records)
+                if extract_out is not None and extract_count > 0:
+                    enrich_out = enrich_agent.process(extract_out)
+                    enriched_count = 0
+                    if enrich_out is not None:
+                        enriched_count = enrich_out.payload.get("enriched_count", 0)
+                        log.info("enriched", count=enriched_count, iteration=iteration)
+                        total_enriched_count += enriched_count
+
+                enriched_total = _count_enriched()
+                remaining_raw = _count_pending()
+                remaining_unextracted = _count_unextracted()
+                iteration_wall_clock_ms = int((time.perf_counter() - iteration_start) * 1000)
+
+                log.info(
+                    "iteration_complete",
+                    iteration=iteration,
+                    norm_batch=norm_count,
+                    extract_batch=extract_count,
+                    extraction_duration_ms=extract_duration_ms,
+                    iteration_wall_clock_ms=iteration_wall_clock_ms,
+                    total_enriched=enriched_total,
+                    remaining_raw=remaining_raw,
+                    remaining_unextracted=remaining_unextracted,
+                )
+
+                if extract_count == 0 and norm_count == 0:
+                    log.info("no_progress", iteration=iteration)
+                    break
+
+            except Exception as exc:
+                log.error("iteration_failed", iteration=iteration, error=str(exc))
+                total_errors += 1
 
         log.info("rate_limit_pause", seconds=args.delay)
         time.sleep(args.delay)
+
+    _shutdown_tracer()
 
     enriched_final = _count_enriched()
     print("\nProcessing complete.")

@@ -48,9 +48,9 @@ def test_extract_skills_returns_skill_records_and_metadata_when_llm_succeeds(
     mock_invoke,
 ) -> None:
     root = _make_skills_root(
-        {"label": "Python", "type": "Technical", "confidence": 0.92, "required_flag": True,
+        {"skill_name": "Python", "type": "Technical", "confidence": 0.92, "required_flag": True,
          "source_span": {"text": "Python", "field_source": "requirements", "start_char": 0, "end_char": 6}},
-        {"label": "SQL", "type": "Technical", "confidence": 0.85, "required_flag": None,
+        {"skill_name": "SQL", "type": "Technical", "confidence": 0.85, "required_flag": None,
          "source_span": {"text": "SQL", "field_source": "requirements", "start_char": 8, "end_char": 11}},
     )
     mock_invoke.return_value = (root, {"success": True, "tokens_used": 100, "cost_usd": 0.0, "extraction_failed": False})
@@ -70,7 +70,7 @@ def test_extract_skills_calls_taxonomy_and_sets_esco_uri(
     mock_invoke,
 ) -> None:
     root = _make_skills_root(
-        {"label": "Python", "type": "Technical", "confidence": 0.9, "required_flag": True,
+        {"skill_name": "Python", "type": "Technical", "confidence": 0.9, "required_flag": True,
          "source_span": {"text": "Python", "field_source": "requirements", "start_char": 0, "end_char": 6}},
     )
     mock_invoke.return_value = (root, {"success": True, "extraction_failed": False})
@@ -98,7 +98,7 @@ def test_extract_skills_includes_pass1_tools_in_prompt_context(
     mock_invoke,
 ) -> None:
     root = _make_skills_root(
-        {"label": "Leadership", "type": "Soft", "confidence": 0.8, "required_flag": None,
+        {"skill_name": "Leadership", "type": "Soft", "confidence": 0.8, "required_flag": None,
          "source_span": {"text": "Lead", "field_source": "description", "start_char": 0, "end_char": 4}},
     )
     mock_invoke.return_value = (root, {"success": True, "extraction_failed": False})
@@ -148,7 +148,7 @@ def test_extract_skills_retries_on_429_with_backoff(
         "model": "test",
     }
     success_root = _make_skills_root(
-        {"label": "Python", "type": "Technical", "confidence": 0.9,
+        {"skill_name": "Python", "type": "Technical", "confidence": 0.9,
          "source_span": {"text": "Python", "field_source": "description", "start_char": 0, "end_char": 6}},
     )
     success_meta = {

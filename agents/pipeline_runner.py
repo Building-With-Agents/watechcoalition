@@ -67,8 +67,10 @@ import structlog  # noqa: E402
 
 from agents.analytics.agent import AnalyticsAgent  # noqa: E402
 from agents.common.event_envelope import EventEnvelope  # noqa: E402
+from agents.common.llm_adapter import register_tracer  # noqa: E402
 from agents.common.message_bus import InProcessEventBus  # noqa: E402
 from agents.common.message_bus.contracts import ORCHESTRATOR_AGENT_ID  # noqa: E402
+from agents.common.observability import LangfuseTracer  # noqa: E402
 from agents.common.types import JobRecord  # noqa: E402
 from agents.demand_analysis.agent import DemandAnalysisAgent  # noqa: E402
 from agents.enrichment.agent import EnrichmentAgent  # noqa: E402
@@ -344,6 +346,13 @@ def main() -> None:
         subscriber_id=ORCHESTRATOR_AGENT_ID,
     )
     register_enrichment_alert_bus(alert_bus)
+
+    # Langfuse tracing (optional — activate only when API key is present)
+    if os.getenv("LANGFUSE_SECRET_KEY"):
+        _tracer = LangfuseTracer(agent_id="pipeline-runner")
+        register_tracer(_tracer)
+        log.info("langfuse_tracer_registered", agent_id="pipeline-runner")
+
     try:
         # Health checks
         if not run_health_checks(PIPELINE):
@@ -389,6 +398,10 @@ def main() -> None:
         )
     finally:
         register_enrichment_alert_bus(None)
+        # Flush and shut down Langfuse tracer so all traces are sent
+        if _tracer is not None and hasattr(_tracer, "shutdown"):
+            _tracer.shutdown()
+            register_tracer(None)
 
 
 if __name__ == "__main__":

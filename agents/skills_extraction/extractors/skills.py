@@ -21,7 +21,7 @@ import time
 from typing import Any
 
 import structlog
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 from agents.common.llm_client import (
     ainvoke_structured_extraction_llm,
@@ -53,18 +53,26 @@ _SKILLS_DEPLOYMENT_KEYS = (
 # Pydantic models for structured LLM output
 # ---------------------------------------------------------------------------
 
+class _LLMSpan(BaseModel):
+    """Source span from LLM structured output — typed for Azure OpenAI compatibility."""
+
+    text: str = ""
+    field_source: str = "description"
+    start_char: int = 0
+    end_char: int = 0
+
+
 class _LLMSkill(BaseModel):
-    """Single skill from LLM structured output.
+    """Single skill from LLM structured output."""
 
-    Uses ``label`` (the prompt field name) and maps to ``skill_name`` on
-    SkillRecord during post-processing.
-    """
-
-    label: str = ""
+    skill_name: str = Field(
+        default="",
+        validation_alias=AliasChoices("skill_name", "label"),
+    )
     type: str = "Technical"
     confidence: float = Field(default=0.5, ge=0.0, le=1.0)
     required_flag: bool | None = None
-    source_span: dict[str, Any] = Field(default_factory=dict)
+    source_span: _LLMSpan = Field(default_factory=_LLMSpan)
 
 
 class _SkillsLLMRoot(BaseModel):
@@ -92,17 +100,17 @@ def _llm_skill_to_record(raw: _LLMSkill) -> SkillRecord | None:
     from agents.common.types.extraction_types import SpanRecord
 
     try:
-        span_dict = raw.source_span
-        if not span_dict or not isinstance(span_dict, dict):
+        span = raw.source_span
+        if not span.text:
             return None
         source_span = SpanRecord(
-            text=str(span_dict.get("text", "")),
-            field_source=span_dict.get("field_source", "description"),
-            start_char=int(span_dict.get("start_char", 0)),
-            end_char=int(span_dict.get("end_char", 0)),
+            text=span.text,
+            field_source=span.field_source,
+            start_char=span.start_char,
+            end_char=span.end_char,
         )
         return SkillRecord(
-            skill_name=raw.label.strip() or "unknown",
+            skill_name=raw.skill_name.strip() or "unknown",
             type=raw.type,
             confidence=raw.confidence,
             required_flag=raw.required_flag,
@@ -177,9 +185,9 @@ def _post_process_llm_skills(
     for raw in parsed.skills:
         rec = _llm_skill_to_record(raw)
         if rec is None:
-            log.warning("skills_extraction_skip_invalid_skill", label=raw.label)
+            log.warning("skills_extraction_skip_invalid_skill", label=raw.skill_name)
             metadata["extraction_warnings"] = metadata.get("extraction_warnings", []) + [
-                f"Invalid skill skipped: {raw.label}"
+                f"Invalid skill skipped: {raw.skill_name}"
             ]
             continue
         skills.append(rec)
