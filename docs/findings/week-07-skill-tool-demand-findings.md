@@ -13,9 +13,11 @@
 | `agents/analytics/aggregators/__init__.py` | Public exports for all four refresh functions |
 | `.cursor/rules/skill-tool-demand.mdc` | **Frozen IMP-021** column contract + DAG (supersedes stale `ARCHITECTURE_DEEP` names like `growth_rate`) |
 
-**Done in this track:** Steps 2, 3, 8, 9 aggregators + unit/DB-smoke tests under `agents/tests/test_{demand_weekly,velocity,co_occurrence}.py`.
+**Done in this track:** Steps 2, 3, 8, 9 aggregators + unit/DB-smoke tests under `agents/tests/test_{demand_weekly,velocity,co_occurrence}.py`; **IMP-021 / cross-check automation:** [agents/scripts/verify_aggregates.py](../../agents/scripts/verify_aggregates.py) (step 2 global sum) and [agents/scripts/verify_analytics_aggregates.py](../../agents/scripts/verify_analytics_aggregates.py) (steps 2–3 drift + per-row checks, step 8 `demand_count`/`esco_uri`, step 9 lex + top-200 parity vs manual SQL with `COLLATE "C"` to match Python `sorted()`).
 
-**Still Week 7 / Pair A (typical next tasks):** Weekly Insights Streamlit (see `.cursor/rules/streamlit-dashboard.mdc`), optional drift / IMP-021 verification automation, `AnalyticsRefreshed` payload extensions per `event-contracts.mdc`.
+**Still Week 7 / Pair A (typical next tasks):** Weekly Insights Streamlit (see `.cursor/rules/streamlit-dashboard.mdc`), `AnalyticsRefreshed` payload extensions per `event-contracts.mdc`.
+
+**Runbook alignment:** Pair A verification and example SQL live in [agents/docs/runbooks/WEEK07_TESTING_RUNBOOK.md](../../agents/docs/runbooks/WEEK07_TESTING_RUNBOOK.md) — **§0 Step 2** (quick aggregate spot-checks), **§5 Layer 6** Tables 1–2 and 6–7 (Pair A tables). The runbook’s **Table 6** sample query still names `current_week_count` / `velocity_pct`; this implementation uses **`week`**, **`demand_count`**, **`week_over_week_change`**, **`four_week_trend`** (see §5 “Data / Evidence” query below).
 
 **Analytics agent wiring:** [agents/analytics/agent.py](../../agents/analytics/agent.py) runs aggregators **2 → 3 → (8, 9 if 2 ok)** inside `process()`, each step in its own `session_scope()` (no single wrapping transaction). `default_analytics_target_week()` uses the **prior ISO week’s Monday** (PostgreSQL week anchor); override with payload keys `analytics_target_week`, `week_start`, or `aggregate_week_start` (ISO date). Outbound `AnalyticsRefreshed` includes `aggregate_refresh` (row counts / skip flags) plus the legacy fixture JSON overlay. Health: `ok` if DB reachable; `degraded` if URL missing, or URL set but DB unreachable **and** analytics fixture exists (walking skeleton); `down` if unreachable and no fixture. Tests: [agents/tests/test_analytics_agent.py](../../agents/tests/test_analytics_agent.py) (patches all four `refresh_*`). [agents/pipeline_runner.py](../../agents/pipeline_runner.py) documents that **13-step** internal items **2, 3, 8, 9** execute inside the Analytics agent’s `process()`.
 
@@ -42,12 +44,12 @@
 - **Dedup:** rows with `jp.is_duplicate IS TRUE` are excluded from counts.
 - **Aggregation:** outer query uses `func.count(func.distinct(...))` + `GROUP BY`; `employer_count` = distinct `company_id` per skill/week.
 - **Idempotency:** `DELETE` for `week_start`, then `insert().from_select(...)`; `computed_at` = single UTC timestamp for the batch.
-- **Not wired:** [agents/analytics/agent.py](../../agents/analytics/agent.py) still uses the Week 2 fixture stub (scheduler integration is a later task).
+- **Agent wiring:** [agents/analytics/agent.py](../../agents/analytics/agent.py) runs steps **2 → 3 → 8 → 9** (8–9 only if step 2 completes) in `process()`, each in its own `session_scope()`.
 
 **Step 8 (`skill_velocity`):** [agents/analytics/aggregators/velocity.py](../../agents/analytics/aggregators/velocity.py) — `refresh_skill_velocity(session, target_week)`.
 
 - **Input:** Last five `week_start` values from `dbo.skill_demand_weekly` ending at `target_week` (Monday anchor, same contract as step 2 / `date_trunc('week', ...)`).
-- **Pipeline (Pandas):** Pivot `posting_count` by `skill_label` × week → sort columns chronologically → `rolling(window=4, min_periods=2).mean()` on transposed frame → `pct_change(axis=1, fill_method=None)`; last column is week-over-week change on the rolling series.
+- **Pipeline (Pandas):** Pivot `posting_count` by `skill_label` × week → sort columns chronologically → **`ROLLING_WINDOW_WEEKS` (4)** rolling mean on transposed frame → `pct_change(axis=1, fill_method=None)`; last column is week-over-week change on the **smoothed** series (not raw single-week spikes).
 - **Thresholds:** `ACCELERATING_THRESHOLD = 0.15`, `DECLINING_THRESHOLD = -0.15`, `STABLE_THRESHOLD = 0.05`; `TREND_CONFIDENCE_DEFAULT = 0.8`.
 - **Numeric hygiene:** `pct_change` can produce `inf` when the prior rolling mean is zero. **Classification** uses the raw value (`inf` → `accelerating`, `-inf` → `declining`) so growth is never mislabeled as `stable`. **`week_over_week_change`** stored in Postgres is always finite: `NaN` / `inf` / `-inf` → `0.0`.
 - **Row fields:** `demand_count` and `esco_uri` come from the **target** week’s demand rows. Bulk insert uses DB column name **`week`** (ORM attribute `velocity_week`).
@@ -57,7 +59,7 @@
 **Step 9 (`skill_co_occurrence`):** [agents/analytics/aggregators/co_occurrence.py](../../agents/analytics/aggregators/co_occurrence.py) — `refresh_skill_co_occurrence(session, week_start)`.
 
 - **Data fetch:** Reuses `_SKILLS_EXPANDED` from `demand_weekly.py` so filters match step 2 exactly (spam, reject threshold, `is_duplicate`, `extraction_failed`, week filter). `SELECT job_posting_id, skill_label` from that subquery; Python groups rows into `list[list[str]]` per posting.
-- **Pair counting:** `sorted(set(skills))[:20]` per posting, then `itertools.combinations`; aggregate counts in a dict; keep **top 200** pairs by count (`sorted(..., key=lambda x: -x[1])[:200]`).
+- **Pair counting:** `sorted(set(skills))[:20]` per posting, then `itertools.combinations` with `skill_a, skill_b = sorted((a, b))` (lexicographic `skill_a` < `skill_b`); aggregate counts in a dict; keep **top 200** pairs by **`(-count, skill_a, skill_b)`** so ties match SQL verification (`verify_analytics_aggregates.py` uses `ORDER BY manual_cnt DESC, skill_a COLLATE "C", skill_b COLLATE "C"`).
 - **Persistence:** `DELETE` `skill_co_occurrence` where `week_start == target_week`; bulk `INSERT` with one shared `computed_at` (`datetime.now(timezone.utc)`). Empty week: delete only, return `0`.
 - **Export:** `from agents.analytics.aggregators import refresh_skill_co_occurrence`. Tests: [agents/tests/test_co_occurrence.py](../../agents/tests/test_co_occurrence.py).
 
@@ -65,7 +67,54 @@
 
 ## Verification Results
 
-**Local run (2026-04-04)** — repo root, venv `.venv`, `PYTHONPATH=.`, `PYTHON_DATABASE_URL` → `localhost:5432/talent_finder`.
+**Local run (2026-04-08)** — repo root, venv `agents/.venv`, `.env` with `PYTHON_DATABASE_URL` → `localhost:5432/talent_finder`; aggregates refreshed for Monday **`2026-03-30`** before checks.
+
+### Week 07 runbook — skill demand spot-check (§0 Step 2)
+
+Command from [WEEK07_TESTING_RUNBOOK.md](../../agents/docs/runbooks/WEEK07_TESTING_RUNBOOK.md) (top skills by `posting_count`):
+
+```bash
+python agents/scripts/db_check.py query "SELECT skill_label, posting_count FROM dbo.skill_demand_weekly ORDER BY posting_count DESC LIMIT 10"
+```
+
+**Captured output (2026-04-08):**
+
+```
+skill_label     posting_count
+------------------------------------------------------------
+Cross-functional Collaboration  37
+Machine Learning        28
+REST APIs       24
+Software Engineering    20
+Python  16
+Code Review     14
+Artificial Intelligence 14
+Cloud Computing 13
+Continuous Integration  13
+Software Development    13
+```
+
+Also use runbook **§5 Table 1** for `week_start` in the result set:
+
+```bash
+python agents/scripts/db_check.py query "SELECT skill_label, posting_count, week_start FROM dbo.skill_demand_weekly ORDER BY posting_count DESC LIMIT 15"
+```
+
+**§5 Table 6 (`skill_velocity`) — implementation columns** (runbook snippet is schema-ahead; use this repo’s columns):
+
+```bash
+python agents/scripts/db_check.py query "SELECT skill_label, week, demand_count, week_over_week_change, four_week_trend FROM dbo.skill_velocity ORDER BY ABS(week_over_week_change) DESC NULLS LAST LIMIT 10"
+```
+
+**§5 Table 7** — co-occurrence sample:
+
+```bash
+python agents/scripts/db_check.py query "SELECT skill_a, skill_b, co_occurrence_count FROM dbo.skill_co_occurrence ORDER BY co_occurrence_count DESC LIMIT 10"
+```
+
+---
+
+### Schema snapshot and tests (includes 2026-04-04 audit)
 
 1. **Migrations** — `run_migrations(get_engine())` printed `migrations_ok`. Log lines show `migrations_start` → `migrations_tables_created` → … → `migrations_complete`. (`db_engine_created` may appear twice if the engine is initialized more than once in the same process; harmless.)
 
@@ -82,15 +131,25 @@ skill_co_occurrence ['id', 'skill_a', 'skill_b', 'co_occurrence_count', 'week_st
 
 3. **Import smoke test** — `from agents.common.data_store.models import SkillDemandWeekly, ToolDemandWeekly, SkillVelocity, SkillCoOccurrence` completed with exit code 0 (no traceback).
 
-4. **Demand refresh tests** — `pytest tests/test_demand_weekly.py -v` from `agents/` (mocked delete/insert + compile check + optional DB smoke when `PYTHON_DATABASE_URL` is set).
+4. **Demand refresh tests** — `pytest -c agents/pyproject.toml agents/tests/test_demand_weekly.py -v` (repo root; mocked delete/insert + compile check + optional DB smoke).
 
-5. **Velocity tests** — `pytest tests/test_velocity.py -v` (window/classify/sanitize helpers, mocked refresh, optional DB smoke).
+5. **Velocity tests** — `pytest -c agents/pyproject.toml agents/tests/test_velocity.py -v` (4-week rolling vs raw spike, classify/sanitize, mocked refresh, optional DB smoke).
 
-6. **Co-occurrence tests** — `pytest tests/test_co_occurrence.py -v` (pair extraction, top-200 cap, mocked refresh, compile check, optional DB smoke).
+6. **Co-occurrence tests** — `pytest -c agents/pyproject.toml agents/tests/test_co_occurrence.py -v` (lexicographic pairs, top-200 cap + deterministic tie-break, mocked refresh, optional DB smoke).
 
-7. **Analytics agent tests** — `pytest tests/test_analytics_agent.py -v` (health states, mocked four `refresh_*`, step 8–9 skip when step 2 fails, target-week helpers). `tests/test_pipeline_runner.py::test_all_pass` is skipped when `PYTHON_DATABASE_URL` is set but the server is unreachable (enrichment health requires a live DB in that case).
+7. **Analytics agent tests** — `pytest -c agents/pyproject.toml agents/tests/test_analytics_agent.py -v` (health states, mocked four `refresh_*`, step 8–9 skip when step 2 fails, target-week helpers). `agents/tests/test_pipeline_runner.py::test_all_pass` may skip when `PYTHON_DATABASE_URL` is set but the server is unreachable.
 
-8. **IMP-021 aggregate verification** — [agents/scripts/verify_aggregates.py](../../agents/scripts/verify_aggregates.py): compares `SUM(posting_count)` on `skill_demand_weekly` for a target Monday to the same total built from `_SKILLS_EXPANDED` (per-skill `COUNT(DISTINCT job_posting_id)` summed). Drift > **0.5%** → exit code 1. **`--list-weeks`** prints Mondays that have Step-2-filtered expanded skill rows (pick `week_start` for `--week`). Run: `PYTHONPATH=. python agents/scripts/verify_aggregates.py` or `--week 2025-01-06` (real Monday, not the literal `YYYY-MM-DD` placeholder).
+8. **IMP-021 — step 2 global sum** — [agents/scripts/verify_aggregates.py](../../agents/scripts/verify_aggregates.py): `SUM(posting_count)` on `skill_demand_weekly` vs reconciled sum from `_SKILLS_EXPANDED`. Drift > **0.5%** → exit code 1. **`--list-weeks`** lists Mondays with Step-2-eligible rows. Example: `PYTHONPATH=. python agents/scripts/verify_aggregates.py --week 2026-03-30`.
+
+9. **Issues #176 / #177 — full Pair A cross-check** — [agents/scripts/verify_analytics_aggregates.py](../../agents/scripts/verify_analytics_aggregates.py): steps **2–3** global drift (≤ `--drift-threshold-pct`, default **0.5**) + per-label full-outer-join mismatches; step **8** `demand_count` / `esco_uri` vs `skill_demand_weekly`, orphans; step **9** lex order (`COLLATE "C"`) + top-200 pair count parity vs manual SQL. Examples:
+
+```bash
+PYTHONPATH=. python agents/scripts/verify_analytics_aggregates.py --week 2026-03-30
+PYTHONPATH=. python agents/scripts/verify_analytics_aggregates.py --week 2026-03-30 --only skills,tools
+PYTHONPATH=. python agents/scripts/verify_analytics_aggregates.py --week 2026-03-30 --only velocity,cooccurrence
+```
+
+**Order:** Refresh steps **2 and 3** for `week_start`, then **8 and 9** (velocity reads five weeks of `skill_demand_weekly` ending at that Monday).
 
 ## Dependency Notes
 
@@ -112,6 +171,9 @@ Weekly Insights UI still deferred. Aggregate **data** is available for charts: s
 - **`UniqueConstraint(skill_label, week_start)`** implies at most one aggregate row per skill per week (single `esco_uri` choice in that row if multiple taxonomy links collapse to one label).
 - Runbook wording **“enriched_jobs”** maps to enriched rows in **`dbo.job_postings`** in this repo (and related pipeline tables); there is no separate `enriched_jobs` table.
 - **Week alignment:** `date_trunc('week', ...)` uses PostgreSQL’s default week boundary (Monday). Refresh must pass that week’s `::date` as `week_start`.
+- **Seeded `agent-fixtures`:** Older snapshots may have `extracted_intelligence.skills = []` for all rows — then `--list-weeks` / step 2 are empty until fixtures or live extraction populate skills. **`aggregate_sum_posting_count = 0`** with a large manual sum usually means step 2 refresh was not run for that week after seeding.
+- **Co-occurrence vs SQL verifier:** PostgreSQL default collation can disagree with Python `sorted()` for ordering skills and tie-breaking top 200; the verifier uses **`COLLATE "C"`** on skill labels in the manual CTE so results align with the Python aggregator after the deterministic top-200 change in `co_occurrence.py`.
+- **`db_check.py query`:** Only **`SELECT`** is allowed; runbook §3 `TRUNCATE` examples via `db_check query` will fail — use `psql`, a one-off admin SQL, or volume reset (see runbook §3) for full resets.
 
 ## Cursor Rules Notes
 
@@ -122,16 +184,18 @@ Weekly Insights UI still deferred. Aggregate **data** is available for charts: s
 - **Code:** [agents/common/data_store/models.py](../../agents/common/data_store/models.py) (section “Analytics aggregate tables (Week 7 — Pair A)”).
 - **Aggregators:** [agents/analytics/aggregators/__init__.py](../../agents/analytics/aggregators/__init__.py), [demand_weekly.py](../../agents/analytics/aggregators/demand_weekly.py), [velocity.py](../../agents/analytics/aggregators/velocity.py), [co_occurrence.py](../../agents/analytics/aggregators/co_occurrence.py); **agent:** [agents/analytics/agent.py](../../agents/analytics/agent.py); tests: [test_demand_weekly.py](../../agents/tests/test_demand_weekly.py), [test_velocity.py](../../agents/tests/test_velocity.py), [test_co_occurrence.py](../../agents/tests/test_co_occurrence.py), [test_analytics_agent.py](../../agents/tests/test_analytics_agent.py).
 - **Cursor contract:** [.cursor/rules/skill-tool-demand.mdc](../../.cursor/rules/skill-tool-demand.mdc).
+- **Week 7 testing runbook:** [agents/docs/runbooks/WEEK07_TESTING_RUNBOOK.md](../../agents/docs/runbooks/WEEK07_TESTING_RUNBOOK.md).
 - **Migrations entrypoint:** [agents/common/data_store/migrations.py](../../agents/common/data_store/migrations.py) (`run_migrations` → `Base.metadata.create_all` + `employer_count` alter).
-- **Local verification transcript:** same machine as above; see **Verification Results** for captured stdout.
+- **Local verification transcript:** see **Verification Results** for captured stdout and commands.
 
-**Manual refresh (example):**
+**Manual refresh (example)** — repo root; `load_dotenv(Path('.env'))` so `PYTHON_DATABASE_URL` is set (same pattern as `verify_aggregates.py`):
 
 ```bash
 PYTHONPATH=. python -c "
+from pathlib import Path
 from datetime import date
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(Path('.env'))
 from agents.common.data_store.database import session_scope
 from agents.analytics.aggregators import (
     refresh_skill_co_occurrence,
@@ -140,7 +204,7 @@ from agents.analytics.aggregators import (
     refresh_tool_demand_weekly,
 )
 with session_scope() as s:
-    ws = date(2025, 1, 6)  # Monday of target ISO week
+    ws = date.fromisoformat('2026-03-30')  # Monday week_start
     print('skills', refresh_skill_demand_weekly(s, ws))
     print('tools', refresh_tool_demand_weekly(s, ws))
     print('velocity', refresh_skill_velocity(s, ws))
