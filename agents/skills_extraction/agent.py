@@ -659,13 +659,18 @@ class SkillsExtractionAgent(BaseAgent):
             concurrency=concurrency,
             batch_wall_clock_ms=batch_wall_clock_ms,
         )
-        # When payload["skills_extraction_alert"] is True, caller/orchestrator should
-        # publish SkillsExtractionAlert so the Orchestration Agent can react.
+
+        payload = self._build_payload(event, results)
+        total_job_ms = sum(r.wall_clock_ms for r in pending)
+        payload["avg_per_job_ms"] = int(total_job_ms / len(pending)) if pending else 0
+        payload["extraction_duration_ms"] = batch_wall_clock_ms
+        payload["parallel_enabled"] = parallel_enabled
+        payload["concurrency"] = concurrency if parallel_enabled else 1
 
         return EventEnvelope(
             correlation_id=event.correlation_id,
             agent_id=self.agent_id,
-            payload=self._build_payload(event, results),
+            payload=payload,
         )
 
     async def process_async(self, event: EventEnvelope) -> EventEnvelope:
@@ -740,10 +745,17 @@ class SkillsExtractionAgent(BaseAgent):
             batch_wall_clock_ms=batch_wall_clock_ms,
         )
 
+        payload = self._build_payload(event, results)
+        total_job_ms = sum(r.wall_clock_ms for r in pending)
+        payload["avg_per_job_ms"] = int(total_job_ms / len(pending)) if pending else 0
+        payload["extraction_duration_ms"] = batch_wall_clock_ms
+        payload["parallel_enabled"] = True
+        payload["concurrency"] = concurrency
+
         return EventEnvelope(
             correlation_id=event.correlation_id,
             agent_id=self.agent_id,
-            payload=self._build_payload(event, results),
+            payload=payload,
         )
 
     def _job_span_context(
@@ -871,9 +883,24 @@ class SkillsExtractionAgent(BaseAgent):
         """Run multiple jobs concurrently while preserving output ordering."""
         semaphore = asyncio.Semaphore(concurrency)
         total = len(work_items)
+        _in_flight = 0
+        _saturation_events = 0
+        _peak_in_flight = 0
 
         async def _extract_one(index: int, item: ExtractionWorkItem) -> PendingExtraction:
+            nonlocal _in_flight, _saturation_events, _peak_in_flight
+            if semaphore.locked():
+                _saturation_events += 1
+                log.debug(
+                    "skills_extraction_semaphore_saturated",
+                    job_id=item.job_id,
+                    concurrency=concurrency,
+                    queued_index=index,
+                    saturation_events=_saturation_events,
+                )
             async with semaphore:
+                _in_flight += 1
+                _peak_in_flight = max(_peak_in_flight, _in_flight)
                 with self._job_span_context(
                     item,
                     execution_mode="parallel",
@@ -889,6 +916,7 @@ class SkillsExtractionAgent(BaseAgent):
                         skills_list = []
                         meta = _job_extraction_failure_meta(item, exc)
                     wall_clock_ms = int((time.perf_counter() - job_start) * 1000)
+                _in_flight -= 1
                 pending_result = PendingExtraction(
                     item=item,
                     tools=tools,
@@ -899,11 +927,20 @@ class SkillsExtractionAgent(BaseAgent):
                 self._log_job_complete(pending_result, execution_mode="parallel")
                 return pending_result
 
-        return list(
+        results = list(
             await asyncio.gather(
                 *[_extract_one(index, item) for index, item in enumerate(work_items, start=1)]
             )
         )
+        if _saturation_events > 0:
+            log.info(
+                "skills_extraction_semaphore_saturation_summary",
+                concurrency=concurrency,
+                total_jobs=total,
+                saturation_events=_saturation_events,
+                peak_in_flight=_peak_in_flight,
+            )
+        return results
 
     def _log_job_complete(
         self,
@@ -1467,7 +1504,11 @@ def _build_combined_pass2_meta(
         "cost_usd": total_cost,
         "latency_ms": total_latency,
         "extraction_warnings": list(warn),
-        "alert_skills_extraction": bool(skills_meta.get("alert_skills_extraction")),
+        "alert_skills_extraction": bool(
+            skills_meta.get("alert_skills_extraction")
+            or tasks_meta.get("alert_tasks_extraction")
+            or resp_meta.get("alert_responsibilities_extraction")
+        ),
         "provider": skills_meta.get("provider", "azure-openai"),
         "model": skills_meta.get("model") or _llm_deployment_name(),
         "context_signals": context_signals,

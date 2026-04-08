@@ -30,7 +30,6 @@ from agents.common.llm_client import (
 from agents.common.types import JobRecord, SkillRecord, TaxonomyResult, ToolRecord
 from agents.skills_extraction.extractors._retry import (
     RATE_LIMIT_BACKOFF_SECS,
-    RATE_LIMIT_MAX_CYCLES,
 )
 from agents.skills_extraction.extractors._retry import (
     is_rate_limited as _is_rate_limited,
@@ -251,13 +250,9 @@ def extract_skills(
             metadata["error_reason"] = str(e)
             return [], metadata
 
-    # 429: back-off with jitter, always respecting server Retry-After header
     is_rate_limited = _is_rate_limited(meta)
     if is_rate_limited:
         for cycle, fallback_delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
-            if cycle >= RATE_LIMIT_MAX_CYCLES:
-                metadata["alert_skills_extraction"] = True
-                return [], metadata
             server_delay = meta.get("retry_after_seconds")
             base_delay = server_delay if server_delay else fallback_delay
             jitter = random.uniform(0.5, min(base_delay * 0.3, 5.0))
@@ -354,10 +349,7 @@ def extract_skills_no_taxonomy(
 
     is_rate_limited = _is_rate_limited(meta)
     if is_rate_limited:
-        for cycle, fallback_delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
-            if cycle >= RATE_LIMIT_MAX_CYCLES:
-                metadata["alert_skills_extraction"] = True
-                return [], metadata
+        for _cycle, fallback_delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
             server_delay = meta.get("retry_after_seconds")
             base_delay = server_delay if server_delay else fallback_delay
             jitter = random.uniform(0.5, min(base_delay * 0.3, 5.0))
@@ -424,9 +416,6 @@ async def extract_skills_no_taxonomy_async(
 
     if _is_rate_limited(meta):
         for cycle, fallback_delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
-            if cycle >= RATE_LIMIT_MAX_CYCLES:
-                metadata["alert_skills_extraction"] = True
-                return [], metadata
             server_delay = meta.get("retry_after_seconds")
             base_delay = server_delay if server_delay else fallback_delay
             jitter = random.uniform(0.5, min(base_delay * 0.3, 5.0))

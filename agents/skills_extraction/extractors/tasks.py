@@ -23,7 +23,6 @@ from agents.common.llm_client import (
 from agents.common.types import ContextSignal, JobRecord, TaskRecord
 from agents.skills_extraction.extractors._retry import (
     RATE_LIMIT_BACKOFF_SECS,
-    RATE_LIMIT_MAX_CYCLES,
 )
 from agents.skills_extraction.extractors._retry import (
     is_rate_limited as _is_rate_limited,
@@ -187,7 +186,7 @@ async def extract_tasks_async(
 
     Retry strategy mirrors ``extract_skills_no_taxonomy_async``:
     - One timeout retry after 0.5 s.
-    - Up to ``RATE_LIMIT_MAX_CYCLES`` backoff cycles on 429, with jitter.
+    - Up to ``len(RATE_LIMIT_BACKOFF_SECS)`` backoff cycles on 429, with jitter.
     - A failed call returns ``([], metadata)`` — never raises.
     """
     metadata = _base_tasks_metadata()
@@ -229,9 +228,6 @@ async def extract_tasks_async(
     # Level 2: rate-limit backoff
     if _is_rate_limited(meta):
         for cycle, fallback_delay in enumerate(RATE_LIMIT_BACKOFF_SECS):
-            if cycle >= RATE_LIMIT_MAX_CYCLES:
-                metadata["alert_tasks_extraction"] = True
-                return [], metadata
             server_delay = meta.get("retry_after_seconds")
             base_delay = server_delay if server_delay else fallback_delay
             jitter = random.uniform(0.5, min(base_delay * 0.3, 5.0))
