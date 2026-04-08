@@ -214,15 +214,13 @@ def complete(
                 cost_usd=result["cost_usd"], success=True,
             )
             if _tracer:
-                try:
+                with contextlib.suppress(Exception):
                     _tracer.log_event("llm_success", {
                         "input_tokens": result["input_tokens"],
                         "output_tokens": result["output_tokens"],
                         "cost_usd": result["cost_usd"],
                         "output": _parse_output_for_trace(result["content"]),
                     })
-                except Exception:
-                    pass
             return result
 
     try:
