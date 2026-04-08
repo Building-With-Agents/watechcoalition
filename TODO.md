@@ -241,13 +241,13 @@ Three files, same pattern for each:
 - [x] Log at batch start: `skills_extraction_parallel_start`, concurrency level, total jobs, parallel enabled/disabled
 - [x] Log per-job completion: `skills_extraction_job_complete`, job_id, wall_clock_ms, dimensions_succeeded
 - [x] Log batch summary: `skills_extraction_batch_complete`, total_wall_clock_ms, total_llm_calls, avg_per_job_ms, concurrency_utilization (jobs_completed / time / concurrency)
-- [ ] Log when semaphore is saturated (all slots occupied) — optional, for tuning
+- [x] Log when semaphore is saturated (all slots occupied) — `skills_extraction_semaphore_saturated` per-event + `skills_extraction_semaphore_saturation_summary` per-batch
 - [x] Deprecation warnings if `_CHUNK_SIZE`, `_CHUNK_COOLDOWN`, or `_INTER_LLM_DELAY` env vars are set while parallel mode is active
 
 #### E3. Metrics for processing loop
 - [x] `run_processing_loop.py` already logs `iteration_complete` — ensure extraction time is captured
 - [x] Add wall-clock timing around `extract_agent.process(extract_event)` call
-- [ ] Compare serial vs parallel in logs for validation
+- [x] Compare serial vs parallel in logs for validation — `run_processing_loop.py` logs `execution_mode`, `serial_estimate_ms`, and `speedup` ratio
 
 ---
 
@@ -360,9 +360,9 @@ Three files, same pattern for each:
 ✅ G4                                   (benchmark estimate writeup + issue-close checklist)
 ```
 
-**Optional follow-ups:**
-1. **E2** — log when the job semaphore is fully saturated to help tune `SKILLS_EXTRACTION_CONCURRENCY`
-2. **E3** — compare serial vs parallel extraction duration in real processing-loop logs after rollout
+**Completed follow-ups:**
+1. **E2** — ✅ log when the job semaphore is fully saturated (`skills_extraction_semaphore_saturated` debug + `skills_extraction_semaphore_saturation_summary` info per batch)
+2. **E3** — ✅ compare serial vs parallel extraction duration in `run_processing_loop.py` logs (`execution_mode`, `serial_estimate_ms`, `speedup` ratio)
 
 ---
 

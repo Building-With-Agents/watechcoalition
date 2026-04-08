@@ -995,7 +995,10 @@ class TestSkillsExtractionAgent:
             ):
                 parallel_out = parallel_agent.process(event)
 
-        assert serial_out.payload == parallel_out.payload
+        _OPERATIONAL_KEYS = {"extraction_duration_ms", "parallel_enabled", "concurrency", "avg_per_job_ms"}
+        serial_comparable = {k: v for k, v in serial_out.payload.items() if k not in _OPERATIONAL_KEYS}
+        parallel_comparable = {k: v for k, v in parallel_out.payload.items() if k not in _OPERATIONAL_KEYS}
+        assert serial_comparable == parallel_comparable
         assert _normalize_saved_results(serial_store.saved_results) == _normalize_saved_results(
             parallel_store.saved_results
         )
