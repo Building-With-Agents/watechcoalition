@@ -17,7 +17,19 @@ select = [
 ]
 ignore = [
     "E501",  # line length handled by formatter
+    "E402",  # module imports after sys.path / load_dotenv bootstrap (CLI and legacy scripts)
+    "N806",  # test / patch aliases (e.g. MockLLMAuditLog, T anchor time)
+    "UP017",  # datetime.UTC is 3.12+; runtime pinned to 3.11
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# CLI and operator scripts intentionally print to stdout/stderr
+"ingestion/tests/fetch_ground_truth.py" = ["T201"]
+"scripts/**" = ["T201"]
+# Repo-root pg-seed CLIs (path relative to repo when ruff invoked from monorepo root)
+"../scripts/pg-seed-data/export_agent_data.py" = ["T201"]
+"../scripts/pg-seed-data/seed_agent_data.py" = ["T201"]
+"common/events/view_harness.py" = ["T201"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["agents"]
@@ -32,6 +44,7 @@ testpaths = [
     "analytics/tests",
     "visualization/tests",
     "orchestration/tests",
+    "scripts/tests",
 ]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
