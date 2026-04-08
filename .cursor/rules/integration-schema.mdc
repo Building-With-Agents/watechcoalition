@@ -95,6 +95,7 @@ Nested **`dedup`** (always present on batch shape):
 - `duplicate_cluster_id` — TEXT  
 - `dedup_text_hash` — TEXT (SHA-256 hex, UTF-8 dedup string)  
 - `dedup_embedding` — `vector(1536)` (pgvector)
+- `canonical_role_id` — TEXT (nullable); FK to `dbo.canonical_roles.role_id` when migration applied — **Pair C** (Week 7 clustering). Contract: `.cursor/rules/canonical-role-clustering.mdc`.
 
 ### `dbo.job_postings` — read for dedup algorithm
 
@@ -165,4 +166,5 @@ ORM: `LLMAuditLog` in `agents/common/data_store/models.py`.
 | `soc_code`, `naics_code`, nested **`employer`** profile on enriched output | Nestor + Fatima |
 | Fuzzy dedup columns + `FuzzyDedupResult` | Pair Emilio (ingestion/dedup stream) |
 | `llm_audit_log` writes | Owning agent per call site |
+| `canonical_roles`, `role_snapshot_weekly`, `job_postings.canonical_role_id`, `EmergenceAlert` | Pair C (Bryan + Emilio) — see `canonical-role-clustering.mdc` |
 | Message bus routing / `event_type` | Orchestration + `contracts.py` |

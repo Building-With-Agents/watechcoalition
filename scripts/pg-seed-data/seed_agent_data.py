@@ -67,7 +67,9 @@ def get_pg_connection() -> psycopg2.extensions.connection:
     if not dsn:
         print("ERROR: Set PYTHON_DATABASE_URL in your .env file")
         sys.exit(1)
-    return psycopg2.connect(dsn)
+    return psycopg2.connect(
+        dsn, connect_timeout=30, options="-c statement_timeout=300000"
+    )
 
 
 def get_primary_key(cur: psycopg2.extensions.cursor, table: str) -> list[str]:
@@ -89,54 +91,80 @@ def get_primary_key(cur: psycopg2.extensions.cursor, table: str) -> list[str]:
     return [row[0] for row in cur.fetchall()]
 
 
+def _convert_value(val):
+    """Convert a fixture value for PostgreSQL insertion."""
+    # Convert ISO datetime strings back to datetime objects
+    if isinstance(val, str) and len(val) >= 19:
+        for _fmt in ("%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S"):
+            try:
+                return datetime.fromisoformat(val)
+            except ValueError:
+                continue
+    # Handle JSON/dict values — store as JSON string
+    if isinstance(val, (dict, list)):
+        return json.dumps(val)
+    return val
+
+
 def upsert_records(
     cur: psycopg2.extensions.cursor,
     table: str,
     records: list[dict],
     pk_cols: list[str],
 ) -> tuple[int, int]:
-    """Insert records with ON CONFLICT DO NOTHING. Returns (inserted, skipped)."""
+    """Insert records with ON CONFLICT DO NOTHING using fast batch inserts.
+
+    Returns (inserted, skipped). Uses psycopg2.extras.execute_values()
+    for batched network round-trips instead of row-by-row.
+    """
     if not records:
         return 0, 0
 
     columns = list(records[0].keys())
     col_names = ", ".join(f'"{c}"' for c in columns)
-    placeholders = ", ".join(["%s"] * len(columns))
     conflict_cols = ", ".join(f'"{c}"' for c in pk_cols)
 
-    sql = (
-        f'INSERT INTO "dbo"."{table}" ({col_names}) '
-        f"VALUES ({placeholders}) "
+    insert_sql = (
+        f'INSERT INTO "dbo"."{table}" ({col_names}) VALUES %s '
         f"ON CONFLICT ({conflict_cols}) DO NOTHING"
     )
 
-    inserted = 0
-    skipped = 0
-
+    # Pre-convert all values into tuple list
+    values_list = []
     for record in records:
-        values = []
-        for col in columns:
-            val = record.get(col)
-            # Convert ISO datetime strings back to datetime objects
-            if isinstance(val, str) and len(val) >= 19:
-                for _fmt in ("%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S"):
-                    try:
-                        val = datetime.fromisoformat(val)
-                        break
-                    except ValueError:
-                        continue
-            # Handle JSON/dict values — store as JSON string
-            if isinstance(val, (dict, list)):
-                val = json.dumps(val)
-            values.append(val)
+        values_list.append(
+            tuple(_convert_value(record.get(c)) for c in columns)
+        )
 
-        cur.execute(sql, values)
-        if cur.rowcount > 0:
-            inserted += 1
-        else:
-            skipped += 1
-
-    return inserted, skipped
+    try:
+        psycopg2.extras.execute_values(
+            cur, insert_sql, values_list, page_size=1000,
+        )
+        inserted = cur.rowcount if cur.rowcount >= 0 else len(values_list)
+        skipped = len(values_list) - inserted
+        return inserted, skipped
+    except Exception as exc:
+        cur.connection.rollback()
+        print(f"    BATCH ERROR: {str(exc)[:300]}")
+        # Fall back to row-by-row to identify problematic rows
+        placeholders = ", ".join(["%s"] * len(columns))
+        row_sql = (
+            f'INSERT INTO "dbo"."{table}" ({col_names}) '
+            f"VALUES ({placeholders}) "
+            f"ON CONFLICT ({conflict_cols}) DO NOTHING"
+        )
+        inserted = 0
+        for i, vals in enumerate(values_list):
+            try:
+                cur.execute(row_sql, vals)
+                cur.connection.commit()
+                if cur.rowcount > 0:
+                    inserted += 1
+            except Exception as row_exc:
+                cur.connection.rollback()
+                if i < 3:
+                    print(f"    Row {i + 1} error: {str(row_exc)[:200]}")
+        return inserted, len(values_list) - inserted
 
 
 def run_migrations() -> None:
