@@ -8,10 +8,10 @@ Run with:
 
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
-from contextlib import contextmanager
 import hashlib
 import threading
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -171,9 +171,9 @@ def test_log_extraction_event_uses_fresh_session_per_concurrent_call() -> None:
     with (
         patch("agents.common.llm_adapter.session_scope", side_effect=_session_scope_factory),
         patch("agents.common.llm_adapter.LLMAuditLog", side_effect=lambda **kwargs: kwargs),
+        ThreadPoolExecutor(max_workers=6) as executor,
     ):
-        with ThreadPoolExecutor(max_workers=6) as executor:
-            list(executor.map(_write_one, range(12)))
+        list(executor.map(_write_one, range(12)))
 
     assert len(created_sessions) == 12
     assert len({id(session) for session in created_sessions}) == 12
