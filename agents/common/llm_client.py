@@ -648,6 +648,33 @@ async def ainvoke_structured_extraction_llm(
     model_tier_for_cost: str,
 ) -> tuple[TSchema | None, dict[str, Any]]:
     """Async counterpart to ``invoke_structured_extraction_llm`` using ``chain.ainvoke``."""
+    if os.getenv("LLM_PROVIDER", "").strip().lower() == "mock":
+        from agents.common.mock_llm_provider import mock_invoke_structured
+
+        tracer = get_tracer()
+        span_ctx = (
+            tracer.start_span(
+                _SPAN_NAME_MAP.get(agent_name, agent_name),
+                correlation_id=str(uuid.uuid4()),
+                input=prompt,
+                metadata={"agent_name": agent_name, "model": "mock-sonnet-v1"},
+            )
+            if tracer
+            else nullcontext()
+        )
+        with span_ctx:
+            parsed, meta = mock_invoke_structured(prompt, output_schema, agent_name=agent_name)
+            log_extraction_event(
+                agent_name=agent_name, prompt=prompt, model="mock-sonnet-v1",
+                provider="mock", latency_ms=meta["latency_ms"],
+                input_tokens=meta.get("tokens_used", 0) // 2,
+                output_tokens=meta.get("tokens_used", 0) // 2,
+                cost_usd=meta["cost_usd"],
+                success=meta["success"],
+                error_reason=meta.get("error_reason"),
+            )
+            return parsed, meta
+
     try:
         deployment = _resolve_azure_deployment(*deployment_env_keys)
     except ValueError as e:
