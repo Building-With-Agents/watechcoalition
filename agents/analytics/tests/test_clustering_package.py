@@ -99,9 +99,7 @@ class _FakeClusterer:
     ) -> None:
         self._labels = np.asarray(labels)
         self.probabilities_ = (
-            np.asarray(probabilities, dtype=float)
-            if probabilities is not None
-            else np.ones(len(labels), dtype=float)
+            np.asarray(probabilities, dtype=float) if probabilities is not None else np.ones(len(labels), dtype=float)
         )
 
     def fit_predict(self, matrix: np.ndarray) -> np.ndarray:

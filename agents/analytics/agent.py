@@ -1,89 +1,277 @@
 """
-Analytics Agent stub — Week 2 Walking Skeleton.
+Analytics Agent — Week 7 canonical role clustering (Pair C) + legacy fixture merge.
 
-Real implementation: Week 7 (aggregates) + Week 8 (Ask the Data).
+When ``PYTHON_DATABASE_URL`` is set and :func:`check_db_connection` is true, loads
+survivor postings, runs embedding + HDBSCAN via :mod:`agents.analytics.clustering`,
+persists ``canonical_roles`` / ``job_postings.canonical_role_id`` / ``role_snapshot_weekly``,
+and publishes ``EmergenceAlert`` events on the optional alert bus.
 
-In the walking skeleton this agent returns the pre-computed batch analytics
-fixture (fixture_analytics_refreshed.json) for every record it processes.
-The fixture represents aggregate analytics across all 10 demo postings.
-
-Note: in the walking skeleton, the same batch analytics payload is emitted
-for every record processed.  In Week 7 the Analytics Agent accumulates data
-across all records before emitting a single AnalyticsRefreshed event at
-the end of a batch run.
-
-``RecordEnriched`` batch payloads (schema v3) include ``batch_id``, batch counts,
-distributions, and ``dedup``; this stub sets ``triggered_by_batch_id`` from that envelope.
+Otherwise (walking skeleton / CI): emits ``AnalyticsRefreshed`` from the batch fixture
+file so downstream agents keep working.
 
 Agent ID (canonical): analytics-agent
-Emits:    AnalyticsRefreshed
+Emits:    AnalyticsRefreshed; EmergenceAlert (bus, when registered and candidates exist)
 Consumes: RecordEnriched
 
-Fixture: agents/data/fixtures/fixture_analytics_refreshed.json
-
-Week 7 replaces this stub with:
-- Aggregation across 6 dimensions: skill, role, industry, region,
-  experience level, company size
-- Salary distributions: median, p25, p75, p95 per dimension
-- Co-occurrence matrices
-- Posting lifecycle metrics
-- LLM-generated weekly summaries (deterministic template fallback)
-- SQL guardrails: SELECT only, allowed tables, 100-row limit, 30s timeout
+``CLUSTER_MIN_TOTAL_POSTINGS`` (default 500) applies only inside the clustering package.
+The global analytics #179 50-posting guard is not implemented here — document in loader.
 """
 
 from __future__ import annotations
 
 import json
+import os
+from datetime import date, timedelta
 from pathlib import Path
+from typing import Any
 
+import structlog
+
+from agents.analytics.canonical_roles.loader import load_posting_cluster_features
+from agents.analytics.canonical_roles.persist import persist_clustering_result
+from agents.analytics.canonical_roles.snapshots import refresh_role_snapshot_weekly
+from agents.analytics.clustering.config import cluster_min_total_postings
+from agents.analytics.clustering.embeddings import embed_posting_features
+from agents.analytics.clustering.pipeline import run_clustering_pipeline
+from agents.analytics.clustering.types import ClusteringResult
 from agents.common.base_agent import BaseAgent
+from agents.common.data_store.database import check_db_connection, session_scope
 from agents.common.event_envelope import EventEnvelope
+from agents.common.events.emergence_alert import build_emergence_alert_envelope
+
+log = structlog.get_logger()
 
 _FIXTURE_PATH = Path(__file__).parent.parent / "data" / "fixtures" / "fixture_analytics_refreshed.json"
 
+_alert_bus: Any | None = None
+
+
+def register_alert_bus(bus: Any | None) -> None:
+    """Register the bus for ``EmergenceAlert`` publishes (orchestration subscribes)."""
+    global _alert_bus
+    _alert_bus = bus
+
+
+def _iso_week_monday(today: date) -> date:
+    """UTC calendar Monday for weekly snapshot alignment."""
+    return today - timedelta(days=today.weekday())
+
+
+def _load_fixture_dict() -> dict[str, Any]:
+    return json.loads(_FIXTURE_PATH.read_text(encoding="utf-8"))
+
+
+def _merge_analytics_payload(
+    *,
+    correlation_id: str,
+    triggered_by_batch_id: Any,
+    extras: dict[str, Any],
+) -> dict[str, Any]:
+    """Merge clustering metrics into the Week 2 fixture shape for downstream compatibility."""
+    base = _load_fixture_dict()
+    out: dict[str, Any] = {
+        **base,
+        "event_type": "AnalyticsRefreshed",
+        "triggered_by_batch_id": triggered_by_batch_id,
+        **extras,
+    }
+    return out
+
 
 class AnalyticsAgent(BaseAgent):
-    """
-    Stub for the Analytics Agent.
-
-    Week 2: returns batch-level fixture data for every record processed.
-    Week 7: replaces this with real aggregate queries and LLM summaries.
-    """
+    """Analytics: canonical role clustering when DB is available; else fixture path."""
 
     @property
     def agent_id(self) -> str:
         return "analytics-agent"
 
     def __init__(self) -> None:
-        self._fixture: dict = {}
+        self._fixture: dict[str, Any] = {}
 
     def health_check(self) -> dict:
-        """Return ok status if the fixture file is present and loadable."""
-        if not _FIXTURE_PATH.exists():
-            return {"status": "down", "agent": self.agent_id, "last_run": None, "metrics": {}}
+        """DB + fixture: ok when DB reachable; degraded when only fixture; down if neither."""
+        db_ok = False
+        if os.getenv("PYTHON_DATABASE_URL"):
+            db_ok = check_db_connection()
+        fixture_ok = _FIXTURE_PATH.exists()
         try:
-            self._fixture = json.loads(_FIXTURE_PATH.read_text(encoding="utf-8"))
-            return {"status": "ok", "agent": self.agent_id, "last_run": None, "metrics": {}}
+            if fixture_ok:
+                self._fixture = _load_fixture_dict()
         except Exception:
-            return {"status": "down", "agent": self.agent_id, "last_run": None, "metrics": {}}
+            fixture_ok = False
+
+        if db_ok:
+            return {
+                "status": "ok",
+                "agent": self.agent_id,
+                "last_run": None,
+                "metrics": {"db_connected": True, "fixture_available": fixture_ok},
+            }
+        if fixture_ok:
+            return {
+                "status": "degraded",
+                "agent": self.agent_id,
+                "last_run": None,
+                "metrics": {"db_connected": False, "fixture_available": True},
+            }
+        return {"status": "down", "agent": self.agent_id, "last_run": None, "metrics": {}}
 
     def process(self, event: EventEnvelope) -> EventEnvelope:
-        """
-        Accept a RecordEnriched event and emit an AnalyticsRefreshed event
-        using the pre-loaded batch-level fixture payload.
+        triggered_by_batch_id = event.payload.get("batch_id")
+        extras: dict[str, Any] = {
+            "canonical_clustering_ran": False,
+            "clustering_skipped": True,
+            "clustering_skip_reason": None,
+            "cluster_min_total_postings": cluster_min_total_postings(),
+        }
 
-        In the walking skeleton the same aggregate payload is returned for
-        every record.  Week 7 replaces this with real batch aggregation.
-        """
-        if not self._fixture:
-            self._fixture = json.loads(_FIXTURE_PATH.read_text(encoding="utf-8"))
+        if not os.getenv("PYTHON_DATABASE_URL") or not check_db_connection():
+            log.info("analytics_fixture_path", reason="db_unavailable", correlation_id=event.correlation_id)
+            payload = _merge_analytics_payload(
+                correlation_id=event.correlation_id,
+                triggered_by_batch_id=triggered_by_batch_id,
+                extras=extras,
+            )
+            return EventEnvelope(
+                correlation_id=event.correlation_id,
+                agent_id=self.agent_id,
+                payload=payload,
+            )
 
-        return EventEnvelope(
+        result: ClusteringResult | None = None
+        cluster_id_to_role_id: dict[str, str] = {}
+
+        try:
+            with session_scope() as session:
+                limit_raw = os.getenv("ANALYTICS_CLUSTERING_LOAD_LIMIT")
+                limit = int(limit_raw) if limit_raw and limit_raw.isdigit() else None
+                features = load_posting_cluster_features(session, limit=limit)
+                extras["clustering_features_loaded"] = len(features)
+
+                if len(features) < cluster_min_total_postings():
+                    extras["clustering_skip_reason"] = "insufficient_total_postings"
+                    payload = _merge_analytics_payload(
+                        correlation_id=event.correlation_id,
+                        triggered_by_batch_id=triggered_by_batch_id,
+                        extras=extras,
+                    )
+                    return EventEnvelope(
+                        correlation_id=event.correlation_id,
+                        agent_id=self.agent_id,
+                        payload=payload,
+                    )
+
+                embedded = embed_posting_features(features, allow_partial=False)
+                if embedded is None:
+                    extras["clustering_skip_reason"] = "embedding_generation_failed"
+                    payload = _merge_analytics_payload(
+                        correlation_id=event.correlation_id,
+                        triggered_by_batch_id=triggered_by_batch_id,
+                        extras=extras,
+                    )
+                    return EventEnvelope(
+                        correlation_id=event.correlation_id,
+                        agent_id=self.agent_id,
+                        payload=payload,
+                    )
+
+                result = run_clustering_pipeline(features, embedded)
+
+                if result.skipped:
+                    extras["clustering_skip_reason"] = result.skip_reason
+                    payload = _merge_analytics_payload(
+                        correlation_id=event.correlation_id,
+                        triggered_by_batch_id=triggered_by_batch_id,
+                        extras=extras,
+                    )
+                    return EventEnvelope(
+                        correlation_id=event.correlation_id,
+                        agent_id=self.agent_id,
+                        payload=payload,
+                    )
+
+                persist_info = persist_clustering_result(
+                    session,
+                    result,
+                    correlation_id=event.correlation_id,
+                )
+                week_start = _iso_week_monday(date.today())
+                snapshot_rows = refresh_role_snapshot_weekly(session, week_start=week_start)
+
+                extras.update(
+                    {
+                        "canonical_clustering_ran": True,
+                        "clustering_skipped": False,
+                        "clustering_skip_reason": None,
+                        "clustering_total_input": result.total_input_postings,
+                        "clustering_eligible_count": result.eligible_posting_count,
+                        "clustering_cluster_count": len(result.clusters),
+                        "clustering_noise_count": result.noise_posting_count,
+                        "canonical_roles_inserted": persist_info.get("roles_inserted"),
+                        "canonical_postings_updated": persist_info.get("postings_updated"),
+                        "canonical_roles_orphans_deleted": persist_info.get("orphans_deleted"),
+                        "role_snapshot_weekly_rows": snapshot_rows,
+                        "role_snapshot_week_start": week_start.isoformat(),
+                        "emergence_candidate_count": len(result.emergence_candidates),
+                    }
+                )
+
+                cluster_id_to_role_id = persist_info["cluster_id_to_role_id"]
+
+        except Exception as exc:
+            log.warning("analytics_clustering_failed", error=str(exc), correlation_id=event.correlation_id)
+            extras["clustering_skip_reason"] = "exception"
+            extras["clustering_error_class"] = type(exc).__name__
+            payload = _merge_analytics_payload(
+                correlation_id=event.correlation_id,
+                triggered_by_batch_id=triggered_by_batch_id,
+                extras=extras,
+            )
+            return EventEnvelope(
+                correlation_id=event.correlation_id,
+                agent_id=self.agent_id,
+                payload=payload,
+            )
+
+        if result is None:
+            extras["clustering_skip_reason"] = "no_result"
+            payload = _merge_analytics_payload(
+                correlation_id=event.correlation_id,
+                triggered_by_batch_id=triggered_by_batch_id,
+                extras=extras,
+            )
+            return EventEnvelope(
+                correlation_id=event.correlation_id,
+                agent_id=self.agent_id,
+                payload=payload,
+            )
+
+        payload = _merge_analytics_payload(
+            correlation_id=event.correlation_id,
+            triggered_by_batch_id=triggered_by_batch_id,
+            extras=extras,
+        )
+        out = EventEnvelope(
             correlation_id=event.correlation_id,
             agent_id=self.agent_id,
-            payload={
-                "event_type": "AnalyticsRefreshed",
-                "triggered_by_batch_id": event.payload.get("batch_id"),
-                **self._fixture,
-            },
+            payload=payload,
         )
+
+        if _alert_bus is not None and result.emergence_candidates:
+            for cand in result.emergence_candidates:
+                try:
+                    _alert_bus.publish(
+                        build_emergence_alert_envelope(
+                            cand,
+                            correlation_id=event.correlation_id,
+                            cluster_id_to_role_id=cluster_id_to_role_id,
+                        )
+                    )
+                except Exception as exc:
+                    log.warning(
+                        "emergence_alert_publish_failed",
+                        error=str(exc),
+                        correlation_id=event.correlation_id,
+                    )
+
+        return out

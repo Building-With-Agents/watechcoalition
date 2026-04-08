@@ -30,6 +30,7 @@ globs:
 | `SourceFailure` | Ingestion | Orchestrator | 1 |
 | `*Failed` | Any agent | **Orchestrator only** | 1 |
 | `*Alert` | Any agent | **Orchestrator only** | 1 |
+| `EmergenceAlert` | Analytics (canonical clustering) | **Orchestrator only** | 1 |
 | `DemandSignalsUpdated` | Demand Analysis | Analytics, Visualization, Orchestrator | 2 |
 | `DemandAnomaly` | Demand Analysis | Orchestrator | 2 |
 
@@ -51,7 +52,8 @@ Each event's `payload` dict should include:
 - **`NormalizationComplete`**: `batch_id`, `record_count`, `quarantine_count`
 - **`SkillsExtracted`**: `batch_id`, `record_count`, `skills_count`, `avg_confidence`
 - **`RecordEnriched`**: Two shapes—see `.cursor/rules/integration-schema.mdc`. **Batch** (non-empty `records` on `SkillsExtracted`): `record_enriched_schema_version` (**v3**), `batch_id`, `enriched_count`, `spam_rejected_count`, `flagged_for_review_count`, `temporal_period_distribution`, `borderplex_subregion_distribution`, `duplicate_count`, `soc_classified_count`, `naics_classified_count`, nested **`dedup`** (`cosine_threshold`, `rolling_window_days`, `stub_count`, `rows_with_duplicate_cluster_id`, `rows_with_matched_job_posting_id`). **Single-record** (flat payload): per-posting fields for classification/spam/promotion; no batch `dedup` block. Frozen key sets: `agents/enrichment/resolvers/record_enriched_contract.py`.
-- **`AnalyticsRefreshed`**: `aggregate_types`, `record_count`, `refresh_duration_ms`
+- **`AnalyticsRefreshed`**: Week 2 fixture merge + clustering fields (`canonical_clustering_ran`, `clustering_skipped`, `clustering_skip_reason`, …); legacy keys include `top_skills`, `run_id`, `total_postings`
+- **`EmergenceAlert`**: `correlation_id`, `posting_ids`, `candidate_role_label`, `posting_count`, `top_skills`, `top_tools`, `nearest_canonical_role`, `filter_reason`, `schema_version` — see `agents/common/events/emergence_alert.py`
 - **`RenderComplete`**: `pages_rendered`, `exports_generated`
 - **`*Failed`**: `error_type`, `error_message`, `retry_count`, `max_retries`
 

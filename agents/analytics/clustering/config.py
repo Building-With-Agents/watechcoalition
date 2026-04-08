@@ -96,6 +96,7 @@ def emergence_min_distinct_employers() -> int:
         DEFAULT_EMERGENCE_MIN_DISTINCT_EMPLOYERS,
     )
 
+
 __all__ = [
     "cluster_distance_metric",
     "cluster_label_dominance_threshold",

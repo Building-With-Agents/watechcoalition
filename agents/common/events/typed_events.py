@@ -107,3 +107,23 @@ class NormalizationFailedEvent(BaseModel):
 
     def model_dump(self, **kwargs: Any) -> dict[str, Any]:
         return self.envelope.model_dump(**kwargs)
+
+
+class EmergenceAlertEvent(BaseModel):
+    """Typed wrapper for EmergenceAlert control events (orchestration-only subscriber)."""
+
+    envelope: EventEnvelope
+
+    @field_validator("envelope")
+    @classmethod
+    def check_event_type(cls, v: EventEnvelope) -> EventEnvelope:
+        if v.payload.get("event_type") != "EmergenceAlert":
+            raise ValueError(f"Expected payload event_type 'EmergenceAlert', got {v.payload.get('event_type')!r}")
+        return v
+
+    @property
+    def correlation_id(self) -> str:
+        return self.envelope.correlation_id
+
+    def model_dump(self, **kwargs: Any) -> dict[str, Any]:
+        return self.envelope.model_dump(**kwargs)

@@ -1,7 +1,8 @@
-"""Tests for AnalyticsAgent — Week 2 stub."""
+"""Tests for AnalyticsAgent — Week 7 clustering + Week 2 fixture fallback."""
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,34 +18,47 @@ class TestAnalyticsAgent:
         assert agent.agent_id == "analytics-agent"
 
     def test_health_check_ok(self) -> None:
-        """Returns 'ok' when the fixture file exists and is valid JSON."""
+        """ok when DB reachable; degraded when only fixture (no DB)."""
         agent = AnalyticsAgent()
         result = agent.health_check()
-        assert result["status"] == "ok"
+        assert result["agent"] == "analytics-agent"
+        assert result["status"] in ("ok", "degraded")
+        if result["status"] == "degraded":
+            assert result["metrics"].get("fixture_available") is True
+        else:
+            assert result["metrics"].get("db_connected") is True
 
     def test_health_check_down_missing_file(self) -> None:
-        """Returns 'down' when the fixture file does not exist."""
+        """Returns 'down' when the fixture file does not exist and DB is unavailable."""
         agent = AnalyticsAgent()
         fake_path = Path("/nonexistent/fixture_analytics_refreshed.json")
         with patch("agents.analytics.agent._FIXTURE_PATH", fake_path):
-            result = agent.health_check()
+            with patch("agents.analytics.agent.check_db_connection", return_value=False):
+                with patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}):
+                    result = agent.health_check()
         assert result["status"] == "down"
 
     def test_process_emits_analytics_refreshed(self, enriched_event: EventEnvelope) -> None:
         """Output event_type is AnalyticsRefreshed."""
         agent = AnalyticsAgent()
-        agent.health_check()  # pre-load fixture
-        out = agent.process(enriched_event)
+        agent.health_check()
+        with patch("agents.analytics.agent.check_db_connection", return_value=False):
+            with patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}):
+                out = agent.process(enriched_event)
         assert out.payload["event_type"] == "AnalyticsRefreshed"
         assert out.agent_id == "analytics-agent"
 
     def test_process_includes_batch_data(self, enriched_event: EventEnvelope) -> None:
-        """Output payload contains the batch-level fixture keys."""
+        """Output payload merges fixture keys with clustering placeholders."""
         agent = AnalyticsAgent()
-        agent.health_check()  # pre-load fixture
-        out = agent.process(enriched_event)
+        agent.health_check()
+        with patch("agents.analytics.agent.check_db_connection", return_value=False):
+            with patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}):
+                out = agent.process(enriched_event)
         p = out.payload
         assert "top_skills" in p
         assert "seniority_distribution" in p
         assert "run_id" in p
         assert p["triggered_by_batch_id"] == enriched_event.payload["batch_id"]
+        assert "canonical_clustering_ran" in p
+        assert "clustering_skipped" in p

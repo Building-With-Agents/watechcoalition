@@ -61,17 +61,13 @@ def _embedding_map(embedded_rows: Sequence[EmbeddedPostingText]) -> dict[str, Em
 def _top_skills(feature_rows: Sequence[PostingClusterFeatures]) -> list[RankedSkill]:
     counts = Counter(skill for feature_row in feature_rows for skill in feature_row.skills)
     return [
-        RankedSkill(skill_name=skill_name, count=count)
-        for skill_name, count in counts.most_common(_TOP_SKILLS_LIMIT)
+        RankedSkill(skill_name=skill_name, count=count) for skill_name, count in counts.most_common(_TOP_SKILLS_LIMIT)
     ]
 
 
 def _top_tools(feature_rows: Sequence[PostingClusterFeatures]) -> list[RankedTool]:
     counts = Counter(tool for feature_row in feature_rows for tool in feature_row.tools)
-    return [
-        RankedTool(tool_name=tool_name, count=count)
-        for tool_name, count in counts.most_common(_TOP_TOOLS_LIMIT)
-    ]
+    return [RankedTool(tool_name=tool_name, count=count) for tool_name, count in counts.most_common(_TOP_TOOLS_LIMIT)]
 
 
 def _distinct_employer_ids(feature_rows: Sequence[PostingClusterFeatures]) -> list[str]:
@@ -102,11 +98,7 @@ def _dominant_cluster_skill_keys(
     minimum_share: float,
 ) -> set[str]:
     if minimum_share <= 0.0:
-        return {
-            ranked_skill.skill_name.casefold()
-            for cluster in clusters
-            for ranked_skill in cluster.top_skills
-        }
+        return {ranked_skill.skill_name.casefold() for cluster in clusters for ranked_skill in cluster.top_skills}
 
     return {
         ranked_skill.skill_name.casefold()

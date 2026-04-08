@@ -373,13 +373,13 @@ python agents/scripts/db_check.py query "SELECT tool_label, posting_count, week_
 Role counts with salary distributions.
 
 ```bash
-python agents/scripts/db_check.py query "SELECT role_title, posting_count, median_salary, p25_salary, p75_salary FROM dbo.role_snapshot_weekly ORDER BY posting_count DESC LIMIT 10"
+python agents/scripts/db_check.py query "SELECT role_title, posting_count, median_salary, salary_p25, salary_p75 FROM dbo.role_snapshot_weekly ORDER BY posting_count DESC LIMIT 10"
 ```
 
 **What to check:**
 - Role titles should be recognizable (Software Engineer, Data Analyst, etc.)
 - Salary values should be realistic (not 0 or astronomically high)
-- `median_salary` should fall between `p25_salary` and `p75_salary`
+- `median_salary` should fall between `salary_p25` and `salary_p75` when both are non-null
 
 ### Table 4 — `sector_summary_weekly`
 
@@ -842,3 +842,17 @@ python agents/scripts/db_check.py query "SELECT COUNT(*) AS pairs FROM dbo.skill
 ```
 
 Expected: hundreds to low thousands of pairs, not millions.
+
+---
+
+## Pair C — Canonical role clustering findings (template)
+
+Complete after a successful clustering run on a sufficiently large sample (see `CLUSTER_MIN_TOTAL_POSTINGS`).
+
+- **Run date / environment:** (e.g. local Postgres vs Azure)
+- **Eligible posting count loaded:** 
+- **Clusters formed / noise rate:** 
+- **Sample cluster labels (coherence):** 
+- **`EmergenceAlert` fired:** yes/no; orchestration log receipt confirmed
+- **`role_snapshot_weekly` sanity:** `salary_p25`–`salary_p95` vs `median_salary` spot-check
+- **Follow-ups:** (e.g. Pair B `compute_salary_percentiles` swap — issue #188)

@@ -46,11 +46,7 @@ def _cluster_feature_rows(
     cluster: ClusterSummary,
     feature_map: dict[str, PostingClusterFeatures],
 ) -> list[PostingClusterFeatures]:
-    return [
-        feature_map[posting_id]
-        for posting_id in cluster.member_posting_ids
-        if posting_id in feature_map
-    ]
+    return [feature_map[posting_id] for posting_id in cluster.member_posting_ids if posting_id in feature_map]
 
 
 def _most_common_title(feature_rows: Sequence[PostingClusterFeatures]) -> tuple[str | None, float]:
@@ -209,9 +205,7 @@ def label_clusters(
         return result
 
     effective_dominance_threshold = (
-        cluster_label_dominance_threshold()
-        if dominance_threshold is None
-        else dominance_threshold
+        cluster_label_dominance_threshold() if dominance_threshold is None else dominance_threshold
     )
     if not 0.0 <= effective_dominance_threshold <= 1.0:
         raise ValueError("dominance_threshold must be between 0.0 and 1.0")

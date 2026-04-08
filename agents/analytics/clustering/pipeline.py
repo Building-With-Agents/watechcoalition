@@ -120,10 +120,7 @@ def _cluster_id_map(raw_labels: Sequence[int], *, minimum_cluster_size: int) -> 
         for raw_label, count in sorted(Counter(raw_labels).items())
         if raw_label != -1 and count >= minimum_cluster_size
     ]
-    return {
-        raw_label: f"cluster-{index:04d}"
-        for index, raw_label in enumerate(surviving_labels, start=1)
-    }
+    return {raw_label: f"cluster-{index:04d}" for index, raw_label in enumerate(surviving_labels, start=1)}
 
 
 def _top_titles(feature_rows: Sequence[PostingClusterFeatures]) -> list[str]:
@@ -134,17 +131,13 @@ def _top_titles(feature_rows: Sequence[PostingClusterFeatures]) -> list[str]:
 def _top_skills(feature_rows: Sequence[PostingClusterFeatures]) -> list[RankedSkill]:
     counts = Counter(skill for feature_row in feature_rows for skill in feature_row.skills)
     return [
-        RankedSkill(skill_name=skill_name, count=count)
-        for skill_name, count in counts.most_common(_TOP_SKILLS_LIMIT)
+        RankedSkill(skill_name=skill_name, count=count) for skill_name, count in counts.most_common(_TOP_SKILLS_LIMIT)
     ]
 
 
 def _top_tools(feature_rows: Sequence[PostingClusterFeatures]) -> list[RankedTool]:
     counts = Counter(tool for feature_row in feature_rows for tool in feature_row.tools)
-    return [
-        RankedTool(tool_name=tool_name, count=count)
-        for tool_name, count in counts.most_common(_TOP_TOOLS_LIMIT)
-    ]
+    return [RankedTool(tool_name=tool_name, count=count) for tool_name, count in counts.most_common(_TOP_TOOLS_LIMIT)]
 
 
 def _cluster_centroid(embedded_rows: Sequence[EmbeddedPostingText]) -> list[float]:
