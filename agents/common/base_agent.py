@@ -1,8 +1,8 @@
 """
-BaseAgent — the interface every agent in the pipeline must implement.
+AgentBase — the abstract interface every agent in the pipeline must implement.
 
 Week 2 walking skeleton: every agent extends this class and implements
-health_check() and process().
+``agent_id``, ``health_check()``, and ``process()``.
 
 Architecture rule: no agent may call another agent directly.
 All inter-agent communication is through EventEnvelope objects only.
@@ -10,21 +10,27 @@ All inter-agent communication is through EventEnvelope objects only.
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
+
 from agents.common.event_envelope import EventEnvelope
 
 
-class BaseAgent:
+class AgentBase(ABC):
     """
     Abstract base class for all Job Intelligence Engine agents.
 
     Subclasses MUST implement:
+        agent_id (property) -> str
         health_check() -> dict
         process(event: EventEnvelope) -> EventEnvelope | None
     """
 
-    def __init__(self, agent_id: str) -> None:
-        self.agent_id = agent_id
+    @property
+    @abstractmethod
+    def agent_id(self) -> str:
+        """Stable agent identifier (e.g. ``ingestion-agent``)."""
 
+    @abstractmethod
     def health_check(self) -> dict:
         """
         Return a dict describing agent readiness.
@@ -42,10 +48,8 @@ class BaseAgent:
         status, the pipeline aborts.  Phase 2 agents returning non-"ok"
         produce a warning, not an abort.
         """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement health_check()"
-        )
 
+    @abstractmethod
     def process(self, event: EventEnvelope) -> EventEnvelope | None:
         """
         Consume an inbound EventEnvelope, perform this agent's work, and
@@ -58,6 +62,7 @@ class BaseAgent:
         - Return None ONLY for Phase 2 agents not yet implemented.
           The pipeline runner handles None returns gracefully.
         """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement process()"
-        )
+
+
+# Historical name used across the codebase and docs — same class as AgentBase.
+BaseAgent = AgentBase
