@@ -111,6 +111,10 @@ def test_run_pipeline_updates_watermark_after_success() -> None:
             "agents.analytics.aggregators.sector_weekly.compute_sector_summary_weekly",
             return_value=[],
         ),
+        patch(
+            "agents.analytics.aggregators.geo_demand.compute_geo_demand_weekly",
+            return_value=[],
+        ),
         patch("agents.analytics.agent.set_last_analytics_success_at") as mock_set,
     ):
         out = agent.run_pipeline(session, event)

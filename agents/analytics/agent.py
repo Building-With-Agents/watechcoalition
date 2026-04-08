@@ -41,10 +41,12 @@ the DB watermark for backfill and tests.
 
 Thirteen-step batch runner: Step 1 is the minimum-data guard. Step 6 writes
 ``dbo.sector_summary_weekly`` via :func:`agents.analytics.aggregators.sector_weekly.compute_sector_summary_weekly`.
+Step 7 writes ``dbo.geo_demand_weekly`` via
+:func:`agents.analytics.aggregators.geo_demand.compute_geo_demand_weekly`.
 ``compute_salary_percentiles`` is implemented for single dimensions without a week
 bucket; Step 6 reuses the same salary expression (:data:`SALARY_VALUE_SQL`) and
 ``percentile_disc(0.5)`` in SQL grouped by sector + week (see module docstring in
-``sector_weekly.py``). Steps 2–5 and 7–13 are placeholders until implemented.
+``sector_weekly.py``). Steps 2–5 and 8–13 are placeholders until implemented.
 
 Weekly rollups use ``analytics_week_start`` or ``week_start`` in the inbound payload
 (ISO date); if absent, the current UTC week’s Monday is used.
@@ -295,8 +297,26 @@ class AnalyticsAgent(BaseAgent):
             rows=len(rows),
         )
 
+    def _run_analytics_pipeline_step_7_geo_demand_weekly(
+        self,
+        session: Session,
+        _event: EventEnvelope,
+        ctx: dict[str, Any],
+    ) -> None:
+        """Step 7 — weekly job counts by Borderplex subregion (``borderplex_subregion``)."""
+        from agents.analytics.aggregators.geo_demand import compute_geo_demand_weekly
+
+        week_start = ctx["week_start"]
+        rows = compute_geo_demand_weekly(session, week_start)
+        ctx["geo_demand_weekly_rows"] = len(rows)
+        log.info(
+            "analytics_pipeline_step_7_complete",
+            week_start=str(week_start),
+            rows=len(rows),
+        )
+
     def run_pipeline(self, session: Session, event: EventEnvelope) -> EventEnvelope | None:
-        """Run the 13-step analytics batch. Step 1: minimum-data guard; Step 6: sector weekly rollup."""
+        """Run the 13-step analytics batch. Step 1: minimum-data guard; Steps 6–7: sector and geo weekly rollups."""
         watermark = resolve_analytics_watermark(session, event.payload)
         if not check_minimum_data(session, watermark):
             return None
@@ -308,7 +328,9 @@ class AnalyticsAgent(BaseAgent):
 
         self._run_analytics_pipeline_step_6_sector_summary_weekly(session, event, ctx)
 
-        for step in range(7, ANALYTICS_PIPELINE_TOTAL_STEPS + 1):
+        self._run_analytics_pipeline_step_7_geo_demand_weekly(session, event, ctx)
+
+        for step in range(8, ANALYTICS_PIPELINE_TOTAL_STEPS + 1):
             _analytics_pipeline_step_placeholder(step)
 
         out = self._emit_analytics_refreshed(event)
