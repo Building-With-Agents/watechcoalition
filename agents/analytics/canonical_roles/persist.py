@@ -140,7 +140,7 @@ def persist_clustering_result(
         pid = a.posting_id
         if a.is_noise:
             session.execute(
-                text("UPDATE dbo.job_postings SET canonical_role_id = NULL WHERE job_posting_id = CAST(:pid AS uuid)"),
+                text("UPDATE dbo.job_postings SET canonical_role_id = NULL WHERE job_posting_id = CAST(:pid AS text)"),
                 {"pid": pid},
             )
             postings_updated += 1
@@ -148,7 +148,7 @@ def persist_clustering_result(
         cid = a.cluster_id
         if cid is None:
             session.execute(
-                text("UPDATE dbo.job_postings SET canonical_role_id = NULL WHERE job_posting_id = CAST(:pid AS uuid)"),
+                text("UPDATE dbo.job_postings SET canonical_role_id = NULL WHERE job_posting_id = CAST(:pid AS text)"),
                 {"pid": pid},
             )
             postings_updated += 1
@@ -156,13 +156,13 @@ def persist_clustering_result(
         role_id = cluster_id_to_role_id.get(cid)
         if role_id is None:
             session.execute(
-                text("UPDATE dbo.job_postings SET canonical_role_id = NULL WHERE job_posting_id = CAST(:pid AS uuid)"),
+                text("UPDATE dbo.job_postings SET canonical_role_id = NULL WHERE job_posting_id = CAST(:pid AS text)"),
                 {"pid": pid},
             )
             postings_updated += 1
             continue
         session.execute(
-            text("UPDATE dbo.job_postings SET canonical_role_id = :rid WHERE job_posting_id = CAST(:pid AS uuid)"),
+            text("UPDATE dbo.job_postings SET canonical_role_id = :rid WHERE job_posting_id = CAST(:pid AS text)"),
             {"rid": role_id, "pid": pid},
         )
         postings_updated += 1
