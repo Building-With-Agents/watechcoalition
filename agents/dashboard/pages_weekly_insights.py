@@ -21,6 +21,7 @@ from agents.dashboard.weekly_insights_queries import (
     fetch_role_snapshot_weekly_placeholder,
     fetch_skill_co_occurrence_for_week,
     fetch_skill_demand_weekly_availability,
+    fetch_skill_demand_weekly_history_for_skills,
     fetch_skill_velocity_for_week,
     fetch_top_skills_for_week,
     max_computed_at,
@@ -54,6 +55,15 @@ def _section_has_data(
         st.info(f"**{title}** — {empty_detail}")
         return False
     return True
+
+
+def _velocity_sparkline_skill_key(skill_label: object, esco_uri: object) -> tuple[str, str | None]:
+    """Normalize velocity row keys for SQL history lookup (NULL-safe ``esco_uri``)."""
+    label = str(skill_label).strip()
+    if esco_uri is None or (isinstance(esco_uri, float) and pd.isna(esco_uri)):
+        return (label, None)
+    text = str(esco_uri).strip()
+    return (label, text if text else None)
 
 
 def _layout_weekly_horizontal_bar(
@@ -167,7 +177,8 @@ def render_weekly_insights() -> None:
     st.subheader("Skill velocity")
     st.caption(
         "**`dbo.skill_velocity`** (step 8): demand, smoothed week-over-week change, IMP-021 trend label, "
-        "confidence. Multi-week sparklines can be added from `skill_demand_weekly` history."
+        "confidence. Sparklines use **`dbo.skill_demand_weekly`** posting counts for the same skills (newest "
+        "weeks ending at the selected anchor)."
     )
 
     vel_hint, vel_df = fetch_skill_velocity_for_week(selected_label)
@@ -221,6 +232,113 @@ def render_weekly_insights() -> None:
         )
         _layout_weekly_horizontal_bar(fig_v, row_count=len(bar_src))
         st.plotly_chart(fig_v, width="stretch")
+
+        sparkline_n = 8
+        history_weeks = 8
+        spark_slice = vel_df.head(sparkline_n)
+        skills_key = tuple(
+            _velocity_sparkline_skill_key(r["skill_label"], r["esco_uri"]) for _, r in spark_slice.iterrows()
+        )
+        hist_err, hist_df = fetch_skill_demand_weekly_history_for_skills(
+            selected_label,
+            skills_key,
+            max_weeks=history_weeks,
+        )
+        if hist_err:
+            st.caption(f"Demand history for sparklines could not load: {hist_err}")
+        elif hist_df.empty:
+            st.caption(
+                "No matching **`skill_demand_weekly`** rows for these velocity skills in the recent window."
+            )
+        else:
+            n_weeks = hist_df["week_start"].nunique()
+            if n_weeks < 2:
+                st.caption(
+                    f"Sparklines need at least two distinct `week_start` values in the last **{history_weeks}** "
+                    f"weeks; found **{n_weeks}**."
+                )
+            else:
+                spark_slice = spark_slice.reset_index(drop=True)
+                spark_slice["_uri_norm"] = spark_slice["esco_uri"].apply(
+                    lambda u: None
+                    if u is None or (isinstance(u, float) and pd.isna(u)) or str(u).strip() == ""
+                    else str(u).strip()
+                )
+                hist_work = hist_df.copy()
+                hist_work["_uri_norm"] = hist_work["esco_uri"].apply(
+                    lambda u: None
+                    if u is None or (isinstance(u, float) and pd.isna(u)) or str(u).strip() == ""
+                    else str(u).strip()
+                )
+                merged = spark_slice.merge(
+                    hist_work,
+                    left_on=["skill_label", "_uri_norm"],
+                    right_on=["skill_label", "_uri_norm"],
+                    how="inner",
+                    suffixes=("", "_h"),
+                )
+                merged["week_start"] = pd.to_datetime(merged["week_start"])
+                order = []
+                seen: set[str] = set()
+                for _, r in spark_slice.iterrows():
+                    lbl = str(r["skill_label"])
+                    u = r["_uri_norm"]
+                    key = f"{lbl}\0{u or ''}"
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    order.append(lbl + ("" if not u else f" ({u[:28]}…)" if len(u) > 28 else f" ({u})"))
+                merged["display_skill"] = merged.apply(
+                    lambda r: str(r["skill_label"])
+                    + (
+                        ""
+                        if r["_uri_norm"] is None
+                        else (
+                            f" ({r['_uri_norm'][:28]}…)"
+                            if len(r["_uri_norm"]) > 28
+                            else f" ({r['_uri_norm']})"
+                        )
+                    ),
+                    axis=1,
+                )
+                present = set(merged["display_skill"].unique())
+                order = [o for o in order if o in present]
+                if merged.empty or not order:
+                    st.caption(
+                        "Demand history returned rows, but none matched these velocity skills "
+                        "(check `skill_label` / `esco_uri` alignment between step 2 and step 8)."
+                    )
+                else:
+                    n_facets = merged["display_skill"].nunique()
+                    fig_sp = px.line(
+                        merged,
+                        x="week_start",
+                        y="posting_count",
+                        facet_row="display_skill",
+                        markers=True,
+                        labels={
+                            "week_start": "Week",
+                            "posting_count": "Postings",
+                            "display_skill": "Skill",
+                        },
+                        title=f"Weekly demand ({n_facets} skills, |WoW| table order)",
+                        category_orders={"display_skill": order},
+                    )
+                    row_h = 52
+                    fig_sp.update_layout(
+                        height=max(220, row_h * n_facets + 80),
+                        margin=dict(t=50, b=40, l=20, r=20),
+                        showlegend=False,
+                    )
+                    fig_sp.update_yaxes(matches=None, title_text="")
+                    fig_sp.update_xaxes(title_text="")
+
+                    def _facet_short_ann(a: go.layout.Annotation) -> None:
+                        if "=" in (a.text or ""):
+                            a.update(text=a.text.split("=", 1)[-1])
+
+                    fig_sp.for_each_annotation(_facet_short_ann)
+                    st.plotly_chart(fig_sp, width="stretch")
 
         with st.expander("Raw `skill_velocity` rows (same query order)"):
             st.dataframe(vel_df, width="stretch", hide_index=True)

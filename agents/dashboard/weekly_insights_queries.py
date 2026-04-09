@@ -197,6 +197,59 @@ def fetch_skill_velocity_for_week(week_start_iso: str) -> tuple[str | None, pd.D
 
 
 @st.cache_data(ttl=300, show_spinner=False)
+def fetch_skill_demand_weekly_history_for_skills(
+    week_start_iso: str,
+    skills_key: tuple[tuple[str, str | None], ...],
+    *,
+    max_weeks: int = 8,
+) -> tuple[str | None, pd.DataFrame]:
+    """``posting_count`` time series from ``dbo.skill_demand_weekly`` for fixed skills up to anchor week.
+
+    ``skills_key`` is an ordered, hashable sequence of ``(skill_label, esco_uri)`` pairs (``esco_uri``
+    ``None`` matches SQL NULL via ``IS NOT DISTINCT FROM``). Weeks are the **latest** ``max_weeks``
+    distinct ``week_start`` values in the table on or before ``week_start_iso`` (newest-first cap).
+
+    Returns ``(error_message, dataframe)`` like :func:`fetch_top_skills_for_week` on failure.
+    Columns: ``week_start``, ``skill_label``, ``esco_uri``, ``posting_count``.
+    """
+    if not skills_key:
+        return None, pd.DataFrame()
+    try:
+        engine = get_dashboard_engine()
+        or_parts: list[str] = []
+        params: dict[str, Any] = {
+            "ws_end": week_start_iso,
+            "max_weeks": int(max_weeks),
+        }
+        for i, (label, esco_uri) in enumerate(skills_key):
+            or_parts.append(
+                f"(s.skill_label = %(lbl{i})s AND s.esco_uri IS NOT DISTINCT FROM %(esc{i})s)"
+            )
+            params[f"lbl{i}"] = label
+            params[f"esc{i}"] = esco_uri
+        where_skills = " OR ".join(or_parts)
+        sql = f"""
+            SELECT s.week_start, s.skill_label, s.esco_uri, s.posting_count
+            FROM dbo.skill_demand_weekly s
+            WHERE s.week_start IN (
+                SELECT week_start FROM (
+                    SELECT DISTINCT week_start
+                    FROM dbo.skill_demand_weekly
+                    WHERE week_start <= CAST(%(ws_end)s AS date)
+                    ORDER BY week_start DESC
+                    LIMIT %(max_weeks)s
+                ) w
+            )
+            AND ({where_skills})
+            ORDER BY s.week_start ASC, s.skill_label ASC, s.esco_uri ASC NULLS FIRST
+        """
+        df = pd.read_sql(sql, engine, params=params)
+        return None, df
+    except Exception as exc:
+        return str(exc), pd.DataFrame()
+
+
+@st.cache_data(ttl=300, show_spinner=False)
 def fetch_skill_co_occurrence_for_week(week_start_iso: str) -> tuple[str | None, pd.DataFrame]:
     """Load ``dbo.skill_co_occurrence`` for ``week_start`` (analytics step 9).
 
