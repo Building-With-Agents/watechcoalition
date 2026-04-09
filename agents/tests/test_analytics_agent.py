@@ -32,19 +32,23 @@ class TestAnalyticsAgent:
         """Returns 'down' when the fixture file does not exist and DB is unavailable."""
         agent = AnalyticsAgent()
         fake_path = Path("/nonexistent/fixture_analytics_refreshed.json")
-        with patch("agents.analytics.agent._FIXTURE_PATH", fake_path):
-            with patch("agents.analytics.agent.check_db_connection", return_value=False):
-                with patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}):
-                    result = agent.health_check()
+        with (
+            patch("agents.analytics.agent._FIXTURE_PATH", fake_path),
+            patch("agents.analytics.agent.check_db_connection", return_value=False),
+            patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}),
+        ):
+            result = agent.health_check()
         assert result["status"] == "down"
 
     def test_process_emits_analytics_refreshed(self, enriched_event: EventEnvelope) -> None:
         """Output event_type is AnalyticsRefreshed."""
         agent = AnalyticsAgent()
         agent.health_check()
-        with patch("agents.analytics.agent.check_db_connection", return_value=False):
-            with patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}):
-                out = agent.process(enriched_event)
+        with (
+            patch("agents.analytics.agent.check_db_connection", return_value=False),
+            patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}),
+        ):
+            out = agent.process(enriched_event)
         assert out.payload["event_type"] == "AnalyticsRefreshed"
         assert out.agent_id == "analytics-agent"
 
@@ -52,9 +56,11 @@ class TestAnalyticsAgent:
         """Output payload merges fixture keys with clustering placeholders."""
         agent = AnalyticsAgent()
         agent.health_check()
-        with patch("agents.analytics.agent.check_db_connection", return_value=False):
-            with patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}):
-                out = agent.process(enriched_event)
+        with (
+            patch("agents.analytics.agent.check_db_connection", return_value=False),
+            patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}),
+        ):
+            out = agent.process(enriched_event)
         p = out.payload
         assert "top_skills" in p
         assert "seniority_distribution" in p
