@@ -245,3 +245,11 @@ Optional psql: `\d dbo.skill_demand_weekly` and `\d dbo.skill_velocity`.
 ```bash
 PYTHONPATH=. python -c "from agents.common.data_store.models import SkillDemandWeekly, ToolDemandWeekly, SkillVelocity, SkillCoOccurrence"
 ```
+
+## Caveats / Known Limitations
+
+- **Insight Summary not week-scoped**  
+  The `insight_summary` section currently displays the most recent summary (`ORDER BY created_at DESC LIMIT 1`) and is not yet filtered by the selected `week_start`. This will be aligned once the upstream schema includes a week-level key.
+
+- **Posting Freshness not week-scoped**  
+  The `posting_freshness` section reflects a recent sample (latest ~100 rows by `computed_at`) rather than metrics scoped to the selected reporting week. This is intentionally labeled in the UI and will be updated when cross-pair schema support is finalized.
