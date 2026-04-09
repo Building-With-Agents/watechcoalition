@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -55,6 +56,53 @@ def _section_has_data(
         st.info(f"**{title}** — {empty_detail}")
         return False
     return True
+
+
+def _co_occurrence_heatmap_labels_and_matrix(
+    co_df: pd.DataFrame,
+    *,
+    max_skills: int,
+    max_pairs_scan: int,
+) -> tuple[list[str], np.ndarray] | None:
+    """Pick up to ``max_skills`` skills from the highest co-occurring pairs, then build a symmetric matrix.
+
+    Skills are discovered by walking ``co_df`` in row order (query order: count descending) over the first
+    ``max_pairs_scan`` rows, adding each endpoint until the set reaches ``max_skills``. Axis labels are
+    **sorted lexicographically** (consistent with Pair A pair ordering). Matrix entries come from **all**
+    rows in ``co_df`` where both endpoints appear in that skill set; diagonal stays ``NaN`` (no self-pairs).
+    Returns ``None`` if fewer than two skills are collected.
+    """
+    if co_df.empty:
+        return None
+    seen: set[str] = set()
+    for _, row in co_df.head(max_pairs_scan).iterrows():
+        for sk in (str(row["skill_a"]).strip(), str(row["skill_b"]).strip()):
+            if not sk or sk in seen:
+                continue
+            if len(seen) >= max_skills:
+                break
+            seen.add(sk)
+        if len(seen) >= max_skills:
+            break
+    labels = sorted(seen)
+    if len(labels) < 2:
+        return None
+    n = len(labels)
+    idx = {s: i for i, s in enumerate(labels)}
+    mat = np.full((n, n), np.nan, dtype=float)
+    for _, row in co_df.iterrows():
+        a = str(row["skill_a"]).strip()
+        b = str(row["skill_b"]).strip()
+        ia, ib = idx.get(a), idx.get(b)
+        if ia is None or ib is None or ia == ib:
+            continue
+        v = pd.to_numeric(row["co_occurrence_count"], errors="coerce")
+        if pd.isna(v):
+            continue
+        fv = float(v)
+        mat[ia, ib] = fv
+        mat[ib, ia] = fv
+    return labels, mat
 
 
 def _velocity_sparkline_skill_key(skill_label: object, esco_uri: object) -> tuple[str, str | None]:
@@ -347,7 +395,8 @@ def render_weekly_insights() -> None:
     st.subheader("Skill co-occurrence")
     st.caption(
         "**`dbo.skill_co_occurrence`** (step 9): skills that co-occur on postings (lexicographic pairs per "
-        "IMP-021). Heatmaps can be added later."
+        "IMP-021). Heatmap shows co-posting intensity among a **small skill subset** derived from the "
+        "highest-count pairs (full table is capped at 200 rows per week)."
     )
 
     co_hint, co_df = fetch_skill_co_occurrence_for_week(selected_label)
@@ -360,38 +409,74 @@ def render_weekly_insights() -> None:
             "weekly skill demand exists for this week."
         ),
     ):
-        co_display = co_df.copy()
-        co_display["pair"] = co_display["skill_a"].astype(str) + " ↔ " + co_display["skill_b"].astype(str)
-        st.dataframe(
-            co_display[["pair", "co_occurrence_count"]].rename(
-                columns={
+        heatmap_max_skills = 12
+        heatmap_pairs_scan = 80
+        hm = _co_occurrence_heatmap_labels_and_matrix(
+            co_df,
+            max_skills=heatmap_max_skills,
+            max_pairs_scan=heatmap_pairs_scan,
+        )
+        if hm is None:
+            st.caption(
+                "Heatmap needs **at least two** distinct skills from the top co-occurring pairs "
+                f"(scanned up to **{heatmap_pairs_scan}** rows). Ranked detail is still available below."
+            )
+        else:
+            labels, mat = hm
+            fig_hm = px.imshow(
+                mat,
+                x=labels,
+                y=labels,
+                labels={"x": "Skill", "y": "Skill", "color": "Co-postings"},
+                color_continuous_scale="Blues",
+                title=f"Co-occurrence heatmap ({len(labels)} skills)",
+                aspect="equal",
+            )
+            fig_hm.update_layout(
+                margin=dict(t=50, b=120, l=120, r=40),
+                height=max(360, 28 * len(labels) + 140),
+            )
+            fig_hm.update_xaxes(side="bottom", tickangle=-45)
+            st.plotly_chart(fig_hm, width="stretch")
+            st.caption(
+                f"Skills are chosen by walking the **top pairs** (up to **{heatmap_pairs_scan}** rows) until "
+                f"**{heatmap_max_skills}** unique names are collected; axes are **sorted A–Z**. "
+                "Off-diagonal counts come from any row in this week’s result where both skills appear in the "
+                "subset; diagonal is empty (pairs are skill ≠ skill)."
+            )
+
+        with st.expander("Ranked pairs, bar chart, and raw rows"):
+            co_display = co_df.copy()
+            co_display["pair"] = co_display["skill_a"].astype(str) + " ↔ " + co_display["skill_b"].astype(str)
+            st.dataframe(
+                co_display[["pair", "co_occurrence_count"]].rename(
+                    columns={
+                        "pair": "Skill pair",
+                        "co_occurrence_count": "Co-postings",
+                    }
+                ),
+                width="stretch",
+                hide_index=True,
+            )
+
+            co_bar_cap = 15
+            co_bar = co_df.head(co_bar_cap).copy()
+            co_bar["pair"] = co_bar["skill_a"].astype(str) + " ↔ " + co_bar["skill_b"].astype(str)
+            co_bar = co_bar.sort_values("co_occurrence_count", ascending=True)
+            fig_co = px.bar(
+                co_bar,
+                x="co_occurrence_count",
+                y="pair",
+                orientation="h",
+                labels={
+                    "co_occurrence_count": "Co-posting count",
                     "pair": "Skill pair",
-                    "co_occurrence_count": "Co-postings",
-                }
-            ),
-            width="stretch",
-            hide_index=True,
-        )
+                },
+                title=f"Top {min(co_bar_cap, len(co_bar))} pairs by co-occurrence",
+            )
+            _layout_weekly_horizontal_bar(fig_co, row_count=len(co_bar), row_px=22)
+            st.plotly_chart(fig_co, width="stretch")
 
-        co_bar_cap = 15
-        co_bar = co_df.head(co_bar_cap).copy()
-        co_bar["pair"] = co_bar["skill_a"].astype(str) + " ↔ " + co_bar["skill_b"].astype(str)
-        co_bar = co_bar.sort_values("co_occurrence_count", ascending=True)
-        fig_co = px.bar(
-            co_bar,
-            x="co_occurrence_count",
-            y="pair",
-            orientation="h",
-            labels={
-                "co_occurrence_count": "Co-posting count",
-                "pair": "Skill pair",
-            },
-            title=f"Top {min(co_bar_cap, len(co_bar))} pairs by co-occurrence",
-        )
-        _layout_weekly_horizontal_bar(fig_co, row_count=len(co_bar), row_px=22)
-        st.plotly_chart(fig_co, width="stretch")
-
-        with st.expander("Raw `skill_co_occurrence` rows (query order)"):
             st.dataframe(co_df, width="stretch", hide_index=True)
 
     st.markdown("---")
