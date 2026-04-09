@@ -114,6 +114,80 @@ def _velocity_sparkline_skill_key(skill_label: object, esco_uri: object) -> tupl
     return (label, text if text else None)
 
 
+def _dedupe_role_display_labels(base: list[str]) -> list[str]:
+    """Make repeated role labels unique for Plotly categories (stable suffix)."""
+    seen: dict[str, int] = {}
+    out: list[str] = []
+    for lab in base:
+        n = seen.get(lab, 0)
+        seen[lab] = n + 1
+        out.append(lab if n == 0 else f"{lab} ({n + 1})")
+    return out
+
+
+def _role_snapshot_precomputed_box_figure(rs_df: pd.DataFrame) -> tuple[go.Figure | None, str | None]:
+    """Horizontal box plot from aggregate quartiles only (no raw salary samples).
+
+    Uses Plotly ``go.Box`` **precomputed** fields: ``q1`` = ``salary_p25``, ``median`` = ``median_salary``,
+    ``q3`` = ``salary_p75``. ``lowerfence`` / ``upperfence`` are set to the same quartiles because min/max
+    are not stored — whiskers coincide with the box edges (honest for this data shape).
+
+    Returns ``(figure, skip_reason)`` with ``skip_reason`` set when no drawable rows remain.
+    """
+    if rs_df.empty:
+        return None, None
+    needed = ("salary_p25", "median_salary", "salary_p75")
+    if not all(c in rs_df.columns for c in needed):
+        return (
+            None,
+            "Salary box plot skipped — result is missing **salary_p25**, **median_salary**, or **salary_p75**.",
+        )
+    work = rs_df.copy()
+    work["_p25"] = pd.to_numeric(work["salary_p25"], errors="coerce")
+    work["_med"] = pd.to_numeric(work["median_salary"], errors="coerce")
+    work["_p75"] = pd.to_numeric(work["salary_p75"], errors="coerce")
+    work = work.dropna(subset=["_p25", "_med", "_p75"])
+    ok = (work["_p25"] <= work["_med"]) & (work["_med"] <= work["_p75"])
+    work = work.loc[ok]
+    if work.empty:
+        return (
+            None,
+            "Salary box plot skipped — need finite **salary_p25**, **median_salary**, **salary_p75** "
+            "with **p25 ≤ median ≤ p75** for at least one role.",
+        )
+    work = work.sort_values("_med", ascending=True)
+    base_labels: list[str] = []
+    for _, row in work.iterrows():
+        title = str(row.get("role_title") or "").strip()
+        rid = str(row.get("canonical_role_id") or "").strip()
+        base_labels.append(title if title else (rid or "—"))
+    y_labels = _dedupe_role_display_labels(base_labels)
+    q1 = work["_p25"].astype(float).tolist()
+    med = work["_med"].astype(float).tolist()
+    q3 = work["_p75"].astype(float).tolist()
+    fig = go.Figure(
+        go.Box(
+            orientation="h",
+            q1=q1,
+            median=med,
+            q3=q3,
+            lowerfence=q1,
+            upperfence=q3,
+            y=y_labels,
+            boxpoints=False,
+            showlegend=False,
+        )
+    )
+    n = len(y_labels)
+    fig.update_layout(
+        title="Salary distribution by role (IQR from aggregates)",
+        xaxis_title="Salary (same units as snapshot table)",
+        margin=dict(t=50, b=60, l=200, r=40),
+        height=max(280, 26 * n + 120),
+    )
+    return fig, None
+
+
 def _layout_weekly_horizontal_bar(
     fig: go.Figure,
     *,
@@ -483,7 +557,8 @@ def render_weekly_insights() -> None:
     st.subheader("Role salary snapshot")
     st.caption(
         "**`dbo.role_snapshot_weekly`** (Pair C — placeholder). "
-        "Contract columns include **`canonical_role_id`**, **`role_title`**, **`salary_p25`** / **`median_salary`** / **`salary_p75`**. "
+        "Box plots use **precomputed** **`salary_p25`** / **`median_salary`** / **`salary_p75`** only (no raw "
+        "offers in this query). Whiskers are set to the same quartiles because min/max are not available. "
         f"Filtered to **week_start = {selected_label}**."
     )
     rs_hint, rs_df = fetch_role_snapshot_weekly_placeholder(selected_label)
@@ -496,7 +571,13 @@ def render_weekly_insights() -> None:
             "aggregates for this anchor."
         ),
     ):
-        st.dataframe(rs_df, width="stretch", hide_index=True)
+        fig_rs, box_skip = _role_snapshot_precomputed_box_figure(rs_df)
+        if box_skip:
+            st.caption(box_skip)
+        if fig_rs is not None:
+            st.plotly_chart(fig_rs, width="stretch")
+        with st.expander("Underlying `role_snapshot_weekly` rows"):
+            st.dataframe(rs_df, width="stretch", hide_index=True)
 
     st.markdown("---")
     st.subheader("Posting lifecycle")
