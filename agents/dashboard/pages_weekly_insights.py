@@ -592,6 +592,35 @@ def render_weekly_insights() -> None:
         title="Posting lifecycle",
         empty_detail="No per-posting freshness rows yet. Run the Pair D posting-freshness persistence when wired.",
     ):
+        st.caption(
+            "**Sample:** up to the **100** most recently computed rows (`ORDER BY computed_at DESC`). "
+            "Figures below describe this slice only."
+        )
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Rows in sample", f"{len(pf_df):,}")
+        if "duration_days" in pf_df.columns:
+            _dd = pd.to_numeric(pf_df["duration_days"], errors="coerce")
+            med_dd = _dd.median()
+            m2.metric(
+                "Median days listed",
+                f"{med_dd:.0f}" if pd.notna(med_dd) else "—",
+            )
+        else:
+            m2.metric("Median days listed", "—")
+        if "is_repost" in pf_df.columns:
+            _rp = pf_df["is_repost"].map(
+                lambda x: x is True or str(x).lower() in ("1", "true", "t")
+            )
+            n_rp = len(_rp)
+            repost_n = int(_rp.sum()) if n_rp else 0
+            pct = 100.0 * repost_n / n_rp if n_rp else float("nan")
+            m3.metric(
+                "Repost share",
+                f"{pct:.0f} %" if pd.notna(pct) else "—",
+            )
+        else:
+            m3.metric("Repost share", "—")
+
         st.dataframe(pf_df, width="stretch", hide_index=True)
         if "duration_days" in pf_df.columns and not pf_df.empty:
             hist_df = pf_df.assign(
@@ -601,10 +630,14 @@ def render_weekly_insights() -> None:
                 fig_pf = px.histogram(
                     hist_df,
                     x="_dd",
-                    labels={"_dd": "Duration (days listed)"},
-                    title="Sample of postings by duration_days (latest rows)",
+                    labels={"_dd": "Days listed"},
+                    title="Distribution of days listed (`duration_days`)",
                 )
-                fig_pf.update_layout(margin=dict(t=40, b=60, l=40, r=20))
+                fig_pf.update_layout(
+                    margin=dict(t=40, b=60, l=40, r=20),
+                    xaxis_title="Days listed",
+                    yaxis_title="Postings in sample",
+                )
                 st.plotly_chart(fig_pf, width="stretch")
 
     st.markdown("---")
