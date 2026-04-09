@@ -31,8 +31,12 @@ _SALARY_MIDPOINT_EXPR = """(
 _ANNUALIZED_SALARY_EXPR = f"""(
     CASE
         WHEN {_SALARY_MIDPOINT_EXPR} IS NULL OR {_SALARY_MIDPOINT_EXPR} <= 0 THEN NULL::double precision
-        WHEN LOWER(TRIM(COALESCE(nj.salary_period, ''))) = 'hourly'
+        WHEN LOWER(TRIM(COALESCE(nj.salary_period, ''))) IN ('hourly', 'hour', 'hr')
             THEN ({_SALARY_MIDPOINT_EXPR}) * 2080.0
+        WHEN LOWER(TRIM(COALESCE(nj.salary_period, ''))) IN ('monthly', 'month', 'mo')
+            THEN ({_SALARY_MIDPOINT_EXPR}) * 12.0
+        WHEN LOWER(TRIM(COALESCE(nj.salary_period, ''))) IN ('weekly', 'week', 'wk')
+            THEN ({_SALARY_MIDPOINT_EXPR}) * 52.0
         ELSE {_SALARY_MIDPOINT_EXPR}
     END
 )"""

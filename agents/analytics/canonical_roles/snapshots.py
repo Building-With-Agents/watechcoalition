@@ -44,7 +44,7 @@ def _annualized_numeric_salary(
     salary_max: float | None,
     salary_period: str | None,
 ) -> float | None:
-    """Single scalar salary for percentile math; annualize hourly with 2080 h/yr factor."""
+    """Single scalar salary for percentile math; annualize non-annual periods."""
     if salary_min is None and salary_max is None:
         return None
     if salary_min is not None and salary_max is not None:
@@ -56,8 +56,12 @@ def _annualized_numeric_salary(
     if mid <= 0:
         return None
     period = (salary_period or "").strip().lower()
-    if period == "hourly":
+    if period in ("hourly", "hour", "hr"):
         return mid * 2080.0
+    if period in ("monthly", "month", "mo"):
+        return mid * 12.0
+    if period in ("weekly", "week", "wk"):
+        return mid * 52.0
     return mid
 
 
