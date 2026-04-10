@@ -128,6 +128,7 @@ os.getenv("SPAM_FLAG_THRESHOLD", "0.7")
 os.getenv("SPAM_REJECT_THRESHOLD", "0.9")
 os.getenv("SKILL_CONFIDENCE_THRESHOLD", "0.75")
 os.getenv("BATCH_SIZE", "100")
+os.getenv("JSEARCH_MAX_PAGES", "10")       # Cap /search pages per JSearch fetch (max 50)
 ```
 
 ## Pydantic for Data Models

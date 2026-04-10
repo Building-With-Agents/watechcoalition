@@ -211,6 +211,7 @@ class TestRawRowIngestionSucceeded:
         from agents.dashboard.streamlit_app import _raw_row_ingestion_succeeded
 
         assert _raw_row_ingestion_succeeded("pending") is True
+        assert _raw_row_ingestion_succeeded("awaiting_description") is True
         assert _raw_row_ingestion_succeeded("normalized") is True
         assert _raw_row_ingestion_succeeded("quarantined") is True
         assert _raw_row_ingestion_succeeded("PENDING") is True

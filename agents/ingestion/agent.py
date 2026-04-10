@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -39,6 +40,17 @@ from agents.ingestion.state import IngestionState, SourceResult
 log = structlog.get_logger()
 
 _DEAD_LETTER_DIR = Path(__file__).parent.parent / "data" / "dead_letter"
+
+
+def raw_processing_status_for_record(record: RawJobRecord) -> str:
+    """Return ``pending`` (normalization-eligible) or ``awaiting_description``.
+
+    Empty or whitespace-only ``record.description`` → ``awaiting_description``.
+    Set env ``ALLOW_EMPTY_DESCRIPTION_PENDING=1`` to stage all rows as ``pending`` (legacy behavior).
+    """
+    if os.getenv("ALLOW_EMPTY_DESCRIPTION_PENDING", "").strip().lower() in ("1", "true", "yes"):
+        return "pending"
+    return "pending" if (record.description or "").strip() else "awaiting_description"
 
 
 # ---------------------------------------------------------------------------
@@ -234,6 +246,7 @@ def stage_records(state: IngestionState) -> IngestionState:
                     title=record.title,
                     company=record.company,
                     description=record.description or None,
+                    description_source=("jsearch_search" if record.source == "jsearch" else None),
                     city=record.city,
                     state=record.state,
                     country=record.country,
@@ -250,7 +263,7 @@ def stage_records(state: IngestionState) -> IngestionState:
                     salary_currency=record.salary_currency,
                     salary_period=record.salary_period,
                     raw_payload=record.raw_payload,
-                    processing_status="pending",
+                    processing_status=raw_processing_status_for_record(record),
                 )
                 session.add(row)
                 session.flush()

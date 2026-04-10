@@ -67,14 +67,14 @@ import structlog  # noqa: E402
 
 from agents.analytics.agent import AnalyticsAgent  # noqa: E402
 from agents.common.event_envelope import EventEnvelope  # noqa: E402
+from agents.common.llm_adapter import register_tracer  # noqa: E402
 from agents.common.message_bus import InProcessEventBus  # noqa: E402
 from agents.common.message_bus.contracts import ORCHESTRATOR_AGENT_ID  # noqa: E402
+from agents.common.observability import LangfuseTracer  # noqa: E402
 from agents.common.types import JobRecord  # noqa: E402
 from agents.demand_analysis.agent import DemandAnalysisAgent  # noqa: E402
 from agents.enrichment.agent import EnrichmentAgent  # noqa: E402
 from agents.enrichment.agent import register_alert_bus as register_enrichment_alert_bus  # noqa: E402
-from agents.common.llm_adapter import register_tracer  # noqa: E402
-from agents.common.observability import LangfuseTracer  # noqa: E402
 from agents.ingestion.agent import IngestionAgent  # noqa: E402
 from agents.normalization.agent import NormalizationAgent  # noqa: E402
 from agents.orchestration.agent import OrchestrationAgent  # noqa: E402

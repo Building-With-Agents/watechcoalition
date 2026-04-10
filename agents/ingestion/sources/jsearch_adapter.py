@@ -1,6 +1,13 @@
 """JSearch source adapter — fetches job postings via RapidAPI JSearch (httpx).
 
-API key from environment: JSEARCH_API_KEY. No hardcoded credentials.
+Environment:
+
+- ``JSEARCH_API_KEY`` — required for fetch.
+- ``BATCH_SIZE`` — target batch size; used to derive how many pages to request
+  (roughly ``ceil(BATCH_SIZE / 10)``, ~10 jobs per page).
+- ``JSEARCH_MAX_PAGES`` — hard cap on search pages per fetch (default ``10``,
+  max ``50``). Raise with ``BATCH_SIZE`` when you need more than ~100 listings
+  in one adapter call (mind RapidAPI rate limits).
 """
 
 from __future__ import annotations
@@ -10,13 +17,37 @@ import os
 from datetime import datetime
 
 import httpx
+import structlog
 
 from agents.common.types.raw_job_record import RawJobRecord
 from agents.common.types.region_config import RegionConfig
 from agents.ingestion.sources.base_adapter import SourceAdapter
 
+log = structlog.get_logger()
+
 JSEARCH_BASE_URL = "https://jsearch.p.rapidapi.com/search"
 JSEARCH_HOST = "jsearch.p.rapidapi.com"
+
+# Upper bound for JSEARCH_MAX_PAGES to avoid accidental huge request loops.
+_JSEARCH_MAX_PAGES_CEILING = 50
+
+
+def jsearch_num_pages_from_env() -> int:
+    """How many ``/search`` pages to request for one :meth:`JSearchAdapter.fetch` call.
+
+    Combines ``BATCH_SIZE`` (desired volume) with ``JSEARCH_MAX_PAGES`` (safety cap).
+    """
+    try:
+        batch_size = int(os.getenv("BATCH_SIZE", "100"))
+    except (TypeError, ValueError):
+        batch_size = 100
+    computed = max(1, (batch_size + 9) // 10)
+    try:
+        max_pages = int(os.getenv("JSEARCH_MAX_PAGES", "10"))
+    except (TypeError, ValueError):
+        max_pages = 10
+    max_pages = max(1, min(max_pages, _JSEARCH_MAX_PAGES_CEILING))
+    return min(computed, max_pages)
 
 
 def _fingerprint(source: str, external_id: str, title: str, company: str, date_posted: str) -> str:
@@ -42,6 +73,19 @@ def _parse_date(value: str | int | float | None) -> datetime | None:
     return None
 
 
+def jsearch_extract_description(job: dict) -> str:
+    """Normalize description text from a JSearch job object (search or detail response)."""
+    description = job.get("job_description") or job.get("description") or job.get("job_highlights") or ""
+    if isinstance(description, dict):
+        description = " ".join(
+            str(v)
+            for v in (description.get("Qualifications", []) or []) + (description.get("Responsibilities", []) or [])
+        )
+    if not isinstance(description, str):
+        description = str(description or "")
+    return description
+
+
 def _job_to_raw_record(job: dict, region_id: str) -> RawJobRecord:
     """Map a single JSearch API job object to RawJobRecord."""
     # JSearch often uses employer_name, job_title, job_id, job_apply_link, job_city, job_state, job_country
@@ -51,14 +95,7 @@ def _job_to_raw_record(job: dict, region_id: str) -> RawJobRecord:
 
     title = (job.get("job_title") or job.get("title") or "").strip() or "Untitled"
     company = (job.get("employer_name") or job.get("company_name") or job.get("company") or "").strip() or "Unknown"
-    description = job.get("job_description") or job.get("description") or job.get("job_highlights") or ""
-    if isinstance(description, dict):
-        description = " ".join(
-            str(v)
-            for v in (description.get("Qualifications", []) or []) + (description.get("Responsibilities", []) or [])
-        )
-    if not isinstance(description, str):
-        description = str(description or "")
+    description = jsearch_extract_description(job)
 
     date_posted_val = (
         job.get("job_posted_at_timestamp") or job.get("job_posted_at_datetime_utc") or job.get("posted_at")
@@ -153,18 +190,15 @@ class JSearchAdapter(SourceAdapter):
             query_parts.extend(region.role_categories[:2])
         query = " ".join(query_parts).strip() or "jobs"
 
-        num_pages = 1
-        try:
-            batch_size = int(os.getenv("BATCH_SIZE", "100"))
-            # Roughly 10 jobs per page on JSearch; cap pages to avoid rate limits
-            num_pages = min(10, max(1, (batch_size + 9) // 10))
-        except (TypeError, ValueError):
-            num_pages = 1
+        num_pages = jsearch_num_pages_from_env()
 
         all_records: list[RawJobRecord] = []
         seen_hashes: set[str] = set()
+        search_requests = 0
+        pages_fetched = 0
         async with httpx.AsyncClient(timeout=30.0) as client:
             for page in range(1, num_pages + 1):
+                search_requests += 1
                 response = await client.get(
                     JSEARCH_BASE_URL,
                     params={
@@ -178,6 +212,7 @@ class JSearchAdapter(SourceAdapter):
                     },
                 )
                 response.raise_for_status()
+                pages_fetched += 1
                 data = response.json()
                 jobs = data.get("data") if isinstance(data, dict) else []
                 if not jobs:
@@ -190,6 +225,13 @@ class JSearchAdapter(SourceAdapter):
                             all_records.append(rec)
                 if len(jobs) < 10:
                     break
+
+        log.info(
+            "jsearch_search_complete",
+            jsearch_search_requests_total=search_requests,
+            jsearch_search_pages_fetched=pages_fetched,
+            search_unique_records_staged=len(all_records),
+        )
 
         return all_records
 

@@ -8,9 +8,11 @@ Optional legacy raw-SQL scripts (pre-consolidation paths) live under
 ``legacy_migrations/`` for reference only; use :func:`run_migrations` for the app.
 
 Usage:
-    from agents.common.data_store.migrations import run_migrations
+    from agents.common.data_store.migrations import run_migrations, sync_postgresql_agent_sequences
     from agents.common.data_store.database import get_engine
     run_migrations(get_engine())
+    # After a pg_restore / manual inserts, if SERIAL PK inserts fail:
+    sync_postgresql_agent_sequences(get_engine())
 """
 
 from __future__ import annotations
@@ -157,6 +159,15 @@ _NORMALIZED_JOBS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.normalized_jobs ADD COLUMN IF NOT EXISTS employer_metadata JSONB",
 ]
 
+# JSearch detail backfill (description fill rate — Phase 1a)
+_RAW_INGESTED_JOBS_DESCRIPTION_DETAIL_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS description_source TEXT",
+    "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS description_fetched_at TIMESTAMPTZ",
+    "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS detail_fetch_attempts INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS detail_last_error TEXT",
+    "ALTER TABLE dbo.raw_ingested_jobs ADD COLUMN IF NOT EXISTS detail_fetch_status TEXT",
+]
+
 # Company HQ / location fields for enrichment resolve_location (#110)
 _COMPANIES_LOCATION_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.companies ADD COLUMN IF NOT EXISTS city TEXT",
@@ -190,6 +201,7 @@ CREATE TABLE IF NOT EXISTS dbo.naics (
 );
 """
 
+# Integer SERIAL/IDENTITY PK tables only (omit UUID PK tables like employer_profiles).
 _SERIAL_SEQUENCE_TARGETS = (
     ("raw_ingested_jobs", "id"),
     ("job_ingestion_runs", "id"),
@@ -197,20 +209,49 @@ _SERIAL_SEQUENCE_TARGETS = (
     ("normalization_quarantine", "id"),
     ("extracted_intelligence", "id"),
     ("llm_audit_log", "id"),
-    ("employer_profiles", "id"),
 )
+
+
+def _resolve_pg_serial_sequence(
+    conn, *, schema: str, table_name: str, column_name: str
+) -> str | None:
+    """Return fully qualified sequence name for a column, or None.
+
+    Uses ``pg_get_serial_sequence`` first; if NULL (some DDL / restores), falls back to
+    the conventional ``{table}_{column}_seq`` in the same schema.
+    """
+    regtbl = f"{schema}.{table_name}"
+    seq_name = conn.execute(
+        text("SELECT pg_get_serial_sequence(CAST(:regtbl AS text), CAST(:col AS text))"),
+        {"regtbl": regtbl, "col": column_name},
+    ).scalar()
+    if seq_name:
+        return seq_name
+    row = conn.execute(
+        text(
+            """
+            SELECT quote_ident(n.nspname::text) || '.' || quote_ident(c.relname::text)
+            FROM pg_class c
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname = :schema
+              AND c.relkind = 'S'
+              AND c.relname = :seq_relname
+            """
+        ),
+        {"schema": schema, "seq_relname": f"{table_name}_{column_name}_seq"},
+    ).scalar()
+    return str(row) if row else None
 
 
 def _sync_serial_sequence(engine: Engine, *, table_name: str, column_name: str = "id") -> None:
     """Advance a PostgreSQL serial/identity sequence to at least ``MAX(column)``."""
+    if engine.dialect.name != "postgresql":
+        return
     try:
         with engine.begin() as conn:
-            seq_name = conn.execute(
-                text(
-                    "SELECT pg_get_serial_sequence(CAST(:table_name AS text), CAST(:column_name AS text))"
-                ),
-                {"table_name": f"dbo.{table_name}", "column_name": column_name},
-            ).scalar()
+            seq_name = _resolve_pg_serial_sequence(
+                conn, schema="dbo", table_name=table_name, column_name=column_name
+            )
             if not seq_name:
                 return
 
@@ -240,6 +281,21 @@ def _sync_serial_sequence(engine: Engine, *, table_name: str, column_name: str =
 def _sync_agent_serial_sequences(engine: Engine) -> None:
     for table_name, column_name in _SERIAL_SEQUENCE_TARGETS:
         _sync_serial_sequence(engine, table_name=table_name, column_name=column_name)
+
+
+def sync_postgresql_agent_sequences(engine: Engine | None = None) -> None:
+    """Resync SERIAL/IDENTITY sequences to ``MAX(id)`` (safe after restore or manual inserts).
+
+    Call from scripts or after ``run_migrations`` if sequences were desynced.
+    No-op on non-PostgreSQL dialects.
+    """
+    if engine is None:
+        from agents.common.data_store.database import get_engine
+
+        engine = get_engine()
+    if engine.dialect.name != "postgresql":
+        return
+    _sync_agent_serial_sequences(engine)
 
 
 def _ensure_duplicate_cluster_id_uuid(engine: Engine) -> None:
@@ -395,6 +451,17 @@ def run_migrations(engine: Engine) -> None:
         except Exception as exc:
             log.warning(
                 "migration_companies_location_alter_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
+
+    for stmt in _RAW_INGESTED_JOBS_DESCRIPTION_DETAIL_ALTER_STATEMENTS:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(stmt))
+        except Exception as exc:
+            log.warning(
+                "migration_raw_ingested_jobs_description_detail_skipped",
                 statement=stmt,
                 error=str(exc),
             )
