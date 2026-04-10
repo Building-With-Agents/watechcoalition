@@ -59,71 +59,46 @@ class TestAnalyticsAgent:
         result = agent.health_check()
         assert result["status"] == "down"
 
-    @patch("agents.analytics.agent.refresh_skill_co_occurrence", return_value=9)
-    @patch("agents.analytics.agent.refresh_skill_velocity", return_value=8)
-    @patch("agents.analytics.agent.refresh_tool_demand_weekly", return_value=3)
-    @patch("agents.analytics.agent.refresh_skill_demand_weekly", return_value=2)
-    @patch("agents.analytics.agent.session_scope")
-    @patch.dict(os.environ, {"PYTHON_DATABASE_URL": "postgresql+psycopg2://localhost/test"})
+    @patch("agents.analytics.agent.check_db_connection", return_value=False)
     def test_process_runs_aggregates_in_order_with_row_counts(
         self,
-        _mock_scope: MagicMock,
-        _mock_r2: MagicMock,
-        _mock_r3: MagicMock,
-        _mock_r8: MagicMock,
-        _mock_r9: MagicMock,
+        _mock_db: MagicMock,
         enriched_event: EventEnvelope,
     ) -> None:
-        mock_cm = MagicMock()
-        mock_cm.__enter__.return_value = MagicMock()
-        mock_cm.__exit__.return_value = None
-        _mock_scope.return_value = mock_cm
-
+        """``process()`` runs the 13-step pipeline and emits flat ``AnalyticsRefreshed`` (Step 13 builder)."""
         enriched_event.payload["analytics_target_week"] = "2025-01-06"
         agent = AnalyticsAgent()
         out = agent.process(enriched_event)
         assert out.payload["event_type"] == "AnalyticsRefreshed"
         assert out.agent_id == "analytics-agent"
-        ar = out.payload["aggregate_refresh"]
-        assert ar["target_week"] == "2025-01-06"
-        assert ar["skill_demand_weekly_rows"] == 2
-        assert ar["tool_demand_weekly_rows"] == 3
-        assert ar["skill_velocity_rows"] == 8
-        assert ar["skill_co_occurrence_rows"] == 9
-        assert _mock_r2.call_count == 1
-        assert _mock_r3.call_count == 1
-        assert _mock_r8.call_count == 1
-        assert _mock_r9.call_count == 1
-        assert _mock_scope.call_count == 4
+        p = out.payload
+        assert p["batch_id"] == enriched_event.payload["batch_id"]
+        assert p["triggered_by_batch_id"] == enriched_event.payload["batch_id"]
+        assert "refreshed_at" in p
+        assert isinstance(p["refreshed_at"], str)
+        assert p["refreshed_at"].endswith("Z")
+        # enriched_event fixture: two freshness_records with posting_id → Step 10 staleness sample
+        assert p["freshness_record_count"] == 2
+        assert p["trajectory_map_count"] == 0
+        assert p["summaries_generated_count"] == 0
+        assert p["llm_generated_count"] == 0
+        assert p["fallback_count"] == 0
+        assert "aggregate_refresh" not in p
 
-    @patch("agents.analytics.agent.refresh_skill_co_occurrence")
-    @patch("agents.analytics.agent.refresh_skill_velocity")
-    @patch("agents.analytics.agent.refresh_tool_demand_weekly", return_value=1)
-    @patch("agents.analytics.agent.refresh_skill_demand_weekly", side_effect=RuntimeError("step2 failed"))
-    @patch("agents.analytics.agent.session_scope")
-    @patch.dict(os.environ, {"PYTHON_DATABASE_URL": "postgresql+psycopg2://localhost/test"})
+    @patch("agents.analytics.agent.check_db_connection", return_value=False)
     def test_process_skips_steps_8_and_9_when_step_2_fails(
         self,
-        _mock_scope: MagicMock,
-        _mock_r2: MagicMock,
-        _mock_r3: MagicMock,
-        _mock_r8: MagicMock,
-        _mock_r9: MagicMock,
+        _mock_db: MagicMock,
         enriched_event: EventEnvelope,
     ) -> None:
-        mock_cm = MagicMock()
-        mock_cm.__enter__.return_value = MagicMock()
-        mock_cm.__exit__.return_value = None
-        _mock_scope.return_value = mock_cm
-
+        """``process()`` does not nest ``aggregate_refresh``; Pair A DB refresh ordering is ``process_aggregates``."""
         agent = AnalyticsAgent()
         out = agent.process(enriched_event)
-        ar = out.payload["aggregate_refresh"]
-        assert ar["skill_velocity_skipped"] is True
-        assert ar["skill_co_occurrence_skipped"] is True
-        assert "skill_demand_weekly_error" in ar
-        _mock_r8.assert_not_called()
-        _mock_r9.assert_not_called()
+        p = out.payload
+        assert p["event_type"] == "AnalyticsRefreshed"
+        assert "aggregate_refresh" not in p
+        assert p["freshness_record_count"] == 2
+        assert p["trajectory_map_count"] == 0
 
     def test_process_skips_db_refresh_without_url(self, enriched_event: EventEnvelope) -> None:
         with (
@@ -133,8 +108,13 @@ class TestAnalyticsAgent:
         ):
             agent = AnalyticsAgent()
             out = agent.process(enriched_event)
-        assert "aggregate_refresh" in out.payload
-        assert "skipped" in out.payload["aggregate_refresh"].get("note", "").lower()
+        p = out.payload
+        assert p["event_type"] == "AnalyticsRefreshed"
+        assert "aggregate_refresh" not in p
+        assert p["batch_id"] == enriched_event.payload["batch_id"]
+        assert p["triggered_by_batch_id"] == enriched_event.payload["batch_id"]
+        assert "refreshed_at" in p
+        assert "freshness_record_count" in p
         mock_r2.assert_not_called()
         mock_scope.assert_not_called()
 
