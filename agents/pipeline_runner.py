@@ -60,12 +60,12 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from dotenv import load_dotenv  # noqa: E402
+import structlog  # noqa: E402
 
 load_dotenv(_REPO_ROOT / ".env")
 
-import structlog  # noqa: E402
-
 from agents.analytics.agent import AnalyticsAgent  # noqa: E402
+from agents.analytics.agent import register_alert_bus as register_analytics_alert_bus  # noqa: E402
 from agents.common.event_envelope import EventEnvelope  # noqa: E402
 from agents.common.llm_adapter import register_tracer  # noqa: E402
 from agents.common.message_bus import InProcessEventBus  # noqa: E402
@@ -73,8 +73,10 @@ from agents.common.message_bus.contracts import ORCHESTRATOR_AGENT_ID  # noqa: E
 from agents.common.observability import LangfuseTracer  # noqa: E402
 from agents.common.types import JobRecord  # noqa: E402
 from agents.demand_analysis.agent import DemandAnalysisAgent  # noqa: E402
-from agents.enrichment.agent import EnrichmentAgent  # noqa: E402
-from agents.enrichment.agent import register_alert_bus as register_enrichment_alert_bus  # noqa: E402
+from agents.enrichment.agent import (  # noqa: E402
+    EnrichmentAgent,
+    register_alert_bus as register_enrichment_alert_bus,
+)
 from agents.ingestion.agent import IngestionAgent  # noqa: E402
 from agents.normalization.agent import NormalizationAgent  # noqa: E402
 from agents.orchestration.agent import OrchestrationAgent  # noqa: E402
@@ -122,6 +124,17 @@ def _on_enrichment_degraded_alert(event: EventEnvelope) -> None:
         posting_id=event.payload.get("posting_id"),
         reason=event.payload.get("reason"),
         classifier=event.payload.get("classifier"),
+    )
+
+
+def _on_emergence_alert(event: EventEnvelope) -> None:
+    """Orchestration-side receipt for EmergenceAlert (bus subscriber). Phase 1: structured log only."""
+    log.warning(
+        "orchestration_EmergenceAlert_received",
+        correlation_id=event.correlation_id,
+        posting_count=event.payload.get("posting_count"),
+        candidate_role_label=event.payload.get("candidate_role_label"),
+        nearest_canonical_role=event.payload.get("nearest_canonical_role"),
     )
 
 
@@ -348,7 +361,13 @@ def main() -> None:
         _on_enrichment_degraded_alert,
         subscriber_id=ORCHESTRATOR_AGENT_ID,
     )
+    alert_bus.subscribe(
+        "EmergenceAlert",
+        _on_emergence_alert,
+        subscriber_id=ORCHESTRATOR_AGENT_ID,
+    )
     register_enrichment_alert_bus(alert_bus)
+    register_analytics_alert_bus(alert_bus)
 
     # Langfuse tracing (optional — activate only when API key is present)
     if os.getenv("LANGFUSE_SECRET_KEY"):
@@ -401,6 +420,7 @@ def main() -> None:
         )
     finally:
         register_enrichment_alert_bus(None)
+        register_analytics_alert_bus(None)
         # Flush and shut down Langfuse tracer so all traces are sent
         if _tracer is not None and hasattr(_tracer, "shutdown"):
             _tracer.shutdown()

@@ -1,9 +1,10 @@
-"""Tests for AnalyticsAgent — aggregate refresh (Week 7) + fixture overlay."""
+"""Tests for AnalyticsAgent — aggregate refresh (Week 7) + clustering + fixture overlay."""
 
 from __future__ import annotations
 
 import os
 from datetime import date, datetime, timezone
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from agents.analytics.agent import AnalyticsAgent, _resolve_target_week, default_analytics_target_week
@@ -159,8 +160,12 @@ class TestAnalyticsAgent:
     def test_process_includes_batch_data(self, enriched_event: EventEnvelope) -> None:
         """Output payload contains AnalyticsRefreshed Week 7 count fields."""
         agent = AnalyticsAgent()
-        agent.health_check()  # pre-load fixture
-        out = agent.process(enriched_event)
+        agent.health_check()
+        with (
+            patch("agents.analytics.agent.check_db_connection", return_value=False),
+            patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}),
+        ):
+            out = agent.process(enriched_event)
         p = out.payload
         assert p["event_type"] == "AnalyticsRefreshed"
         assert p["batch_id"] == enriched_event.payload["batch_id"]
@@ -169,6 +174,19 @@ class TestAnalyticsAgent:
         assert "trajectory_map_count" in p
         assert "summaries_generated_count" in p
         assert p["triggered_by_batch_id"] == enriched_event.payload["batch_id"]
+
+    def test_process_clustering_includes_clustering_keys(self, enriched_event: EventEnvelope) -> None:
+        """Clustering output payload contains clustering-related keys."""
+        agent = AnalyticsAgent()
+        with (
+            patch("agents.analytics.agent.check_db_connection", return_value=False),
+            patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}),
+        ):
+            out = agent.process_clustering(enriched_event)
+        p = out.payload
+        assert p["event_type"] == "AnalyticsRefreshed"
+        assert "canonical_clustering_ran" in p
+        assert "clustering_skipped" in p
 
     def test_default_analytics_target_week_is_prior_monday(self) -> None:
         # Wednesday 2025-01-08 -> this_monday 2025-01-06 -> prior Monday 2024-12-30

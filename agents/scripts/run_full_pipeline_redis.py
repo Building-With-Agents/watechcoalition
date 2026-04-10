@@ -43,6 +43,7 @@ except ImportError:
     pass
 
 from agents.analytics.agent import AnalyticsAgent
+from agents.analytics.agent import register_alert_bus as register_analytics_alert_bus
 from agents.common.event_envelope import EventEnvelope
 from agents.common.llm_adapter import register_alert_bus as register_llm_alert_bus
 from agents.common.message_bus.redis_streams import (
@@ -115,6 +116,27 @@ def _run(
     buses: list[RedisStreamsEventBus] = []
     bus_by_name: dict[str, RedisStreamsEventBus] = {}
 
+    try:
+        return _run_redis_pipeline_inner(
+            redis_url,
+            correlation_id,
+            buses,
+            bus_by_name,
+            metrics,
+            run_start,
+        )
+    finally:
+        register_analytics_alert_bus(None)
+
+
+def _run_redis_pipeline_inner(
+    redis_url: str,
+    correlation_id: str,
+    buses: list[RedisStreamsEventBus],
+    bus_by_name: dict[str, RedisStreamsEventBus],
+    metrics: list[dict[str, Any]],
+    run_start: float,
+) -> dict[str, Any]:
     for stage_name, _agent, _sub_event, _next_stage in STAGES:
         stream_name = f"{STREAM_PREFIX}:{stage_name}"
         group_name = f"{STREAM_PREFIX}:{stage_name}-group"
@@ -131,6 +153,7 @@ def _run(
     orchestration_bus = bus_by_name["orchestration"]
     register_llm_alert_bus(orchestration_bus)
     register_enrichment_alert_bus(orchestration_bus)
+    register_analytics_alert_bus(orchestration_bus)
 
     def make_handler(
         stage_name: str,
@@ -196,6 +219,11 @@ def _run(
     )
     orchestration_bus.subscribe(
         "EnrichmentDegraded",
+        orchestration_handler,
+        subscriber_id="orchestration-agent",
+    )
+    orchestration_bus.subscribe(
+        "EmergenceAlert",
         orchestration_handler,
         subscriber_id="orchestration-agent",
     )

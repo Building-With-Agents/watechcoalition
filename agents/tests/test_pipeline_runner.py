@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from unittest.mock import patch
 
 import pytest
 
@@ -92,7 +93,11 @@ class TestRunPipelineStubs:
             (OrchestrationAgent(), False),
         ]
         trigger = {"event_type": "NormalizationComplete", "posting_id": 1}
-        entries = run_pipeline(stub_pipeline, "test-stubs", trigger)
+        with (
+            patch("agents.analytics.agent.check_db_connection", return_value=False),
+            patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}),
+        ):
+            entries = run_pipeline(stub_pipeline, "test-stubs", trigger)
         assert len(entries) == 5
 
     def test_correlation_id_consistency(self) -> None:
@@ -111,7 +116,11 @@ class TestRunPipelineStubs:
             (OrchestrationAgent(), False),
         ]
         trigger = {"event_type": "NormalizationComplete", "posting_id": 1}
-        entries = run_pipeline(stub_pipeline, "test-cid", trigger)
+        with (
+            patch("agents.analytics.agent.check_db_connection", return_value=False),
+            patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}),
+        ):
+            entries = run_pipeline(stub_pipeline, "test-cid", trigger)
         for entry in entries:
             assert entry["correlation_id"] == "test-cid"
 

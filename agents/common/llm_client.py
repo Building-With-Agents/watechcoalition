@@ -43,6 +43,8 @@ def _parse_output_for_trace(text: str, max_chars: int = 4000) -> str | dict | li
         return _json.loads(truncated)
     except (ValueError, TypeError):
         return truncated
+
+
 log = structlog.get_logger()
 
 # Maps audit-log agent_name values to clean Langfuse span names.
