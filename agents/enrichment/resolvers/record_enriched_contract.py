@@ -6,8 +6,9 @@ registry lives in ``.cursor/rules/integration-schema.mdc``.
 **Two shapes** (both ``event_type`` == ``RecordEnriched``):
 
 1. **Batch aggregate** — ``build_record_enriched_event()`` / batch ``process()`` when
-   ``payload["records"]`` is a non-empty list. Includes ``record_enriched_schema_version``
-   and a nested ``dedup`` block (Pair fuzzy-dedup integration, schema v3+).
+   ``payload["records"]`` is a non-empty list (incoming ``SkillsExtracted`` shape). Includes
+   ``record_enriched_schema_version``, ``freshness_records`` (per-row slice for analytics
+   Step 10), and a nested ``dedup`` block (Pair fuzzy-dedup integration, schema v3+).
 
 2. **Single-record** — flat per-posting payload from ``process()`` when there is no
    batch ``records`` list. Does **not** use ``record_enriched_schema_version`` (optional
@@ -44,6 +45,7 @@ RECORD_ENRICHED_BATCH_PAYLOAD_KEYS = frozenset(
         "soc_classified_count",
         "naics_classified_count",
         "dedup",
+        "freshness_records",
     }
 )
 

@@ -191,6 +191,30 @@ CREATE TABLE IF NOT EXISTS dbo.naics (
 );
 """
 
+# Analytics Week 7 Pair D — posting_freshness + trajectory_map (ORM-aligned; idempotent with create_all).
+_POSTING_FRESHNESS_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.posting_freshness (
+    posting_id TEXT PRIMARY KEY,
+    first_seen TIMESTAMPTZ NOT NULL,
+    last_seen TIMESTAMPTZ NOT NULL,
+    duration_days INTEGER NOT NULL,
+    is_repost BOOLEAN NOT NULL DEFAULT FALSE,
+    repost_count INTEGER NOT NULL DEFAULT 0,
+    fill_proxy BOOLEAN NOT NULL DEFAULT FALSE,
+    computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_posting_freshness_posting_id
+    ON dbo.posting_freshness (posting_id);
+"""
+
+_TRAJECTORY_MAP_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.trajectory_map (
+    role_id TEXT PRIMARY KEY,
+    trajectory_data JSONB,
+    computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+"""
+
 # sector_summary_weekly schema upgrades (Step 6 — employer_count, top_skills, computed_at)
 _SECTOR_SUMMARY_WEEKLY_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.sector_summary_weekly ADD COLUMN IF NOT EXISTS employer_count INTEGER NOT NULL DEFAULT 0",
@@ -223,7 +247,6 @@ CREATE TABLE IF NOT EXISTS dbo.geo_demand_weekly (
 _SKILL_DEMAND_WEEKLY_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.skill_demand_weekly ADD COLUMN IF NOT EXISTS employer_count INTEGER NOT NULL DEFAULT 0",
 ]
-
 _SERIAL_SEQUENCE_TARGETS = (
     ("raw_ingested_jobs", "id"),
     ("job_ingestion_runs", "id"),
@@ -413,6 +436,12 @@ def run_migrations(engine: Engine) -> None:
         with engine.begin() as conn:
             conn.execute(text(_NAICS_DDL))
         log.info("migrations_naics_created")
+
+    # 4b. Analytics tables (posting_freshness, trajectory_map) — explicit DDL mirrors ORM models.
+    with engine.begin() as conn:
+        conn.execute(text(_POSTING_FRESHNESS_DDL))
+        conn.execute(text(_TRAJECTORY_MAP_DDL))
+    log.info("migrations_analytics_tables_created")
 
     # 4c. Week 7 analytics aggregate tables (PostgreSQL DDL; ORM also registers via create_all)
     if engine.dialect.name == "postgresql":

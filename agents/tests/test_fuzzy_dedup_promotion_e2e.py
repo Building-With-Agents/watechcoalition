@@ -174,8 +174,10 @@ def test_fuzzy_dedup_promotion_updates_current_and_survivor_rows(e2e_engine: Eng
         )
         current = _fetch_dedup_columns(e2e_engine, seed.job_posting_id)
         peer = _fetch_dedup_columns(e2e_engine, peer_id)
-        assert current == {"is_duplicate": True, "duplicate_cluster_id": CLUSTER_ID}
-        assert peer == {"is_duplicate": False, "duplicate_cluster_id": CLUSTER_ID}
+        assert current["is_duplicate"] is True
+        assert str(current["duplicate_cluster_id"]) == CLUSTER_ID
+        assert peer["is_duplicate"] is False
+        assert str(peer["duplicate_cluster_id"]) == CLUSTER_ID
     finally:
         _delete_job_posting(e2e_engine, peer_id)
         teardown_enrichment_e2e(e2e_engine, seed)

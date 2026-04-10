@@ -15,8 +15,10 @@ Reference tables (seeded, agent-owned): companies, industry_sectors,
 
 from __future__ import annotations
 
+import os
 import uuid
 from datetime import date, datetime, timezone
+from typing import Literal
 
 from sqlalchemy import (
     Boolean,
@@ -40,6 +42,19 @@ class Base(DeclarativeBase):
     """Shared declarative base for all agent models."""
 
     pass
+
+
+FRESH_THRESHOLD_DAYS = int(os.getenv("FRESH_THRESHOLD_DAYS", "30"))
+STALE_THRESHOLD_DAYS = int(os.getenv("STALE_THRESHOLD_DAYS", "90"))
+
+
+def classify_freshness(days: int) -> Literal["fresh", "stale", "expired"]:
+    """Classify posting age in whole days using FRESH_THRESHOLD_DAYS and STALE_THRESHOLD_DAYS."""
+    if days <= FRESH_THRESHOLD_DAYS:
+        return "fresh"
+    if days <= STALE_THRESHOLD_DAYS:
+        return "stale"
+    return "expired"
 
 
 # ---------------------------------------------------------------------------
@@ -338,6 +353,47 @@ class EmployerProfile(Base):
 
 
 # ---------------------------------------------------------------------------
+# Analytics (Week 7) — posting freshness (Pair D)
+# ---------------------------------------------------------------------------
+
+
+class PostingFreshness(Base):
+    """Per-job-posting freshness snapshot for analytics (dbo.posting_freshness). Runbook schema."""
+
+    __tablename__ = "posting_freshness"
+    __table_args__ = (
+        Index("ix_posting_freshness_posting_id", "posting_id"),
+        {"schema": "dbo"},
+    )
+
+    posting_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    first_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    duration_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_repost: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    repost_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    fill_proxy: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    computed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
+class TrajectoryMap(Base):
+    """Phase 2 scaffold — trajectory data per role (dbo.trajectory_map). Empty data, schema only."""
+
+    __tablename__ = "trajectory_map"
+    __table_args__ = ({"schema": "dbo"},)
+
+    role_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    trajectory_data: Mapped[dict] = mapped_column(JSON, nullable=True)
+    computed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
+# ---------------------------------------------------------------------------
 # Analytics aggregate tables (Week 7 — Pair A)
 # Frozen column contract: .cursor/rules/skill-tool-demand.mdc (IMP-021).
 # ---------------------------------------------------------------------------
@@ -426,7 +482,6 @@ class SkillCoOccurrence(Base):
     co_occurrence_count: Mapped[int] = mapped_column(Integer, nullable=False)
     week_start: Mapped[date] = mapped_column(Date, nullable=False)
     computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-
 
 # ===========================================================================
 # Reference tables — seeded via pgloader, now agent-owned (full read+write).

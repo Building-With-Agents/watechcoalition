@@ -157,24 +157,17 @@ class TestAnalyticsAgent:
         assert out.agent_id == "analytics-agent"
 
     def test_process_includes_batch_data(self, enriched_event: EventEnvelope) -> None:
-        with (
-            patch.dict(os.environ, {"PYTHON_DATABASE_URL": "postgresql+psycopg2://localhost/test"}),
-            patch("agents.analytics.agent.session_scope") as mock_scope,
-            patch("agents.analytics.agent.refresh_skill_demand_weekly", return_value=0),
-            patch("agents.analytics.agent.refresh_tool_demand_weekly", return_value=0),
-            patch("agents.analytics.agent.refresh_skill_velocity", return_value=0),
-            patch("agents.analytics.agent.refresh_skill_co_occurrence", return_value=0),
-        ):
-            mock_cm = MagicMock()
-            mock_cm.__enter__.return_value = MagicMock()
-            mock_cm.__exit__.return_value = None
-            mock_scope.return_value = mock_cm
-            agent = AnalyticsAgent()
-            out = agent.process(enriched_event)
+        """Output payload contains AnalyticsRefreshed Week 7 count fields."""
+        agent = AnalyticsAgent()
+        agent.health_check()  # pre-load fixture
+        out = agent.process(enriched_event)
         p = out.payload
-        assert "top_skills" in p
-        assert "seniority_distribution" in p
-        assert "run_id" in p
+        assert p["event_type"] == "AnalyticsRefreshed"
+        assert p["batch_id"] == enriched_event.payload["batch_id"]
+        assert "refreshed_at" in p
+        assert "freshness_record_count" in p
+        assert "trajectory_map_count" in p
+        assert "summaries_generated_count" in p
         assert p["triggered_by_batch_id"] == enriched_event.payload["batch_id"]
 
     def test_default_analytics_target_week_is_prior_monday(self) -> None:

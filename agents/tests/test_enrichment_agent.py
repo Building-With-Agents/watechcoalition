@@ -1081,3 +1081,181 @@ class TestEnrichmentAgentBatchRecords:
         assert out.payload["duplicate_count"] == 0
         assert out.payload["soc_classified_count"] == 1
         assert out.payload["naics_classified_count"] == 1
+
+    def test_batch_e2e_spam_gate_runs_before_resolution(self) -> None:
+        """Rejected and flagged rows must not invoke Pair D resolvers — only the clean row does."""
+        correlation_id = "e2e-issue-96-gate-order"
+        batch_id = "batch-e2e-96-gate"
+        skills = [{"name": "Python", "type": "Technical", "confidence": 0.92}]
+        payload: dict[str, Any] = {
+            "event_type": "SkillsExtracted",
+            "batch_id": batch_id,
+            "records": [
+                {
+                    "posting_id": 901,
+                    "title": "Rejected posting",
+                    "company": "SpamCo",
+                    "location": "Internet",
+                    "skills": skills,
+                    "is_spam": True,
+                },
+                {
+                    "posting_id": 902,
+                    "title": "Flagged posting",
+                    "company": "MaybeCo",
+                    "location": "Unknown",
+                    "skills": skills,
+                    "is_spam": None,
+                },
+                {
+                    "posting_id": 903,
+                    "title": "Software Engineer",
+                    "company": "GoodCorp",
+                    "location": "El Paso, TX",
+                    "skills": skills,
+                    "is_spam": False,
+                    "quality_score": 0.88,
+                    "extraction_confidence": 0.91,
+                    "taxonomy_coverage": 0.84,
+                    "seniority": "mid",
+                    "role_classification": "Software Engineering",
+                    "soc_code": "15-1252",
+                    "naics_code": "541511",
+                    "temporal_period": "agentic_era",
+                    "borderplex_subregion": "el_paso",
+                    "is_duplicate": False,
+                },
+            ],
+        }
+        event = EventEnvelope(
+            correlation_id=correlation_id,
+            agent_id="skills-extraction-agent",
+            payload=payload,
+        )
+
+        agent = EnrichmentAgent()
+        enriched_from_record: list[dict[str, Any]] = []
+
+        def spy_enrich_record(posting: dict[str, Any], session: object) -> dict[str, Any]:
+            out = EnrichmentAgent.enrich_record(agent, posting, session)
+            enriched_from_record.append(out)
+            return out
+
+        agent.enrich_record = spy_enrich_record  # type: ignore[method-assign]
+
+        loc_uuid = "550e8400-e29b-41d4-a716-446655440096"
+        with (
+            patch("agents.enrichment.agent.check_db_connection", return_value=False),
+            patch("agents.enrichment.agent.resolve_company", return_value=(4242, 0.97)) as mock_company,
+            patch(
+                "agents.enrichment.agent.resolve_location",
+                return_value=(loc_uuid, 0.94, "El Paso, TX", "el_paso"),
+            ) as mock_location,
+            patch("agents.enrichment.agent.resolve_sector", return_value="sector-e2e") as mock_sector,
+        ):
+            agent.process(event)
+
+        company_names = [c[0][0] for c in mock_company.call_args_list]
+        location_texts = [c[0][0] for c in mock_location.call_args_list]
+        role_classes = [c[0][0] for c in mock_sector.call_args_list]
+
+        assert company_names == ["GoodCorp"]
+        assert "SpamCo" not in company_names
+        assert "MaybeCo" not in company_names
+        assert location_texts == ["El Paso, TX"]
+        assert role_classes == ["Software Engineering"]
+
+        assert len(enriched_from_record) == 1
+        assert enriched_from_record[0]["posting_id"] == 903
+
+    def test_batch_e2e_enrichment_degraded_classifier_unavailable(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Batch path: spam classifier degraded on a row emits EnrichmentDegraded and still returns RecordEnriched."""
+        monkeypatch.setenv(
+            "PYTHON_DATABASE_URL",
+            "postgresql+psycopg2://user:pass@localhost:5432/db",
+        )
+        bus = InProcessEventBus()
+        alerts: list[EventEnvelope] = []
+        bus.subscribe(
+            "EnrichmentDegraded",
+            lambda event: alerts.append(event),
+            subscriber_id="orchestration-agent",
+        )
+        register_enrichment_alert_bus(bus)
+
+        correlation_id = "c-batch-spam-degraded"
+        batch_id = "batch-degraded-e2e"
+        skills = [{"name": "Python", "type": "Technical", "confidence": 0.9}]
+        payload: dict[str, Any] = {
+            "event_type": "SkillsExtracted",
+            "batch_id": batch_id,
+            "records": [
+                {
+                    "posting_id": 101,
+                    "normalized_job_id": 77,
+                    "title": "ML Engineer",
+                    "company": "Acme",
+                    "location": "El Paso, TX",
+                    "skills": skills,
+                    "is_spam": False,
+                    "role_classification": "Software Engineering",
+                    "temporal_period": "agentic_era",
+                    "borderplex_subregion": "el_paso",
+                    "soc_code": "15-1252",
+                    "naics_code": "541511",
+                    "is_duplicate": False,
+                },
+            ],
+        }
+        event = EventEnvelope(
+            correlation_id=correlation_id,
+            agent_id="skills-extraction-agent",
+            payload=payload,
+        )
+
+        def fake_enrich_record(posting: dict[str, Any], session: object) -> dict[str, Any]:
+            return {
+                **posting,
+                "company_id": 4242,
+                "location_id": "550e8400-e29b-41d4-a716-446655440001",
+                "raw_location_text": "El Paso, TX",
+                "borderplex_subregion": "el_paso",
+                "field_confidence": {"company_id": 0.9, "location_id": 0.9, "sector_id": 0.0, "seniority": 0.0},
+                "overall_confidence": 0.8,
+                "spam_degraded": True,
+                "is_spam": None,
+                "spam_score": None,
+                "spam_extraction_note": "empty_extraction",
+            }
+
+        agent = EnrichmentAgent()
+        try:
+            with (
+                patch("agents.enrichment.agent.check_db_connection", return_value=False),
+                patch.object(EnrichmentAgent, "enrich_record", side_effect=fake_enrich_record),
+                patch("agents.enrichment.agent.resolve_sector", return_value="sector-batch"),
+            ):
+                out = agent.process(event)
+        finally:
+            register_enrichment_alert_bus(None)
+
+        assert out.payload["event_type"] == "RecordEnriched"
+        assert out.payload["batch_id"] == batch_id
+        assert out.payload["enriched_count"] == 1
+        assert out.payload["spam_rejected_count"] == 0
+        assert out.payload["flagged_for_review_count"] == 0
+
+        assert len(alerts) == 1
+        alert = alerts[0]
+        assert alert.correlation_id == correlation_id
+        assert alert.agent_id == "enrichment-agent"
+        assert alert.payload["event_type"] == "EnrichmentDegraded"
+        assert alert.payload["posting_id"] == 101
+        assert alert.payload["normalized_job_id"] == 77
+        assert alert.payload["triggered_by_event_type"] == "SkillsExtracted"
+        assert alert.payload["classifier"] == "spam_preview"
+        assert alert.payload["reason"] == "spam_classifier_unavailable"
+        assert alert.payload["extraction_note"] == "empty_extraction"
+
