@@ -207,6 +207,12 @@ INGESTION_SCHEDULE=0 2 * * *        # Cron expression — default: daily at 2am
 SPAM_FLAG_THRESHOLD=0.7             # Flag for operator review above this
 SPAM_REJECT_THRESHOLD=0.9           # Auto-reject above this
 SKILL_CONFIDENCE_THRESHOLD=0.75
+SKILLS_EXTRACTION_PARALLEL=1        # Run tasks/responsibilities/skills concurrently and process jobs in parallel
+SKILLS_EXTRACTION_CONCURRENCY=5     # Max jobs in flight when parallel mode is enabled
+# Deprecated serial-only throttles; used only when SKILLS_EXTRACTION_PARALLEL=0
+SKILLS_EXTRACTION_CHUNK_SIZE=5
+SKILLS_EXTRACTION_CHUNK_COOLDOWN=30
+SKILLS_EXTRACTION_DELAY=1.0
 BATCH_SIZE=100
 ```
 
@@ -336,6 +342,8 @@ ALTER TABLE job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB;
 
 ### Skills Extraction Agent *(Work Intelligence Agent)*
 - **No fixture fallback in testing or production.** When normalized text is empty or extraction fails, the agent must fail explicitly (`extraction_status = "failed"`, `extraction_failed = True`) with a clear `error_reason` — never silently return fixture/placeholder data. Fixture data masks real pipeline issues (e.g., empty descriptions from JSearch, misconfigured normalization mappers). Fixture fallback is only acceptable in walking-skeleton demos (Week 2).
+- Parallel execution: when `SKILLS_EXTRACTION_PARALLEL=1`, the agent runs tasks, responsibilities, and skills concurrently inside each job and processes multiple jobs concurrently up to `SKILLS_EXTRACTION_CONCURRENCY`. If the caller already has a running event loop, the agent falls back to the serial path to preserve the synchronous `process()` contract.
+- Deprecated serial throttles: `SKILLS_EXTRACTION_CHUNK_SIZE`, `SKILLS_EXTRACTION_CHUNK_COOLDOWN`, and `SKILLS_EXTRACTION_DELAY` apply only when `SKILLS_EXTRACTION_PARALLEL=0`.
 - Taxonomy linking order (strict):
   1. Exact match → GenAI Extension Layer (10 predefined GenAI skills; `is_genai_extension = True`, `esco_uri` maps to parent ESCO cluster)
   2. Exact name match → ESCO digital skills cluster (maps to `skills` table)
