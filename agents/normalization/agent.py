@@ -12,6 +12,7 @@ Consumes: IngestBatch
 
 from __future__ import annotations
 
+import contextlib
 import os
 import uuid
 
@@ -427,7 +428,7 @@ class NormalizationAgent(AgentBase):
             )
 
             if tracer:
-                try:
+                with contextlib.suppress(Exception):
                     # Build rich input from the raw records the graph processed
                     raw_records = result.get("_pending_records", [])
                     input_summary = {
@@ -471,8 +472,6 @@ class NormalizationAgent(AgentBase):
                     obs = tracer._observation_stack[-1] if tracer._observation_stack else None
                     if obs:
                         obs.update(input=_json.dumps(input_summary))
-                except Exception:
-                    pass
 
             return EventEnvelope(
                 correlation_id=event.correlation_id,

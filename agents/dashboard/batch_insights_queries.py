@@ -13,6 +13,7 @@ import pandas as pd
 import streamlit as st
 
 from agents.dashboard.readonly_engine import get_dashboard_engine
+from agents.dashboard.relation_safe import is_undefined_relation_error, read_sql_relation_safe
 
 
 def _norm_count(engine: Any) -> int:
@@ -20,11 +21,58 @@ def _norm_count(engine: Any) -> int:
     return int(pd.read_sql(q, engine).iloc[0]["c"])
 
 
+def _empty_category_df() -> pd.DataFrame:
+    return pd.DataFrame(columns=["category", "cnt"])
+
+
+def _batch_insights_degraded_bundle(soft_warnings: list[str]) -> dict[str, Any]:
+    """Minimal bundle when primary job tables are unavailable."""
+    empty = _empty_category_df()
+    return {
+        "use_normalized": False,
+        "table": "",
+        "state_col": "state",
+        "total_rows": 0,
+        "source_df": empty.copy(),
+        "state_df": empty.copy(),
+        "city_df": empty.copy(),
+        "remote_df": empty.copy(),
+        "employment_df": empty.copy(),
+        "experience_df": empty.copy(),
+        "salary_rows": 0,
+        "median_min": None,
+        "median_max": None,
+        "salary_hist_lo": None,
+        "salary_hist_hi": None,
+        "salary_hist_df": pd.DataFrame(columns=["bin", "bin_start", "cnt"]),
+        "raw_status_df": empty.copy(),
+        "recent_df": pd.DataFrame(),
+        "dashboard_soft_warnings": list(soft_warnings),
+    }
+
+
 @st.cache_data(ttl=300, show_spinner=False)
 def fetch_batch_insights_bundle() -> dict[str, Any]:
     """Run aggregate queries; returns dict of DataFrames and scalars for Batch Insights."""
     engine = get_dashboard_engine()
-    use_norm = _norm_count(engine) > 0
+    soft: list[str] = []
+
+    def _append_soft(msg: str) -> None:
+        if msg and msg not in soft:
+            soft.append(msg)
+
+    use_norm = False
+    try:
+        use_norm = _norm_count(engine) > 0
+    except Exception as exc:
+        if is_undefined_relation_error(exc):
+            _append_soft(
+                "`dbo.normalized_jobs` is missing. Falling back to raw ingested jobs when available."
+            )
+            use_norm = False
+        else:
+            raise
+
     table = "dbo.normalized_jobs" if use_norm else "dbo.raw_ingested_jobs"
     state_col = "state_province" if use_norm else "state"
 
@@ -34,8 +82,17 @@ def fetch_batch_insights_bundle() -> dict[str, Any]:
         "state_col": state_col,
     }
 
-    total = pd.read_sql(f"SELECT COUNT(*)::bigint AS c FROM {table}", engine).iloc[0]["c"]
-    out["total_rows"] = int(total)
+    try:
+        total = int(pd.read_sql(f"SELECT COUNT(*)::bigint AS c FROM {table}", engine).iloc[0]["c"])
+    except Exception as exc:
+        if is_undefined_relation_error(exc):
+            _append_soft(
+                f"Primary jobs table `{table}` is missing. Batch Insights aggregates are unavailable."
+            )
+            degraded = _batch_insights_degraded_bundle(soft)
+            return degraded
+        raise
+    out["total_rows"] = total
 
     out["source_df"] = pd.read_sql(
         f"""
@@ -178,7 +235,7 @@ def fetch_batch_insights_bundle() -> dict[str, Any]:
         out["salary_hist_hi"] = None
         out["salary_hist_df"] = pd.DataFrame(columns=["bin", "bin_start", "cnt"])
 
-    out["raw_status_df"] = pd.read_sql(
+    raw_status_df, raw_status_warn = read_sql_relation_safe(
         """
         SELECT processing_status AS category, COUNT(*)::bigint AS cnt
         FROM dbo.raw_ingested_jobs
@@ -186,7 +243,14 @@ def fetch_batch_insights_bundle() -> dict[str, Any]:
         ORDER BY cnt DESC
         """,
         engine,
+        user_hint=(
+            "`dbo.raw_ingested_jobs` is missing. Processing-status distribution is skipped; "
+            "other charts use normalized or raw job tables only."
+        ),
     )
+    out["raw_status_df"] = raw_status_df
+    if raw_status_warn:
+        _append_soft(raw_status_warn)
 
     recent_cols_norm = (
         "title, company, source, city, state_province, employment_type, experience_level"
@@ -209,8 +273,18 @@ def fetch_batch_insights_bundle() -> dict[str, Any]:
         LIMIT 50
         """
     )
-    out["recent_df"] = pd.read_sql(recent_sql, engine)
+    try:
+        out["recent_df"] = pd.read_sql(recent_sql, engine)
+    except Exception as exc:
+        if is_undefined_relation_error(exc):
+            _append_soft(
+                f"Recent-records query failed: `{table}` is not available for the sample table."
+            )
+            out["recent_df"] = pd.DataFrame()
+        else:
+            raise
 
+    out["dashboard_soft_warnings"] = soft
     return out
 
 

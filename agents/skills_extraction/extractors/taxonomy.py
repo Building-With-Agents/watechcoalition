@@ -21,6 +21,7 @@ Reference: ARCHITECTURE_DEEP.md § 6-Step Taxonomy Resolution.
 
 from __future__ import annotations
 
+import contextlib
 import csv
 import json
 import os
@@ -851,7 +852,7 @@ def resolve_taxonomy_batch(labels: list[str]) -> list[TaxonomyResult]:
     results = [resolved_map[lab] for lab in labels]
 
     # Log taxonomy resolution metrics to Langfuse tracer (if registered)
-    try:
+    with contextlib.suppress(Exception):
         from agents.common.llm_adapter import get_tracer
 
         tracer = get_tracer()
@@ -876,8 +877,6 @@ def resolve_taxonomy_batch(labels: list[str]) -> list[TaxonomyResult]:
                 "step5_onet": stats.get(5, 0),
                 "step6_raw_fallback": fallback,
             })
-    except Exception:
-        pass
 
     return results
 

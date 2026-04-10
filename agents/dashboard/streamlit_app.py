@@ -1,14 +1,16 @@
 """
 Journey Dashboard — Database-connected Streamlit dashboard.
 
-Three-page Streamlit dashboard for observing pipeline data.
+Multi-page Streamlit dashboard for observing pipeline data.
 
 Pages
 -----
-1. Pipeline Run Summary   — ingestion runs, record counts, stage completion.
-2. Record Journey         — select one record and trace it through stages.
-3. Batch Insights         — aggregate charts: locations, employment types,
+1. Ingestion Overview / Normalization Quality (Week 6) — pipeline health.
+2. Pipeline Run Summary   — ingestion runs, record counts, stage completion.
+3. Record Journey         — select one record and trace it through stages.
+4. Batch Insights         — aggregate charts: locations, employment types,
                             experience levels, salary distributions, sources.
+5. Weekly Insights (Week 7) — `skill_demand_weekly` top skills by week.
 
 Data source: PostgreSQL (via SQLAlchemy) with JSON file fallback.
 
@@ -34,6 +36,7 @@ from agents.dashboard.batch_insights_queries import (
     series_from_category_count,
     series_from_salary_histogram,
 )
+from agents.dashboard.relation_safe import read_sql_relation_safe
 
 # ---------------------------------------------------------------------------
 # Environment & paths
@@ -90,8 +93,11 @@ def _db_available() -> bool:
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def _load_ingestion_runs() -> pd.DataFrame:
-    """Load ingestion run history from DB."""
+def _load_ingestion_runs() -> tuple[pd.DataFrame, str | None]:
+    """Load ingestion run history from DB.
+
+    Returns ``(dataframe, optional_warning)`` when ``dbo.job_ingestion_runs`` is missing.
+    """
     from agents.dashboard.readonly_engine import get_dashboard_engine
 
     query = """
@@ -102,7 +108,11 @@ def _load_ingestion_runs() -> pd.DataFrame:
         ORDER BY started_at DESC
         LIMIT 50
     """
-    return pd.read_sql(query, get_dashboard_engine())
+    return read_sql_relation_safe(
+        query,
+        get_dashboard_engine(),
+        user_hint="`dbo.job_ingestion_runs` is missing. Apply agent migrations or run the Ingestion agent to create pipeline tables.",
+    )
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -111,14 +121,21 @@ def _load_raw_jobs(
     *,
     limit: int = 500,
     offset: int = 0,
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, str | None]:
     """Load raw ingested jobs, optionally filtered by run_id.
 
     When ``run_id`` is set, returns all rows for that run (no limit — typical batches are small).
     Otherwise returns a newest-first window: ``LIMIT`` / ``OFFSET`` (for Record Journey paging).
+
+    Returns ``(dataframe, optional_warning)`` when ``dbo.raw_ingested_jobs`` is missing.
     """
     from agents.dashboard.readonly_engine import get_dashboard_engine
 
+    engine = get_dashboard_engine()
+    hint = (
+        "`dbo.raw_ingested_jobs` is missing. Apply agent migrations or run the Ingestion agent "
+        "to create staging tables."
+    )
     if run_id:
         query = """
             SELECT id, ingestion_run_id, region_id, source, external_id,
@@ -130,7 +147,7 @@ def _load_raw_jobs(
             WHERE ingestion_run_id = %(run_id)s
             ORDER BY id
         """
-        return pd.read_sql(query, get_dashboard_engine(), params={"run_id": run_id})
+        return read_sql_relation_safe(query, engine, params={"run_id": run_id}, user_hint=hint)
     lim, off = _clamp_list_window(limit, offset)
     query = """
         SELECT id, ingestion_run_id, region_id, source, external_id,
@@ -142,7 +159,7 @@ def _load_raw_jobs(
         ORDER BY id DESC
         LIMIT %(lim)s OFFSET %(off)s
     """
-    return pd.read_sql(query, get_dashboard_engine(), params={"lim": lim, "off": off})
+    return read_sql_relation_safe(query, engine, params={"lim": lim, "off": off}, user_hint=hint)
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -151,13 +168,16 @@ def _load_normalized_jobs(
     *,
     limit: int = 500,
     offset: int = 0,
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, str | None]:
     """Load normalized jobs, optionally filtered by run_id.
 
     Same window semantics as :func:`_load_raw_jobs`.
+    Returns ``(dataframe, optional_warning)`` when ``dbo.normalized_jobs`` is missing.
     """
     from agents.dashboard.readonly_engine import get_dashboard_engine
 
+    engine = get_dashboard_engine()
+    hint = "`dbo.normalized_jobs` is missing. Apply agent migrations or run the Normalization agent."
     if run_id:
         query = """
             SELECT id, raw_job_id, ingestion_run_id, region_id, source, external_id,
@@ -169,7 +189,7 @@ def _load_normalized_jobs(
             WHERE ingestion_run_id = %(run_id)s
             ORDER BY id
         """
-        return pd.read_sql(query, get_dashboard_engine(), params={"run_id": run_id})
+        return read_sql_relation_safe(query, engine, params={"run_id": run_id}, user_hint=hint)
     lim, off = _clamp_list_window(limit, offset)
     query = """
         SELECT id, raw_job_id, ingestion_run_id, region_id, source, external_id,
@@ -181,11 +201,11 @@ def _load_normalized_jobs(
         ORDER BY id DESC
         LIMIT %(lim)s OFFSET %(off)s
     """
-    return pd.read_sql(query, get_dashboard_engine(), params={"lim": lim, "off": off})
+    return read_sql_relation_safe(query, engine, params={"lim": lim, "off": off}, user_hint=hint)
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def _load_normalized_for_raw_job(raw_job_id: int) -> pd.DataFrame:
+def _load_normalized_for_raw_job(raw_job_id: int) -> tuple[pd.DataFrame, str | None]:
     """Load normalized row(s) for a single raw job (Record Journey with paged raw list)."""
     from agents.dashboard.readonly_engine import get_dashboard_engine
 
@@ -200,11 +220,16 @@ def _load_normalized_for_raw_job(raw_job_id: int) -> pd.DataFrame:
         ORDER BY id DESC
         LIMIT 5
     """
-    return pd.read_sql(q, get_dashboard_engine(), params={"rid": int(raw_job_id)})
+    return read_sql_relation_safe(
+        q,
+        get_dashboard_engine(),
+        params={"rid": int(raw_job_id)},
+        user_hint="`dbo.normalized_jobs` is missing. Apply agent migrations or run the Normalization agent.",
+    )
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def _load_quarantine_for_raw_job(raw_job_id: int) -> pd.DataFrame:
+def _load_quarantine_for_raw_job(raw_job_id: int) -> tuple[pd.DataFrame, str | None]:
     """Load quarantine row(s) for a single raw job."""
     from agents.dashboard.readonly_engine import get_dashboard_engine
 
@@ -216,14 +241,21 @@ def _load_quarantine_for_raw_job(raw_job_id: int) -> pd.DataFrame:
         ORDER BY quarantined_at DESC
         LIMIT 5
     """
-    return pd.read_sql(q, get_dashboard_engine(), params={"rid": int(raw_job_id)})
+    return read_sql_relation_safe(
+        q,
+        get_dashboard_engine(),
+        params={"rid": int(raw_job_id)},
+        user_hint="`dbo.normalization_quarantine` is missing. Apply agent migrations.",
+    )
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def _load_quarantined(run_id: str | None = None) -> pd.DataFrame:
+def _load_quarantined(run_id: str | None = None) -> tuple[pd.DataFrame, str | None]:
     """Load quarantined records."""
     from agents.dashboard.readonly_engine import get_dashboard_engine
 
+    engine = get_dashboard_engine()
+    hint = "`dbo.normalization_quarantine` is missing. Apply agent migrations."
     if run_id:
         query = """
             SELECT id, raw_job_id, ingestion_run_id, source, external_id,
@@ -232,7 +264,7 @@ def _load_quarantined(run_id: str | None = None) -> pd.DataFrame:
             WHERE ingestion_run_id = %(run_id)s
             ORDER BY quarantined_at DESC
         """
-        return pd.read_sql(query, get_dashboard_engine(), params={"run_id": run_id})
+        return read_sql_relation_safe(query, engine, params={"run_id": run_id}, user_hint=hint)
     query = """
         SELECT id, raw_job_id, ingestion_run_id, source, external_id,
                error_type, error_detail, quarantined_at
@@ -240,7 +272,7 @@ def _load_quarantined(run_id: str | None = None) -> pd.DataFrame:
         ORDER BY quarantined_at DESC
         LIMIT 100
     """
-    return pd.read_sql(query, get_dashboard_engine())
+    return read_sql_relation_safe(query, engine, user_hint=hint)
 
 
 # ---------------------------------------------------------------------------
@@ -276,9 +308,12 @@ def _sort_key(cid: str) -> int:
 def _page_run_summary_db() -> None:
     st.title("Pipeline Run Summary")
 
-    runs_df = _load_ingestion_runs()
+    runs_df, warn_runs = _load_ingestion_runs()
+    if warn_runs:
+        st.warning(warn_runs)
     if runs_df.empty:
-        st.warning("No ingestion runs found in the database yet.")
+        if not warn_runs:
+            st.info("No ingestion runs found in the database yet.")
         return
 
     # -- Run selector
@@ -317,9 +352,12 @@ def _page_run_summary_db() -> None:
     st.markdown("---")
 
     # -- Stage completion: raw -> normalized
-    raw_df = _load_raw_jobs(selected_run_id)
-    norm_df = _load_normalized_jobs(selected_run_id)
-    quarantine_df = _load_quarantined(selected_run_id)
+    raw_df, warn_raw = _load_raw_jobs(selected_run_id)
+    norm_df, warn_norm = _load_normalized_jobs(selected_run_id)
+    quarantine_df, warn_quarantine = _load_quarantined(selected_run_id)
+    for w in dict.fromkeys((warn_raw, warn_norm, warn_quarantine)):
+        if w:
+            st.warning(w)
 
     col_a, col_b, col_c = st.columns(3)
     col_a.metric("Raw Ingested", len(raw_df))
@@ -397,9 +435,14 @@ def _page_record_journey_db() -> None:
             "Use offset to page into older raw ingested jobs. Normalization status is looked up per row in SQL."
         )
 
-    raw_df = _load_raw_jobs(limit=int(rj_limit), offset=int(rj_offset))
+    raw_df, warn_raw = _load_raw_jobs(limit=int(rj_limit), offset=int(rj_offset))
+    if warn_raw:
+        st.warning(warn_raw)
     if raw_df.empty:
-        st.warning("No ingested records in this window — try a smaller offset or verify the database.")
+        if not warn_raw:
+            st.info(
+                "No ingested records in this window — try a smaller offset or verify the database."
+            )
         return
 
     lim_clamped, off_clamped = _clamp_list_window(int(rj_limit), int(rj_offset))
@@ -460,7 +503,7 @@ def _page_record_journey_db() -> None:
 
     # -- Stage 2: Normalization
     st.markdown("#### Stage 2: Normalization")
-    norm_match = _load_normalized_for_raw_job(raw_id)
+    norm_match, warn_norm = _load_normalized_for_raw_job(raw_id)
 
     if not norm_match.empty:
         norm_row = norm_match.iloc[0]
@@ -499,7 +542,11 @@ def _page_record_journey_db() -> None:
                     f"{norm_row.get('salary_period', '')}"
                 )
     else:
-        q_match = _load_quarantine_for_raw_job(raw_id)
+        if warn_norm:
+            st.warning(warn_norm)
+        q_match, warn_quarantine = _load_quarantine_for_raw_job(raw_id)
+        if warn_quarantine:
+            st.warning(warn_quarantine)
         if not q_match.empty:
             q_row = q_match.iloc[0]
             with st.expander("Normalization — QUARANTINED", expanded=True):
@@ -534,9 +581,15 @@ def _page_batch_insights_db() -> None:
         st.error(f"Could not load batch insights: {exc}")
         return
 
+    for msg in bundle.get("dashboard_soft_warnings") or []:
+        st.warning(msg)
+
     total = int(bundle["total_rows"])
     if total <= 0:
-        st.warning("No records found in the database yet.")
+        if bundle.get("dashboard_soft_warnings"):
+            st.info("No job rows available for Batch Insights with the current database snapshot.")
+        else:
+            st.warning("No records found in the database yet.")
         return
 
     source_label = "normalized" if bundle["use_normalized"] else "raw ingested"
@@ -951,7 +1004,7 @@ def main() -> None:
         st.sidebar.caption("Set `PYTHON_DATABASE_URL` (or `PYTHON_DATABASE_URL_READONLY`) in `.env`.")
 
     st.sidebar.markdown("---")
-    st.sidebar.caption("Week 6 — observability")
+    st.sidebar.caption("Week 6 — observability · Week 7 — weekly insights")
     page = st.sidebar.radio(
         "Navigate",
         options=[
@@ -960,6 +1013,7 @@ def main() -> None:
             "Pipeline Run Summary",
             "Record Journey",
             "Batch Insights",
+            "Weekly Insights",
         ],
     )
 
@@ -978,9 +1032,20 @@ def main() -> None:
             _page_record_journey_db()
         elif page == "Batch Insights":
             _page_batch_insights_db()
+        elif page == "Weekly Insights":
+            from agents.dashboard.pages_weekly_insights import render_weekly_insights
+
+            render_weekly_insights()
     else:
         entries = _load_run_log()
-        if page in ("Ingestion Overview", "Normalization Quality"):
+        if page == "Weekly Insights":
+            st.title("Weekly Insights")
+            st.warning(
+                "This page needs PostgreSQL aggregate tables. Set `PYTHON_DATABASE_URL` "
+                "(or `PYTHON_DATABASE_URL_READONLY`) and restart the app."
+            )
+            st.info("Journey and Batch Insights (JSON) still work with `agents/data/output/pipeline_run.json`.")
+        elif page in ("Ingestion Overview", "Normalization Quality"):
             st.title(page)
             st.warning("Week 6 observability pages require PostgreSQL. Set `PYTHON_DATABASE_URL` and restart the app.")
             st.info("Journey pages below still work with `agents/data/output/pipeline_run.json`.")

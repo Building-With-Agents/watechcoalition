@@ -162,7 +162,7 @@ class LangfuseTracer(TracerBase):
         obs = self._observation_stack[-1] if self._observation_stack else None
         if obs is None:
             return
-        try:
+        with contextlib.suppress(Exception):
             update_kwargs: dict[str, Any] = {}
             if "input_tokens" in payload and "output_tokens" in payload:
                 update_kwargs["usage_details"] = {
@@ -176,8 +176,6 @@ class LangfuseTracer(TracerBase):
                 update_kwargs["output"] = payload["output"]
             if update_kwargs:
                 obs.update(**update_kwargs)
-        except Exception:
-            pass
 
     def record_latency(self, operation: str, *, seconds: float) -> None:
         # Record in-memory for test assertions
@@ -231,11 +229,9 @@ class LangfuseTracer(TracerBase):
     def shutdown(self) -> None:
         """Flush pending traces and release resources."""
         if self._client:
-            try:
+            with contextlib.suppress(Exception):
                 self._client.flush()
                 self._client.shutdown()
-            except Exception:
-                pass
 
     # ------------------------------------------------------------------
     # Test helpers (in-memory trace recording)

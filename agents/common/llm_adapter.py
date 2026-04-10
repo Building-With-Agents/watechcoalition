@@ -114,7 +114,9 @@ def log_extraction_event(
     """Centralized logging: write one row to llm_audit_log after every LLM call.
 
     Never raises — logging must not break the pipeline. All agents use this
-    via the adapter; no per-agent logging.
+    via the adapter; no per-agent logging. Each call opens its own short-lived
+    SQLAlchemy session via ``session_scope()``, so async extraction tasks do not
+    share Session objects even when many LLM calls finish close together.
     """
     try:
         prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()
@@ -289,7 +291,7 @@ def complete(
                     )
 
                     if _tracer:
-                        try:
+                        with contextlib.suppress(Exception):
                             _tracer.record_latency("llm_call", seconds=latency_ms / 1000.0)
                             _tracer.log_event(
                                 "llm_success",
@@ -300,8 +302,6 @@ def complete(
                                     "output": _parse_output_for_trace(content),
                                 },
                             )
-                        except Exception:
-                            pass
 
                     return {
                         "content": content,

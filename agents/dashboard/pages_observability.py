@@ -36,6 +36,9 @@ def render_ingestion_overview() -> None:
     elif err_msg and not used_fallback:
         st.error(f"Could not load ingestion data: {err_msg}")
 
+    if data.schema_note:
+        st.warning(data.schema_note)
+
     _staleness_banner(data.fetched_at)
 
     col1, col2, col3 = st.columns(3)
@@ -107,6 +110,9 @@ def render_normalization_quality() -> None:
         st.warning(f"Showing last successful data. Current load failed: {err_msg}")
     elif err_msg and not used_fallback:
         st.error(f"Could not load normalization data: {err_msg}")
+
+    if data.schema_note:
+        st.warning(data.schema_note)
 
     _staleness_banner(data.fetched_at)
 
