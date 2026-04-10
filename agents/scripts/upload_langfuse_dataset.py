@@ -44,7 +44,6 @@ def main() -> None:
 
     # Create or get dataset (idempotent)
     client.create_dataset(name=args.dataset_name)
-    print(f"Dataset: {args.dataset_name}")
 
     with open(GT_PATH, encoding="utf-8") as f:
         records = json.load(f)
@@ -77,12 +76,8 @@ def main() -> None:
                 "source": record.get("source", ""),
             },
         )
-        gt_id = record.get("ground_truth_id", "?")
-        title = record.get("title", "?")[:60]
-        print(f"  Uploaded: {gt_id} — {title}")
 
     client.flush()
-    print(f"\nDone. {len(records)} items uploaded to dataset '{args.dataset_name}'.")
 
 
 if __name__ == "__main__":

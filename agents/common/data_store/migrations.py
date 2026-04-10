@@ -115,6 +115,7 @@ _JOB_POSTINGS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS quality_score DOUBLE PRECISION",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS is_spam BOOLEAN",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS spam_score DOUBLE PRECISION",
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS spam_tier TEXT",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS overall_confidence DOUBLE PRECISION",
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS field_confidence JSONB",
     # Phase 1b — Week 5 enrichment output (SOC persisted here; legacy Prisma column may be occupation_code)
@@ -187,6 +188,34 @@ CREATE TABLE IF NOT EXISTS dbo.naics (
     seq_no INTEGER,
     createdat TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updatedat TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+"""
+
+# sector_summary_weekly schema upgrades (Step 6 — employer_count, top_skills, computed_at)
+_SECTOR_SUMMARY_WEEKLY_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.sector_summary_weekly ADD COLUMN IF NOT EXISTS employer_count INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE dbo.sector_summary_weekly ADD COLUMN IF NOT EXISTS top_skills JSONB NOT NULL DEFAULT '[]'::jsonb",
+    "ALTER TABLE dbo.sector_summary_weekly ADD COLUMN IF NOT EXISTS computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()",
+    "ALTER TABLE dbo.sector_summary_weekly DROP COLUMN IF EXISTS median_salary",
+]
+
+# Week 7 Pair B — weekly analytics aggregates (issues #180 / #181)
+_WEEK7_ANALYTICS_AGGREGATES_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.sector_summary_weekly (
+    id SERIAL PRIMARY KEY,
+    week_start DATE NOT NULL,
+    sector TEXT NOT NULL,
+    posting_count INTEGER NOT NULL,
+    employer_count INTEGER NOT NULL DEFAULT 0,
+    avg_salary DOUBLE PRECISION,
+    top_skills JSONB NOT NULL DEFAULT '[]'::jsonb,
+    computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS dbo.geo_demand_weekly (
+    id SERIAL PRIMARY KEY,
+    week_start DATE NOT NULL,
+    borderplex_subregion VARCHAR(32) NOT NULL,
+    posting_count INTEGER NOT NULL
 );
 """
 
@@ -324,6 +353,26 @@ def run_migrations(engine: Engine) -> None:
     Base.metadata.create_all(engine)
     log.info("migrations_tables_created")
 
+    # 1b. Seed analytics pipeline state singleton (id=1) for DB-backed watermark
+    if engine.dialect.name == "postgresql":
+        try:
+            with engine.begin() as conn:
+                conn.execute(
+                    text(
+                        """
+                        INSERT INTO dbo.analytics_pipeline_state (id, last_successful_run_at, updated_at)
+                        VALUES (1, NULL, NOW())
+                        ON CONFLICT (id) DO NOTHING
+                        """
+                    )
+                )
+            log.info("migrations_analytics_pipeline_state_seeded")
+        except Exception as exc:
+            log.warning(
+                "migration_analytics_pipeline_state_seed_skipped",
+                error=str(exc),
+            )
+
     # 2. Create extracted_intelligence table (DDL may add indexes idempotently)
     with engine.begin() as conn:
         conn.execute(text(_EXTRACTED_INTELLIGENCE_DDL))
@@ -364,6 +413,31 @@ def run_migrations(engine: Engine) -> None:
         with engine.begin() as conn:
             conn.execute(text(_NAICS_DDL))
         log.info("migrations_naics_created")
+
+    # 4c. Week 7 analytics aggregate tables (PostgreSQL DDL; ORM also registers via create_all)
+    if engine.dialect.name == "postgresql":
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(_WEEK7_ANALYTICS_AGGREGATES_DDL))
+            log.info("migrations_week7_analytics_aggregates_created")
+        except Exception as exc:
+            log.warning(
+                "migration_week7_analytics_aggregates_skipped",
+                error=str(exc),
+            )
+
+    # 4d. sector_summary_weekly — align with Analytics Step 6 ORM (idempotent alters)
+    if engine.dialect.name == "postgresql":
+        for stmt in _SECTOR_SUMMARY_WEEKLY_ALTER_STATEMENTS:
+            try:
+                with engine.begin() as conn:
+                    conn.execute(text(stmt))
+            except Exception as exc:
+                log.warning(
+                    "migration_sector_summary_weekly_alter_skipped",
+                    statement=stmt,
+                    error=str(exc),
+                )
 
     # 5. Add enrichment columns to dbo.job_postings (and related).
     #    Each ALTER runs in its own transaction so a single failure

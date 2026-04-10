@@ -291,7 +291,7 @@ def complete(
                     )
 
                     if _tracer:
-                        try:
+                        with contextlib.suppress(Exception):
                             _tracer.record_latency("llm_call", seconds=latency_ms / 1000.0)
                             _tracer.log_event(
                                 "llm_success",
@@ -302,8 +302,6 @@ def complete(
                                     "output": _parse_output_for_trace(content),
                                 },
                             )
-                        except Exception:
-                            pass
 
                     return {
                         "content": content,

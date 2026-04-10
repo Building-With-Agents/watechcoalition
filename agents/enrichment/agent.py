@@ -649,7 +649,7 @@ class EnrichmentAgent(BaseAgent):
 
             # Log enrichment output to Langfuse
             if tracer:
-                try:
+                with suppress(Exception):
                     total_processed = enriched_count + spam_rejected_count + flagged_for_review_count
                     tracer.log_event("enrichment_complete", {
                         "output": _json.dumps({
@@ -669,8 +669,6 @@ class EnrichmentAgent(BaseAgent):
                         "naics_classified_count": naics_classified_count,
                         "total_processed": total_processed,
                     })
-                except Exception:
-                    pass
 
         return build_record_enriched_event(
             correlation_id=correlation_id,

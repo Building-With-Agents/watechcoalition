@@ -78,6 +78,7 @@ def test_all_tables_exist(engine: Engine) -> None:
     inspector = inspect(engine)
     tables = set(inspector.get_table_names(schema="dbo"))
     expected = {
+        "analytics_pipeline_state",
         "raw_ingested_jobs",
         "normalized_jobs",
         "job_ingestion_runs",
@@ -122,6 +123,7 @@ def test_job_postings_has_phase1_columns(engine: Engine) -> None:
         "quality_score",
         "is_spam",
         "spam_score",
+        "spam_tier",
         "overall_confidence",
         "field_confidence",
         "employer_profile_id",

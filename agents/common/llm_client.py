@@ -357,7 +357,7 @@ def invoke_skills_llm(
                 success=True,
             )
             if tracer:
-                try:
+                with contextlib.suppress(Exception):
                     tracer.record_latency("llm_call", seconds=latency_ms / 1000.0)
                     tracer.log_event(
                         "llm_success",
@@ -368,8 +368,6 @@ def invoke_skills_llm(
                             "output": _parse_output_for_trace(text),
                         },
                     )
-                except Exception:
-                    pass
             return text, {
                 "tokens_used": tokens_used,
                 "cost_usd": cost_usd,

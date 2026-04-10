@@ -65,16 +65,11 @@ def main() -> None:
     args = parser.parse_args()
 
     reset_count = reset_unextracted_to_pending()
-    print(f"Reset {reset_count} records to pending for extraction")
 
     if reset_count == 0:
-        print("Nothing to process — all normalized records already have extracted_intelligence.")
         return
 
     max_iterations = (reset_count + args.batch_size - 1) // args.batch_size
-    est_minutes = reset_count  # ~1 min/job
-    print(f"Estimated: {max_iterations} iterations, ~{est_minutes} min ({est_minutes // 60}h {est_minutes % 60}m)")
-    print(f"Running: --max-iterations {max_iterations} --batch-size {args.batch_size} --delay {args.delay}")
 
     os.environ["NORM_BATCH_SIZE"] = str(args.batch_size)
 
@@ -96,12 +91,7 @@ def _export_and_open_pr() -> None:
     """Export fixtures and open a PR against development."""
     import subprocess
 
-    print("\n" + "=" * 60)
-    print("Post-pipeline: exporting fixtures and opening PR")
-    print("=" * 60)
-
     # Export fixtures
-    print("\nExporting fixtures...")
     subprocess.run(
         [sys.executable, str(_REPO_ROOT / "scripts" / "pg-seed-data" / "export_agent_data.py")],
         cwd=str(_REPO_ROOT),
@@ -110,7 +100,6 @@ def _export_and_open_pr() -> None:
 
     # Git: create branch, commit, push, open PR
     branch = "update/re-export-fixtures-with-skills"
-    print(f"\nCreating branch {branch}...")
     subprocess.run(["git", "checkout", "-b", branch], cwd=str(_REPO_ROOT), check=False)
     subprocess.run(["git", "add", "scripts/pg-seed-data/agent-fixtures/"], cwd=str(_REPO_ROOT), check=True)
 
@@ -122,7 +111,6 @@ def _export_and_open_pr() -> None:
         text=True,
     )
     if result.returncode != 0:
-        print("No fixture changes to commit.")
         subprocess.run(["git", "checkout", "development"], cwd=str(_REPO_ROOT), check=False)
         return
 
@@ -136,7 +124,6 @@ def _export_and_open_pr() -> None:
         check=True,
     )
     subprocess.run(["git", "checkout", "development"], cwd=str(_REPO_ROOT), check=False)
-    print("\nDone — PR opened against development.")
 
 
 if __name__ == "__main__":

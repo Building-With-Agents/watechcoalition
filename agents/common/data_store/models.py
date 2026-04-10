@@ -7,8 +7,8 @@ Prisma/MSSQL is being phased out.
 
 Agent-created tables: raw_ingested_jobs, job_ingestion_runs, normalized_jobs,
     normalization_quarantine, extracted_intelligence, llm_audit_log,
-    employer_profiles, skill_demand_weekly, tool_demand_weekly, skill_velocity,
-    skill_co_occurrence.
+    employer_profiles, analytics_pipeline_state, sector_summary_weekly, geo_demand_weekly,
+    skill_demand_weekly, tool_demand_weekly, skill_velocity, skill_co_occurrence.
 Reference tables (seeded, agent-owned): companies, industry_sectors,
     technology_areas, skills, socc, naics, job_postings.
 """
@@ -570,3 +570,73 @@ class NAICS(Base):
     seq_no: Mapped[int | None] = mapped_column(Integer, nullable=True)
     createdat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updatedat: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+
+# ---------------------------------------------------------------------------
+# Analytics pipeline state (Week 7 — minimum-data guard watermark)
+# ---------------------------------------------------------------------------
+
+
+class AnalyticsPipelineState(Base):
+    """Singleton row ``id = 1``: last time analytics completed and emitted ``AnalyticsRefreshed``.
+
+    The analytics agent reads ``last_successful_run_at`` to count new ``job_postings``
+    rows since the previous successful run. Updated only after the guard passes and
+    the pipeline finishes (same session as downstream aggregate writes in Week 7).
+    """
+
+    __tablename__ = "analytics_pipeline_state"
+    __table_args__ = {"schema": "dbo"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    last_successful_run_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Analytics aggregates (Week 7 — Pair B)
+# ---------------------------------------------------------------------------
+
+
+class SectorSummaryWeekly(Base):
+    """Weekly aggregates by industry sector (Pair B — Analytics Step 6).
+
+    ``avg_salary`` stores the salary **median (p50)** (same basis as
+    :func:`agents.analytics.aggregators.salary_percentiles.compute_salary_percentiles`).
+    ``top_skills`` is the top 10 most frequent extracted ``skill_name`` values for the sector-week.
+    """
+
+    __tablename__ = "sector_summary_weekly"
+    __table_args__ = {"schema": "dbo"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    week_start: Mapped[date] = mapped_column(Date, nullable=False)
+    sector: Mapped[str] = mapped_column(Text, nullable=False)
+    posting_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    employer_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    avg_salary: Mapped[float | None] = mapped_column(Float, nullable=True)
+    top_skills: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    computed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
+class GeoDemandWeekly(Base):
+    """Weekly job counts by enrichment ``borderplex_subregion``."""
+
+    __tablename__ = "geo_demand_weekly"
+    __table_args__ = {"schema": "dbo"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    week_start: Mapped[date] = mapped_column(Date, nullable=False)
+    borderplex_subregion: Mapped[str] = mapped_column(String(32), nullable=False)
+    posting_count: Mapped[int] = mapped_column(Integer, nullable=False)

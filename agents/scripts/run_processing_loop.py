@@ -23,6 +23,7 @@ Usage (from repo root):
 from __future__ import annotations
 
 import argparse
+import contextlib
 import os
 import sys
 import time
@@ -78,13 +79,11 @@ def _init_tracer() -> None:
 def _shutdown_tracer() -> None:
     global _tracer
     if _tracer is not None:
-        try:
+        with contextlib.suppress(Exception):
             from agents.common.llm_adapter import register_tracer
 
             _tracer.shutdown()
             register_tracer(None)
-        except Exception:
-            pass
         _tracer = None
 
 
