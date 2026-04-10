@@ -58,6 +58,7 @@ def build_record_enriched_event(
     dedup_stub_count: int = 0,
     dedup_rows_with_duplicate_cluster_id: int = 0,
     dedup_rows_with_matched_job_posting_id: int = 0,
+    freshness_records: list[dict[str, Any]] | None = None,
 ) -> EventEnvelope:
     """Build one ``RecordEnriched`` event for the whole batch (Week 5–6 + dedup integration)."""
     dedup = build_dedup_block(
@@ -65,6 +66,7 @@ def build_record_enriched_event(
         rows_with_duplicate_cluster_id=dedup_rows_with_duplicate_cluster_id,
         rows_with_matched_job_posting_id=dedup_rows_with_matched_job_posting_id,
     )
+    fr = freshness_records if freshness_records is not None else []
     return EventEnvelope(
         correlation_id=correlation_id,
         agent_id="enrichment-agent",
@@ -81,5 +83,6 @@ def build_record_enriched_event(
             "soc_classified_count": soc_classified_count,
             "naics_classified_count": naics_classified_count,
             "dedup": dedup,
+            "freshness_records": list(fr),
         },
     )

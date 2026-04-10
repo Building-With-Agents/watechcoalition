@@ -5,13 +5,17 @@ Week 4: Skills + Tools extraction (Bryan+Emilio), Taxonomy resolution (Angel+Fab
 Week 5: Tasks + Responsibilities + Context extraction (full implementation).
 """
 from agents.skills_extraction.extractors.context import extract_context
-from agents.skills_extraction.extractors.responsibilities import extract_responsibilities
+from agents.skills_extraction.extractors.responsibilities import (
+    extract_responsibilities,
+    extract_responsibilities_async,
+)
 from agents.skills_extraction.extractors.skills import (
     apply_taxonomy_to_skills,
     extract_skills,
     extract_skills_no_taxonomy,
+    extract_skills_no_taxonomy_async,
 )
-from agents.skills_extraction.extractors.tasks import extract_tasks
+from agents.skills_extraction.extractors.tasks import extract_tasks, extract_tasks_async
 from agents.skills_extraction.extractors.taxonomy import (
     resolution_report,
     resolution_stats,
@@ -24,9 +28,12 @@ __all__ = [
     "apply_taxonomy_to_skills",
     "extract_context",
     "extract_responsibilities",
+    "extract_responsibilities_async",
     "extract_skills",
     "extract_skills_no_taxonomy",
+    "extract_skills_no_taxonomy_async",
     "extract_tasks",
+    "extract_tasks_async",
     "extract_tools",
     "resolution_report",
     "resolution_stats",

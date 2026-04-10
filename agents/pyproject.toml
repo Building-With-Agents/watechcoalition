@@ -23,6 +23,8 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+# sys.path + load_dotenv before agents.* — isort cannot merge with top import block
+"pipeline_runner.py" = ["I001"]
 "agents/ingestion/tests/fetch_ground_truth.py" = ["T20"]
 "ingestion/tests/fetch_ground_truth.py" = ["T20"]
 # CLI harness scripts intentionally print to stdout

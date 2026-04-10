@@ -7,15 +7,19 @@ Prisma/MSSQL is being phased out.
 
 Agent-created tables: raw_ingested_jobs, job_ingestion_runs, normalized_jobs,
     normalization_quarantine, extracted_intelligence, llm_audit_log,
-    employer_profiles, analytics_pipeline_state, sector_summary_weekly, geo_demand_weekly.
+    employer_profiles, canonical_roles, role_snapshot_weekly,
+    analytics_pipeline_state, sector_summary_weekly, geo_demand_weekly,
+    skill_demand_weekly, tool_demand_weekly, skill_velocity, skill_co_occurrence.
 Reference tables (seeded, agent-owned): companies, industry_sectors,
     technology_areas, skills, socc, naics, job_postings.
 """
 
 from __future__ import annotations
 
+import os
 import uuid
 from datetime import date, datetime, timezone
+from typing import Literal
 
 from sqlalchemy import (
     Boolean,
@@ -29,6 +33,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     Uuid,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSON, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -38,6 +43,19 @@ class Base(DeclarativeBase):
     """Shared declarative base for all agent models."""
 
     pass
+
+
+FRESH_THRESHOLD_DAYS = int(os.getenv("FRESH_THRESHOLD_DAYS", "30"))
+STALE_THRESHOLD_DAYS = int(os.getenv("STALE_THRESHOLD_DAYS", "90"))
+
+
+def classify_freshness(days: int) -> Literal["fresh", "stale", "expired"]:
+    """Classify posting age in whole days using FRESH_THRESHOLD_DAYS and STALE_THRESHOLD_DAYS."""
+    if days <= FRESH_THRESHOLD_DAYS:
+        return "fresh"
+    if days <= STALE_THRESHOLD_DAYS:
+        return "stale"
+    return "expired"
 
 
 # ---------------------------------------------------------------------------
@@ -333,6 +351,216 @@ class EmployerProfile(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
     )
+
+
+# ---------------------------------------------------------------------------
+# Analytics — Week 7 canonical role clustering (Pair C, IMP-023)
+# ---------------------------------------------------------------------------
+
+
+class CanonicalRole(Base):
+    """Unsupervised cluster -> human-readable canonical role (HDBSCAN + embeddings).
+
+    ``role_id`` is the stable external key (FK from ``job_postings.canonical_role_id``
+    and ``role_snapshot_weekly.canonical_role_id``). ``cluster_centroid`` stores the
+    mean embedding as a JSON array of floats (same dimension as posting embeddings).
+
+    See: ``agents/docs/week 7/WEEK-07-canonical-role-clustering-bryan-emilio-runbook.md``
+    and ``.cursor/rules/canonical-role-clustering.mdc``.
+    """
+
+    __tablename__ = "canonical_roles"
+    __table_args__ = (
+        Index("ix_canonical_roles_computed_at", "computed_at"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    role_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    label: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    posting_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    cluster_centroid: Mapped[list[float] | None] = mapped_column(JSONB, nullable=True)
+    representative_titles: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    top_skills: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    top_tools: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    is_llm_generated: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    computed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
+class RoleSnapshotWeekly(Base):
+    """Weekly aggregates per canonical role (step 5 of the analytics pipeline).
+
+    Salary percentiles align with Pair B helper / runbook; ``avg_salary`` and
+    ``median_salary`` support dashboards and ARCHITECTURE_DEEP examples.
+    """
+
+    __tablename__ = "role_snapshot_weekly"
+    __table_args__ = (
+        UniqueConstraint("week_start", "canonical_role_id", name="uq_role_snapshot_weekly_week_role"),
+        Index("ix_role_snapshot_weekly_week_start", "week_start"),
+        Index("ix_role_snapshot_weekly_canonical_role_id", "canonical_role_id"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    week_start: Mapped[date] = mapped_column(Date, nullable=False)
+    canonical_role_id: Mapped[str] = mapped_column(
+        String(64),
+        ForeignKey("dbo.canonical_roles.role_id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    posting_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    role_title: Mapped[str | None] = mapped_column(Text, nullable=True)
+    avg_salary: Mapped[float | None] = mapped_column(Float, nullable=True)
+    median_salary: Mapped[float | None] = mapped_column(Float, nullable=True)
+    salary_p25: Mapped[float | None] = mapped_column(Float, nullable=True)
+    salary_p50: Mapped[float | None] = mapped_column(Float, nullable=True)
+    salary_p75: Mapped[float | None] = mapped_column(Float, nullable=True)
+    salary_p95: Mapped[float | None] = mapped_column(Float, nullable=True)
+    top_skills: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    top_tools: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    computed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+# ---------------------------------------------------------------------------
+# Analytics (Week 7) — posting freshness (Pair D)
+# ---------------------------------------------------------------------------
+
+
+class PostingFreshness(Base):
+    """Per-job-posting freshness snapshot for analytics (dbo.posting_freshness). Runbook schema."""
+
+    __tablename__ = "posting_freshness"
+    __table_args__ = (
+        Index("ix_posting_freshness_posting_id", "posting_id"),
+        {"schema": "dbo"},
+    )
+
+    posting_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    first_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    duration_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_repost: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    repost_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    fill_proxy: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    computed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
+class TrajectoryMap(Base):
+    """Phase 2 scaffold -- trajectory data per role (dbo.trajectory_map). Empty data, schema only."""
+
+    __tablename__ = "trajectory_map"
+    __table_args__ = ({"schema": "dbo"},)
+
+    role_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    trajectory_data: Mapped[dict] = mapped_column(JSON, nullable=True)
+    computed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Analytics aggregate tables (Week 7 -- Pair A)
+# Frozen column contract: .cursor/rules/skill-tool-demand.mdc (IMP-021).
+# ---------------------------------------------------------------------------
+
+
+class SkillDemandWeekly(Base):
+    """Weekly skill demand counts (Analytics step 2).
+
+    ``employer_count`` stores distinct employers for the skill in the week
+    (``func.count(func.distinct(company_id))`` pattern in SQL -- IMP-021).
+    """
+
+    __tablename__ = "skill_demand_weekly"
+    __table_args__ = (
+        UniqueConstraint("skill_label", "week_start", name="uq_skill_demand_week"),
+        Index("ix_skill_demand_weekly_week", "week_start"),
+        Index("ix_skill_demand_weekly_skill", "skill_label"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    skill_label: Mapped[str] = mapped_column(Text, nullable=False)
+    esco_uri: Mapped[str | None] = mapped_column(Text, nullable=True)
+    week_start: Mapped[date] = mapped_column(Date, nullable=False)
+    posting_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    employer_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class ToolDemandWeekly(Base):
+    """Weekly tool demand counts (Analytics step 3)."""
+
+    __tablename__ = "tool_demand_weekly"
+    __table_args__ = (
+        UniqueConstraint("tool_label", "week_start", name="uq_tool_demand_week"),
+        Index("ix_tool_demand_weekly_week", "week_start"),
+        Index("ix_tool_demand_weekly_tool", "tool_label"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    tool_label: Mapped[str] = mapped_column(Text, nullable=False)
+    week_start: Mapped[date] = mapped_column(Date, nullable=False)
+    posting_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class SkillVelocity(Base):
+    """Skill demand velocity / trend (Analytics step 8).
+
+    Python attribute ``velocity_week`` maps to DB column ``week`` (reserved name).
+    """
+
+    __tablename__ = "skill_velocity"
+    __table_args__ = (
+        UniqueConstraint("skill_label", "week", name="uq_skill_velocity_week"),
+        Index("ix_skill_velocity_week", "week"),
+        Index("ix_skill_velocity_skill", "skill_label"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    skill_label: Mapped[str] = mapped_column(Text, nullable=False)
+    esco_uri: Mapped[str | None] = mapped_column(Text, nullable=True)
+    velocity_week: Mapped[date] = mapped_column("week", Date, nullable=False)
+    demand_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    week_over_week_change: Mapped[float] = mapped_column(Float, nullable=False)
+    four_week_trend: Mapped[str] = mapped_column(Text, nullable=False)
+    trend_confidence: Mapped[float] = mapped_column(Float, nullable=False)
+
+
+class SkillCoOccurrence(Base):
+    """Skill pair co-occurrence within a week (Analytics step 9)."""
+
+    __tablename__ = "skill_co_occurrence"
+    __table_args__ = (
+        UniqueConstraint("skill_a", "skill_b", "week_start", name="uq_skill_co_occurrence_week"),
+        Index("ix_skill_co_occurrence_week", "week_start"),
+        Index("ix_skill_co_occurrence_skills", "skill_a", "skill_b"),
+        {"schema": "dbo"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    skill_a: Mapped[str] = mapped_column(Text, nullable=False)
+    skill_b: Mapped[str] = mapped_column(Text, nullable=False)
+    co_occurrence_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    week_start: Mapped[date] = mapped_column(Date, nullable=False)
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 # ===========================================================================

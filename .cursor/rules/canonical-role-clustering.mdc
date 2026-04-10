@@ -67,7 +67,8 @@ Suggested `EventEnvelope.payload` keys (snake_case, extend with `schema_version`
 | `posting_ids` | list[str] | Job posting UUIDs as text. |
 | `candidate_role_label` | str | Short proposed label for the candidate group. |
 | `posting_count` | int | |
-| `top_skills` | list | |
+| `top_skills` | list | Objects with `skill_name`, `count`. |
+| `top_tools` | list | Objects with `tool_name`, `count`. |
 | `nearest_canonical_role` | str \| null | `role_id` of closest cluster, if any. |
 | `filter_reason` | str \| null | Why it passed emergence filters (IMP-023), not raw noise. |
 

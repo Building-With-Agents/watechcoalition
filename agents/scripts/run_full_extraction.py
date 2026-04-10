@@ -14,6 +14,7 @@ At ~1 min/job with Azure OpenAI, 1000 jobs takes ~16-17 hours.
 from __future__ import annotations
 
 import argparse
+import logging
 import os
 import sys
 from pathlib import Path
@@ -30,6 +31,7 @@ from sqlalchemy import text
 
 from agents.common.data_store.database import session_scope
 
+log = logging.getLogger(__name__)
 
 def reset_unextracted_to_pending() -> int:
     """Reset raw_ingested_jobs to 'pending' for records not yet in extracted_intelligence."""
@@ -58,6 +60,7 @@ def reset_unextracted_to_pending() -> int:
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description="Run full extraction on unprocessed records")
     parser.add_argument("--batch-size", type=int, default=5, help="Records per iteration (default: 5)")
     parser.add_argument("--delay", type=int, default=5, help="Seconds between iterations (default: 5)")
@@ -65,11 +68,27 @@ def main() -> None:
     args = parser.parse_args()
 
     reset_count = reset_unextracted_to_pending()
+    log.info("Reset %s records to pending for extraction", reset_count)
 
     if reset_count == 0:
+        log.info("Nothing to process — all normalized records already have extracted_intelligence.")
         return
 
     max_iterations = (reset_count + args.batch_size - 1) // args.batch_size
+    est_minutes = reset_count  # ~1 min/job
+    log.info(
+        "Estimated: %s iterations, ~%s min (%sh %sm)",
+        max_iterations,
+        est_minutes,
+        est_minutes // 60,
+        est_minutes % 60,
+    )
+    log.info(
+        "Running: --max-iterations %s --batch-size %s --delay %s",
+        max_iterations,
+        args.batch_size,
+        args.delay,
+    )
 
     os.environ["NORM_BATCH_SIZE"] = str(args.batch_size)
 
@@ -91,7 +110,12 @@ def _export_and_open_pr() -> None:
     """Export fixtures and open a PR against development."""
     import subprocess
 
+    log.info("\n%s", "=" * 60)
+    log.info("Post-pipeline: exporting fixtures and opening PR")
+    log.info("%s", "=" * 60)
+
     # Export fixtures
+    log.info("\nExporting fixtures...")
     subprocess.run(
         [sys.executable, str(_REPO_ROOT / "scripts" / "pg-seed-data" / "export_agent_data.py")],
         cwd=str(_REPO_ROOT),
@@ -100,6 +124,7 @@ def _export_and_open_pr() -> None:
 
     # Git: create branch, commit, push, open PR
     branch = "update/re-export-fixtures-with-skills"
+    log.info("\nCreating branch %s...", branch)
     subprocess.run(["git", "checkout", "-b", branch], cwd=str(_REPO_ROOT), check=False)
     subprocess.run(["git", "add", "scripts/pg-seed-data/agent-fixtures/"], cwd=str(_REPO_ROOT), check=True)
 
@@ -111,6 +136,7 @@ def _export_and_open_pr() -> None:
         text=True,
     )
     if result.returncode != 0:
+        log.info("No fixture changes to commit.")
         subprocess.run(["git", "checkout", "development"], cwd=str(_REPO_ROOT), check=False)
         return
 
@@ -124,6 +150,7 @@ def _export_and_open_pr() -> None:
         check=True,
     )
     subprocess.run(["git", "checkout", "development"], cwd=str(_REPO_ROOT), check=False)
+    log.info("\nDone — PR opened against development.")
 
 
 if __name__ == "__main__":

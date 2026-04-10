@@ -1,6 +1,14 @@
-"""Salary percentile aggregates for Pair C ``role_snapshot_weekly`` (issue #188)."""
+"""Salary percentile aggregates for analytics tables.
+
+Pair C ``role_snapshot_weekly`` (issue #188) adds ``canonical_role_id`` grouping
+and ``week_start`` filtering with annualized salary normalization.
+
+Pair B reuses ``SALARY_VALUE_SQL`` for sector / weekly aggregations.
+"""
 
 from __future__ import annotations
+
+from datetime import date
 
 import structlog
 from sqlalchemy import text
@@ -13,6 +21,7 @@ _ALLOWED_GROUP_COL_SQL: dict[str, str] = {
     "soc_code": "jp.soc_code",
     "naics_code": "jp.naics_code",
     "borderplex_subregion": "jp.borderplex_subregion",
+    "canonical_role_id": "jp.canonical_role_id",
 }
 
 # Shared with sector / weekly aggregations — same basis as ``compute_salary_percentiles``.
@@ -26,6 +35,21 @@ SALARY_VALUE_SQL = """(
     END
 )"""
 
+_SALARY_MIDPOINT_EXPR = SALARY_VALUE_SQL
+
+_ANNUALIZED_SALARY_EXPR = f"""(
+    CASE
+        WHEN {_SALARY_MIDPOINT_EXPR} IS NULL OR {_SALARY_MIDPOINT_EXPR} <= 0 THEN NULL::double precision
+        WHEN LOWER(TRIM(COALESCE(nj.salary_period, ''))) IN ('hourly', 'hour', 'hr')
+            THEN ({_SALARY_MIDPOINT_EXPR}) * 2080.0
+        WHEN LOWER(TRIM(COALESCE(nj.salary_period, ''))) IN ('monthly', 'month', 'mo')
+            THEN ({_SALARY_MIDPOINT_EXPR}) * 12.0
+        WHEN LOWER(TRIM(COALESCE(nj.salary_period, ''))) IN ('weekly', 'week', 'wk')
+            THEN ({_SALARY_MIDPOINT_EXPR}) * 52.0
+        ELSE {_SALARY_MIDPOINT_EXPR}
+    END
+)"""
+
 _SALARY_EXPR = SALARY_VALUE_SQL
 
 
@@ -33,15 +57,19 @@ def compute_salary_percentiles(
     session: Session,
     group_col: str,
     having_threshold: int = 50,
+    *,
+    week_start: date | None = None,
 ) -> dict[str, dict[str, float]]:
     """
     Per-group salary percentiles (p25, p50, p75, p95) using PostgreSQL ``percentile_disc``.
 
     Joins ``dbo.job_postings`` to ``dbo.normalized_jobs`` on ``source`` + ``external_id``.
-    Salary basis: midpoint of min/max when both present, else max, else min.
+    Salary basis: midpoint of min/max when both present, else max, else min, with hourly
+    salaries annualized to a 2080-hour year so downstream weekly snapshots stay comparable.
 
     Groups with fewer than ``having_threshold`` rows (with non-null salary and group key)
     are omitted from the result.
+    When ``week_start`` is provided, only postings published in that UTC week are included.
     """
     if group_col not in _ALLOWED_GROUP_COL_SQL:
         log.warning(
@@ -62,12 +90,22 @@ def compute_salary_percentiles(
         raise NotImplementedError("compute_salary_percentiles requires PostgreSQL")
 
     col_sql = _ALLOWED_GROUP_COL_SQL[group_col]
+    normalized_threshold = max(int(having_threshold), 0)
+
+    week_filter_sql = ""
+    params: dict[str, object] = {"having_threshold": normalized_threshold}
+    if week_start is not None:
+        week_filter_sql = """
+      AND jp.publish_date IS NOT NULL
+      AND DATE_TRUNC('week', jp.publish_date AT TIME ZONE 'UTC')::date = :week_start
+"""
+        params["week_start"] = week_start
 
     sql = f"""
 WITH base AS (
     SELECT
         TRIM(BOTH FROM {col_sql}::text) AS grp,
-        {_SALARY_EXPR} AS salary_value
+        {_ANNUALIZED_SALARY_EXPR} AS salary_value
     FROM dbo.job_postings jp
     INNER JOIN dbo.normalized_jobs nj
         ON nj.source = jp.source
@@ -75,7 +113,8 @@ WITH base AS (
     WHERE jp.source IS NOT NULL
       AND jp.external_id IS NOT NULL
       AND TRIM(BOTH FROM {col_sql}::text) <> ''
-      AND {_SALARY_EXPR} IS NOT NULL
+      AND {_ANNUALIZED_SALARY_EXPR} IS NOT NULL
+{week_filter_sql}
 )
 SELECT
     grp,
@@ -92,13 +131,11 @@ HAVING COUNT(*) >= :having_threshold
     log.info(
         "salary_percentiles_compute_start",
         group_col=group_col,
-        having_threshold=having_threshold,
+        having_threshold=normalized_threshold,
+        week_start=str(week_start) if week_start else None,
     )
 
-    rows = session.execute(
-        text(sql),
-        {"having_threshold": having_threshold},
-    ).mappings().all()
+    rows = session.execute(text(sql), params).mappings().all()
 
     out: dict[str, dict[str, float]] = {}
     for row in rows:
@@ -113,7 +150,8 @@ HAVING COUNT(*) >= :having_threshold
     log.info(
         "salary_percentiles_compute_complete",
         group_col=group_col,
-        having_threshold=having_threshold,
+        having_threshold=normalized_threshold,
+        week_start=str(week_start) if week_start else None,
         group_count=len(out),
     )
     return out

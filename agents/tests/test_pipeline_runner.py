@@ -2,17 +2,29 @@
 
 from __future__ import annotations
 
+import os
+from unittest.mock import patch
+
+import pytest
+
+from agents.common.data_store.database import check_db_connection
 from agents.pipeline_runner import PIPELINE, run_health_checks, run_pipeline
 
 
 class TestRunHealthChecks:
     """Verify health check gating logic."""
 
+    @pytest.mark.skipif(
+        bool(os.getenv("PYTHON_DATABASE_URL")) and not check_db_connection(),
+        reason="PYTHON_DATABASE_URL is set but DB is unreachable — enrichment-agent health is down",
+    )
     def test_all_pass(self) -> None:
         """Returns True when all Phase 1 agents are healthy (real pipeline).
 
-        DB-dependent agents (ingestion, normalization) report "degraded"
-        without a database, which is accepted by the pipeline runner.
+        DB-dependent agents (ingestion, normalization, skills) report "degraded"
+        without a live database when no URL is configured, or when the URL is set
+        and the server is reachable. Enrichment requires a reachable DB when the
+        URL is set — otherwise health fails (see skipif above).
         """
         assert run_health_checks(PIPELINE) is True
 
@@ -81,7 +93,11 @@ class TestRunPipelineStubs:
             (OrchestrationAgent(), False),
         ]
         trigger = {"event_type": "NormalizationComplete", "posting_id": 1}
-        entries = run_pipeline(stub_pipeline, "test-stubs", trigger)
+        with (
+            patch("agents.analytics.agent.check_db_connection", return_value=False),
+            patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}),
+        ):
+            entries = run_pipeline(stub_pipeline, "test-stubs", trigger)
         assert len(entries) == 5
 
     def test_correlation_id_consistency(self) -> None:
@@ -100,7 +116,11 @@ class TestRunPipelineStubs:
             (OrchestrationAgent(), False),
         ]
         trigger = {"event_type": "NormalizationComplete", "posting_id": 1}
-        entries = run_pipeline(stub_pipeline, "test-cid", trigger)
+        with (
+            patch("agents.analytics.agent.check_db_connection", return_value=False),
+            patch.dict(os.environ, {"PYTHON_DATABASE_URL": ""}),
+        ):
+            entries = run_pipeline(stub_pipeline, "test-cid", trigger)
         for entry in entries:
             assert entry["correlation_id"] == "test-cid"
 

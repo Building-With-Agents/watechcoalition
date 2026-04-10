@@ -132,7 +132,16 @@ _JOB_POSTINGS_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS zip_code VARCHAR(10)",
     # Link to dbo.employer_profiles (UUID PK) after enrichment upsert
     "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS employer_profile_id UUID REFERENCES dbo.employer_profiles(id)",
+    # Week 7 — canonical role clustering (Pair C): posting → discovered role
+    "ALTER TABLE dbo.job_postings ADD COLUMN IF NOT EXISTS canonical_role_id TEXT",
 ]
+
+# Optional FK after ``canonical_roles`` exists (create_all + alters). Idempotent via try/except.
+_CANONICAL_ROLE_JOB_POSTING_FK = """
+ALTER TABLE dbo.job_postings
+    ADD CONSTRAINT fk_job_postings_canonical_roles
+    FOREIGN KEY (canonical_role_id) REFERENCES dbo.canonical_roles (role_id)
+"""
 
 # Legacy Prisma cleanup: drop FK constraints and make NOT NULL columns nullable (#159).
 # Pipeline stores location directly on job_postings row, not via company_addresses FK.
@@ -191,6 +200,30 @@ CREATE TABLE IF NOT EXISTS dbo.naics (
 );
 """
 
+# Analytics Week 7 Pair D — posting_freshness + trajectory_map (ORM-aligned; idempotent with create_all).
+_POSTING_FRESHNESS_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.posting_freshness (
+    posting_id TEXT PRIMARY KEY,
+    first_seen TIMESTAMPTZ NOT NULL,
+    last_seen TIMESTAMPTZ NOT NULL,
+    duration_days INTEGER NOT NULL,
+    is_repost BOOLEAN NOT NULL DEFAULT FALSE,
+    repost_count INTEGER NOT NULL DEFAULT 0,
+    fill_proxy BOOLEAN NOT NULL DEFAULT FALSE,
+    computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_posting_freshness_posting_id
+    ON dbo.posting_freshness (posting_id);
+"""
+
+_TRAJECTORY_MAP_DDL = """
+CREATE TABLE IF NOT EXISTS dbo.trajectory_map (
+    role_id TEXT PRIMARY KEY,
+    trajectory_data JSONB,
+    computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+"""
+
 # sector_summary_weekly schema upgrades (Step 6 — employer_count, top_skills, computed_at)
 _SECTOR_SUMMARY_WEEKLY_ALTER_STATEMENTS = [
     "ALTER TABLE dbo.sector_summary_weekly ADD COLUMN IF NOT EXISTS employer_count INTEGER NOT NULL DEFAULT 0",
@@ -219,6 +252,10 @@ CREATE TABLE IF NOT EXISTS dbo.geo_demand_weekly (
 );
 """
 
+# Week 7: skill_demand_weekly may predate employer_count (IMP-021 distinct-employer metric)
+_SKILL_DEMAND_WEEKLY_ALTER_STATEMENTS = [
+    "ALTER TABLE dbo.skill_demand_weekly ADD COLUMN IF NOT EXISTS employer_count INTEGER NOT NULL DEFAULT 0",
+]
 _SERIAL_SEQUENCE_TARGETS = (
     ("raw_ingested_jobs", "id"),
     ("job_ingestion_runs", "id"),
@@ -409,6 +446,12 @@ def run_migrations(engine: Engine) -> None:
             conn.execute(text(_NAICS_DDL))
         log.info("migrations_naics_created")
 
+    # 4b. Analytics tables (posting_freshness, trajectory_map) — explicit DDL mirrors ORM models.
+    with engine.begin() as conn:
+        conn.execute(text(_POSTING_FRESHNESS_DDL))
+        conn.execute(text(_TRAJECTORY_MAP_DDL))
+    log.info("migrations_analytics_tables_created")
+
     # 4c. Week 7 analytics aggregate tables (PostgreSQL DDL; ORM also registers via create_all)
     if engine.dialect.name == "postgresql":
         try:
@@ -451,6 +494,18 @@ def run_migrations(engine: Engine) -> None:
     _ensure_duplicate_cluster_id_uuid(engine)
     _sync_agent_serial_sequences(engine)
 
+    # 5b. FK job_postings.canonical_role_id → canonical_roles.role_id (PostgreSQL)
+    if engine.dialect.name == "postgresql":
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(_CANONICAL_ROLE_JOB_POSTING_FK))
+            log.info("migrations_canonical_role_fk_added")
+        except Exception as exc:
+            log.warning(
+                "migration_canonical_role_fk_skipped",
+                error=str(exc),
+            )
+
     for stmt in _NORMALIZED_JOBS_ALTER_STATEMENTS:
         try:
             with engine.begin() as conn:
@@ -482,6 +537,18 @@ def run_migrations(engine: Engine) -> None:
         except Exception as exc:
             log.warning(
                 "migration_legacy_cleanup_skipped",
+                statement=stmt,
+                error=str(exc),
+            )
+
+    # Week 7 (after development base): skill_demand_weekly employer_count backfill
+    for stmt in _SKILL_DEMAND_WEEKLY_ALTER_STATEMENTS:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(stmt))
+        except Exception as exc:
+            log.warning(
+                "migration_skill_demand_weekly_alter_skipped",
                 statement=stmt,
                 error=str(exc),
             )

@@ -230,9 +230,9 @@ def main() -> None:
             agent_id="processing-loop",
             payload={"event_type": "ProcessingTrigger", "batch_id": ""},
         )
-
         # Wrap entire iteration in a parent trace so all agent spans
         # and LLM call generations appear nested under one trace in Langfuse.
+        iteration_start = time.perf_counter()
         trace_ctx = (
             _tracer.start_trace(
                 f"processing-loop-iter-{iteration}",
@@ -256,12 +256,30 @@ def main() -> None:
 
                 # Stage 2: Extract skills (FIFO — finds unextracted records itself)
                 extract_event = norm_out or trigger
+                extract_start = time.perf_counter()
                 extract_out = extract_agent.process(extract_event)
+                extract_duration_ms = int((time.perf_counter() - extract_start) * 1000)
                 extract_count = 0
+                parallel_enabled = os.getenv("SKILLS_EXTRACTION_PARALLEL", "1").strip().lower() not in ("0", "false", "no")
+                serial_estimate_ms = 0
                 if extract_out is not None:
                     records = extract_out.payload.get("records", [])
                     extract_count = len(records) if isinstance(records, list) else 0
-                    log.info("extracted", count=extract_count, iteration=iteration)
+
+                    concurrency = int(os.getenv("SKILLS_EXTRACTION_CONCURRENCY", "5"))
+                    avg_per_job_ms = extract_out.payload.get("avg_per_job_ms", 0)
+                    serial_estimate_ms = avg_per_job_ms * extract_count if avg_per_job_ms else 0
+                    log.info(
+                        "extracted",
+                        count=extract_count,
+                        iteration=iteration,
+                        extraction_duration_ms=extract_duration_ms,
+                        execution_mode="parallel" if parallel_enabled else "serial",
+                        concurrency=concurrency if parallel_enabled else 1,
+                        avg_per_job_ms=avg_per_job_ms,
+                        serial_estimate_ms=serial_estimate_ms,
+                        speedup=round(serial_estimate_ms / extract_duration_ms, 2) if extract_duration_ms > 0 and serial_estimate_ms > 0 else None,
+                    )
                     total_extracted += extract_count
 
                 # Stage 3: Enrich (processes extraction output records)
@@ -276,12 +294,17 @@ def main() -> None:
                 enriched_total = _count_enriched()
                 remaining_raw = _count_pending()
                 remaining_unextracted = _count_unextracted()
+                iteration_wall_clock_ms = int((time.perf_counter() - iteration_start) * 1000)
 
                 log.info(
                     "iteration_complete",
                     iteration=iteration,
                     norm_batch=norm_count,
                     extract_batch=extract_count,
+                    extraction_duration_ms=extract_duration_ms,
+                    execution_mode="parallel" if parallel_enabled else "serial",
+                    serial_estimate_ms=serial_estimate_ms,
+                    iteration_wall_clock_ms=iteration_wall_clock_ms,
                     total_enriched=enriched_total,
                     remaining_raw=remaining_raw,
                     remaining_unextracted=remaining_unextracted,

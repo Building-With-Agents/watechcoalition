@@ -95,6 +95,7 @@ from agents.enrichment.resolvers.confidence import (
     compute_overall_confidence,
 )
 from agents.enrichment.resolvers.events import build_record_enriched_event
+from agents.enrichment.resolvers.freshness_slice import build_freshness_record_for_analytics
 from agents.enrichment.resolvers.location_resolver import resolve_location
 from agents.enrichment.resolvers.sector_resolver import resolve_sector
 from agents.enrichment.schemas import EnrichedJobProfile
@@ -349,6 +350,7 @@ _EXTRA_POSTING_KEYS = frozenset(
         "matched_job_posting_id",
         "survivor_job_posting_id",
         "stub",
+        "date_posted",
     }
 )
 
@@ -537,12 +539,14 @@ class EnrichmentAgent(BaseAgent):
         dedup_stub_count = 0
         dedup_rows_with_duplicate_cluster_id = 0
         dedup_rows_with_matched_job_posting_id = 0
+        freshness_records: list[dict[str, Any]] = []
 
         def run_batch(session: Session | None) -> None:
             nonlocal enriched_count, spam_rejected_count, flagged_for_review_count
             nonlocal duplicate_count, soc_classified_count, naics_classified_count
             nonlocal dedup_stub_count, dedup_rows_with_duplicate_cluster_id
             nonlocal dedup_rows_with_matched_job_posting_id
+            nonlocal freshness_records
             for idx, row in enumerate(rows):
                 bucket = _spam_bucket(row)
                 if bucket == "rejected":
@@ -577,6 +581,16 @@ class EnrichmentAgent(BaseAgent):
                         enriched = self.enrich_record(posting, session=session)
                         sector_id = resolve_sector(posting.get("role_classification"), session=session)
                         enriched["sector_id"] = sector_id
+
+                        if enriched.get("spam_degraded") is True:
+                            _emit_enrichment_degraded(
+                                correlation_id=correlation_id,
+                                posting_id=posting.get("posting_id"),
+                                normalized_job_id=_coerce_normalized_job_id(row.get("normalized_job_id")),
+                                triggered_by_event_type=payload.get("event_type"),
+                                reason="spam_classifier_unavailable",
+                                extraction_note=enriched.get("spam_extraction_note"),
+                            )
 
                         # Score quality (deterministic — no LLM call)
                         extraction = build_extraction_dict(
@@ -630,6 +644,8 @@ class EnrichmentAgent(BaseAgent):
                                     normalized_job_id=nj_promo,
                                     error=str(promo_exc),
                                 )
+
+                        freshness_records.append(build_freshness_record_for_analytics(posting, enriched))
                     except Exception:
                         log.warning("enrichment_process_degraded", agent=self.agent_id)
 
@@ -685,6 +701,7 @@ class EnrichmentAgent(BaseAgent):
             dedup_stub_count=dedup_stub_count,
             dedup_rows_with_duplicate_cluster_id=dedup_rows_with_duplicate_cluster_id,
             dedup_rows_with_matched_job_posting_id=dedup_rows_with_matched_job_posting_id,
+            freshness_records=freshness_records,
         )
 
     def process(self, event: EventEnvelope) -> EventEnvelope:
