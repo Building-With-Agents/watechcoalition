@@ -157,6 +157,9 @@ def _job_record_from_event_payload(payload: dict) -> JobRecord | None:
 # ---------------------------------------------------------------------------
 # Pipeline definition
 # ---------------------------------------------------------------------------
+# AnalyticsAgent (Week 7) runs ARCHITECTURE_DEEP **13-step** internal items **2, 3,
+# 8, 9** inside ``process()``: skill demand weekly, tool demand weekly, skill
+# velocity, skill co-occurrence (Pair A / IMP-021), each in its own DB session.
 
 PIPELINE: list[tuple[Any, bool]] = [
     (IngestionAgent(), False),
