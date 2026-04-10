@@ -77,9 +77,7 @@ def main() -> None:
 
     # Count total pending
     with session_scope() as s:
-        total = s.execute(text(
-            "SELECT count(*) FROM dbo.job_postings WHERE quality_score IS NULL"
-        )).scalar()
+        total = s.execute(text("SELECT count(*) FROM dbo.job_postings WHERE quality_score IS NULL")).scalar()
 
     log.info("backfill_start", total_pending=total, batch_size=args.batch_size, delay=args.delay)
     if args.dry_run:
@@ -100,9 +98,17 @@ def main() -> None:
             break
 
         with session_scope() as session:
-            rows = session.execute(_SELECT_PENDING_SQL, {
-                "batch_size": args.batch_size, "offset": 0,
-            }).mappings().all()
+            rows = (
+                session.execute(
+                    _SELECT_PENDING_SQL,
+                    {
+                        "batch_size": args.batch_size,
+                        "offset": 0,
+                    },
+                )
+                .mappings()
+                .all()
+            )
 
             if not rows:
                 break
@@ -153,13 +159,16 @@ def main() -> None:
                     except Exception as e:
                         log.warning("backfill_naics_failed", job_posting_id=jp_id, error=str(e))
 
-                    session.execute(_UPDATE_SQL, {
-                        "job_posting_id": jp_id,
-                        "quality_score": q_res.quality_score,
-                        "soc_code": soc_code,
-                        "naics_code": naics_code,
-                        "spam_score": spam_res.spam_score,
-                    })
+                    session.execute(
+                        _UPDATE_SQL,
+                        {
+                            "job_posting_id": jp_id,
+                            "quality_score": q_res.quality_score,
+                            "soc_code": soc_code,
+                            "naics_code": naics_code,
+                            "spam_score": spam_res.spam_score,
+                        },
+                    )
                     updated += 1
 
                 except Exception as e:
@@ -168,13 +177,25 @@ def main() -> None:
 
                 processed += 1
                 if processed % 10 == 0:
-                    log.info("backfill_progress", processed=processed, updated=updated,
-                             errors=errors, soc=soc_classified, naics=naics_classified)
+                    log.info(
+                        "backfill_progress",
+                        processed=processed,
+                        updated=updated,
+                        errors=errors,
+                        soc=soc_classified,
+                        naics=naics_classified,
+                    )
 
                 time.sleep(args.delay)
 
-    log.info("backfill_complete", processed=processed, updated=updated,
-             errors=errors, soc_classified=soc_classified, naics_classified=naics_classified)
+    log.info(
+        "backfill_complete",
+        processed=processed,
+        updated=updated,
+        errors=errors,
+        soc_classified=soc_classified,
+        naics_classified=naics_classified,
+    )
     print("\nBackfill complete.")
     print(f"  Processed: {processed}")
     print(f"  Updated: {updated}")

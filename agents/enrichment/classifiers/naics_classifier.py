@@ -115,7 +115,7 @@ def _build_prompt(
     description: str | None,
     candidates: list[dict[str, str]],
 ) -> str:
-    lines = [f'{c["code"]}: {c["title"]}' for c in candidates]
+    lines = [f"{c['code']}: {c['title']}" for c in candidates]
     block = "\n".join(lines)
     desc = (description or "").strip()
     return f"""Classify this job into one NAICS 2022 industry from the list below.

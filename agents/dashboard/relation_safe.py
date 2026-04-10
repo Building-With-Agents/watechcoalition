@@ -27,11 +27,7 @@ def read_sql_relation_safe(
     Other exceptions are re-raised so real connectivity/SQL bugs still surface.
     """
     try:
-        df = (
-            pd.read_sql(query, engine, params=params)
-            if params is not None
-            else pd.read_sql(query, engine)
-        )
+        df = pd.read_sql(query, engine, params=params) if params is not None else pd.read_sql(query, engine)
         return df, None
     except Exception as exc:
         if is_undefined_relation_error(exc):

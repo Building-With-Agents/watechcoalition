@@ -136,10 +136,14 @@ def compute_sector_summary_weekly(session: Session, week_start: date) -> list[Se
         """
     )
 
-    rows = session.execute(
-        sql,
-        {"week_start_ts": ws, "week_end_ts": we},
-    ).mappings().all()
+    rows = (
+        session.execute(
+            sql,
+            {"week_start_ts": ws, "week_end_ts": we},
+        )
+        .mappings()
+        .all()
+    )
 
     result: list[SectorSummaryWeekly] = []
     for row in rows:

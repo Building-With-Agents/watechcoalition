@@ -67,9 +67,7 @@ from agents.skills_extraction.extractors.taxonomy import resolve_taxonomy_batch
 from agents.skills_extraction.prompts import SKILLS_PROMPT_VERSION
 from agents.skills_extraction.validator import validate_extraction_result
 
-_FIXTURE_PATH = (
-    Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
-)
+_FIXTURE_PATH = Path(__file__).parent.parent / "data" / "fixtures" / "fixture_skills_extracted.json"
 EXTRACTION_PASS1_LABEL = "pattern-context-tools-v1"
 EXTRACTION_VERSION = f"week5-six-dim-{SKILLS_PROMPT_VERSION}"
 FIXTURE_EXTRACTION_MODEL = "fixture-week2-skills"
@@ -193,11 +191,7 @@ def _serial_inter_job_delay() -> float:
 
 def _warn_parallel_deprecated_serial_throttles() -> None:
     """Warn once when deprecated serial-only throttle env vars are set in parallel mode."""
-    configured = [
-        name
-        for name in _DEPRECATED_SERIAL_THROTTLE_ENV_KEYS
-        if os.getenv(name) not in (None, "")
-    ]
+    configured = [name for name in _DEPRECATED_SERIAL_THROTTLE_ENV_KEYS if os.getenv(name) not in (None, "")]
     if not configured:
         return
 
@@ -215,11 +209,7 @@ def _warn_parallel_deprecated_serial_throttles() -> None:
 
 def _persisted_extraction_model_llm() -> str:
     """Stable label: Pass 1 strategy + Pass 2 deployment + prompt version."""
-    return (
-        f"pass1={EXTRACTION_PASS1_LABEL};"
-        f"pass2={_llm_deployment_name()};"
-        f"prompt={SKILLS_PROMPT_VERSION}"
-    )
+    return f"pass1={EXTRACTION_PASS1_LABEL};pass2={_llm_deployment_name()};prompt={SKILLS_PROMPT_VERSION}"
 
 
 @dataclass(frozen=True)
@@ -287,11 +277,7 @@ class EventOrDatabaseWorkItemLoader:
         payload = event.payload
         batch_id = _string_value(payload.get("batch_id"))
 
-        inline_records = (
-            payload.get("normalized_jobs")
-            or payload.get("jobs")
-            or payload.get("job_records")
-        )
+        inline_records = payload.get("normalized_jobs") or payload.get("jobs") or payload.get("job_records")
         if isinstance(inline_records, list):
             items = [
                 item
@@ -402,10 +388,7 @@ class EventOrDatabaseWorkItemLoader:
             normalized_job_id = _int_value(mapping.get("id"))
 
         external_id = str(
-            mapping.get("external_id")
-            or posting_id
-            or normalized_job_id
-            or title.casefold().replace(" ", "-")
+            mapping.get("external_id") or posting_id or normalized_job_id or title.casefold().replace(" ", "-")
         )
         description = _string_value(mapping.get("description")) or _string_value(mapping.get("raw_text"))
         requirements = _string_value(mapping.get("requirements"))
@@ -476,10 +459,14 @@ class SQLAlchemyExtractionStore:
                         .order_by(ExtractedIntelligence.id)
                         .all()
                     )
-                    row = existing_rows[0] if existing_rows else ExtractedIntelligence(
-                        normalized_job_id=normalized_job_id,
-                        extraction_version=EXTRACTION_VERSION,
-                        extraction_model=FIXTURE_EXTRACTION_MODEL,
+                    row = (
+                        existing_rows[0]
+                        if existing_rows
+                        else ExtractedIntelligence(
+                            normalized_job_id=normalized_job_id,
+                            extraction_version=EXTRACTION_VERSION,
+                            extraction_model=FIXTURE_EXTRACTION_MODEL,
+                        )
                     )
                     if not existing_rows:
                         session.add(row)
@@ -495,12 +482,8 @@ class SQLAlchemyExtractionStore:
                     row.tasks = list(getattr(result, "tasks", []) or [])
                     row.responsibilities = list(getattr(result, "responsibilities", []) or [])
                     row.context = list(getattr(result, "context", []) or [])
-                    validated = validate_extraction_result(
-                        result.skills, [tool.model_dump() for tool in result.tools]
-                    )
-                    row.extraction_warnings = list(
-                        dict.fromkeys([*list(result.extraction_warnings), *validated])
-                    )
+                    validated = validate_extraction_result(result.skills, [tool.model_dump() for tool in result.tools])
+                    row.extraction_warnings = list(dict.fromkeys([*list(result.extraction_warnings), *validated]))
                     row.overall_confidence = _overall_extraction_confidence(result)
                     # Degraded = partial LLM failure (e.g. tasks) but skills OK — not a hard failure.
                     row.extraction_failed = result.extraction_status == "failed"
@@ -632,6 +615,7 @@ class SkillsExtractionAgent(BaseAgent):
         taxonomy_map: dict[str, Any] = {}
         if all_labels:
             import structlog as _structlog
+
             _log = _structlog.get_logger()
             _log.info(
                 "taxonomy_batch_resolve",
@@ -928,9 +912,7 @@ class SkillsExtractionAgent(BaseAgent):
                 return pending_result
 
         results = list(
-            await asyncio.gather(
-                *[_extract_one(index, item) for index, item in enumerate(work_items, start=1)]
-            )
+            await asyncio.gather(*[_extract_one(index, item) for index, item in enumerate(work_items, start=1)])
         )
         if _saturation_events > 0:
             log.info(
@@ -983,16 +965,8 @@ class SkillsExtractionAgent(BaseAgent):
             total_llm_calls=sum(int((result.meta or {}).get("pass2_llm_calls") or 0) for result in pending),
             avg_per_job_ms=int(total_job_ms / total_jobs) if total_jobs else 0,
             concurrency_utilization=round(concurrency_utilization, 4),
-            failed_jobs=sum(
-                1
-                for result in pending
-                if (result.meta or {}).get("extraction_status") == "failed"
-            ),
-            degraded_jobs=sum(
-                1
-                for result in pending
-                if (result.meta or {}).get("extraction_status") == "degraded"
-            ),
+            failed_jobs=sum(1 for result in pending if (result.meta or {}).get("extraction_status") == "failed"),
+            degraded_jobs=sum(1 for result in pending if (result.meta or {}).get("extraction_status") == "degraded"),
         )
 
     def _extract_work_item_no_taxonomy_parallel_bridge(
@@ -1001,16 +975,19 @@ class SkillsExtractionAgent(BaseAgent):
         """Run one work item through the async intra-job path from sync agent code."""
         pending = self._extract_batch_parallel_bridge([item], concurrency=1)
         if not pending:
-            return [], [], _job_extraction_failure_meta(
-                item,
-                RuntimeError("parallel bridge returned no pending results"),
-            ), False
+            return (
+                [],
+                [],
+                _job_extraction_failure_meta(
+                    item,
+                    RuntimeError("parallel bridge returned no pending results"),
+                ),
+                False,
+            )
         result = pending[0]
         return result.tools, result.skills_list, result.meta, True
 
-    def _extract_work_item_no_taxonomy(
-        self, item: ExtractionWorkItem
-    ) -> tuple[list[ToolRecord], list, dict, bool]:
+    def _extract_work_item_no_taxonomy(self, item: ExtractionWorkItem) -> tuple[list[ToolRecord], list, dict, bool]:
         """Pass 1: context + tools. Pass 2: tasks, responsibilities, skills (taxonomy deferred).
 
         Returns ``(tools, skills_list, combined_meta, used_llm)``. ``combined_meta`` carries
@@ -1021,18 +998,14 @@ class SkillsExtractionAgent(BaseAgent):
         context_signals, ctx_meta = extract_context(job)
 
         has_normalized_text = bool(
-            (job.description or "").strip()
-            or (job.requirements or "").strip()
-            or (job.responsibilities or "").strip()
+            (job.description or "").strip() or (job.requirements or "").strip() or (job.responsibilities or "").strip()
         )
 
         if not has_normalized_text:
             return tools, [], _no_normalized_text_meta(item, context_signals, ctx_meta), False
 
         tasks, tasks_meta = extract_tasks(job, pass1_context=context_signals)
-        responsibilities, resp_meta = extract_responsibilities(
-            job, pass1_context=context_signals
-        )
+        responsibilities, resp_meta = extract_responsibilities(job, pass1_context=context_signals)
         skills_list, skills_meta = extract_skills_no_taxonomy(job, pass1_tools=tools)
 
         combined_meta = _build_combined_pass2_meta(
@@ -1060,9 +1033,7 @@ class SkillsExtractionAgent(BaseAgent):
         context_signals, ctx_meta = extract_context(job)
 
         has_normalized_text = bool(
-            (job.description or "").strip()
-            or (job.requirements or "").strip()
-            or (job.responsibilities or "").strip()
+            (job.description or "").strip() or (job.requirements or "").strip() or (job.responsibilities or "").strip()
         )
 
         if not has_normalized_text:
@@ -1078,12 +1049,8 @@ class SkillsExtractionAgent(BaseAgent):
         pass2_latency_ms = int((time.perf_counter() - start) * 1000)
 
         tasks, tasks_meta = _resolve_async_dimension_result(tasks_result, "tasks")
-        responsibilities, resp_meta = _resolve_async_dimension_result(
-            resp_result, "responsibilities"
-        )
-        skills_list, skills_meta = _resolve_async_dimension_result(
-            skills_result, "skills"
-        )
+        responsibilities, resp_meta = _resolve_async_dimension_result(resp_result, "responsibilities")
+        skills_list, skills_meta = _resolve_async_dimension_result(skills_result, "skills")
 
         combined_meta = _build_combined_pass2_meta(
             context_signals=context_signals,
@@ -1137,6 +1104,7 @@ class SkillsExtractionAgent(BaseAgent):
             )
         # No fixture fallback — fail explicitly so data issues surface
         import structlog as _sl
+
         _sl.get_logger().error(
             "skills_extraction_no_metadata",
             job_id=item.job_id,
@@ -1174,12 +1142,8 @@ class SkillsExtractionAgent(BaseAgent):
         )
         taxonomy_coverage = (skills_with_taxonomy / total_skills) if total_skills else 0.0
         total_cost = sum(getattr(result, "extraction_cost_usd", 0.0) or 0.0 for result in results)
-        any_llm_called = any(
-            (getattr(r, "extraction_tokens_used", 0) or 0) > 0 for r in results
-        )
-        any_alert = any(
-            getattr(r, "alert_skills_extraction", False) for r in results
-        )
+        any_llm_called = any((getattr(r, "extraction_tokens_used", 0) or 0) > 0 for r in results)
+        any_alert = any(getattr(r, "alert_skills_extraction", False) for r in results)
         payload: dict[str, Any] = {
             "event_type": "SkillsExtracted",
             "batch_id": event.payload.get("batch_id"),
@@ -1265,7 +1229,9 @@ class SkillsExtractionAgent(BaseAgent):
                     "seniority": fixture_payload.get("seniority"),
                     "extraction_status": fixture_payload.get("extraction_status", "success"),
                 }
-            ] if posting_id is not None else [],
+            ]
+            if posting_id is not None
+            else [],
             "llm_provider": "stub",
             "llm_model": "stub",
             "llm_call_logged": False,
@@ -1342,8 +1308,7 @@ def _no_normalized_text_meta(
         "tokens_used": int(ctx_meta.get("tokens_used") or 0),
         "cost_usd": float(ctx_meta.get("cost_usd") or 0.0),
         "latency_ms": int(ctx_meta.get("latency_ms") or 0),
-        "extraction_warnings": list(warn)
-        + ["No normalized text available for extraction"],
+        "extraction_warnings": list(warn) + ["No normalized text available for extraction"],
         "alert_skills_extraction": False,
         "provider": ctx_meta.get("provider", "pattern-matching"),
         "model": ctx_meta.get("model", "none"),
@@ -1427,11 +1392,7 @@ def _resolve_async_dimension_result(
     """Normalize ``asyncio.gather(..., return_exceptions=True)`` results per dimension."""
     if isinstance(result, BaseException):
         return [], _async_dimension_failure_meta(dimension, result)
-    if (
-        isinstance(result, tuple)
-        and len(result) == 2
-        and isinstance(result[1], dict)
-    ):
+    if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], dict):
         payload, meta = result
         return list(payload or []), meta
     malformed = RuntimeError(f"{dimension} extractor returned malformed result")

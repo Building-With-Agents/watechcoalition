@@ -169,15 +169,9 @@ def main() -> None:
             )
 
         print(f"Projected enrichment LLM (linear on job count): ~${proj_enrich:.2f}")
-        print(
-            f"Projected subtotal (extraction_cost_usd method + enrichment): "
-            f"~${proj_extract + proj_enrich:.2f}"
-        )
+        print(f"Projected subtotal (extraction_cost_usd method + enrichment): ~${proj_extract + proj_enrich:.2f}")
         if proj_audit > 0:
-            print(
-                f"Projected subtotal (audit-based skills + enrichment): "
-                f"~${proj_audit + proj_enrich:.2f}"
-            )
+            print(f"Projected subtotal (audit-based skills + enrichment): ~${proj_audit + proj_enrich:.2f}")
         print(
             "\nNote: extraction_cost_usd may not include every billed token path; "
             "prefer the audit-based line when it differs materially."

@@ -121,11 +121,7 @@ def _resolve_llm_pick_with_reason(raw: str, candidate_codes: set[str]) -> tuple[
     if len(contained) > 1:
         return "unclassified", "ambiguous_multiple_catalog_codes_in_response"
 
-    regex_hits = [
-        m.group(0)
-        for m in _SOC_CODE_IN_TEXT.finditer(s)
-        if m.group(0) in candidate_codes
-    ]
+    regex_hits = [m.group(0) for m in _SOC_CODE_IN_TEXT.finditer(s) if m.group(0) in candidate_codes]
     unique_hits = list(dict.fromkeys(regex_hits))
     if len(unique_hits) == 1:
         return unique_hits[0], "regex_hyphenated_code_in_candidate_set"
@@ -203,9 +199,7 @@ def _rank_and_dedupe_soc_candidates(
                 score += 10
             if "network" in occ and "computer" in occ:
                 score += 10
-            if "cloud" in tl and any(
-                x in occ for x in ("software", "computer", "network", "system", "developer")
-            ):
+            if "cloud" in tl and any(x in occ for x in ("software", "computer", "network", "system", "developer")):
                 score += 8
         for tok in toks:
             if tok in occ:
@@ -239,25 +233,14 @@ async def get_soc_candidates(
 
     branches: list = []
     if needles_for_match:
-        branches.append(
-            or_(*[func.lower(SOCC.title).contains(n) for n in needles_for_match])
-        )
+        branches.append(or_(*[func.lower(SOCC.title).contains(n) for n in needles_for_match]))
     if tech_profile:
-        branches.append(
-            or_(
-                *[func.lower(SOCC.title).contains(f) for f in _TECH_SOCC_TITLE_FRAGMENTS]
-            )
-        )
+        branches.append(or_(*[func.lower(SOCC.title).contains(f) for f in _TECH_SOCC_TITLE_FRAGMENTS]))
     if not branches:
         return []
 
     where_match = or_(*branches) if len(branches) > 1 else branches[0]
-    stmt = (
-        select(SOCC.code, SOCC.title)
-        .where(and_(_socc_version_clause(), where_match))
-        .distinct()
-        .limit(50)
-    )
+    stmt = select(SOCC.code, SOCC.title).where(and_(_socc_version_clause(), where_match)).distinct().limit(50)
 
     diag_cloud_engineer = (title or "").strip() == _CLOUD_ENGINEER_DIAG_TITLE
     if diag_cloud_engineer:
@@ -281,9 +264,7 @@ async def get_soc_candidates(
 
     rows = session.execute(stmt).all()
     raw_out = [{"code": str(r[0]).strip(), "title": str(r[1]).strip()} for r in rows if r[0]]
-    out = _rank_and_dedupe_soc_candidates(
-        raw_out, title or "", tech_profile=tech_profile, limit=15
-    )
+    out = _rank_and_dedupe_soc_candidates(raw_out, title or "", tech_profile=tech_profile, limit=15)
 
     if diag_cloud_engineer:
         log.info(
@@ -307,7 +288,7 @@ async def classify_soc(
         return "unclassified"
 
     candidate_codes = {c["code"] for c in candidates}
-    lines = [f'{c["code"]}: {c["title"]}' for c in candidates]
+    lines = [f"{c['code']}: {c['title']}" for c in candidates]
     candidates_block = "\n".join(lines)
 
     prompt = f"""Job Title: {title}

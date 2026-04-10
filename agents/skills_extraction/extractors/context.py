@@ -148,9 +148,7 @@ def extract_context(
                             signal_type=signal_type,
                             field_source=field_source,
                         )
-                        metadata["extraction_metadata"]["extraction_warnings"].append(
-                            f"invalid_span:{signal_type}"
-                        )
+                        metadata["extraction_metadata"]["extraction_warnings"].append(f"invalid_span:{signal_type}")
 
         log.info(
             "context_extraction_complete",

@@ -89,7 +89,7 @@ class EmployerClassificationLLMOutput(BaseModel):
     )
     sector: str = Field(
         ...,
-        description='High-level industry: one of technology, finance, healthcare, retail, manufacturing, education, government, consulting, media, energy, logistics, telecommunications, real_estate, hospitality, nonprofit — or unknown.',
+        description="High-level industry: one of technology, finance, healthcare, retail, manufacturing, education, government, consulting, media, energy, logistics, telecommunications, real_estate, hospitality, nonprofit — or unknown.",
     )
 
 
@@ -210,11 +210,7 @@ def persist_employer_metadata(
 
     stmt = None
     if normalized_job_id is not None:
-        stmt = (
-            update(NormalizedJob)
-            .where(NormalizedJob.id == int(normalized_job_id))
-            .values(employer_metadata=payload)
-        )
+        stmt = update(NormalizedJob).where(NormalizedJob.id == int(normalized_job_id)).values(employer_metadata=payload)
     elif source is not None and external_id is not None and str(source).strip() and str(external_id).strip():
         stmt = (
             update(NormalizedJob)

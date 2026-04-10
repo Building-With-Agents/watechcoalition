@@ -51,4 +51,3 @@ def test_boundary_days_equals_stale_threshold_is_stale() -> None:
 
 def test_empty_input_returns_empty() -> None:
     assert detect_staleness([]) == []
-

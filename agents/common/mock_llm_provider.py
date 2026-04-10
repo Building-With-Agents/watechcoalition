@@ -140,9 +140,7 @@ def mock_complete(prompt: str, agent_name: str, **kwargs: Any) -> dict[str, Any]
     }
 
 
-def mock_invoke_skills_llm(
-    prompt: str, *, agent_name: str | None = None
-) -> tuple[str, dict[str, Any]]:
+def mock_invoke_skills_llm(prompt: str, *, agent_name: str | None = None) -> tuple[str, dict[str, Any]]:
     """Mock replacement for llm_client.invoke_skills_llm().
 
     Handles skills extraction (default) and SOC classification

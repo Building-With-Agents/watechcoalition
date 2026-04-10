@@ -235,15 +235,11 @@ def run_eval(ground_truth_path: str | Path) -> None:
         gt_skills = normalize_list([_skill_label(s) for s in job["skills"] if _skill_label(s)])
         gt_tools = {
             normalize_tool_label_for_eval(t)
-            for t in normalize_list(
-                [t.get("tool_name") or "" for t in job["tools"] if t.get("tool_name")]
-            )
+            for t in normalize_list([t.get("tool_name") or "" for t in job["tools"] if t.get("tool_name")])
         }
 
         pred_skills = normalize_list(pred.get("skills", []))
-        pred_tools = {
-            normalize_tool_label_for_eval(t) for t in normalize_list(pred.get("tools", []))
-        }
+        pred_tools = {normalize_tool_label_for_eval(t) for t in normalize_list(pred.get("tools", []))}
 
         p_s, r_s, f_s = compute_metrics(pred_skills, gt_skills)
         p_t, r_t, f_t = compute_metrics(pred_tools, gt_tools)
@@ -315,12 +311,8 @@ def run_eval(ground_truth_path: str | Path) -> None:
     _log(f"Total Pred Skills: {total_pred_skills}")
     _log(f"Fuzzy-matched Skills: {total_fuzzy_matched_skills}")
 
-    fp_s = (
-        total_fuzzy_matched_skills / total_pred_skills if total_pred_skills > 0 else 0.0
-    )
-    fr_s = (
-        total_fuzzy_matched_skills / total_true_skills if total_true_skills > 0 else 0.0
-    )
+    fp_s = total_fuzzy_matched_skills / total_pred_skills if total_pred_skills > 0 else 0.0
+    fr_s = total_fuzzy_matched_skills / total_true_skills if total_true_skills > 0 else 0.0
     ff_s = f1_from_precision_recall(fp_s, fr_s)
     _log(f"Skills Precision: {fp_s:.2f}")
     _log(f"Skills Recall:    {fr_s:.2f}")
@@ -331,12 +323,8 @@ def run_eval(ground_truth_path: str | Path) -> None:
     _log(f"Total Pred Tools: {total_pred_tools}")
     _log(f"Fuzzy-matched Tools: {total_fuzzy_matched_tools}")
 
-    fp_t = (
-        total_fuzzy_matched_tools / total_pred_tools if total_pred_tools > 0 else 0.0
-    )
-    fr_t = (
-        total_fuzzy_matched_tools / total_true_tools if total_true_tools > 0 else 0.0
-    )
+    fp_t = total_fuzzy_matched_tools / total_pred_tools if total_pred_tools > 0 else 0.0
+    fr_t = total_fuzzy_matched_tools / total_true_tools if total_true_tools > 0 else 0.0
     ff_t = f1_from_precision_recall(fp_t, fr_t)
     _log(f"Tools Precision: {fp_t:.2f}")
     _log(f"Tools Recall:    {fr_t:.2f}")

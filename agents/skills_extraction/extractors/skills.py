@@ -57,6 +57,7 @@ _SKILLS_DEPLOYMENT_KEYS = (
 # Pydantic models for structured LLM output
 # ---------------------------------------------------------------------------
 
+
 class _LLMSpan(BaseModel):
     """Source span from LLM structured output — typed for Azure OpenAI compatibility."""
 
@@ -88,6 +89,7 @@ class _SkillsLLMRoot(BaseModel):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _skill_confidence_threshold() -> float:
     """Minimum confidence for a skill to be kept; skills below this are discarded."""
@@ -154,8 +156,6 @@ def _base_skills_metadata() -> dict[str, Any]:
     }
 
 
-
-
 def _post_process_llm_skills(
     parsed: _SkillsLLMRoot,
     metadata: dict[str, Any],
@@ -201,6 +201,7 @@ def _post_process_llm_skills(
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def extract_skills(
     job_record: JobRecord,

@@ -22,7 +22,7 @@ def test_skills_prompt_contains_soft_skill_suppression_guidance() -> None:
     assert 'SKIP generic "Communication"' in prompt
     assert "Stakeholder communication for cross-functional alignment" in prompt
     assert 'do NOT invent "Scrum Facilitation"' in prompt
-    assert 'do NOT suppress these because they are hard skills' in prompt
+    assert "do NOT suppress these because they are hard skills" in prompt
     assert "top 10 to 25 most important skills" in prompt
     assert "ESCO standard terms" in prompt
     assert "Do NOT extract standard job duties" in prompt

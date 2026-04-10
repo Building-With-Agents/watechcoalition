@@ -207,9 +207,7 @@ def _structured_usage_metadata(
             usage = md.get("token_usage") or md.get("usage")
             if isinstance(usage, dict):
                 tokens_used = int(
-                    usage.get("total_tokens")
-                    or (usage.get("input_tokens", 0) + usage.get("output_tokens", 0))
-                    or 0
+                    usage.get("total_tokens") or (usage.get("input_tokens", 0) + usage.get("output_tokens", 0)) or 0
                 )
 
     if tokens_used <= 0:
@@ -271,20 +269,27 @@ def invoke_skills_llm(
         with span_ctx:
             text, meta = mock_invoke_skills_llm(prompt, agent_name=audit_agent)
             log_extraction_event(
-                agent_name=audit_agent, prompt=prompt, model="mock-sonnet-v1",
-                provider="mock", latency_ms=meta["latency_ms"],
+                agent_name=audit_agent,
+                prompt=prompt,
+                model="mock-sonnet-v1",
+                provider="mock",
+                latency_ms=meta["latency_ms"],
                 input_tokens=meta.get("tokens_used", 0) // 2,
                 output_tokens=meta.get("tokens_used", 0) // 2,
-                cost_usd=meta["cost_usd"], success=True,
+                cost_usd=meta["cost_usd"],
+                success=True,
             )
             if tracer:
                 with contextlib.suppress(Exception):
-                    tracer.log_event("llm_success", {
-                        "input_tokens": meta.get("tokens_used", 0) // 2,
-                        "output_tokens": meta.get("tokens_used", 0) // 2,
-                        "cost_usd": meta["cost_usd"],
-                        "output": _parse_output_for_trace(text),
-                    })
+                    tracer.log_event(
+                        "llm_success",
+                        {
+                            "input_tokens": meta.get("tokens_used", 0) // 2,
+                            "output_tokens": meta.get("tokens_used", 0) // 2,
+                            "cost_usd": meta["cost_usd"],
+                            "output": _parse_output_for_trace(text),
+                        },
+                    )
             return text, meta
 
     llm = _get_llm()
@@ -331,9 +336,7 @@ def invoke_skills_llm(
                 usage = msg.response_metadata.get("token_usage") or msg.response_metadata.get("usage")
                 if isinstance(usage, dict):
                     tokens_used = int(
-                        usage.get("total_tokens")
-                        or (usage.get("input_tokens", 0) + usage.get("output_tokens", 0))
-                        or 0
+                        usage.get("total_tokens") or (usage.get("input_tokens", 0) + usage.get("output_tokens", 0)) or 0
                     )
                     input_tokens = int(usage.get("input_tokens", 0))
                     output_tokens = int(usage.get("output_tokens", 0))
@@ -434,9 +437,7 @@ def _resolve_azure_deployment(*env_keys: str) -> str:
         val = os.getenv(key)
         if val and val.strip():
             return val.strip()
-    raise ValueError(
-        "Azure OpenAI deployment not configured. Set one of: " + ", ".join(env_keys)
-    )
+    raise ValueError("Azure OpenAI deployment not configured. Set one of: " + ", ".join(env_keys))
 
 
 def invoke_structured_extraction_llm(
@@ -484,8 +485,11 @@ def invoke_structured_extraction_llm(
         with span_ctx:
             parsed, meta = mock_invoke_structured(prompt, output_schema, agent_name=agent_name)
             log_extraction_event(
-                agent_name=agent_name, prompt=prompt, model="mock-sonnet-v1",
-                provider="mock", latency_ms=meta["latency_ms"],
+                agent_name=agent_name,
+                prompt=prompt,
+                model="mock-sonnet-v1",
+                provider="mock",
+                latency_ms=meta["latency_ms"],
                 input_tokens=meta.get("tokens_used", 0) // 2,
                 output_tokens=meta.get("tokens_used", 0) // 2,
                 cost_usd=meta["cost_usd"],
@@ -494,12 +498,19 @@ def invoke_structured_extraction_llm(
             )
             if tracer:
                 with contextlib.suppress(Exception):
-                    tracer.log_event("llm_success", {
-                        "input_tokens": meta.get("tokens_used", 0) // 2,
-                        "output_tokens": meta.get("tokens_used", 0) // 2,
-                        "cost_usd": meta["cost_usd"],
-                        "output": parsed.model_dump(mode="json") if hasattr(parsed, "model_dump") else _parse_output_for_trace(str(parsed)) if parsed else "mock_parse_failed",
-                    })
+                    tracer.log_event(
+                        "llm_success",
+                        {
+                            "input_tokens": meta.get("tokens_used", 0) // 2,
+                            "output_tokens": meta.get("tokens_used", 0) // 2,
+                            "cost_usd": meta["cost_usd"],
+                            "output": parsed.model_dump(mode="json")
+                            if hasattr(parsed, "model_dump")
+                            else _parse_output_for_trace(str(parsed))
+                            if parsed
+                            else "mock_parse_failed",
+                        },
+                    )
             return parsed, meta
 
     try:
@@ -557,9 +568,7 @@ def invoke_structured_extraction_llm(
                 msg_for_usage=msg_for_usage,
                 deployment_name=deployment_name,
             )
-            cost_usd = compute_extraction_cost(
-                input_tokens_est, output_tokens_est, model_tier_for_cost
-            )
+            cost_usd = compute_extraction_cost(input_tokens_est, output_tokens_est, model_tier_for_cost)
 
             log_extraction_event(
                 agent_name=agent_name,
@@ -666,8 +675,11 @@ async def ainvoke_structured_extraction_llm(
         with span_ctx:
             parsed, meta = mock_invoke_structured(prompt, output_schema, agent_name=agent_name)
             log_extraction_event(
-                agent_name=agent_name, prompt=prompt, model="mock-sonnet-v1",
-                provider="mock", latency_ms=meta["latency_ms"],
+                agent_name=agent_name,
+                prompt=prompt,
+                model="mock-sonnet-v1",
+                provider="mock",
+                latency_ms=meta["latency_ms"],
                 input_tokens=meta.get("tokens_used", 0) // 2,
                 output_tokens=meta.get("tokens_used", 0) // 2,
                 cost_usd=meta["cost_usd"],
@@ -722,9 +734,7 @@ async def ainvoke_structured_extraction_llm(
         try:
             chain = _structured_output_chain(llm, output_schema)
             timeout_seconds = int(os.getenv("SKILLS_EXTRACTION_LLM_TIMEOUT", "120"))
-            raw_out: Any = await asyncio.wait_for(
-                chain.ainvoke(prompt), timeout=timeout_seconds
-            )
+            raw_out: Any = await asyncio.wait_for(chain.ainvoke(prompt), timeout=timeout_seconds)
 
             latency_ms = int((time.perf_counter() - start) * 1000)
 
@@ -735,9 +745,7 @@ async def ainvoke_structured_extraction_llm(
                 msg_for_usage=msg_for_usage,
                 deployment_name=deployment_name,
             )
-            cost_usd = compute_extraction_cost(
-                input_tokens_est, output_tokens_est, model_tier_for_cost
-            )
+            cost_usd = compute_extraction_cost(input_tokens_est, output_tokens_est, model_tier_for_cost)
 
             log_extraction_event(
                 agent_name=agent_name,

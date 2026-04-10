@@ -110,11 +110,7 @@ def generate_summary(
             max_tokens=1200,
         )
         content = (result.get("content") or "").strip()
-        ok = bool(
-            result.get("success")
-            and not result.get("extraction_failed")
-            and content
-        )
+        ok = bool(result.get("success") and not result.get("extraction_failed") and content)
         if ok:
             return {
                 "skill_label": None,

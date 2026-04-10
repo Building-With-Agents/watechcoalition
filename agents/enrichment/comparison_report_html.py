@@ -33,7 +33,7 @@ def render_enrichment_comparison_html(
     ``external_id``) and enrichment fields (``seniority``, ``role_classification``,
     ``normalized_job_id``, optional ``job_posting_id``).
     """
-    subtitle_html = f"<p class=\"sub\">{_esc(subtitle)}</p>" if subtitle else ""
+    subtitle_html = f'<p class="sub">{_esc(subtitle)}</p>' if subtitle else ""
     cards: list[str] = []
     for i, row in enumerate(rows, start=1):
         cards.append(_render_card(row, index=i))
@@ -168,7 +168,7 @@ def _render_card(row: dict[str, Any], *, index: int) -> str:
     title = _esc(row.get("job_title") or row.get("title") or "(no title)")
     company = _esc(row.get("job_company") or row.get("company") or "")
     desc = row.get("job_description") or row.get("description") or ""
-    desc_html = _esc(desc) if desc else "<em class=\"muted\">(no description)</em>"
+    desc_html = _esc(desc) if desc else '<em class="muted">(no description)</em>'
 
     src = _esc(row.get("source") or "")
     eid = _esc(row.get("external_id") or "")
@@ -180,11 +180,7 @@ def _render_card(row: dict[str, Any], *, index: int) -> str:
     ]
     loc = ", ".join(str(p) for p in loc_parts if p)
     url = row.get("job_url") or ""
-    url_html = (
-        f'<div class="meta"><a href="{_esc(url)}" rel="noopener">Job URL</a></div>'
-        if url
-        else ""
-    )
+    url_html = f'<div class="meta"><a href="{_esc(url)}" rel="noopener">Job URL</a></div>' if url else ""
 
     seniority = _esc(row.get("seniority") or "")
     role = _esc(row.get("role_classification") or "")
@@ -192,9 +188,7 @@ def _render_card(row: dict[str, Any], *, index: int) -> str:
     qc = row.get("quality_components")
     qs_html = f"{float(qs):.4f}" if isinstance(qs, int | float) else _esc(qs)
     qc_html = (
-        f"<pre class=\"qc-pre\">{_esc(json.dumps(qc, indent=2, sort_keys=True))}</pre>"
-        if isinstance(qc, dict)
-        else ""
+        f'<pre class="qc-pre">{_esc(json.dumps(qc, indent=2, sort_keys=True))}</pre>' if isinstance(qc, dict) else ""
     )
 
     return f"""
@@ -204,12 +198,12 @@ def _render_card(row: dict[str, Any], *, index: int) -> str:
       <div class="col col-posting">
         <h3>Job posting (normalized)</h3>
         <div class="title-line">{title}</div>
-        {f'<div class="company">{company}</div>' if company else ''}
+        {f'<div class="company">{company}</div>' if company else ""}
         <div class="meta">
           <div><strong>source</strong> <code>{src}</code> · <strong>external_id</strong> <code>{eid}</code></div>
           <div><strong>normalized_job_id</strong> <code>{_esc(nj)}</code>
-          {f' · <strong>job_posting_id</strong> <code>{_esc(jp)}</code>' if jp else ''}</div>
-          {f'<div><strong>location</strong> {_esc(loc)}</div>' if loc else ''}
+          {f" · <strong>job_posting_id</strong> <code>{_esc(jp)}</code>" if jp else ""}</div>
+          {f"<div><strong>location</strong> {_esc(loc)}</div>" if loc else ""}
         </div>
         {url_html}
         <div class="body-text">{desc_html}</div>
@@ -218,11 +212,11 @@ def _render_card(row: dict[str, Any], *, index: int) -> str:
         <h3>Enrichment output</h3>
         <dl class="enrich-dl">
           <dt>Seniority</dt>
-          <dd>{seniority or '<em>—</em>'}</dd>
+          <dd>{seniority or "<em>—</em>"}</dd>
           <dt>Role classification</dt>
-          <dd class="enrich-role">{role or '<em>—</em>'}</dd>
+          <dd class="enrich-role">{role or "<em>—</em>"}</dd>
           <dt>Quality score</dt>
-          <dd>{qs_html if qs is not None else '<em>—</em>'}</dd>
+          <dd>{qs_html if qs is not None else "<em>—</em>"}</dd>
         </dl>
         {qc_html}
       </div>

@@ -32,9 +32,7 @@ load_repo_root_dotenv()
 
 _DEFAULT_CASES_PATH = _REPO_ROOT / "agents" / "eval" / "dedup_threshold_calibration_cases.json"
 _DEFAULT_REPORT_PATH = _REPO_ROOT / "agents" / "data" / "reports" / "dedup_threshold_calibration.json"
-_DEFAULT_FINDINGS_PATH = (
-    _REPO_ROOT / "agents" / "docs" / "week 6" / "FINDINGS-fuzzy-dedup-bryan-emilio.md"
-)
+_DEFAULT_FINDINGS_PATH = _REPO_ROOT / "agents" / "docs" / "week 6" / "FINDINGS-fuzzy-dedup-bryan-emilio.md"
 
 
 def _repo_relative(path: Path) -> str:

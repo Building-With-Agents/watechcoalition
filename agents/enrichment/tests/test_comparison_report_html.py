@@ -49,7 +49,7 @@ def test_render_escapes_xss_in_title() -> None:
                 "external_id": "y",
                 "seniority": "mid",
                 "role_classification": "A",
-                "job_title": '<script>alert(1)</script>',
+                "job_title": "<script>alert(1)</script>",
                 "job_company": "",
                 "job_description": "",
             }

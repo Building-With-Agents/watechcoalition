@@ -69,4 +69,3 @@ def test_empty_input_returns_empty_dict() -> None:
 )
 def test_classify_trajectory_direct(delta: float, expected: str) -> None:
     assert classify_trajectory(delta) == expected
-

@@ -61,7 +61,7 @@ def reset_jobs(count: int, dry_run: bool) -> None:
         print("Tip: make sure you ran seed_pg_database.py + seed_agent_data.py first.")
         return
 
-    raw_ids  = [r.raw_id  for r in rows]
+    raw_ids = [r.raw_id for r in rows]
     norm_ids = [r.norm_id for r in rows]
 
     print(f"\n{'DRY RUN — ' if dry_run else ''}Resetting {len(rows)} job(s):\n")
@@ -121,8 +121,8 @@ def reset_jobs(count: int, dry_run: bool) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Reset N fully-processed jobs to pending for pipeline re-testing.")
-    parser.add_argument("--count",   type=int,  default=3,     help="Number of jobs to reset (default: 3)")
-    parser.add_argument("--dry-run", action="store_true",      help="Preview what would be reset without writing")
+    parser.add_argument("--count", type=int, default=3, help="Number of jobs to reset (default: 3)")
+    parser.add_argument("--dry-run", action="store_true", help="Preview what would be reset without writing")
     args = parser.parse_args()
 
     if args.count < 1:

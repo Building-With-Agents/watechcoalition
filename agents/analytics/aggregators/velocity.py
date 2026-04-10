@@ -140,9 +140,7 @@ def refresh_skill_velocity(session: Session, target_week: date) -> int:
         trend = _classify_trend(raw_pct)
         woc = _sanitize_pct_for_db(raw_pct)
 
-        demand_count = (
-            int(pivoted.loc[skill_label, target_week]) if target_week in pivoted.columns else 0
-        )
+        demand_count = int(pivoted.loc[skill_label, target_week]) if target_week in pivoted.columns else 0
 
         rows.append(
             {

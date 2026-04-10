@@ -5,6 +5,7 @@ Usage:
     python agents/scripts/run_clustering.py
     python agents/scripts/run_clustering.py --min-postings 100
 """
+
 from __future__ import annotations
 
 import argparse
@@ -65,9 +66,9 @@ def main() -> None:
         with_skills = sum(1 for f in features if f.skills)
         with_tools = sum(1 for f in features if f.tools)
         with_resp = sum(1 for f in features if f.responsibilities)
-        print(f"With skills:      {with_skills} ({100*with_skills/len(features):.1f}%)")
-        print(f"With tools:       {with_tools} ({100*with_tools/len(features):.1f}%)")
-        print(f"With respons.:    {with_resp} ({100*with_resp/len(features):.1f}%)")
+        print(f"With skills:      {with_skills} ({100 * with_skills / len(features):.1f}%)")
+        print(f"With tools:       {with_tools} ({100 * with_tools / len(features):.1f}%)")
+        print(f"With respons.:    {with_resp} ({100 * with_resp / len(features):.1f}%)")
 
         print("\n--- Generating embeddings (Azure OpenAI) ---")
         embedded = embed_posting_features(features, allow_partial=False)
@@ -88,7 +89,7 @@ def main() -> None:
         print(f"  Eligible:           {result.eligible_posting_count}")
         print(f"  Clusters found:     {len(result.clusters)}")
         print(f"  Noise postings:     {result.noise_posting_count}")
-        print(f"  Noise rate:         {100*result.noise_posting_count/result.eligible_posting_count:.1f}%")
+        print(f"  Noise rate:         {100 * result.noise_posting_count / result.eligible_posting_count:.1f}%")
         print(f"  Emergence cands:    {len(result.emergence_candidates)}")
 
         print("\n--- Top clusters ---")
@@ -110,9 +111,7 @@ def main() -> None:
                 print(f"    Reason: {ec.filter_reason}")
 
         print("\n--- Persisting to DB ---")
-        persist_info = persist_clustering_result(
-            session, result, correlation_id="week7-clustering-run"
-        )
+        persist_info = persist_clustering_result(session, result, correlation_id="week7-clustering-run")
         print(f"  Roles inserted:    {persist_info.get('roles_inserted')}")
         print(f"  Postings updated:  {persist_info.get('postings_updated')}")
 
@@ -131,11 +130,11 @@ def main() -> None:
         findings = {
             "run_date": date.today().isoformat(),
             "features_loaded": len(features),
-            "skills_coverage": f"{100*with_skills/len(features):.1f}%",
-            "tools_coverage": f"{100*with_tools/len(features):.1f}%",
+            "skills_coverage": f"{100 * with_skills / len(features):.1f}%",
+            "tools_coverage": f"{100 * with_tools / len(features):.1f}%",
             "clusters_found": len(result.clusters),
             "noise_count": result.noise_posting_count,
-            "noise_rate": f"{100*result.noise_posting_count/result.eligible_posting_count:.1f}%",
+            "noise_rate": f"{100 * result.noise_posting_count / result.eligible_posting_count:.1f}%",
             "emergence_candidates": len(result.emergence_candidates),
             "roles_persisted": persist_info.get("roles_inserted"),
             "snapshot_rows": snapshot_rows,

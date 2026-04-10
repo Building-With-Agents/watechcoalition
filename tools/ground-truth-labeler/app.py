@@ -48,19 +48,24 @@ load_dotenv(_LABELER_DIR / ".env")
 
 OUTPUT_FILE = Path(__file__).parent / "ground_truth_labeled.json"
 CACHE_FILE = Path(__file__).parent / "jsearch_cache.json"
-EVAL_GT_FILE = Path(__file__).parent.parent.parent / "agents" / "eval" / "extraction_ground_truth.json"
+EVAL_GT_FILE = (
+    Path(__file__).parent.parent.parent
+    / "agents"
+    / "eval"
+    / "extraction_ground_truth.json"
+)
 
 # Dev-to-record assignments for Week 4 ground truth labeling (skills/tools).
 # Each dev now continues with tasks/responsibilities/context on these same records.
 LABELER_ASSIGNMENTS = {
     "Enrique": ["gt-001", "gt-002", "gt-003", "gt-004"],
-    "Emilio":  ["gt-006", "gt-011", "gt-016", "gt-021"],
-    "Juan":    ["gt-007", "gt-008", "gt-009", "gt-010"],
-    "Angel":   ["gt-012", "gt-013", "gt-014"],
-    "Bryan":   ["gt-017", "gt-018", "gt-019", "gt-020"],
-    "Fabian":  ["gt-022", "gt-023", "gt-024"],
-    "Fatima":  ["gt-026", "gt-027", "gt-028", "gt-029"],
-    "Nestor":  ["gt-005", "gt-015", "gt-025", "gt-030"],
+    "Emilio": ["gt-006", "gt-011", "gt-016", "gt-021"],
+    "Juan": ["gt-007", "gt-008", "gt-009", "gt-010"],
+    "Angel": ["gt-012", "gt-013", "gt-014"],
+    "Bryan": ["gt-017", "gt-018", "gt-019", "gt-020"],
+    "Fabian": ["gt-022", "gt-023", "gt-024"],
+    "Fatima": ["gt-026", "gt-027", "gt-028", "gt-029"],
+    "Nestor": ["gt-005", "gt-015", "gt-025", "gt-030"],
 }
 
 
@@ -105,7 +110,11 @@ def load_cache() -> dict:
 def save_cache(query: str, jobs: list[dict], job_index: int = 0) -> None:
     """Save JSearch results and current position to disk cache."""
     CACHE_FILE.write_text(
-        json.dumps({"query": query, "jobs": jobs, "job_index": job_index}, indent=2, ensure_ascii=False),
+        json.dumps(
+            {"query": query, "jobs": jobs, "job_index": job_index},
+            indent=2,
+            ensure_ascii=False,
+        ),
         encoding="utf-8",
     )
 
@@ -204,21 +213,13 @@ def load_record_into_session(record: dict, record_index: int) -> None:
             raw["source_span"] = _build_span(raw["source_span"])
         return ContextSignal.model_construct(**raw)
 
-    st.session_state.skills = [
-        _build_skill(s) for s in record.get("skills", [])
-    ]
-    st.session_state.tools = [
-        _build_tool(t) for t in record.get("tools", [])
-    ]
-    st.session_state.tasks = [
-        _build_task(t) for t in record.get("tasks", [])
-    ]
+    st.session_state.skills = [_build_skill(s) for s in record.get("skills", [])]
+    st.session_state.tools = [_build_tool(t) for t in record.get("tools", [])]
+    st.session_state.tasks = [_build_task(t) for t in record.get("tasks", [])]
     st.session_state.labeled_responsibilities = [
         _build_resp(r) for r in record.get("labeled_responsibilities", [])
     ]
-    st.session_state.context = [
-        _build_ctx(c) for c in record.get("context", [])
-    ]
+    st.session_state.context = [_build_ctx(c) for c in record.get("context", [])]
     st.session_state.labeler_notes = record.get("labeler_notes", {})
 
     # Editing flags
@@ -329,7 +330,8 @@ def reset_labels() -> None:
 st.set_page_config(page_title="Ground Truth Labeler", page_icon="🏷️", layout="wide")
 
 # CSS: independent scrolling for left (form) and right (job text) columns
-st.markdown("""
+st.markdown(
+    """
 <style>
 /* The horizontal block containing the labeling columns:
    kill flex-grow so height constraint is respected */
@@ -346,7 +348,9 @@ st.markdown("""
     height: 100% !important;
 }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # --- Sidebar: dataset status + labeled items for current job ---
 dataset = load_dataset()
@@ -358,7 +362,10 @@ with st.sidebar:
 
     # Show labeled items for current job
     _label_steps = ("skills", "tools", "tasks", "responsibilities", "context", "save")
-    if st.session_state.phase == "label" and st.session_state.label_step in _label_steps:
+    if (
+        st.session_state.phase == "label"
+        and st.session_state.label_step in _label_steps
+    ):
         st.divider()
         st.subheader("Current Job Labels")
         if st.session_state.skills:
@@ -376,7 +383,9 @@ with st.sidebar:
             for task in st.session_state.tasks:
                 st.markdown(f"- {task.task_description[:40]}")
         if st.session_state.labeled_responsibilities:
-            st.markdown(f"**Responsibilities ({len(st.session_state.labeled_responsibilities)})**")
+            st.markdown(
+                f"**Responsibilities ({len(st.session_state.labeled_responsibilities)})**"
+            )
             for resp in st.session_state.labeled_responsibilities:
                 st.markdown(f"- {resp.responsibility_description[:40]}")
         if st.session_state.context:
@@ -489,7 +498,7 @@ if st.session_state.phase == "search":
             st.divider()
             st.subheader(f"Batch ({len(st.session_state.jobs)} jobs)")
             for i, j in enumerate(st.session_state.jobs):
-                st.markdown(f"{i+1}. **{j['title']}** — {j['company']}")
+                st.markdown(f"{i + 1}. **{j['title']}** — {j['company']}")
             if st.button("▶️ Start Labeling Batch"):
                 save_cache("manual", st.session_state.jobs)
                 st.session_state.job_index = 0
@@ -524,7 +533,9 @@ if st.session_state.phase == "search":
                     if not my_records:
                         st.warning(f"No records found for {labeler_name}.")
                     else:
-                        st.markdown(f"**{labeler_name}'s records ({len(my_records)}):**")
+                        st.markdown(
+                            f"**{labeler_name}'s records ({len(my_records)}):**"
+                        )
                         for _idx, (_ds_idx, rec) in enumerate(my_records):
                             n_skills = len(rec.get("skills", []))
                             n_tools = len(rec.get("tools", []))
@@ -541,7 +552,10 @@ if st.session_state.phase == "search":
 
                         # Record picker
                         record_options = {
-                            f"{rec['ground_truth_id']} — {rec['title'][:50]}": (ds_idx, rec)
+                            f"{rec['ground_truth_id']} — {rec['title'][:50]}": (
+                                ds_idx,
+                                rec,
+                            )
                             for ds_idx, rec in my_records
                         }
                         chosen = st.selectbox(
@@ -556,13 +570,17 @@ if st.session_state.phase == "search":
                             ds_idx, rec = record_options[chosen]
                             col1, col2 = st.columns(2)
                             with col1:
-                                if st.button("📋 Continue from Tasks", key="btn_continue_tasks"):
+                                if st.button(
+                                    "📋 Continue from Tasks", key="btn_continue_tasks"
+                                ):
                                     load_record_into_session(rec, ds_idx)
                                     set_phase("label")
                                     set_label_step("tasks")
                                     st.rerun()
                             with col2:
-                                if st.button("📖 Edit from Review", key="btn_continue_review"):
+                                if st.button(
+                                    "📖 Edit from Review", key="btn_continue_review"
+                                ):
                                     load_record_into_session(rec, ds_idx)
                                     set_phase("label")
                                     set_label_step("review")
@@ -580,7 +598,9 @@ elif st.session_state.phase == "label":
     if idx >= len(jobs):
         st.title("🏷️ Ground Truth Labeling Tool")
         st.success(f"✅ All {len(jobs)} jobs in this batch have been labeled!")
-        st.info(f"Dataset now has **{len(load_dataset())}** total records in `{OUTPUT_FILE.name}`.")
+        st.info(
+            f"Dataset now has **{len(load_dataset())}** total records in `{OUTPUT_FILE.name}`."
+        )
         if st.button("🔍 Search for more jobs"):
             clear_cache()
             set_phase("search")
@@ -614,7 +634,9 @@ elif st.session_state.phase == "label":
             )
 
         st.markdown(f"### {job['title']} — {job['company']}")
-        st.caption(f"{job.get('city', '')}, {job.get('state', '')} | ID: {job['external_id']}")
+        st.caption(
+            f"{job.get('city', '')}, {job.get('state', '')} | ID: {job['external_id']}"
+        )
         st.divider()
 
         # =================================================================
@@ -628,7 +650,11 @@ elif st.session_state.phase == "label":
                     st.session_state.job_index += 1
                     cached = load_cache()
                     if cached.get("jobs"):
-                        save_cache(cached.get("query", ""), cached["jobs"], st.session_state.job_index)
+                        save_cache(
+                            cached.get("query", ""),
+                            cached["jobs"],
+                            st.session_state.job_index,
+                        )
                     reset_labels()
                     set_label_step("review")
                     st.rerun()
@@ -681,7 +707,11 @@ elif st.session_state.phase == "label":
 
                 # --- Determine if editing ---
                 editing_idx = st.session_state.get("editing_skill_index")
-                editing_skill = st.session_state.skills[editing_idx] if editing_idx is not None else None
+                editing_skill = (
+                    st.session_state.skills[editing_idx]
+                    if editing_idx is not None
+                    else None
+                )
 
                 if editing_skill:
                     st.markdown(f"#### ✏️ Edit Skill: {editing_skill.skill_name}")
@@ -699,7 +729,7 @@ elif st.session_state.phase == "label":
                     st.success(
                         f"**field_source:** `{span_field}` | "
                         f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
-                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                        f'**text:** *"{span_text[:80]}{"..." if len(span_text) > 80 else ""}"*'
                     )
                 elif span_sel:
                     span_text = span_sel["text"]
@@ -709,14 +739,16 @@ elif st.session_state.phase == "label":
                     st.success(
                         f"**field_source:** `{span_field}` | "
                         f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
-                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                        f'**text:** *"{span_text[:80]}{"..." if len(span_text) > 80 else ""}"*'
                     )
                 else:
                     span_text = None
                     span_field = None
                     span_start = None
                     span_end = None
-                    st.warning("No span selected — drag text in the right pane to set source_span.")
+                    st.warning(
+                        "No span selected — drag text in the right pane to set source_span."
+                    )
 
                 # Determine default skill_name from editing
                 default_name = editing_skill.skill_name if editing_skill else ""
@@ -732,17 +764,48 @@ elif st.session_state.phase == "label":
                         s_type = st.selectbox(
                             "Type",
                             ["Technical", "Domain", "Soft", "Certification", "Tool"],
-                            index=["Technical", "Domain", "Soft", "Certification", "Tool"].index(editing_skill.type) if editing_skill else 0,
+                            index=[
+                                "Technical",
+                                "Domain",
+                                "Soft",
+                                "Certification",
+                                "Tool",
+                            ].index(editing_skill.type)
+                            if editing_skill
+                            else 0,
                         )
-                        s_required = st.checkbox("Required?", value=editing_skill.required_flag if editing_skill and editing_skill.required_flag is not None else True)
+                        s_required = st.checkbox(
+                            "Required?",
+                            value=editing_skill.required_flag
+                            if editing_skill and editing_skill.required_flag is not None
+                            else True,
+                        )
                     with c2:
-                        s_genai = st.checkbox("GenAI Extension skill?", value=editing_skill.is_genai_extension if editing_skill else False)
-                    s_esco = st.text_input("ESCO URI (optional)", value=editing_skill.esco_uri or "" if editing_skill else "")
+                        s_genai = st.checkbox(
+                            "GenAI Extension skill?",
+                            value=editing_skill.is_genai_extension
+                            if editing_skill
+                            else False,
+                        )
+                    s_esco = st.text_input(
+                        "ESCO URI (optional)",
+                        value=editing_skill.esco_uri or "" if editing_skill else "",
+                    )
                     s_note = st.text_input(
                         "Labeler note (optional)",
-                        value=st.session_state.labeler_notes.get(editing_skill.skill_name, "") if editing_skill else "",
+                        value=st.session_state.labeler_notes.get(
+                            editing_skill.skill_name, ""
+                        )
+                        if editing_skill
+                        else "",
                     )
-                    s_confidence = st.slider("Confidence", 0.0, 1.0, editing_skill.confidence if editing_skill else 1.0, 0.05)
+                    s_confidence = st.slider(
+                        "Confidence",
+                        0.0,
+                        1.0,
+                        editing_skill.confidence if editing_skill else 1.0,
+                        0.05,
+                    )
 
                     btn_label = "💾 Save Skill" if editing_skill else "➕ Add Skill"
                     submitted = st.form_submit_button(btn_label)
@@ -750,7 +813,9 @@ elif st.session_state.phase == "label":
                         if not s_label.strip():
                             st.error("Skill name is required.")
                         elif span_field is None:
-                            st.error("Source span is required — drag to select text in the right pane first.")
+                            st.error(
+                                "Source span is required — drag to select text in the right pane first."
+                            )
                         else:
                             skill_name = s_label.strip()
                             skill = SkillRecord(
@@ -773,7 +838,9 @@ elif st.session_state.phase == "label":
                             else:
                                 st.session_state.skills.append(skill)
                             if s_note.strip():
-                                st.session_state.labeler_notes[skill_name] = s_note.strip()
+                                st.session_state.labeler_notes[skill_name] = (
+                                    s_note.strip()
+                                )
                             # Clear span selection after use
                             st.session_state.pop("span_selection", None)
                             st.rerun()
@@ -844,8 +911,20 @@ elif st.session_state.phase == "label":
 
                 # --- Determine if editing ---
                 editing_tidx = st.session_state.get("editing_tool_index")
-                editing_tool = st.session_state.tools[editing_tidx] if editing_tidx is not None else None
-                cat_options = ["language", "framework", "platform", "database", "devops", "ai_tool", "other"]
+                editing_tool = (
+                    st.session_state.tools[editing_tidx]
+                    if editing_tidx is not None
+                    else None
+                )
+                cat_options = [
+                    "language",
+                    "framework",
+                    "platform",
+                    "database",
+                    "devops",
+                    "ai_tool",
+                    "other",
+                ]
 
                 if editing_tool:
                     st.markdown(f"#### ✏️ Edit Tool: {editing_tool.tool_name}")
@@ -863,7 +942,7 @@ elif st.session_state.phase == "label":
                     st.success(
                         f"**field_source:** `{span_field}` | "
                         f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
-                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                        f'**text:** *"{span_text[:80]}{"..." if len(span_text) > 80 else ""}"*'
                     )
                 elif span_sel:
                     span_text = span_sel["text"]
@@ -873,14 +952,16 @@ elif st.session_state.phase == "label":
                     st.success(
                         f"**field_source:** `{span_field}` | "
                         f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
-                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                        f'**text:** *"{span_text[:80]}{"..." if len(span_text) > 80 else ""}"*'
                     )
                 else:
                     span_text = None
                     span_field = None
                     span_start = None
                     span_end = None
-                    st.warning("No span selected — drag text in the right pane to set source_span.")
+                    st.warning(
+                        "No span selected — drag text in the right pane to set source_span."
+                    )
 
                 # Determine default name from span selection or editing
                 default_name = editing_tool.tool_name if editing_tool else ""
@@ -894,15 +975,31 @@ elif st.session_state.phase == "label":
                     t_category = st.selectbox(
                         "Category",
                         cat_options,
-                        index=cat_options.index(editing_tool.category) if editing_tool else None,
+                        index=cat_options.index(editing_tool.category)
+                        if editing_tool
+                        else None,
                         placeholder="Select category...",
                     )
-                    t_genai = st.checkbox("GenAI tool?", value=editing_tool.is_genai_tool if editing_tool else False, help="Pinecone, LangChain, OpenAI API, etc.")
+                    t_genai = st.checkbox(
+                        "GenAI tool?",
+                        value=editing_tool.is_genai_tool if editing_tool else False,
+                        help="Pinecone, LangChain, OpenAI API, etc.",
+                    )
                     t_note = st.text_input(
                         "Labeler note (optional)",
-                        value=st.session_state.labeler_notes.get(editing_tool.tool_name, "") if editing_tool else "",
+                        value=st.session_state.labeler_notes.get(
+                            editing_tool.tool_name, ""
+                        )
+                        if editing_tool
+                        else "",
                     )
-                    t_confidence = st.slider("Confidence", 0.0, 1.0, editing_tool.confidence if editing_tool else 1.0, 0.05)
+                    t_confidence = st.slider(
+                        "Confidence",
+                        0.0,
+                        1.0,
+                        editing_tool.confidence if editing_tool else 1.0,
+                        0.05,
+                    )
 
                     btn_label = "💾 Save Tool" if editing_tool else "➕ Add Tool"
                     submitted = st.form_submit_button(btn_label)
@@ -910,7 +1007,9 @@ elif st.session_state.phase == "label":
                         if not t_name.strip():
                             st.error("Tool name is required.")
                         elif span_field is None:
-                            st.error("Source span is required — drag to select text in the right pane first.")
+                            st.error(
+                                "Source span is required — drag to select text in the right pane first."
+                            )
                         elif t_category is None:
                             st.error("Category is required.")
                         else:
@@ -1001,14 +1100,36 @@ elif st.session_state.phase == "label":
             with left:
                 span_sel = st.session_state.get("span_selection")
                 editing_tidx = st.session_state.get("editing_task_index")
-                editing_task = st.session_state.tasks[editing_tidx] if editing_tidx is not None else None
+                editing_task = (
+                    st.session_state.tasks[editing_tidx]
+                    if editing_tidx is not None
+                    else None
+                )
 
-                cat_options = ["development", "analysis", "management", "support", "design", "testing", "operations", "other"]
-                freq_options = ["daily", "weekly", "monthly", "quarterly", "as_needed", "unspecified"]
+                cat_options = [
+                    "development",
+                    "analysis",
+                    "management",
+                    "support",
+                    "design",
+                    "testing",
+                    "operations",
+                    "other",
+                ]
+                freq_options = [
+                    "daily",
+                    "weekly",
+                    "monthly",
+                    "quarterly",
+                    "as_needed",
+                    "unspecified",
+                ]
                 complexity_options = ["routine", "analytical", "creative", "strategic"]
 
                 if editing_task:
-                    st.markdown(f"#### ✏️ Edit Task: {editing_task.task_description[:30]}")
+                    st.markdown(
+                        f"#### ✏️ Edit Task: {editing_task.task_description[:30]}"
+                    )
                 else:
                     st.markdown("#### 📋 Add Task")
 
@@ -1021,7 +1142,7 @@ elif st.session_state.phase == "label":
                     st.success(
                         f"**field_source:** `{span_field}` | "
                         f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
-                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                        f'**text:** *"{span_text[:80]}{"..." if len(span_text) > 80 else ""}"*'
                     )
                 elif span_sel:
                     span_text = span_sel["text"]
@@ -1031,34 +1152,55 @@ elif st.session_state.phase == "label":
                     st.success(
                         f"**field_source:** `{span_field}` | "
                         f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
-                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                        f'**text:** *"{span_text[:80]}{"..." if len(span_text) > 80 else ""}"*'
                     )
                 else:
                     span_text = span_field = span_start = span_end = None
-                    st.warning("No span selected — drag text in the right pane to set source_span.")
+                    st.warning(
+                        "No span selected — drag text in the right pane to set source_span."
+                    )
 
                 default_desc = editing_task.task_description if editing_task else ""
 
                 with st.form("task_form", clear_on_submit=True):
-                    tk_desc = st.text_area("Task description", value=default_desc, height=80)
+                    tk_desc = st.text_area(
+                        "Task description", value=default_desc, height=80
+                    )
                     c1, c2 = st.columns(2)
                     with c1:
                         tk_cat = st.selectbox(
-                            "Category", cat_options,
-                            index=cat_options.index(editing_task.category) if editing_task and editing_task.category in cat_options else None,
+                            "Category",
+                            cat_options,
+                            index=cat_options.index(editing_task.category)
+                            if editing_task and editing_task.category in cat_options
+                            else None,
                             placeholder="Select category...",
                         )
                         tk_freq = st.selectbox(
-                            "Frequency", freq_options,
-                            index=freq_options.index(editing_task.frequency) if editing_task and editing_task.frequency in freq_options else None,
+                            "Frequency",
+                            freq_options,
+                            index=freq_options.index(editing_task.frequency)
+                            if editing_task and editing_task.frequency in freq_options
+                            else None,
                             placeholder="Select frequency...",
                         )
                     with c2:
                         tk_complexity = st.selectbox(
-                            "Complexity", [None] + complexity_options,
-                            index=([None] + complexity_options).index(editing_task.complexity) if editing_task else 0,
+                            "Complexity",
+                            [None] + complexity_options,
+                            index=([None] + complexity_options).index(
+                                editing_task.complexity
+                            )
+                            if editing_task
+                            else 0,
                         )
-                    tk_confidence = st.slider("Confidence", 0.0, 1.0, editing_task.confidence if editing_task else 1.0, 0.05)
+                    tk_confidence = st.slider(
+                        "Confidence",
+                        0.0,
+                        1.0,
+                        editing_task.confidence if editing_task else 1.0,
+                        0.05,
+                    )
 
                     btn_label = "💾 Save Task" if editing_task else "➕ Add Task"
                     submitted = st.form_submit_button(btn_label)
@@ -1066,7 +1208,9 @@ elif st.session_state.phase == "label":
                         if not tk_desc.strip():
                             st.error("Task description is required.")
                         elif span_field is None:
-                            st.error("Source span is required — drag to select text in the right pane first.")
+                            st.error(
+                                "Source span is required — drag to select text in the right pane first."
+                            )
                         elif tk_cat is None:
                             st.error("Category is required.")
                         elif tk_freq is None:
@@ -1109,7 +1253,9 @@ elif st.session_state.phase == "label":
                             if task.source_span:
                                 sp = task.source_span
                                 sp_info = f" (`{sp.field_source}` [{sp.start_char}:{sp.end_char}])"
-                            st.markdown(f"- **{task.task_description[:50]}** — {task.category}{sp_info}")
+                            st.markdown(
+                                f"- **{task.task_description[:50]}** — {task.category}{sp_info}"
+                            )
                         with tc2:
                             if st.button("✏️", key=f"etk_{i}"):
                                 st.session_state.editing_task_index = i
@@ -1154,13 +1300,19 @@ elif st.session_state.phase == "label":
             with left:
                 span_sel = st.session_state.get("span_selection")
                 editing_ridx = st.session_state.get("editing_resp_index")
-                editing_resp = st.session_state.labeled_responsibilities[editing_ridx] if editing_ridx is not None else None
+                editing_resp = (
+                    st.session_state.labeled_responsibilities[editing_ridx]
+                    if editing_ridx is not None
+                    else None
+                )
 
                 scope_options = ["individual", "team", "department", "organization"]
                 level_options = ["entry", "mid", "senior", "lead", "executive"]
 
                 if editing_resp:
-                    st.markdown(f"#### ✏️ Edit Responsibility: {editing_resp.responsibility_description[:30]}")
+                    st.markdown(
+                        f"#### ✏️ Edit Responsibility: {editing_resp.responsibility_description[:30]}"
+                    )
                 else:
                     st.markdown("#### 👔 Add Responsibility")
 
@@ -1173,7 +1325,7 @@ elif st.session_state.phase == "label":
                     st.success(
                         f"**field_source:** `{span_field}` | "
                         f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
-                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                        f'**text:** *"{span_text[:80]}{"..." if len(span_text) > 80 else ""}"*'
                     )
                 elif span_sel:
                     span_text = span_sel["text"]
@@ -1183,37 +1335,61 @@ elif st.session_state.phase == "label":
                     st.success(
                         f"**field_source:** `{span_field}` | "
                         f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
-                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                        f'**text:** *"{span_text[:80]}{"..." if len(span_text) > 80 else ""}"*'
                     )
                 else:
                     span_text = span_field = span_start = span_end = None
-                    st.warning("No span selected — drag text in the right pane to set source_span.")
+                    st.warning(
+                        "No span selected — drag text in the right pane to set source_span."
+                    )
 
-                default_desc = editing_resp.responsibility_description if editing_resp else ""
+                default_desc = (
+                    editing_resp.responsibility_description if editing_resp else ""
+                )
 
                 with st.form("resp_form", clear_on_submit=True):
-                    r_desc = st.text_area("Responsibility description", value=default_desc, height=80)
+                    r_desc = st.text_area(
+                        "Responsibility description", value=default_desc, height=80
+                    )
                     c1, c2 = st.columns(2)
                     with c1:
                         r_scope = st.selectbox(
-                            "Scope", [None] + scope_options,
-                            index=([None] + scope_options).index(editing_resp.scope) if editing_resp and editing_resp.scope else 0,
+                            "Scope",
+                            [None] + scope_options,
+                            index=([None] + scope_options).index(editing_resp.scope)
+                            if editing_resp and editing_resp.scope
+                            else 0,
                         )
                     with c2:
                         r_level = st.selectbox(
-                            "Level", level_options,
-                            index=level_options.index(editing_resp.level) if editing_resp else None,
+                            "Level",
+                            level_options,
+                            index=level_options.index(editing_resp.level)
+                            if editing_resp
+                            else None,
                             placeholder="Select level...",
                         )
-                    r_confidence = st.slider("Confidence", 0.0, 1.0, editing_resp.confidence if editing_resp else 1.0, 0.05)
+                    r_confidence = st.slider(
+                        "Confidence",
+                        0.0,
+                        1.0,
+                        editing_resp.confidence if editing_resp else 1.0,
+                        0.05,
+                    )
 
-                    btn_label = "💾 Save Responsibility" if editing_resp else "➕ Add Responsibility"
+                    btn_label = (
+                        "💾 Save Responsibility"
+                        if editing_resp
+                        else "➕ Add Responsibility"
+                    )
                     submitted = st.form_submit_button(btn_label)
                     if submitted:
                         if not r_desc.strip():
                             st.error("Responsibility description is required.")
                         elif span_field is None:
-                            st.error("Source span is required — drag to select text in the right pane first.")
+                            st.error(
+                                "Source span is required — drag to select text in the right pane first."
+                            )
                         elif r_level is None:
                             st.error("Level is required.")
                         else:
@@ -1230,7 +1406,9 @@ elif st.session_state.phase == "label":
                                 ),
                             )
                             if editing_ridx is not None:
-                                st.session_state.labeled_responsibilities[editing_ridx] = resp
+                                st.session_state.labeled_responsibilities[
+                                    editing_ridx
+                                ] = resp
                                 st.session_state.pop("editing_resp_index", None)
                             else:
                                 st.session_state.labeled_responsibilities.append(resp)
@@ -1245,7 +1423,9 @@ elif st.session_state.phase == "label":
 
                 # Show current responsibilities
                 if st.session_state.labeled_responsibilities:
-                    st.markdown(f"**Responsibilities added ({len(st.session_state.labeled_responsibilities)})**")
+                    st.markdown(
+                        f"**Responsibilities added ({len(st.session_state.labeled_responsibilities)})**"
+                    )
                     for i, resp in enumerate(st.session_state.labeled_responsibilities):
                         rc1, rc2, rc3 = st.columns([4, 1, 1])
                         with rc1:
@@ -1253,7 +1433,9 @@ elif st.session_state.phase == "label":
                             if resp.source_span:
                                 sp = resp.source_span
                                 sp_info = f" (`{sp.field_source}` [{sp.start_char}:{sp.end_char}])"
-                            st.markdown(f"- **{resp.responsibility_description[:50]}** — {resp.level}{sp_info}")
+                            st.markdown(
+                                f"- **{resp.responsibility_description[:50]}** — {resp.level}{sp_info}"
+                            )
                         with rc2:
                             if st.button("✏️", key=f"er_{i}"):
                                 st.session_state.editing_resp_index = i
@@ -1296,9 +1478,19 @@ elif st.session_state.phase == "label":
             with left:
                 span_sel = st.session_state.get("span_selection")
                 editing_cidx = st.session_state.get("editing_ctx_index")
-                editing_ctx = st.session_state.context[editing_cidx] if editing_cidx is not None else None
+                editing_ctx = (
+                    st.session_state.context[editing_cidx]
+                    if editing_cidx is not None
+                    else None
+                )
 
-                signal_options = ["remote_policy", "team_size", "reporting_structure", "growth_stage", "ai_usage"]
+                signal_options = [
+                    "remote_policy",
+                    "team_size",
+                    "reporting_structure",
+                    "growth_stage",
+                    "ai_usage",
+                ]
 
                 if editing_ctx:
                     st.markdown(f"#### ✏️ Edit Context: {editing_ctx.signal_type}")
@@ -1314,7 +1506,7 @@ elif st.session_state.phase == "label":
                     st.success(
                         f"**field_source:** `{span_field}` | "
                         f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
-                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                        f'**text:** *"{span_text[:80]}{"..." if len(span_text) > 80 else ""}"*'
                     )
                 elif span_sel:
                     span_text = span_sel["text"]
@@ -1324,16 +1516,21 @@ elif st.session_state.phase == "label":
                     st.success(
                         f"**field_source:** `{span_field}` | "
                         f"**start_char:** {span_start} | **end_char:** {span_end}  \n"
-                        f"**text:** *\"{span_text[:80]}{'...' if len(span_text) > 80 else ''}\"*"
+                        f'**text:** *"{span_text[:80]}{"..." if len(span_text) > 80 else ""}"*'
                     )
                 else:
                     span_text = span_field = span_start = span_end = None
-                    st.warning("No span selected — drag text in the right pane to set source_span.")
+                    st.warning(
+                        "No span selected — drag text in the right pane to set source_span."
+                    )
 
                 with st.form("ctx_form", clear_on_submit=True):
                     cx_type = st.selectbox(
-                        "Signal type", signal_options,
-                        index=signal_options.index(editing_ctx.signal_type) if editing_ctx else None,
+                        "Signal type",
+                        signal_options,
+                        index=signal_options.index(editing_ctx.signal_type)
+                        if editing_ctx
+                        else None,
                         placeholder="Select signal type...",
                     )
                     cx_value = st.text_input(
@@ -1341,7 +1538,13 @@ elif st.session_state.phase == "label":
                         value=editing_ctx.value if editing_ctx else "",
                         help="e.g. 'fully remote', '5-10 people', 'reports to VP Engineering'",
                     )
-                    cx_confidence = st.slider("Confidence", 0.0, 1.0, editing_ctx.confidence if editing_ctx else 1.0, 0.05)
+                    cx_confidence = st.slider(
+                        "Confidence",
+                        0.0,
+                        1.0,
+                        editing_ctx.confidence if editing_ctx else 1.0,
+                        0.05,
+                    )
 
                     btn_label = "💾 Save Signal" if editing_ctx else "➕ Add Signal"
                     submitted = st.form_submit_button(btn_label)
@@ -1349,7 +1552,9 @@ elif st.session_state.phase == "label":
                         if cx_type is None:
                             st.error("Signal type is required.")
                         elif span_field is None:
-                            st.error("Source span is required — drag to select text in the right pane first.")
+                            st.error(
+                                "Source span is required — drag to select text in the right pane first."
+                            )
                         elif not cx_value.strip():
                             st.error("Value is required.")
                         else:
@@ -1380,7 +1585,9 @@ elif st.session_state.phase == "label":
 
                 # Show current context signals
                 if st.session_state.context:
-                    st.markdown(f"**Context signals added ({len(st.session_state.context)})**")
+                    st.markdown(
+                        f"**Context signals added ({len(st.session_state.context)})**"
+                    )
                     for i, ctx in enumerate(st.session_state.context):
                         cc1, cc2, cc3 = st.columns([4, 1, 1])
                         with cc1:
@@ -1388,7 +1595,9 @@ elif st.session_state.phase == "label":
                             if ctx.source_span:
                                 sp = ctx.source_span
                                 sp_info = f" (`{sp.field_source}` [{sp.start_char}:{sp.end_char}])"
-                            st.markdown(f"- **{ctx.signal_type}:** {ctx.value[:40]}{sp_info}")
+                            st.markdown(
+                                f"- **{ctx.signal_type}:** {ctx.value[:40]}{sp_info}"
+                            )
                         with cc2:
                             if st.button("✏️", key=f"ec_{i}"):
                                 st.session_state.editing_ctx_index = i
@@ -1509,7 +1718,11 @@ elif st.session_state.phase == "label":
                         # Persist position to cache so refresh resumes here
                         cached = load_cache()
                         if cached.get("jobs"):
-                            save_cache(cached.get("query", ""), cached["jobs"], st.session_state.job_index)
+                            save_cache(
+                                cached.get("query", ""),
+                                cached["jobs"],
+                                st.session_state.job_index,
+                            )
                         reset_labels()
                         set_label_step("review")
                         st.rerun()

@@ -22,8 +22,7 @@ class PostingFreshnessResult:
 
 def _reason_for(days: int, status: Literal["fresh", "stale", "expired"]) -> str:
     return (
-        f"{days} days since posted; classified {status} "
-        f"(fresh ≤{FRESH_THRESHOLD_DAYS}, stale ≤{STALE_THRESHOLD_DAYS})"
+        f"{days} days since posted; classified {status} (fresh ≤{FRESH_THRESHOLD_DAYS}, stale ≤{STALE_THRESHOLD_DAYS})"
     )
 
 

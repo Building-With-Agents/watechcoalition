@@ -50,9 +50,7 @@ def build_enrichment_output_record(
     extraction_failed: bool = False,
 ) -> dict[str, Any]:
     """Return one JSON-serializable row: ids, source, external_id, seniority, role, quality."""
-    extraction = build_extraction_dict(
-        skills, tools, tasks, responsibilities, context
-    )
+    extraction = build_extraction_dict(skills, tools, tasks, responsibilities, context)
     role, seniority = classify_job(
         job_title or "",
         job_description if isinstance(job_description, str) else None,
@@ -166,8 +164,6 @@ LEFT JOIN dbo.job_postings jp
     AND jp.external_id = nj.external_id
 """
 
-SPAM_PREVIEW_SQL_BY_RUN = (
-    _SPAM_PREVIEW_LATEST_EI + "WHERE nj.ingestion_run_id = :run_id\nORDER BY nj.id\n"
-)
+SPAM_PREVIEW_SQL_BY_RUN = _SPAM_PREVIEW_LATEST_EI + "WHERE nj.ingestion_run_id = :run_id\nORDER BY nj.id\n"
 
 SPAM_PREVIEW_SQL_RECENT = _SPAM_PREVIEW_LATEST_EI + "ORDER BY nj.id DESC\nLIMIT :lim\n"

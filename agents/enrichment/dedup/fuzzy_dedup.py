@@ -150,7 +150,9 @@ def _persist_dedup_cache(session: Session, *, job_posting_id: str, text_hash: st
     )
 
 
-def _hydrate_survivor_vectors(session: Session, *, job_posting_id: str, survivors: list[Any]) -> tuple[list[dict[str, Any]], int, int]:
+def _hydrate_survivor_vectors(
+    session: Session, *, job_posting_id: str, survivors: list[Any]
+) -> tuple[list[dict[str, Any]], int, int]:
     ready: list[dict[str, Any]] = []
     pending: list[tuple[dict[str, Any], str, str]] = []
     cache_hits = 0
@@ -276,15 +278,19 @@ def run_fuzzy_dedup(
             )
             return _unique_result()
 
-    survivors = session.execute(
-        _LIST_SURVIVORS_SQL,
-        {
-            "company_id": company_id,
-            "window_start": window_start,
-            "anchor": anchor,
-            "job_posting_id": jid,
-        },
-    ).mappings().all()
+    survivors = (
+        session.execute(
+            _LIST_SURVIVORS_SQL,
+            {
+                "company_id": company_id,
+                "window_start": window_start,
+                "anchor": anchor,
+                "job_posting_id": jid,
+            },
+        )
+        .mappings()
+        .all()
+    )
     hydrated_survivors, survivor_cache_hits, survivor_embedded_count = _hydrate_survivor_vectors(
         session,
         job_posting_id=jid,
@@ -323,9 +329,7 @@ def run_fuzzy_dedup(
     cur_pd = publish_date_for_tiebreak(_current_row_dict(current))
     sur_pd = publish_date_for_tiebreak(best_row)
 
-    current_wins = cur_c > sur_c or (
-        cur_c == sur_c and cur_pd is not None and (sur_pd is None or cur_pd >= sur_pd)
-    )
+    current_wins = cur_c > sur_c or (cur_c == sur_c and cur_pd is not None and (sur_pd is None or cur_pd >= sur_pd))
 
     matched_id = str(best_row["job_posting_id"])
     cluster_base = best_row.get("duplicate_cluster_id")

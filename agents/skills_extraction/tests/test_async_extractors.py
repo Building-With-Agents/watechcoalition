@@ -270,6 +270,7 @@ def test_extract_skills_no_taxonomy_async_returns_empty_on_failed_dimension(
 # Tasks async — retry / 429 backoff
 # ---------------------------------------------------------------------------
 
+
 def test_extract_tasks_async_retries_on_429_with_backoff(dummy_job: JobRecord) -> None:
     """Tasks async extractor should await backoff then retry after a 429."""
     rate_limit_meta = {
@@ -357,6 +358,7 @@ def test_extract_tasks_async_returns_empty_on_persistent_failure(dummy_job: JobR
 # ---------------------------------------------------------------------------
 # Responsibilities async — retry / 429 backoff
 # ---------------------------------------------------------------------------
+
 
 def test_extract_responsibilities_async_retries_on_429_with_backoff(dummy_job: JobRecord) -> None:
     """Responsibilities async extractor should await backoff then retry after a 429."""
@@ -453,6 +455,7 @@ def test_extract_responsibilities_async_returns_empty_on_persistent_failure(
 # ---------------------------------------------------------------------------
 # process_async() — async public entrypoint
 # ---------------------------------------------------------------------------
+
 
 def _make_normalization_event(batch_id: str = "b-async-1") -> EventEnvelope:
     return EventEnvelope(

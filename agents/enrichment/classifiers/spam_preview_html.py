@@ -47,7 +47,9 @@ def render_spam_preview_html(
 
         score_s = "NULL" if preview.spam_score is None else f"{preview.spam_score:.4f}"
         oc_s = "NULL" if preview.overall_confidence is None else f"{preview.overall_confidence:.4f}"
-        fc_json = json.dumps(preview.field_confidence, indent=2, ensure_ascii=False) if preview.field_confidence else "{}"
+        fc_json = (
+            json.dumps(preview.field_confidence, indent=2, ensure_ascii=False) if preview.field_confidence else "{}"
+        )
 
         title = html.escape(str(row.get("job_title") or ""))
         company = html.escape(str(row.get("job_company") or ""))

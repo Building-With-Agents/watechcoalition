@@ -75,21 +75,29 @@ def parse_job_sections(job: dict) -> dict:
 
     # Requirements: join Qualifications array if present
     qualifications = highlights.get("Qualifications") or []
-    requirements_text = "\n".join(f"- {q}" for q in qualifications) if qualifications else ""
+    requirements_text = (
+        "\n".join(f"- {q}" for q in qualifications) if qualifications else ""
+    )
 
     # Responsibilities: join Responsibilities array if present
     responsibilities_list = highlights.get("Responsibilities") or []
     responsibilities_text = (
-        "\n".join(f"- {r}" for r in responsibilities_list) if responsibilities_list else ""
+        "\n".join(f"- {r}" for r in responsibilities_list)
+        if responsibilities_list
+        else ""
     )
 
     return {
         "external_id": job.get("job_id", ""),
         "title": fix_mojibake(job.get("job_title") or job.get("title", "")),
-        "company": fix_mojibake(job.get("employer_name") or job.get("company_name", "")),
+        "company": fix_mojibake(
+            job.get("employer_name") or job.get("company_name", "")
+        ),
         "city": job.get("job_city", ""),
         "state": job.get("job_state", ""),
-        "description": fix_mojibake(job.get("job_description") or job.get("description", "")),
+        "description": fix_mojibake(
+            job.get("job_description") or job.get("description", "")
+        ),
         "requirements": fix_mojibake(requirements_text),
         "responsibilities": fix_mojibake(responsibilities_text),
         "job_url": job.get("job_apply_link") or job.get("job_google_link", ""),

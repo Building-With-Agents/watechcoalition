@@ -235,8 +235,7 @@ def render_weekly_insights() -> None:
     if not avail.ok:
         st.error(f"Could not reach the database: {avail.error}")
         st.info(
-            "Check `PYTHON_DATABASE_URL` or `PYTHON_DATABASE_URL_READONLY` in `.env` and that "
-            "PostgreSQL is running."
+            "Check `PYTHON_DATABASE_URL` or `PYTHON_DATABASE_URL_READONLY` in `.env` and that PostgreSQL is running."
         )
         return
 
@@ -266,9 +265,7 @@ def render_weekly_insights() -> None:
         return
 
     if skills_df.empty:
-        st.warning(
-            f"**Top skills** — no rows for **week_start = {selected_label}** though this week is listed."
-        )
+        st.warning(f"**Top skills** — no rows for **week_start = {selected_label}** though this week is listed.")
         st.info(
             "**Next steps** — Rerun the app, pick another week, or re-run the skill-demand aggregate for "
             "this anchor (data may have changed under cache)."
@@ -317,9 +314,9 @@ def render_weekly_insights() -> None:
         display["wow_pct"] = (pd.to_numeric(display["week_over_week_change"], errors="coerce") * 100.0).map(
             lambda x: f"{x:+.1f} %" if pd.notna(x) else "—"
         )
-        display["trend_confidence_fmt"] = pd.to_numeric(
-            display["trend_confidence"], errors="coerce"
-        ).map(lambda x: f"{x:.2f}" if pd.notna(x) else "—")
+        display["trend_confidence_fmt"] = pd.to_numeric(display["trend_confidence"], errors="coerce").map(
+            lambda x: f"{x:.2f}" if pd.notna(x) else "—"
+        )
         show_cols = [
             "skill_label",
             "demand_count",
@@ -369,9 +366,7 @@ def render_weekly_insights() -> None:
         if hist_err:
             st.caption(f"Demand history for sparklines could not load: {hist_err}")
         elif hist_df.empty:
-            st.caption(
-                "No matching **`skill_demand_weekly`** rows for these velocity skills in the recent window."
-            )
+            st.caption("No matching **`skill_demand_weekly`** rows for these velocity skills in the recent window.")
         else:
             n_weeks = hist_df["week_start"].nunique()
             if n_weeks < 2:
@@ -382,15 +377,19 @@ def render_weekly_insights() -> None:
             else:
                 spark_slice = spark_slice.reset_index(drop=True)
                 spark_slice["_uri_norm"] = spark_slice["esco_uri"].apply(
-                    lambda u: None
-                    if u is None or (isinstance(u, float) and pd.isna(u)) or str(u).strip() == ""
-                    else str(u).strip()
+                    lambda u: (
+                        None
+                        if u is None or (isinstance(u, float) and pd.isna(u)) or str(u).strip() == ""
+                        else str(u).strip()
+                    )
                 )
                 hist_work = hist_df.copy()
                 hist_work["_uri_norm"] = hist_work["esco_uri"].apply(
-                    lambda u: None
-                    if u is None or (isinstance(u, float) and pd.isna(u)) or str(u).strip() == ""
-                    else str(u).strip()
+                    lambda u: (
+                        None
+                        if u is None or (isinstance(u, float) and pd.isna(u)) or str(u).strip() == ""
+                        else str(u).strip()
+                    )
                 )
                 merged = spark_slice.merge(
                     hist_work,
@@ -411,14 +410,12 @@ def render_weekly_insights() -> None:
                     seen.add(key)
                     order.append(lbl + ("" if not u else f" ({u[:28]}…)" if len(u) > 28 else f" ({u})"))
                 merged["display_skill"] = merged.apply(
-                    lambda r: str(r["skill_label"])
-                    + (
-                        ""
-                        if r["_uri_norm"] is None
-                        else (
-                            f" ({r['_uri_norm'][:28]}…)"
-                            if len(r["_uri_norm"]) > 28
-                            else f" ({r['_uri_norm']})"
+                    lambda r: (
+                        str(r["skill_label"])
+                        + (
+                            ""
+                            if r["_uri_norm"] is None
+                            else (f" ({r['_uri_norm'][:28]}…)" if len(r["_uri_norm"]) > 28 else f" ({r['_uri_norm']})")
                         )
                     ),
                     axis=1,
@@ -608,9 +605,7 @@ def render_weekly_insights() -> None:
         else:
             m2.metric("Median days listed", "—")
         if "is_repost" in pf_df.columns:
-            _rp = pf_df["is_repost"].map(
-                lambda x: x is True or str(x).lower() in ("1", "true", "t")
-            )
+            _rp = pf_df["is_repost"].map(lambda x: x is True or str(x).lower() in ("1", "true", "t"))
             n_rp = len(_rp)
             repost_n = int(_rp.sum()) if n_rp else 0
             pct = 100.0 * repost_n / n_rp if n_rp else float("nan")
@@ -623,9 +618,7 @@ def render_weekly_insights() -> None:
 
         st.dataframe(pf_df, width="stretch", hide_index=True)
         if "duration_days" in pf_df.columns and not pf_df.empty:
-            hist_df = pf_df.assign(
-                _dd=pd.to_numeric(pf_df["duration_days"], errors="coerce")
-            ).dropna(subset=["_dd"])
+            hist_df = pf_df.assign(_dd=pd.to_numeric(pf_df["duration_days"], errors="coerce")).dropna(subset=["_dd"])
             if not hist_df.empty:
                 fig_pf = px.histogram(
                     hist_df,

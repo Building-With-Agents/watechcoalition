@@ -94,9 +94,7 @@ def _count_pending() -> int:
         from agents.common.data_store.models import RawIngestedJob
 
         with session_scope() as session:
-            return session.query(RawIngestedJob).filter(
-                RawIngestedJob.processing_status == "pending"
-            ).count()
+            return session.query(RawIngestedJob).filter(RawIngestedJob.processing_status == "pending").count()
     except Exception as exc:
         log.error("count_pending_failed", error=str(exc))
         return -1
@@ -130,6 +128,7 @@ def _count_enriched() -> int:
 
         with session_scope() as session:
             from sqlalchemy import text
+
             row = session.execute(text("SELECT COUNT(*) FROM dbo.job_postings")).scalar()
             return row or 0
     except Exception as exc:
@@ -173,7 +172,9 @@ def main() -> None:
         total_work = max(pending, unextracted_preview)
         estimated_iterations = (total_work + args.batch_size - 1) // args.batch_size if total_work > 0 else 0
         print(f"Estimated iterations: {estimated_iterations}")
-        print(f"Estimated time: ~{estimated_iterations * (args.delay + 30)}s ({estimated_iterations * (args.delay + 30) // 60} min)")
+        print(
+            f"Estimated time: ~{estimated_iterations * (args.delay + 30)}s ({estimated_iterations * (args.delay + 30) // 60} min)"
+        )
         return
 
     unextracted = _count_unextracted()
@@ -260,7 +261,11 @@ def main() -> None:
                 extract_out = extract_agent.process(extract_event)
                 extract_duration_ms = int((time.perf_counter() - extract_start) * 1000)
                 extract_count = 0
-                parallel_enabled = os.getenv("SKILLS_EXTRACTION_PARALLEL", "1").strip().lower() not in ("0", "false", "no")
+                parallel_enabled = os.getenv("SKILLS_EXTRACTION_PARALLEL", "1").strip().lower() not in (
+                    "0",
+                    "false",
+                    "no",
+                )
                 serial_estimate_ms = 0
                 if extract_out is not None:
                     records = extract_out.payload.get("records", [])
@@ -278,7 +283,9 @@ def main() -> None:
                         concurrency=concurrency if parallel_enabled else 1,
                         avg_per_job_ms=avg_per_job_ms,
                         serial_estimate_ms=serial_estimate_ms,
-                        speedup=round(serial_estimate_ms / extract_duration_ms, 2) if extract_duration_ms > 0 and serial_estimate_ms > 0 else None,
+                        speedup=round(serial_estimate_ms / extract_duration_ms, 2)
+                        if extract_duration_ms > 0 and serial_estimate_ms > 0
+                        else None,
                     )
                     total_extracted += extract_count
 

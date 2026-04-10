@@ -22,11 +22,7 @@ _FALLBACK_SECTOR_TITLE = "Other"
 
 
 def _resolve_sector_by_title(session: Any, title: str) -> str | None:
-    stmt = (
-        select(IndustrySector.industry_sector_id)
-        .where(IndustrySector.sector_title == title)
-        .limit(1)
-    )
+    stmt = select(IndustrySector.industry_sector_id).where(IndustrySector.sector_title == title).limit(1)
     return session.execute(stmt).scalar_one_or_none()
 
 

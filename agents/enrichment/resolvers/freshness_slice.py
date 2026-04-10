@@ -40,6 +40,7 @@ def coerce_days_since_posted(posting: dict[str, Any], enriched: dict[str, Any]) 
 def build_freshness_record_for_analytics(posting: dict[str, Any], enriched: dict[str, Any]) -> dict[str, Any]:
     """Minimal dict for :func:`agents.analytics.agent._records_from_record_enriched_payload`."""
     days = coerce_days_since_posted(posting, enriched)
+
     def _pick(key: str) -> Any:
         if key in enriched:
             return enriched[key]

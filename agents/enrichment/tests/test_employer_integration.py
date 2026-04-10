@@ -101,9 +101,7 @@ def _parse_args() -> argparse.Namespace:
         type=str,
         default=None,
         metavar="JSON",
-        help=(
-            "Skip the LLM. Inline JSON (fragile in PowerShell). Prefer --inject-profile-file."
-        ),
+        help=("Skip the LLM. Inline JSON (fragile in PowerShell). Prefer --inject-profile-file."),
     )
     p.add_argument(
         "--inject-profile-file",
@@ -221,9 +219,7 @@ def _print_llm_scan_diagnostics(session, min_chars: int) -> None:
     max_desc = session.scalar(
         select(func.max(func.coalesce(func.length(NormalizedJob.description), 0))).select_from(NormalizedJob)
     )
-    meeting = int(
-        session.scalar(select(func.count()).select_from(NormalizedJob).where(score >= min_chars)) or 0
-    )
+    meeting = int(session.scalar(select(func.count()).select_from(NormalizedJob).where(score >= min_chars)) or 0)
     print("\n=== Diagnostics (why no rows?) ===", file=sys.stderr)
     print(f"  normalized_jobs total rows:     {total}", file=sys.stderr)
     print(f"  rows with score >= {min_chars}:        {meeting}", file=sys.stderr)
@@ -237,8 +233,7 @@ def _print_llm_scan_diagnostics(session, min_chars: int) -> None:
         file=sys.stderr,
     )
     print(
-        "  Tip: Text may be in requirements/responsibilities. Try --min-description-chars 0 "
-        "or a lower number.",
+        "  Tip: Text may be in requirements/responsibilities. Try --min-description-chars 0 or a lower number.",
         file=sys.stderr,
     )
 
@@ -263,11 +258,7 @@ def _fetch_jobs_for_llm_scan(
 
 
 def _has_non_unknown_llm_fields(profile: EmployerProfile) -> bool:
-    return (
-        profile.company_size != "unknown"
-        or profile.ai_maturity_signal != "unknown"
-        or profile.sector != "unknown"
-    )
+    return profile.company_size != "unknown" or profile.ai_maturity_signal != "unknown" or profile.sector != "unknown"
 
 
 def _run_llm_scan(args: argparse.Namespace) -> None:
@@ -302,10 +293,7 @@ def _run_llm_scan(args: argparse.Namespace) -> None:
                 rich_count += 1
 
             print("\n---")
-            print(
-                f"id={job.id}  corpus_chars={len(corpus)}  "
-                f"title={job.title!r}  company={job.company!r}"
-            )
+            print(f"id={job.id}  corpus_chars={len(corpus)}  title={job.title!r}  company={job.company!r}")
             print(json.dumps(profile.model_dump(mode="json"), indent=2))
 
             if persist:
@@ -379,7 +367,9 @@ def main() -> None:
         print(f"  company (row):     {job.company}")
         if args.rich_demo and not injecting:
             print("  company (classify):  [rich-demo] " + company_for_profile)
-        print(f"  employer_metadata (before): {json.dumps(job.employer_metadata, indent=2) if job.employer_metadata else repr(job.employer_metadata)}")
+        print(
+            f"  employer_metadata (before): {json.dumps(job.employer_metadata, indent=2) if job.employer_metadata else repr(job.employer_metadata)}"
+        )
 
         co_count = _companies_count(session)
         print("\n=== dbo.companies ===")
@@ -417,7 +407,9 @@ def main() -> None:
         session.refresh(job)
 
         print("\n=== After persist ===")
-        print(f"  employer_metadata (after): {json.dumps(job.employer_metadata, indent=2) if job.employer_metadata else repr(job.employer_metadata)}")
+        print(
+            f"  employer_metadata (after): {json.dumps(job.employer_metadata, indent=2) if job.employer_metadata else repr(job.employer_metadata)}"
+        )
         print("Done.")
 
 

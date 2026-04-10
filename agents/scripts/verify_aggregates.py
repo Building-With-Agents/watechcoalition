@@ -118,9 +118,7 @@ def parse_target_week(s: str) -> date:
     raw = s.strip()
     collapsed = raw.replace(" ", "").upper()
     if collapsed in ("YYYY-MM-DD", "<YYYY-MM-DD>"):
-        raise ValueError(
-            "'YYYY-MM-DD' is a documentation placeholder. Use a real Monday, e.g. --week 2025-01-06"
-        )
+        raise ValueError("'YYYY-MM-DD' is a documentation placeholder. Use a real Monday, e.g. --week 2025-01-06")
     try:
         return date.fromisoformat(raw[:10])
     except ValueError:

@@ -222,9 +222,7 @@ def fetch_skill_demand_weekly_history_for_skills(
             "max_weeks": int(max_weeks),
         }
         for i, (label, esco_uri) in enumerate(skills_key):
-            or_parts.append(
-                f"(s.skill_label = %(lbl{i})s AND s.esco_uri IS NOT DISTINCT FROM %(esc{i})s)"
-            )
+            or_parts.append(f"(s.skill_label = %(lbl{i})s AND s.esco_uri IS NOT DISTINCT FROM %(esc{i})s)")
             params[f"lbl{i}"] = label
             params[f"esc{i}"] = esco_uri
         where_skills = " OR ".join(or_parts)

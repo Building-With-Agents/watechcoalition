@@ -33,12 +33,14 @@ from agents.common.data_store.database import session_scope
 
 log = logging.getLogger(__name__)
 
+
 def reset_unextracted_to_pending() -> int:
     """Reset raw_ingested_jobs to 'pending' for records not yet in extracted_intelligence."""
     with session_scope() as s:
         # Find raw jobs that have been normalized but whose normalized_jobs row
         # doesn't have a corresponding extracted_intelligence row
-        result = s.execute(text("""
+        result = s.execute(
+            text("""
             UPDATE dbo.raw_ingested_jobs
             SET processing_status = 'pending'
             WHERE id IN (
@@ -53,7 +55,8 @@ def reset_unextracted_to_pending() -> int:
                   AND rij.description IS NOT NULL
                   AND length(rij.description) > 50
             )
-        """))
+        """)
+        )
         count = result.rowcount
         s.commit()
         return count
@@ -64,7 +67,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run full extraction on unprocessed records")
     parser.add_argument("--batch-size", type=int, default=5, help="Records per iteration (default: 5)")
     parser.add_argument("--delay", type=int, default=5, help="Seconds between iterations (default: 5)")
-    parser.add_argument("--skip-export", action="store_true", help="Skip fixture export and PR after pipeline completes")
+    parser.add_argument(
+        "--skip-export", action="store_true", help="Skip fixture export and PR after pipeline completes"
+    )
     args = parser.parse_args()
 
     reset_count = reset_unextracted_to_pending()
@@ -94,11 +99,15 @@ def main() -> None:
 
     # Import and run the processing loop
     from agents.scripts.run_processing_loop import main as run_loop
+
     sys.argv = [
         "run_processing_loop.py",
-        "--max-iterations", str(max_iterations),
-        "--batch-size", str(args.batch_size),
-        "--delay", str(args.delay),
+        "--max-iterations",
+        str(max_iterations),
+        "--batch-size",
+        str(args.batch_size),
+        "--delay",
+        str(args.delay),
     ]
     run_loop()
 
@@ -142,10 +151,17 @@ def _export_and_open_pr() -> None:
 
     subprocess.run(["git", "push", "-u", "origin", branch], cwd=str(_REPO_ROOT), check=True)
     subprocess.run(
-        ["gh", "pr", "create",
-         "--title", "Update fixtures: re-export after full extraction run",
-         "--base", "development",
-         "--body", "Re-exported agent fixtures after running full extraction pipeline. Skills arrays now populated."],
+        [
+            "gh",
+            "pr",
+            "create",
+            "--title",
+            "Update fixtures: re-export after full extraction run",
+            "--base",
+            "development",
+            "--body",
+            "Re-exported agent fixtures after running full extraction pipeline. Skills arrays now populated.",
+        ],
         cwd=str(_REPO_ROOT),
         check=True,
     )

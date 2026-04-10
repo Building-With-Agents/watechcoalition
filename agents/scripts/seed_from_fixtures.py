@@ -142,9 +142,7 @@ def _map_to_normalized_job(obj: dict[str, Any], *, seq: int) -> NormalizedJob:
     requirements = requirements.strip() or None if isinstance(requirements, str) else None
 
     responsibilities = obj.get("responsibilities")
-    responsibilities = (
-        responsibilities.strip() or None if isinstance(responsibilities, str) else None
-    )
+    responsibilities = responsibilities.strip() or None if isinstance(responsibilities, str) else None
 
     raw_jid = int(posting_id) if isinstance(posting_id, int) else None
     if isinstance(posting_id, str) and posting_id.isdigit():
@@ -176,9 +174,7 @@ def _map_to_normalized_job(obj: dict[str, Any], *, seq: int) -> NormalizedJob:
 
 def _pad_to_count(records: list[dict[str, Any]], n: int) -> list[dict[str, Any]]:
     if not records:
-        raise SystemExit(
-            "No job-like records (title+company) found in the selected fixture files."
-        )
+        raise SystemExit("No job-like records (title+company) found in the selected fixture files.")
     if len(records) >= n:
         return records[:n]
     padded: list[dict[str, Any]] = []

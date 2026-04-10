@@ -526,15 +526,52 @@ class TestSkillsExtractionAgent:
         )
         with (
             patch.dict(os.environ, {"SKILLS_EXTRACTION_PARALLEL": "1"}, clear=False),
-            patch("agents.skills_extraction.agent.extract_context", return_value=([], {"tokens_used": 0, "cost_usd": 0.0, "latency_ms": 5, "extraction_failed": False, "extraction_metadata": {}})),
-            patch("agents.skills_extraction.agent.extract_tasks_async", new=AsyncMock(side_effect=RuntimeError("tasks boom"))),
+            patch(
+                "agents.skills_extraction.agent.extract_context",
+                return_value=(
+                    [],
+                    {
+                        "tokens_used": 0,
+                        "cost_usd": 0.0,
+                        "latency_ms": 5,
+                        "extraction_failed": False,
+                        "extraction_metadata": {},
+                    },
+                ),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_tasks_async",
+                new=AsyncMock(side_effect=RuntimeError("tasks boom")),
+            ),
             patch(
                 "agents.skills_extraction.agent.extract_responsibilities_async",
-                new=AsyncMock(return_value=([], {"extraction_failed": False, "tokens_used": 7, "cost_usd": 0.001, "latency_ms": 50, "extraction_metadata": {}})),
+                new=AsyncMock(
+                    return_value=(
+                        [],
+                        {
+                            "extraction_failed": False,
+                            "tokens_used": 7,
+                            "cost_usd": 0.001,
+                            "latency_ms": 50,
+                            "extraction_metadata": {},
+                        },
+                    )
+                ),
             ),
             patch(
                 "agents.skills_extraction.agent.extract_skills_no_taxonomy_async",
-                new=AsyncMock(return_value=([skill], {"extraction_failed": False, "tokens_used": 13, "cost_usd": 0.002, "latency_ms": 70, "model": "skills-deployment"})),
+                new=AsyncMock(
+                    return_value=(
+                        [skill],
+                        {
+                            "extraction_failed": False,
+                            "tokens_used": 13,
+                            "cost_usd": 0.002,
+                            "latency_ms": 70,
+                            "model": "skills-deployment",
+                        },
+                    )
+                ),
             ),
             patch(
                 "agents.skills_extraction.agent.resolve_taxonomy_batch",
@@ -587,10 +624,65 @@ class TestSkillsExtractionAgent:
 
         with (
             patch.dict(os.environ, {"SKILLS_EXTRACTION_PARALLEL": "1"}, clear=False),
-            patch("agents.skills_extraction.agent.extract_context", return_value=([], {"tokens_used": 0, "cost_usd": 0.0, "latency_ms": 40, "extraction_failed": False, "extraction_metadata": {}})),
-            patch("agents.skills_extraction.agent.extract_tasks_async", new=AsyncMock(return_value=([], {"extraction_failed": False, "tokens_used": 10, "cost_usd": 0.001, "latency_ms": 200, "extraction_metadata": {}}))),
-            patch("agents.skills_extraction.agent.extract_responsibilities_async", new=AsyncMock(return_value=([], {"extraction_failed": False, "tokens_used": 11, "cost_usd": 0.001, "latency_ms": 300, "extraction_metadata": {}}))),
-            patch("agents.skills_extraction.agent.extract_skills_no_taxonomy_async", new=AsyncMock(return_value=([], {"extraction_failed": False, "tokens_used": 12, "cost_usd": 0.001, "latency_ms": 500, "extraction_metadata": {}, "model": "skills-deployment"}))),
+            patch(
+                "agents.skills_extraction.agent.extract_context",
+                return_value=(
+                    [],
+                    {
+                        "tokens_used": 0,
+                        "cost_usd": 0.0,
+                        "latency_ms": 40,
+                        "extraction_failed": False,
+                        "extraction_metadata": {},
+                    },
+                ),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_tasks_async",
+                new=AsyncMock(
+                    return_value=(
+                        [],
+                        {
+                            "extraction_failed": False,
+                            "tokens_used": 10,
+                            "cost_usd": 0.001,
+                            "latency_ms": 200,
+                            "extraction_metadata": {},
+                        },
+                    )
+                ),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_responsibilities_async",
+                new=AsyncMock(
+                    return_value=(
+                        [],
+                        {
+                            "extraction_failed": False,
+                            "tokens_used": 11,
+                            "cost_usd": 0.001,
+                            "latency_ms": 300,
+                            "extraction_metadata": {},
+                        },
+                    )
+                ),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_skills_no_taxonomy_async",
+                new=AsyncMock(
+                    return_value=(
+                        [],
+                        {
+                            "extraction_failed": False,
+                            "tokens_used": 12,
+                            "cost_usd": 0.001,
+                            "latency_ms": 500,
+                            "extraction_metadata": {},
+                            "model": "skills-deployment",
+                        },
+                    )
+                ),
+            ),
             patch(
                 "agents.skills_extraction.agent.time.perf_counter",
                 side_effect=[10.0, 10.01, 10.02, 10.27, 10.28, 10.29],
@@ -626,12 +718,57 @@ class TestSkillsExtractionAgent:
         agent = SkillsExtractionAgent()
         with (
             patch.dict(os.environ, {"SKILLS_EXTRACTION_PARALLEL": "0"}, clear=False),
-            patch("agents.skills_extraction.agent.extract_tasks", return_value=([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0, "latency_ms": 10, "extraction_metadata": {}})) as m_tasks,
-            patch("agents.skills_extraction.agent.extract_responsibilities", return_value=([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0, "latency_ms": 10, "extraction_metadata": {}})) as m_resp,
-            patch("agents.skills_extraction.agent.extract_skills_no_taxonomy", return_value=([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0, "latency_ms": 10, "extraction_metadata": {}})) as m_skills,
-            patch("agents.skills_extraction.agent.extract_tasks_async", new=AsyncMock(side_effect=AssertionError("async path should not run"))),
-            patch("agents.skills_extraction.agent.extract_responsibilities_async", new=AsyncMock(side_effect=AssertionError("async path should not run"))),
-            patch("agents.skills_extraction.agent.extract_skills_no_taxonomy_async", new=AsyncMock(side_effect=AssertionError("async path should not run"))),
+            patch(
+                "agents.skills_extraction.agent.extract_tasks",
+                return_value=(
+                    [],
+                    {
+                        "extraction_failed": False,
+                        "tokens_used": 0,
+                        "cost_usd": 0.0,
+                        "latency_ms": 10,
+                        "extraction_metadata": {},
+                    },
+                ),
+            ) as m_tasks,
+            patch(
+                "agents.skills_extraction.agent.extract_responsibilities",
+                return_value=(
+                    [],
+                    {
+                        "extraction_failed": False,
+                        "tokens_used": 0,
+                        "cost_usd": 0.0,
+                        "latency_ms": 10,
+                        "extraction_metadata": {},
+                    },
+                ),
+            ) as m_resp,
+            patch(
+                "agents.skills_extraction.agent.extract_skills_no_taxonomy",
+                return_value=(
+                    [],
+                    {
+                        "extraction_failed": False,
+                        "tokens_used": 0,
+                        "cost_usd": 0.0,
+                        "latency_ms": 10,
+                        "extraction_metadata": {},
+                    },
+                ),
+            ) as m_skills,
+            patch(
+                "agents.skills_extraction.agent.extract_tasks_async",
+                new=AsyncMock(side_effect=AssertionError("async path should not run")),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_responsibilities_async",
+                new=AsyncMock(side_effect=AssertionError("async path should not run")),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_skills_no_taxonomy_async",
+                new=AsyncMock(side_effect=AssertionError("async path should not run")),
+            ),
         ):
             out = agent.process(event)
 
@@ -800,12 +937,57 @@ class TestSkillsExtractionAgent:
         with (
             patch.dict(os.environ, {"SKILLS_EXTRACTION_PARALLEL": "1"}, clear=False),
             patch("agents.skills_extraction.agent.asyncio.get_running_loop", return_value=object()),
-            patch("agents.skills_extraction.agent.extract_tasks", return_value=([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0, "latency_ms": 10, "extraction_metadata": {}})) as m_tasks,
-            patch("agents.skills_extraction.agent.extract_responsibilities", return_value=([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0, "latency_ms": 10, "extraction_metadata": {}})) as m_resp,
-            patch("agents.skills_extraction.agent.extract_skills_no_taxonomy", return_value=([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0, "latency_ms": 10, "extraction_metadata": {}})) as m_skills,
-            patch("agents.skills_extraction.agent.extract_tasks_async", new=AsyncMock(side_effect=AssertionError("async path should not run"))),
-            patch("agents.skills_extraction.agent.extract_responsibilities_async", new=AsyncMock(side_effect=AssertionError("async path should not run"))),
-            patch("agents.skills_extraction.agent.extract_skills_no_taxonomy_async", new=AsyncMock(side_effect=AssertionError("async path should not run"))),
+            patch(
+                "agents.skills_extraction.agent.extract_tasks",
+                return_value=(
+                    [],
+                    {
+                        "extraction_failed": False,
+                        "tokens_used": 0,
+                        "cost_usd": 0.0,
+                        "latency_ms": 10,
+                        "extraction_metadata": {},
+                    },
+                ),
+            ) as m_tasks,
+            patch(
+                "agents.skills_extraction.agent.extract_responsibilities",
+                return_value=(
+                    [],
+                    {
+                        "extraction_failed": False,
+                        "tokens_used": 0,
+                        "cost_usd": 0.0,
+                        "latency_ms": 10,
+                        "extraction_metadata": {},
+                    },
+                ),
+            ) as m_resp,
+            patch(
+                "agents.skills_extraction.agent.extract_skills_no_taxonomy",
+                return_value=(
+                    [],
+                    {
+                        "extraction_failed": False,
+                        "tokens_used": 0,
+                        "cost_usd": 0.0,
+                        "latency_ms": 10,
+                        "extraction_metadata": {},
+                    },
+                ),
+            ) as m_skills,
+            patch(
+                "agents.skills_extraction.agent.extract_tasks_async",
+                new=AsyncMock(side_effect=AssertionError("async path should not run")),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_responsibilities_async",
+                new=AsyncMock(side_effect=AssertionError("async path should not run")),
+            ),
+            patch(
+                "agents.skills_extraction.agent.extract_skills_no_taxonomy_async",
+                new=AsyncMock(side_effect=AssertionError("async path should not run")),
+            ),
         ):
             out = agent.process(event)
 
@@ -1038,15 +1220,49 @@ class TestSkillsExtractionAgent:
             ),
             patch(
                 "agents.skills_extraction.agent.extract_tasks_async",
-                new=AsyncMock(return_value=([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0, "latency_ms": 10, "extraction_metadata": {}})),
+                new=AsyncMock(
+                    return_value=(
+                        [],
+                        {
+                            "extraction_failed": False,
+                            "tokens_used": 0,
+                            "cost_usd": 0.0,
+                            "latency_ms": 10,
+                            "extraction_metadata": {},
+                        },
+                    )
+                ),
             ) as m_tasks,
             patch(
                 "agents.skills_extraction.agent.extract_responsibilities_async",
-                new=AsyncMock(return_value=([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0, "latency_ms": 10, "extraction_metadata": {}})),
+                new=AsyncMock(
+                    return_value=(
+                        [],
+                        {
+                            "extraction_failed": False,
+                            "tokens_used": 0,
+                            "cost_usd": 0.0,
+                            "latency_ms": 10,
+                            "extraction_metadata": {},
+                        },
+                    )
+                ),
             ) as m_resp,
             patch(
                 "agents.skills_extraction.agent.extract_skills_no_taxonomy_async",
-                new=AsyncMock(return_value=([], {"extraction_failed": False, "tokens_used": 0, "cost_usd": 0.0, "latency_ms": 10, "extraction_metadata": {}, "model": "skills-deployment"})),
+                new=AsyncMock(
+                    return_value=(
+                        [],
+                        {
+                            "extraction_failed": False,
+                            "tokens_used": 0,
+                            "cost_usd": 0.0,
+                            "latency_ms": 10,
+                            "extraction_metadata": {},
+                            "model": "skills-deployment",
+                        },
+                    )
+                ),
             ) as m_skills,
         ):
             out = agent.process(

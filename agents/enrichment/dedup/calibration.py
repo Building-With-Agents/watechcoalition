@@ -294,7 +294,9 @@ def generate_calibration_report(
 ) -> CalibrationReport:
     """Embed labeled cases once and evaluate them across multiple thresholds."""
     effective_default = dedup_cosine_threshold() if default_threshold is None else default_threshold
-    report_thresholds = parse_thresholds(None if thresholds is None else ",".join(str(t) for t in thresholds), default_threshold=effective_default)
+    report_thresholds = parse_thresholds(
+        None if thresholds is None else ",".join(str(t) for t in thresholds), default_threshold=effective_default
+    )
     vectors_by_text = _embed_unique_texts(
         cases,
         audit_agent_name=audit_agent_name,

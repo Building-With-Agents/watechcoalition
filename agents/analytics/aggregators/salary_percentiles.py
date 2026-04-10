@@ -77,9 +77,7 @@ def compute_salary_percentiles(
             group_col=group_col,
             allowed=tuple(_ALLOWED_GROUP_COL_SQL),
         )
-        raise ValueError(
-            f"group_col must be one of {sorted(_ALLOWED_GROUP_COL_SQL)}; got {group_col!r}"
-        )
+        raise ValueError(f"group_col must be one of {sorted(_ALLOWED_GROUP_COL_SQL)}; got {group_col!r}")
 
     bind = session.get_bind()
     if bind is None or bind.dialect.name != "postgresql":

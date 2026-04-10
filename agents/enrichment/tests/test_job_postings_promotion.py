@@ -604,6 +604,4 @@ def test_apply_enrichment_sector_id_is_in_params_base_for_all_tiers() -> None:
 
         assert out is True, f"Expected True for tier={tier}"
         _stmt, params = session.execute.call_args_list[1][0]
-        assert params.get("sector_id") == sector_uuid, (
-            f"sector_id missing or wrong for tier={tier}"
-        )
+        assert params.get("sector_id") == sector_uuid, f"sector_id missing or wrong for tier={tier}"

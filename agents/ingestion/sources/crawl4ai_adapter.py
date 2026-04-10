@@ -178,9 +178,7 @@ class Crawl4AIAdapter(SourceAdapter):
                     config=CrawlerRunConfig(cache_mode=CacheMode.BYPASS),
                 )
         except UnicodeEncodeError as e:
-            raise Crawl4AIAdapterError(
-                f"Crawl4AI encoding error (likely Windows cp1252 vs Unicode): {e}"
-            ) from e
+            raise Crawl4AIAdapterError(f"Crawl4AI encoding error (likely Windows cp1252 vs Unicode): {e}") from e
         except Exception as e:
             raise Crawl4AIAdapterError(f"Crawl4AI init/fetch failed: {e}") from e
 

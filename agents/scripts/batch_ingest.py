@@ -127,9 +127,9 @@ def main() -> None:
     )
 
     if args.dry_run:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("Batch Ingestion Plan")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         for i, q in enumerate(queries, 1):
             pages = q.get("pages", 10)
             print(f"\n  [{i}] {q['name']}")
@@ -138,7 +138,7 @@ def main() -> None:
         print(f"\n  Total: {total_requests} API requests")
         print(f"  Keys available: {len(api_keys)} x {budget_per_key} = {len(api_keys) * budget_per_key} budget")
         print(f"  Delay: {args.delay}s between queries")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")
         return
 
     # Late imports
@@ -235,7 +235,9 @@ def main() -> None:
         total_requests=total_requests_used,
         keys_used=current_key_idx + 1,
     )
-    print(f"\nDone. {total_staged} records staged. {total_requests_used} API requests used across {current_key_idx + 1} key(s).")
+    print(
+        f"\nDone. {total_staged} records staged. {total_requests_used} API requests used across {current_key_idx + 1} key(s)."
+    )
     print("Run processing loop: python agents/scripts/run_processing_loop.py")
 
 

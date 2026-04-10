@@ -172,9 +172,7 @@ def export_table(
     rows = cur.fetchall()
 
     # NULL out PII FK columns
-    pii_fk_cols = {
-        c.lower() for c in PII_FK_COLUMNS.get(table_name, [])
-    }
+    pii_fk_cols = {c.lower() for c in PII_FK_COLUMNS.get(table_name, [])}
 
     records: list[dict] = []
     for row in rows:

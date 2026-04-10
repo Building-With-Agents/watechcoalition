@@ -511,12 +511,14 @@ class EnrichmentAgent(BaseAgent):
         _input_str: str | None = None
         if tracer:
             with suppress(Exception):
-                _input_str = _json.dumps({
-                    "event_type": payload.get("event_type", "SkillsExtracted"),
-                    "correlation_id": correlation_id,
-                    "batch_id": batch_id,
-                    "record_count": len(rows),
-                })
+                _input_str = _json.dumps(
+                    {
+                        "event_type": payload.get("event_type", "SkillsExtracted"),
+                        "correlation_id": correlation_id,
+                        "batch_id": batch_id,
+                        "record_count": len(rows),
+                    }
+                )
 
         span_ctx = (
             tracer.start_span(
@@ -565,11 +567,13 @@ class EnrichmentAgent(BaseAgent):
                     tracer.start_span(
                         f"enrich/{job_title}",
                         correlation_id=correlation_id,
-                        input=_json.dumps({
-                            "title": posting.get("title", ""),
-                            "company": posting.get("company", ""),
-                            "normalized_job_id": posting.get("normalized_job_id"),
-                        }),
+                        input=_json.dumps(
+                            {
+                                "title": posting.get("title", ""),
+                                "company": posting.get("company", ""),
+                                "normalized_job_id": posting.get("normalized_job_id"),
+                            }
+                        ),
                         metadata={"idx": idx + 1, "total": len(rows)},
                     )
                     if tracer
@@ -668,24 +672,29 @@ class EnrichmentAgent(BaseAgent):
             if tracer:
                 with suppress(Exception):
                     total_processed = enriched_count + spam_rejected_count + flagged_for_review_count
-                    tracer.log_event("enrichment_complete", {
-                        "output": _json.dumps({
-                            "event_type": "RecordEnriched",
-                            "batch_id": batch_id,
+                    tracer.log_event(
+                        "enrichment_complete",
+                        {
+                            "output": _json.dumps(
+                                {
+                                    "event_type": "RecordEnriched",
+                                    "batch_id": batch_id,
+                                    "enriched_count": enriched_count,
+                                    "spam_rejected_count": spam_rejected_count,
+                                    "flagged_for_review_count": flagged_for_review_count,
+                                    "soc_classified_count": soc_classified_count,
+                                    "naics_classified_count": naics_classified_count,
+                                    "duplicate_count": duplicate_count,
+                                }
+                            ),
                             "enriched_count": enriched_count,
                             "spam_rejected_count": spam_rejected_count,
                             "flagged_for_review_count": flagged_for_review_count,
                             "soc_classified_count": soc_classified_count,
                             "naics_classified_count": naics_classified_count,
-                            "duplicate_count": duplicate_count,
-                        }),
-                        "enriched_count": enriched_count,
-                        "spam_rejected_count": spam_rejected_count,
-                        "flagged_for_review_count": flagged_for_review_count,
-                        "soc_classified_count": soc_classified_count,
-                        "naics_classified_count": naics_classified_count,
-                        "total_processed": total_processed,
-                    })
+                            "total_processed": total_processed,
+                        },
+                    )
 
         return build_record_enriched_event(
             correlation_id=correlation_id,

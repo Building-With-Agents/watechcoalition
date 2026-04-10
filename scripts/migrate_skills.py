@@ -28,7 +28,9 @@ MSSQL_CONN = (
 PG_DSN = os.getenv(
     "PYTHON_DATABASE_URL",
     "postgresql+psycopg2://postgres:YourComplex!P4ssw0rd@localhost:5432/talent_finder",
-).replace("postgresql+psycopg2://", "postgresql://")  # psycopg2 uses plain postgresql://
+).replace(
+    "postgresql+psycopg2://", "postgresql://"
+)  # psycopg2 uses plain postgresql://
 
 
 def migrate_skills():
@@ -78,7 +80,9 @@ def migrate_skills():
                 # pgvector expects '[0.1,0.2,...]' format with standard decimal notation
                 embedding_pg = "[" + ",".join(f"{float(v):.10f}" for v in floats) + "]"
             except Exception as e:
-                print(f"  WARNING: Could not convert embedding for skill {skill_id}: {e}")
+                print(
+                    f"  WARNING: Could not convert embedding for skill {skill_id}: {e}"
+                )
                 embedding_pg = None
 
         cur_pg.execute(
@@ -88,8 +92,16 @@ def migrate_skills():
                  skill_type, embedding, updatedat, createdat)
             VALUES (%s, %s, %s, %s, %s, %s::vector, %s, %s)
             """,
-            (skill_id, subcat_id, name, info_url, skill_type,
-             embedding_pg, updated_at, created_at),
+            (
+                skill_id,
+                subcat_id,
+                name,
+                info_url,
+                skill_type,
+                embedding_pg,
+                updated_at,
+                created_at,
+            ),
         )
         inserted += 1
 

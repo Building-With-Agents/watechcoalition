@@ -101,19 +101,20 @@ def render_selectable_job_text(job: dict, bridge_key: str = "span_bridge") -> No
             f'style="background:{bg}; border-left:3px solid {border}; '
             f'padding:10px; border-radius:6px; margin-bottom:8px;">'
             f'<div style="margin-bottom:4px;">'
-            f'<strong>&#x1F4CC; {label}</strong> '
+            f"<strong>&#x1F4CC; {label}</strong> "
             f'<code style="font-size:0.7em; opacity:0.7;">{field_source}</code>'
-            f'</div>'
+            f"</div>"
             f'<div class="gt-section-text" data-field="{field_source}" '
             f'style="white-space:pre-wrap; font-size:0.85em; line-height:1.5; '
             f'cursor:text; user-select:text;">'
-            f'{escaped}</div></div>'
+            f"{escaped}</div></div>"
         )
 
     st.markdown(all_html, unsafe_allow_html=True)
 
     # Inject mouseup listener that writes to the hidden Streamlit text_input
-    components.html("""
+    components.html(
+        """
     <script>
     (function() {
         var parentDoc = window.parent.document;
@@ -213,4 +214,7 @@ def render_selectable_job_text(job: dict, bridge_key: str = "span_bridge") -> No
         }
     })();
     </script>
-    """, height=0, width=0)
+    """,
+        height=0,
+        width=0,
+    )

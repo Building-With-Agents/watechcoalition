@@ -272,17 +272,13 @@ def _sync_serial_sequence(engine: Engine, *, table_name: str, column_name: str =
     try:
         with engine.begin() as conn:
             seq_name = conn.execute(
-                text(
-                    "SELECT pg_get_serial_sequence(CAST(:table_name AS text), CAST(:column_name AS text))"
-                ),
+                text("SELECT pg_get_serial_sequence(CAST(:table_name AS text), CAST(:column_name AS text))"),
                 {"table_name": f"dbo.{table_name}", "column_name": column_name},
             ).scalar()
             if not seq_name:
                 return
 
-            max_value = conn.execute(
-                text(f'SELECT COALESCE(MAX("{column_name}"), 0) FROM dbo.{table_name}')
-            ).scalar()
+            max_value = conn.execute(text(f'SELECT COALESCE(MAX("{column_name}"), 0) FROM dbo.{table_name}')).scalar()
             max_value = int(max_value or 0)
             if max_value > 0:
                 conn.execute(

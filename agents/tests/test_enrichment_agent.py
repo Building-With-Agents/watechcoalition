@@ -1168,9 +1168,7 @@ class TestEnrichmentAgentBatchRecords:
         assert len(enriched_from_record) == 1
         assert enriched_from_record[0]["posting_id"] == 903
 
-    def test_batch_e2e_enrichment_degraded_classifier_unavailable(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_batch_e2e_enrichment_degraded_classifier_unavailable(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Batch path: spam classifier degraded on a row emits EnrichmentDegraded and still returns RecordEnriched."""
         monkeypatch.setenv(
             "PYTHON_DATABASE_URL",
@@ -1258,4 +1256,3 @@ class TestEnrichmentAgentBatchRecords:
         assert alert.payload["classifier"] == "spam_preview"
         assert alert.payload["reason"] == "spam_classifier_unavailable"
         assert alert.payload["extraction_note"] == "empty_extraction"
-

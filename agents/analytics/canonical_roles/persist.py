@@ -106,9 +106,9 @@ def persist_clustering_result(
     desired_role_ids = set(cluster_id_to_role_id.values())
     existing_roles = {
         row.role_id: row
-        for row in session.execute(
-            select(CanonicalRole).where(CanonicalRole.role_id.in_(desired_role_ids))
-        ).scalars().all()
+        for row in session.execute(select(CanonicalRole).where(CanonicalRole.role_id.in_(desired_role_ids)))
+        .scalars()
+        .all()
     }
 
     now = datetime.now(timezone.utc)

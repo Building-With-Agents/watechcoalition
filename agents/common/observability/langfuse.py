@@ -155,9 +155,7 @@ class LangfuseTracer(TracerBase):
     def log_event(self, event_name: str, payload: dict[str, Any], *, level: str = "info") -> None:
         # Record in-memory for test assertions
         if self._traces:
-            self._traces[-1]["events"].append(
-                {"event": event_name, "level": level, **payload}
-            )
+            self._traces[-1]["events"].append({"event": event_name, "level": level, **payload})
 
         obs = self._observation_stack[-1] if self._observation_stack else None
         if obs is None:
@@ -193,9 +191,7 @@ class LangfuseTracer(TracerBase):
     def increment_counter(self, metric: str, *, value: int = 1) -> None:
         # Record in-memory for test assertions
         if self._traces:
-            self._traces[-1]["events"].append(
-                {"event": "counter", "metric": metric, "value": value}
-            )
+            self._traces[-1]["events"].append({"event": "counter", "metric": metric, "value": value})
 
         obs = self._observation_stack[-1] if self._observation_stack else None
         if obs is None:
@@ -207,8 +203,7 @@ class LangfuseTracer(TracerBase):
         # Record in-memory for test assertions
         if self._traces:
             self._traces[-1]["events"].append(
-                {"event": "error_recorded", "error": str(error),
-                 "error_type": type(error).__name__, **(context or {})}
+                {"event": "error_recorded", "error": str(error), "error_type": type(error).__name__, **(context or {})}
             )
             self._traces[-1]["status"] = "error"
 

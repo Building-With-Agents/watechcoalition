@@ -7,6 +7,7 @@ the llm_audit_log table is queryable for cost audit.
 Usage (from repo root, venv active):
     python agents/scripts/verify_angel_fabian_eval.py
 """
+
 # ruff: noqa: T201
 from __future__ import annotations
 
@@ -74,11 +75,7 @@ def main() -> int:
         from agents.common.data_store.database import session_scope
 
         with session_scope() as session:
-            row = session.execute(
-                sa_text(
-                    "SELECT COUNT(*) AS cnt FROM dbo.llm_audit_log"
-                )
-            ).fetchone()
+            row = session.execute(sa_text("SELECT COUNT(*) AS cnt FROM dbo.llm_audit_log")).fetchone()
             count = row[0] if row else 0
             print(f"  llm_audit_log rows: {count}")
             if count > 0:
@@ -102,9 +99,9 @@ def main() -> int:
     # ------------------------------------------------------------------
     # Summary
     # ------------------------------------------------------------------
-    print(f"\n{'='*40}")
+    print(f"\n{'=' * 40}")
     print(f"Angel + Fabian verification: {passed} passed, {failed} failed")
-    print(f"{'='*40}\n")
+    print(f"{'=' * 40}\n")
     return 1 if failed > 0 else 0
 
 

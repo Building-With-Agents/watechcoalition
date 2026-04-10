@@ -178,9 +178,7 @@ def test_log_extraction_event_uses_fresh_session_per_concurrent_call() -> None:
     assert len(created_sessions) == 12
     assert len({id(session) for session in created_sessions}) == 12
     assert len(exited_sessions) == 12
-    assert {id(session) for session in exited_sessions} == {
-        id(session) for session in created_sessions
-    }
+    assert {id(session) for session in exited_sessions} == {id(session) for session in created_sessions}
     for session in created_sessions:
         session.add.assert_called_once()
         session.close.assert_called_once()

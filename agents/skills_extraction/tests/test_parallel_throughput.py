@@ -95,6 +95,7 @@ async def _slow_skills_invoke(*_args, **_kwargs):
 # Intra-job parallelism: three LLM calls per job run concurrently
 # ---------------------------------------------------------------------------
 
+
 def test_intra_job_parallel_faster_than_serial() -> None:
     """Three intra-job LLM calls (tasks + responsibilities + skills) must run
     concurrently: wall time ≈ 1× latency, not 3× latency."""
@@ -153,8 +154,7 @@ def test_intra_job_parallel_faster_than_serial() -> None:
     serial_lower_bound = 3 * _SIMULATED_LLM_LATENCY_S
     parallel_upper_bound = _SIMULATED_LLM_LATENCY_S * 2.2
     assert max_in_flight == 3, (
-        f"Expected all three intra-job LLM calls to overlap, but observed only "
-        f"{max_in_flight} concurrent call(s)."
+        f"Expected all three intra-job LLM calls to overlap, but observed only {max_in_flight} concurrent call(s)."
     )
     assert elapsed < parallel_upper_bound, (
         f"Intra-job parallel took {elapsed:.3f}s — expected < {parallel_upper_bound:.3f}s "
@@ -166,6 +166,7 @@ def test_intra_job_parallel_faster_than_serial() -> None:
 # ---------------------------------------------------------------------------
 # Inter-job parallelism: N jobs processed concurrently
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("n_jobs,concurrency", [(5, 5), (10, 5)])
 def test_inter_job_parallel_faster_than_serial(n_jobs: int, concurrency: int) -> None:
@@ -207,6 +208,7 @@ def test_inter_job_parallel_faster_than_serial(n_jobs: int, concurrency: int) ->
     serial_lower_bound = n_jobs * _SIMULATED_LLM_LATENCY_S
     # Parallel upper bound: ceil(n_jobs / concurrency) × per-job latency × 2.5 (CI jitter).
     import math
+
     parallel_expected = math.ceil(n_jobs / concurrency) * _SIMULATED_LLM_LATENCY_S * 2.5
 
     assert elapsed < serial_lower_bound, (
@@ -222,6 +224,7 @@ def test_inter_job_parallel_faster_than_serial(n_jobs: int, concurrency: int) ->
 # ---------------------------------------------------------------------------
 # Partial failure: one failed dimension does not block others
 # ---------------------------------------------------------------------------
+
 
 def test_failed_dimension_does_not_block_other_dimensions() -> None:
     """A 429 on tasks must not prevent responsibilities and skills from returning results."""

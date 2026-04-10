@@ -177,19 +177,14 @@ def main() -> int:
     print("[2/4] Building JobRecord payloads (normalized_job_id = normalized_jobs.id)...")
     for i, row in enumerate(rows, 1):
         jr = _normalized_job_to_job_record(row)
-        print(
-            f"      [{i}/{n}] id={row.id} title={jr.title[:50]!r}… "
-            f"company={jr.company[:30]!r}…"
-        )
+        print(f"      [{i}/{n}] id={row.id} title={jr.title[:50]!r}… company={jr.company[:30]!r}…")
 
     agent = SkillsExtractionAgent()
     batch_id = f"populate-week5-{uuid.uuid4().hex[:8]}"
     correlation = f"populate-week5-{uuid.uuid4()}"
 
     if use_batch:
-        print(
-            f"[3/4] Running SkillsExtractionAgent.process() once (batched, batch_id={batch_id})…"
-        )
+        print(f"[3/4] Running SkillsExtractionAgent.process() once (batched, batch_id={batch_id})…")
         records = [_normalized_job_to_inline_payload(r) for r in rows]
         event = _build_event(
             correlation_id=correlation,
@@ -217,9 +212,7 @@ def main() -> int:
         found = 0
         for nid in ids:
             row = session.scalars(
-                select(ExtractedIntelligence).where(
-                    ExtractedIntelligence.normalized_job_id == nid
-                )
+                select(ExtractedIntelligence).where(ExtractedIntelligence.normalized_job_id == nid)
             ).first()
             if row:
                 found += 1

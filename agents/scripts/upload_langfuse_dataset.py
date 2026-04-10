@@ -39,7 +39,8 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description="Upload ground truth to Langfuse dataset")
     parser.add_argument(
-        "--dataset-name", default=DEFAULT_DATASET_NAME,
+        "--dataset-name",
+        default=DEFAULT_DATASET_NAME,
         help=f"Langfuse dataset name (default: {DEFAULT_DATASET_NAME})",
     )
     args = parser.parse_args()

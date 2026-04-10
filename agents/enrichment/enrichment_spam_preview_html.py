@@ -29,9 +29,9 @@ def render_enrichment_spam_preview_html(
     subtitle: str = "",
 ) -> str:
     """*rows*: each dict has ``db`` (SQL row mapping), ``enriched`` (RecordEnriched payload)."""
-    sub = f"<p class=\"sub\">{_esc(subtitle)}</p>" if subtitle else ""
+    sub = f'<p class="sub">{_esc(subtitle)}</p>' if subtitle else ""
     legend = (
-        "<p class=\"legend\"><strong>Spam tiers:</strong> clean → would write <code>is_spam=false</code>; "
+        '<p class="legend"><strong>Spam tiers:</strong> clean → would write <code>is_spam=false</code>; '
         "flagged → <code>is_spam</code> NULL with <code>spam_score</code>; rejected → would not write to "
         "<code>job_postings</code>. uncertain = classifier degraded.</p>"
     )

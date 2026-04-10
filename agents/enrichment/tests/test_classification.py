@@ -79,9 +79,7 @@ def test_classify_seniority_junior() -> None:
 
 
 def test_classify_seniority_intern_flag() -> None:
-    assert (
-        classify_seniority("Software Engineer", None, None, is_internship=True) == "intern"
-    )
+    assert classify_seniority("Software Engineer", None, None, is_internship=True) == "intern"
 
 
 def test_classify_seniority_mid_ic_fallback() -> None:
@@ -93,9 +91,7 @@ def test_classify_seniority_unknown() -> None:
 
 
 def test_classify_seniority_description_fallback() -> None:
-    assert (
-        classify_seniority("Specialist", "This is a senior level role.", None) == "senior"
-    )
+    assert classify_seniority("Specialist", "This is a senior level role.", None) == "senior"
 
 
 def test_flatten_extraction_json_nested() -> None:

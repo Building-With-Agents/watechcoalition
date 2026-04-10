@@ -31,6 +31,7 @@ def _make_select_result(rows: list[dict]) -> MagicMock:
 # Existing tests
 # ---------------------------------------------------------------------------
 
+
 def test_compute_sector_summary_weekly_non_postgresql_raises() -> None:
     session = MagicMock()
     bind = MagicMock()
@@ -99,6 +100,7 @@ def test_compute_sector_summary_weekly_null_p50() -> None:
 # New tests
 # ---------------------------------------------------------------------------
 
+
 def test_compute_sector_summary_weekly_empty_result() -> None:
     """No sectors met the 5-posting minimum — should return [] without crashing."""
     session = _pg_session()
@@ -114,9 +116,21 @@ def test_compute_sector_summary_weekly_multiple_sectors() -> None:
     """Three sectors returned → three ORM objects, one per sector."""
     session = _pg_session()
     db_rows = [
-        {"sector_label": "Healthcare", "posting_count": 20, "employer_count": 8, "p50_salary": 90_000.0, "top_skills": ["nursing"]},
-        {"sector_label": "Finance",    "posting_count": 15, "employer_count": 6, "p50_salary": 120_000.0, "top_skills": ["excel", "python"]},
-        {"sector_label": "Retail",     "posting_count": 7,  "employer_count": 4, "p50_salary": 45_000.0, "top_skills": []},
+        {
+            "sector_label": "Healthcare",
+            "posting_count": 20,
+            "employer_count": 8,
+            "p50_salary": 90_000.0,
+            "top_skills": ["nursing"],
+        },
+        {
+            "sector_label": "Finance",
+            "posting_count": 15,
+            "employer_count": 6,
+            "p50_salary": 120_000.0,
+            "top_skills": ["excel", "python"],
+        },
+        {"sector_label": "Retail", "posting_count": 7, "employer_count": 4, "p50_salary": 45_000.0, "top_skills": []},
     ]
     session.execute.side_effect = [MagicMock(), _make_select_result(db_rows)]
 
@@ -141,9 +155,7 @@ def test_compute_sector_summary_weekly_delete_before_insert() -> None:
     compute_sector_summary_weekly(session, ws)
 
     first_call_arg = session.execute.call_args_list[0][0][0]
-    assert isinstance(first_call_arg, Delete), (
-        "First execute() call must be the DELETE statement, not the SELECT"
-    )
+    assert isinstance(first_call_arg, Delete), "First execute() call must be the DELETE statement, not the SELECT"
 
 
 def test_compute_sector_summary_weekly_week_boundary_params() -> None:
@@ -183,7 +195,13 @@ def test_compute_sector_summary_weekly_null_top_skills() -> None:
     """If the DB driver returns None for top_skills, the ORM object gets an empty list."""
     session = _pg_session()
     db_rows = [
-        {"sector_label": "Logistics", "posting_count": 9, "employer_count": 3, "p50_salary": 60_000.0, "top_skills": None},
+        {
+            "sector_label": "Logistics",
+            "posting_count": 9,
+            "employer_count": 3,
+            "p50_salary": 60_000.0,
+            "top_skills": None,
+        },
     ]
     session.execute.side_effect = [MagicMock(), _make_select_result(db_rows)]
 
@@ -196,7 +214,13 @@ def test_compute_sector_summary_weekly_top_skills_iterable() -> None:
     """top_skills as a non-list iterable (e.g. tuple) is still flattened to a plain list."""
     session = _pg_session()
     db_rows = [
-        {"sector_label": "Energy", "posting_count": 11, "employer_count": 5, "p50_salary": 95_000.0, "top_skills": ("python", "sql", "spark")},
+        {
+            "sector_label": "Energy",
+            "posting_count": 11,
+            "employer_count": 5,
+            "p50_salary": 95_000.0,
+            "top_skills": ("python", "sql", "spark"),
+        },
     ]
     session.execute.side_effect = [MagicMock(), _make_select_result(db_rows)]
 

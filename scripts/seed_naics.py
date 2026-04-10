@@ -126,7 +126,11 @@ def _resolve_excel_columns(df: pd.DataFrame) -> tuple[str, str, str | None]:
         )
     if title_col is None:
         title_col = next(
-            (c for c in cols if "title" in str(c).lower() and "naics" in str(c).lower()),
+            (
+                c
+                for c in cols
+                if "title" in str(c).lower() and "naics" in str(c).lower()
+            ),
             None,
         )
     if seq_col is None:

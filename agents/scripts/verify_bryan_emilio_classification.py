@@ -7,6 +7,7 @@ sample job data. No Azure LLM needed -- classification is deterministic
 Usage (from repo root, venv active):
     python agents/scripts/verify_bryan_emilio_classification.py
 """
+
 # ruff: noqa: T201
 from __future__ import annotations
 
@@ -98,7 +99,7 @@ def main() -> int:
             seniority_pass += 1
         else:
             seniority_fail += 1
-        print(f"  {status}: \"{tc['title']}\" -> {result} (expected: {expected})")
+        print(f'  {status}: "{tc["title"]}" -> {result} (expected: {expected})')
 
     if seniority_pass >= 3:
         print(f"  PASS: classify_seniority -- {seniority_pass}/{len(TEST_CASES)} correct")
@@ -117,9 +118,7 @@ def main() -> int:
         from agents.common.data_store.database import session_scope
 
         with session_scope() as session:
-            tech_rows = session.execute(
-                sa_text("SELECT id, title FROM dbo.technology_areas ORDER BY title")
-            ).fetchall()
+            tech_rows = session.execute(sa_text("SELECT id, title FROM dbo.technology_areas ORDER BY title")).fetchall()
             sector_rows = session.execute(
                 sa_text("SELECT industry_sector_id, sector_title FROM dbo.industry_sectors ORDER BY sector_title")
             ).fetchall()
@@ -134,7 +133,7 @@ def main() -> int:
         for tc in TEST_CASES[:3]:
             corpus = f"{tc['title']} {tc['description']}"
             role = classify_role(tc["title"], corpus, tech_areas, sectors)
-            print(f"  \"{tc['title']}\" -> role: {role}")
+            print(f'  "{tc["title"]}" -> role: {role}')
 
         print("  PASS: classify_role runs without error")
         passed += 1
@@ -158,7 +157,7 @@ def main() -> int:
                 sectors if "sectors" in dir() else [],
                 is_internship=tc.get("is_internship", False),
             )
-            print(f"  \"{tc['title']}\" -> role={role}, seniority={seniority}")
+            print(f'  "{tc["title"]}" -> role={role}, seniority={seniority}')
 
         print("  PASS: classify_job runs without error")
         passed += 1
@@ -169,9 +168,9 @@ def main() -> int:
     # ------------------------------------------------------------------
     # Summary
     # ------------------------------------------------------------------
-    print(f"\n{'='*40}")
+    print(f"\n{'=' * 40}")
     print(f"Bryan + Emilio verification: {passed} passed, {failed} failed")
-    print(f"{'='*40}\n")
+    print(f"{'=' * 40}\n")
     return 1 if failed > 0 else 0
 
 

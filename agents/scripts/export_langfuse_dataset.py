@@ -35,11 +35,13 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description="Export Langfuse dataset to ground truth JSON")
     parser.add_argument(
-        "--dataset-name", default=DEFAULT_DATASET_NAME,
+        "--dataset-name",
+        default=DEFAULT_DATASET_NAME,
         help=f"Langfuse dataset name (default: {DEFAULT_DATASET_NAME})",
     )
     parser.add_argument(
-        "--output", default=str(DEFAULT_OUTPUT),
+        "--output",
+        default=str(DEFAULT_OUTPUT),
         help=f"Output JSON path (default: {DEFAULT_OUTPUT})",
     )
     args = parser.parse_args()

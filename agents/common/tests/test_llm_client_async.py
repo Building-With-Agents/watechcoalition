@@ -118,9 +118,7 @@ def test_ainvoke_structured_extraction_llm_timeout_returns_failed_metadata() -> 
 def test_ainvoke_structured_extraction_llm_returns_rate_limit_metadata() -> None:
     """429 responses should expose the retry-after metadata used by async callers."""
     chain = MagicMock()
-    chain.ainvoke = AsyncMock(
-        side_effect=RuntimeError("Rate limit reached. Retry after 11 seconds.")
-    )
+    chain.ainvoke = AsyncMock(side_effect=RuntimeError("Rate limit reached. Retry after 11 seconds."))
     llm = MagicMock()
     llm.with_structured_output.return_value = chain
     azure_cls = MagicMock(return_value=llm)

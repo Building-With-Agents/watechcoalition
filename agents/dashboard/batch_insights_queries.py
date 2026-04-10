@@ -66,9 +66,7 @@ def fetch_batch_insights_bundle() -> dict[str, Any]:
         use_norm = _norm_count(engine) > 0
     except Exception as exc:
         if is_undefined_relation_error(exc):
-            _append_soft(
-                "`dbo.normalized_jobs` is missing. Falling back to raw ingested jobs when available."
-            )
+            _append_soft("`dbo.normalized_jobs` is missing. Falling back to raw ingested jobs when available.")
             use_norm = False
         else:
             raise
@@ -86,9 +84,7 @@ def fetch_batch_insights_bundle() -> dict[str, Any]:
         total = int(pd.read_sql(f"SELECT COUNT(*)::bigint AS c FROM {table}", engine).iloc[0]["c"])
     except Exception as exc:
         if is_undefined_relation_error(exc):
-            _append_soft(
-                f"Primary jobs table `{table}` is missing. Batch Insights aggregates are unavailable."
-            )
+            _append_soft(f"Primary jobs table `{table}` is missing. Batch Insights aggregates are unavailable.")
             degraded = _batch_insights_degraded_bundle(soft)
             return degraded
         raise
@@ -252,12 +248,8 @@ def fetch_batch_insights_bundle() -> dict[str, Any]:
     if raw_status_warn:
         _append_soft(raw_status_warn)
 
-    recent_cols_norm = (
-        "title, company, source, city, state_province, employment_type, experience_level"
-    )
-    recent_cols_raw = (
-        "title, company, source, city, state AS state_province, employment_type, experience_level"
-    )
+    recent_cols_norm = "title, company, source, city, state_province, employment_type, experience_level"
+    recent_cols_raw = "title, company, source, city, state AS state_province, employment_type, experience_level"
     recent_sql = (
         f"""
         SELECT {recent_cols_norm}
@@ -277,9 +269,7 @@ def fetch_batch_insights_bundle() -> dict[str, Any]:
         out["recent_df"] = pd.read_sql(recent_sql, engine)
     except Exception as exc:
         if is_undefined_relation_error(exc):
-            _append_soft(
-                f"Recent-records query failed: `{table}` is not available for the sample table."
-            )
+            _append_soft(f"Recent-records query failed: `{table}` is not available for the sample table.")
             out["recent_df"] = pd.DataFrame()
         else:
             raise
@@ -313,11 +303,7 @@ def series_from_salary_histogram(
     for _, r in rows.iterrows():
         wb = int(r["bin"])
         cnt = int(r["cnt"])
-        start = (
-            float(r["bin_start"])
-            if "bin_start" in r and pd.notna(r["bin_start"])
-            else lo + (wb - 1) * width
-        )
+        start = float(r["bin_start"]) if "bin_start" in r and pd.notna(r["bin_start"]) else lo + (wb - 1) * width
         if wb < 1:
             lab = f"< ${lo:,.0f}"
         elif wb > n_buckets:

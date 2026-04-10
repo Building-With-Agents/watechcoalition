@@ -54,47 +54,47 @@ INSERT_ORDER: list[list[str]] = [
         "socc_2018",
         "otherprioritypopulations",
         "ragrecordmanager",
-        "self_assessments",          # FK → pathways, but pathways is tier 0 below
+        "self_assessments",  # FK → pathways, but pathways is tier 0 below
     ],
     # Tier 1: Depend only on tier-0 tables
     [
-        "pathways",                  # no FK to seeded tables
-        "skills",                    # FK → skill_subcategories
-        "edu_providers",             # FK → users (PII, NULLed)
-        "companies",                 # FK → industry_sectors, users (NULLed)
-        "training",                  # no FK to seeded tables
-        "programs",                  # no FK to seeded tables
+        "pathways",  # no FK to seeded tables
+        "skills",  # FK → skill_subcategories
+        "edu_providers",  # FK → users (PII, NULLed)
+        "companies",  # FK → industry_sectors, users (NULLed)
+        "training",  # no FK to seeded tables
+        "programs",  # no FK to seeded tables
     ],
     # Tier 2: Depend on tier-0 and tier-1 tables
     [
-        "jobrole",                   # FK → pathways
-        "company_addresses",         # FK → companies, postal_geo_data
-        "edu_addresses",             # FK → edu_providers, postal_geo_data
-        "company_social_links",      # FK → companies, social_media_platforms
-        "company_testimonials",      # FK → companies
-        "cip_to_socc_map",           # FK → cip, socc
-        "socc2018_to_cip2020_map",   # FK → cip, socc_2018
-        "pathway_has_skills",        # FK → pathways, skills
-        "pathway_subcategories",     # FK → pathways
-        "pathwaytraining",           # FK → pathways, training
-        "provider_programs",         # FK → edu_providers, programs, cip
-        "providertestimonials",      # FK → edu_providers
-        "sa_questions",              # FK → self_assessments
+        "jobrole",  # FK → pathways
+        "company_addresses",  # FK → companies, postal_geo_data
+        "edu_addresses",  # FK → edu_providers, postal_geo_data
+        "company_social_links",  # FK → companies, social_media_platforms
+        "company_testimonials",  # FK → companies
+        "cip_to_socc_map",  # FK → cip, socc
+        "socc2018_to_cip2020_map",  # FK → cip, socc_2018
+        "pathway_has_skills",  # FK → pathways, skills
+        "pathway_subcategories",  # FK → pathways
+        "pathwaytraining",  # FK → pathways, training
+        "provider_programs",  # FK → edu_providers, programs, cip
+        "providertestimonials",  # FK → edu_providers
+        "sa_questions",  # FK → self_assessments
         "proj_based_tech_assessments",  # FK → pathways
     ],
     # Tier 3: Depend on tier-2 tables
     [
-        "jobroleskill",              # FK → jobrole, skills
-        "jobroletraining",           # FK → jobrole, training
-        "job_postings",              # FK → companies, company_addresses, industry_sectors, technology_areas
-        "events",                    # FK → users (NULLed)
+        "jobroleskill",  # FK → jobrole, skills
+        "jobroletraining",  # FK → jobrole, training
+        "job_postings",  # FK → companies, company_addresses, industry_sectors, technology_areas
+        "events",  # FK → users (NULLed)
         "provider_program_has_skills",  # FK → provider_programs, skills
-        "sa_possible_answers",       # FK → sa_questions
-        "_otherprioritypopulations", # FK → otherprioritypopulations (+ PII table)
+        "sa_possible_answers",  # FK → sa_questions
+        "_otherprioritypopulations",  # FK → otherprioritypopulations (+ PII table)
     ],
     # Tier 4: Depend on tier-3 tables
     [
-        "_jobpostingskills",         # FK → job_postings, skills
+        "_jobpostingskills",  # FK → job_postings, skills
     ],
 ]
 
@@ -109,12 +109,16 @@ def get_pg_connection() -> psycopg2.extensions.connection:
     dsn = dsn.replace("postgresql+psycopg2://", "postgresql://")
     if not dsn:
         print("ERROR: Set PYTHON_DATABASE_URL in your .env file")
-        print("Example: postgresql+psycopg2://postgres:YourPassword@localhost:5432/talent_finder")
+        print(
+            "Example: postgresql+psycopg2://postgres:YourPassword@localhost:5432/talent_finder"
+        )
         sys.exit(1)
     return psycopg2.connect(dsn)
 
 
-def wait_for_postgres(max_retries: int = 30, delay: float = 2.0) -> psycopg2.extensions.connection:
+def wait_for_postgres(
+    max_retries: int = 30, delay: float = 2.0
+) -> psycopg2.extensions.connection:
     """Wait for PostgreSQL to be ready, retrying on connection failure."""
     for attempt in range(1, max_retries + 1):
         try:
@@ -172,7 +176,9 @@ def get_dbo_tables(cur: psycopg2.extensions.cursor) -> list[str]:
     return [row[0] for row in cur.fetchall()]
 
 
-def disable_fk_triggers(conn: psycopg2.extensions.connection, tables: list[str]) -> None:
+def disable_fk_triggers(
+    conn: psycopg2.extensions.connection, tables: list[str]
+) -> None:
     """Disable all triggers (FK enforcement) on dbo tables."""
     cur = conn.cursor()
     for table in tables:
@@ -272,7 +278,9 @@ def insert_records(
 
     try:
         psycopg2.extras.execute_values(
-            cur, insert_sql, values_list,
+            cur,
+            insert_sql,
+            values_list,
             template=values_template,
             page_size=1000,
         )
@@ -334,13 +342,17 @@ def seed_database() -> None:
     # ── Load metadata ─────────────────────────────────────────────
     if not METADATA_FILE.exists():
         print(f"ERROR: Metadata file not found: {METADATA_FILE}")
-        print("Run the export script first: python scripts/pg-seed-data/export_pg_fixtures.py")
+        print(
+            "Run the export script first: python scripts/pg-seed-data/export_pg_fixtures.py"
+        )
         sys.exit(1)
 
     metadata = json.loads(METADATA_FILE.read_text(encoding="utf-8"))
     expected_counts: dict[str, int] = metadata["counts"]
-    print(f"\nFixtures: {len(expected_counts)} tables, "
-          f"{sum(expected_counts.values()):,} total rows expected")
+    print(
+        f"\nFixtures: {len(expected_counts)} tables, "
+        f"{sum(expected_counts.values()):,} total rows expected"
+    )
 
     # ── Connect (with retry for Docker startup) ────────────────────
     print("\nConnecting to PostgreSQL...")
@@ -372,10 +384,7 @@ def seed_database() -> None:
         ordered_tables.extend(tier)
 
     # Append any tables in metadata but not in explicit order
-    remaining = [
-        t for t in expected_counts
-        if t not in set(ordered_tables)
-    ]
+    remaining = [t for t in expected_counts if t not in set(ordered_tables)]
     ordered_tables.extend(sorted(remaining))
 
     total_inserted = 0
@@ -425,9 +434,7 @@ def seed_database() -> None:
         cur.execute(f'SELECT count(*) FROM "dbo"."{table_name}"')
         actual = cur.fetchone()[0]
         if actual != expected:
-            mismatches.append(
-                f"  {table_name}: expected {expected:,}, got {actual:,}"
-            )
+            mismatches.append(f"  {table_name}: expected {expected:,}, got {actual:,}")
     cur.close()
     conn.close()
 
@@ -436,8 +443,10 @@ def seed_database() -> None:
     tables_with_data = sum(1 for _, (i, e) in table_results.items() if e > 0)
 
     print(f"\n{'=' * 60}")
-    print(f"Seed complete: {total_inserted:,} / {total_expected:,} rows "
-          f"across {tables_with_data} tables")
+    print(
+        f"Seed complete: {total_inserted:,} / {total_expected:,} rows "
+        f"across {tables_with_data} tables"
+    )
 
     if mismatches:
         print(f"\nWARNING: {len(mismatches)} count mismatches:")
@@ -453,6 +462,7 @@ def seed_database() -> None:
         sys.path.insert(0, _seed_dir)
     try:
         from seed_agent_data import seed_all
+
         seed_all()
     except Exception as exc:
         print(f"  Agent pipeline seed failed: {exc}")

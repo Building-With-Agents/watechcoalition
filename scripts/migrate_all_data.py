@@ -156,14 +156,11 @@ def migrate():
     # ── Disable FK constraints in PostgreSQL ─────────────────────
     print("Disabling FK constraints in PostgreSQL...")
     pg_cur.execute(
-        "SELECT tablename, schemaname FROM pg_tables "
-        "WHERE schemaname = 'dbo'"
+        "SELECT tablename, schemaname FROM pg_tables WHERE schemaname = 'dbo'"
     )
     pg_tables = pg_cur.fetchall()
     for tbl, sch in pg_tables:
-        pg_cur.execute(
-            f'ALTER TABLE "{sch}"."{tbl}" DISABLE TRIGGER ALL'
-        )
+        pg_cur.execute(f'ALTER TABLE "{sch}"."{tbl}" DISABLE TRIGGER ALL')
     pg.commit()
 
     # ── Truncate all PostgreSQL tables ───────────────────────────
@@ -188,9 +185,7 @@ def migrate():
         col_types = {c[0]: c[1] for c in columns}
 
         # Check if this table has an embedding column (vector type)
-        has_embedding = any(
-            cn.lower() == "embedding" for cn in col_names
-        )
+        has_embedding = any(cn.lower() == "embedding" for cn in col_names)
 
         # Read all rows from MSSQL
         col_list = ", ".join(f"[{c}]" for c in col_names)
@@ -241,12 +236,12 @@ def migrate():
                 pg.rollback()
                 # Re-disable triggers after rollback
                 for tbl2, sch2 in pg_tables:
-                    pg_cur.execute(
-                        f'ALTER TABLE "{sch2}"."{tbl2}" DISABLE TRIGGER ALL'
-                    )
+                    pg_cur.execute(f'ALTER TABLE "{sch2}"."{tbl2}" DISABLE TRIGGER ALL')
                 pg.commit()
                 errors.append((f"{schema}.{table}", str(e)[:200]))
-                print(f"  {schema}.{table}: ERROR on row {row_count + 1}: {str(e)[:100]}")
+                print(
+                    f"  {schema}.{table}: ERROR on row {row_count + 1}: {str(e)[:100]}"
+                )
                 break
 
         if row_count > 0:
@@ -258,9 +253,7 @@ def migrate():
     # ── Re-enable FK constraints ─────────────────────────────────
     print("\nRe-enabling FK constraints...")
     for tbl, sch in pg_tables:
-        pg_cur.execute(
-            f'ALTER TABLE "{sch}"."{tbl}" ENABLE TRIGGER ALL'
-        )
+        pg_cur.execute(f'ALTER TABLE "{sch}"."{tbl}" ENABLE TRIGGER ALL')
     pg.commit()
 
     # ── Summary ──────────────────────────────────────────────────

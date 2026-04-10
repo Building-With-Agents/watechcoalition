@@ -866,17 +866,20 @@ def resolve_taxonomy_batch(labels: list[str]) -> list[TaxonomyResult]:
             coverage = (n - fallback) / n if n else 0.0
             resolved = [r for r in results if r.resolution_step < 6]
             avg_conf = sum(r.confidence for r in resolved) / len(resolved) if resolved else 0.0
-            tracer.log_event("taxonomy_resolution", {
-                "total_labels": n,
-                "taxonomy_coverage": round(coverage, 4),
-                "avg_confidence": round(avg_conf, 4),
-                "step1_genai": stats.get(1, 0),
-                "step2_exact_esco": stats.get(2, 0),
-                "step3_normalized_esco": stats.get(3, 0),
-                "step4_embedding": stats.get(4, 0),
-                "step5_onet": stats.get(5, 0),
-                "step6_raw_fallback": fallback,
-            })
+            tracer.log_event(
+                "taxonomy_resolution",
+                {
+                    "total_labels": n,
+                    "taxonomy_coverage": round(coverage, 4),
+                    "avg_confidence": round(avg_conf, 4),
+                    "step1_genai": stats.get(1, 0),
+                    "step2_exact_esco": stats.get(2, 0),
+                    "step3_normalized_esco": stats.get(3, 0),
+                    "step4_embedding": stats.get(4, 0),
+                    "step5_onet": stats.get(5, 0),
+                    "step6_raw_fallback": fallback,
+                },
+            )
 
     return results
 

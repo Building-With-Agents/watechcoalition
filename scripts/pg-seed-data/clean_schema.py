@@ -39,8 +39,7 @@ def clean_schema() -> None:
     lines = [
         ln
         for ln in lines
-        if not re.match(r"^SET\s", ln)
-        and not re.match(r"^SELECT pg_catalog\.", ln)
+        if not re.match(r"^SET\s", ln) and not re.match(r"^SELECT pg_catalog\.", ln)
     ]
 
     cleaned = "\n".join(lines)

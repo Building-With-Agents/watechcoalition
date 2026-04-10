@@ -10,6 +10,7 @@ Usage (from repo root, venv active):
     # Skip LLM calls (test context only -- no Azure needed):
     python agents/scripts/verify_fatima_nestor_extractors.py --context-only
 """
+
 # ruff: noqa: T201
 from __future__ import annotations
 
@@ -99,9 +100,9 @@ def main() -> int:
         failed += 1
 
     if args.context_only:
-        print(f"\n{'='*40}")
+        print(f"\n{'=' * 40}")
         print(f"Fatima + Nestor verification (context only): {passed} passed, {failed} failed")
-        print(f"{'='*40}\n")
+        print(f"{'=' * 40}\n")
         return 1 if failed > 0 else 0
 
     # ------------------------------------------------------------------
@@ -151,9 +152,9 @@ def main() -> int:
     # ------------------------------------------------------------------
     # Summary
     # ------------------------------------------------------------------
-    print(f"\n{'='*40}")
+    print(f"\n{'=' * 40}")
     print(f"Fatima + Nestor verification: {passed} passed, {failed} failed")
-    print(f"{'='*40}\n")
+    print(f"{'=' * 40}\n")
     return 1 if failed > 0 else 0
 
 

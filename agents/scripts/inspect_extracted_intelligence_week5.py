@@ -77,11 +77,7 @@ def main() -> int:
         return 1
 
     with session_scope() as session:
-        stmt = (
-            select(ExtractedIntelligence)
-            .order_by(ExtractedIntelligence.extracted_at.desc())
-            .limit(args.limit)
-        )
+        stmt = select(ExtractedIntelligence).order_by(ExtractedIntelligence.extracted_at.desc()).limit(args.limit)
         rows = list(session.scalars(stmt).all())
 
     if not rows:

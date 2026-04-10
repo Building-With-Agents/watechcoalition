@@ -196,9 +196,7 @@ def run_report(since: datetime | None, baseline_per_record: float | None) -> str
         lines.append(f"- Baseline (input): **{_fmt_money(baseline_per_record)}** / successful EI row")
         lines.append(f"- Actual: **{_fmt_money(per_record)}** / successful EI row")
         lines.append(f"- Delta: **{delta:+.1f}%** — {flag}")
-        lines.append(
-            "_Baseline source should be documented (e.g. eval run from `prompt_iteration_log.md`)._\n"
-        )
+        lines.append("_Baseline source should be documented (e.g. eval run from `prompt_iteration_log.md`)._\n")
 
     return "\n".join(lines)
 

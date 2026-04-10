@@ -33,9 +33,7 @@ def build_dedup_text(
     """
     title = strip_boilerplate_noise((job_title or "").strip())
     company = strip_boilerplate_noise((company_name or "").strip())
-    body = strip_boilerplate_noise((requirements_or_description or "").strip())[
-        :_DEDUP_REQUIREMENTS_MAX_CHARS
-    ]
+    body = strip_boilerplate_noise((requirements_or_description or "").strip())[:_DEDUP_REQUIREMENTS_MAX_CHARS]
     parts = [p for p in (title, company, body) if p]
     return " | ".join(parts)
 

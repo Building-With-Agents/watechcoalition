@@ -39,9 +39,10 @@ def test_check_minimum_data_false_and_exact_log_message(monkeypatch: pytest.Monk
     result.scalar_one.return_value = 12
     session.execute.return_value = result
 
-    with patch("agents.analytics.agent._job_postings_table_for_guard", return_value=jp), patch(
-        "agents.analytics.agent.log"
-    ) as log_mock:
+    with (
+        patch("agents.analytics.agent._job_postings_table_for_guard", return_value=jp),
+        patch("agents.analytics.agent.log") as log_mock,
+    ):
         ok = check_minimum_data(session, datetime(2025, 1, 1, tzinfo=timezone.utc))
 
     assert ok is False

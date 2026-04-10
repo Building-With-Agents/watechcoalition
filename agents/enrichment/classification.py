@@ -332,9 +332,7 @@ def classify_job(
     """Return ``(role_classification, seniority)``."""
     corpus = build_job_corpus(job_title, job_description, extraction)
     role = classify_role(job_title, corpus, technology_areas, industry_sectors)
-    seniority = classify_seniority(
-        job_title, job_description, extraction, is_internship=is_internship
-    )
+    seniority = classify_seniority(job_title, job_description, extraction, is_internship=is_internship)
     return role, seniority
 
 
@@ -404,9 +402,7 @@ async def build_job_profile_with_soc(
     soc_code_override: str | None = None,
 ) -> JobProfile:
     job_profile = JobProfile.model_validate(job_record.model_dump())
-    await enrich_job_profile_soc(
-        job_profile, session, llm, soc_code_override=soc_code_override
-    )
+    await enrich_job_profile_soc(job_profile, session, llm, soc_code_override=soc_code_override)
     return job_profile
 
 
@@ -417,8 +413,4 @@ def enrich_job_profile_soc_blocking(
     *,
     soc_code_override: str | None = None,
 ) -> None:
-    asyncio.run(
-        enrich_job_profile_soc(
-            job_profile, session, llm, soc_code_override=soc_code_override
-        )
-    )
+    asyncio.run(enrich_job_profile_soc(job_profile, session, llm, soc_code_override=soc_code_override))

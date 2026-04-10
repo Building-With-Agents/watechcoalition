@@ -46,9 +46,7 @@ _STATE_ABB = {
 }
 
 
-def _format_location_from_eval(
-    city: object, state: object, title: str | None = None
-) -> str:
+def _format_location_from_eval(city: object, state: object, title: str | None = None) -> str:
     """Match fatima_context_temp formatting from eval city/state (and title fallback)."""
     c = city if city is not None else None
     s = state if state is not None else None
@@ -75,6 +73,7 @@ def _format_location_from_eval(
 
 def _normalize_location(a: str, b: str) -> bool:
     """Loose equality: lower case, collapse spaces, map full state names."""
+
     def norm(x: str) -> str:
         t = " ".join(x.strip().lower().split())
         for full, ab in _STATE_ABB.items():
@@ -106,7 +105,11 @@ def _work_mode_from_signals(signals: list[ContextSignal]) -> str | None:
         )
     ):
         return "Remote"
-    return f"— (unmapped: {remote_sigs[0].value[:48]}…)" if len(remote_sigs[0].value) > 48 else f"— (unmapped: {remote_sigs[0].value})"
+    return (
+        f"— (unmapped: {remote_sigs[0].value[:48]}…)"
+        if len(remote_sigs[0].value) > 48
+        else f"— (unmapped: {remote_sigs[0].value})"
+    )
 
 
 def _work_mode_code(signals: list[ContextSignal], job: JobRecord) -> str:
@@ -162,13 +165,9 @@ def _seniority_heuristic(title: str, blob: str) -> str:
         return "Lead"
     if "manager" in tl and re.search(r"leadership|grc manager", tl):
         return "Lead"
-    if re.search(r"\b5\+\s*years|\b7\+\s*years", bl) and re.search(
-        r"engineer|scientist", tl
-    ):
+    if re.search(r"\b5\+\s*years|\b7\+\s*years", bl) and re.search(r"engineer|scientist", tl):
         return "Senior"
-    if "senior individual contributor" in bl or re.search(
-        r"\bsenior\s+individual\s+contributor\b", bl
-    ):
+    if "senior individual contributor" in bl or re.search(r"\bsenior\s+individual\s+contributor\b", bl):
         return "Senior"
     if re.search(r"\b>\s*1[01]\s*years|1[01]\+\s*years|\b1[12]\s*\+\s*years", bl):
         return "Senior"
@@ -210,7 +209,9 @@ def main() -> int:
     mismatch_rows: list[tuple[str, str, str, str]] = []
 
     print("Notes:")
-    print("  • Work mode (code) = remote_policy signals, else city=Remote -> Remote, else title (…Remote…) -> Remote, else On-site.")
+    print(
+        "  • Work mode (code) = remote_policy signals, else city=Remote -> Remote, else title (…Remote…) -> Remote, else On-site."
+    )
     print("  • Location (code) = city/state from eval JSON (same basis as fatima labels).")
     print("  • Seniority (code) = title/body heuristic (extract_context has no seniority).")
     print()
@@ -228,10 +229,8 @@ def main() -> int:
         job = _eval_to_job(rec)
         signals, _meta = extract_context(job)
         code_wm = _work_mode_code(signals, job)
-        code_loc = _format_location_from_eval(
-            rec.get("city"), rec.get("state"), rec.get("title")
-        )
-        blob = f"{rec.get('title','')}\n{rec.get('description','')}"
+        code_loc = _format_location_from_eval(rec.get("city"), rec.get("state"), rec.get("title"))
+        blob = f"{rec.get('title', '')}\n{rec.get('description', '')}"
         code_sen = _seniority_heuristic(rec.get("title") or "", blob)
 
         loc_ok = _normalize_location(man_loc, code_loc)
@@ -253,9 +252,7 @@ def main() -> int:
                 parts.append(f"work_mode manual={man_wm!r} code={code_wm!r}")
             if not sen_ok:
                 parts.append(f"seniority manual={man_sen!r} code={code_sen!r}")
-            mismatch_rows.append(
-                (ext, man_loc, man_wm, man_sen, code_loc, code_wm, code_sen, " | ".join(parts))
-            )
+            mismatch_rows.append((ext, man_loc, man_wm, man_sen, code_loc, code_wm, code_sen, " | ".join(parts)))
 
     n = len(eval_rows)
     print(f"Accuracy (n={n}):")
@@ -263,7 +260,9 @@ def main() -> int:
     print(f"  Work mode: {wm_hits}/{n}  ({100.0 * wm_hits / n:.1f}%)")
     print(f"  Seniority: {sen_hits}/{n}  ({100.0 * sen_hits / n:.1f}%)")
     print()
-    print("Mismatches (external_id | manual location | manual WM | manual sen | code location | code WM | code sen | diff)")
+    print(
+        "Mismatches (external_id | manual location | manual WM | manual sen | code location | code WM | code sen | diff)"
+    )
     print("-" * 120)
     if not mismatch_rows:
         print("(none — all records match on all three dimensions)")

@@ -210,9 +210,7 @@ def _resolve_or_create_company(session: Session, company_name: str) -> str:
         )
         return placeholder_id
 
-    row = session.execute(
-        _RESOLVE_COMPANY_BY_NAME_SQL, {"company_name": company_name}
-    ).mappings().first()
+    row = session.execute(_RESOLVE_COMPANY_BY_NAME_SQL, {"company_name": company_name}).mappings().first()
     if row:
         return str(row["company_id"])
 
@@ -229,13 +227,9 @@ def _resolve_or_create_company(session: Session, company_name: str) -> str:
     return new_id
 
 
-def _insert_job_posting_from_normalized(
-    session: Session, normalized_job_id: int
-) -> dict[str, Any] | None:
+def _insert_job_posting_from_normalized(session: Session, normalized_job_id: int) -> dict[str, Any] | None:
     """Create a new job_postings row from normalized_jobs data. Returns resolved dict or None."""
-    nj = session.execute(
-        _LOAD_NORMALIZED_JOB_SQL, {"nj_id": normalized_job_id}
-    ).mappings().first()
+    nj = session.execute(_LOAD_NORMALIZED_JOB_SQL, {"nj_id": normalized_job_id}).mappings().first()
     if not nj:
         log.warning(
             "enrichment_promotion_normalized_job_not_found",
@@ -333,15 +327,11 @@ def derive_enrichment_output_fields(resolved_job_posting: dict[str, Any] | None)
 
     temporal_period = classify_temporal_period(resolved_job_posting.get("date_posted"))
     borderplex_subregion = classify_borderplex_subregion(
-        city=resolved_job_posting.get("city")
-        if isinstance(resolved_job_posting.get("city"), str)
-        else None,
+        city=resolved_job_posting.get("city") if isinstance(resolved_job_posting.get("city"), str) else None,
         state_province=resolved_job_posting.get("state_province")
         if isinstance(resolved_job_posting.get("state_province"), str)
         else None,
-        country=resolved_job_posting.get("country")
-        if isinstance(resolved_job_posting.get("country"), str)
-        else None,
+        country=resolved_job_posting.get("country") if isinstance(resolved_job_posting.get("country"), str) else None,
         is_remote=resolved_job_posting.get("is_remote")
         if isinstance(resolved_job_posting.get("is_remote"), bool)
         else None,
@@ -356,21 +346,29 @@ def derive_enrichment_output_fields(resolved_job_posting: dict[str, Any] | None)
 
 
 def _load_existing_fuzzy_dedup_state(session: Session, job_posting_id: str) -> dict[str, Any]:
-    row = session.execute(
-        _LOAD_FUZZY_DEDUP_STATE_SQL,
-        {"job_posting_id": job_posting_id},
-    ).mappings().first()
+    row = (
+        session.execute(
+            _LOAD_FUZZY_DEDUP_STATE_SQL,
+            {"job_posting_id": job_posting_id},
+        )
+        .mappings()
+        .first()
+    )
     return dict(row) if row else {}
 
 
 def _cluster_member_ids(session: Session, cluster_id: str, *, exclude_job_posting_id: str) -> list[str]:
-    rows = session.execute(
-        _LIST_CLUSTER_MEMBER_IDS_SQL,
-        {
-            "duplicate_cluster_id": cluster_id,
-            "job_posting_id": exclude_job_posting_id,
-        },
-    ).mappings().all()
+    rows = (
+        session.execute(
+            _LIST_CLUSTER_MEMBER_IDS_SQL,
+            {
+                "duplicate_cluster_id": cluster_id,
+                "job_posting_id": exclude_job_posting_id,
+            },
+        )
+        .mappings()
+        .all()
+    )
     return [str(row["job_posting_id"]) for row in rows]
 
 
@@ -570,16 +568,10 @@ def apply_enrichment_to_job_postings(
 
     naics_raw = record_enriched_payload.get("naics_code")
     # Match employer-style sentinels: never persist SQL NULL when NAICS is missing/uncertain.
-    naics_code = (
-        naics_raw.strip()
-        if isinstance(naics_raw, str) and naics_raw.strip()
-        else "unknown"
-    )
+    naics_code = naics_raw.strip() if isinstance(naics_raw, str) and naics_raw.strip() else "unknown"
 
     soc_raw = record_enriched_payload.get("soc_code")
-    soc_code: str | None = (
-        soc_raw.strip() if isinstance(soc_raw, str) and soc_raw.strip() else None
-    )
+    soc_code: str | None = soc_raw.strip() if isinstance(soc_raw, str) and soc_raw.strip() else None
 
     role_classification = record_enriched_payload.get("role_classification")
     sector_id = resolve_sector(role_classification, session)
@@ -592,9 +584,7 @@ def apply_enrichment_to_job_postings(
             _SELECT_EMPLOYER_PROFILE_ID_SQL,
             {"company_id": cid},
         ).scalar_one_or_none()
-        employer_profile_id_param = (
-            row if row is not None else upsert_employer_profile_by_company_id(session, cid, em)
-        )
+        employer_profile_id_param = row if row is not None else upsert_employer_profile_by_company_id(session, cid, em)
 
     params_base: dict[str, Any] = {
         "job_posting_id": str(job_posting_id),

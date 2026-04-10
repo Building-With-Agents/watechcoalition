@@ -55,10 +55,14 @@ def compute_geo_demand_weekly(session: Session, week_start: date) -> list[GeoDem
         """
     )
 
-    rows = session.execute(
-        sql,
-        {"week_start_ts": ws, "week_end_ts": we},
-    ).mappings().all()
+    rows = (
+        session.execute(
+            sql,
+            {"week_start_ts": ws, "week_end_ts": we},
+        )
+        .mappings()
+        .all()
+    )
 
     result: list[GeoDemandWeekly] = []
     for row in rows:

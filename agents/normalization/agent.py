@@ -462,11 +462,14 @@ class NormalizationAgent(AgentBase):
                         "normalization_status": out_payload.get("normalization_status", "success"),
                     }
 
-                    tracer.log_event("normalization_complete", {
-                        "input_tokens": len(raw_records),  # proxy: 1 per record
-                        "output_tokens": normalized,
-                        "output": _json.dumps(output_summary),
-                    })
+                    tracer.log_event(
+                        "normalization_complete",
+                        {
+                            "input_tokens": len(raw_records),  # proxy: 1 per record
+                            "output_tokens": normalized,
+                            "output": _json.dumps(output_summary),
+                        },
+                    )
 
                     # Update the span input with raw records summary
                     obs = tracer._observation_stack[-1] if tracer._observation_stack else None

@@ -84,12 +84,40 @@ except Exception:  # pragma: no cover - SQLAlchemy may not be available in all e
     create_engine = None
     text = None
 
-DIGITAL_COLLECTION_FILENAME = Path(__file__).parent.parent / "agents" / "skills_extraction" / "taxonomy" / "digitalSkillsCollection_en.csv"
-SKILLS_FILENAME = Path(__file__).parent.parent / "agents" / "skills_extraction" / "taxonomy" / "skills_en.csv"
-DEFAULT_OUTPUT_JSON = Path(__file__).parent.parent / "agents" / "skills_extraction" / "taxonomy" / "esco_digital_skills.json"
-DEFAULT_METADATA_JSON = Path(__file__).parent.parent / "agents" / "skills_extraction" / "taxonomy" / "esco_source_metadata.json"
+DIGITAL_COLLECTION_FILENAME = (
+    Path(__file__).parent.parent
+    / "agents"
+    / "skills_extraction"
+    / "taxonomy"
+    / "digitalSkillsCollection_en.csv"
+)
+SKILLS_FILENAME = (
+    Path(__file__).parent.parent
+    / "agents"
+    / "skills_extraction"
+    / "taxonomy"
+    / "skills_en.csv"
+)
+DEFAULT_OUTPUT_JSON = (
+    Path(__file__).parent.parent
+    / "agents"
+    / "skills_extraction"
+    / "taxonomy"
+    / "esco_digital_skills.json"
+)
+DEFAULT_METADATA_JSON = (
+    Path(__file__).parent.parent
+    / "agents"
+    / "skills_extraction"
+    / "taxonomy"
+    / "esco_source_metadata.json"
+)
 DEFAULT_GENAI_EXTENSION_JSON = (
-    Path(__file__).parent.parent / "agents" / "skills_extraction" / "taxonomy" / "genai_extension.json"
+    Path(__file__).parent.parent
+    / "agents"
+    / "skills_extraction"
+    / "taxonomy"
+    / "genai_extension.json"
 )
 DEFAULT_DB_TABLE = "esco_digital_skills"
 
@@ -190,6 +218,7 @@ INCLUDE_LABEL_KEYWORDS = {
     "web",
 }
 
+
 @dataclass(frozen=True)
 class Config:
     download_url: str | None
@@ -204,7 +233,9 @@ class Config:
 
 
 def parse_args() -> Config:
-    parser = argparse.ArgumentParser(description="Seed ESCO digital skills from English CSV data")
+    parser = argparse.ArgumentParser(
+        description="Seed ESCO digital skills from English CSV data"
+    )
     parser.add_argument(
         "--download-url",
         default=None,
@@ -263,7 +294,9 @@ def parse_args() -> Config:
 
     return Config(
         download_url=args.download_url,
-        extracted_dir=Path(args.extracted_dir).expanduser().resolve() if args.extracted_dir else None,
+        extracted_dir=Path(args.extracted_dir).expanduser().resolve()
+        if args.extracted_dir
+        else None,
         output_json=Path(args.output_json),
         metadata_json=Path(args.metadata_json),
         keep_workdir=args.keep_workdir,
@@ -340,7 +373,9 @@ def find_required_csvs(root_dir: Path) -> tuple[Path, Path]:
     skills_matches = list(root_dir.rglob("skills_en.csv"))
 
     if not digital_matches:
-        raise FileNotFoundError(f"Could not find digitalSkillsCollection_en.csv under {root_dir}")
+        raise FileNotFoundError(
+            f"Could not find digitalSkillsCollection_en.csv under {root_dir}"
+        )
     if not skills_matches:
         raise FileNotFoundError(f"Could not find skills_en.csv under {root_dir}")
 
@@ -360,10 +395,20 @@ def load_skills_by_uri(skills_csv_path: Path) -> dict[str, dict[str, str]]:
     skills_by_uri: dict[str, dict[str, str]] = {}
     with skills_csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
-        required = {"conceptUri", "preferredLabel", "altLabels", "hiddenLabels", "definition", "scopeNote", "description"}
+        required = {
+            "conceptUri",
+            "preferredLabel",
+            "altLabels",
+            "hiddenLabels",
+            "definition",
+            "scopeNote",
+            "description",
+        }
         missing = required - set(reader.fieldnames or [])
         if missing:
-            raise ValueError(f"skills_en.csv missing expected columns: {sorted(missing)}")
+            raise ValueError(
+                f"skills_en.csv missing expected columns: {sorted(missing)}"
+            )
         for row in reader:
             uri = (row.get("conceptUri") or "").strip()
             if uri:
@@ -392,7 +437,9 @@ def load_digital_rows(digital_csv_path: Path) -> list[dict[str, str]]:
         return list(reader)
 
 
-def build_record(digital_row: dict[str, str], skills_by_uri: dict[str, dict[str, str]]) -> dict[str, Any]:
+def build_record(
+    digital_row: dict[str, str], skills_by_uri: dict[str, dict[str, str]]
+) -> dict[str, Any]:
     """Build one final ESCO digital skill record.
 
     Output shape is designed for the Week 4 taxonomy resolver:
@@ -415,7 +462,9 @@ def build_record(digital_row: dict[str, str], skills_by_uri: dict[str, dict[str,
 
     # Use the richer description from the digital collection when present; fall
     # back to the master skills table otherwise.
-    description = (digital_row.get("description") or skill_row.get("description") or "").strip()
+    description = (
+        digital_row.get("description") or skill_row.get("description") or ""
+    ).strip()
     definition = (skill_row.get("definition") or "").strip()
     scope_note = (skill_row.get("scopeNote") or "").strip()
 
@@ -439,7 +488,9 @@ def build_record(digital_row: dict[str, str], skills_by_uri: dict[str, dict[str,
     }
 
 
-def build_records(digital_rows: Iterable[dict[str, str]], skills_by_uri: dict[str, dict[str, str]]) -> list[dict[str, Any]]:
+def build_records(
+    digital_rows: Iterable[dict[str, str]], skills_by_uri: dict[str, dict[str, str]]
+) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     seen_uris: set[str] = set()
 
@@ -482,6 +533,7 @@ def write_metadata(
     with metadata_json.open("w", encoding="utf-8") as handle:
         json.dump(metadata, handle, indent=2, ensure_ascii=False)
 
+
 def filter_records(records: list[dict]) -> list[dict]:
     """
     Narrow the full ESCO digital collection to a tighter Week 4 working set.
@@ -498,7 +550,11 @@ def filter_records(records: list[dict]) -> list[dict]:
 
     for item in records:
         normalized_label = (item.get("normalized_label") or "").strip()
-        parents = {x.strip().lower() for x in item.get("broader_concept_labels", []) if x.strip()}
+        parents = {
+            x.strip().lower()
+            for x in item.get("broader_concept_labels", [])
+            if x.strip()
+        }
 
         # Step 1: must belong to at least one core technical parent group
         if not (parents & KEEP_PARENT_LABELS):
@@ -530,7 +586,9 @@ def filter_records(records: list[dict]) -> list[dict]:
             "web programming",
         }
 
-        has_strong_label_signal = any(keyword in normalized_label for keyword in INCLUDE_LABEL_KEYWORDS)
+        has_strong_label_signal = any(
+            keyword in normalized_label for keyword in INCLUDE_LABEL_KEYWORDS
+        )
         has_strong_parent_signal = bool(parents & strong_parent_groups)
 
         if not (has_strong_label_signal or has_strong_parent_signal):
@@ -710,14 +768,24 @@ def seed_postgres(records: list[dict[str, Any]], db_url: str, db_table: str) -> 
                 "reuse_level": record["reuse_level"],
                 "status": record["status"],
                 "alt_labels": json.dumps(record["alt_labels"], ensure_ascii=False),
-                "normalized_alt_labels": json.dumps(record["normalized_alt_labels"], ensure_ascii=False),
-                "hidden_labels": json.dumps(record["hidden_labels"], ensure_ascii=False),
-                "normalized_hidden_labels": json.dumps(record["normalized_hidden_labels"], ensure_ascii=False),
+                "normalized_alt_labels": json.dumps(
+                    record["normalized_alt_labels"], ensure_ascii=False
+                ),
+                "hidden_labels": json.dumps(
+                    record["hidden_labels"], ensure_ascii=False
+                ),
+                "normalized_hidden_labels": json.dumps(
+                    record["normalized_hidden_labels"], ensure_ascii=False
+                ),
                 "description": record["description"],
                 "definition": record["definition"],
                 "scope_note": record["scope_note"],
-                "broader_concept_uris": json.dumps(record["broader_concept_uris"], ensure_ascii=False),
-                "broader_concept_labels": json.dumps(record["broader_concept_labels"], ensure_ascii=False),
+                "broader_concept_uris": json.dumps(
+                    record["broader_concept_uris"], ensure_ascii=False
+                ),
+                "broader_concept_labels": json.dumps(
+                    record["broader_concept_labels"], ensure_ascii=False
+                ),
             }
         )
 
@@ -725,6 +793,7 @@ def seed_postgres(records: list[dict[str, Any]], db_url: str, db_table: str) -> 
         connection.execute(create_schema_sql)
         connection.execute(create_table_sql)
         connection.execute(upsert_sql, payload)
+
 
 def resolve_workspace(config: Config) -> tuple[Path, Path | None, bool]:
     """Return (workspace_dir, zip_path_or_none, cleanup_when_done)."""
@@ -741,6 +810,7 @@ def resolve_workspace(config: Config) -> tuple[Path, Path | None, bool]:
     workspace_dir = Path(tempfile.mkdtemp(prefix="esco_seed_"))
     zip_path = workspace_dir / "esco_dataset.zip"
     return workspace_dir, zip_path, not config.keep_workdir
+
 
 def run(config: Config) -> int:
     workspace_dir, zip_path, cleanup_when_done = resolve_workspace(config)

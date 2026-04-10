@@ -132,13 +132,14 @@ def upsert_records(
     # Pre-convert all values into tuple list
     values_list = []
     for record in records:
-        values_list.append(
-            tuple(_convert_value(record.get(c)) for c in columns)
-        )
+        values_list.append(tuple(_convert_value(record.get(c)) for c in columns))
 
     try:
         psycopg2.extras.execute_values(
-            cur, insert_sql, values_list, page_size=1000,
+            cur,
+            insert_sql,
+            values_list,
+            page_size=1000,
         )
         inserted = cur.rowcount if cur.rowcount >= 0 else len(values_list)
         skipped = len(values_list) - inserted
