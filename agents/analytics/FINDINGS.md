@@ -9,6 +9,7 @@
 
 ## Verification Results
 - 16/16 tests passing across test_geo_demand.py, test_minimum_data_guard.py, test_salary_percentiles.py, test_sector_weekly.py
+- compute_salary_percentiles() confirmed consumed by Pair C via cherry-pick (commit 2d2edafc)
 
 ## Design Decisions
 - Used PostgreSQL percentile_disc for salary percentiles — exact rather than interpolated
@@ -18,3 +19,7 @@
 ## Challenges
 - Merged Gary's development infrastructure fixes (skills extraction fix, Langfuse tracing, label→skill_name rename) and resolved linting errors across multiple files
 - Local Docker postgres environment issues — postgres-server missing POSTGRES_PASSWORD env var
+
+## Carries Forward
+- Step 7 geo_demand_weekly persistence bug — aggregator computes results correctly but session.add_all() is not called, so rows are never written to the database. One-line fix for Week 8.
+- temporal_trend and top_roles columns on geo_demand_weekly not yet implemented

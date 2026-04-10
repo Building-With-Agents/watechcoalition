@@ -33,6 +33,7 @@ from agents.enrichment.classifiers.temporal_period import classify_temporal_peri
 from agents.enrichment.dedup import run_fuzzy_dedup
 from agents.enrichment.dedup.types import FuzzyDedupResult
 from agents.enrichment.employer_profile_storage import upsert_employer_profile_by_company_id
+from agents.enrichment.resolvers.sector_resolver import resolve_sector
 
 log = structlog.get_logger()
 
@@ -75,6 +76,7 @@ _UPDATE_UNCERTAIN_SQL = text(
         borderplex_subregion = :borderplex_subregion,
         naics_code = :naics_code,
         soc_code = :soc_code,
+        sector_id = CAST(:sector_id AS uuid),
         employer_profile_id = COALESCE(CAST(:employer_profile_id AS uuid), employer_profile_id)
     WHERE job_posting_id::text = :job_posting_id
     """
@@ -90,6 +92,7 @@ _UPDATE_CLEAN_SQL = text(
         borderplex_subregion = :borderplex_subregion,
         naics_code = :naics_code,
         soc_code = :soc_code,
+        sector_id = CAST(:sector_id AS uuid),
         employer_profile_id = COALESCE(CAST(:employer_profile_id AS uuid), employer_profile_id),
         is_spam = FALSE,
         spam_score = :spam_score
@@ -107,6 +110,7 @@ _UPDATE_FLAGGED_SQL = text(
         borderplex_subregion = :borderplex_subregion,
         naics_code = :naics_code,
         soc_code = :soc_code,
+        sector_id = CAST(:sector_id AS uuid),
         employer_profile_id = COALESCE(CAST(:employer_profile_id AS uuid), employer_profile_id),
         is_spam = NULL,
         spam_score = :spam_score
@@ -577,6 +581,9 @@ def apply_enrichment_to_job_postings(
         soc_raw.strip() if isinstance(soc_raw, str) and soc_raw.strip() else None
     )
 
+    role_classification = record_enriched_payload.get("role_classification")
+    sector_id = resolve_sector(role_classification, session)
+
     employer_profile_id_param = None
     em = record_enriched_payload.get("employer_metadata")
     if isinstance(em, dict) and str(company_id).strip():
@@ -596,6 +603,7 @@ def apply_enrichment_to_job_postings(
         "field_confidence": fc_json,
         "naics_code": naics_code,
         "soc_code": soc_code,
+        "sector_id": sector_id,
         "employer_profile_id": employer_profile_id_param,
         **derived_output_fields,
     }

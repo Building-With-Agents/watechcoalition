@@ -284,6 +284,7 @@ def test_apply_enrichment_to_job_postings_logs_and_continues_on_dedup_failure() 
             return_value={"job_posting_id": CURRENT_ID, "company_id": MATCHED_ID},
         ),
         patch("agents.enrichment.job_postings_promotion.run_fuzzy_dedup", side_effect=RuntimeError("boom")),
+        patch("agents.enrichment.job_postings_promotion.resolve_sector", return_value=None),
     ):
         applied = apply_enrichment_to_job_postings(
             session,
@@ -314,6 +315,7 @@ def _apply_with_resolved_row_for_temporal_borderplex(resolved_row: dict[str, obj
     with (
         patch("agents.enrichment.job_postings_promotion.run_fuzzy_dedup", return_value=dedup_result),
         patch("agents.enrichment.job_postings_promotion.apply_fuzzy_dedup_result", return_value=True),
+        patch("agents.enrichment.job_postings_promotion.resolve_sector", return_value=None),
     ):
         out = apply_enrichment_to_job_postings(
             session,
@@ -423,17 +425,18 @@ def test_apply_enrichment_binds_soc_code_column_from_payload() -> None:
     update_result = MagicMock()
     session.execute.side_effect = [resolve_result, update_result]
 
-    out = apply_enrichment_to_job_postings(
-        session,
-        42,
-        {
-            "spam_tier": "clean",
-            "spam_score": 0.2,
-            "quality_score": 0.85,
-            "soc_code": "17-3029",
-            "naics_code": "541512",
-        },
-    )
+    with patch("agents.enrichment.job_postings_promotion.resolve_sector", return_value=None):
+        out = apply_enrichment_to_job_postings(
+            session,
+            42,
+            {
+                "spam_tier": "clean",
+                "spam_score": 0.2,
+                "quality_score": 0.85,
+                "soc_code": "17-3029",
+                "naics_code": "541512",
+            },
+        )
     assert out is True
     _stmt, params = session.execute.call_args_list[1][0]
     assert params["soc_code"] == "17-3029"
@@ -478,18 +481,129 @@ def test_apply_enrichment_selects_employer_profile_id_when_metadata_present() ->
         *[MagicMock() for _ in range(10)],
     ]
 
-    out = apply_enrichment_to_job_postings(
-        session,
-        42,
-        {
-            "spam_tier": "clean",
-            "spam_score": 0.2,
-            "quality_score": 0.85,
-            "employer_metadata": {"company_size": "smb", "is_known_employer": True},
-        },
-    )
+    with patch("agents.enrichment.job_postings_promotion.resolve_sector", return_value=None):
+        out = apply_enrichment_to_job_postings(
+            session,
+            42,
+            {
+                "spam_tier": "clean",
+                "spam_score": 0.2,
+                "quality_score": 0.85,
+                "employer_metadata": {"company_size": "smb", "is_known_employer": True},
+            },
+        )
 
     assert out is True
     # Index 2: main promotion UPDATE (after resolve + employer_profile id lookup).
     _stmt, params = session.execute.call_args_list[2][0]
     assert params["employer_profile_id"] == ep_id
+
+
+# ---------------------------------------------------------------------------
+# sector_id promotion tests
+# ---------------------------------------------------------------------------
+
+
+def test_apply_enrichment_persists_sector_id_for_known_role() -> None:
+    """sector_id resolved via resolve_sector must be written to job_postings."""
+    sector_uuid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+    session = MagicMock()
+    resolve_result = MagicMock()
+    resolve_result.mappings.return_value.first.return_value = {
+        "job_posting_id": "11111111-1111-1111-1111-111111111111",
+        "company_id": "22222222-2222-2222-2222-222222222222",
+        "date_posted": datetime(2023, 6, 15, 12, 0, 0, tzinfo=timezone.utc),
+    }
+    update_result = MagicMock()
+
+    with patch(
+        "agents.enrichment.job_postings_promotion.resolve_sector",
+        return_value=sector_uuid,
+    ) as mock_resolve_sector:
+        # Two execute calls: resolve_job_posting_row + UPDATE
+        session.execute.side_effect = [resolve_result, update_result]
+        out = apply_enrichment_to_job_postings(
+            session,
+            42,
+            {
+                "spam_tier": "clean",
+                "spam_score": 0.2,
+                "quality_score": 0.85,
+                "role_classification": "Software Engineering",
+            },
+        )
+
+    assert out is True
+    mock_resolve_sector.assert_called_once_with("Software Engineering", session)
+    _stmt, params = session.execute.call_args_list[1][0]
+    assert params["sector_id"] == sector_uuid
+
+
+def test_apply_enrichment_persists_sector_id_for_unknown_role_fallback() -> None:
+    """When role_classification is absent, resolve_sector(None) fallback must still be called."""
+    other_sector_uuid = "ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb"
+    session = MagicMock()
+    resolve_result = MagicMock()
+    resolve_result.mappings.return_value.first.return_value = {
+        "job_posting_id": "11111111-1111-1111-1111-111111111111",
+        "company_id": "22222222-2222-2222-2222-222222222222",
+        "date_posted": None,
+    }
+    update_result = MagicMock()
+
+    with patch(
+        "agents.enrichment.job_postings_promotion.resolve_sector",
+        return_value=other_sector_uuid,
+    ) as mock_resolve_sector:
+        session.execute.side_effect = [resolve_result, update_result]
+        out = apply_enrichment_to_job_postings(
+            session,
+            42,
+            {
+                "spam_tier": "clean",
+                "spam_score": 0.2,
+                "quality_score": 0.85,
+            },
+        )
+
+    assert out is True
+    mock_resolve_sector.assert_called_once_with(None, session)
+    _stmt, params = session.execute.call_args_list[1][0]
+    assert params["sector_id"] == other_sector_uuid
+    assert params["sector_id"] is not None
+
+
+def test_apply_enrichment_sector_id_is_in_params_base_for_all_tiers() -> None:
+    """sector_id must appear in the UPDATE params for clean, flagged, and uncertain tiers."""
+    sector_uuid = "11112222-3333-4444-5555-666677778888"
+
+    for tier, spam_score in [("clean", 0.2), ("flagged", 0.75), ("uncertain", None)]:
+        session = MagicMock()
+        resolve_result = MagicMock()
+        resolve_result.mappings.return_value.first.return_value = {
+            "job_posting_id": "11111111-1111-1111-1111-111111111111",
+            "company_id": "22222222-2222-2222-2222-222222222222",
+            "date_posted": None,
+        }
+        update_result = MagicMock()
+
+        with patch(
+            "agents.enrichment.job_postings_promotion.resolve_sector",
+            return_value=sector_uuid,
+        ):
+            session.execute.side_effect = [resolve_result, update_result]
+            payload: dict[str, object] = {
+                "spam_tier": tier,
+                "quality_score": 0.85,
+                "role_classification": "Data Engineering",
+            }
+            if spam_score is not None:
+                payload["spam_score"] = spam_score
+
+            out = apply_enrichment_to_job_postings(session, 42, payload)
+
+        assert out is True, f"Expected True for tier={tier}"
+        _stmt, params = session.execute.call_args_list[1][0]
+        assert params.get("sector_id") == sector_uuid, (
+            f"sector_id missing or wrong for tier={tier}"
+        )

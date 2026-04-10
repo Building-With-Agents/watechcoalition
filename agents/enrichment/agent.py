@@ -431,6 +431,7 @@ def _job_postings_promotion_payload(
         "field_confidence": enriched.get("field_confidence"),
         "naics_code": enriched.get("naics_code"),
         "soc_code": enriched.get("soc_code"),
+        "role_classification": enriched.get("role_classification"),
     }
 
 
