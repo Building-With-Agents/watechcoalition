@@ -7,6 +7,7 @@ Loads .env from repo root so Azure env vars are available when this module is us
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import json as _json
 import os
@@ -67,6 +68,30 @@ def _extract_retry_after(error_message: str) -> int | None:
     return None
 
 
+def _structured_rate_limit_metadata(error: Exception) -> tuple[str, bool, int | None]:
+    """Return normalized error text plus rate-limit metadata for structured calls."""
+    error_str = str(error)
+    is_rate_limit = False
+    retry_after: int | None = None
+
+    try:
+        from openai import RateLimitError
+
+        is_rate_limit = isinstance(error, RateLimitError)
+    except ImportError:
+        pass
+
+    if not is_rate_limit:
+        is_rate_limit = "429" in error_str or "rate limit" in error_str.lower()
+
+    if is_rate_limit:
+        retry_after = _extract_retry_after(error_str)
+        if not error_str.startswith("429:"):
+            error_str = f"429: {error_str}"
+
+    return error_str, is_rate_limit, retry_after
+
+
 def _model_tier_for_skills_extraction(model_name: str) -> str:
     """Map deployment/model name to pricing tier for :func:`compute_extraction_cost`.
 
@@ -107,6 +132,101 @@ def _get_llm() -> Any:
         azure_deployment=deployment,
         temperature=0.1,
     )
+
+
+def _build_structured_llm(deployment: str) -> Any:
+    """Build Azure OpenAI chat model for structured extraction calls."""
+    try:
+        from langchain_openai import AzureChatOpenAI
+    except ImportError as e:
+        raise ImportError(
+            "langchain-openai is required for Pass 2 skills extraction. Install with: pip install langchain-openai"
+        ) from e
+
+    return AzureChatOpenAI(
+        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+        api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-preview"),
+        azure_deployment=deployment,
+        temperature=0.1,
+    )
+
+
+def _structured_metadata_failure(
+    *,
+    error_reason: str,
+    latency_ms: int,
+    provider: str,
+    model_name: str,
+    is_rate_limit: bool = False,
+    retry_after_seconds: int | None = None,
+) -> dict[str, Any]:
+    """Build the standard failure metadata payload for structured extraction."""
+    metadata: dict[str, Any] = {
+        "tokens_used": 0,
+        "cost_usd": 0.0,
+        "latency_ms": latency_ms,
+        "success": False,
+        "extraction_failed": True,
+        "error_reason": error_reason,
+        "provider": provider,
+        "model": model_name,
+    }
+    if is_rate_limit or retry_after_seconds is not None:
+        metadata["is_rate_limit"] = is_rate_limit
+        metadata["retry_after_seconds"] = retry_after_seconds
+    return metadata
+
+
+def _structured_parse_output(raw_out: Any) -> tuple[TSchema | None, Any]:
+    """Normalize LangChain structured-output responses with and without raw payloads."""
+    if isinstance(raw_out, dict) and "parsed" in raw_out:
+        return raw_out.get("parsed"), raw_out.get("raw")
+    return raw_out, None
+
+
+def _structured_usage_metadata(
+    *,
+    prompt: str,
+    parsed: TSchema | None,
+    msg_for_usage: Any,
+    deployment_name: str,
+) -> tuple[str, int, int, int]:
+    """Extract model and token counts from a structured response."""
+    model_name = deployment_name
+    tokens_used = 0
+
+    if msg_for_usage is not None and hasattr(msg_for_usage, "response_metadata"):
+        md = getattr(msg_for_usage, "response_metadata", None) or {}
+        if isinstance(md, dict):
+            actual_model = md.get("model_name") or md.get("model")
+            if actual_model:
+                model_name = f"{actual_model} ({deployment_name})"
+            usage = md.get("token_usage") or md.get("usage")
+            if isinstance(usage, dict):
+                tokens_used = int(
+                    usage.get("total_tokens")
+                    or (usage.get("input_tokens", 0) + usage.get("output_tokens", 0))
+                    or 0
+                )
+
+    if tokens_used <= 0:
+        out_preview = ""
+        if parsed is not None:
+            out_preview = str(parsed)[:2000]
+        tokens_used = max(1, (len(prompt) + len(out_preview)) // 4)
+
+    input_tokens_est = len(prompt) // 4
+    output_tokens_est = max(0, tokens_used - input_tokens_est)
+    return model_name, tokens_used, input_tokens_est, output_tokens_est
+
+
+def _structured_output_chain(llm: Any, output_schema: type[TSchema]) -> Any:
+    """Return a structured-output chain, preferring raw metadata when supported."""
+    try:
+        return llm.with_structured_output(output_schema, include_raw=True)
+    except TypeError:
+        return llm.with_structured_output(output_schema)
 
 
 def invoke_skills_llm(
@@ -383,39 +503,19 @@ def invoke_structured_extraction_llm(
             return parsed, meta
 
     try:
-        from langchain_openai import AzureChatOpenAI
-    except ImportError as e:
-        log.error("structured_llm_import_failed", error=str(e))
-        return None, {
-            "tokens_used": 0,
-            "cost_usd": 0.0,
-            "latency_ms": 0,
-            "success": False,
-            "extraction_failed": True,
-            "error_reason": str(e),
-            "provider": "azure-openai",
-            "model": "",
-        }
-
-    try:
         deployment = _resolve_azure_deployment(*deployment_env_keys)
     except ValueError as e:
         log.warning("structured_llm_missing_deployment", error=str(e))
-        return None, {
-            "tokens_used": 0,
-            "cost_usd": 0.0,
-            "latency_ms": 0,
-            "success": False,
-            "extraction_failed": True,
-            "error_reason": str(e),
-            "provider": "azure-openai",
-            "model": "",
-        }
+        return None, _structured_metadata_failure(
+            error_reason=str(e),
+            latency_ms=0,
+            provider="azure-openai",
+            model_name="",
+        )
 
     deployment_name = deployment
     model_name = deployment_name  # overwritten below if response has actual model
     provider = "azure-openai"
-
     tracer = get_tracer()
     span_ctx = (
         tracer.start_span(
@@ -431,54 +531,32 @@ def invoke_structured_extraction_llm(
 
     with span_ctx:
         try:
-            llm = AzureChatOpenAI(
-                azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-                api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-                api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-preview"),
-                azure_deployment=deployment,
-                temperature=0.1,
+            llm = _build_structured_llm(deployment)
+        except ImportError as e:
+            log.error("structured_llm_import_failed", error=str(e))
+            if tracer:
+                with contextlib.suppress(Exception):
+                    tracer.record_error(e, context={"agent_name": agent_name, "model": model_name})
+            return None, _structured_metadata_failure(
+                error_reason=str(e),
+                latency_ms=0,
+                provider=provider,
+                model_name="",
             )
-            try:
-                chain = llm.with_structured_output(output_schema, include_raw=True)
-                raw_out: Any = chain.invoke(prompt)
-            except TypeError:
-                chain = llm.with_structured_output(output_schema)
-                raw_out = chain.invoke(prompt)
+
+        try:
+            chain = _structured_output_chain(llm, output_schema)
+            raw_out: Any = chain.invoke(prompt)
 
             latency_ms = int((time.perf_counter() - start) * 1000)
 
-            parsed: TSchema | None
-            msg_for_usage: Any = None
-            if isinstance(raw_out, dict) and "parsed" in raw_out:
-                parsed = raw_out.get("parsed")
-                msg_for_usage = raw_out.get("raw")
-            else:
-                parsed = raw_out  # type: ignore[assignment]
-                msg_for_usage = None
-
-            # Extract actual model name from response metadata
-            tokens_used = 0
-            if msg_for_usage is not None and hasattr(msg_for_usage, "response_metadata"):
-                md = getattr(msg_for_usage, "response_metadata", None) or {}
-                if isinstance(md, dict):
-                    actual_model = md.get("model_name") or md.get("model")
-                    if actual_model:
-                        model_name = f"{actual_model} ({deployment_name})"
-                    usage = md.get("token_usage") or md.get("usage")
-                    if isinstance(usage, dict):
-                        tokens_used = int(
-                            usage.get("total_tokens")
-                            or (usage.get("input_tokens", 0) + usage.get("output_tokens", 0))
-                            or 0
-                        )
-            if tokens_used <= 0:
-                out_preview = ""
-                if parsed is not None:
-                    out_preview = str(parsed)[:2000]
-                tokens_used = max(1, (len(prompt) + len(out_preview)) // 4)
-
-            input_tokens_est = len(prompt) // 4
-            output_tokens_est = max(0, tokens_used - input_tokens_est)
+            parsed, msg_for_usage = _structured_parse_output(raw_out)
+            model_name, tokens_used, input_tokens_est, output_tokens_est = _structured_usage_metadata(
+                prompt=prompt,
+                parsed=parsed,
+                msg_for_usage=msg_for_usage,
+                deployment_name=deployment_name,
+            )
             cost_usd = compute_extraction_cost(
                 input_tokens_est, output_tokens_est, model_tier_for_cost
             )
@@ -497,27 +575,31 @@ def invoke_structured_extraction_llm(
             )
 
             if tracer:
-                try:
+                with contextlib.suppress(Exception):
                     tracer.record_latency("llm_call", seconds=latency_ms / 1000.0)
-                    tracer.log_event("llm_success", {
-                        "input_tokens": input_tokens_est,
-                        "output_tokens": output_tokens_est,
-                        "cost_usd": round(cost_usd, 6),
-                        "output": parsed.model_dump(mode="json") if hasattr(parsed, "model_dump") else _parse_output_for_trace(str(parsed)) if parsed is not None else "structured_output_empty",
-                    })
-                except Exception:
-                    pass
+                    tracer.log_event(
+                        "llm_success",
+                        {
+                            "input_tokens": input_tokens_est,
+                            "output_tokens": output_tokens_est,
+                            "cost_usd": round(cost_usd, 6),
+                            "output": parsed.model_dump(mode="json")
+                            if hasattr(parsed, "model_dump")
+                            else _parse_output_for_trace(str(parsed))
+                            if parsed is not None
+                            else "structured_output_empty",
+                        },
+                    )
 
             if parsed is None:
-                return None, {
+                return None, _structured_metadata_failure(
+                    error_reason="structured_output_empty",
+                    latency_ms=latency_ms,
+                    provider=provider,
+                    model_name=model_name,
+                ) | {
                     "tokens_used": tokens_used,
                     "cost_usd": cost_usd,
-                    "latency_ms": latency_ms,
-                    "success": False,
-                    "extraction_failed": True,
-                    "error_reason": "structured_output_empty",
-                    "provider": provider,
-                    "model": model_name,
                 }
 
             return parsed, {
@@ -532,6 +614,7 @@ def invoke_structured_extraction_llm(
             }
         except Exception as e:
             latency_ms = int((time.perf_counter() - start) * 1000)
+            error_str, is_rate_limit, retry_after = _structured_rate_limit_metadata(e)
             log_extraction_event(
                 agent_name=agent_name,
                 prompt=prompt,
@@ -542,18 +625,194 @@ def invoke_structured_extraction_llm(
                 output_tokens=0,
                 cost_usd=0.0,
                 success=False,
-                error_reason=str(e),
+                error_reason=error_str,
             )
             if tracer:
                 with contextlib.suppress(Exception):
                     tracer.record_error(e, context={"agent_name": agent_name, "model": model_name})
-            return None, {
-                "tokens_used": 0,
-                "cost_usd": 0.0,
+            return None, _structured_metadata_failure(
+                error_reason=error_str,
+                latency_ms=latency_ms,
+                provider=provider,
+                model_name=model_name,
+                is_rate_limit=is_rate_limit,
+                retry_after_seconds=retry_after,
+            )
+
+
+async def ainvoke_structured_extraction_llm(
+    prompt: str,
+    output_schema: type[TSchema],
+    *,
+    agent_name: str,
+    deployment_env_keys: tuple[str, ...],
+    model_tier_for_cost: str,
+) -> tuple[TSchema | None, dict[str, Any]]:
+    """Async counterpart to ``invoke_structured_extraction_llm`` using ``chain.ainvoke``."""
+    if os.getenv("LLM_PROVIDER", "").strip().lower() == "mock":
+        from agents.common.mock_llm_provider import mock_invoke_structured
+
+        tracer = get_tracer()
+        span_ctx = (
+            tracer.start_span(
+                _SPAN_NAME_MAP.get(agent_name, agent_name),
+                correlation_id=str(uuid.uuid4()),
+                input=prompt,
+                metadata={"agent_name": agent_name, "model": "mock-sonnet-v1"},
+            )
+            if tracer
+            else nullcontext()
+        )
+        with span_ctx:
+            parsed, meta = mock_invoke_structured(prompt, output_schema, agent_name=agent_name)
+            log_extraction_event(
+                agent_name=agent_name, prompt=prompt, model="mock-sonnet-v1",
+                provider="mock", latency_ms=meta["latency_ms"],
+                input_tokens=meta.get("tokens_used", 0) // 2,
+                output_tokens=meta.get("tokens_used", 0) // 2,
+                cost_usd=meta["cost_usd"],
+                success=meta["success"],
+                error_reason=meta.get("error_reason"),
+            )
+            return parsed, meta
+
+    try:
+        deployment = _resolve_azure_deployment(*deployment_env_keys)
+    except ValueError as e:
+        log.warning("structured_llm_missing_deployment", error=str(e))
+        return None, _structured_metadata_failure(
+            error_reason=str(e),
+            latency_ms=0,
+            provider="azure-openai",
+            model_name="",
+        )
+
+    deployment_name = deployment
+    model_name = deployment_name
+    provider = "azure-openai"
+
+    tracer = get_tracer()
+    span_ctx = (
+        tracer.start_span(
+            _SPAN_NAME_MAP.get(agent_name, agent_name),
+            correlation_id=str(uuid.uuid4()),
+            input=prompt,
+            metadata={"agent_name": agent_name, "model": model_name},
+        )
+        if tracer
+        else nullcontext()
+    )
+    start = time.perf_counter()
+
+    with span_ctx:
+        try:
+            llm = _build_structured_llm(deployment)
+        except ImportError as e:
+            log.error("structured_llm_import_failed", error=str(e))
+            if tracer:
+                with contextlib.suppress(Exception):
+                    tracer.record_error(e, context={"agent_name": agent_name, "model": model_name})
+            return None, _structured_metadata_failure(
+                error_reason=str(e),
+                latency_ms=0,
+                provider=provider,
+                model_name="",
+            )
+
+        try:
+            chain = _structured_output_chain(llm, output_schema)
+            timeout_seconds = int(os.getenv("SKILLS_EXTRACTION_LLM_TIMEOUT", "120"))
+            raw_out: Any = await asyncio.wait_for(
+                chain.ainvoke(prompt), timeout=timeout_seconds
+            )
+
+            latency_ms = int((time.perf_counter() - start) * 1000)
+
+            parsed, msg_for_usage = _structured_parse_output(raw_out)
+            model_name, tokens_used, input_tokens_est, output_tokens_est = _structured_usage_metadata(
+                prompt=prompt,
+                parsed=parsed,
+                msg_for_usage=msg_for_usage,
+                deployment_name=deployment_name,
+            )
+            cost_usd = compute_extraction_cost(
+                input_tokens_est, output_tokens_est, model_tier_for_cost
+            )
+
+            log_extraction_event(
+                agent_name=agent_name,
+                prompt=prompt,
+                model=model_name,
+                provider=provider,
+                latency_ms=latency_ms,
+                input_tokens=input_tokens_est,
+                output_tokens=output_tokens_est,
+                cost_usd=cost_usd,
+                success=parsed is not None,
+                error_reason=None if parsed is not None else "structured_output_empty",
+            )
+
+            if tracer:
+                with contextlib.suppress(Exception):
+                    tracer.record_latency("llm_call", seconds=latency_ms / 1000.0)
+                    tracer.log_event(
+                        "llm_success",
+                        {
+                            "input_tokens": input_tokens_est,
+                            "output_tokens": output_tokens_est,
+                            "cost_usd": round(cost_usd, 6),
+                            "output": parsed.model_dump(mode="json")
+                            if hasattr(parsed, "model_dump")
+                            else _parse_output_for_trace(str(parsed))
+                            if parsed is not None
+                            else "structured_output_empty",
+                        },
+                    )
+
+            if parsed is None:
+                return None, _structured_metadata_failure(
+                    error_reason="structured_output_empty",
+                    latency_ms=latency_ms,
+                    provider=provider,
+                    model_name=model_name,
+                ) | {
+                    "tokens_used": tokens_used,
+                    "cost_usd": cost_usd,
+                }
+
+            return parsed, {
+                "tokens_used": tokens_used,
+                "cost_usd": cost_usd,
                 "latency_ms": latency_ms,
-                "success": False,
-                "extraction_failed": True,
-                "error_reason": str(e),
+                "success": True,
+                "extraction_failed": False,
+                "error_reason": None,
                 "provider": provider,
                 "model": model_name,
             }
+        except Exception as e:
+            latency_ms = int((time.perf_counter() - start) * 1000)
+            error_str, is_rate_limit, retry_after = _structured_rate_limit_metadata(e)
+            log_extraction_event(
+                agent_name=agent_name,
+                prompt=prompt,
+                model=model_name,
+                provider=provider,
+                latency_ms=latency_ms,
+                input_tokens=0,
+                output_tokens=0,
+                cost_usd=0.0,
+                success=False,
+                error_reason=error_str,
+            )
+            if tracer:
+                with contextlib.suppress(Exception):
+                    tracer.record_error(e, context={"agent_name": agent_name, "model": model_name})
+            return None, _structured_metadata_failure(
+                error_reason=error_str,
+                latency_ms=latency_ms,
+                provider=provider,
+                model_name=model_name,
+                is_rate_limit=is_rate_limit,
+                retry_after_seconds=retry_after,
+            )
