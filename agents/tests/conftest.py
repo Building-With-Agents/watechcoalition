@@ -145,6 +145,20 @@ def enriched_event() -> EventEnvelope:
                 "rows_with_duplicate_cluster_id": 0,
                 "rows_with_matched_job_posting_id": 0,
             },
+            "freshness_records": [
+                {
+                    "posting_id": "demo-1",
+                    "days_since_posted": 5,
+                    "skills": [{"name": "Python", "type": "Technical", "confidence": 0.9}],
+                },
+                {
+                    "posting_id": "demo-2",
+                    "days_since_posted": 45,
+                    "is_duplicate": True,
+                    "repost_count": 2,
+                    "skills": [],
+                },
+            ],
         },
     )
 

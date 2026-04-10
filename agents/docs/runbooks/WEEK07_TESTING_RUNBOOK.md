@@ -92,6 +92,20 @@ python agents/scripts/db_check.py query "SELECT role_title, posting_count, media
 python agents/scripts/db_check.py query "SELECT id, summary_type, is_llm_generated, created_at FROM dbo.insight_summary ORDER BY created_at DESC LIMIT 5"
 ```
 
+**Pair A — automated aggregate checks (IMP-021):** After refreshing aggregates for a chosen anchor Monday (Analytics Agent steps 2–3 then 8, or your pair’s equivalent), run:
+
+```bash
+PYTHONPATH=. python agents/scripts/verify_aggregates.py --list-weeks
+PYTHONPATH=. python agents/scripts/verify_aggregates.py --week <YYYY-MM-DD>   # Monday
+
+PYTHONPATH=. python agents/scripts/verify_analytics_aggregates.py --week <YYYY-MM-DD>
+# Optional filters:
+# PYTHONPATH=. python agents/scripts/verify_analytics_aggregates.py --week <Monday> --only skills,tools
+# PYTHONPATH=. python agents/scripts/verify_analytics_aggregates.py --week <Monday> --only velocity,cooccurrence
+```
+
+Worked examples and notes live in [docs/findings/week-07-skill-tool-demand-findings.md](../../../docs/findings/week-07-skill-tool-demand-findings.md).
+
 If these queries return errors like `relation "dbo.skill_demand_weekly" does not exist`, the Analytics Agent has not been implemented yet. Proceed to Section 5 for the full list of expected tables and queries.
 
 ### Step 3 — Verify Langfuse connectivity
@@ -461,16 +475,18 @@ python agents/scripts/db_check.py query "SELECT region, subregion, posting_count
 
 ### Table 6 — `skill_velocity`
 
-Week-over-week demand change for skills.
+Demand trend for skills (Phase 1 Pair A). Values are derived in Python from the last **five** `week_start` slices in `skill_demand_weekly` ending at the anchor Monday: a **4-week rolling mean** of weekly `posting_count`, then week-over-week **`pct_change`** on that smoothed series (not a raw single-week spike). The ORM maps Python attribute **`velocity_week`** → database column **`week`**.
 
 ```bash
-python agents/scripts/db_check.py query "SELECT skill_label, current_week_count, prior_week_count, velocity_pct FROM dbo.skill_velocity ORDER BY ABS(velocity_pct) DESC LIMIT 10"
+python agents/scripts/db_check.py query "SELECT skill_label, week, demand_count, week_over_week_change, four_week_trend, trend_confidence, esco_uri FROM dbo.skill_velocity ORDER BY ABS(week_over_week_change) DESC NULLS LAST LIMIT 10"
 ```
 
 **What to check:**
-- `velocity_pct` is the percentage change: `(current - prior) / prior * 100`
-- Requires at least 2 weeks of data to be meaningful
-- With seeded data from a single batch, velocity may be 0 or NULL (expected)
+- **`week`** is the velocity anchor (Monday), same convention as `skill_demand_weekly.week_start`
+- **`demand_count`** and **`esco_uri`** for that row match **`skill_demand_weekly`** for the same `skill_label` and `week_start = week` (refresh **step 2** before **step 8**)
+- **`week_over_week_change`** is the stored **smoothed** WoW metric; it is always a **finite** float (non-finite values are sanitized to `0.0` in the aggregator)
+- **`four_week_trend`** is the label: `accelerating` | `declining` | `stable` | `volatile` | `emerging` (classification can use raw `inf`/`-inf` before sanitization for storage)
+- With thin history across weeks, many rows may show **`week_over_week_change = 0.0`** while **`four_week_trend`** is still `emerging` or `stable` — refresh **`skill_demand_weekly`** for multiple consecutive Mondays to see richer trends
 
 ### Table 7 — `skill_co_occurrence`
 
@@ -483,7 +499,7 @@ python agents/scripts/db_check.py query "SELECT skill_a, skill_b, co_occurrence_
 **What to check:**
 - Common pairs like (Python, SQL), (AWS, Docker), (JavaScript, React) should appear
 - `co_occurrence_count` should be less than or equal to each skill's individual count
-- Pairs should be unordered (skill_a < skill_b alphabetically to avoid duplicates)
+- Pairs are stored with **`skill_a` < `skill_b`** (lexicographic) to avoid duplicates; the table keeps **at most 200 rows per `week_start`**, with a deterministic top-200 ordering (**`-co_occurrence_count`**, then pair names)
 
 ### Table 8 — `posting_freshness`
 
@@ -893,19 +909,22 @@ Check that aggregate tables have data before expecting summaries:
 python agents/scripts/db_check.py query "SELECT 'skill_demand_weekly' AS tbl, COUNT(*) FROM dbo.skill_demand_weekly UNION ALL SELECT 'role_snapshot_weekly', COUNT(*) FROM dbo.role_snapshot_weekly"
 ```
 
-**Skill velocity shows all zeros**
+**Skill velocity looks “flat” or mostly `week_over_week_change = 0.0`**
 
-`skill_velocity` computes week-over-week change. If all your data was ingested in a single week, there is no prior week to compare against, so velocity is 0 or NULL. This is expected with a single-batch seed. Re-running the pipeline after a week (or with data spanning multiple weeks) produces non-zero velocities.
+`skill_velocity` is **not** a simple `(this_week − last_week) / last_week` on raw counts. The aggregator uses the last **five** `week_start` values from `skill_demand_weekly`, smooths with a **4-week rolling mean**, then stores **finite** `week_over_week_change` (non-finite → `0.0`). With thin weekly history or after sanitization, many rows legitimately show **`0.0`** while **`four_week_trend`** may still read `emerging` or `stable`. Refresh **`skill_demand_weekly`** for **multiple consecutive Mondays** (steps 2–3 before step 8) before expecting large deltas.
 
-**Co-occurrence matrix is very large**
+**Co-occurrence row counts**
 
-With many unique skills, the co-occurrence matrix can grow quadratically. The Analytics Agent should implement a cardinality cap — only track the top N skills (e.g., top 100 by posting count) and coalesce the long tail into "Other." If the `skill_co_occurrence` table has millions of rows, the cap may not be implemented:
+Pair A caps co-occurrence at **200 pairs per `week_start`** with deterministic tie-breaking. Total row count should scale with the number of weeks processed (e.g., on the order of **200 × weeks**), not millions:
 
 ```bash
 python agents/scripts/db_check.py query "SELECT COUNT(*) AS pairs FROM dbo.skill_co_occurrence"
+python agents/scripts/db_check.py query "SELECT week_start, COUNT(*) AS n FROM dbo.skill_co_occurrence GROUP BY week_start ORDER BY n DESC LIMIT 5"
 ```
 
 Expected: hundreds to low thousands of pairs, not millions.
+
+If any `week_start` shows more than 200 rows, the cap is not applied as shipped.
 
 ---
 

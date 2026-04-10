@@ -38,3 +38,9 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
     for item in items:
         if "live_llm" in item.keywords:
             item.add_marker(skip_live)
+
+
+@pytest.fixture(autouse=True)
+def _analytics_minimum_data_guard_off_for_tests(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Analytics agent tests do not require 50+ enriched rows on the dev database."""
+    monkeypatch.setenv("ANALYTICS_DISABLE_MINIMUM_DATA_GUARD", "1")

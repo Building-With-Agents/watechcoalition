@@ -1,4 +1,10 @@
-"""Shared salary percentile aggregates for analytics tables."""
+"""Salary percentile aggregates for analytics tables.
+
+Pair C ``role_snapshot_weekly`` (issue #188) adds ``canonical_role_id`` grouping
+and ``week_start`` filtering with annualized salary normalization.
+
+Pair B reuses ``SALARY_VALUE_SQL`` for sector / weekly aggregations.
+"""
 
 from __future__ import annotations
 
@@ -18,7 +24,8 @@ _ALLOWED_GROUP_COL_SQL: dict[str, str] = {
     "canonical_role_id": "jp.canonical_role_id",
 }
 
-_SALARY_MIDPOINT_EXPR = """(
+# Shared with sector / weekly aggregations — same basis as ``compute_salary_percentiles``.
+SALARY_VALUE_SQL = """(
     CASE
         WHEN nj.salary_min IS NOT NULL AND nj.salary_max IS NOT NULL
             THEN (nj.salary_min::double precision + nj.salary_max::double precision) / 2.0
@@ -27,6 +34,8 @@ _SALARY_MIDPOINT_EXPR = """(
         ELSE NULL::double precision
     END
 )"""
+
+_SALARY_MIDPOINT_EXPR = SALARY_VALUE_SQL
 
 _ANNUALIZED_SALARY_EXPR = f"""(
     CASE
@@ -40,6 +49,8 @@ _ANNUALIZED_SALARY_EXPR = f"""(
         ELSE {_SALARY_MIDPOINT_EXPR}
     END
 )"""
+
+_SALARY_EXPR = SALARY_VALUE_SQL
 
 
 def compute_salary_percentiles(
@@ -56,7 +67,8 @@ def compute_salary_percentiles(
     Salary basis: midpoint of min/max when both present, else max, else min, with hourly
     salaries annualized to a 2080-hour year so downstream weekly snapshots stay comparable.
 
-    Groups with fewer than ``having_threshold`` rows are omitted from the result.
+    Groups with fewer than ``having_threshold`` rows (with non-null salary and group key)
+    are omitted from the result.
     When ``week_start`` is provided, only postings published in that UTC week are included.
     """
     if group_col not in _ALLOWED_GROUP_COL_SQL:
@@ -65,7 +77,9 @@ def compute_salary_percentiles(
             group_col=group_col,
             allowed=tuple(_ALLOWED_GROUP_COL_SQL),
         )
-        raise ValueError(f"group_col must be one of {sorted(_ALLOWED_GROUP_COL_SQL)}; got {group_col!r}")
+        raise ValueError(
+            f"group_col must be one of {sorted(_ALLOWED_GROUP_COL_SQL)}; got {group_col!r}"
+        )
 
     bind = session.get_bind()
     if bind is None or bind.dialect.name != "postgresql":

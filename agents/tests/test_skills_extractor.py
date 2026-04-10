@@ -169,3 +169,6 @@ def test_extract_skills_retries_on_429_with_backoff(
     assert len(skills) == 1
     assert skills[0].skill_name == "Python"
     assert mock_time.sleep.called
+    assert meta["tokens_used"] == 100
+    assert meta["cost_usd"] == 0.01
+    assert meta["latency_ms"] == 550

@@ -26,25 +26,25 @@
 </head>
 <body>
   <h1>Full pipeline Redis — Run report</h1>
-  <p>Correlation ID: <code>redis-pipe-cd457f5d</code></p>
-  <p class="e2e">End-to-end latency: <strong>43535.47 ms</strong> | Overall: <strong class="ok">Success</strong></p>
-  
+  <p>Correlation ID: <code>redis-pipe-7bd8b5d3</code></p>
+  <p class="e2e">End-to-end latency: <strong>None ms</strong> | Overall: <strong class="error">Failure</strong></p>
+  <p class="error">Redis error: Redis connection failed: No module named 'redis'</p>
 
   <h2>Timeline (locate the failing stage)</h2>
   <div class="timeline" role="list">
-<div class="step ok"><span class="step-name">ingestion</span><span class="step-ms">25109.83 ms</span><span class="step-status">OK</span></div>
+<div class="step skipped"><span class="step-name">ingestion</span><span class="step-ms">—</span><span class="step-status">skipped</span></div>
     <div class="arrow" aria-hidden="true">→</div>
-    <div class="step ok"><span class="step-name">normalization</span><span class="step-ms">80.53 ms</span><span class="step-status">OK</span></div>
+    <div class="step skipped"><span class="step-name">normalization</span><span class="step-ms">—</span><span class="step-status">skipped</span></div>
     <div class="arrow" aria-hidden="true">→</div>
-    <div class="step ok"><span class="step-name">skills</span><span class="step-ms">11.65 ms</span><span class="step-status">OK</span></div>
+    <div class="step skipped"><span class="step-name">skills</span><span class="step-ms">—</span><span class="step-status">skipped</span></div>
     <div class="arrow" aria-hidden="true">→</div>
-    <div class="step ok"><span class="step-name">enrichment</span><span class="step-ms">7.63 ms</span><span class="step-status">OK</span></div>
+    <div class="step skipped"><span class="step-name">enrichment</span><span class="step-ms">—</span><span class="step-status">skipped</span></div>
     <div class="arrow" aria-hidden="true">→</div>
-    <div class="step ok"><span class="step-name">analytics</span><span class="step-ms">0.36 ms</span><span class="step-status">OK</span></div>
+    <div class="step skipped"><span class="step-name">analytics</span><span class="step-ms">—</span><span class="step-status">skipped</span></div>
     <div class="arrow" aria-hidden="true">→</div>
-    <div class="step ok"><span class="step-name">visualization</span><span class="step-ms">0.05 ms</span><span class="step-status">OK</span></div>
+    <div class="step skipped"><span class="step-name">visualization</span><span class="step-ms">—</span><span class="step-status">skipped</span></div>
     <div class="arrow" aria-hidden="true">→</div>
-    <div class="step ok"><span class="step-name">orchestration</span><span class="step-ms">0.05 ms</span><span class="step-status">OK</span></div>
+    <div class="step skipped"><span class="step-name">orchestration</span><span class="step-ms">—</span><span class="step-status">skipped</span></div>
   </div>
 
   <h2>Per-stage details</h2>
@@ -52,90 +52,6 @@
     <thead><tr><th>Stage</th><th>Event in → out</th><th>Latency</th><th>Status</th><th>Error</th></tr></thead>
     <tbody>
 
-    <tr class="">
-      <td>ingestion</td>
-      <td>PipelineTrigger → IngestBatch</td>
-      <td>25109.83 ms</td>
-      <td>OK</td>
-      <td></td>
-    </tr>
-    <tr class="">
-      <td>normalization</td>
-      <td>IngestBatch → NormalizationComplete</td>
-      <td>80.53 ms</td>
-      <td>OK</td>
-      <td></td>
-    </tr>
-    <tr class="">
-      <td>skills</td>
-      <td>NormalizationComplete → SkillsExtracted</td>
-      <td>11.65 ms</td>
-      <td>OK</td>
-      <td></td>
-    </tr>
-    <tr class="">
-      <td>skills</td>
-      <td>NormalizationComplete → SkillsExtracted</td>
-      <td>18057.93 ms</td>
-      <td>OK</td>
-      <td></td>
-    </tr>
-    <tr class="">
-      <td>enrichment</td>
-      <td>SkillsExtracted → RecordEnriched</td>
-      <td>7.63 ms</td>
-      <td>OK</td>
-      <td></td>
-    </tr>
-    <tr class="">
-      <td>enrichment</td>
-      <td>SkillsExtracted → RecordEnriched</td>
-      <td>75.36 ms</td>
-      <td>OK</td>
-      <td></td>
-    </tr>
-    <tr class="">
-      <td>analytics</td>
-      <td>RecordEnriched → AnalyticsRefreshed</td>
-      <td>0.36 ms</td>
-      <td>OK</td>
-      <td></td>
-    </tr>
-    <tr class="">
-      <td>analytics</td>
-      <td>RecordEnriched → AnalyticsRefreshed</td>
-      <td>0.05 ms</td>
-      <td>OK</td>
-      <td></td>
-    </tr>
-    <tr class="">
-      <td>visualization</td>
-      <td>AnalyticsRefreshed → RenderComplete</td>
-      <td>0.05 ms</td>
-      <td>OK</td>
-      <td></td>
-    </tr>
-    <tr class="">
-      <td>visualization</td>
-      <td>AnalyticsRefreshed → RenderComplete</td>
-      <td>0.06 ms</td>
-      <td>OK</td>
-      <td></td>
-    </tr>
-    <tr class="">
-      <td>orchestration</td>
-      <td>RenderComplete → OrchestrationAck</td>
-      <td>0.05 ms</td>
-      <td>OK</td>
-      <td></td>
-    </tr>
-    <tr class="">
-      <td>orchestration</td>
-      <td>RenderComplete → OrchestrationAck</td>
-      <td>0.03 ms</td>
-      <td>OK</td>
-      <td></td>
-    </tr>
     </tbody>
   </table>
 
@@ -143,13 +59,7 @@
   <table>
     <thead><tr><th>Stream</th><th>Published</th><th>Delivered</th><th>In flight</th><th>Max in flight</th></tr></thead>
     <tbody>
-    <tr><td><code>pipeline:ingestion</code></td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
-    <tr><td><code>pipeline:normalization</code></td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
-    <tr><td><code>pipeline:skills</code></td><td>1</td><td>2</td><td>0</td><td>1</td></tr>
-    <tr><td><code>pipeline:enrichment</code></td><td>2</td><td>2</td><td>0</td><td>1</td></tr>
-    <tr><td><code>pipeline:analytics</code></td><td>2</td><td>2</td><td>0</td><td>1</td></tr>
-    <tr><td><code>pipeline:visualization</code></td><td>2</td><td>2</td><td>0</td><td>1</td></tr>
-    <tr><td><code>pipeline:orchestration</code></td><td>2</td><td>2</td><td>0</td><td>1</td></tr>
+    <tr><td colspan="5">No counters (run failed before publish).</td></tr>
     </tbody>
   </table>
 </body>

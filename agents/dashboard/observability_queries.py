@@ -14,6 +14,7 @@ from agents.dashboard.observability_metrics import (
     compute_error_rate_pct,
 )
 from agents.dashboard.readonly_engine import get_dashboard_engine
+from agents.dashboard.relation_safe import read_sql_relation_safe
 
 SESSION_KEY_INGESTION_GOOD = "_obs_last_good_ingestion"
 SESSION_KEY_NORM_GOOD = "_obs_last_good_normalization"
@@ -29,6 +30,7 @@ class IngestionObsFetchResult:
     recent_runs_df: pd.DataFrame
     dedup_rate_pct: float | None
     error_rate_pct: float | None
+    schema_note: str | None = None
 
 
 @dataclass
@@ -40,6 +42,7 @@ class NormalizationObsFetchResult:
     conformance_pct: float | None
     quarantine_df: pd.DataFrame
     salary_coverage_pct: float | None
+    schema_note: str | None = None
 
 
 def _utcnow() -> datetime:
@@ -53,6 +56,9 @@ def _fetch_ingestion_obs_cached() -> IngestionObsFetchResult:
     On DB errors, **raises** so Streamlit does not cache a failure blob (transient
     outages recover on the next rerun). Callers use ``resolve_ingestion_obs`` for
     session fallback.
+
+    Missing ``raw_ingested_jobs`` / ``job_ingestion_runs`` yields empty frames for that
+    query plus a ``schema_note`` (partial DB snapshots).
     """
     ts = _utcnow()
     engine = get_dashboard_engine()
@@ -78,9 +84,22 @@ def _fetch_ingestion_obs_cached() -> IngestionObsFetchResult:
         ORDER BY started_at DESC
         LIMIT 10
     """
-    daily_df = pd.read_sql(daily_sql, engine)
-    runs_all_df = pd.read_sql(runs_sql, engine)
-    recent_runs_df = pd.read_sql(recent_sql, engine)
+    daily_df, w_daily = read_sql_relation_safe(
+        daily_sql,
+        engine,
+        user_hint="`dbo.raw_ingested_jobs` is missing. Daily volume chart and related metrics are unavailable.",
+    )
+    runs_all_df, w_runs = read_sql_relation_safe(
+        runs_sql,
+        engine,
+        user_hint="`dbo.job_ingestion_runs` is missing. Run-level metrics and recent-runs table are unavailable.",
+    )
+    if w_runs:
+        recent_runs_df = pd.DataFrame()
+    else:
+        recent_runs_df, _ = read_sql_relation_safe(recent_sql, engine)
+    hints = [x for x in dict.fromkeys((w_daily, w_runs)) if x]
+    schema_note = "\n".join(hints) if hints else None
     dedup = compute_dedup_rate_pct(runs_all_df)
     err = compute_error_rate_pct(runs_all_df)
     return IngestionObsFetchResult(
@@ -92,6 +111,7 @@ def _fetch_ingestion_obs_cached() -> IngestionObsFetchResult:
         recent_runs_df=recent_runs_df,
         dedup_rate_pct=dedup,
         error_rate_pct=err,
+        schema_note=schema_note,
     )
 
 
@@ -117,13 +137,28 @@ def _fetch_normalization_obs_cached() -> NormalizationObsFetchResult:
         GROUP BY error_type
         ORDER BY record_count DESC
     """
-    agg = pd.read_sql(norm_agg_sql, engine)
-    quarantine_df = pd.read_sql(quarantine_sql, engine)
-    total = int(agg.iloc[0]["total"]) if not agg.empty else 0
-    success_count = int(agg.iloc[0]["success_count"]) if not agg.empty else 0
-    salary_present = int(agg.iloc[0]["salary_present"]) if not agg.empty else 0
+    agg, w_norm = read_sql_relation_safe(
+        norm_agg_sql,
+        engine,
+        user_hint="`dbo.normalized_jobs` is missing. Normalization quality metrics are unavailable.",
+    )
+    quarantine_df, w_quarantine = read_sql_relation_safe(
+        quarantine_sql,
+        engine,
+        user_hint="`dbo.normalization_quarantine` is missing. Quarantine breakdown is unavailable.",
+    )
+    if agg.empty:
+        total = 0
+        success_count = 0
+        salary_present = 0
+    else:
+        total = int(agg.iloc[0]["total"])
+        success_count = int(agg.iloc[0]["success_count"])
+        salary_present = int(agg.iloc[0]["salary_present"])
     conf = (success_count / total * 100.0) if total > 0 else None
     sal = (salary_present / total * 100.0) if total > 0 else None
+    hints = [x for x in dict.fromkeys((w_norm, w_quarantine)) if x]
+    schema_note = "\n".join(hints) if hints else None
     return NormalizationObsFetchResult(
         fetched_at=ts,
         ok=True,
@@ -132,6 +167,7 @@ def _fetch_normalization_obs_cached() -> NormalizationObsFetchResult:
         conformance_pct=conf,
         quarantine_df=quarantine_df,
         salary_coverage_pct=sal,
+        schema_note=schema_note,
     )
 
 
@@ -156,6 +192,7 @@ def resolve_ingestion_obs(ss: Any) -> tuple[IngestionObsFetchResult, bool, str |
             recent_runs_df=empty,
             dedup_rate_pct=None,
             error_rate_pct=None,
+            schema_note=None,
         )
         return fail_state, False, err_msg
 
@@ -179,5 +216,6 @@ def resolve_normalization_obs(ss: Any) -> tuple[NormalizationObsFetchResult, boo
             conformance_pct=None,
             quarantine_df=empty,
             salary_coverage_pct=None,
+            schema_note=None,
         )
         return fail_state, False, err_msg
