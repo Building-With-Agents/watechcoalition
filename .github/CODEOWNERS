@@ -1,2 +1,9 @@
-# All changes require approval from theGaryLarson
-* @theGaryLarson
+# Default owners for this repository.
+#
+# @theGaryLarson was sole code owner until his departure from CFA (last working
+# day 2026-08-21). Replaced 2026-08-26 so review requests route to the builders
+# team and to CFA staff rather than to a departed account.
+#
+# @Ritusql (Executive Director, CFA) is listed alongside the team so ownership
+# survives the cohort winding down, not just Gary's departure.
+* @Building-With-Agents/builders @Ritusql
